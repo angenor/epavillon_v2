@@ -53,6 +53,7 @@ async fn une_piece_se_rattache_se_lit_et_se_detache_sans_detruire_lobjet() {
             document_type_code: None,
             is_public: false,
             sort_order: 0,
+            presented_by_speaker_id: None,
         },
     )
     .await
@@ -126,6 +127,7 @@ async fn un_objet_inconnu_est_refuse_en_nommant_le_champ() {
             document_type_code: None,
             is_public: false,
             sort_order: 0,
+            presented_by_speaker_id: None,
         },
     )
     .await
@@ -156,6 +158,7 @@ async fn une_personne_sans_acces_ne_lit_ni_ne_rattache() {
             document_type_code: None,
             is_public: false,
             sort_order: 0,
+            presented_by_speaker_id: None,
         },
     )
     .await
@@ -178,6 +181,7 @@ async fn une_personne_sans_acces_ne_lit_ni_ne_rattache() {
             document_type_code: None,
             is_public: false,
             sort_order: 0,
+            presented_by_speaker_id: None,
         },
     )
     .await

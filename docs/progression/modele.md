@@ -338,3 +338,17 @@ Refonte demandée par le commanditaire après usage en production.
 ## 29/10/2026, `050_media.sql` : la photo d'un intervenant posée par l'organisation
 
 Commentaire seul, aucune structure : le rôle `avatar` de `programme.proposal_speakers` ne sert plus aux seuls intervenants sans personne (D16). L'organisation porteuse y pose la photo de n'importe quel intervenant de son dossier (garde `OrganisationDuDossierDeLaLigne` du module média) ; la page publique d'une activité lit cette photo d'abord, l'avatar de la personne à défaut. Rien à recharger.
+
+## 29/10/2026, `070_programme_proposals.sql` et `075_programme_sessions.sql` : le jour J d'une activité retenue
+
+Fiche d'un dossier, phase 2 : une fois le dossier retenu, l'organisation prépare l'activité sur la plateforme au lieu de l'écrire par courriel.
+
+- **`programme.proposal_focal_points`** (070 § 4 bis) : les personnes à joindre sur place. `speaker_id` facultatif (vers `proposal_speakers`, `ON DELETE CASCADE` : un intervenant retiré n'est plus point focal), `person_id` facultatif (`xmod_fk_proposal_focal_points_person`, `ON DELETE SET NULL`), `full_name` instantané (`ck_proposal_focal_points_name`, 200 caractères), `phone` et `whatsapp` en texte libre (50 caractères, `ck_proposal_focal_points_phones`), `sort_order`. Une même personne une fois par dossier (`ux_proposal_focal_points_speaker`, `ux_proposal_focal_points_person`, partiels). « Au moins un » est une règle de l'API (la base ne sait pas exiger une ligne) ; sans ligne, l'API propose le déposant.
+- **`programme.proposal_technical_needs`** : une ligne par dossier (clé `proposal_id`), absente tant que rien n'est déclaré ; vidéo, intervention à distance et détail, accessibilité et détail, autre (`ck_proposal_technical_needs_lengths`), `updated_at` (déclencheur `tg_set_updated_at`), `updated_by` (`xmod_fk_proposal_technical_needs_updater`).
+- **`programme.proposal_social_posts`** : liens des publications à relayer, `url platform.url` (http ou https, plutôt qu'un `ck_` de plus), `created_by` (`xmod_fk_proposal_social_posts_creator`), unique par dossier (`ux_proposal_social_posts`). La plateforme n'est pas une colonne : l'API la déduit de l'adresse.
+- **`programme.proposal_documents.presented_by_speaker_id`** (en queue de table, `ON DELETE SET NULL`) : qui présente un support ; l'appartenance au même dossier est vérifiée par l'API.
+- **`programme.proposal_needs_deadline(uuid)`** (075 § 7 ter, car elle lit les séances) : dix jours avant la première séance non annulée, NULL sans séance. Indicative ; les rappels automatiques (phase suivante) la reliront.
+
+Aucune des trois tables n'est auditée : seul le dossier l'est. Présentations : rôle `document` de `programme.proposals` inchangé, `{application/pdf,application/vnd.*}` couvre PowerPoint (`.ppt`, `.pptx`).
+
+**Migration** : `ops/migrations/2026-10-29-fiche-jour-j.sql`, rejouable et additive, jouée deux fois en local sur `epavillon` ; `cross_module_fk_report` conforme. **En production** : avant de démarrer l'API qui sert `/proposals/{id}/day-plan`.

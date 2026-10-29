@@ -163,7 +163,9 @@
     "cta": {
       "bio": "Complete",
       "photo": "Add",
-      "cover": "Add"
+      "cover": "Add",
+      "focalPhone": "Complete",
+      "needs": "Report"
     },
     "logo": {
       "title": "Your organisation has no logo",
@@ -171,7 +173,9 @@
       "askManager": "It is missing from the public page and the cover image. Only a manager of {organization} can add it: please ask them.",
       "action": "Add the logo",
       "field": "Organisation logo"
-    }
+    },
+    "focalPhone": "The focal point phone ({names}) | The focal point phone ({names}) | The focal points phones ({names})",
+    "needs": "Your technical needs"
   },
   "speakers": {
     "photoMissing": "Photo missing",
@@ -193,7 +197,9 @@
       "bios": "Biographies",
       "photos": "Speaker photos",
       "logo": "Organisation logo",
-      "format": "Format and duration"
+      "format": "Format and duration",
+      "focal": "Reachable focal point",
+      "needs": "Technical needs"
     }
   },
   "cover": {
@@ -220,5 +226,79 @@
     "categories": "Categories",
     "languages": "Languages",
     "country": "Country"
+  },
+  "dayPlan": {
+    "prepare": "Your activity is accepted · prepare the day",
+    "promote": "Promote your activity"
+  },
+  "focal": {
+    "title": "On-site focal point",
+    "description": "The person IFDD staff call on the day: delays, room, equipment. At least one.",
+    "origin": {
+      "submitter": "Submitted the file",
+      "speaker": "Speaker",
+      "colleague": "Colleague"
+    },
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "missingPhone": "Phone number needed",
+    "name": "Full name",
+    "sameNumber": "Same number on WhatsApp",
+    "remove": "Remove this person",
+    "add": "Another person",
+    "atLeastOne": "At least one focal point is required: add someone else before removing this person.",
+    "hint": "By default, the person who submitted the file, speaker or not. Tick “On-site focal point” on a speaker to add them here, or add a colleague.",
+    "checkbox": "On-site focal point"
+  },
+  "needs": {
+    "title": "Technical needs",
+    "description": "What the technical team must plan for your activity.",
+    "deadline": "To be reported before {date}: the technical team plans ahead.",
+    "notDeclared": "Not reported yet. Tell us even if you need nothing.",
+    "none": "No particular need.",
+    "kinds": {
+      "video": {
+        "label": "Video to play",
+        "hint": "A film or a clip with sound."
+      },
+      "remote": {
+        "label": "Remote speaker",
+        "hint": "Someone speaks from another country."
+      },
+      "accessibility": {
+        "label": "Accessibility",
+        "hint": "Sign language, captions, wheelchair access."
+      }
+    },
+    "remoteDetails": "Who speaks remotely, and from which country?",
+    "accessibilityDetails": "What is needed",
+    "other": "Anything else (optional)",
+    "otherPlaceholder": "For example: two wireless microphones, a table for four."
+  },
+  "presentations": {
+    "title": "Presentations",
+    "description": "The slides shown during the activity. PowerPoint or PDF.",
+    "empty": "No presentation yet.",
+    "add": "Add a presentation",
+    "remove": "Remove",
+    "untitled": "Presentation"
+  },
+  "social": {
+    "title": "Your social media posts",
+    "description": "Paste the link of each post about your activity: IFDD shares it.",
+    "field": "Link to a post",
+    "placeholder": "https://www.linkedin.com/posts/…",
+    "add": "Add",
+    "remove": "Remove",
+    "removeLabel": "Remove the post {url}",
+    "platforms": {
+      "linkedin": "LinkedIn",
+      "facebook": "Facebook",
+      "x": "X",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "other": "Link"
+    }
   }
 }

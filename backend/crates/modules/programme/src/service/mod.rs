@@ -4,6 +4,7 @@ pub mod backfill;
 pub mod birth;
 pub mod comment_circle;
 pub mod comments;
+pub mod day_plan;
 pub mod desk;
 pub mod detail;
 pub mod documents;

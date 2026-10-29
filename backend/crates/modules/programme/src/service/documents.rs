@@ -45,6 +45,9 @@ pub struct AttachDocumentPayload {
     pub is_public: bool,
     #[serde(default)]
     pub sort_order: i16,
+    /// Qui présente ce support le jour J : un intervenant de CE dossier.
+    #[serde(default)]
+    pub presented_by_speaker_id: Option<Uuid>,
 }
 
 /// Les pièces d'un dossier, **après contrôle d'accès**.
@@ -78,6 +81,12 @@ pub async fn rattacher(
             )
             .field("asset_id")
         })?;
+    crate::service::day_plan::verifier_presentateur(
+        state,
+        dossier,
+        payload.presented_by_speaker_id,
+    )
+    .await?;
 
     // Le titre par défaut est le nom du fichier d'origine : une pièce sans
     // titre s'affiche « Document » dans une liste, et personne ne sait laquelle
@@ -101,6 +110,7 @@ pub async fn rattacher(
             document_type_code: payload.document_type_code.as_deref(),
             is_public: payload.is_public,
             sort_order: payload.sort_order,
+            presented_by_speaker_id: payload.presented_by_speaker_id,
         },
     )
     .await?;

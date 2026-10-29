@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.people SET phone = '+221 77 000 00 00' WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e22a3850161789fe720cb25b4bef8a77609c4ea955ea08526c357d129a08bcc7"
+}

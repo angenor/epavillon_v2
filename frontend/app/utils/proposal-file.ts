@@ -1,4 +1,5 @@
 import type { DraftSpeaker, ProposalDraft } from '~/types/proposal-form'
+import type { ProposalDayPlan } from '~/types/programme/day-plan'
 import { plainTextOf } from './proposal-draft.ts'
 
 /**
@@ -13,12 +14,16 @@ export interface ProposalFileFacts {
   draft: ProposalDraft
   hasCover: boolean
   hasLogo: boolean
+  /** Activité retenue seulement : ce que le jour J demande en plus. */
+  dayPlan?: ProposalDayPlan | null
 }
 
 export type ProposalFileGap =
   | { kind: 'bio'; names: string[] }
   | { kind: 'photo'; names: string[] }
   | { kind: 'cover' }
+  | { kind: 'focalPhone'; names: string[] }
+  | { kind: 'needs' }
 
 export function speakerName(speaker: Pick<DraftSpeaker, 'first_name' | 'last_name'>): string {
   return `${speaker.first_name} ${speaker.last_name}`.trim()
@@ -36,6 +41,12 @@ export function proposalFileGaps(facts: ProposalFileFacts): ProposalFileGap[] {
   const withoutPhoto = facts.draft.speakers.filter((speaker) => !hasPhoto(speaker)).map(speakerName)
   if (withoutPhoto.length > 0) gaps.push({ kind: 'photo', names: withoutPhoto })
   if (!facts.hasCover) gaps.push({ kind: 'cover' })
+  const plan = facts.dayPlan
+  if (plan) {
+    const withoutPhone = plan.focal_points.filter((point) => !point.phone.trim()).map((point) => point.full_name)
+    if (withoutPhone.length > 0) gaps.push({ kind: 'focalPhone', names: withoutPhone })
+    if (plan.technical_needs.updated_at === null) gaps.push({ kind: 'needs' })
+  }
   return gaps
 }
 
@@ -48,6 +59,8 @@ export type ProposalFileChecklistKey =
   | 'photos'
   | 'logo'
   | 'format'
+  | 'focal'
+  | 'needs'
 
 export interface ProposalFileChecklistItem {
   key: ProposalFileChecklistKey
@@ -76,5 +89,11 @@ export function proposalFileChecklist(facts: ProposalFileFacts): ProposalFileChe
     item('photos', draft.speakers.length > 0 && draft.speakers.every(hasPhoto), 'intervenants'),
     item('logo', facts.hasLogo, 'logo', true),
     item('format', draft.format !== null && draft.duration_minutes !== null, 'format'),
+    ...(facts.dayPlan
+      ? [
+          item('focal', facts.dayPlan.focal_points.some((point) => point.phone.trim().length > 0), 'point-focal'),
+          item('needs', facts.dayPlan.technical_needs.updated_at !== null, 'besoins-techniques'),
+        ]
+      : []),
   ]
 }

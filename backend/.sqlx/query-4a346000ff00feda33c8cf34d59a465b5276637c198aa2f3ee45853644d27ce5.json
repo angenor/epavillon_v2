@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT video, remote, remote_details, accessibility, accessibility_details,\n                other, updated_at\n           FROM programme.proposal_technical_needs\n          WHERE proposal_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "video",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_technical_needs",
+            "name": "video"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "remote",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_technical_needs",
+            "name": "remote"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "remote_details",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_technical_needs",
+            "name": "remote_details"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "accessibility",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_technical_needs",
+            "name": "accessibility"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "accessibility_details",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_technical_needs",
+            "name": "accessibility_details"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "other",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_technical_needs",
+            "name": "other"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_technical_needs",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "4a346000ff00feda33c8cf34d59a465b5276637c198aa2f3ee45853644d27ce5"
+}

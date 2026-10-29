@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, speaker_id, person_id, full_name, phone, whatsapp\n           FROM programme.proposal_focal_points\n          WHERE proposal_id = $1\n          ORDER BY sort_order, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_focal_points",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "speaker_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_focal_points",
+            "name": "speaker_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_focal_points",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "full_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_focal_points",
+            "name": "full_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "phone",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_focal_points",
+            "name": "phone"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "whatsapp",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_focal_points",
+            "name": "whatsapp"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "fd88ea0e552ca50e346038f0b67fa3a23c97ad6c89ab109627a44e0e59a2a3ad"
+}

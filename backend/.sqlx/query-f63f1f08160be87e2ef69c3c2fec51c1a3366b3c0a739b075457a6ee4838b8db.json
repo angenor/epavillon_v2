@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_technical_needs\n             (proposal_id, video, remote, remote_details, accessibility,\n              accessibility_details, other, updated_by)\n         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n         ON CONFLICT (proposal_id) DO UPDATE\n            SET video = EXCLUDED.video,\n                remote = EXCLUDED.remote,\n                remote_details = EXCLUDED.remote_details,\n                accessibility = EXCLUDED.accessibility,\n                accessibility_details = EXCLUDED.accessibility_details,\n                other = EXCLUDED.other,\n                updated_by = EXCLUDED.updated_by",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Bool",
+        "Text",
+        "Bool",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f63f1f08160be87e2ef69c3c2fec51c1a3366b3c0a739b075457a6ee4838b8db"
+}

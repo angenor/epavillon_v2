@@ -185,7 +185,8 @@ export const proposalAssets = [
 // Pièces jointes aux dossiers
 // ---------------------------------------------------------------------------
 
-export const proposalDocuments = [
+// Annoté plutôt que `satisfies` : la fiche hors ligne y rattache des pièces.
+export const proposalDocuments: ProposalDocument[] = [
   {
     id: PROPOSAL_DOCUMENT(1),
     proposal_id: PROPOSAL.adaptationCotiere,
@@ -196,6 +197,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.sowFall,
     uploaded_at: '2026-06-04T11:20:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
   {
     // INTERNE : le budget ne s'affiche pas sur la page publique de l'activité.
@@ -208,6 +210,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.sowFall,
     uploaded_at: '2026-06-04T11:25:00Z',
     sort_order: 20,
+    presented_by_speaker_id: null,
   },
   {
     id: PROPOSAL_DOCUMENT(3),
@@ -219,6 +222,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.josephPierre,
     uploaded_at: '2026-06-12T10:05:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
   {
     id: PROPOSAL_DOCUMENT(4),
@@ -230,6 +234,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.kabore,
     uploaded_at: '2026-06-13T09:40:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
   {
     id: PROPOSAL_DOCUMENT(5),
@@ -244,6 +249,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.lemoine,
     uploaded_at: '2026-07-01T16:10:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
   {
     id: PROPOSAL_DOCUMENT(6),
@@ -255,6 +261,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.tremblay,
     uploaded_at: '2026-06-21T08:30:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
   {
     id: PROPOSAL_DOCUMENT(7),
@@ -266,6 +273,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.koffi,
     uploaded_at: '2026-07-21T12:00:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
 
   // --- Dossiers en cours d'évaluation (A8) ---------------------------------
@@ -282,6 +290,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.ngoBassong,
     uploaded_at: '2026-07-24T09:10:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
   {
     id: PROPOSAL_DOCUMENT(9),
@@ -293,6 +302,7 @@ export const proposalDocuments = [
     uploaded_by: PERSON.ngoBassong,
     uploaded_at: '2026-07-24T09:14:00Z',
     sort_order: 20,
+    presented_by_speaker_id: null,
   },
   {
     id: PROPOSAL_DOCUMENT(10),
@@ -304,5 +314,6 @@ export const proposalDocuments = [
     uploaded_by: PERSON.zinsou,
     uploaded_at: '2026-07-27T15:30:00Z',
     sort_order: 10,
+    presented_by_speaker_id: null,
   },
-] satisfies ProposalDocument[]
+]

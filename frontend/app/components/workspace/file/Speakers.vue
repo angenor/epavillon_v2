@@ -16,15 +16,26 @@ interface Props {
   speakers: DraftSpeaker[]
   canSetPhoto: boolean
   photoRule: AttachableRoleRule | null
+  /** Activité retenue : chaque intervenant peut être coché comme point focal. */
+  focalSpeakerIds?: string[] | null
+  focalBusy?: boolean
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<{ photoSet: [] }>()
+const props = withDefaults(defineProps<Props>(), { focalSpeakerIds: null, focalBusy: false })
+const emit = defineEmits<{ photoSet: []; toggleFocal: [speakerId: string, on: boolean] }>()
 
 const { t } = useI18n()
 const api = useApi()
 
 const openPhoto = ref<string | null>(null)
+
+// Une case refusée (le dernier point focal) garde sa valeur : sans nouveau rendu, le navigateur la laisserait décochée.
+const focalRender = ref(0)
+
+function toggleFocal(speakerId: string, on: boolean): void {
+  emit('toggleFocal', speakerId, on)
+  focalRender.value += 1
+}
 const photoError = ref<string | null>(null)
 
 const hasBio = (speaker: DraftSpeaker) => plainTextOf(speaker.bio).trim().length > 0
@@ -85,6 +96,17 @@ async function attachPhoto(speakerId: string, assetId: AssetId | null): Promise<
           <UiBadge v-if="!speaker.photo_image" intent="warning" :label="t('organization.workspace.proposal.speakers.photoMissing')" />
           <UiBadge v-if="!hasBio(speaker)" intent="warning" :label="t('organization.workspace.proposal.speakers.bioMissing')" />
         </p>
+
+        <UiCheckbox
+          v-if="props.focalSpeakerIds && speaker.speaker_id"
+          :id="`focal-${speaker.speaker_id}`"
+          :key="`focal-${speaker.speaker_id}-${focalRender}`"
+          class="mt-3"
+          :model-value="props.focalSpeakerIds.includes(speaker.speaker_id)"
+          :disabled="props.focalBusy"
+          :label="t('organization.workspace.proposal.focal.checkbox')"
+          @update:model-value="(on) => toggleFocal(speaker.speaker_id as string, on)"
+        />
 
         <MediaImageField
           v-if="openPhoto === speaker.speaker_id && speaker.speaker_id"

@@ -183,6 +183,16 @@ export {
 export { proposalHistories, proposalHistory } from './proposals/history'
 
 export {
+  proposalDayPlan,
+  saveProposalFocalPoints,
+  saveProposalTechnicalNeeds,
+  addProposalSocialPost,
+  removeProposalSocialPost,
+  attachProposalDocument,
+  removeProposalDocument,
+} from './proposals/day-plan'
+
+export {
   editableProposal,
   editedProposal,
   saveExistingProposal,

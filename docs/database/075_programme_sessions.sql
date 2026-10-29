@@ -1133,6 +1133,28 @@ COMMENT ON FUNCTION programme.session_schedule_history IS
     'Historique des reports de créneau d''une session : qui a déplacé quoi, quand, et depuis quel horaire.';
 
 -- -----------------------------------------------------------------------------
+-- 7 ter. Date limite indicative des besoins techniques d'un dossier (29/10)
+--
+-- Dix jours avant la première séance non annulée du dossier, nulle sans séance.
+-- Rien n'est refusé après : elle sert à rappeler à l'organisation ce qui manque
+-- (070 § 4 bis). Une fonction plutôt qu'un calcul dans l'API : les rappels
+-- automatiques la reliront. Ici et non dans 070 : elle lit les séances.
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION programme.proposal_needs_deadline(p_proposal_id uuid)
+RETURNS timestamptz
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT min(s.starts_at) - interval '10 days'
+      FROM programme.sessions s
+     WHERE s.proposal_id = p_proposal_id
+       AND s.status <> 'cancelled';
+$$;
+
+COMMENT ON FUNCTION programme.proposal_needs_deadline IS
+    'Dix jours avant la première séance non annulée du dossier ; NULL sans séance. Indicative.';
+
+-- -----------------------------------------------------------------------------
 -- 8. Déclaration des références vers les organisations (pour la fusion)
 -- -----------------------------------------------------------------------------
 INSERT INTO org.organization_references (ref_schema, ref_table, ref_column, strategy, dedupe_on) VALUES

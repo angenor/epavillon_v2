@@ -46,6 +46,8 @@ pub struct Piece {
     #[serde(with = "time::serde::rfc3339")]
     pub uploaded_at: OffsetDateTime,
     pub sort_order: i16,
+    /// L'intervenant du dossier qui présente ce support, s'il est dit.
+    pub presented_by_speaker_id: Option<Uuid>,
 }
 
 /// Ce que ce module lit d'un objet stocké — et rien de plus. La fiche complète
@@ -85,6 +87,7 @@ pub async fn du_dossier<'e>(
     let lignes = sqlx::query!(
         r#"SELECT d.id, d.proposal_id, d.asset_id, d.title, d.document_type_code,
                   d.is_public, d.uploaded_by, d.uploaded_at, d.sort_order,
+                  d.presented_by_speaker_id,
                   a.id AS "asset_id_reel?", a.original_filename,
                   a.mime_type AS "mime_type?", a.byte_size AS "byte_size?",
                   a.status::text AS "status?",
@@ -113,6 +116,7 @@ pub async fn du_dossier<'e>(
                 uploaded_by: l.uploaded_by,
                 uploaded_at: l.uploaded_at,
                 sort_order: l.sort_order,
+                presented_by_speaker_id: l.presented_by_speaker_id,
             },
             asset: match (
                 l.asset_id_reel,
@@ -149,6 +153,7 @@ pub struct NouvellePiece<'a> {
     pub document_type_code: Option<&'a str>,
     pub is_public: bool,
     pub sort_order: i16,
+    pub presented_by_speaker_id: Option<Uuid>,
 }
 
 /// Rattacher un objet **déjà stocké** au dossier.
@@ -165,17 +170,19 @@ pub async fn rattacher(
     let ligne = sqlx::query!(
         r#"INSERT INTO programme.proposal_documents
                (proposal_id, asset_id, title, document_type_code, is_public,
-                uploaded_by, sort_order)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
+                uploaded_by, sort_order, presented_by_speaker_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id, proposal_id, asset_id, title, document_type_code,
-                  is_public, uploaded_by, uploaded_at, sort_order"#,
+                  is_public, uploaded_by, uploaded_at, sort_order,
+                  presented_by_speaker_id"#,
         dossier.as_uuid(),
         nouvelle.asset_id,
         nouvelle.title,
         nouvelle.document_type_code,
         nouvelle.is_public,
         par,
-        nouvelle.sort_order
+        nouvelle.sort_order,
+        nouvelle.presented_by_speaker_id
     )
     .fetch_one(conn)
     .await?;
@@ -190,6 +197,7 @@ pub async fn rattacher(
         uploaded_by: ligne.uploaded_by,
         uploaded_at: ligne.uploaded_at,
         sort_order: ligne.sort_order,
+        presented_by_speaker_id: ligne.presented_by_speaker_id,
     })
 }
 

@@ -46,12 +46,14 @@ import type {
 import type { Review, ReviewAssignment, ReviewMode, ReviewRecommendation, ReviewScore } from './programme/review'
 import type { ScheduleThemeBadge } from './views'
 import type {
+  AssetId,
   CriterionId,
   IsoDateTime,
   Numeric,
   OrganizationId,
   PersonId,
   ProposalId,
+  TaxonomyTermCode,
   Url,
   Uuid,
 } from './shared'
@@ -132,6 +134,23 @@ export interface ProposalDocumentEntry {
    * bouton.
    */
   url: Url | null
+}
+
+/**
+ * Rattacher un objet DÉJÀ STOCKÉ au dossier (`POST /proposals/{id}/documents`) :
+ * le fichier passe d'abord par `POST /media/assets`. Titre vide : le nom du
+ * fichier d'origine.
+ */
+export interface AttachDocumentPayload {
+  asset_id: AssetId
+  title: string
+  /** Code de la taxonomie `document_type` (`presentation` pour un support du jour J). */
+  document_type_code: TaxonomyTermCode | null
+  /** Interne au dossier par défaut. */
+  is_public: boolean
+  sort_order: number
+  /** Un intervenant de CE dossier, ou personne (absent : personne). */
+  presented_by_speaker_id?: Uuid | null
 }
 
 // ---------------------------------------------------------------------------

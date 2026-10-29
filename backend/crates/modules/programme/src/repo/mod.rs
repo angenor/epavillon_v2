@@ -13,6 +13,7 @@ pub mod conflicts;
 pub mod consents;
 pub mod cross;
 pub mod dashboard;
+pub mod day_plan;
 pub mod documents;
 pub mod forms;
 pub mod organizations;

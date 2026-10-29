@@ -227,6 +227,8 @@ export interface ProposalDocument {
   uploaded_by: PersonId | null
   uploaded_at: IsoDateTime
   sort_order: number
+  /** Qui présente ce support le jour J : une ligne `ProposalSpeaker` du même dossier. */
+  presented_by_speaker_id: Uuid | null
 }
 
 // ---------------------------------------------------------------------------

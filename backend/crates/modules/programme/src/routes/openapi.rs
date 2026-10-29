@@ -70,6 +70,11 @@ pub struct ApiErrorBody {
         crate::routes::workspace::marquer_non_lu,
         crate::routes::workspace::ajouter_destinataires,
         crate::routes::admin_ops::deduire,
+        crate::routes::day_plan::lire,
+        crate::routes::day_plan::points_focaux,
+        crate::routes::day_plan::besoins,
+        crate::routes::day_plan::ajouter_publication,
+        crate::routes::day_plan::retirer_publication,
         // --- Séances et inscriptions (B5) : dix-sept chemins ------------------
         crate::routes::planner::ecran,
         crate::routes::sessions::liste,
@@ -121,7 +126,7 @@ mod tests {
     /// en porte deux — une lecture et un rattachement —, et
     /// `/proposal-comments/{id}/resolution` aussi.
     #[test]
-    fn les_soixante_six_routes_sont_documentees() {
+    fn les_soixante_et_onze_routes_sont_documentees() {
         let doc = super::ProgrammeApi::openapi();
         let operations: usize = doc
             .paths
@@ -142,8 +147,8 @@ mod tests {
             .sum();
 
         assert_eq!(
-            operations, 66,
-            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10"
+            operations, 71,
+            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10, les cinq du jour J du 29/10"
         );
     }
 

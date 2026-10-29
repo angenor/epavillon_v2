@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.assets\n               (bucket, object_key, checksum_sha256, mime_type, byte_size,\n                original_filename, owner_organization_id, status, scan_verdict)\n           VALUES ('epavillon', '2027/03/' || gen_random_uuid()::text || '/support.pptx',\n                   md5(gen_random_uuid()::text) || md5(gen_random_uuid()::text),\n                   'application/vnd.openxmlformats-officedocument.presentationml.presentation',\n                   4096, 'support.pptx', $1, 'ready', 'clean')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8bca2fb06ad9acfdb13d8559adad1a16fc992f37e9861d064c3c4acf7df7fafd"
+}

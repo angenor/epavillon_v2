@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_social_posts (proposal_id, url, created_by)\n         VALUES ($1, $2::text::platform.url, $3)\n         ON CONFLICT (proposal_id, url) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e5388a7e74e520392a656cb0e5224258eb3291933a8173f37b5b927b19f9e22d"
+}

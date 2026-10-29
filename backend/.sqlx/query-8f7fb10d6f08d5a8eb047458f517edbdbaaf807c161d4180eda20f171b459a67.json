@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT d.id, d.proposal_id, d.asset_id, d.title, d.document_type_code,\n                  d.is_public, d.uploaded_by, d.uploaded_at, d.sort_order,\n                  a.id AS \"asset_id_reel?\", a.original_filename,\n                  a.mime_type AS \"mime_type?\", a.byte_size AS \"byte_size?\",\n                  a.status::text AS \"status?\",\n                  a.scan_verdict::text AS \"scan_verdict?\",\n                  CASE WHEN a.status = 'ready' AND a.deleted_at IS NULL\n                       THEN media.object_url(a.bucket, a.object_key) END AS \"url?\"\n             FROM programme.proposal_documents d\n             LEFT JOIN media.assets a ON a.id = d.asset_id\n            WHERE d.proposal_id = $1\n            ORDER BY d.sort_order, d.uploaded_at",
+  "query": "INSERT INTO programme.proposal_documents\n               (proposal_id, asset_id, title, document_type_code, is_public,\n                uploaded_by, sort_order, presented_by_speaker_id)\n           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n        RETURNING id, proposal_id, asset_id, title, document_type_code,\n                  is_public, uploaded_by, uploaded_at, sort_order,\n                  presented_by_speaker_id",
   "describe": {
     "columns": [
       {
@@ -104,69 +104,32 @@
       },
       {
         "ordinal": 9,
-        "name": "asset_id_reel?",
+        "name": "presented_by_speaker_id",
         "type_info": "Uuid",
         "origin": {
           "Table": {
-            "table": "media.assets",
-            "name": "id"
+            "table": "programme.proposal_documents",
+            "name": "presented_by_speaker_id"
           }
         }
-      },
-      {
-        "ordinal": 10,
-        "name": "original_filename",
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "media.assets",
-            "name": "original_filename"
-          }
-        }
-      },
-      {
-        "ordinal": 11,
-        "name": "mime_type?",
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "media.assets",
-            "name": "mime_type"
-          }
-        }
-      },
-      {
-        "ordinal": 12,
-        "name": "byte_size?",
-        "type_info": "Int8",
-        "origin": {
-          "Table": {
-            "table": "media.assets",
-            "name": "byte_size"
-          }
-        }
-      },
-      {
-        "ordinal": 13,
-        "name": "status?",
-        "type_info": "Text",
-        "origin": "Expression"
-      },
-      {
-        "ordinal": 14,
-        "name": "scan_verdict?",
-        "type_info": "Text",
-        "origin": "Expression"
-      },
-      {
-        "ordinal": 15,
-        "name": "url?",
-        "type_info": "Text",
-        "origin": "Expression"
       }
     ],
     "parameters": {
       "Left": [
+        "Uuid",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Text",
+        "Bool",
+        "Uuid",
+        "Int2",
         "Uuid"
       ]
     },
@@ -180,14 +143,8 @@
       true,
       false,
       false,
-      false,
-      true,
-      false,
-      false,
-      null,
-      null,
-      null
+      true
     ]
   },
-  "hash": "149712ba32effe2df6bb9aff83344f7d09498d5163154848f17f64c0b710c266"
+  "hash": "8f7fb10d6f08d5a8eb047458f517edbdbaaf807c161d4180eda20f171b459a67"
 }

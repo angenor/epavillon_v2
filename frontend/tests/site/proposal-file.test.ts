@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { proposalFileChecklist, proposalFileGaps } from '../../app/utils/proposal-file.ts'
 import type { DraftSpeaker, ProposalDraft } from '../../app/types/proposal-form.ts'
 import type { AttachedImage } from '../../app/types/media.ts'
+import type { ProposalDayPlan } from '../../app/types/programme/day-plan.ts'
 
 const photo = { asset_id: 'a', url: 'x' } as unknown as AttachedImage
 
@@ -43,4 +44,17 @@ test('la liste du dossier marque le logo en rouge et compte ce qui est fait', ()
   assert.equal(logo?.done, false)
   assert.equal(logo?.danger, true)
   assert.equal(items.filter((item) => item.done).length, items.length - 1)
+})
+
+test('une activité retenue réclame le téléphone du point focal et ses besoins techniques', () => {
+  const dayPlan = {
+    focal_points: [{ id: null, speaker_id: null, person_id: 'p', full_name: 'Fatou Sarr', phone: '', whatsapp: '', is_default: true }],
+    technical_needs: { video: false, remote: false, remote_details: '', accessibility: false, accessibility_details: '', other: '', updated_at: null },
+    social_posts: [],
+    needs_deadline: null,
+  } as unknown as ProposalDayPlan
+  const facts = { draft: draft([speaker('Mariam', '<p>Directrice</p>', true)]), hasCover: true, hasLogo: true, dayPlan }
+  assert.deepEqual(proposalFileGaps(facts), [{ kind: 'focalPhone', names: ['Fatou Sarr'] }, { kind: 'needs' }])
+  const keys = proposalFileChecklist(facts).filter((item) => !item.done).map((item) => item.key)
+  assert.deepEqual(keys, ['focal', 'needs'])
 })

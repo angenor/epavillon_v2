@@ -4,6 +4,7 @@
 pub mod admin_desk;
 pub mod admin_list;
 pub mod admin_ops;
+pub mod day_plan;
 pub mod detail;
 pub mod openapi;
 pub mod people;

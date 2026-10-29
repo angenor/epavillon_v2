@@ -137,3 +137,9 @@ Direction 1 arbitrée sur maquette (canevas « Fiche dossier : direction »). R�
 - Serveur : `est_modifiable_par_lorganisation`, `exiger_un_dossier_complet` sur le chemin organisation hors brouillon, garde média de la ligne d'intervenant, `DraftSpeaker.speaker_id`, `ProposalFile.organization_logo`, `ReopenedSpeaker.photo_image`.
 
 Reste : phase 2 (point focal, besoins techniques, présentations, publications sur les réseaux, rappels calculés), phase 3 (atelier de l'image de couverture, image de partage).
+
+## 29/10 : la fiche d'un dossier, phase 2 (le jour J)
+
+Activité retenue seulement. Point focal sur place : par défaut le déposant (intervenant ou non), on coche un intervenant ou on ajoute un collègue ; au moins un, le refus est dit dans la carte. Besoins techniques en trois tuiles (vidéo, à distance, accessibilité) et un texte libre ; date limite indicative à dix jours de la première séance (`programme.proposal_needs_deadline`). Présentations : documents `presentation`. Publications : liens collés, réseau déduit de l'adresse. Point focal et besoins se ferment à la fin de l'édition ; présentations et publications restent ouvertes (bilan).
+
+Composants `FocalPoints`, `TechnicalNeeds`, `Presentations`, `SocialPosts` ; `GET /proposals/{id}/day-plan` et ses écritures. Non fait : rappels automatiques, lecture côté back-office.

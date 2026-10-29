@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.events\n            SET starts_at = now() - interval '10 days', ends_at = now() - interval '1 day'\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b19e88d24adabd0d577eef83d99e12eff858f71e5b8a55909f86f96558da153a"
+}

@@ -21,6 +21,7 @@
  *   programme/review.ts        070_programme_proposals.sql § 5
  *   programme/session.ts       075_programme_sessions.sql § 1, 2, 7
  *   programme/registration.ts  075_programme_sessions.sql § 3, 4, 5
+ *   programme/day-plan.ts      070_programme_proposals.sql § 4 bis : le jour J d'une activité retenue
  *   content.ts                 115_content.sql — les contenus mis en avant
  *   engagement.ts              110_engagement.sql § 6 — les rappels seuls
  *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
@@ -68,6 +69,7 @@ export type * from './programme/proposal'
 export type * from './programme/review'
 export type * from './programme/session'
 export type * from './programme/registration'
+export type * from './programme/day-plan'
 
 export type * from './content'
 export type * from './engagement'

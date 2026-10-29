@@ -576,10 +576,123 @@ CREATE TABLE programme.proposal_documents (
     uploaded_by  uuid        CONSTRAINT xmod_fk_proposal_documents_uploader
                              REFERENCES identity.people(id) ON DELETE SET NULL,
     uploaded_at  timestamptz NOT NULL DEFAULT now(),
-    sort_order   smallint    NOT NULL DEFAULT 0
+    sort_order   smallint    NOT NULL DEFAULT 0,
+    -- Qui présente ce support le jour J (29/10), facultatif ; ajoutée en dernier,
+    -- comme la migration. Un intervenant retiré du dossier laisse la pièce, sans
+    -- présentateur. L'appartenance au même dossier est vérifiée par l'API.
+    presented_by_speaker_id uuid REFERENCES programme.proposal_speakers(id) ON DELETE SET NULL
 );
 
 CREATE INDEX ix_proposal_documents_proposal ON programme.proposal_documents (proposal_id, sort_order);
+
+-- -----------------------------------------------------------------------------
+-- 4 bis. Le jour J d'une activité retenue (29/10)
+--
+-- Une fois le dossier retenu, l'organisation prépare l'activité : qui joindre
+-- sur place, ce qu'il faut à l'équipe technique, et où l'activité est relayée
+-- sur les réseaux sociaux. La v1 recueillait tout cela par courriel, sans trace
+-- dans la plateforme ; l'équipe relançait à la main, souvent la veille.
+--
+-- Les supports présentés (PowerPoint, PDF) ne sont pas ici : ce sont des pièces
+-- du dossier (`proposal_documents`, type `presentation`).
+--
+-- Aucune de ces tables n'est auditée : seul le dossier l'est (le journal de ses
+-- champs). Ce sont des informations pratiques, réécrites à chaque
+-- enregistrement, pas des engagements dont il faudrait retrouver l'historique.
+-- -----------------------------------------------------------------------------
+
+-- Les personnes à joindre le jour J. L'API propose le déposant tant que rien
+-- n'est enregistré ; une fois la liste enregistrée, elle en compte au moins
+-- une (règle de l'API : la base ne sait pas exiger « au moins une ligne »).
+-- Trois origines possibles : un intervenant du dossier (`speaker_id`), une
+-- personne connue (le déposant, un membre : `person_id`), ou un collègue saisi
+-- à la main (ni l'un ni l'autre).
+CREATE TABLE programme.proposal_focal_points (
+    id          uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    proposal_id uuid        NOT NULL REFERENCES programme.proposals(id) ON DELETE CASCADE,
+    -- Un intervenant retiré du dossier n'est plus point focal.
+    speaker_id  uuid        REFERENCES programme.proposal_speakers(id) ON DELETE CASCADE,
+    person_id   uuid        CONSTRAINT xmod_fk_proposal_focal_points_person
+                            REFERENCES identity.people(id) ON DELETE SET NULL,
+    -- Instantané affiché, comme les instantanés d'un intervenant : le nom qu'on
+    -- demandera à l'accueil du pavillon, même si la fiche change ensuite.
+    full_name   text        NOT NULL,
+    -- Texte libre : un numéro international se saisit de vingt façons, et le
+    -- refuser au mauvais format laisserait l'activité sans contact.
+    phone       text        NOT NULL DEFAULT '',
+    whatsapp    text        NOT NULL DEFAULT '',
+    sort_order  smallint    NOT NULL DEFAULT 0,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ck_proposal_focal_points_name CHECK (
+        length(btrim(full_name)) > 0 AND length(full_name) <= 200),
+    CONSTRAINT ck_proposal_focal_points_phones CHECK (
+        length(phone) <= 50 AND length(whatsapp) <= 50)
+);
+
+-- Une même personne une fois par dossier, qu'elle vienne de la liste des
+-- intervenants ou des membres.
+CREATE UNIQUE INDEX ux_proposal_focal_points_speaker ON programme.proposal_focal_points (proposal_id, speaker_id)
+    WHERE speaker_id IS NOT NULL;
+CREATE UNIQUE INDEX ux_proposal_focal_points_person  ON programme.proposal_focal_points (proposal_id, person_id)
+    WHERE person_id IS NOT NULL;
+CREATE INDEX ix_proposal_focal_points_proposal ON programme.proposal_focal_points (proposal_id, sort_order);
+CREATE INDEX ix_proposal_focal_points_person   ON programme.proposal_focal_points (person_id);
+
+COMMENT ON TABLE programme.proposal_focal_points IS
+    'Personnes à joindre le jour J d''une activité retenue. Au moins une une fois la liste enregistrée ; le déposant est proposé par défaut.';
+
+-- Les besoins techniques signalés à l'avance. Une ligne par dossier, absente
+-- tant que l'organisation n'a rien déclaré : « aucun besoin » enregistré (tout
+-- à faux) n'est pas « pas encore répondu », et c'est la présence de la ligne
+-- qui les distingue.
+CREATE TABLE programme.proposal_technical_needs (
+    proposal_id           uuid        PRIMARY KEY REFERENCES programme.proposals(id) ON DELETE CASCADE,
+    -- Une vidéo à projeter pendant l'activité.
+    video                 boolean     NOT NULL DEFAULT false,
+    -- Au moins une intervention à distance ; qui, depuis quel pays, en clair.
+    remote                boolean     NOT NULL DEFAULT false,
+    remote_details        text        NOT NULL DEFAULT '',
+    -- Langue des signes, sous-titres, accès en fauteuil… en clair.
+    accessibility         boolean     NOT NULL DEFAULT false,
+    accessibility_details text        NOT NULL DEFAULT '',
+    -- Ce que l'équipe technique doit savoir d'autre.
+    other                 text        NOT NULL DEFAULT '',
+    updated_at            timestamptz NOT NULL DEFAULT now(),
+    updated_by            uuid        CONSTRAINT xmod_fk_proposal_technical_needs_updater
+                                      REFERENCES identity.people(id) ON DELETE SET NULL,
+    CONSTRAINT ck_proposal_technical_needs_lengths CHECK (
+        length(remote_details) <= 2000 AND length(accessibility_details) <= 2000
+        AND length(other) <= 4000)
+);
+
+CREATE TRIGGER tg_proposal_technical_needs_updated_at
+    BEFORE UPDATE ON programme.proposal_technical_needs
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+COMMENT ON TABLE programme.proposal_technical_needs IS
+    'Besoins techniques d''une activité retenue, déclarés par l''organisation. Ligne absente : rien de déclaré.';
+
+-- Les publications relatives à l'activité, que l'IFDD relaie. La plateforme
+-- (LinkedIn, Facebook, X…) n'est pas une colonne : elle se déduit de l'adresse
+-- à la lecture. Une colonne figerait la liste des réseaux, qui change plus vite
+-- que le modèle (Twitter est devenu X en 2023).
+CREATE TABLE programme.proposal_social_posts (
+    id          uuid         PRIMARY KEY DEFAULT platform.uuid_v7(),
+    proposal_id uuid         NOT NULL REFERENCES programme.proposals(id) ON DELETE CASCADE,
+    -- `platform.url` : http ou https, sans espace, 2048 caractères au plus.
+    url         platform.url NOT NULL,
+    created_by  uuid         CONSTRAINT xmod_fk_proposal_social_posts_creator
+                             REFERENCES identity.people(id) ON DELETE SET NULL,
+    created_at  timestamptz  NOT NULL DEFAULT now(),
+    CONSTRAINT ux_proposal_social_posts UNIQUE (proposal_id, url)
+);
+
+COMMENT ON TABLE programme.proposal_social_posts IS
+    'Liens des publications sur les réseaux sociaux relatives à une activité. La plateforme se déduit de l''adresse.';
+
+-- La date limite indicative des besoins techniques, calculée sur les séances du
+-- dossier, vit dans 075 (`programme.proposal_needs_deadline()`) : les séances
+-- sont chargées après ce fichier.
 
 -- -----------------------------------------------------------------------------
 -- 5. Évaluation

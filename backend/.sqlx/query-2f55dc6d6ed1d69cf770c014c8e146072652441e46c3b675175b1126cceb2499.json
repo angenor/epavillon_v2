@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT pe.display_name AS \"display_name!\", pe.phone\n             FROM programme.proposals p\n             JOIN identity.people pe ON pe.id = $2\n            WHERE p.id = $1\n              AND (pe.id = p.submitted_by\n                   OR pe.id = p.contact_person_id\n                   OR EXISTS (SELECT 1 FROM org.memberships m\n                               WHERE m.organization_id = p.organization_id\n                                 AND m.person_id = pe.id AND m.status = 'active'))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "phone",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "phone"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "2f55dc6d6ed1d69cf770c014c8e146072652441e46c3b675175b1126cceb2499"
+}

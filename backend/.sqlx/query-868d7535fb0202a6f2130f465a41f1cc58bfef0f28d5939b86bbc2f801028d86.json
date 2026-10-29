@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_focal_points\n                 (proposal_id, speaker_id, person_id, full_name, phone, whatsapp, sort_order)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "868d7535fb0202a6f2130f465a41f1cc58bfef0f28d5939b86bbc2f801028d86"
+}

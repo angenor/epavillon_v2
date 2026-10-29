@@ -27,7 +27,13 @@
  */
 
 import type { AdministeredEvents } from '~/types/identity'
-import type { ProposalDocumentEntry } from '~/types/admin-review'
+import type { AttachDocumentPayload, ProposalDocumentEntry } from '~/types/admin-review'
+import type {
+  AddSocialPostPayload,
+  ProposalDayPlan,
+  SaveFocalPointsPayload,
+  SaveTechnicalNeedsPayload,
+} from '~/types/programme/day-plan'
 import type { ScheduleThemeBadge } from '~/types/views'
 import type {
   EditableProposal,
@@ -43,7 +49,7 @@ import type {
   ProposalFacet,
   ProposalListScreen,
 } from '~/types/admin-proposals'
-import type { MarkCommentsReadPayload, ProposalCommentView } from '~/types/programme/proposal'
+import type { MarkCommentsReadPayload, ProposalCommentView, ProposalDocument } from '~/types/programme/proposal'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -153,6 +159,35 @@ export function createProposalsApi({ call, callOrNull, send, assertEventInScope 
           }
         }),
     ),
+  /**
+   * RATTACHER UN OBJET DÉJÀ STOCKÉ au dossier : le fichier passe d'abord par
+   * `POST /media/assets` (rôle `document` de `programme.proposals`, PDF et
+   * `application/vnd.*`, PowerPoint compris). `presented_by_speaker_id` dit qui
+   * présente un support du jour J. `actorId` ne sert qu'aux données simulées.
+   */
+  attachDocument: (id: Uuid, payload: AttachDocumentPayload, actorId: Uuid | null = null): Promise<ProposalDocument> =>
+    send(`/proposals/${id}/documents`, payload, (m) => m.attachProposalDocument(id, payload, actorId)),
+  /** Détacher une pièce : l'objet stocké demeure (un même fichier peut servir ailleurs). */
+  removeDocument: (id: Uuid, documentId: Uuid): Promise<void> =>
+    send(`/proposals/${id}/documents/${documentId}`, {}, (m) => m.removeProposalDocument(id, documentId), 'DELETE'),
+
+  /**
+   * LE JOUR J d'une activité retenue : points focaux (le déposant proposé tant
+   * que rien n'est enregistré), besoins techniques, publications, date limite
+   * indicative. Chaque écriture rend le jour J entier.
+   */
+  dayPlan: (id: Uuid): Promise<ProposalDayPlan> =>
+    call(`/proposals/${id}/day-plan`, (m) => m.proposalDayPlan(id)),
+  /** Remplace la liste entière ; une liste vide est refusée par l'API. */
+  saveFocalPoints: (id: Uuid, payload: SaveFocalPointsPayload): Promise<ProposalDayPlan> =>
+    send(`/proposals/${id}/focal-points`, payload, (m) => m.saveProposalFocalPoints(id, payload), 'PUT'),
+  saveTechnicalNeeds: (id: Uuid, payload: SaveTechnicalNeedsPayload): Promise<ProposalDayPlan> =>
+    send(`/proposals/${id}/technical-needs`, payload, (m) => m.saveProposalTechnicalNeeds(id, payload), 'PUT'),
+  addSocialPost: (id: Uuid, payload: AddSocialPostPayload): Promise<ProposalDayPlan> =>
+    send(`/proposals/${id}/social-posts`, payload, (m) => m.addProposalSocialPost(id, payload)),
+  removeSocialPost: (id: Uuid, postId: Uuid): Promise<ProposalDayPlan> =>
+    send(`/proposals/${id}/social-posts/${postId}`, {}, (m) => m.removeProposalSocialPost(id, postId), 'DELETE'),
+
   /**
    * LE FIL D'ÉCHANGES, filtré À LA SOURCE et lu par une personne.
    *

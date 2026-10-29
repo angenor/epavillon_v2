@@ -547,6 +547,9 @@ export const PROPOSAL_COMMENT = (n: number): Uuid => uuid('7044', n)
 /** `programme.proposal_transitions`. */
 export const PROPOSAL_TRANSITION = (n: number): Uuid => uuid('7045', n)
 
+/** `programme.proposal_social_posts` (jour J, § 4 bis). */
+export const PROPOSAL_SOCIAL_POST = (n: number): Uuid => uuid('7046', n)
+
 // ---------------------------------------------------------------------------
 // Évaluation — 070_programme_proposals.sql § 5
 // ---------------------------------------------------------------------------

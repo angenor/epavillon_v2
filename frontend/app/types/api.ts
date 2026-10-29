@@ -5305,6 +5305,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposals/{id}/day-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Le jour J d'un dossier.
+         * @description `ProposalDayPlan` : points focaux, besoins techniques, publications et date limite indicative des besoins (dix jours avant la première séance non annulée, nulle sans séance). **Tant qu'aucun point focal n'est enregistré, le déposant est proposé** (`id: null`, `is_default: true`, téléphone de sa fiche). `technical_needs.updated_at` nul : rien de déclaré, pas même « aucun besoin ». La plateforme d'une publication se déduit de son adresse. Accès de la fiche : adhésion active à l'organisation porteuse (ou la déposante en attente), ou lecture générale dans le périmètre.
+         */
+        get: operations["propositions_jour_j"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposals/{id}/decision": {
         parameters: {
             query?: never;
@@ -5402,6 +5422,26 @@ export interface paths {
          */
         get: operations["propositions_dossier_du_deposant"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/focal-points": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Remplacer les points focaux.
+         * @description `SaveFocalPointsPayload` → `ProposalDayPlan`. **Remplace la liste entière**, dans l'ordre reçu ; une liste vide est refusée (au moins une personne à joindre). Chaque entrée désigne un intervenant du dossier (`speaker_id`), une personne connue du dossier (`person_id` : déposant, contact ou membre actif), ou personne (collègue saisi à la main, nom obligatoire). Nom ou téléphone laissés vides reprennent ceux de la fiche. Une même personne deux fois est refusée. Organisation porteuse ou `programme.proposal.decide` sur l'édition ; dossier retenu ; refusé après la fin de l'édition.
+         */
+        put: operations["propositions_points_focaux"];
         post?: never;
         delete?: never;
         options?: never;
@@ -5529,6 +5569,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposals/{id}/social-posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ajouter une publication.
+         * @description `AddSocialPostPayload` → `ProposalDayPlan`. Seule une adresse http(s) complète est acceptée ; la plateforme se déduit de l'adresse à la lecture. Un lien déjà présent rend `CONFLICT`. Organisation porteuse ou `programme.proposal.decide` sur l'édition ; dossier retenu ; **permis après la fin de l'édition** (le bilan se fait après).
+         */
+        post: operations["propositions_ajouter_une_publication"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/social-posts/{post_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Retirer une publication.
+         * @description Retrait d'une publication → `ProposalDayPlan`. Mêmes droits que l'ajout, permis après la fin de l'édition.
+         */
+        delete: operations["propositions_retirer_une_publication"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposals/{id}/speakers": {
         parameters: {
             query?: never;
@@ -5563,6 +5643,26 @@ export interface paths {
          * @description `SaveDraftPayload` → `SubmitProposalResult`. **Les trois refus de recevabilité sortent en 200**, avec leur valeur : l'échéance pour un appel clos, le plafond pour un quota atteint. Ils sont classés **avant** l'écriture parce que le déclencheur ne les rend que dans une phrase française, et parce qu'un même code d'erreur PostgreSQL sert aux quatre causes possibles. Le déclencheur reste le dernier mot : une course est **reclassée**, jamais lue au texte. Le brouillon est enregistré **avant** toute décision — si l'appel a fermé entre le chargement et le clic, l'organisation ne perd pas en plus ce qu'elle venait de saisir. La réponse porte le nombre de revues attendues et la date d'annonce, **lus sur l'appel**.
          */
         post: operations["depot_deposer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/technical-needs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Déclarer les besoins techniques.
+         * @description `SaveTechnicalNeedsPayload` → `ProposalDayPlan`. La ligne naît au premier enregistrement, même « aucun besoin ». Le détail d'une case décochée est effacé. Organisation porteuse ou `programme.proposal.decide` sur l'édition ; dossier retenu ; refusé après la fin de l'édition. La date limite est indicative : rien n'est refusé après.
+         */
+        put: operations["propositions_besoins_techniques"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -20944,6 +21044,47 @@ export interface operations {
             };
         };
     };
+    propositions_jour_j: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ProposalDayPlan */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     propositions_decider: {
         parameters: {
             query?: never;
@@ -21189,6 +21330,60 @@ export interface operations {
             };
             /** @description Aucune session, ou session close */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_points_focaux: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description ProposalDayPlan */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Liste vide, nom manquant, doublon : VALIDATION_FAILED ; intervenant ou personne étrangers au dossier : PROPOSAL_UNKNOWN_REFERENCE ; dossier non retenu ou édition terminée : PROPOSAL_NOT_EDITABLE */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21519,6 +21714,121 @@ export interface operations {
             };
         };
     };
+    propositions_ajouter_une_publication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description ProposalDayPlan */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Lien déjà présent : CONFLICT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Adresse invalide : VALIDATION_FAILED ; dossier non retenu : PROPOSAL_NOT_EDITABLE */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_retirer_une_publication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+                /** @description Identifiant de la publication */
+                post_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ProposalDayPlan */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Publication inexistante, d'un autre dossier, **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier non retenu : PROPOSAL_NOT_EDITABLE */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     propositions_intervenants: {
         parameters: {
             query?: never;
@@ -21613,6 +21923,60 @@ export interface operations {
                 };
             };
             /** @description Dossier incomplet, ou bornes d'intervenants de l'appel */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_besoins_techniques: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description ProposalDayPlan */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Texte trop long : VALIDATION_FAILED ; dossier non retenu ou édition terminée : PROPOSAL_NOT_EDITABLE */
             422: {
                 headers: {
                     [name: string]: unknown;

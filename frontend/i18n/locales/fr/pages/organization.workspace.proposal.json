@@ -163,7 +163,9 @@
     "cta": {
       "bio": "Compléter",
       "photo": "Ajouter",
-      "cover": "Ajouter"
+      "cover": "Ajouter",
+      "focalPhone": "Compléter",
+      "needs": "Signaler"
     },
     "logo": {
       "title": "Votre organisation n'a pas de logo",
@@ -171,7 +173,9 @@
       "askManager": "Il manque sur la page publique et sur l'image de couverture. Seul un référent de {organization} peut l'ajouter : demandez-le-lui.",
       "action": "Ajouter le logo",
       "field": "Logo de l'organisation"
-    }
+    },
+    "focalPhone": "Le téléphone du point focal ({names}) | Le téléphone du point focal ({names}) | Le téléphone des points focaux ({names})",
+    "needs": "Vos besoins techniques"
   },
   "speakers": {
     "photoMissing": "Photo manquante",
@@ -193,7 +197,9 @@
       "bios": "Biographies",
       "photos": "Photos des intervenants",
       "logo": "Logo de l'organisation",
-      "format": "Format et durée"
+      "format": "Format et durée",
+      "focal": "Point focal joignable",
+      "needs": "Besoins techniques"
     }
   },
   "cover": {
@@ -220,5 +226,79 @@
     "categories": "Catégories",
     "languages": "Langues",
     "country": "Pays"
+  },
+  "dayPlan": {
+    "prepare": "Votre activité est retenue · préparer le jour J",
+    "promote": "Faire connaître votre activité"
+  },
+  "focal": {
+    "title": "Point focal sur place",
+    "description": "La personne que l'équipe de l'IFDD appelle le jour J : retard, salle, matériel. Au moins une.",
+    "origin": {
+      "submitter": "A déposé le dossier",
+      "speaker": "Intervenant",
+      "colleague": "Collègue"
+    },
+    "phone": "Téléphone",
+    "whatsapp": "WhatsApp",
+    "missingPhone": "Téléphone à renseigner",
+    "name": "Nom et prénom",
+    "sameNumber": "Même numéro sur WhatsApp",
+    "remove": "Retirer cette personne",
+    "add": "Une autre personne",
+    "atLeastOne": "Il faut au moins un point focal : ajoutez quelqu'un d'autre avant de retirer cette personne.",
+    "hint": "Par défaut, la personne qui a déposé le dossier, intervenante ou non. Cochez « Point focal sur place » sur un intervenant pour l'ajouter ici, ou ajoutez un collègue.",
+    "checkbox": "Point focal sur place"
+  },
+  "needs": {
+    "title": "Besoins techniques",
+    "description": "Ce que l'équipe technique doit prévoir pour votre activité.",
+    "deadline": "À signaler avant le {date} : l'équipe technique s'organise à l'avance.",
+    "notDeclared": "Pas encore signalés. Dites-le même si vous n'avez besoin de rien.",
+    "none": "Aucun besoin particulier.",
+    "kinds": {
+      "video": {
+        "label": "Vidéo à projeter",
+        "hint": "Un film ou une séquence avec du son."
+      },
+      "remote": {
+        "label": "Intervention à distance",
+        "hint": "Une personne parle depuis un autre pays."
+      },
+      "accessibility": {
+        "label": "Accessibilité",
+        "hint": "Langue des signes, sous-titres, accès en fauteuil."
+      }
+    },
+    "remoteDetails": "Qui intervient à distance, et depuis quel pays ?",
+    "accessibilityDetails": "Ce qui est nécessaire",
+    "other": "Autre chose à savoir (facultatif)",
+    "otherPlaceholder": "Par exemple : deux micros sans fil, une table pour quatre."
+  },
+  "presentations": {
+    "title": "Présentations",
+    "description": "Les supports projetés pendant l'activité. PowerPoint ou PDF.",
+    "empty": "Aucune présentation pour le moment.",
+    "add": "Ajouter une présentation",
+    "remove": "Retirer",
+    "untitled": "Présentation"
+  },
+  "social": {
+    "title": "Vos publications sur les réseaux sociaux",
+    "description": "Collez le lien de chaque publication sur votre activité : l'IFDD la relaie.",
+    "field": "Lien d'une publication",
+    "placeholder": "https://www.linkedin.com/posts/…",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "removeLabel": "Retirer la publication {url}",
+    "platforms": {
+      "linkedin": "LinkedIn",
+      "facebook": "Facebook",
+      "x": "X",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "other": "Lien"
+    }
   }
 }

@@ -10,6 +10,7 @@ pub mod answers;
 pub mod birth;
 pub mod blind;
 pub mod bulk;
+pub mod day_plan;
 pub mod derived;
 pub mod desk;
 pub mod draft;

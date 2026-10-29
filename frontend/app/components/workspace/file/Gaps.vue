@@ -53,11 +53,13 @@ const ANCHORS: Record<ProposalFileGap['kind'], string> = {
   bio: '#intervenants',
   photo: '#intervenants',
   cover: '#couverture',
+  focalPhone: '#point-focal',
+  needs: '#besoins-techniques',
 }
 
 function labelOf(gap: ProposalFileGap): string {
   const key = 'organization.workspace.proposal.gaps'
-  if (gap.kind === 'cover') return t(`${key}.cover`)
+  if (gap.kind === 'cover' || gap.kind === 'needs') return t(`${key}.${gap.kind}`)
   return t(`${key}.${gap.kind}`, { names: gap.names.join(', ') }, gap.names.length)
 }
 </script>

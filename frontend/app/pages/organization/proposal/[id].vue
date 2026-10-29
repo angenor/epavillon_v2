@@ -6,6 +6,7 @@ import type { AttachableRoleRule } from '~/types/media'
 import type { Intent, SelectOption, TabItem } from '~/types/ui'
 import type { AssetId, Uuid } from '~/types/shared'
 import type { ProposalFileSection } from '~/composables/useProposalFileEditor'
+import type { FocalPointInput, ProposalDayPlan, SaveTechnicalNeedsPayload } from '~/types/programme/day-plan'
 
 /**
  * LA FICHE D'UN DOSSIER — `/mon-organisation/dossiers/:id`,
@@ -244,12 +245,117 @@ const facts = computed(() =>
         draft: editor.saved.value,
         hasCover: file.value.tracking.cover !== null,
         hasLogo: file.value.organization_logo !== null,
+        dayPlan: dayPlan.value,
       }
     : null,
 )
 
 const gaps = computed(() => (facts.value ? proposalFileGaps(facts.value) : []))
 const checklist = computed(() => (facts.value ? proposalFileChecklist(facts.value) : []))
+
+// ---------------------------------------------------------------------------
+// Le jour J : activité retenue seulement
+// ---------------------------------------------------------------------------
+
+const isAccepted = computed(() => proposalStatus.value === 'accepted')
+
+const { data: dayPlan } = useAsyncData<ProposalDayPlan | null>(
+  () => `proposal-day-plan-${proposalId.value}`,
+  () => (isAccepted.value ? api.proposals.dayPlan(proposalId.value) : Promise.resolve(null)),
+  { lazy: true, watch: [proposalId, isAccepted] },
+)
+
+/** Point focal et besoins techniques : jusqu'à la fin de l'édition. Présentations et publications : après aussi, le bilan se fait après. */
+const canPrepare = computed(() => {
+  const current = file.value
+  return isAccepted.value && current != null && !isEditionOver(current.tracking.edition)
+})
+const canPromote = computed(() => isAccepted.value)
+
+const daySaving = ref<'focal' | 'needs' | 'social' | 'presentations' | null>(null)
+const dayError = ref<{ part: 'focal' | 'needs' | 'social' | 'presentations'; message: string } | null>(null)
+
+async function dayWrite(part: NonNullable<typeof daySaving.value>, write: () => Promise<ProposalDayPlan | void>): Promise<void> {
+  daySaving.value = part
+  dayError.value = null
+  try {
+    const plan = await write()
+    if (plan) dayPlan.value = plan
+  } catch (thrown) {
+    dayError.value = { part, message: apiErrorMessage(thrown, (key) => t(key)) }
+  } finally {
+    daySaving.value = null
+  }
+}
+
+const errorOf = (part: NonNullable<typeof daySaving.value>) => (dayError.value?.part === part ? dayError.value.message : null)
+
+const focalInputs = computed<FocalPointInput[]>(() =>
+  (dayPlan.value?.focal_points ?? []).map(({ speaker_id, person_id, full_name, phone, whatsapp }) => ({
+    speaker_id,
+    person_id,
+    full_name,
+    phone,
+    whatsapp,
+  })),
+)
+
+const focalSpeakerIds = computed(() =>
+  (dayPlan.value?.focal_points ?? []).flatMap((point) => (point.speaker_id ? [point.speaker_id] : [])),
+)
+
+function saveFocal(points: FocalPointInput[]): Promise<void> {
+  return dayWrite('focal', () => api.proposals.saveFocalPoints(proposalId.value, { focal_points: points }))
+}
+
+/** Cocher un intervenant l'ajoute aux points focaux, décocher le retire ; le dernier reste. */
+function toggleFocal(speakerId: string, on: boolean): Promise<void> {
+  const speaker = editor.saved.value?.speakers.find((entry) => entry.speaker_id === speakerId)
+  const next = on
+    ? [...focalInputs.value, { speaker_id: speakerId, person_id: null, full_name: speaker ? speakerName(speaker) : '', phone: '', whatsapp: '' }]
+    : focalInputs.value.filter((point) => point.speaker_id !== speakerId)
+  if (next.length === 0) {
+    dayError.value = { part: 'focal', message: t('organization.workspace.proposal.focal.atLeastOne') }
+    return Promise.resolve()
+  }
+  return saveFocal(next)
+}
+
+function saveNeeds(needs: SaveTechnicalNeedsPayload): Promise<void> {
+  return dayWrite('needs', () => api.proposals.saveTechnicalNeeds(proposalId.value, needs))
+}
+
+function addPost(url: string): Promise<void> {
+  return dayWrite('social', () => api.proposals.addSocialPost(proposalId.value, { url }))
+}
+
+function removePost(postId: Uuid): Promise<void> {
+  return dayWrite('social', () => api.proposals.removeSocialPost(proposalId.value, postId))
+}
+
+const presentationCount = computed(
+  () => (editor.data.value?.documents ?? []).filter((entry) => entry.document.document_type_code === 'presentation').length,
+)
+
+function addPresentation(assetId: AssetId, title: string): Promise<void> {
+  return dayWrite('presentations', async () => {
+    await api.proposals.attachDocument(proposalId.value, {
+      asset_id: assetId,
+      title: title || t('organization.workspace.proposal.presentations.untitled'),
+      document_type_code: 'presentation',
+      is_public: false,
+      sort_order: presentationCount.value,
+    })
+    await editor.refresh()
+  })
+}
+
+function removePresentation(documentId: Uuid): Promise<void> {
+  return dayWrite('presentations', async () => {
+    await api.proposals.removeDocument(proposalId.value, documentId)
+    await editor.refresh()
+  })
+}
 
 // ---------------------------------------------------------------------------
 // Lien public et QR code : à la publication du programme seulement
@@ -566,7 +672,10 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
                   :speakers="editor.saved.value.speakers"
                   :can-set-photo="canEditMedia"
                   :photo-rule="mediaRules?.avatar ?? null"
+                  :focal-speaker-ids="dayPlan && canPrepare ? focalSpeakerIds : null"
+                  :focal-busy="daySaving === 'focal'"
                   @photo-set="refreshAll()"
+                  @toggle-focal="toggleFocal"
                 />
                 <template #edit>
                   <ProposalStepSpeakers
@@ -577,6 +686,49 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
                   />
                 </template>
               </WorkspaceFileSection>
+
+              <!-- LE JOUR J -->
+              <template v-if="dayPlan">
+                <p class="-mb-2 text-sm font-bold tracking-wide text-success uppercase">
+                  {{ t('organization.workspace.proposal.dayPlan.prepare') }}
+                </p>
+                <WorkspaceFileFocalPoints
+                  :points="dayPlan.focal_points"
+                  :can-edit="canPrepare"
+                  :saving="daySaving === 'focal'"
+                  :error="errorOf('focal')"
+                  @save="saveFocal"
+                />
+                <WorkspaceFileTechnicalNeeds
+                  :needs="dayPlan.technical_needs"
+                  :deadline="dayPlan.needs_deadline"
+                  :timezone="timezone"
+                  :can-edit="canPrepare"
+                  :saving="daySaving === 'needs'"
+                  :error="errorOf('needs')"
+                  @save="saveNeeds"
+                />
+                <WorkspaceFilePresentations
+                  :proposal-id="file.tracking.proposal.id"
+                  :documents="editor.data.value?.documents ?? []"
+                  :can-edit="canPromote"
+                  :busy="daySaving === 'presentations'"
+                  :error="errorOf('presentations')"
+                  @add="addPresentation"
+                  @remove="removePresentation"
+                />
+                <p class="-mb-2 text-sm font-bold tracking-wide text-success uppercase">
+                  {{ t('organization.workspace.proposal.dayPlan.promote') }}
+                </p>
+                <WorkspaceFileSocialPosts
+                  :posts="dayPlan.social_posts"
+                  :can-edit="canPromote"
+                  :busy="daySaving === 'social'"
+                  :error="errorOf('social')"
+                  @add="addPost"
+                  @remove="removePost"
+                />
+              </template>
 
               <!-- ORGANISATIONS -->
               <WorkspaceFileSection
