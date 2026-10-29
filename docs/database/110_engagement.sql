@@ -1140,7 +1140,7 @@ CREATE TYPE engagement.mailing_status AS ENUM (
 -- de base (les modèles par défaut, qui ne se modifient pas) habillée de textes
 -- et d'images choisis : titre et sous-titre (à défaut, nom et dates de
 -- l'édition de l'envoi), dégradé sous le texte, et deux images rattachées par
--- le module media (rôles `background`, 3:1, et `logo`). Rattaché à une édition
+-- le module media (rôles `background`, 6:1, et `logo`). Rattaché à une édition
 -- ou commun à toutes ; rattaché, il peut être présélectionné quand un envoi de
 -- cette édition écrit à ses déposants (`mailing_suggested_template()`).
 CREATE TABLE engagement.mail_templates (
@@ -1163,7 +1163,7 @@ CREATE TABLE engagement.mail_templates (
     CONSTRAINT ck_mail_templates_name CHECK (length(btrim(name)) BETWEEN 1 AND 120),
     CONSTRAINT ck_mail_templates_layout CHECK (layout IN ('sobre', 'institutionnel', 'annonce',
                                                           'banniere', 'texte_sur_image',
-                                                          'institutionnel_logo')),
+                                                          'institutionnel_logo', 'edition')),
     CONSTRAINT ck_mail_templates_texts CHECK (coalesce(length(title), 0) <= 200
                                               AND coalesce(length(subtitle), 0) <= 200),
     -- Présélectionner « pour les déposants de cet événement » suppose un événement.
@@ -1221,11 +1221,12 @@ CREATE TABLE engagement.mailings (
     -- ligne, 600 px) : 'sobre' (texte et signature de l'IFDD),
     -- 'institutionnel' (bandeau, logo, pied de page IFDD et OIF), 'annonce'
     -- (bandeau, grand titre, bouton d'action). Depuis le 29/10, trois mises en
-    -- page aux visuels de l'édition de l'envoi : 'banniere' (sa bannière 3:1,
+    -- page aux visuels de l'édition de l'envoi : 'banniere' (sa bannière 6:1,
     -- puis son logo, son nom et ses dates), 'texte_sur_image' (nom et dates en
-    -- blanc sur la bannière) et 'institutionnel_logo' (bandeau institutionnel,
-    -- son logo à droite sur une tuile blanche). Sans l'image qu'elles
-    -- attendent, elles retombent sur 'institutionnel'.
+    -- blanc sur la bannière), 'institutionnel_logo' (bandeau institutionnel,
+    -- son logo à droite sur une tuile blanche) et 'edition' (la bande logo,
+    -- nom et dates de 'banniere', sans l'image). Sans l'image ou l'édition
+    -- qu'elles attendent, elles retombent sur 'institutionnel'.
     template        text        NOT NULL DEFAULT 'sobre',
     -- Valeur de secours de chaque variable, pour qui n'a pas de compte (on
     -- écrit volontiers à des personnes non inscrites) : {"prenom": "Madame,
@@ -1265,7 +1266,7 @@ CREATE TABLE engagement.mailings (
     CONSTRAINT ck_mailings_extra CHECK (cardinality(extra_addresses) <= 500),
     CONSTRAINT ck_mailings_template CHECK (template IN ('sobre', 'institutionnel', 'annonce',
                                                          'banniere', 'texte_sur_image',
-                                                         'institutionnel_logo')),
+                                                         'institutionnel_logo', 'edition')),
     CONSTRAINT ck_mailings_fallbacks CHECK (jsonb_typeof(variable_fallbacks) = 'object'),
     CONSTRAINT ck_mailings_cta CHECK ((cta_label IS NULL) = (cta_url IS NULL))
 );
@@ -1514,15 +1515,15 @@ INSERT INTO media.attachable_roles
      10485760, 10485760)
 ON CONFLICT DO NOTHING;
 
--- IMAGES D'UN GABARIT PERSONNALISÉ (29/10) : le fond, 3:1 (affiché 600 x 200,
--- déposé en 1200 x 400 au plus, JPEG compressé par l'outil de dépôt), et le
+-- IMAGES D'UN GABARIT PERSONNALISÉ (29/10) : le fond, 6:1 (affiché 600 x 100,
+-- déposé en 1200 x 200 au plus, JPEG compressé par l'outil de dépôt), et le
 -- logo. JPEG ou PNG seulement : Outlook ne lit pas le WebP. Servies par leur
 -- adresse publique dans le courriel.
 INSERT INTO media.attachable_roles
     (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes,
      max_byte_size, expected_aspect_ratio) VALUES
     ('engagement', 'mail_templates', 'background', '{"fr":"Image de fond","en":"Background image"}', false,
-     '{image/jpeg,image/png}', 2097152, 3.0000),
+     '{image/jpeg,image/png}', 2097152, 6.0000),
     ('engagement', 'mail_templates', 'logo', '{"fr":"Logo","en":"Logo"}', false,
      '{image/jpeg,image/png}', 2097152, NULL)
 ON CONFLICT DO NOTHING;

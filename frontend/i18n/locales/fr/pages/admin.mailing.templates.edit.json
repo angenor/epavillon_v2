@@ -26,7 +26,7 @@
   "imagesHint": "À défaut, la bannière et le logo de l'édition.",
   "imagesUnused": "Cette mise en page n'affiche pas d'image de fond ; le logo sert à « Institutionnel + logo de l'édition ».",
   "background": "Image de fond",
-  "backgroundUse": "affichée 600 x 200 en tête du courriel",
+  "backgroundUse": "affichée 600 x 100 en tête du courriel",
   "logo": "Logo",
   "logoUse": "sur fond blanc, 40 à 56 px de haut",
   "preview": "Aperçu",

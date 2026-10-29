@@ -26,6 +26,7 @@ export type MailingTemplate =
   | 'banniere'
   | 'texte_sur_image'
   | 'institutionnel_logo'
+  | 'edition'
 
 /** Les modèles par défaut, dans l'ordre où la fenêtre de rédaction les propose. */
 export const MAILING_TEMPLATES: MailingTemplate[] = [
@@ -35,6 +36,7 @@ export const MAILING_TEMPLATES: MailingTemplate[] = [
   'banniere',
   'texte_sur_image',
   'institutionnel_logo',
+  'edition',
 ]
 
 /** Les familles de destinataires lues par `mailing_audience()`. */
@@ -257,7 +259,7 @@ export interface MailTemplate {
   created_by_name: string | null
   created_at: string
   updated_at: string
-  /** Rôle `background` (3:1), tel que `media.attached_image()` le rend. */
+  /** Rôle `background` (6:1), tel que `media.attached_image()` le rend. */
   background: AttachedImage | null
   logo: AttachedImage | null
   /** Faux : commun à toutes les éditions, sans la permission globale. */

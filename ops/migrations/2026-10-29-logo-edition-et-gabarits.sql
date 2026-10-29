@@ -20,6 +20,6 @@ ON CONFLICT DO NOTHING;
 ALTER TABLE engagement.mailings DROP CONSTRAINT IF EXISTS ck_mailings_template;
 ALTER TABLE engagement.mailings ADD CONSTRAINT ck_mailings_template
     CHECK (template IN ('sobre', 'institutionnel', 'annonce',
-                        'banniere', 'texte_sur_image', 'institutionnel_logo'));
+                        'banniere', 'texte_sur_image', 'institutionnel_logo', 'edition'));
 
 COMMIT;

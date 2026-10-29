@@ -67,7 +67,7 @@ pub struct Apparence {
 }
 
 /// Les visuels d'une édition, remplacés par ceux d'un gabarit personnalisé :
-/// titre et sous-titre (à défaut, nom et période de l'édition), fond 3:1 et
+/// titre et sous-titre (à défaut, nom et période de l'édition), fond 6:1 et
 /// logo (à défaut, la bannière et le logo de l'édition, par leur adresse
 /// publique, en JPEG ou PNG).
 pub async fn apparence(
@@ -80,7 +80,7 @@ pub async fn apparence(
     let gabarit = perso.map_or(gabarit, |g| g.layout.as_str()).to_owned();
     if !matches!(
         gabarit.as_str(),
-        "banniere" | "texte_sur_image" | "institutionnel_logo"
+        "banniere" | "texte_sur_image" | "institutionnel_logo" | "edition"
     ) {
         return Ok(Apparence {
             gabarit,

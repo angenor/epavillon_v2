@@ -157,12 +157,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn le_recadrage_courriel_rend_un_3_1_leger() {
+    fn le_recadrage_courriel_rend_un_6_1_leger() {
         let source = png(1920, 1080, 255);
-        let faite = decliner(&source, 1200, Some((3, 1)), Some(70), RenditionFormat::Jpeg).unwrap();
-        assert_eq!((faite.width, faite.height), (1200, 400));
+        let faite = decliner(&source, 1200, Some((6, 1)), Some(62), RenditionFormat::Jpeg).unwrap();
+        assert_eq!((faite.width, faite.height), (1200, 200));
         let mesure = mesurer(&faite.octets).unwrap();
-        assert_eq!((mesure.width, mesure.height), (1200, 400));
+        assert_eq!((mesure.width, mesure.height), (1200, 200));
     }
 
     fn png(largeur: u32, hauteur: u32, opacite: u8) -> Vec<u8> {

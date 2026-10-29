@@ -16,7 +16,7 @@ use std::sync::Arc;
 
 /// Le nombre de déclinaisons attendues d'une image de 1920 px : les trois
 /// tailles configurées lui sont toutes inférieures, et le recadrage `courriel`
-/// (1200 x 400) s'y ajoute.
+/// (1200 x 200) s'y ajoute.
 const DECLINAISONS_ATTENDUES: i64 = 4;
 
 /// **L'original est servi avant les déclinaisons.**
@@ -110,7 +110,7 @@ async fn le_passage_du_worker_rend_lobjet_servable() {
             &sources["courriel_jpeg"]["width"],
             &sources["courriel_jpeg"]["height"]
         ),
-        (&serde_json::json!(1200), &serde_json::json!(400))
+        (&serde_json::json!(1200), &serde_json::json!(200))
     );
 
     let cle = format!("_renditions/{}/thumb.jpeg", depose.asset.id.simple());

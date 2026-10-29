@@ -11,7 +11,7 @@ import type { SelectOption } from '~/types/ui'
  * Enregistré à chaque pause de frappe, puis relu en APERÇU : celui-là même que
  * le worker enverrait, sur un texte d'exemple et avec les visuels de l'édition
  * sous les siens. Ses deux images passent par l'outil de dépôt du site
- * (`MediaImageField`) : le fond recadré en 3:1, 1200 px au plus, JPEG
+ * (`MediaImageField`) : le fond recadré en 6:1, 1200 px au plus, JPEG
  * compressé ; le logo, 400 px au plus. Elles se rattachent par
  * `PUT /media/attachments`, comme les visuels d'une édition.
  */
@@ -317,7 +317,7 @@ async function remove(): Promise<void> {
                 role="background"
                 :label="t('admin.mailing.templates.edit.background')"
                 :use="t('admin.mailing.templates.edit.backgroundUse')"
-                shape-label="3:1"
+                shape-label="6:1"
                 :rule="ruleOf('background')"
                 :image="template.background"
                 :asset-id="template.background?.asset_id ?? null"

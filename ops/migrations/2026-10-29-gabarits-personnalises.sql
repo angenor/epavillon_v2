@@ -6,7 +6,7 @@
 --
 -- Après 2026-10-29-logo-edition-et-gabarits. Déployer avec l'API et le worker :
 -- l'API sert l'écran des gabarits, le worker fabrique la variante `courriel`
--- (3:1, 1200 x 400, JPEG compressé) des bandeaux d'édition déjà servis, mis en
+-- (6:1, 1200 x 200, JPEG compressé) des bandeaux d'édition déjà servis, mis en
 -- file en fin de migration.
 
 -- Hors transaction : une valeur ajoutée à une énumération ne s'emploie pas
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS engagement.mail_templates (
     CONSTRAINT ck_mail_templates_name CHECK (length(btrim(name)) BETWEEN 1 AND 120),
     CONSTRAINT ck_mail_templates_layout CHECK (layout IN ('sobre', 'institutionnel', 'annonce',
                                                           'banniere', 'texte_sur_image',
-                                                          'institutionnel_logo')),
+                                                          'institutionnel_logo', 'edition')),
     CONSTRAINT ck_mail_templates_texts CHECK (coalesce(length(title), 0) <= 200
                                               AND coalesce(length(subtitle), 0) <= 200),
     -- Présélectionner « pour les déposants de cet événement » suppose un événement.
@@ -60,6 +60,12 @@ CREATE TRIGGER tg_mail_templates_audit
 COMMENT ON TABLE engagement.mail_templates IS
     'Gabarits de courriel personnalisés du back-office : mise en page de base, textes, images (media, rôles background et logo), édition de rattachement.';
 
+-- Rejouée sur une base qui portait les six mises en page du premier passage.
+ALTER TABLE engagement.mail_templates DROP CONSTRAINT IF EXISTS ck_mail_templates_layout;
+ALTER TABLE engagement.mail_templates ADD CONSTRAINT ck_mail_templates_layout
+    CHECK (layout IN ('sobre', 'institutionnel', 'annonce',
+                      'banniere', 'texte_sur_image', 'institutionnel_logo', 'edition'));
+
 ALTER TABLE engagement.mailings
     ADD COLUMN IF NOT EXISTS mail_template_id uuid
         REFERENCES engagement.mail_templates(id) ON DELETE SET NULL;
@@ -70,7 +76,7 @@ UPDATE engagement.mailings SET template = 'banniere' WHERE template = 'banniere_
 UPDATE engagement.mailings SET template = 'institutionnel_logo' WHERE template = 'institutionnel_edition';
 ALTER TABLE engagement.mailings ADD CONSTRAINT ck_mailings_template
     CHECK (template IN ('sobre', 'institutionnel', 'annonce',
-                        'banniere', 'texte_sur_image', 'institutionnel_logo'));
+                        'banniere', 'texte_sur_image', 'institutionnel_logo', 'edition'));
 
 CREATE OR REPLACE FUNCTION engagement.mailing_suggested_template(p_mailing_id uuid)
 RETURNS uuid
@@ -101,10 +107,12 @@ INSERT INTO media.attachable_roles
     (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes,
      max_byte_size, expected_aspect_ratio) VALUES
     ('engagement', 'mail_templates', 'background', '{"fr":"Image de fond","en":"Background image"}', false,
-     '{image/jpeg,image/png}', 2097152, 3.0000),
+     '{image/jpeg,image/png}', 2097152, 6.0000),
     ('engagement', 'mail_templates', 'logo', '{"fr":"Logo","en":"Logo"}', false,
      '{image/jpeg,image/png}', 2097152, NULL)
-ON CONFLICT DO NOTHING;
+-- Rejouée sur une base qui portait le 3:1 du premier passage : la forme suit.
+ON CONFLICT (owner_schema, owner_table, role)
+    DO UPDATE SET expected_aspect_ratio = EXCLUDED.expected_aspect_ratio;
 
 -- La variante `courriel` des bandeaux d'édition déjà servis : le worker ne
 -- fabrique que ce qui manque, sans refaire l'analyse ni toucher l'objet.

@@ -7,8 +7,8 @@
 //! # Trois tailles, et un format par objet
 //!
 //! `lg` 1600 px, `md` 800 px, `thumb` 320 px, à la **largeur**, hauteur
-//! proportionnelle. S'y ajoute `courriel` (29/10) : 1200 x 400, recadré au
-//! centre en 3:1, JPEG de qualité 62, l'en-tête d'un courriel (600 x 200
+//! proportionnelle. S'y ajoute `courriel` (29/10) : 1200 x 200, recadré au
+//! centre en 6:1, JPEG de qualité 62, l'en-tête d'un courriel (600 x 100
 //! affichés) sous 120 Ko là où `lg` en pèse 400. Le format suit la matière : **JPEG si l'image est opaque,
 //! PNG si elle porte de la transparence** — un logo aplati sur du blanc est un
 //! défaut visible sur fond sombre, et c'est le cas le plus fréquent de la
@@ -63,7 +63,7 @@ pub const VARIANTES: &[Variante] = &[
     Variante {
         code: "courriel",
         largeur_max: 1200,
-        rapport: Some((3, 1)),
+        rapport: Some((6, 1)),
         qualite: Some(62),
     },
 ];

@@ -7,8 +7,8 @@
 //!
 //! ```text
 //! ESSAI_SORTIE=<dossier> \
-//! ESSAI_FOND=<bannière 3:1>.jpeg:1200x400 ESSAI_LOGO=<logo>.jpeg:320x397 \
-//! ESSAI_FOND_PERSO=<fond déposé>.jpeg:1200x400 ESSAI_LOGO_PERSO=<logo déposé>.png:LxH \
+//! ESSAI_FOND=<bannière 6:1>.jpeg:1200x200 ESSAI_LOGO=<logo>.jpeg:320x397 \
+//! ESSAI_FOND_PERSO=<fond déposé>.jpeg:1200x200 ESSAI_LOGO_PERSO=<logo déposé>.png:LxH \
 //! cargo test -p engagement --test gabarits_essai -- --ignored
 //! ```
 
@@ -191,6 +191,12 @@ fn ecrire_les_courriels_dessai() {
             "Gabarit personnalisé CdP31",
             "texte_sur_image",
             &perso,
+        ),
+        (
+            "5-edition-sans-image.eml",
+            "Édition, sans image",
+            "edition",
+            &cdp31,
         ),
     ] {
         let apparence = Apparence {

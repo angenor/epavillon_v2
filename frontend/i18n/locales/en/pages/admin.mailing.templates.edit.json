@@ -26,7 +26,7 @@
   "imagesHint": "Defaults to the edition banner and logo.",
   "imagesUnused": "This layout shows no background image; the logo is used by “Institutional + edition logo”.",
   "background": "Background image",
-  "backgroundUse": "shown 600 x 200 at the top of the email",
+  "backgroundUse": "shown 600 x 100 at the top of the email",
   "logo": "Logo",
   "logoUse": "on white, 40 to 56 px high",
   "preview": "Preview",

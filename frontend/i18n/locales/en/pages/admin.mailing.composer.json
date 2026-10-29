@@ -83,6 +83,10 @@
     "institutionnel_logo": {
       "name": "Institutional + edition logo",
       "hint": "The institutional banner, the edition logo on the right. Without a logo: Institutional."
+    },
+    "edition": {
+      "name": "Edition, no image",
+      "hint": "The edition logo on the left, its name, dates and venue on the right, no image."
     }
   }
 }

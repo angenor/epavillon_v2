@@ -74,7 +74,7 @@ export type AttachmentRole =
   | 'video'
   | 'thumbnail'
   | 'attachment'
-  /** L'image de fond d'un gabarit de courriel (29/10), 3:1. */
+  /** L'image de fond d'un gabarit de courriel (29/10), 6:1. */
   | 'background'
   /** Photo de départ de l'atelier de couverture, gardée à part de l'image fabriquée. */
   | 'cover_source'

@@ -83,6 +83,10 @@
     "institutionnel_logo": {
       "name": "Institutionnel + logo de l'édition",
       "hint": "Le bandeau institutionnel, le logo de l'édition à droite. Sans logo : Institutionnel."
+    },
+    "edition": {
+      "name": "Édition, sans image",
+      "hint": "Le logo de l'édition à gauche, son nom, ses dates et son lieu à droite, sans image."
     }
   }
 }

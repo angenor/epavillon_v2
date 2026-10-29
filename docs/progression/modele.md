@@ -367,7 +367,7 @@ Fiche d'un dossier, phase 3 : le site dessine l'image de couverture (modèle, co
 Demande du commanditaire : des courriels aux couleurs de l'édition de l'envoi.
 
 - **`media.attachable_roles`** : `('event', 'events', 'logo')`, un seul fichier, `image/*`, 5 Mo, sans forme imposée. Posé au back-office avec le bandeau, la couverture et la vignette ; lu par `media.attached_image()`.
-- **`engagement.mailings.template`** : `ck_mailings_template` admet `banniere` (bannière 3:1 de l'édition en tête, puis logo, nom et dates), `texte_sur_image` (nom et dates en blanc sur la bannière) et `institutionnel_logo` (bandeau institutionnel, logo de l'édition à droite). Sans l'image attendue, le rendu retombe sur `institutionnel`. Codes d'abord nommés `banniere_edition` et `institutionnel_edition`, renommés le même jour avant toute mise en ligne.
+- **`engagement.mailings.template`** : `ck_mailings_template` admet `banniere` (bannière 6:1 de l'édition en tête, puis logo, nom et dates), `texte_sur_image` (nom et dates en blanc sur la bannière) et `institutionnel_logo` (bandeau institutionnel, logo de l'édition à droite). Sans l'image attendue, le rendu retombe sur `institutionnel`. Codes d'abord nommés `banniere_edition` et `institutionnel_edition`, renommés le même jour avant toute mise en ligne ; s'y ajoute `edition` (la bande logo, nom et dates, sans image).
 
 **Migration** : `ops/migrations/2026-10-29-logo-edition-et-gabarits.sql` (rejouable), jouée deux fois en local sur `epavillon` et sur une copie de `epavillon-20261028-204320` (après celle du 28/10, fenêtre unique). **En production** : avec l'API et le worker, puis le lot 101 (bandeau et logo CdP30, logo CdP31).
 
@@ -375,11 +375,11 @@ Demande du commanditaire : des courriels aux couleurs de l'édition de l'envoi.
 
 Retours du commanditaire sur les essais du jour, et page de création de gabarits recommandée.
 
-- **`engagement.mail_templates`** : nom, mise en page de base (`ck_mail_templates_layout`, les six codes des modèles par défaut), titre et sous-titre facultatifs (200 caractères), `gradient`, `event_id` facultatif (`xmod_fk_mail_templates_event`, nul : commun à toutes les éditions), `preselect_for_submitters` (`ck_mail_templates_preselect` : suppose un événement ; `ux_mail_templates_preselect` : un seul par événement), auteur, dates, audit.
+- **`engagement.mail_templates`** : nom, mise en page de base (`ck_mail_templates_layout`, les sept codes des modèles par défaut, `edition` compris), titre et sous-titre facultatifs (200 caractères), `gradient`, `event_id` facultatif (`xmod_fk_mail_templates_event`, nul : commun à toutes les éditions), `preselect_for_submitters` (`ck_mail_templates_preselect` : suppose un événement ; `ux_mail_templates_preselect` : un seul par événement), auteur, dates, audit.
 - **`engagement.mailings.mail_template_id`** (`ON DELETE SET NULL`) : le gabarit personnalisé d'un envoi ; sa mise en page est recopiée dans `template`.
 - **`engagement.mailing_suggested_template(mailing)`** : le gabarit présélectionné de l'édition quand l'envoi écrit à ses déposants (groupe des déposants, ou adresse d'un déposant ou contact d'un dossier non brouillon).
-- **`media.attachment_role`** gagne `background` ; **`media.attachable_roles`** : `('engagement', 'mail_templates', 'background')` (3:1, JPEG ou PNG, 2 Mo) et `logo` (JPEG ou PNG, 2 Mo). Garde `GabaritDeCourriel` dans `media/domain/guards.rs` : `engagement.mailing.send` sur l'édition du gabarit et le périmètre, globale pour un gabarit commun.
+- **`media.attachment_role`** gagne `background` ; **`media.attachable_roles`** : `('engagement', 'mail_templates', 'background')` (6:1, JPEG ou PNG, 2 Mo) et `logo` (JPEG ou PNG, 2 Mo). Garde `GabaritDeCourriel` dans `media/domain/guards.rs` : `engagement.mailing.send` sur l'édition du gabarit et le périmètre, globale pour un gabarit commun.
 
-Côté worker (pas de modèle) : variante `courriel` (1200 x 400, recadrée au centre en 3:1, JPEG de qualité 62) ; un objet déjà servable reçoit les variantes manquantes sans nouvelle analyse.
+Côté worker (pas de modèle) : variante `courriel` (1200 x 200, recadrée au centre en 6:1, JPEG de qualité 62) ; un objet déjà servable reçoit les variantes manquantes sans nouvelle analyse.
 
 **Migration** : `ops/migrations/2026-10-29-gabarits-personnalises.sql` (après celle du logo ; ajout de valeur d'énumération hors transaction), jouée deux fois en local sur `epavillon` ; elle met en file la variante `courriel` des bandeaux d'édition déjà servis. **En production** : avec l'API et le worker.
