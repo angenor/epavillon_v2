@@ -39,6 +39,12 @@ import type { NavSection } from '~/types/navigation'
  * le trait à peine visible et le fond des panneaux valent tous deux `gris-800`.
  * Les trois traits de la colonne y étaient donc rigoureusement invisibles, et le
  * regroupement des entrées avec eux.
+ *
+ * REPLIÉE (`collapsed`), LA COLONNE DEVIENT UN RAIL D'ICÔNES de 68 px, au-delà de
+ * 1024 px seulement : le tiroir garde ses libellés. Toutes les variantes portent
+ * donc le préfixe `lg:`, y compris dans les emplacements, qui reçoivent
+ * `collapsed` pour s'y plier. Les libellés restent dans le DOM (`lg:sr-only`) :
+ * lecteurs d'écran et navigation par titres n'y perdent rien.
  */
 
 interface Props {
@@ -47,10 +53,14 @@ interface Props {
   label: string
   /** Tiroir déployé sur écran étroit — contrôlé par le layout. */
   open?: boolean
+  /** Rail d'icônes sur grand écran ; sans effet sur le tiroir. */
+  collapsed?: boolean
+  /** Montre le bouton qui replie et déplie la colonne sur grand écran. */
+  collapsible?: boolean
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; toggleCollapsed: [] }>()
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -83,16 +93,34 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
   <aside
     id="ui-sidenav"
-    class="fixed start-0 top-0 z-50 flex h-dvh w-[min(19rem,86vw)] flex-col bg-surface-raised shadow-lg transition-[transform,visibility] duration-(--duration-base) ease-out lg:visible lg:sticky lg:z-0 lg:h-screen lg:w-65 lg:shrink-0 lg:translate-x-0 lg:border-e lg:border-border lg:shadow-none lg:transition-none"
-    :class="props.open ? 'visible translate-x-0' : 'invisible -translate-x-full'"
+    class="fixed start-0 top-0 z-50 flex h-dvh w-[min(19rem,86vw)] flex-col overflow-x-hidden bg-surface-raised shadow-lg transition-[transform,visibility] duration-(--duration-base) ease-out lg:visible lg:sticky lg:z-0 lg:h-screen lg:shrink-0 lg:translate-x-0 lg:border-e lg:border-border lg:shadow-none lg:transition-[width]"
+    :class="[
+      props.open ? 'visible translate-x-0' : 'invisible -translate-x-full',
+      props.collapsed ? 'lg:w-17' : 'lg:w-65',
+    ]"
   >
     <div
       v-if="$slots.brand"
       class="flex shrink-0 items-start gap-2 border-b border-border px-5 py-4"
+      :class="props.collapsed ? 'lg:flex-col lg:items-center lg:px-3' : ''"
     >
       <div class="min-w-0 flex-1">
-        <slot name="brand" />
+        <slot name="brand" :collapsed="props.collapsed" />
       </div>
+
+      <button
+        v-if="props.collapsible"
+        type="button"
+        class="hidden min-h-(--target-min) min-w-(--target-min) shrink-0 cursor-pointer items-center justify-center rounded-md text-text-subtle transition-colors hover:bg-surface-hover hover:text-text lg:inline-flex"
+        :class="props.collapsed ? '' : '-me-2'"
+        :aria-expanded="!props.collapsed"
+        aria-controls="ui-sidenav"
+        :aria-label="props.collapsed ? t('nav.admin.sidebar.expand') : t('nav.admin.sidebar.collapse')"
+        :title="props.collapsed ? t('nav.admin.sidebar.expand') : t('nav.admin.sidebar.collapse')"
+        @click="emit('toggleCollapsed')"
+      >
+        <UiIcon name="sidebar" size="1.15rem" :stroke-width="1.8" />
+      </button>
 
       <button
         type="button"
@@ -104,13 +132,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
       </button>
     </div>
 
-    <nav class="min-h-0 flex-1 overflow-y-auto px-3 py-4" :aria-label="props.label">
+    <nav class="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-4" :aria-label="props.label">
       <div
         v-for="(section, index) in props.sections"
         :key="section.labelKey"
-        :class="index > 0 ? 'mt-5 border-t border-border pt-4' : ''"
+        :class="index > 0 ? ['mt-5 border-t border-border pt-4', props.collapsed ? 'lg:mt-3 lg:pt-3' : ''] : ''"
       >
-        <h2 class="px-3 pb-2 text-xs font-semibold tracking-caps text-text-subtle uppercase">
+        <h2
+          class="px-3 pb-2 text-xs font-semibold tracking-caps text-text-subtle uppercase"
+          :class="props.collapsed ? 'lg:sr-only' : ''"
+        >
           {{ t(section.labelKey) }}
         </h2>
         <ul class="space-y-0.5">
@@ -118,11 +149,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
             <NuxtLink
               :to="localePath(item.to)"
               class="group relative flex min-h-(--target-min) items-center gap-3 rounded-md py-2 pe-2 ps-3 text-sm no-underline transition-colors duration-(--duration-fast)"
-              :class="
+              :class="[
                 isCurrent(item.to)
                   ? 'bg-accent-surface font-semibold text-accent'
-                  : 'text-text-secondary hover:bg-surface-hover hover:text-text'
-              "
+                  : 'text-text-secondary hover:bg-surface-hover hover:text-text',
+                props.collapsed ? 'lg:justify-center lg:px-0' : '',
+              ]"
+              :title="props.collapsed ? t(item.labelKey) : undefined"
               :aria-current="isCurrent(item.to) ? 'page' : undefined"
             >
               <span
@@ -137,7 +170,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
                 class="shrink-0 transition-colors duration-(--duration-fast)"
                 :class="isCurrent(item.to) ? 'text-accent' : 'text-text-subtle group-hover:text-text'"
               />
-              <span class="min-w-0 flex-1 truncate">{{ t(item.labelKey) }}</span>
+              <span
+                class="min-w-0 flex-1 truncate"
+                :class="props.collapsed ? 'lg:sr-only' : ''"
+              >{{ t(item.labelKey) }}</span>
               <!-- Compteur poussé à la marge intérieure droite, jamais collé au
                    libellé : c'est ce qui le rend comparable d'une entrée à
                    l'autre en descendant la colonne. Même pastille que les
@@ -147,6 +183,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
                 :value="item.count"
                 tone="accent"
                 class="shrink-0"
+                :class="props.collapsed ? 'lg:hidden' : ''"
               />
             </NuxtLink>
           </li>
@@ -155,7 +192,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     </nav>
 
     <div v-if="$slots.footer" class="shrink-0 border-t border-border p-3">
-      <slot name="footer" />
+      <slot name="footer" :collapsed="props.collapsed" />
     </div>
   </aside>
 </template>

@@ -49,6 +49,8 @@ const PATHS: Record<string, string> = {
   'arrow-up-right': 'M8 16 16 8M9 8h7v7',
   'external-link': 'M14 4h6v6M20 4l-8.5 8.5M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  // Panneau à colonne : replier ou déplier la barre latérale.
+  sidebar: 'M4.8 4.5h14.4a.8.8 0 0 1 .8.8v13.4a.8.8 0 0 1-.8.8H4.8a.8.8 0 0 1-.8-.8V5.3a.8.8 0 0 1 .8-.8ZM9.5 4.5v15',
   close: 'M6 6l12 12M18 6 6 18',
   'more-vertical': 'M12 5.5v.01M12 12v.01M12 18.5v.01',
   'more-horizontal': 'M5.5 12h.01M12 12h.01M18.5 12h.01',

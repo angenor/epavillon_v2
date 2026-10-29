@@ -169,6 +169,7 @@ const sections: NavSection[] = [
 ]
 
 const isSidebarOpen = ref(false)
+const sidebar = useAdminSidebar()
 watch(() => route.fullPath, () => (isSidebarOpen.value = false))
 
 // Le fil d'Ariane est déclaré par chaque page (`definePageMeta({ breadcrumb })`).
@@ -209,9 +210,12 @@ const sectionsVisibles = computed(() =>
       :sections="sectionsVisibles"
       :label="t('nav.admin.sidebar.label')"
       :open="isSidebarOpen"
+      :collapsed="sidebar.isCollapsed.value"
+      collapsible
       @close="isSidebarOpen = false"
+      @toggle-collapsed="sidebar.toggle()"
     >
-      <template #brand>
+      <template #brand="{ collapsed }">
         <!-- Le logo mène au tableau de bord — le retour au site public est au
              pied, où on le cherche. -->
         <NuxtLink :to="localePath('/admin')" class="block no-underline">
@@ -231,21 +235,27 @@ const sectionsVisibles = computed(() =>
           >
           <span
             class="mt-2 block font-display text-xs font-semibold tracking-caps text-text-subtle uppercase"
+            :class="collapsed ? 'lg:sr-only' : ''"
           >
             {{ t('nav.admin.title') }}
           </span>
         </NuxtLink>
       </template>
 
-      <template #footer>
-        <div v-if="auth.person" class="mb-1 flex items-center gap-3 px-3 py-2">
+      <template #footer="{ collapsed }">
+        <div
+          v-if="auth.person"
+          class="mb-1 flex items-center gap-3 px-3 py-2"
+          :class="collapsed ? 'lg:justify-center lg:px-0' : ''"
+          :title="collapsed ? auth.person.display_name : undefined"
+        >
           <span
             class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-surface font-mono text-xs font-bold text-accent"
             aria-hidden="true"
           >
             {{ initialsOf(auth.person.display_name) }}
           </span>
-          <span class="min-w-0 flex-1">
+          <span class="min-w-0 flex-1" :class="collapsed ? 'lg:sr-only' : ''">
             <span class="block truncate text-sm font-semibold text-text">
               {{ auth.person.display_name }}
             </span>
@@ -258,19 +268,23 @@ const sectionsVisibles = computed(() =>
         <NuxtLink
           :to="localePath('/')"
           class="group flex min-h-(--target-min) items-center gap-3 rounded-md px-3 text-sm text-text-secondary no-underline transition-colors duration-(--duration-fast) hover:bg-surface-hover hover:text-text"
+          :class="collapsed ? 'lg:justify-center lg:px-0' : ''"
+          :title="collapsed ? t('nav.admin.backToSite') : undefined"
         >
           <UiIcon
             name="arrow-left"
             size="1.05rem"
             class="shrink-0 text-text-subtle transition-colors duration-(--duration-fast) group-hover:text-text"
           />
-          {{ t('nav.admin.backToSite') }}
+          <span :class="collapsed ? 'lg:sr-only' : ''">{{ t('nav.admin.backToSite') }}</span>
         </NuxtLink>
 
         <button
           v-if="auth.isAuthenticated"
           type="button"
           class="group flex min-h-(--target-min) w-full cursor-pointer items-center gap-3 rounded-md px-3 text-sm text-text-secondary transition-colors duration-(--duration-fast) hover:bg-danger-surface hover:text-danger"
+          :class="collapsed ? 'lg:justify-center lg:px-0' : ''"
+          :title="collapsed ? t('nav.account.logout') : undefined"
           @click="signOut"
         >
           <UiIcon
@@ -278,7 +292,7 @@ const sectionsVisibles = computed(() =>
             size="1.05rem"
             class="shrink-0 text-text-subtle transition-colors duration-(--duration-fast) group-hover:text-danger"
           />
-          {{ t('nav.account.logout') }}
+          <span :class="collapsed ? 'lg:sr-only' : ''">{{ t('nav.account.logout') }}</span>
         </button>
       </template>
     </UiSideNav>
@@ -298,7 +312,7 @@ const sectionsVisibles = computed(() =>
           @click="isSidebarOpen = !isSidebarOpen"
         >
           <span class="sr-only">
-            {{ isSidebarOpen ? t('nav.admin.sidebar.collapse') : t('nav.admin.sidebar.expand') }}
+            {{ isSidebarOpen ? t('common.a11y.closeMenu') : t('common.a11y.openMenu') }}
           </span>
           <UiIcon :name="isSidebarOpen ? 'close' : 'menu'" size="1.25rem" :stroke-width="1.8" />
         </button>
