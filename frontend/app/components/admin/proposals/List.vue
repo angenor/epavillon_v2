@@ -37,6 +37,10 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { date } = useDateTime()
 const localePath = useLocalePath()
+const route = useRoute()
+
+/** La fiche reprend les filtres de la liste dans son panneau des dossiers. */
+const selection = computed(() => proposalSelectionQuery(route.query))
 
 const SORT_LABEL: Partial<Record<ProposalSortKey, string>> = {
   average_score: 'score',
@@ -53,18 +57,6 @@ const SORT_LABEL: Partial<Record<ProposalSortKey, string>> = {
 const sortOptions = computed<SelectOption[]>(() =>
   Object.entries(SORT_LABEL).map(([value, key]) => ({ value, label: t(`admin.proposals.columns.${key}`) })),
 )
-
-// « Annulé » est violet comme le report : la décision est prise, elle n'attend plus rien.
-const STATUS_TONE: Record<ProposalDashboardRow['status'], string> = {
-  draft: 'text-neutral bg-neutral-surface',
-  submitted: 'text-info bg-info-surface',
-  under_review: 'text-warning bg-warning-surface',
-  changes_requested: 'text-warning bg-warning-surface',
-  accepted: 'text-success bg-success-surface',
-  rejected: 'text-danger bg-danger-surface',
-  withdrawn: 'text-neutral bg-neutral-surface',
-  cancelled: 'text-postponed bg-postponed-surface',
-}
 
 // Un brouillon reste à son organisation ; un dossier clos ne se corrige plus.
 const NOT_EDITABLE: ProposalDashboardRow['status'][] = ['draft', 'rejected', 'withdrawn', 'cancelled']
@@ -211,7 +203,7 @@ function toggleAll(checked: boolean): void {
             <div class="flex flex-wrap items-center gap-2">
               <span
                 class="inline-flex items-center rounded-sm px-2 py-0.5 text-[0.6875rem] font-semibold tracking-caps uppercase"
-                :class="STATUS_TONE[row.status]"
+                :class="PROPOSAL_STATUS_TONE[row.status]"
               >
                 {{ t(`admin.proposals.status.${row.status}`) }}
               </span>
@@ -240,7 +232,7 @@ function toggleAll(checked: boolean): void {
             <h3 class="mt-1.5 text-base leading-snug font-semibold text-heading">
               <!-- Le lien s'étend à toute la rangée ; la case à cocher reste au-dessus. -->
               <NuxtLink
-                :to="localePath(`/admin/propositions/${row.id}`)"
+                :to="{ path: localePath(`/admin/propositions/${row.id}`), query: selection }"
                 class="clamp-2 rounded-sm text-heading no-underline outline-none after:absolute after:inset-0 group-hover:text-accent focus-visible:ring-2 focus-visible:ring-focus"
                 :title="tr(row.title)"
               >

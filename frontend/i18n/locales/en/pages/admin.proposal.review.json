@@ -42,7 +42,8 @@
     "submittedAt": "Submitted on {date}",
     "decidedAt": "Decided on {date}",
     "notSubmitted": "Never submitted",
-    "openInList": "Show in the list"
+    "openInList": "Show in the list",
+    "reading": "Reading"
   },
   "decision": {
     "title": "Decision",
@@ -94,7 +95,9 @@
     "submitter": "Submitted by",
     "submittedBy": "Submitted by {name}",
     "contact": "Submission contact: {name}",
-    "empty": "Not provided"
+    "empty": "Not provided",
+    "facts": "Dossier facts",
+    "project": "The project"
   },
   "organizations": {
     "title": "Organizations",
@@ -266,7 +269,8 @@
       "reply": "Reply",
       "cancel": "Cancel",
       "empty": "Write a message before sending it.",
-      "replying": "You are replying in a thread."
+      "replying": "You are replying in a thread.",
+      "new": "New message"
     },
     "confirm": {
       "title": "This message goes to the organization",
@@ -314,7 +318,10 @@
       "unreadBy": "Not read yet (0 of {total})",
       "organisationRead": "Read by the organisation on {date} ({name})",
       "organisationUnread": "Not read by the organisation yet"
-    }
+    },
+    "launcher": "Open the exchanges",
+    "launcherUnread": "Open the exchanges | Open the exchanges, one unread message | Open the exchanges, {count} unread messages",
+    "windowTitle": "Exchanges · {reference}"
   },
   "mode": {
     "label": "How to score",
@@ -344,11 +351,25 @@
   },
   "floating": {
     "launcher": "Review this proposal",
-    "launcherScored": "My score: {score} out of 20 — open the review",
-    "title": "Review — {reference}",
+    "launcherScored": "My score: {score} out of 20, open the review",
+    "title": "Review · {reference}",
     "tabs": {
       "mine": "My score",
       "all": "All scores"
     }
+  },
+  "navigator": {
+    "title": "Dossiers",
+    "count": "{shown} of {total}",
+    "collapse": "Collapse the dossier panel",
+    "expand": "Show the other dossiers",
+    "open": "Other dossiers",
+    "mine": "To score by me",
+    "reset": "Clear filters",
+    "empty": "No dossier matches this selection.",
+    "score": "{score} / 20",
+    "reviews": "{done}/{expected} reviews",
+    "previous": "Previous dossier: {reference}",
+    "next": "Next dossier: {reference}"
   }
 }

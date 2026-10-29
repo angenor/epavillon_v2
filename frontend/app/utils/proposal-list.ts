@@ -25,7 +25,7 @@ import type { ProposalDashboardRow } from '~/types/views'
 import type { ProposalStatus, ProposalTransitionRule } from '~/types/programme/proposal'
 import type { EffectivePermission } from '~/types/identity'
 import type { SortDirection } from '~/types/ui'
-import type { Uuid } from '~/types/shared'
+import type { PersonId, Uuid } from '~/types/shared'
 
 // ---------------------------------------------------------------------------
 // Recherche
@@ -100,6 +100,28 @@ export function filterProposals(
 
     return true
   })
+}
+
+/**
+ * « À noter par moi » : la personne est affectée au dossier et n'a pas déposé sa
+ * revue. Une revue rendue sans affectation n'apparaît pas dans `reviewers` : le
+ * signal ne couvre que les affectations.
+ */
+export function isAwaitingReviewBy(row: ProposalDashboardRow, personId: PersonId | null): boolean {
+  if (!personId) return false
+  return row.reviewers.some((reviewer) => reviewer.person_id === personId && reviewer.submitted_at === null)
+}
+
+/** Teinte d'un statut dans les listes. « Annulé » est violet comme le report : décidé, n'attend plus rien. */
+export const PROPOSAL_STATUS_TONE: Record<ProposalStatus, string> = {
+  draft: 'text-neutral bg-neutral-surface',
+  submitted: 'text-info bg-info-surface',
+  under_review: 'text-warning bg-warning-surface',
+  changes_requested: 'text-warning bg-warning-surface',
+  accepted: 'text-success bg-success-surface',
+  rejected: 'text-danger bg-danger-surface',
+  withdrawn: 'text-neutral bg-neutral-surface',
+  cancelled: 'text-postponed bg-postponed-surface',
 }
 
 // ---------------------------------------------------------------------------

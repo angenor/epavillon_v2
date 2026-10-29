@@ -3,16 +3,12 @@ import type {
   ProposalFacet,
   ProposalFacets,
   ProposalFilterText,
-  ProposalFlag,
-  ProposalListFilters,
   ProposalListScreen,
   ProposalSortKey,
 } from '~/types/admin-proposals'
 import type { EffectivePermission } from '~/types/identity'
 import type { ProposalStatus, ProposalTransitionRule } from '~/types/programme/proposal'
-import type { ParticipationMode } from '~/types/event/edition'
 import type { ProposalDashboardRow } from '~/types/views'
-import type { SortDirection } from '~/types/ui'
 import type { CsvColumn } from '~/utils/proposal-list'
 
 /**
@@ -63,8 +59,6 @@ const { date } = useDateTime()
 const api = useApi()
 const auth = useAuthStore()
 const adminScope = useAdminScopeStore()
-const route = useRoute()
-const router = useRouter()
 
 useHead(() => ({ title: t('admin.proposals.title') }))
 
@@ -129,103 +123,7 @@ const canDecide = computed(() =>
 
 const PER_PAGE = 20
 
-/** Une valeur de requête peut arriver seule ou répétée : on rend toujours une liste. */
-function queryList(value: unknown): string[] {
-  if (Array.isArray(value)) return value.flatMap((entry) => String(entry).split(',')).filter(Boolean)
-  if (typeof value === 'string') return value.split(',').filter(Boolean)
-  return []
-}
-
-function queryText(value: unknown): string {
-  return typeof value === 'string' ? value : ''
-}
-
-/**
- * Les paramètres sont en FRANÇAIS et minuscules : ils apparaissent dans une URL
- * qu'on se transmet par courriel, et le tableau de bord en pose déjà un
- * (`?filtre=non-evaluees`). Ce contrat-là est public, il ne suit pas les noms de
- * colonnes de la base.
- */
-const FLAG_PARAM: Record<string, ProposalFlag> = {
-  'non-evaluees': 'unreviewed',
-  'en-retard': 'late',
-  'non-consultees': 'unread',
-  'messages-non-lus': 'unread_messages',
-}
-const FLAG_TO_PARAM: Record<ProposalFlag, string> = {
-  unreviewed: 'non-evaluees',
-  late: 'en-retard',
-  unread: 'non-consultees',
-  unread_messages: 'messages-non-lus',
-}
-
-const filters = computed<ProposalListFilters>(() => ({
-  search: queryText(route.query.q),
-  statuses: queryList(route.query.statut) as ProposalStatus[],
-  themes: queryList(route.query.thematique),
-  formats: queryList(route.query.format) as ParticipationMode[],
-  countries: queryList(route.query.pays),
-  organizations: queryList(route.query.organisation),
-  reviewer: queryText(route.query.revisionniste) || null,
-  flags: queryList(route.query.filtre)
-    .map((value) => FLAG_PARAM[value])
-    .filter((flag): flag is ProposalFlag => Boolean(flag)),
-}))
-
-const SORT_PARAM: Record<string, ProposalSortKey> = {
-  titre: 'title',
-  organisation: 'organization',
-  pays: 'country',
-  format: 'format',
-  statut: 'status',
-  revues: 'reviews',
-  note: 'average_score',
-  rang: 'event_rank',
-  depot: 'submitted_at',
-}
-const SORT_TO_PARAM = Object.fromEntries(
-  Object.entries(SORT_PARAM).map(([param, key]) => [key, param]),
-) as Record<ProposalSortKey, string>
-
-/** Le tri par défaut : la note, décroissante. C'est la question du comité. */
-const sortKey = computed<ProposalSortKey>(
-  () => SORT_PARAM[queryText(route.query.tri)] ?? 'average_score',
-)
-const sortDirection = computed<Exclude<SortDirection, null>>(() =>
-  queryText(route.query.sens) === 'asc' ? 'asc' : 'desc',
-)
-const page = computed(() => Math.max(1, Number.parseInt(queryText(route.query.page) || '1', 10) || 1))
-
-/** Écrit dans l'URL ; une valeur vide retire son paramètre plutôt que de l'y laisser. */
-function updateQuery(patch: Record<string, string | string[] | null>): void {
-  const query: Record<string, string | string[]> = { ...route.query } as Record<string, string | string[]>
-  for (const [key, value] of Object.entries(patch)) {
-    if (value === null || value === '' || (Array.isArray(value) && value.length === 0)) delete query[key]
-    else query[key] = value
-  }
-  router.replace({ query })
-}
-
-function setFilters(next: ProposalListFilters): void {
-  updateQuery({
-    q: next.search.trim() || null,
-    statut: next.statuses.join(','),
-    thematique: next.themes.join(','),
-    format: next.formats.join(','),
-    pays: next.countries.join(','),
-    organisation: next.organizations.join(','),
-    revisionniste: next.reviewer,
-    filtre: next.flags.map((flag) => FLAG_TO_PARAM[flag]).join(','),
-    // Tout changement de filtre ramène en page 1 : rester en page 3 d'un
-    // résultat qui n'en compte plus qu'une donne un tableau vide et une
-    // pagination qui affirme le contraire.
-    page: null,
-  })
-}
-
-function setSort(key: ProposalSortKey, direction: Exclude<SortDirection, null>): void {
-  updateQuery({ tri: SORT_TO_PARAM[key], sens: direction, page: null })
-}
+const { filters, sortKey, sortDirection, page, updateQuery, setFilters, setSort } = useProposalListQuery()
 
 // ---------------------------------------------------------------------------
 // Ce que l'écran affiche
@@ -609,10 +507,7 @@ const deadlineNotice = computed(() => {
               :title="t('admin.proposals.noResults.title')"
               :description="t('admin.proposals.noResults.description', { total: allRows.length })"
               :action-label="t('admin.proposals.noResults.action')"
-              @action="setFilters({
-                search: '', statuses: [], themes: [], formats: [],
-                countries: [], organizations: [], reviewer: null, flags: [],
-              })"
+              @action="setFilters(EMPTY_PROPOSAL_FILTERS)"
             />
           </template>
         </AdminProposalsList>

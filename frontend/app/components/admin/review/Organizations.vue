@@ -41,15 +41,15 @@ function ratioPercent(ratio: number): number {
 
 <template>
   <section aria-labelledby="review-organizations-title">
-    <h3 id="review-organizations-title" class="text-sm font-semibold tracking-wide uppercase">
+    <h2 id="review-organizations-title" class="text-xl font-semibold">
       {{ t('admin.proposal.review.organizations.title') }}
-    </h3>
+    </h2>
 
-    <ul class="mt-3 flex flex-col gap-3">
+    <ul class="mt-3 flex flex-col divide-y divide-border-subtle border-y border-border">
       <li
         v-for="entry in props.entries"
         :key="entry.link.organization_id"
-        class="rounded-md border border-border bg-surface px-4 py-3"
+        class="py-3"
       >
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span class="font-semibold text-text">

@@ -28,7 +28,9 @@
     "seeMore": "See more",
     "select": "Select",
     "submit": "Submit",
-    "upload": "Upload"
+    "upload": "Upload",
+    "enlarge": "Enlarge window",
+    "reduce": "Reduce window"
   },
   "states": {
     "loading": {

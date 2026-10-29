@@ -38,15 +38,15 @@ function speakerName(entry: ProposalSpeakerEntry): string {
 
 <template>
   <section aria-labelledby="review-speakers-title">
-    <h3 id="review-speakers-title" class="text-sm font-semibold tracking-wide uppercase">
+    <h2 id="review-speakers-title" class="text-xl font-semibold">
       {{ t('admin.proposal.review.speakers.title') }}
-    </h3>
+    </h2>
 
     <p v-if="props.entries.length === 0" class="mt-3 text-sm text-text-muted">
       {{ t('admin.proposal.review.speakers.empty') }}
     </p>
 
-    <ul v-else class="mt-3 flex flex-col divide-y divide-border-subtle">
+    <ul v-else class="mt-3 flex flex-col divide-y divide-border-subtle border-y border-border">
       <li v-for="entry in props.entries" :key="entry.speaker.id" class="py-3">
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span class="font-medium text-text">
@@ -97,7 +97,7 @@ function speakerName(entry: ProposalSpeakerEntry): string {
 
         <p class="mt-1 text-sm text-text-muted">
           <span v-if="entry.speaker.job_title_snapshot">{{ entry.speaker.job_title_snapshot }}</span>
-          <span v-if="entry.speaker.job_title_snapshot && entry.speaker.organization_snapshot"> — </span>
+          <span v-if="entry.speaker.job_title_snapshot && entry.speaker.organization_snapshot">, </span>
           <span v-if="entry.speaker.organization_snapshot">{{ entry.speaker.organization_snapshot }}</span>
         </p>
 

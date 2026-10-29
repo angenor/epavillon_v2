@@ -28,7 +28,9 @@
     "seeMore": "Voir plus",
     "select": "Sélectionner",
     "submit": "Soumettre",
-    "upload": "Téléverser"
+    "upload": "Téléverser",
+    "enlarge": "Agrandir la fenêtre",
+    "reduce": "Réduire la fenêtre"
   },
   "states": {
     "loading": {

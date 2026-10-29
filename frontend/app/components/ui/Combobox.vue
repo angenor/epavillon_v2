@@ -128,7 +128,9 @@ function onKeydown(event: KeyboardEvent): void {
     }
     case 'Escape':
       if (open.value) {
+        // Échap ferme la liste, pas la fenêtre qui contient le champ.
         event.preventDefault()
+        event.stopPropagation()
         closeList()
       }
       break

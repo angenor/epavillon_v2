@@ -17,6 +17,9 @@ import type { TabItem } from '~/types/ui'
  */
 
 interface Props {
+  open: boolean
+  /** Rang du bouton dans la colonne des boutons flottants. */
+  stack?: number
   referenceCode: string
   criteria: ReviewCriterion[]
   usesScoringGrid: boolean
@@ -36,13 +39,13 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
+  'update:open': [value: boolean]
   save: [payload: Omit<SaveReviewPayload, 'proposal_id'>]
   recuse: []
 }>()
 
 const { t } = useI18n()
 
-const open = ref(false)
 const tab = ref<'mine' | 'all'>('mine')
 
 const myScore = computed(() => {
@@ -68,7 +71,8 @@ function onSave(payload: Omit<SaveReviewPayload, 'proposal_id'>): void {
 
 <template>
   <UiFloatingPanel
-    v-model:open="open"
+    :open="props.open"
+    :stack="props.stack"
     :title="t('admin.proposal.review.floating.title', { reference: props.referenceCode })"
     :launcher-label="
       myScore
@@ -77,6 +81,7 @@ function onSave(payload: Omit<SaveReviewPayload, 'proposal_id'>): void {
     "
     launcher-icon="star"
     :launcher-value="myScore"
+    @update:open="(value: boolean) => emit('update:open', value)"
   >
     <UiTabs
       class="px-5 pt-2"

@@ -52,6 +52,9 @@ const PATHS: Record<string, string> = {
   // Panneau à colonne : replier ou déplier la barre latérale.
   sidebar: 'M4.8 4.5h14.4a.8.8 0 0 1 .8.8v13.4a.8.8 0 0 1-.8.8H4.8a.8.8 0 0 1-.8-.8V5.3a.8.8 0 0 1 .8-.8ZM9.5 4.5v15',
   close: 'M6 6l12 12M18 6 6 18',
+  // Fenêtre flottante : l'agrandir, la ramener à sa taille.
+  maximize: 'M14 4h6v6M10 20H4v-6M20 4l-6.5 6.5M4 20l6.5-6.5',
+  minimize: 'M19 10h-5V5M5 14h5v5M14 10l6-6M10 14l-6 6',
   'more-vertical': 'M12 5.5v.01M12 12v.01M12 18.5v.01',
   'more-horizontal': 'M5.5 12h.01M12 12h.01M18.5 12h.01',
 
@@ -90,6 +93,8 @@ const PATHS: Record<string, string> = {
   // réinitialisation. À ne pas confondre avec `inbox`, qui figure une CORBEILLE
   // de travail à traiter, pas un message en transit.
   mail: 'M4 6.5h16a.8.8 0 0 1 .8.8v9.4a.8.8 0 0 1-.8.8H4a.8.8 0 0 1-.8-.8V7.3a.8.8 0 0 1 .8-.8ZM3.5 7.6 12 13.2l8.5-5.6',
+  // Bulle de discussion : les échanges autour d'un dossier.
+  chat: 'M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-7l-4.5 3.5V16H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1ZM8.5 9.5h7M8.5 12.5h4.5',
 
   // — Thème d'affichage
   sun: 'M12 16.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4ZM12 2.6v2.2M12 19.2v2.2M4.2 12H2M22 12h-2.2M6.3 6.3 4.8 4.8M19.2 19.2l-1.5-1.5M17.7 6.3l1.5-1.5M4.8 19.2l1.5-1.5',

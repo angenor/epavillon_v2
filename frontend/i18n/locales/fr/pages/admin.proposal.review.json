@@ -42,7 +42,8 @@
     "submittedAt": "Déposé le {date}",
     "decidedAt": "Décidé le {date}",
     "notSubmitted": "Jamais déposé",
-    "openInList": "Voir dans la liste"
+    "openInList": "Voir dans la liste",
+    "reading": "Lecture"
   },
   "decision": {
     "title": "Décision",
@@ -94,7 +95,9 @@
     "submitter": "Déposé par",
     "submittedBy": "Déposé par {name}",
     "contact": "Contact du dossier : {name}",
-    "empty": "Non renseigné"
+    "empty": "Non renseigné",
+    "facts": "Fiche du dossier",
+    "project": "Le projet"
   },
   "organizations": {
     "title": "Organisations",
@@ -266,7 +269,8 @@
       "reply": "Répondre",
       "cancel": "Annuler",
       "empty": "Écrivez un message avant de l'envoyer.",
-      "replying": "Vous répondez dans un fil."
+      "replying": "Vous répondez dans un fil.",
+      "new": "Nouveau message"
     },
     "confirm": {
       "title": "Ce message part chez l'organisation",
@@ -314,7 +318,10 @@
       "unreadBy": "Pas encore lu (0 sur {total})",
       "organisationRead": "Lu par l'organisation le {date} ({name})",
       "organisationUnread": "Pas encore lu par l'organisation"
-    }
+    },
+    "launcher": "Ouvrir les échanges",
+    "launcherUnread": "Ouvrir les échanges | Ouvrir les échanges, un message non lu | Ouvrir les échanges, {count} messages non lus",
+    "windowTitle": "Échanges · {reference}"
   },
   "mode": {
     "label": "Façon de noter",
@@ -344,11 +351,25 @@
   },
   "floating": {
     "launcher": "Évaluer ce dossier",
-    "launcherScored": "Ma note : {score} sur 20 — ouvrir l'évaluation",
-    "title": "Évaluation — {reference}",
+    "launcherScored": "Ma note : {score} sur 20, ouvrir l'évaluation",
+    "title": "Évaluation · {reference}",
     "tabs": {
       "mine": "Ma note",
       "all": "Toutes les notes"
     }
+  },
+  "navigator": {
+    "title": "Dossiers",
+    "count": "{shown} sur {total}",
+    "collapse": "Replier le panneau des dossiers",
+    "expand": "Afficher les autres dossiers",
+    "open": "Autres dossiers",
+    "mine": "À noter par moi",
+    "reset": "Effacer les filtres",
+    "empty": "Aucun dossier ne correspond à cette sélection.",
+    "score": "{score} / 20",
+    "reviews": "{done}/{expected} revues",
+    "previous": "Dossier précédent : {reference}",
+    "next": "Dossier suivant : {reference}"
   }
 }

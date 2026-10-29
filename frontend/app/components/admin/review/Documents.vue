@@ -41,7 +41,7 @@ function megabytes(bytes: number): string {
 
 <template>
   <section aria-labelledby="review-documents-title">
-    <h3 id="review-documents-title" class="text-sm font-semibold tracking-wide uppercase">
+    <h3 id="review-documents-title" class="text-xs tracking-caps text-text-subtle uppercase">
       {{ t('admin.proposal.review.documents.title') }}
     </h3>
 
@@ -53,11 +53,11 @@ function megabytes(bytes: number): string {
       <li
         v-for="entry in props.entries"
         :key="entry.document.id"
-        class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border bg-surface px-3 py-2"
+        class="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-border bg-surface px-3 py-2"
       >
         <UiIcon name="document" size="1.15rem" :stroke-width="1.7" class="shrink-0 text-text-subtle" />
 
-        <span class="min-w-0 flex-1">
+        <span class="min-w-0 flex-1 basis-40">
           <span class="block font-medium text-text">{{ tr(entry.document.title) }}</span>
           <span class="block text-xs text-text-subtle">
             <template v-if="entry.asset">

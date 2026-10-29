@@ -26,6 +26,8 @@ interface Props {
   leadOrganizationName: string
   submit: (payload: Omit<PostCommentPayload, 'proposal_id'>) => Promise<boolean>
   busy?: boolean
+  /** « Annuler » toujours offert : la rédaction se replie même vide. */
+  alwaysCancelable?: boolean
 }
 
 const props = defineProps<Props>()
@@ -189,7 +191,7 @@ async function send(): Promise<void> {
       >
         {{ t('admin.proposal.review.comments.compose.send') }}
       </UiButton>
-      <UiButton v-if="props.replyTo || body" variant="ghost" :disabled="props.busy" @click="cancel()">
+      <UiButton v-if="props.alwaysCancelable || props.replyTo || body" variant="ghost" :disabled="props.busy" @click="cancel()">
         {{ t('admin.proposal.review.comments.compose.cancel') }}
       </UiButton>
     </div>

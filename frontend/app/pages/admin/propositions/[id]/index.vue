@@ -20,10 +20,18 @@ import type { DecisionOption } from '~/utils/review-scoring'
  * lecture recommencée — l'écran le plus dense de la plateforme est aussi celui
  * qu'on ne doit jamais avoir à quitter.
  *
- * LE DOSSIER PREND TOUTE LA LARGEUR ; L'ÉVALUATION FLOTTE (arbitré le 16/09).
- * Noter est facultatif — l'IFDD retient parfois un dossier de partenaire sans
- * l'évaluer —, la notation s'ouvre donc à la demande dans une fenêtre flottante,
- * comme en v1, et reste ouverte pendant qu'on lit.
+ * COMPOSITION (29/10, demande du commanditaire, comme en v1) :
+ *  · à gauche, LES AUTRES DOSSIERS (`AdminReviewNavigator`) avec les filtres de
+ *    la liste, repliable ; en tiroir sous 1024 px. Ouvert, il replie la barre
+ *    du back-office le temps de la fiche, sans toucher à la préférence ;
+ *  · au centre, le dossier : en-tête et décision, puis le texte, avec sa fiche
+ *    signalétique et ses pièces en marge ;
+ *  · en bas à droite, DEUX BOUTONS FLOTTANTS empilés : les échanges (avec le
+ *    nombre de messages non lus) et l'évaluation. Une seule fenêtre ouverte à
+ *    la fois, et elle le reste d'un dossier à l'autre.
+ *
+ * L'ÉVALUATION FLOTTE (arbitré le 16/09) : noter est facultatif, l'IFDD retient
+ * parfois un dossier de partenaire sans l'évaluer.
  *
  * L'ÉVALUATION EN AVEUGLE EST LA RÈGLE DE L'APPEL, pas un réglage d'écran.
  * `calls_for_proposals.blind_review` commande, et le voile est appliqué À LA
@@ -122,6 +130,56 @@ useHead(() => ({
     ? `${screen.value.proposal.reference_code} — ${tr(screen.value.proposal.title)}`
     : t('admin.proposal.review.title'),
 }))
+
+// ---------------------------------------------------------------------------
+// Les autres dossiers, les fenêtres flottantes
+// ---------------------------------------------------------------------------
+
+const nav = useProposalNavigator()
+const neighbours = computed(() => nav.neighbours(proposalId.value))
+
+const currentUnread = computed(() =>
+  commentsStatus.value === 'success' ? comments.value.filter((comment) => !comment.is_read).length : null,
+)
+
+watch(currentUnread, (count) => {
+  if (count !== null) nav.setUnreadCount(proposalId.value, count)
+})
+
+const navOpen = useState('review-navigator-open', () => true)
+const drawerOpen = ref(false)
+const desk = useState<'comments' | 'score' | null>('review-desk-open', () => null)
+
+function setDesk(name: 'comments' | 'score', open: boolean): void {
+  if (open) desk.value = name
+  else if (desk.value === name) desk.value = null
+}
+
+/**
+ * Le panneau des dossiers prend la place de la barre du back-office : elle se
+ * replie en rail tant qu'il est ouvert, et reprend son état en quittant les fiches.
+ */
+const sidebar = useAdminSidebar()
+const sidebarBefore = useState<boolean | null>('review-sidebar-before', () => null)
+
+function restoreSidebar(): void {
+  if (sidebarBefore.value === null) return
+  sidebar.setCollapsed(sidebarBefore.value, { persist: false })
+  sidebarBefore.value = null
+}
+
+function syncSidebar(open: boolean): void {
+  if (!window.matchMedia('(min-width: 64rem)').matches) return
+  if (!open) return restoreSidebar()
+  if (sidebarBefore.value === null) sidebarBefore.value = sidebar.isCollapsed.value
+  sidebar.setCollapsed(true, { persist: false })
+}
+
+onMounted(() => syncSidebar(navOpen.value))
+watch(navOpen, (open) => syncSidebar(open))
+onBeforeRouteLeave((to) => {
+  if (!/\/admin\/propositions\/[^/]+$/.test(to.path)) restoreSidebar()
+})
 
 const timezone = computed(() => screen.value?.edition.timezone ?? 'UTC')
 const zoneLabel = computed(() => screen.value?.edition.city?.trim() || timezone.value)
@@ -249,7 +307,7 @@ async function saveReview(payload: Omit<SaveReviewPayload, 'proposal_id'>): Prom
     // de l'évaluation en aveugle : l'écran entier se recharge, il ne se rafistole
     // pas champ par champ.
     savedAt.value = new Date().toLocaleTimeString()
-    await refresh()
+    await Promise.all([refresh(), nav.refresh()])
   } catch (thrown) {
     reviewError.value = writeError(thrown)
   } finally {
@@ -361,7 +419,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
       notice.value = t('admin.proposal.review.decision.success', {
         status: t(`admin.proposal.review.status.${payload.toStatus}`),
       })
-      await refresh()
+      await Promise.all([refresh(), nav.refresh()])
     } else {
       decisionError.value = t(`admin.proposal.review.decision.${
         result.status === 'reason_required' ? 'reasonRequired' : 'notAllowed'
@@ -376,9 +434,9 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
 </script>
 
 <template>
-  <!-- pb-20 : le bouton flottant ne couvre jamais la fin du fil. -->
-  <div class="mx-auto w-full max-w-[100rem] pb-20">
-    <!-- ACCÈS REFUSÉ — aucun droit d'administration, ou édition hors périmètre.
+  <!-- pb-36 : les deux boutons flottants ne couvrent jamais la fin du dossier. -->
+  <div class="mx-auto w-full max-w-[110rem] pb-36">
+    <!-- ACCÈS REFUSÉ : aucun droit d'administration, ou édition hors périmètre.
          Distinct d'un dossier introuvable : l'un dit « vous n'avez pas ce
          droit », l'autre « ce dossier n'existe pas ». -->
     <UiForbiddenState
@@ -388,169 +446,252 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
       :action-label="t('admin.proposal.review.backToList')"
     />
 
-    <template v-else>
-      <UiErrorState
-        v-if="error"
-        :retry-label="t('common.actions.retry')"
-        @retry="refresh()"
-      />
-
-      <div v-else-if="status === 'pending' && !screen" class="flex flex-col gap-4">
-        <UiSkeletonLoader height="9rem" />
-        <UiSkeletonLoader height="28rem" />
+    <div v-else class="lg:flex lg:items-start lg:gap-8">
+      <!-- LES AUTRES DOSSIERS : colonne collante sur grand écran, rail une fois
+           replié. Sous 1024 px, ils passent dans un tiroir. -->
+      <aside
+        v-if="navOpen"
+        class="sticky top-[calc(var(--admin-header-height)+1rem)] hidden h-[calc(100dvh-var(--admin-header-height)-2rem)] w-76 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-raised lg:block"
+      >
+        <AdminReviewNavigator
+          :current-id="proposalId"
+          collapsible
+          @collapse="navOpen = false"
+        />
+      </aside>
+      <div
+        v-else
+        class="sticky top-[calc(var(--admin-header-height)+1rem)] hidden shrink-0 lg:block"
+      >
+        <UiButton
+          variant="secondary"
+          icon="sidebar"
+          icon-only
+          :label="t('admin.proposal.review.navigator.expand')"
+          @click="navOpen = true"
+        />
       </div>
 
-      <UiEmptyState
-        v-else-if="!screen"
-        icon="inbox"
-        :title="t('admin.proposal.review.notFound.title')"
-        :description="t('admin.proposal.review.notFound.description')"
-        :action-label="t('admin.proposal.review.notFound.action')"
-        :action-to="localePath('/admin/propositions')"
-      />
+      <div class="@container min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <NuxtLink :to="nav.listLink.value" class="inline-flex min-h-(--target-min) items-center gap-1.5 text-sm no-underline">
+            <UiIcon name="arrow-left" size="1rem" :stroke-width="1.8" />
+            {{ t('admin.proposal.review.backToList') }}
+          </NuxtLink>
+          <UiButton
+            class="lg:hidden"
+            variant="secondary"
+            icon="sidebar"
+            @click="drawerOpen = true"
+          >
+            {{ t('admin.proposal.review.navigator.open') }}
+          </UiButton>
+        </div>
 
-      <template v-else>
-        <NuxtLink
-          :to="localePath('/admin/propositions')"
-          class="inline-flex items-center gap-1.5 text-sm no-underline"
-        >
-          <UiIcon name="arrow-left" size="1rem" :stroke-width="1.8" />
-          {{ t('admin.proposal.review.backToList') }}
-        </NuxtLink>
-
-        <AdminReviewHeader
-          class="mt-3"
-          :proposal="screen.proposal"
-          :rank="screen.rank"
-          :required-reviews="screen.required_reviews"
-          :committee="screen.committee"
-          :read-count="screen.read_count"
-          :first-visit="screen.first_visit"
-          :timezone="timezone"
-          :decisions="decisions"
-          :can-decide="screen.permissions.can_decide"
-          :busy="busy"
-          @decide="openDecision"
+        <UiErrorState
+          v-if="error"
+          class="mt-6"
+          :retry-label="t('common.actions.retry')"
+          @retry="refresh()"
         />
 
-        <UiAlert
-          v-if="notice"
-          class="mt-4"
-          intent="success"
-          live
-          dismissible
-          :message="notice"
-          @dismiss="notice = null"
+        <div v-else-if="status === 'pending' && !screen" class="mt-6 flex flex-col gap-4">
+          <UiSkeletonLoader height="12rem" />
+          <UiSkeletonLoader height="28rem" />
+        </div>
+
+        <UiEmptyState
+          v-else-if="!screen"
+          class="mt-6"
+          icon="inbox"
+          :title="t('admin.proposal.review.notFound.title')"
+          :description="t('admin.proposal.review.notFound.description')"
+          :action-label="t('admin.proposal.review.notFound.action')"
+          :action-to="localePath('/admin/propositions')"
         />
 
-        <div class="mt-6 flex min-w-0 flex-col gap-8">
+        <template v-else>
+          <AdminReviewHeader
+            class="mt-4"
+            :proposal="screen.proposal"
+            :rank="screen.rank"
+            :required-reviews="screen.required_reviews"
+            :committee="screen.committee"
+            :read-count="screen.read_count"
+            :first-visit="screen.first_visit"
+            :timezone="timezone"
+            :decisions="decisions"
+            :can-decide="screen.permissions.can_decide"
+            :busy="busy"
+            @decide="openDecision"
+          >
+            <template #actions>
+              <UiButton
+                v-if="canEditContent"
+                variant="secondary"
+                icon="edit"
+                :to="editTo"
+                :label="t('admin.proposal.edit.action')"
+              />
+              <UiButton
+                variant="ghost"
+                icon="chevron-left"
+                icon-only
+                :disabled="!neighbours.previous"
+                :to="neighbours.previous ? nav.linkTo(neighbours.previous.id) : undefined"
+                :label="t('admin.proposal.review.navigator.previous', { reference: neighbours.previous?.reference_code ?? '' })"
+              />
+              <UiButton
+                variant="ghost"
+                icon="chevron-right"
+                icon-only
+                :disabled="!neighbours.next"
+                :to="neighbours.next ? nav.linkTo(neighbours.next.id) : undefined"
+                :label="t('admin.proposal.review.navigator.next', { reference: neighbours.next?.reference_code ?? '' })"
+              />
+            </template>
+          </AdminReviewHeader>
+
+          <UiAlert
+            v-if="notice"
+            class="mt-4"
+            intent="success"
+            live
+            dismissible
+            :message="notice"
+            @dismiss="notice = null"
+          />
+
           <UiTabs
+            class="mt-10"
             :items="tabs"
             :model-value="activeTab"
             :label="t('admin.proposal.review.tabs.dossier')"
             @update:model-value="selectTab"
           />
 
-          <template v-if="activeTab === 'dossier'">
-            <div v-if="canEditContent" class="flex justify-end">
-              <UiButton
-                variant="secondary"
-                icon="edit"
-                :to="editTo"
-                :label="t('admin.proposal.edit.action')"
-              />
+          <!-- LE DOSSIER : le texte à gauche, sa fiche et ses pièces en marge.
+               Sous 56 rem de large, la fiche passe au-dessus du texte. -->
+          <div
+            v-if="activeTab === 'dossier'"
+            class="mt-8 grid gap-x-12 gap-y-10 @4xl:grid-cols-[minmax(0,1fr)_19rem]"
+          >
+            <aside class="@4xl:col-start-2 @4xl:row-start-1">
+              <div class="flex flex-col gap-6 rounded-lg border border-border bg-surface-raised p-5 @4xl:sticky @4xl:top-[calc(var(--admin-header-height)+1rem)]">
+                <AdminReviewDossierFacts
+                  :proposal="screen.proposal"
+                  :themes="screen.themes"
+                  :timezone="timezone"
+                  :zone-label="zoneLabel"
+                  :country-name="countryName"
+                  :submitter-name="personName(screen.proposal.submitted_by)"
+                  :contact-name="personName(screen.proposal.contact_person_id)"
+                />
+                <AdminReviewDocuments
+                  class="border-t border-border-subtle pt-4"
+                  :entries="screen.documents"
+                  :timezone="timezone"
+                />
+              </div>
+            </aside>
+
+            <div class="flex min-w-0 flex-col gap-16 @4xl:col-start-1 @4xl:row-start-1">
+              <section aria-labelledby="review-project-title">
+                <h2 id="review-project-title" class="mb-4 text-xl font-semibold">
+                  {{ t('admin.proposal.review.dossier.project') }}
+                </h2>
+                <AdminReviewDossier :proposal="screen.proposal" />
+              </section>
+              <AdminReviewOrganizations :entries="screen.organizations" :timezone="timezone" />
+              <AdminReviewSpeakers :entries="screen.speakers" :timezone="timezone" />
             </div>
-
-            <AdminReviewDossier
-              :proposal="screen.proposal"
-              :themes="screen.themes"
-              :timezone="timezone"
-              :zone-label="zoneLabel"
-              :country-name="countryName"
-              :submitter-name="personName(screen.proposal.submitted_by)"
-              :contact-name="personName(screen.proposal.contact_person_id)"
-            />
-
-            <AdminReviewOrganizations :entries="screen.organizations" :timezone="timezone" />
-            <AdminReviewSpeakers :entries="screen.speakers" :timezone="timezone" />
-            <AdminReviewDocuments :entries="screen.documents" :timezone="timezone" />
-          </template>
+          </div>
 
           <!-- L'HISTORIQUE CHAMP PAR CHAMP est le même composant que l'espace
                organisation : `programme.proposal_history()` rend la même chose
-               aux deux écrans, et deux rendus divergeraient sur les cas qui
-               comptent — un titre multilingue, une date, un statut. -->
-          <WorkspaceHistoryList v-else :entries="screen.history" :timezone="timezone" />
-        </div>
+               aux deux écrans. -->
+          <WorkspaceHistoryList v-else class="mt-8" :entries="screen.history" :timezone="timezone" />
 
-        <AdminReviewFloatingDesk
-          :reference-code="screen.proposal.reference_code"
-          :criteria="screen.criteria"
-          :uses-scoring-grid="screen.uses_scoring_grid"
-          :max-weighted-score="screen.max_weighted_score"
-          :my-review="screen.my_review"
-          :permissions="screen.permissions"
-          :peer-reviews="screen.peer_reviews"
-          :committee="screen.committee"
-          :blind-veiled="screen.blind_veiled"
-          :veiled-count="screen.veiled_count"
-          :required-reviews="screen.required_reviews"
-          :timezone="timezone"
-          :busy="busy"
-          :error="reviewError"
-          :saved-at="savedAt"
-          @save="saveReview"
-          @recuse="recusalOpen = true"
-        />
+          <AdminReviewCommentsDesk
+            :open="desk === 'comments'"
+            :stack="0"
+            :reference-code="screen.proposal.reference_code"
+            :comments="comments"
+            :loading="commentsStatus === 'pending' && !busy"
+            :failed="Boolean(commentsError)"
+            :participants="screen.participants"
+            :audience="commentAudience"
+            :viewer-id="auth.person?.id ?? null"
+            :lead-organization-name="leadOrganizationName"
+            :timezone="timezone"
+            :zone-label="zoneLabel"
+            :can-write="screen.permissions.can_review || screen.permissions.can_decide"
+            :busy="busy"
+            :error="commentError"
+            :submit="postComment"
+            :mark-read="markCommentsRead"
+            :add-recipients="addCommentRecipients"
+            @update:open="(value: boolean) => setDesk('comments', value)"
+            @unread="markCommentUnread"
+            @retry="refreshComments()"
+          />
 
-        <UiErrorState
-          v-if="commentsError"
-          class="mt-8"
-          :retry-label="t('common.actions.retry')"
-          @retry="refreshComments()"
-        />
-        <UiSkeletonLoader
-          v-else-if="commentsStatus === 'pending' && comments.length === 0 && !busy"
-          class="mt-8"
-          height="16rem"
-        />
-        <AdminReviewComments
-          v-else
-          class="mt-8"
-          :comments="comments"
-          :participants="screen.participants"
-          :audience="commentAudience"
-          :viewer-id="auth.person?.id ?? null"
-          :lead-organization-name="leadOrganizationName"
-          :timezone="timezone"
-          :zone-label="zoneLabel"
-          :can-write="screen.permissions.can_review || screen.permissions.can_decide"
-          :busy="busy"
-          :error="commentError"
-          :submit="postComment"
-          :mark-read="markCommentsRead"
-          :add-recipients="addCommentRecipients"
-          @unread="markCommentUnread"
-        />
+          <AdminReviewFloatingDesk
+            :open="desk === 'score'"
+            :stack="1"
+            :reference-code="screen.proposal.reference_code"
+            :criteria="screen.criteria"
+            :uses-scoring-grid="screen.uses_scoring_grid"
+            :max-weighted-score="screen.max_weighted_score"
+            :my-review="screen.my_review"
+            :permissions="screen.permissions"
+            :peer-reviews="screen.peer_reviews"
+            :committee="screen.committee"
+            :blind-veiled="screen.blind_veiled"
+            :veiled-count="screen.veiled_count"
+            :required-reviews="screen.required_reviews"
+            :timezone="timezone"
+            :busy="busy"
+            :error="reviewError"
+            :saved-at="savedAt"
+            @update:open="(value: boolean) => setDesk('score', value)"
+            @save="saveReview"
+            @recuse="recusalOpen = true"
+          />
 
-        <AdminReviewRecusalDialog
-          v-model:open="recusalOpen"
-          :busy="busy"
-          :error="reviewError"
-          @submit="recuse"
-        />
+          <AdminReviewRecusalDialog
+            v-model:open="recusalOpen"
+            :busy="busy"
+            :error="reviewError"
+            @submit="recuse"
+          />
 
-        <AdminReviewDecisionDialog
-          v-model:open="decisionOpen"
-          :option="pendingDecision"
-          :proposal-id="screen.proposal.id"
-          :reference-code="screen.proposal.reference_code"
-          :current-status="screen.proposal.status"
-          :busy="busy"
-          :error="decisionError"
-          @submit="decide"
+          <AdminReviewDecisionDialog
+            v-model:open="decisionOpen"
+            :option="pendingDecision"
+            :proposal-id="screen.proposal.id"
+            :reference-code="screen.proposal.reference_code"
+            :current-status="screen.proposal.status"
+            :busy="busy"
+            :error="decisionError"
+            @submit="decide"
+          />
+        </template>
+      </div>
+    </div>
+
+    <UiDrawer
+      v-model:open="drawerOpen"
+      side="left"
+      width="22rem"
+      :title="t('admin.proposal.review.navigator.open')"
+    >
+      <div v-if="drawerOpen" class="-mx-5 -my-4 h-[calc(100%+2rem)]">
+        <AdminReviewNavigator
+          :current-id="proposalId"
+          @navigate="drawerOpen = false"
         />
-      </template>
-    </template>
+      </div>
+    </UiDrawer>
   </div>
 </template>

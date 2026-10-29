@@ -22,6 +22,9 @@ import type { PersonId, TimeZoneName, Uuid } from '~/types/shared'
  *
  * LU / NON LU : un message non lu porte un point ; il devient lu une fois
  * affiché (`useReadOnSight`), sans clic.
+ *
+ * Rendu dans la fenêtre des échanges (`CommentsDesk`) : les fils défilent, la
+ * rédaction se déplie au pied de la fenêtre, à la demande.
  */
 
 interface Props {
@@ -89,6 +92,28 @@ const unreadCount = computed(() => props.comments.filter((comment) => !comment.i
 // ---------------------------------------------------------------------------
 
 const replyingTo = ref<ProposalCommentView | null>(null)
+const composing = ref(false)
+const list = ref<HTMLElement | null>(null)
+
+function startReply(thread: ProposalCommentView): void {
+  replyingTo.value = thread
+  composing.value = true
+}
+
+function stopComposing(): void {
+  replyingTo.value = null
+  composing.value = false
+}
+
+// Un message envoyé s'ajoute en bas du fil : la liste y descend pour le montrer.
+watch(
+  () => props.comments.length,
+  async (count, previous) => {
+    if (count <= previous) return
+    await nextTick()
+    list.value?.scrollTo({ top: list.value.scrollHeight, behavior: 'smooth' })
+  },
+)
 
 function circleOf(thread: ProposalCommentView): string | null {
   if (thread.recipients.length === 0) return null
@@ -119,34 +144,25 @@ async function confirmWidening(): Promise<void> {
 </script>
 
 <template>
-  <section
-    ref="root"
-    class="rounded-lg border border-border bg-surface-raised"
-    aria-labelledby="review-comments-title"
-  >
-    <header class="border-b border-border-subtle px-5 py-4">
-      <h2 id="review-comments-title" class="flex flex-wrap items-center gap-3 text-lg font-semibold">
-        {{ t('admin.proposal.review.comments.title') }}
+  <div ref="root" class="flex min-h-0 flex-1 flex-col">
+    <div ref="list" class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+      <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-muted">
+        <span class="max-w-(--measure)">{{ t('admin.proposal.review.comments.description') }}</span>
         <UiBadge
           v-if="unreadCount > 0"
           size="sm"
           intent="info"
           :label="t('admin.proposal.review.comments.read.newCount', unreadCount)"
         />
-      </h2>
-      <p class="mt-1 max-w-(--measure) text-sm text-text-muted">
-        {{ t('admin.proposal.review.comments.description') }}
       </p>
-    </header>
 
-    <div class="flex flex-col gap-4 p-5">
-      <UiAlert v-if="props.error && !widening" intent="danger" live :message="props.error" />
+      <UiAlert v-if="props.error && !widening" class="mt-4" intent="danger" live :message="props.error" />
 
-      <p v-if="threads.length === 0" class="text-sm text-text-muted">
+      <p v-if="threads.length === 0" class="mt-6 text-sm text-text-muted">
         {{ t('admin.proposal.review.comments.empty') }}
       </p>
 
-      <ol v-else class="flex flex-col gap-4">
+      <ol v-else class="mt-4 flex flex-col gap-4">
         <li
           v-for="thread in threads"
           :key="thread.root.id"
@@ -191,7 +207,7 @@ async function confirmWidening(): Promise<void> {
               v-if="replyingTo?.id !== thread.root.id"
               variant="ghost"
               icon="mail"
-              @click="replyingTo = thread.root"
+              @click="startReply(thread.root)"
             >
               {{ t('admin.proposal.review.comments.compose.reply') }}
             </UiButton>
@@ -210,17 +226,28 @@ async function confirmWidening(): Promise<void> {
           </footer>
         </li>
       </ol>
+    </div>
 
-      <AdminReviewCommentComposer
-        v-if="props.canWrite"
-        :reply-to="replyingTo"
-        :reply-circle="replyingTo ? circleOf(replyingTo) : null"
-        :audience="others"
-        :lead-organization-name="props.leadOrganizationName"
-        :submit="props.submit"
-        :busy="props.busy"
-        @cancel="replyingTo = null"
-      />
+    <!-- LA RÉDACTION SE DÉPLIE AU PIED : repliée, les fils gardent toute la
+         hauteur ; dépliée, elle défile seule et les fils restent lisibles au-dessus. -->
+    <div v-if="props.canWrite" class="shrink-0 border-t border-border">
+      <div v-if="!composing" class="px-4 py-3 sm:px-5">
+        <UiButton variant="secondary" icon="edit" block @click="composing = true">
+          {{ t('admin.proposal.review.comments.compose.new') }}
+        </UiButton>
+      </div>
+      <div v-else class="max-h-[70dvh] overflow-y-auto p-3 sm:max-h-[min(70dvh,32rem)]">
+        <AdminReviewCommentComposer
+          :reply-to="replyingTo"
+          :reply-circle="replyingTo ? circleOf(replyingTo) : null"
+          :audience="others"
+          :lead-organization-name="props.leadOrganizationName"
+          :submit="props.submit"
+          :busy="props.busy"
+          always-cancelable
+          @cancel="stopComposing()"
+        />
+      </div>
     </div>
 
     <UiModal
@@ -259,5 +286,5 @@ async function confirmWidening(): Promise<void> {
         </UiButton>
       </template>
     </UiModal>
-  </section>
+  </div>
 </template>
