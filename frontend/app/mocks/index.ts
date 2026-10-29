@@ -282,6 +282,12 @@ export {
   mailingPreview,
   testMailing,
   updateMailing,
+  mailTemplates,
+  mailTemplateById,
+  createMailTemplate,
+  updateMailTemplate,
+  deleteMailTemplate,
+  mailTemplatePreview,
 } from './admin-mailings'
 export { publicSessionStreams } from './streams'
 export { publicSessionMeeting, meetingAccess, registrationJoined, adminSessionMeeting, syncSessionMeeting } from './meetings'

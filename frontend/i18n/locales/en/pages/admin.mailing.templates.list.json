@@ -1,0 +1,24 @@
+{
+  "crumb": "Templates",
+  "title": "Email templates",
+  "subtitle": "Layouts with the texts and images of your choice, offered in the compose window after the default layouts. This edition's first, then those shared by all.",
+  "new": "New template",
+  "defaultName": "New template",
+  "caption": "Email templates of the edition",
+  "columns": {
+    "name": "Name",
+    "layout": "Layout",
+    "scope": "Scope",
+    "date": "Updated ({zone})"
+  },
+  "scope": {
+    "edition": "This edition",
+    "all": "All editions"
+  },
+  "preselected": "For submitters",
+  "readOnly": "Shared: can be chosen, not edited",
+  "empty": {
+    "title": "No template",
+    "description": "Create a template to dress your emails with the image and logo of your choice."
+  }
+}

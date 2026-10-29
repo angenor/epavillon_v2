@@ -38,6 +38,12 @@
     "edition": "Édition",
     "editionHint": "Les groupes de destinataires viennent de cette édition.",
     "template": "Gabarit",
+    "defaults": "Modèles par défaut",
+    "custom": "Gabarits de l'édition",
+    "customHint": "Sur la mise en page « {layout} ».",
+    "manage": "Gérer les gabarits",
+    "preselected": "Présélectionné : cet envoi écrit aux déposants de l'édition.",
+    "customError": "Les gabarits de l'édition n'ont pas pu être lus.",
     "ctaLabel": "Texte du bouton d'action",
     "ctaUrl": "Lien du bouton d'action",
     "replyButton": "Bouton « Répondre »",
@@ -66,11 +72,15 @@
       "name": "Annonce",
       "hint": "Bandeau, grand titre (l'objet), bouton d'action."
     },
-    "banniere_edition": {
+    "banniere": {
       "name": "Bannière de l'édition",
       "hint": "La bannière de l'édition en tête, puis son logo, son nom et ses dates. Sans bannière : Institutionnel."
     },
-    "institutionnel_edition": {
+    "texte_sur_image": {
+      "name": "Texte sur l'image",
+      "hint": "Le nom et les dates de l'édition en blanc sur sa bannière. Sans bannière : Institutionnel."
+    },
+    "institutionnel_logo": {
       "name": "Institutionnel + logo de l'édition",
       "hint": "Le bandeau institutionnel, le logo de l'édition à droite. Sans logo : Institutionnel."
     }

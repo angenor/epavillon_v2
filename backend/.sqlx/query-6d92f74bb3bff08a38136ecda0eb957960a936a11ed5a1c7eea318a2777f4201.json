@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM media.renditions WHERE asset_id = $1 AND variant_code = 'courriel'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6d92f74bb3bff08a38136ecda0eb957960a936a11ed5a1c7eea318a2777f4201"
+}

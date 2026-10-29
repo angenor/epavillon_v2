@@ -18,13 +18,20 @@ const LISERE: [&str; 5] = ["#00a1e4", "#8fbf2f", "#ffd500", "#e63132", "#732f85"
 const BLEU_PALE: &str = "#bac1ea";
 const TEXTE: &str = "#231f20";
 const POLICE: &str = "Arial,Helvetica,sans-serif";
+/// Le voile du texte posé sur une image, comme `.scrim-fade-bottom` du site
+/// (`--color-scrim`, 92 % en bas, 62 % à mi-hauteur, transparent en haut).
+const VOILE: &str =
+    "linear-gradient(to top,rgba(35,31,32,0.92) 0%,rgba(35,31,32,0.62) 45%,rgba(35,31,32,0) 100%)";
 
-pub const GABARITS: [&str; 5] = [
+/// Les mises en page : les modèles par défaut, et la base d'un gabarit
+/// personnalisé (`engagement.mail_templates.layout`).
+pub const GABARITS: [&str; 6] = [
     "sobre",
     "institutionnel",
     "annonce",
-    "banniere_edition",
-    "institutionnel_edition",
+    "banniere",
+    "texte_sur_image",
+    "institutionnel_logo",
 ];
 
 /// Le symbole inversé de l'ePavillon (« e » blanc), 84 x 80 px affiché en
@@ -33,9 +40,9 @@ pub const GABARITS: [&str; 5] = [
 const LOGO_EPAVILLON: &[u8] = include_bytes!("../../assets/logo-epavillon-symbole-inverse.png");
 pub const CID_LOGO: &str = "logo-epavillon";
 
-/// Une image de l'édition prête à citer : adresse publique (ou `cid:`) et
-/// dimensions du fichier servi, d'où se déduisent les attributs `width` et
-/// `height` qu'Outlook exige.
+/// Une image prête à citer : adresse publique (ou `cid:`) et dimensions du
+/// fichier servi, d'où se déduisent les attributs `width` et `height` qu'Outlook
+/// exige.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ImageEdition {
     pub src: String,
@@ -43,16 +50,21 @@ pub struct ImageEdition {
     pub hauteur: u32,
 }
 
-/// L'édition de l'envoi, telle que ses deux gabarits la montrent.
+/// Ce que les mises en page de l'édition montrent : textes, lien et images de
+/// l'édition de l'envoi, remplacés par ceux d'un gabarit personnalisé.
 #[derive(Debug, Clone)]
-pub struct Edition {
-    pub nom: String,
-    /// « Du 9 au 20 novembre 2026, Antalya ».
-    pub dates: Option<String>,
+pub struct Visuels {
+    /// Le nom de l'édition, ou le titre du gabarit.
+    pub titre: String,
+    /// « Du 9 au 20 novembre 2026, Antalya », ou le sous-titre du gabarit.
+    pub sous_titre: Option<String>,
     /// La page publique de l'édition.
     pub lien: String,
-    pub banniere: Option<ImageEdition>,
+    /// L'image de tête, au rapport 3:1 (affichée 600 x 200).
+    pub fond: Option<ImageEdition>,
     pub logo: Option<ImageEdition>,
+    /// Le voile sombre sous le texte posé sur l'image.
+    pub degrade: bool,
 }
 
 /// Ce qui habille le corps rendu.
@@ -64,36 +76,40 @@ pub struct MiseEnPage<'a> {
     pub action: Option<(&'a str, &'a str)>,
     /// Le lien `mailto:` du bouton Répondre, s'il est demandé.
     pub repondre: Option<String>,
-    /// L'édition de l'envoi : sa bannière et son logo, pour ses deux gabarits.
-    pub edition: Option<&'a Edition>,
+    pub visuels: Option<&'a Visuels>,
 }
 
-/// L'en-tête que le gabarit prend vraiment : sans l'image qu'il attend, un
-/// gabarit de l'édition retombe sur l'institutionnel.
+/// L'en-tête que le gabarit prend vraiment : sans l'image qu'elle attend, une
+/// mise en page de l'édition retombe sur l'institutionnel.
 enum Tete<'a> {
     Aucune,
-    Institutionnelle(Option<(&'a Edition, &'a ImageEdition)>),
-    Banniere(&'a Edition, &'a ImageEdition),
+    Institutionnelle(Option<(&'a Visuels, &'a ImageEdition)>),
+    Banniere(&'a Visuels, &'a ImageEdition),
+    TexteSurImage(&'a Visuels, &'a ImageEdition),
 }
 
-fn tete<'a>(gabarit: &str, edition: Option<&'a Edition>) -> Tete<'a> {
+fn tete<'a>(gabarit: &str, visuels: Option<&'a Visuels>) -> Tete<'a> {
+    let fond = visuels.and_then(|v| v.fond.as_ref().map(|f| (v, f)));
+    let logo = visuels.and_then(|v| v.logo.as_ref().map(|l| (v, l)));
     match gabarit {
         "sobre" => Tete::Aucune,
-        "banniere_edition" => match edition.and_then(|e| e.banniere.as_ref().map(|b| (e, b))) {
-            Some((e, b)) => Tete::Banniere(e, b),
+        "banniere" => match fond {
+            Some((v, f)) => Tete::Banniere(v, f),
             None => Tete::Institutionnelle(None),
         },
-        "institutionnel_edition" => {
-            Tete::Institutionnelle(edition.and_then(|e| e.logo.as_ref().map(|l| (e, l))))
-        }
+        "texte_sur_image" => match fond {
+            Some((v, f)) => Tete::TexteSurImage(v, f),
+            None => Tete::Institutionnelle(None),
+        },
+        "institutionnel_logo" => Tete::Institutionnelle(logo),
         _ => Tete::Institutionnelle(None),
     }
 }
 
 /// Les images à intégrer au message pour ce gabarit : le symbole de l'ePavillon
 /// quand l'en-tête bleu nuit est dessiné.
-pub fn images_integrees(gabarit: &str, edition: Option<&Edition>) -> Vec<InlineImage> {
-    match tete(gabarit, edition) {
+pub fn images_integrees(gabarit: &str, visuels: Option<&Visuels>) -> Vec<InlineImage> {
+    match tete(gabarit, visuels) {
         Tete::Institutionnelle(_) => vec![InlineImage {
             content_id: CID_LOGO.to_owned(),
             mime_type: "image/png".to_owned(),
@@ -138,10 +154,11 @@ pub fn mettre_en_page(corps: &str, m: &MiseEnPage<'_>) -> String {
         contenu.push_str(&signature());
     }
 
-    let mut lignes = match tete(m.gabarit, m.edition) {
+    let mut lignes = match tete(m.gabarit, m.visuels) {
         Tete::Aucune => String::new(),
         Tete::Institutionnelle(logo) => bandeau(logo) + &lisere(),
-        Tete::Banniere(edition, image) => banniere(edition, image) + &lisere(),
+        Tete::Banniere(v, image) => banniere(v, image) + &lisere(),
+        Tete::TexteSurImage(v, image) => texte_sur_image(v, image) + &lisere(),
     };
     lignes.push_str(&format!(
         "<tr><td style=\"padding:28px 32px;font-family:{POLICE};font-size:15px;line-height:1.6;color:{TEXTE}\">{contenu}</td></tr>"
@@ -157,7 +174,7 @@ pub fn mettre_en_page(corps: &str, m: &MiseEnPage<'_>) -> String {
     }
 
     format!(
-        "<!doctype html><html lang=\"fr\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"></head>\
+        "<!doctype html><html lang=\"fr\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"></head>\
 <body style=\"margin:0;padding:0;background:#f4f5f7\">\
 <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f5f7\"><tr><td align=\"center\" style=\"padding:24px 12px\">\
 <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"width:600px;max-width:100%;background:#ffffff;border:1px solid #e3e5ea\">{lignes}</table>\
@@ -165,26 +182,33 @@ pub fn mettre_en_page(corps: &str, m: &MiseEnPage<'_>) -> String {
     )
 }
 
-/// L'en-tête bleu nuit : le symbole, le nom sur deux lignes comme la barre du
-/// site, et, pour le gabarit de l'édition, son logo à l'extrême droite sur une
-/// tuile blanche (un logo foncé disparaîtrait sur le bleu nuit).
-fn bandeau(logo: Option<(&Edition, &ImageEdition)>) -> String {
+/// L'en-tête bleu nuit, 72 px de haut : le symbole, le nom sur deux lignes
+/// comme la barre du site, et, pour `institutionnel_logo`, le logo de l'édition
+/// à l'extrême droite sur une tuile blanche (un logo foncé disparaîtrait sur le
+/// bleu nuit). La tuile (56 px de logo) prend la place des marges intérieures :
+/// l'en-tête garde sa hauteur.
+fn bandeau(logo: Option<(&Visuels, &ImageEdition)>) -> String {
+    let marge = if logo.is_some() {
+        "4px 32px"
+    } else {
+        "16px 32px"
+    };
     let tuile = logo
-        .map(|(edition, image)| {
-            let (l, h) = ajuster(image, 40, 140);
+        .map(|(v, image)| {
+            let (l, h) = ajuster(image, 56, 180);
             format!(
                 "<td align=\"right\" style=\"vertical-align:middle;padding-left:16px\">\
 <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"right\"><tr>\
-<td style=\"background:#ffffff;border-radius:6px;padding:6px 10px\">\
+<td style=\"background:#ffffff;border-radius:6px;padding:4px 8px\">\
 <img src=\"{}\" alt=\"{}\" width=\"{l}\" height=\"{h}\" style=\"display:block;border:0;width:{l}px;height:{h}px\"></td>\
 </tr></table></td>",
                 echapper(&image.src),
-                echapper(&edition.nom)
+                echapper(&v.titre)
             )
         })
         .unwrap_or_default();
     format!(
-        "<tr><td style=\"background:{BLEU_NUIT};padding:16px 32px\">\
+        "<tr><td style=\"background:{BLEU_NUIT};padding:{marge}\">\
 <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr>\
 <td width=\"42\" style=\"width:42px;padding-right:12px;vertical-align:middle\"><img src=\"cid:{CID_LOGO}\" alt=\"\" width=\"42\" height=\"40\" style=\"display:block;border:0;width:42px;height:40px\"></td>\
 <td style=\"vertical-align:middle;font-family:{POLICE}\">\
@@ -194,13 +218,19 @@ fn bandeau(logo: Option<(&Edition, &ImageEdition)>) -> String {
     )
 }
 
-/// La bannière de l'édition sur toute la largeur, cliquable vers sa page, puis
-/// une bande blanche : son logo à gauche, son nom et ses dates à droite.
-fn banniere(edition: &Edition, image: &ImageEdition) -> String {
-    let hauteur = (600 * u64::from(image.hauteur) / u64::from(image.largeur.max(1))).max(1);
-    let lien = echapper(&edition.lien);
-    let nom = echapper(&edition.nom);
-    let logo = edition
+/// Hauteur affichée d'une image de tête 3:1 dans 600 px.
+fn hauteur_de_tete(image: &ImageEdition) -> u64 {
+    (600 * u64::from(image.hauteur) / u64::from(image.largeur.max(1))).max(1)
+}
+
+/// L'image de tête sur toute la largeur (600 x 200), cliquable vers la page de
+/// l'édition, puis une bande blanche : le logo à gauche, titre et sous-titre à
+/// droite.
+fn banniere(v: &Visuels, image: &ImageEdition) -> String {
+    let hauteur = hauteur_de_tete(image);
+    let lien = echapper(&v.lien);
+    let titre = echapper(&v.titre);
+    let logo = v
         .logo
         .as_ref()
         .map(|l| {
@@ -212,13 +242,9 @@ fn banniere(edition: &Edition, image: &ImageEdition) -> String {
             )
         })
         .unwrap_or_default();
-    let alignement = if edition.logo.is_some() {
-        "right"
-    } else {
-        "left"
-    };
-    let dates = edition
-        .dates
+    let alignement = if v.logo.is_some() { "right" } else { "left" };
+    let sous_titre = v
+        .sous_titre
         .as_deref()
         .map(|d| {
             format!(
@@ -229,13 +255,54 @@ fn banniere(edition: &Edition, image: &ImageEdition) -> String {
         .unwrap_or_default();
     format!(
         "<tr><td style=\"padding:0;font-size:0;line-height:0\"><a href=\"{lien}\" style=\"display:block\">\
-<img src=\"{}\" alt=\"{nom}\" width=\"600\" height=\"{hauteur}\" style=\"display:block;border:0;width:100%;max-width:600px;height:auto\"></a></td></tr>\
+<img src=\"{}\" alt=\"{titre}\" width=\"600\" height=\"{hauteur}\" style=\"display:block;border:0;width:100%;max-width:600px;height:auto\"></a></td></tr>\
 <tr><td style=\"background:#ffffff;padding:16px 32px\">\
 <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr>{logo}\
 <td align=\"{alignement}\" style=\"vertical-align:middle;font-family:{POLICE};text-align:{alignement}\">\
-<p style=\"margin:0;font-size:17px;line-height:22px;mso-line-height-rule:exactly;font-weight:bold;color:{BLEU_NUIT}\">{nom}</p>{dates}\
+<p style=\"margin:0;font-size:17px;line-height:22px;mso-line-height-rule:exactly;font-weight:bold;color:{BLEU_NUIT}\">{titre}</p>{sous_titre}\
 </td></tr></table></td></tr>",
         echapper(&image.src)
+    )
+}
+
+/// Le titre et le sous-titre en blanc sur l'image, sur un voile sombre du bas
+/// vers le haut. Image de fond en CSS, repli VML pour Outlook bureau (qui
+/// ignore le dégradé) ; sans prise en charge des images de fond, un aplat bleu
+/// nuit porte le texte.
+fn texte_sur_image(v: &Visuels, image: &ImageEdition) -> String {
+    let hauteur = hauteur_de_tete(image);
+    let src = echapper(&image.src);
+    let lien = echapper(&v.lien);
+    let voile = if v.degrade {
+        format!("background-image:{VOILE};")
+    } else {
+        String::new()
+    };
+    let ombre = "text-shadow:0 1px 3px rgba(0,0,0,0.6);";
+    let sous_titre = v
+        .sous_titre
+        .as_deref()
+        .map(|d| {
+            format!(
+                "<p style=\"margin:6px 0 0;font-family:{POLICE};font-size:14px;line-height:18px;mso-line-height-rule:exactly;color:#ffffff;{ombre}\">{}</p>",
+                echapper(d)
+            )
+        })
+        .unwrap_or_default();
+    // 600 x hauteur px = 450 x (hauteur x 0,75) pt pour le rectangle VML.
+    let hauteur_pt = hauteur * 3 / 4;
+    format!(
+        "<tr><td background=\"{src}\" bgcolor=\"{BLEU_NUIT}\" width=\"600\" height=\"{hauteur}\" valign=\"bottom\" \
+style=\"padding:0;height:{hauteur}px;background-color:{BLEU_NUIT};background-image:url('{src}');background-size:cover;background-position:center;background-repeat:no-repeat\">\
+<!--[if gte mso 9]><v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" fill=\"true\" stroke=\"false\" style=\"width:450pt;height:{hauteur_pt}pt;\">\
+<v:fill type=\"frame\" src=\"{src}\" color=\"{BLEU_NUIT}\" /><v:textbox inset=\"0,0,0,0\"><![endif]-->\
+<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr>\
+<td height=\"{hauteur}\" valign=\"bottom\" style=\"height:{hauteur}px;vertical-align:bottom;padding:0 32px 22px;{voile}\">\
+<p style=\"margin:0;font-family:{POLICE};font-size:24px;line-height:28px;mso-line-height-rule:exactly;font-weight:bold;color:#ffffff;{ombre}\">\
+<a href=\"{lien}\" style=\"color:#ffffff;text-decoration:none\">{}</a></p>{sous_titre}\
+</td></tr></table>\
+<!--[if gte mso 9]></v:textbox></v:rect><![endif]--></td></tr>",
+        echapper(&v.titre)
     )
 }
 
@@ -268,15 +335,10 @@ fn ajuster(image: &ImageEdition, hauteur: u32, largeur_max: u32) -> (u32, u32) {
     }
 }
 
-/// L'image d'un rôle de l'édition, telle que `media.attached_image()` la rend,
-/// réduite au fichier à citer : une variante JPEG ou PNG (Outlook ne lit pas le
-/// WebP), ou l'original s'il est l'un des deux. La plus petite qui atteint la
-/// taille demandée, sinon la plus grande : ni flou, ni original de plusieurs Mo.
-pub fn choisir_image(
-    image: &serde_json::Value,
-    largeur_min: u32,
-    hauteur_min: u32,
-) -> Option<ImageEdition> {
+/// Les fichiers JPEG ou PNG d'une image telle que `media.attached_image()` la
+/// rend : ses variantes, et l'original s'il est l'un des deux. Outlook ne lit
+/// pas le WebP.
+fn candidats(image: &serde_json::Value) -> Vec<ImageEdition> {
     let candidat = |v: &serde_json::Value| -> Option<ImageEdition> {
         let src = v.get("url")?.as_str()?.to_owned();
         let largeur = u32::try_from(v.get("width")?.as_u64()?).ok()?;
@@ -287,7 +349,7 @@ pub fn choisir_image(
             hauteur,
         })
     };
-    let mut candidats: Vec<ImageEdition> = image
+    let mut liste: Vec<ImageEdition> = image
         .get("sources")
         .and_then(serde_json::Value::as_object)
         .into_iter()
@@ -302,17 +364,50 @@ pub fn choisir_image(
             .iter()
             .any(|e| chemin.ends_with(e))
         {
-            candidats.push(original);
+            liste.push(original);
         }
     }
-    candidats.sort_by_key(|c| u64::from(c.largeur) * u64::from(c.hauteur));
-    let suffisant = candidats
+    liste.sort_by_key(|c| u64::from(c.largeur) * u64::from(c.hauteur));
+    liste
+}
+
+/// La plus petite qui atteint la taille demandée, sinon la plus grande.
+fn la_plus_juste(
+    mut liste: Vec<ImageEdition>,
+    largeur_min: u32,
+    hauteur_min: u32,
+) -> Option<ImageEdition> {
+    match liste
         .iter()
-        .position(|c| c.largeur >= largeur_min && c.hauteur >= hauteur_min);
-    match suffisant {
-        Some(i) => Some(candidats.swap_remove(i)),
-        None => candidats.pop(),
+        .position(|c| c.largeur >= largeur_min && c.hauteur >= hauteur_min)
+    {
+        Some(i) => Some(liste.swap_remove(i)),
+        None => liste.pop(),
     }
+}
+
+/// Une image quelconque (le logo) : ni flou, ni original de plusieurs Mo.
+pub fn choisir_image(
+    image: &serde_json::Value,
+    largeur_min: u32,
+    hauteur_min: u32,
+) -> Option<ImageEdition> {
+    la_plus_juste(candidats(image), largeur_min, hauteur_min)
+}
+
+/// L'image de tête : un fichier au rapport 3:1 (à 5 % près), la variante
+/// `courriel` du module media (1200 x 400, JPEG compressé) ou un fond déposé
+/// déjà recadré. Un bandeau d'une autre forme n'en a pas : la mise en page
+/// retombe alors sur l'institutionnel plutôt que d'étirer une image haute.
+pub fn choisir_fond(image: &serde_json::Value) -> Option<ImageEdition> {
+    let au_rapport: Vec<ImageEdition> = candidats(image)
+        .into_iter()
+        .filter(|c| {
+            let r = f64::from(c.largeur) / f64::from(c.hauteur);
+            (r - 3.0).abs() <= 0.15
+        })
+        .collect();
+    la_plus_juste(au_rapport, 1200, 0)
 }
 
 /// La période d'une édition en toutes lettres : « Du 9 au 20 novembre 2026 ».
@@ -508,25 +603,26 @@ mod tests {
         assert!(mailto_reponse(None, &[], "x").is_none());
     }
 
-    fn edition(banniere: bool, logo: bool) -> Edition {
-        Edition {
-            nom: "CdP31 <Antalya>".into(),
-            dates: Some("Du 9 au 20 novembre 2026, Antalya".into()),
+    fn visuels(fond: bool, logo: bool) -> Visuels {
+        Visuels {
+            titre: "CdP31 <Antalya>".into(),
+            sous_titre: Some("Du 9 au 20 novembre 2026, Antalya".into()),
             lien: "https://site.org/evenements/cdp31".into(),
-            banniere: banniere.then(|| ImageEdition {
-                src: "https://site.org/b.jpeg".into(),
-                largeur: 1600,
-                hauteur: 900,
+            fond: fond.then(|| ImageEdition {
+                src: "https://site.org/courriel.jpeg".into(),
+                largeur: 1200,
+                hauteur: 400,
             }),
             logo: logo.then(|| ImageEdition {
                 src: "https://site.org/l.png".into(),
                 largeur: 320,
                 hauteur: 160,
             }),
+            degrade: true,
         }
     }
 
-    fn rendre(gabarit: &str, edition: Option<&Edition>) -> String {
+    fn rendre(gabarit: &str, v: Option<&Visuels>) -> String {
         mettre_en_page(
             "<p>Bonjour</p>",
             &MiseEnPage {
@@ -534,27 +630,27 @@ mod tests {
                 sujet: "Objet",
                 action: Some(("Voir", "https://exemple.org")),
                 repondre: None,
-                edition,
+                visuels: v,
             },
         )
     }
 
     #[test]
     fn les_gabarits_tiennent_dans_600_pixels() {
-        let e = edition(true, true);
+        let v = visuels(true, true);
         for gabarit in GABARITS {
-            let html = rendre(gabarit, Some(&e));
+            let html = rendre(gabarit, Some(&v));
             assert!(html.contains("width=\"600\""));
             assert_eq!(html.contains(">Voir</a>"), gabarit == "annonce");
             assert!(!html.contains('\u{2014}'), "tiret cadratin dans {gabarit}");
-            let integrees = images_integrees(gabarit, Some(&e));
+            let integrees = images_integrees(gabarit, Some(&v));
             assert_eq!(
                 html.contains(&format!("cid:{CID_LOGO}")),
                 !integrees.is_empty(),
                 "{gabarit}"
             );
         }
-        assert!(!rendre("sobre", Some(&e)).contains("cid:"));
+        assert!(!rendre("sobre", Some(&v)).contains("cid:"));
     }
 
     #[test]
@@ -562,38 +658,65 @@ mod tests {
         let html = rendre("institutionnel", None);
         assert!(html.contains("<span style=\"font-weight:300\">e</span><span style=\"font-weight:bold\">Pavillon</span>"));
         assert!(html.contains("text-transform:uppercase;color:#bac1ea\">de la Francophonie"));
-        assert!(!html.contains("epavillon@4x.png"));
+        assert!(html.contains("padding:16px 32px"));
         assert_eq!(images_integrees("institutionnel", None).len(), 1);
     }
 
     #[test]
-    fn la_banniere_de_ledition_et_ses_replis() {
-        let e = edition(true, true);
-        let html = rendre("banniere_edition", Some(&e));
-        assert!(html.contains("src=\"https://site.org/b.jpeg\" alt=\"CdP31 &lt;Antalya&gt;\" width=\"600\" height=\"337\""), "{html}");
+    fn la_banniere_basse_et_ses_replis() {
+        let v = visuels(true, true);
+        let html = rendre("banniere", Some(&v));
+        assert!(html.contains("src=\"https://site.org/courriel.jpeg\" alt=\"CdP31 &lt;Antalya&gt;\" width=\"600\" height=\"200\""), "{html}");
         assert!(html.contains("<a href=\"https://site.org/evenements/cdp31\""));
         assert!(html.contains("width=\"96\" height=\"48\""), "{html}");
         assert!(html.contains("Du 9 au 20 novembre 2026, Antalya"));
-        assert!(images_integrees("banniere_edition", Some(&e)).is_empty());
+        assert!(images_integrees("banniere", Some(&v)).is_empty());
 
-        // Sans logo : le nom seul, à gauche.
-        let sans_logo = rendre("banniere_edition", Some(&edition(true, false)));
+        let sans_logo = rendre("banniere", Some(&visuels(true, false)));
         assert!(!sans_logo.contains("l.png"));
         assert!(sans_logo.contains("text-align:left"));
 
-        // Sans bannière : l'institutionnel.
-        let repli = rendre("banniere_edition", Some(&edition(false, true)));
+        let repli = rendre("banniere", Some(&visuels(false, true)));
         assert_eq!(repli, rendre("institutionnel", None));
     }
 
     #[test]
-    fn le_logo_de_ledition_sur_sa_tuile() {
-        let e = edition(false, true);
-        let html = rendre("institutionnel_edition", Some(&e));
-        assert!(html.contains("background:#ffffff;border-radius:6px"));
-        assert!(html.contains("src=\"https://site.org/l.png\" alt=\"CdP31 &lt;Antalya&gt;\" width=\"80\" height=\"40\""), "{html}");
+    fn le_texte_sur_limage_a_son_voile_et_son_repli_outlook() {
+        let v = visuels(true, false);
+        let html = rendre("texte_sur_image", Some(&v));
+        assert!(
+            html.contains("background-image:url('https://site.org/courriel.jpeg')"),
+            "{html}"
+        );
+        assert!(html.contains("bgcolor=\"#1d1a5b\""));
+        assert!(html.contains("<v:fill type=\"frame\" src=\"https://site.org/courriel.jpeg\""));
+        assert!(html.contains("height:150pt"));
+        assert!(html.contains("linear-gradient(to top"));
+        assert!(html.contains("color:#ffffff;text-decoration:none\">CdP31 &lt;Antalya&gt;</a>"));
+        let sans_voile = rendre(
+            "texte_sur_image",
+            Some(&Visuels {
+                degrade: false,
+                ..visuels(true, false)
+            }),
+        );
+        assert!(!sans_voile.contains("linear-gradient"));
         assert_eq!(
-            rendre("institutionnel_edition", Some(&edition(true, false))),
+            rendre("texte_sur_image", Some(&visuels(false, true))),
+            rendre("institutionnel", None)
+        );
+    }
+
+    #[test]
+    fn le_logo_agrandi_ne_grandit_pas_lentete() {
+        let v = visuels(false, true);
+        let html = rendre("institutionnel_logo", Some(&v));
+        assert!(html.contains("background:#ffffff;border-radius:6px;padding:4px 8px"));
+        assert!(html.contains("width=\"112\" height=\"56\""), "{html}");
+        // 4 + 56 + 2 x 4 + 4 = 72, comme 16 + 40 + 16.
+        assert!(html.contains("padding:4px 32px"));
+        assert_eq!(
+            rendre("institutionnel_logo", Some(&visuels(true, false))),
             rendre("institutionnel", None)
         );
     }
@@ -606,27 +729,27 @@ mod tests {
     }
 
     #[test]
-    fn limage_choisie_est_un_jpeg_ou_un_png_a_la_bonne_taille() {
+    fn le_fond_est_un_3_1_leger_jamais_un_webp() {
         let image = serde_json::json!({
-            "url": "https://s/o/photo.webp", "width": 3315, "height": 1860,
+            "url": "https://s/o/photo.jpg", "width": 3315, "height": 1860,
             "sources": {
                 "lg_jpeg": { "url": "https://s/lg.jpeg", "width": 1600, "height": 898 },
                 "md_jpeg": { "url": "https://s/md.jpeg", "width": 800, "height": 449 },
-                "thumb_jpeg": { "url": "https://s/thumb.jpeg", "width": 320, "height": 180 },
-                "lg_webp": { "url": "https://s/lg.webp", "width": 1200, "height": 673 }
+                "courriel_jpeg": { "url": "https://s/courriel.jpeg", "width": 1200, "height": 400 },
+                "lg_webp": { "url": "https://s/lg.webp", "width": 1200, "height": 400 }
             }
         });
-        assert_eq!(
-            choisir_image(&image, 1200, 0).unwrap().src,
-            "https://s/lg.jpeg"
-        );
+        assert_eq!(choisir_fond(&image).unwrap().src, "https://s/courriel.jpeg");
         assert_eq!(
             choisir_image(&image, 0, 120).unwrap().src,
-            "https://s/thumb.jpeg"
+            "https://s/md.jpeg"
         );
-        // Un petit logo sans variante : l'original, s'il est un PNG.
-        let petit = serde_json::json!({ "url": "https://s/logo.PNG", "width": 200, "height": 100, "sources": {} });
-        assert_eq!(choisir_image(&petit, 0, 120).unwrap().largeur, 200);
+        // Sans variante 3:1 : pas d'image de tête.
+        let haute = serde_json::json!({ "url": "https://s/b.jpg", "width": 1600, "height": 900, "sources": {} });
+        assert!(choisir_fond(&haute).is_none());
+        // Un fond déposé déjà recadré : l'original.
+        let depose = serde_json::json!({ "url": "https://s/fond.jpg", "width": 1200, "height": 400, "sources": {} });
+        assert_eq!(choisir_fond(&depose).unwrap().largeur, 1200);
         let webp = serde_json::json!({ "url": "https://s/logo.webp", "width": 200, "height": 100, "sources": {} });
         assert!(choisir_image(&webp, 0, 120).is_none());
     }

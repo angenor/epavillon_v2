@@ -99,7 +99,13 @@ impl JobHandler for ProcessAsset {
 
         // Garde n° 1 de la reprise : les deux états terminaux ne se retraitent
         // pas. Sans elle, un rejeu refabriquerait des déclinaisons déjà servies.
-        if matches!(objet.status.as_str(), "ready" | "quarantined") {
+        // Un objet servable reçoit seulement les déclinaisons ajoutées à la
+        // configuration depuis (29/10, `courriel`) : ni nouvelle analyse, ni
+        // changement d'état, et la garde n° 2 écarte ce qui existe.
+        if objet.status == "ready" {
+            return self.completer(job, &objet).await;
+        }
+        if objet.status == "quarantined" {
             tracing::debug!(%asset_id, etat = %objet.status, "traitement déjà abouti");
             return Ok(());
         }
@@ -120,6 +126,25 @@ impl JobHandler for ProcessAsset {
 }
 
 impl ProcessAsset {
+    /// Les déclinaisons manquantes d'un objet déjà servable.
+    async fn completer(&self, job: &ClaimedJob, objet: &AObjetTraiter) -> Result<()> {
+        if !objet.mime_type.starts_with("image/") {
+            return Ok(());
+        }
+        let octets = Arc::new(
+            self.entrepots
+                .du_bucket(&objet.bucket)
+                .get(&objet.object_key)
+                .await?,
+        );
+        let contenu = Arc::clone(&octets);
+        let Some(mesure) = tache_bloquante(move || imaging::mesurer(&contenu)).await? else {
+            return Ok(());
+        };
+        self.fabriquer_les_declinaisons(job, objet, &octets, mesure)
+            .await
+    }
+
     async fn traiter(&self, job: &ClaimedJob, objet: &AObjetTraiter) -> Result<()> {
         let ctx = job.context();
 
@@ -245,21 +270,23 @@ impl ProcessAsset {
             let cle = variants::cle_declinaison(objet.id, variante.code, format);
             let contenu = Arc::clone(octets);
             let largeur = variante.largeur_max;
+            let (rapport, qualite) = (variante.rapport, variante.qualite);
 
             // **La tâche bloquante dédiée** : quelques centaines de
             // millisecondes de calcul pur qui ne doivent pas tenir le fil
             // asynchrone.
-            let faite =
-                match tache_bloquante(move || imaging::redimensionner(&contenu, largeur, format))
-                    .await?
-                {
-                    Ok(faite) => faite,
-                    Err(motif) => {
-                        return self
-                            .echec_de_declinaison(job, objet.id, variante.code, format, &cle, motif)
-                            .await
-                    }
-                };
+            let faite = match tache_bloquante(move || {
+                imaging::decliner(&contenu, largeur, rapport, qualite, format)
+            })
+            .await?
+            {
+                Ok(faite) => faite,
+                Err(motif) => {
+                    return self
+                        .echec_de_declinaison(job, objet.id, variante.code, format, &cle, motif)
+                        .await
+                }
+            };
 
             let poids = faite.octets.len() as i64;
             self.entrepots

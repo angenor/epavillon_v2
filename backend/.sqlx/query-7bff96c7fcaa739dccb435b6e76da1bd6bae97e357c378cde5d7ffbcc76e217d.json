@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.mail_templates\n               (name, layout, title, subtitle, gradient, event_id, preselect_for_submitters, created_by)\n           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        "Uuid",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7bff96c7fcaa739dccb435b6e76da1bd6bae97e357c378cde5d7ffbcc76e217d"
+}

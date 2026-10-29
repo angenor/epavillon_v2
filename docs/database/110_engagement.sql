@@ -1136,6 +1136,56 @@ CREATE TYPE engagement.mailing_status AS ENUM (
     'cancelled'   -- arrêté en cours de route : les destinataires restants ne reçoivent rien
 );
 
+-- GABARITS PERSONNALISÉS (29/10, demande du commanditaire). Une mise en page
+-- de base (les modèles par défaut, qui ne se modifient pas) habillée de textes
+-- et d'images choisis : titre et sous-titre (à défaut, nom et dates de
+-- l'édition de l'envoi), dégradé sous le texte, et deux images rattachées par
+-- le module media (rôles `background`, 3:1, et `logo`). Rattaché à une édition
+-- ou commun à toutes ; rattaché, il peut être présélectionné quand un envoi de
+-- cette édition écrit à ses déposants (`mailing_suggested_template()`).
+CREATE TABLE engagement.mail_templates (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    name            text        NOT NULL,
+    layout          text        NOT NULL,
+    title           text,
+    subtitle        text,
+    -- Le voile sombre du bas vers le haut sous le texte posé sur l'image.
+    gradient        boolean     NOT NULL DEFAULT true,
+    -- Nul : commun à toutes les éditions (permission globale pour l'écrire).
+    event_id        uuid        CONSTRAINT xmod_fk_mail_templates_event
+                                REFERENCES event.events(id) ON DELETE RESTRICT,
+    preselect_for_submitters boolean NOT NULL DEFAULT false,
+    created_by      uuid        CONSTRAINT xmod_fk_mail_templates_author
+                                REFERENCES identity.people(id) ON DELETE SET NULL,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    updated_at      timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_mail_templates_name CHECK (length(btrim(name)) BETWEEN 1 AND 120),
+    CONSTRAINT ck_mail_templates_layout CHECK (layout IN ('sobre', 'institutionnel', 'annonce',
+                                                          'banniere', 'texte_sur_image',
+                                                          'institutionnel_logo')),
+    CONSTRAINT ck_mail_templates_texts CHECK (coalesce(length(title), 0) <= 200
+                                              AND coalesce(length(subtitle), 0) <= 200),
+    -- Présélectionner « pour les déposants de cet événement » suppose un événement.
+    CONSTRAINT ck_mail_templates_preselect CHECK (NOT preselect_for_submitters OR event_id IS NOT NULL)
+);
+
+-- Un seul gabarit présélectionné par édition : deux se disputeraient l'envoi.
+CREATE UNIQUE INDEX ux_mail_templates_preselect
+    ON engagement.mail_templates (event_id) WHERE preselect_for_submitters;
+CREATE INDEX ix_mail_templates_event ON engagement.mail_templates (event_id);
+
+CREATE TRIGGER tg_mail_templates_updated_at
+    BEFORE UPDATE ON engagement.mail_templates
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+CREATE TRIGGER tg_mail_templates_audit
+    AFTER INSERT OR UPDATE OR DELETE ON engagement.mail_templates
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON TABLE engagement.mail_templates IS
+    'Gabarits de courriel personnalisés du back-office : mise en page de base, textes, images (media, rôles background et logo), édition de rattachement.';
+
 CREATE TABLE engagement.mailings (
     id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     -- RÈGLE MÉTIER N° 8 : un envoi appartient à une édition, et un
@@ -1170,11 +1220,12 @@ CREATE TABLE engagement.mailings (
     -- page, rendu par le worker en HTML de messagerie (tableaux, styles en
     -- ligne, 600 px) : 'sobre' (texte et signature de l'IFDD),
     -- 'institutionnel' (bandeau, logo, pied de page IFDD et OIF), 'annonce'
-    -- (bandeau, grand titre, bouton d'action). Depuis le 29/10, deux gabarits
-    -- de l'édition de l'envoi : 'banniere_edition' (sa bannière en tête, puis
-    -- son logo, son nom et ses dates) et 'institutionnel_edition' (bandeau
-    -- institutionnel, son logo à droite sur une tuile blanche). Sans l'image
-    -- qu'ils attendent, ils retombent sur 'institutionnel'.
+    -- (bandeau, grand titre, bouton d'action). Depuis le 29/10, trois mises en
+    -- page aux visuels de l'édition de l'envoi : 'banniere' (sa bannière 3:1,
+    -- puis son logo, son nom et ses dates), 'texte_sur_image' (nom et dates en
+    -- blanc sur la bannière) et 'institutionnel_logo' (bandeau institutionnel,
+    -- son logo à droite sur une tuile blanche). Sans l'image qu'elles
+    -- attendent, elles retombent sur 'institutionnel'.
     template        text        NOT NULL DEFAULT 'sobre',
     -- Valeur de secours de chaque variable, pour qui n'a pas de compte (on
     -- écrit volontiers à des personnes non inscrites) : {"prenom": "Madame,
@@ -1188,6 +1239,10 @@ CREATE TABLE engagement.mailings (
     cta_url         platform.url,
 
     duplicated_from uuid        REFERENCES engagement.mailings(id) ON DELETE SET NULL,
+    -- Gabarit personnalisé (29/10) : ses textes et ses images remplacent ceux
+    -- de l'édition, sa mise en page est recopiée dans `template`. Nul : un des
+    -- modèles par défaut. Un gabarit supprimé rend l'envoi à sa mise en page.
+    mail_template_id uuid       REFERENCES engagement.mail_templates(id) ON DELETE SET NULL,
     created_by      uuid        CONSTRAINT xmod_fk_mailings_author
                                 REFERENCES identity.people(id) ON DELETE SET NULL,
     queued_by       uuid        CONSTRAINT xmod_fk_mailings_sender
@@ -1209,7 +1264,8 @@ CREATE TABLE engagement.mailings (
     CONSTRAINT ck_mailings_copies CHECK (cardinality(cc) <= 10 AND cardinality(bcc) <= 10),
     CONSTRAINT ck_mailings_extra CHECK (cardinality(extra_addresses) <= 500),
     CONSTRAINT ck_mailings_template CHECK (template IN ('sobre', 'institutionnel', 'annonce',
-                                                         'banniere_edition', 'institutionnel_edition')),
+                                                         'banniere', 'texte_sur_image',
+                                                         'institutionnel_logo')),
     CONSTRAINT ck_mailings_fallbacks CHECK (jsonb_typeof(variable_fallbacks) = 'object'),
     CONSTRAINT ck_mailings_cta CHECK ((cta_label IS NULL) = (cta_url IS NULL))
 );
@@ -1400,6 +1456,35 @@ $$;
 COMMENT ON FUNCTION engagement.mailing_audience IS
     'Destinataires d''un envoi du back-office : critères d''une édition (union) et adresses libres, dédoublonnés, liste de suppression signalée.';
 
+-- Le gabarit à présélectionner pour un envoi (29/10) : celui de son édition
+-- marqué « pour les déposants », quand l'envoi leur écrit (le groupe des
+-- déposants, ou l'adresse d'un déposant ou contact d'un dossier non brouillon
+-- de l'édition). L'écran le propose ; l'auteur reste libre de le retirer.
+CREATE OR REPLACE FUNCTION engagement.mailing_suggested_template(p_mailing_id uuid)
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT t.id
+    FROM engagement.mailings m
+    JOIN engagement.mail_templates t
+      ON t.event_id = m.event_id AND t.preselect_for_submitters
+    WHERE m.id = p_mailing_id
+      AND (EXISTS (SELECT 1 FROM jsonb_array_elements(
+                       CASE WHEN jsonb_typeof(m.audience) = 'array' THEN m.audience ELSE '[]' END) c
+                   WHERE c ->> 'kind' = 'submitters')
+           OR EXISTS (SELECT 1
+                      FROM unnest(m.extra_addresses) a
+                      JOIN identity.people pe ON pe.primary_email = a
+                      JOIN programme.proposals p
+                        ON p.event_id = m.event_id AND p.deleted_at IS NULL AND p.status <> 'draft'
+                       AND pe.id IN (p.submitted_by, p.contact_person_id)))
+    LIMIT 1;
+$$;
+
+COMMENT ON FUNCTION engagement.mailing_suggested_template IS
+    'Gabarit personnalisé à présélectionner pour un envoi qui écrit aux déposants de son édition ; NULL sinon.';
+
 -- Copie de l'équipe proposée par défaut, réglable sans redéploiement. Aucune
 -- limite d'envoi : décision du commanditaire le 28/10.
 INSERT INTO platform.settings (key, value, description) VALUES
@@ -1427,4 +1512,17 @@ INSERT INTO media.attachable_roles
     ('engagement', 'mailings', 'attachment', '{"fr":"Pièce jointe","en":"Attachment"}', true,
      '{application/pdf,application/msword,application/vnd.*,application/rtf,text/plain,text/csv,image/*}',
      10485760, 10485760)
+ON CONFLICT DO NOTHING;
+
+-- IMAGES D'UN GABARIT PERSONNALISÉ (29/10) : le fond, 3:1 (affiché 600 x 200,
+-- déposé en 1200 x 400 au plus, JPEG compressé par l'outil de dépôt), et le
+-- logo. JPEG ou PNG seulement : Outlook ne lit pas le WebP. Servies par leur
+-- adresse publique dans le courriel.
+INSERT INTO media.attachable_roles
+    (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes,
+     max_byte_size, expected_aspect_ratio) VALUES
+    ('engagement', 'mail_templates', 'background', '{"fr":"Image de fond","en":"Background image"}', false,
+     '{image/jpeg,image/png}', 2097152, 3.0000),
+    ('engagement', 'mail_templates', 'logo', '{"fr":"Logo","en":"Logo"}', false,
+     '{image/jpeg,image/png}', 2097152, NULL)
 ON CONFLICT DO NOTHING;

@@ -56,8 +56,12 @@ const props = withDefaults(
      */
     owner?: { schema: string; table: string; id: Uuid } | null
     disabled?: boolean
+    /** Réglages de sortie de l'éditeur : largeur maximale, formats, qualité. */
+    maxWidth?: number | null
+    formats?: Array<'jpeg' | 'webp' | 'png'> | null
+    defaultQuality?: number | null
   }>(),
-  { rule: null, image: null, owner: null },
+  { rule: null, image: null, owner: null, maxWidth: null, formats: null, defaultQuality: null },
 )
 
 const emit = defineEmits<{
@@ -268,6 +272,9 @@ const maxLabel = computed(() =>
       :aspect-ratio="aspectRatio"
       :ratio-label="props.shapeLabel"
       :max-byte-size="props.rule?.max_byte_size ?? null"
+      :max-width="props.maxWidth"
+      :formats="props.formats"
+      :default-quality="props.defaultQuality"
       :busy="busy"
       :apply-disabled="!altText?.fr"
       :apply-hint="t('image-field.altText.required')"

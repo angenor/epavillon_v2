@@ -18,6 +18,9 @@ import type {
   MailingPayload,
   MailingPreview,
   MailingTestResult,
+  MailTemplate,
+  MailTemplatePayload,
+  MailTemplatePreview,
 } from '~/types/admin-mailings'
 import type { AdministeredEvents } from '~/types/identity'
 import type { EventId, Uuid } from '~/types/shared'
@@ -72,5 +75,35 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
 
     duplicate: (mailingId: Uuid): Promise<Mailing> =>
       send(`/admin/mailings/${mailingId}/duplicate`, {}, (m) => m.duplicateMailing(mailingId), 'POST'),
+
+    /**
+     * GABARITS PERSONNALISÉS (29/10). Ceux de l'édition et les communs ; leurs
+     * images se posent par `PUT /media/attachments`, comme celles d'une édition.
+     */
+    templates: {
+      list: (eventId: EventId, scope: AdministeredEvents): Promise<MailTemplate[]> => {
+        assertEventInScope(eventId, scope)
+        return call('/admin/mail-templates', (m) => m.mailTemplates(eventId), { event_id: eventId })
+      },
+
+      /** `null` : inexistant ou hors droit. */
+      byId: (templateId: Uuid): Promise<MailTemplate | null> =>
+        callOrNull(`/admin/mail-templates/${templateId}`, (m) => m.mailTemplateById(templateId)),
+
+      create: (payload: MailTemplatePayload): Promise<MailTemplate> =>
+        send('/admin/mail-templates', payload, (m) => m.createMailTemplate(payload), 'POST'),
+
+      update: (templateId: Uuid, payload: MailTemplatePayload): Promise<MailTemplate> =>
+        send(`/admin/mail-templates/${templateId}`, payload, (m) => m.updateMailTemplate(templateId, payload), 'PUT'),
+
+      remove: (templateId: Uuid): Promise<{ deleted: boolean }> =>
+        send(`/admin/mail-templates/${templateId}`, {}, (m) => m.deleteMailTemplate(templateId), 'DELETE'),
+
+      /** Rendu par la fonction du worker ; `eventId` sert un gabarit commun. */
+      preview: (templateId: Uuid, eventId?: EventId): Promise<MailTemplatePreview | null> =>
+        callOrNull(`/admin/mail-templates/${templateId}/preview`, (m) => m.mailTemplatePreview(templateId), {
+          event_id: eventId,
+        }),
+    },
   }
 }

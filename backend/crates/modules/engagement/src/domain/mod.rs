@@ -8,6 +8,7 @@
 
 pub mod gabarits;
 pub mod ids;
+pub mod mail_template;
 pub mod mailing;
 pub mod notification;
 pub mod offsets;

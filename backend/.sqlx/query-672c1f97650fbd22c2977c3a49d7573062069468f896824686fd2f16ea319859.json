@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.mailings\n              SET subject = $2, body_html = $3, audience = $4,\n                  extra_addresses = $5::text[]::platform.email[],\n                  cc = $6::text[]::platform.email[], bcc = $7::text[]::platform.email[],\n                  reply_to = $8::text::platform.email, event_id = $9,\n                  template = $10, variable_fallbacks = $11, reply_button = $12,\n                  cta_label = $13, cta_url = $14::text::platform.url, mail_template_id = $15\n            WHERE id = $1 AND status = 'draft'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb",
+        "TextArray",
+        "TextArray",
+        "TextArray",
+        "Text",
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Bool",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "672c1f97650fbd22c2977c3a49d7573062069468f896824686fd2f16ea319859"
+}

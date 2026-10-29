@@ -163,6 +163,25 @@ pub async fn exiger_le_droit(
             Ok(None)
         }
 
+        Garde::GabaritDeCourriel { permission } => {
+            let Some(edition) = cross::edition_du_gabarit(pool, porteuse.owner_id).await? else {
+                return Err(ApiError::not_found());
+            };
+            // Commun à toutes les éditions : la portée globale. Rattaché : la
+            // permission sur son édition ET le périmètre (règle n° 8).
+            let autorise = match edition {
+                Some(event_id) => {
+                    has_permission(pool, acteur, permission, Scope::Event(event_id)).await?
+                        && kernel::auth::administered_events(pool, acteur)
+                            .await?
+                            .allows(event_id)
+                }
+                None => has_permission(pool, acteur, permission, Scope::Global).await?,
+            };
+            refuser_sauf(autorise)?;
+            Ok(None)
+        }
+
         Garde::PersonneElleMeme { permission } => {
             if !cross::personne_existe(pool, porteuse.owner_id).await? {
                 return Err(ApiError::not_found());

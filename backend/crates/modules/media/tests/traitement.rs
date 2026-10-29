@@ -15,8 +15,9 @@ use media::scan::{Scanner, Verdict};
 use std::sync::Arc;
 
 /// Le nombre de déclinaisons attendues d'une image de 1920 px : les trois
-/// tailles configurées lui sont toutes inférieures.
-const DECLINAISONS_ATTENDUES: i64 = 3;
+/// tailles configurées lui sont toutes inférieures, et le recadrage `courriel`
+/// (1200 x 400) s'y ajoute.
+const DECLINAISONS_ATTENDUES: i64 = 4;
 
 /// **L'original est servi avant les déclinaisons.**
 ///
@@ -96,7 +97,7 @@ async fn le_passage_du_worker_rend_lobjet_servable() {
     // rend sous la forme qu'un `<picture>` attend : `<variante>_<format>`.
     let sources = objet.sources.as_object().expect("un objet de déclinaisons");
     assert_eq!(sources.len(), DECLINAISONS_ATTENDUES as usize);
-    for code in ["lg_jpeg", "md_jpeg", "thumb_jpeg"] {
+    for code in ["lg_jpeg", "md_jpeg", "thumb_jpeg", "courriel_jpeg"] {
         let source = sources
             .get(code)
             .unwrap_or_else(|| panic!("{code} absente"));
@@ -104,6 +105,13 @@ async fn le_passage_du_worker_rend_lobjet_servable() {
         assert!(source["bytes"].as_i64().expect("poids") > 0);
     }
     assert_eq!(sources["md_jpeg"]["width"], 800);
+    assert_eq!(
+        (
+            &sources["courriel_jpeg"]["width"],
+            &sources["courriel_jpeg"]["height"]
+        ),
+        (&serde_json::json!(1200), &serde_json::json!(400))
+    );
 
     let cle = format!("_renditions/{}/thumb.jpeg", depose.asset.id.simple());
     assert!(
@@ -431,4 +439,61 @@ async fn lespace_des_declinaisons_compte_dans_la_consommation() {
         commun::espace_consomme(&bac, terrain.organisation).await,
         apres_depot + poids_declinaisons
     );
+}
+
+/// **Un objet déjà servable reçoit les déclinaisons ajoutées depuis** (29/10,
+/// `courriel`), sans nouvelle analyse ni changement d'état, et sans refaire
+/// celles qui existent.
+#[tokio::test]
+async fn un_objet_servable_recoit_la_declinaison_manquante() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let fichier = commun::couverture_16_9();
+    let depose = commun::deposer(
+        &bac,
+        terrain.referente,
+        &fichier,
+        commun::metadonnees(&fichier),
+    )
+    .await
+    .expect("dépôt");
+    commun::passer_le_worker(&bac).await;
+
+    // Servi avant que la variante n'existe : on la retire, puis on remet le
+    // traitement en file comme le fait la migration du 29/10.
+    sqlx::query!(
+        "DELETE FROM media.renditions WHERE asset_id = $1 AND variant_code = 'courriel'",
+        depose.asset.id
+    )
+    .execute(bac.pool())
+    .await
+    .expect("retrait");
+    sqlx::query!(
+        "INSERT INTO platform.jobs (queue, task, payload, idempotency_key, priority)
+         SELECT 'media', 'media.process_asset',
+                jsonb_build_object('asset_id', a.id, 'bucket', a.bucket,
+                                   'object_key', a.object_key, 'mime_type', a.mime_type),
+                'courriel:' || a.id, 50
+         FROM media.assets a WHERE a.id = $1",
+        depose.asset.id
+    )
+    .execute(bac.pool())
+    .await
+    .expect("mise en file");
+    let scanne_avant = media::service::read::objet(&bac.state, depose.asset.id)
+        .await
+        .expect("lecture")
+        .scanned_at;
+
+    let issues = commun::passer_le_worker(&bac).await;
+    assert!(issues.iter().all(Result::is_ok), "{issues:?}");
+    assert_eq!(
+        commun::compter_declinaisons(&bac, depose.asset.id).await,
+        DECLINAISONS_ATTENDUES
+    );
+    let objet = media::service::read::objet(&bac.state, depose.asset.id)
+        .await
+        .expect("lecture");
+    assert_eq!(objet.status, "ready");
+    assert_eq!(objet.scanned_at, scanne_avant, "aucune nouvelle analyse");
 }

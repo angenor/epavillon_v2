@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT engagement.mailing_suggested_template($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "mailing_suggested_template",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5e464e82aedd2140d15094a9a7828567b902fe2e773c16829dcb40a24bbf9be4"
+}

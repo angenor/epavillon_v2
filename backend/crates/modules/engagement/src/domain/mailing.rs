@@ -41,8 +41,12 @@ pub struct MailingPayload {
     pub reply_to: Option<String>,
     /// Changer d'édition, tant que c'est un brouillon : gardé sur la nouvelle.
     pub event_id: Option<Uuid>,
-    /// `sobre`, `institutionnel` ou `annonce`.
+    /// Une mise en page par défaut : `sobre`, `institutionnel`, `annonce`,
+    /// `banniere`, `texte_sur_image`, `institutionnel_logo`. Seule, elle retire
+    /// le gabarit personnalisé.
     pub template: Option<String>,
+    /// Un gabarit personnalisé de l'édition ou commun ; chaîne vide : aucun.
+    pub mail_template_id: Option<String>,
     /// Valeur de secours par variable ; une chaîne vide retire le secours.
     pub variable_fallbacks: Option<HashMap<String, String>>,
     pub reply_button: Option<bool>,
@@ -121,6 +125,7 @@ pub struct Mailing {
     pub reply_button: bool,
     pub cta_label: Option<String>,
     pub cta_url: Option<String>,
+    pub mail_template_id: Option<Uuid>,
     pub duplicated_from: Option<Uuid>,
     pub created_by_name: Option<String>,
     pub queued_by_name: Option<String>,
@@ -203,6 +208,9 @@ pub struct MailingAudience {
     /// Messages remis au serveur d'envoi : un par destinataire, plus un par
     /// adresse en copie ou en copie cachée, et ce pour chaque message.
     pub envelope_count: i64,
+    /// Le gabarit de l'édition à présélectionner : l'envoi écrit à ses déposants
+    /// (`engagement.mailing_suggested_template()`).
+    pub suggested_mail_template_id: Option<Uuid>,
     pub entries: Vec<MailingAudienceEntry>,
 }
 

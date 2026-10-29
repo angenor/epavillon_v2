@@ -18,6 +18,9 @@ import type {
   MailingRecipient,
   MailingSummary,
   MailingTestResult,
+  MailTemplate,
+  MailTemplatePayload,
+  MailTemplatePreview,
 } from '~/types/admin-mailings'
 import type { EventId, Uuid } from '~/types/shared'
 import { EVENT, mockUuid } from './ids'
@@ -73,6 +76,7 @@ function seed(): void {
     reply_button: false,
     cta_label: null,
     cta_url: null,
+    mail_template_id: null,
     duplicated_from: null,
     created_by_name: 'Awa Sow Fall',
     queued_by_name: 'Awa Sow Fall',
@@ -130,13 +134,25 @@ function apply(m: Mailing, p: MailingPayload): Mailing {
     bcc: p.bcc ?? m.bcc,
     reply_to: p.reply_to === undefined ? m.reply_to : p.reply_to || null,
     event_id: p.event_id ?? m.event_id,
-    template: p.template ?? m.template,
+    ...templateOf(m, p),
     variable_fallbacks: p.variable_fallbacks ?? m.variable_fallbacks,
     reply_button: p.reply_button ?? m.reply_button,
     cta_label: p.cta_label === undefined ? m.cta_label : p.cta_label || null,
     cta_url: p.cta_url === undefined ? m.cta_url : p.cta_url || null,
     updated_at: now(),
   }
+}
+
+/** Le gabarit personnalisé l'emporte ; un modèle par défaut seul le retire. */
+function templateOf(m: Mailing, p: MailingPayload): Pick<Mailing, 'template' | 'mail_template_id'> {
+  if (p.mail_template_id !== undefined) {
+    const custom = p.mail_template_id ? templates.get(p.mail_template_id) : undefined
+    return custom
+      ? { template: custom.layout, mail_template_id: custom.id }
+      : { template: p.template ?? m.template, mail_template_id: null }
+  }
+  if (p.template !== undefined) return { template: p.template, mail_template_id: null }
+  return { template: m.template, mail_template_id: m.mail_template_id }
 }
 
 export function mailingListScreen(eventId: EventId): MailingListScreen {
@@ -168,6 +184,7 @@ export function mailingAudience(id: Uuid): MailingAudience | null {
     without_account: entries.filter((e) => !e.is_suppressed && !e.person_id).length,
     fallback_count: entries.filter((e) => !e.is_suppressed && !e.first_name).length,
     envelope_count: envelope,
+    suggested_mail_template_id: suggestedTemplate(m),
     entries,
   }
 }
@@ -192,6 +209,7 @@ export function createMailing(payload: CreateMailingPayload): Mailing {
       reply_button: false,
       cta_label: null,
       cta_url: null,
+      mail_template_id: null,
       duplicated_from: null,
       created_by_name: 'Awa Sow Fall',
       queued_by_name: null,
@@ -274,6 +292,7 @@ export function duplicateMailing(id: Uuid): Mailing {
     bcc: m.bcc,
     reply_to: m.reply_to,
     template: m.template,
+    mail_template_id: m.mail_template_id,
     variable_fallbacks: m.variable_fallbacks,
     reply_button: m.reply_button,
     cta_label: m.cta_label,
@@ -292,4 +311,70 @@ export function mailingPreview(id: Uuid, email?: string): MailingPreview | null 
   const prenom = entry?.first_name ?? m.variable_fallbacks.prenom ?? ''
   const html = m.body_html.replace(/\{\{\s*prenom\s*\}\}/g, prenom)
   return { to: entry?.email ?? 'destinataire@exemple.org', has_account: Boolean(entry?.person_id), subject: m.subject, html }
+}
+
+// ---------------------------------------------------------------------------
+// Gabarits personnalisés (29/10)
+// ---------------------------------------------------------------------------
+
+const templates = new Map<Uuid, MailTemplate>()
+let templateSequence = 1
+
+/** Comme `engagement.mailing_suggested_template()` : écrire aux déposants de l'édition. */
+function suggestedTemplate(m: Mailing): Uuid | null {
+  const writesToSubmitters =
+    m.audience.some((c) => c.kind === 'submitters') ||
+    ENTRIES.some((e) => e.sources.includes('submitters') && m.extra_addresses.includes(e.email))
+  if (!writesToSubmitters) return null
+  return [...templates.values()].find((t) => t.event_id === m.event_id && t.preselect_for_submitters)?.id ?? null
+}
+
+function foundTemplate(id: Uuid): MailTemplate {
+  const template = templates.get(id)
+  if (!template) throw new Error('gabarit introuvable')
+  return template
+}
+
+export function mailTemplates(eventId: EventId): MailTemplate[] {
+  return [...templates.values()]
+    .filter((t) => t.event_id === null || t.event_id === eventId)
+    .sort((a, b) => Number(a.event_id === null) - Number(b.event_id === null) || a.name.localeCompare(b.name))
+}
+
+export function mailTemplateById(id: Uuid): MailTemplate | null {
+  return templates.get(id) ?? null
+}
+
+export function createMailTemplate(payload: MailTemplatePayload): MailTemplate {
+  const id = mockUuid('7094', templateSequence++)
+  const template: MailTemplate = {
+    ...payload,
+    id,
+    created_by_name: 'Awa Sow Fall',
+    created_at: now(),
+    updated_at: now(),
+    background: null,
+    logo: null,
+    can_edit: true,
+  }
+  templates.set(id, template)
+  return template
+}
+
+export function updateMailTemplate(id: Uuid, payload: MailTemplatePayload): MailTemplate {
+  const next: MailTemplate = { ...foundTemplate(id), ...payload, updated_at: now() }
+  templates.set(id, next)
+  return next
+}
+
+export function deleteMailTemplate(id: Uuid): { deleted: boolean } {
+  return { deleted: templates.delete(id) }
+}
+
+/** Hors ligne, un aperçu sans mise en page : le nom et le titre. */
+export function mailTemplatePreview(id: Uuid): MailTemplatePreview | null {
+  const t = templates.get(id)
+  if (!t) return null
+  const title = t.title ?? t.name
+  return { subject: t.name, html: `<p><strong>${title}</strong></p><p>${t.subtitle ?? ''}</p>` }
 }

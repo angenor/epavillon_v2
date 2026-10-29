@@ -72,11 +72,41 @@ pub fn redimensionner(
     largeur_cible: u32,
     format: RenditionFormat,
 ) -> Result<Declinaison, String> {
+    decliner(octets, largeur_cible, None, None, format)
+}
+
+/// Comme [`redimensionner`], avec un recadrage au centre au rapport donné
+/// (largeur, hauteur) avant la réduction, et une qualité JPEG.
+pub fn decliner(
+    octets: &[u8],
+    largeur_cible: u32,
+    rapport: Option<(u32, u32)>,
+    qualite: Option<u8>,
+    format: RenditionFormat,
+) -> Result<Declinaison, String> {
     let source = image::load_from_memory(octets).map_err(|e| e.to_string())?;
     let (largeur, hauteur) = source.dimensions();
     if largeur == 0 || hauteur == 0 {
         return Err("image de dimension nulle".to_owned());
     }
+    let source = match rapport {
+        Some((rl, rh)) if rl > 0 && rh > 0 => {
+            let (l, h) = (u64::from(largeur), u64::from(hauteur));
+            let (rl, rh) = (u64::from(rl), u64::from(rh));
+            // La plus grande fenêtre au rapport voulu, centrée.
+            let (cl, ch) = if l * rh > h * rl {
+                (h * rl / rh, h)
+            } else {
+                (l, l * rh / rl)
+            };
+            let (cl, ch) = (cl.max(1) as u32, ch.max(1) as u32);
+            source.crop_imm((largeur - cl) / 2, (hauteur - ch) / 2, cl, ch)
+        }
+        _ => source,
+    };
+    let (largeur, hauteur) = source.dimensions();
+    // Un recadrage plus étroit que la cible n'est pas agrandi.
+    let largeur_cible = largeur_cible.min(largeur);
 
     // La hauteur est calculée plutôt que déduite d'un cadre : `resize` bornerait
     // aussi la hauteur, et une image très haute ressortirait plus étroite que la
@@ -94,9 +124,16 @@ pub fn redimensionner(
 
     let mut sortie = std::io::Cursor::new(Vec::new());
     match format {
-        RenditionFormat::Jpeg => DynamicImage::ImageRgb8(reduite.to_rgb8())
-            .write_to(&mut sortie, image::ImageFormat::Jpeg)
-            .map_err(|e| e.to_string())?,
+        RenditionFormat::Jpeg => match qualite {
+            Some(q) => {
+                image::codecs::jpeg::JpegEncoder::new_with_quality(&mut sortie, q.clamp(1, 100))
+                    .encode_image(&DynamicImage::ImageRgb8(reduite.to_rgb8()))
+                    .map_err(|e| e.to_string())?
+            }
+            None => DynamicImage::ImageRgb8(reduite.to_rgb8())
+                .write_to(&mut sortie, image::ImageFormat::Jpeg)
+                .map_err(|e| e.to_string())?,
+        },
         RenditionFormat::Png => DynamicImage::ImageRgba8(reduite.to_rgba8())
             .write_to(&mut sortie, image::ImageFormat::Png)
             .map_err(|e| e.to_string())?,
@@ -118,6 +155,15 @@ pub fn redimensionner(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn le_recadrage_courriel_rend_un_3_1_leger() {
+        let source = png(1920, 1080, 255);
+        let faite = decliner(&source, 1200, Some((3, 1)), Some(70), RenditionFormat::Jpeg).unwrap();
+        assert_eq!((faite.width, faite.height), (1200, 400));
+        let mesure = mesurer(&faite.octets).unwrap();
+        assert_eq!((mesure.width, mesure.height), (1200, 400));
+    }
 
     fn png(largeur: u32, hauteur: u32, opacite: u8) -> Vec<u8> {
         let mut tampon = image::RgbaImage::new(largeur, hauteur);

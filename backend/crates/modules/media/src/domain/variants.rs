@@ -7,7 +7,9 @@
 //! # Trois tailles, et un format par objet
 //!
 //! `lg` 1600 px, `md` 800 px, `thumb` 320 px, à la **largeur**, hauteur
-//! proportionnelle. Le format suit la matière : **JPEG si l'image est opaque,
+//! proportionnelle. S'y ajoute `courriel` (29/10) : 1200 x 400, recadré au
+//! centre en 3:1, JPEG de qualité 62, l'en-tête d'un courriel (600 x 200
+//! affichés) sous 120 Ko là où `lg` en pèse 400. Le format suit la matière : **JPEG si l'image est opaque,
 //! PNG si elle porte de la transparence** — un logo aplati sur du blanc est un
 //! défaut visible sur fond sombre, et c'est le cas le plus fréquent de la
 //! plateforme.
@@ -32,20 +34,37 @@ pub struct Variante {
     /// chiffres séparés par des soulignés.
     pub code: &'static str,
     pub largeur_max: u32,
+    /// Recadrage au centre à ce rapport (largeur, hauteur) ; `None` garde la
+    /// forme de l'original.
+    pub rapport: Option<(u32, u32)>,
+    /// Qualité JPEG, de 1 à 100 ; `None` : celle de l'encodeur (75).
+    pub qualite: Option<u8>,
 }
 
 pub const VARIANTES: &[Variante] = &[
     Variante {
         code: "lg",
         largeur_max: 1600,
+        rapport: None,
+        qualite: None,
     },
     Variante {
         code: "md",
         largeur_max: 800,
+        rapport: None,
+        qualite: None,
     },
     Variante {
         code: "thumb",
         largeur_max: 320,
+        rapport: None,
+        qualite: None,
+    },
+    Variante {
+        code: "courriel",
+        largeur_max: 1200,
+        rapport: Some((3, 1)),
+        qualite: Some(62),
     },
 ];
 
@@ -92,7 +111,12 @@ mod tests {
         assert!(attendues(200).is_empty());
         assert_eq!(attendues(500).len(), 1);
         assert_eq!(attendues(1000).len(), 2);
-        assert_eq!(attendues(4000).len(), 3);
+        assert_eq!(attendues(4000).len(), 4);
+        assert_eq!(
+            attendues(1200).len(),
+            2,
+            "1200 px : pas de recadrage courriel"
+        );
     }
 
     #[test]

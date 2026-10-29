@@ -38,6 +38,12 @@
     "edition": "Edition",
     "editionHint": "Recipient groups come from this edition.",
     "template": "Template",
+    "defaults": "Default layouts",
+    "custom": "Edition templates",
+    "customHint": "Based on the \u201c{layout}\u201d layout.",
+    "manage": "Manage templates",
+    "preselected": "Preselected: this email goes to the edition's submitters.",
+    "customError": "The edition templates could not be loaded.",
     "ctaLabel": "Action button text",
     "ctaUrl": "Action button link",
     "replyButton": "“Reply” button",
@@ -66,11 +72,15 @@
       "name": "Announcement",
       "hint": "Banner, large title (the subject), action button."
     },
-    "banniere_edition": {
+    "banniere": {
       "name": "Edition banner",
       "hint": "The edition banner on top, then its logo, name and dates. Without a banner: Institutional."
     },
-    "institutionnel_edition": {
+    "texte_sur_image": {
+      "name": "Text on the image",
+      "hint": "The edition name and dates in white on its banner. Without a banner: Institutional."
+    },
+    "institutionnel_logo": {
       "name": "Institutional + edition logo",
       "hint": "The institutional banner, the edition logo on the right. Without a logo: Institutional."
     }

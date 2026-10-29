@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.id, m.event_id, m.status::text AS \"status!\", m.subject, m.body_html,\n                  m.audience, m.extra_addresses::text[] AS \"extra_addresses!\",\n                  m.cc::text[] AS \"cc!\", m.bcc::text[] AS \"bcc!\", m.reply_to::text AS reply_to,\n                  m.duplicated_from,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,\n                  m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at,\n                  m.template, m.variable_fallbacks, m.reply_button, m.cta_label,\n                  m.cta_url::text AS cta_url\n             FROM engagement.mailings m\n            WHERE m.id = $1",
+  "query": "SELECT m.id, m.event_id, m.status::text AS \"status!\", m.subject, m.body_html,\n                  m.audience, m.extra_addresses::text[] AS \"extra_addresses!\",\n                  m.cc::text[] AS \"cc!\", m.bcc::text[] AS \"bcc!\", m.reply_to::text AS reply_to,\n                  m.duplicated_from,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,\n                  m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at,\n                  m.template, m.variable_fallbacks, m.reply_button, m.cta_label,\n                  m.cta_url::text AS cta_url, m.mail_template_id\n             FROM engagement.mailings m\n            WHERE m.id = $1",
   "describe": {
     "columns": [
       {
@@ -215,6 +215,17 @@
         "name": "cta_url",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "mail_template_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "mail_template_id"
+          }
+        }
       }
     ],
     "parameters": {
@@ -245,8 +256,9 @@
       false,
       false,
       true,
-      null
+      null,
+      true
     ]
   },
-  "hash": "52c618c5337fa1cd6e4c244b55a0684cf9922f8871e7450e3fe342427831d69e"
+  "hash": "f0cf17079310b438cc5b0e418bd7d52abcaffc0bba0b4bc68e04bd873176162d"
 }

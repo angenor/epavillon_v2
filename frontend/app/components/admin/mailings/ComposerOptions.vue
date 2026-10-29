@@ -4,7 +4,9 @@ import type {
   MailingAudienceEntry,
   MailingPreview,
   MailingTemplate,
+  MailTemplate,
 } from '~/types/admin-mailings'
+import { MAILING_TEMPLATES } from '~/types/admin-mailings'
 import type { Uuid } from '~/types/shared'
 import type { SelectOption } from '~/types/ui'
 
@@ -24,10 +26,17 @@ interface Props {
   refreshKey: number
   testing: boolean
   testMessage: string | null
+  /** Le gabarit a été présélectionné pour les déposants, pas choisi. */
+  preselected?: boolean
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ 'update:modelValue': [value: ComposerOptionsValue]; test: [] }>()
+const emit = defineEmits<{
+  'update:modelValue': [value: ComposerOptionsValue]
+  test: []
+  /** Un gabarit choisi à la main : la présélection ne le remplace plus. */
+  'template-chosen': []
+}>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -46,8 +55,39 @@ const editions = computed<SelectOption[]>(() =>
   adminScope.events.map((e) => ({ value: e.id, label: e.acronym ? `${e.acronym}, ${tr(e.title)}` : tr(e.title) })),
 )
 
-const TEMPLATES: MailingTemplate[] = ['sobre', 'institutionnel', 'annonce', 'banniere_edition', 'institutionnel_edition']
+const localePath = useLocalePath()
 const tokenOf = variableToken
+
+// Les gabarits personnalisés de l'édition de l'envoi, et les communs.
+const customTemplates = ref<MailTemplate[]>([])
+const customError = ref<string | null>(null)
+watch(
+  () => props.modelValue.eventId,
+  async (eventId) => {
+    customError.value = null
+    if (!eventId) return
+    try {
+      customTemplates.value = await api.adminMailings.templates.list(eventId, adminScope.scope)
+    } catch {
+      customTemplates.value = []
+      customError.value = t('admin.mailing.composer.options.customError')
+    }
+  },
+  { immediate: true },
+)
+
+function chooseDefault(template: MailingTemplate): void {
+  emit('template-chosen')
+  emit('update:modelValue', { ...props.modelValue, template, customTemplateId: '' })
+}
+
+function chooseCustom(custom: MailTemplate): void {
+  emit('template-chosen')
+  emit('update:modelValue', { ...props.modelValue, template: custom.layout, customTemplateId: custom.id })
+}
+
+const isDefaultChosen = (template: MailingTemplate) =>
+  !props.modelValue.customTemplateId && props.modelValue.template === template
 
 // « Vu par » : une personne avec compte et, s'il y en a, une sans, pour voir le secours.
 const viewers = computed<SelectOption[]>(() => {
@@ -105,13 +145,22 @@ watch(
     </div>
 
     <fieldset>
-      <legend class="text-sm font-semibold text-text">{{ t('admin.mailing.composer.options.template') }}</legend>
-      <div class="mt-2 grid gap-2 sm:grid-cols-3">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <legend class="text-sm font-semibold text-text">{{ t('admin.mailing.composer.options.template') }}</legend>
+        <NuxtLink :to="localePath('/admin/courriels/gabarits')" class="text-sm text-accent underline-offset-2 hover:underline">
+          {{ t('admin.mailing.composer.options.manage') }}
+        </NuxtLink>
+      </div>
+      <p v-if="props.preselected" class="mt-1 text-xs text-text-subtle" role="status">
+        {{ t('admin.mailing.composer.options.preselected') }}
+      </p>
+      <p class="mt-2 text-xs font-semibold text-text-muted">{{ t('admin.mailing.composer.options.defaults') }}</p>
+      <div class="mt-1 grid gap-2 sm:grid-cols-3">
         <label
-          v-for="tpl in TEMPLATES"
+          v-for="tpl in MAILING_TEMPLATES"
           :key="tpl"
           class="flex min-h-(--target-min) cursor-pointer flex-col rounded-lg border p-3"
-          :class="props.modelValue.template === tpl ? 'border-accent bg-accent-surface' : 'border-border bg-surface-raised'"
+          :class="isDefaultChosen(tpl) ? 'border-accent bg-accent-surface' : 'border-border bg-surface-raised'"
         >
           <span class="flex items-center gap-2 text-sm font-semibold">
             <input
@@ -119,14 +168,41 @@ watch(
               name="mailing-template"
               class="cursor-pointer"
               :value="tpl"
-              :checked="props.modelValue.template === tpl"
-              @change="set('template', tpl)"
+              :checked="isDefaultChosen(tpl)"
+              @change="chooseDefault(tpl)"
             >
             {{ t(`admin.mailing.composer.templates.${tpl}.name`) }}
           </span>
           <span class="mt-1 text-xs text-text-subtle">{{ t(`admin.mailing.composer.templates.${tpl}.hint`) }}</span>
         </label>
       </div>
+      <template v-if="customTemplates.length">
+        <p class="mt-4 text-xs font-semibold text-text-muted">{{ t('admin.mailing.composer.options.custom') }}</p>
+        <div class="mt-1 grid gap-2 sm:grid-cols-3">
+          <label
+            v-for="custom in customTemplates"
+            :key="custom.id"
+            class="flex min-h-(--target-min) cursor-pointer flex-col rounded-lg border p-3"
+            :class="props.modelValue.customTemplateId === custom.id ? 'border-accent bg-accent-surface' : 'border-border bg-surface-raised'"
+          >
+            <span class="flex items-center gap-2 text-sm font-semibold">
+              <input
+                type="radio"
+                name="mailing-template"
+                class="cursor-pointer"
+                :value="custom.id"
+                :checked="props.modelValue.customTemplateId === custom.id"
+                @change="chooseCustom(custom)"
+              >
+              {{ custom.name }}
+            </span>
+            <span class="mt-1 text-xs text-text-subtle">
+              {{ t('admin.mailing.composer.options.customHint', { layout: t(`admin.mailing.composer.templates.${custom.layout}.name`) }) }}
+            </span>
+          </label>
+        </div>
+      </template>
+      <UiAlert v-if="customError" class="mt-2" intent="warning" compact :message="customError" />
     </fieldset>
 
     <div v-if="props.modelValue.template === 'annonce'" class="grid gap-4 md:grid-cols-2">

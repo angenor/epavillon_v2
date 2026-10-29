@@ -139,6 +139,7 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
         reply_button: e.habillage.reply_button,
         cta_label: e.habillage.cta_label,
         cta_url: e.habillage.cta_url,
+        mail_template_id: e.habillage.mail_template_id,
         duplicated_from: e.duplicated_from,
         created_by_name: e.created_by_name,
         queued_by_name: e.queued_by_name,
@@ -201,6 +202,7 @@ pub async fn audience(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result
         without_account,
         fallback_count,
         envelope_count,
+        suggested_mail_template_id: crate::repo::mail_templates::suggere(state.pool(), id).await?,
         entries,
     })
 }
@@ -242,7 +244,7 @@ pub async fn apercu(
         ),
     };
     let valeurs = crate::domain::mailing::valeurs(&variables, &envoi.habillage.variable_fallbacks);
-    let edition = crate::jobs::send_mailing::edition_de_lenvoi(
+    let apparence = crate::jobs::send_mailing::apparence_de_lenvoi(
         state.db(),
         &envoi,
         &state.config().app_public_url,
@@ -253,7 +255,7 @@ pub async fn apercu(
         &adresse,
         &envoi,
         &valeurs,
-        edition.as_ref(),
+        &apparence,
     )?;
     Ok(MailingPreview {
         to: adresse,
@@ -301,6 +303,7 @@ fn habillage_par_defaut() -> mailings::Habillage {
         reply_button: false,
         cta_label: None,
         cta_url: None,
+        mail_template_id: None,
     }
 }
 
@@ -359,12 +362,20 @@ fn preparer_habillage(
             }
         }
     };
+    // Une mise en page choisie seule retire le gabarit personnalisé ; le
+    // gabarit nommé se vérifie à part (`resoudre_le_gabarit`), contre la base.
+    let mail_template_id = match (&p.template, &p.mail_template_id) {
+        (_, Some(_)) => base.mail_template_id,
+        (Some(_), None) => None,
+        (None, None) => base.mail_template_id,
+    };
     Ok(mailings::Habillage {
         template,
         variable_fallbacks,
         reply_button: p.reply_button.unwrap_or(base.reply_button),
         cta_label,
         cta_url,
+        mail_template_id,
     })
 }
 
@@ -444,6 +455,46 @@ fn preparer(base: Brouillon, p: &MailingPayload) -> Result<Brouillon> {
     })
 }
 
+/// Le gabarit personnalisé d'un brouillon : nommé, il doit exister et servir
+/// l'édition de l'envoi (le sien ou un commun), et sa mise en page est
+/// recopiée ; gardé d'avant, il tombe si l'envoi change d'édition.
+async fn resoudre_le_gabarit(
+    state: &EngagementState,
+    brouillon: &mut Brouillon,
+    p: &MailingPayload,
+    edition: Uuid,
+) -> Result<()> {
+    let demande = match p.mail_template_id.as_deref().map(str::trim) {
+        Some("") => {
+            brouillon.habillage.mail_template_id = None;
+            return Ok(());
+        }
+        Some(brut) => Some(
+            Uuid::parse_str(brut)
+                .map_err(|_| ApiError::validation("Gabarit inconnu.", "mail_template_id"))?,
+        ),
+        None => brouillon.habillage.mail_template_id,
+    };
+    let Some(id) = demande else {
+        return Ok(());
+    };
+    match crate::repo::mail_templates::lire(state.pool(), id).await? {
+        Some(g) if g.event_id.is_none_or(|e| e == edition) => {
+            brouillon.habillage.mail_template_id = Some(g.id);
+            brouillon.habillage.template = g.layout;
+        }
+        // Un gabarit d'une autre édition ne suit pas l'envoi qui en change.
+        Some(_) if p.mail_template_id.is_none() => brouillon.habillage.mail_template_id = None,
+        _ => {
+            return Err(ApiError::validation(
+                "Ce gabarit n'existe pas ou ne sert pas cette édition.",
+                "mail_template_id",
+            ))
+        }
+    }
+    Ok(())
+}
+
 fn brouillon_de(e: &mailings::LigneEnvoi) -> Result<Brouillon> {
     Ok(Brouillon {
         subject: e.subject.clone(),
@@ -482,7 +533,8 @@ pub async fn creer(
         reply_to: None,
         habillage: habillage_par_defaut(),
     };
-    let brouillon = preparer(base, &payload.draft)?;
+    let mut brouillon = preparer(base, &payload.draft)?;
+    resoudre_le_gabarit(state, &mut brouillon, &payload.draft, payload.event_id).await?;
 
     let mut tx = state.db().write(ctx).await?;
     let id = mailings::creer(
@@ -508,7 +560,7 @@ pub async fn modifier(
     if envoi.status != "draft" {
         return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
     }
-    let brouillon = preparer(brouillon_de(&envoi)?, payload)?;
+    let mut brouillon = preparer(brouillon_de(&envoi)?, payload)?;
     // Changer d'édition : le droit se vérifie aussi sur la nouvelle.
     let edition = match payload.event_id {
         Some(nouvelle) if nouvelle != envoi.event_id => {
@@ -517,6 +569,7 @@ pub async fn modifier(
         }
         _ => envoi.event_id,
     };
+    resoudre_le_gabarit(state, &mut brouillon, payload, edition).await?;
 
     let mut tx = state.db().write(ctx).await?;
     if !mailings::modifier(&mut tx, id, edition, &brouillon.valeurs()).await? {

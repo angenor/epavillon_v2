@@ -120,6 +120,7 @@ enumeration_texte! {
         Video => "video",
         Thumbnail => "thumbnail",
         Attachment => "attachment",
+        Background => "background",
         CoverSource => "cover_source",
     }
 }

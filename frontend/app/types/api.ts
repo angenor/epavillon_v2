@@ -466,6 +466,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/mail-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les gabarits d'une édition.
+         * @description `MailTemplate[]` : les gabarits personnalisés utilisables pour l'édition, les siens puis les communs à toutes, avec leurs images (`background`, `logo`, rattachements du module media). `can_edit` faux : un gabarit commun sans la permission globale, qui se choisit sans se modifier.
+         *
+         *     Gardé par `engagement.mailing.send` **sur l'édition** et le périmètre d'administration.
+         */
+        get: operations["engagement_gabarits_lister"];
+        put?: never;
+        /**
+         * Créer un gabarit.
+         * @description `MailTemplatePayload` → `MailTemplate`. `event_id` nul : commun à toutes les éditions, ce qui demande la permission globale. `preselect_for_submitters` suppose un événement, et un seul gabarit présélectionné par événement. Les images se posent ensuite par `PUT /media/attachments` sur `('engagement', 'mail_templates', id)`.
+         */
+        post: operations["engagement_gabarits_creer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/mail-templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Un gabarit.
+         * @description `MailTemplate`.
+         */
+        get: operations["engagement_gabarits_detail"];
+        /**
+         * Modifier un gabarit.
+         * @description `MailTemplatePayload` → `MailTemplate` : écriture complète. Les envois qui le citent prennent ses nouveaux textes et images au prochain rendu ; un envoi parti n'est pas réécrit.
+         */
+        put: operations["engagement_gabarits_modifier"];
+        post?: never;
+        /**
+         * Supprimer un gabarit.
+         * @description `{ deleted: true }`. Les envois qui le citaient gardent sa mise en page, sans ses textes ni ses images.
+         */
+        delete: operations["engagement_gabarits_supprimer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/mail-templates/{id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * L'aperçu d'un gabarit.
+         * @description `MailTemplatePreview` : le gabarit rendu par la fonction du worker sur un texte d'exemple, avec les visuels de son édition sous les siens. Un gabarit commun demande `event_id`, l'édition de l'aperçu. N'envoie rien.
+         */
+        get: operations["engagement_gabarits_apercu"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/mailings": {
         parameters: {
             query?: never;
@@ -6638,6 +6712,20 @@ export interface components {
             bounce_kind?: string | null;
             detail?: string | null;
         };
+        /** @description L'écriture d'un gabarit (`MailTemplatePayload`), complète à chaque fois. */
+        MailTemplatePayload: {
+            name: string;
+            layout: string;
+            title?: string | null;
+            subtitle?: string | null;
+            gradient: boolean;
+            /**
+             * Format: uuid
+             * @description Nul : commun à toutes les éditions.
+             */
+            event_id?: string | null;
+            preselect_for_submitters: boolean;
+        };
         /**
          * @description Un critère de destinataires (`MailingCriterion`). Les filtres vides valent
          *     « le défaut du critère », écrit dans `engagement.mailing_audience()`.
@@ -6668,8 +6756,14 @@ export interface components {
              * @description Changer d'édition, tant que c'est un brouillon : gardé sur la nouvelle.
              */
             event_id?: string | null;
-            /** @description `sobre`, `institutionnel` ou `annonce`. */
+            /**
+             * @description Une mise en page par défaut : `sobre`, `institutionnel`, `annonce`,
+             *     `banniere`, `texte_sur_image`, `institutionnel_logo`. Seule, elle retire
+             *     le gabarit personnalisé.
+             */
             template?: string | null;
+            /** @description Un gabarit personnalisé de l'édition ou commun ; chaîne vide : aucun. */
+            mail_template_id?: string | null;
             /** @description Valeur de secours par variable ; une chaîne vide retire le secours. */
             variable_fallbacks?: {
                 [key: string]: string;
@@ -8252,6 +8346,323 @@ export interface operations {
             };
             /** @description Périmètre d'administration vide */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_gabarits_lister: {
+        parameters: {
+            query: {
+                /** @description L'édition */
+                event_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MailTemplate[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_gabarits_creer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MailTemplatePayload"];
+            };
+        };
+        responses: {
+            /** @description MailTemplate */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_gabarits_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Le gabarit */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MailTemplate */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Gabarit inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_gabarits_modifier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Le gabarit */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MailTemplatePayload"];
+            };
+        };
+        responses: {
+            /** @description MailTemplate */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Gabarit inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_gabarits_supprimer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Le gabarit */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Supprimé */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Gabarit inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_gabarits_apercu: {
+        parameters: {
+            query?: {
+                /** @description L'édition de l'aperçu, pour un gabarit commun */
+                event_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Le gabarit */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MailTemplatePreview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Gabarit inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

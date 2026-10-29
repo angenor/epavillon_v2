@@ -168,6 +168,18 @@ pub async fn edition_de_lenvoi(pool: &PgPool, mailing_id: Uuid) -> Result<Option
     Ok(edition)
 }
 
+/// L'édition d'un gabarit de courriel : `None` s'il n'existe pas, `Some(None)`
+/// s'il est commun à toutes les éditions.
+pub async fn edition_du_gabarit(pool: &PgPool, template_id: Uuid) -> Result<Option<Option<Uuid>>> {
+    let edition = sqlx::query_scalar!(
+        "SELECT t.event_id FROM engagement.mail_templates t WHERE t.id = $1",
+        template_id
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(edition)
+}
+
 /// La personne existe-t-elle ?
 pub async fn personne_existe(pool: &PgPool, person_id: Uuid) -> Result<bool> {
     let existe = sqlx::query_scalar!(

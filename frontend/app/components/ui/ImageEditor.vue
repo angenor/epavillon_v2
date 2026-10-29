@@ -58,6 +58,15 @@ const props = withDefaults(
     ratioLabel?: string
     /** Plafond du rôle, en octets. Le bouton refuse au-delà. */
     maxByteSize?: number | null
+    /**
+     * Largeur de sortie maximale, en pixels : le fond d'un courriel ne dépasse
+     * pas 1200 (affiché en 600). Nulle : celle de la sélection.
+     */
+    maxWidth?: number | null
+    /** Formats proposés, le premier par défaut. Un courriel n'accepte ni WebP. */
+    formats?: Array<'jpeg' | 'webp' | 'png'> | null
+    /** Qualité proposée d'emblée (JPEG, WebP), en pourcentage. */
+    defaultQuality?: number | null
     /** L'appelant travaille — dépôt en cours. */
     busy?: boolean
     /** Le bouton d'envoi reste fermé tant que l'appelant n'a pas ce qu'il faut. */
@@ -72,7 +81,7 @@ const props = withDefaults(
     applyHint?: string
     applyLabel?: string
   }>(),
-  { aspectRatio: null, maxByteSize: null },
+  { aspectRatio: null, maxByteSize: null, maxWidth: null, formats: null, defaultQuality: null },
 )
 
 const emit = defineEmits<{
@@ -83,7 +92,7 @@ const emit = defineEmits<{
 const { t, locale } = useI18n()
 
 type Format = 'jpeg' | 'webp' | 'png'
-const FORMATS: Format[] = ['jpeg', 'webp', 'png']
+const FORMATS = computed<Format[]>(() => (props.formats?.length ? props.formats : ['jpeg', 'webp', 'png']))
 
 /** Le plus petit côté de sélection, en pixels d'écran. Sous cela, on ne vise plus. */
 const MIN_DISPLAY_SIDE = 40
@@ -120,8 +129,8 @@ const crop = reactive({ x: 0, y: 0, w: 0, h: 0 })
 /** Taille du cadre de dessin, en pixels CSS. Tenue par l'observateur de taille. */
 const view = reactive({ w: 0, h: 0 })
 
-const format = ref<Format>('jpeg')
-const quality = ref(82)
+const format = ref<Format>(FORMATS.value[0] ?? 'jpeg')
+const quality = ref(props.defaultQuality ?? 82)
 const outputWidth = ref(DEFAULT_OUTPUT_WIDTH)
 
 const output = ref<{ blob: Blob; width: number; height: number } | null>(null)
@@ -149,7 +158,7 @@ onMounted(() => {
     }
     image.value = element
     initCrop()
-    outputWidth.value = Math.min(DEFAULT_OUTPUT_WIDTH, Math.round(crop.w))
+    outputWidth.value = Math.min(props.maxWidth ?? DEFAULT_OUTPUT_WIDTH, Math.round(crop.w))
     draw()
     scheduleEncode()
   }
@@ -544,7 +553,10 @@ function onKeyDown(event: KeyboardEvent): void {
 // Encodage
 // ---------------------------------------------------------------------------
 
-const maxOutputWidth = computed(() => Math.max(MIN_OUTPUT_WIDTH, Math.round(crop.w)))
+const maxOutputWidth = computed(() => {
+  const selection = Math.max(MIN_OUTPUT_WIDTH, Math.round(crop.w))
+  return props.maxWidth ? Math.min(props.maxWidth, selection) : selection
+})
 const minOutputWidth = computed(() => Math.min(MIN_OUTPUT_WIDTH, maxOutputWidth.value))
 
 const mimeOf: Record<Format, string> = {

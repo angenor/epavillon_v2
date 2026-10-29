@@ -50,6 +50,8 @@ pub struct Habillage {
     pub reply_button: bool,
     pub cta_label: Option<String>,
     pub cta_url: Option<String>,
+    /// Gabarit personnalisé (29/10) ; `template` porte alors sa mise en page.
+    pub mail_template_id: Option<Uuid>,
 }
 
 /// Ce qu'un brouillon enregistre, déjà validé et assaini.
@@ -78,7 +80,7 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,
                   m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at,
                   m.template, m.variable_fallbacks, m.reply_button, m.cta_label,
-                  m.cta_url::text AS cta_url
+                  m.cta_url::text AS cta_url, m.mail_template_id
              FROM engagement.mailings m
             WHERE m.id = $1"#,
         id
@@ -111,6 +113,7 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
             reply_button: l.reply_button,
             cta_label: l.cta_label,
             cta_url: l.cta_url,
+            mail_template_id: l.mail_template_id,
         },
     }))
 }
@@ -235,10 +238,10 @@ pub async fn creer(
         r#"INSERT INTO engagement.mailings
                (event_id, subject, body_html, audience, extra_addresses, cc, bcc, reply_to,
                 duplicated_from, created_by, template, variable_fallbacks, reply_button,
-                cta_label, cta_url)
+                cta_label, cta_url, mail_template_id)
            VALUES ($1, $2, $3, $4, $5::text[]::platform.email[], $6::text[]::platform.email[],
                    $7::text[]::platform.email[], $8::text::platform.email, $9, $10,
-                   $11, $12, $13, $14, $15::text::platform.url)
+                   $11, $12, $13, $14, $15::text::platform.url, $16)
            RETURNING id"#,
         event_id,
         v.subject,
@@ -254,7 +257,8 @@ pub async fn creer(
         v.habillage.variable_fallbacks,
         v.habillage.reply_button,
         v.habillage.cta_label,
-        v.habillage.cta_url
+        v.habillage.cta_url,
+        v.habillage.mail_template_id
     )
     .fetch_one(conn)
     .await?;
@@ -275,7 +279,7 @@ pub async fn modifier(
                   cc = $6::text[]::platform.email[], bcc = $7::text[]::platform.email[],
                   reply_to = $8::text::platform.email, event_id = $9,
                   template = $10, variable_fallbacks = $11, reply_button = $12,
-                  cta_label = $13, cta_url = $14::text::platform.url
+                  cta_label = $13, cta_url = $14::text::platform.url, mail_template_id = $15
             WHERE id = $1 AND status = 'draft'"#,
         id,
         v.subject,
@@ -290,7 +294,8 @@ pub async fn modifier(
         v.habillage.variable_fallbacks,
         v.habillage.reply_button,
         v.habillage.cta_label,
-        v.habillage.cta_url
+        v.habillage.cta_url,
+        v.habillage.mail_template_id
     )
     .execute(conn)
     .await?

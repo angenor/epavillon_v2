@@ -6,6 +6,7 @@
  * des formes du crate `engagement` (`domain/mailing.rs`).
  */
 
+import type { AttachedImage } from '~/types/media'
 import type { EventId, Uuid } from '~/types/shared'
 
 /** `engagement.mailing_status`. */
@@ -14,8 +15,27 @@ export type MailingStatus = 'draft' | 'queued' | 'sent' | 'cancelled'
 /** `engagement.mailing_recipient_status`. */
 export type MailingRecipientStatus = 'queued' | 'sending' | 'sent' | 'failed' | 'suppressed' | 'cancelled'
 
-/** Gabarit de mise en page (`engagement.mailings.template`). */
-export type MailingTemplate = 'sobre' | 'institutionnel' | 'annonce' | 'banniere_edition' | 'institutionnel_edition'
+/**
+ * Mise en page (`engagement.mailings.template`, `engagement.mail_templates.layout`) :
+ * les modèles par défaut, et la base d'un gabarit personnalisé (29/10).
+ */
+export type MailingTemplate =
+  | 'sobre'
+  | 'institutionnel'
+  | 'annonce'
+  | 'banniere'
+  | 'texte_sur_image'
+  | 'institutionnel_logo'
+
+/** Les modèles par défaut, dans l'ordre où la fenêtre de rédaction les propose. */
+export const MAILING_TEMPLATES: MailingTemplate[] = [
+  'sobre',
+  'institutionnel',
+  'annonce',
+  'banniere',
+  'texte_sur_image',
+  'institutionnel_logo',
+]
 
 /** Les familles de destinataires lues par `mailing_audience()`. */
 export type MailingCriterionKind = 'submitters' | 'speakers' | 'registrants' | 'roles'
@@ -96,6 +116,8 @@ export interface Mailing {
   reply_button: boolean
   cta_label: string | null
   cta_url: string | null
+  /** Gabarit personnalisé ; `template` porte alors sa mise en page. */
+  mail_template_id: Uuid | null
   duplicated_from: Uuid | null
   created_by_name: string | null
   queued_by_name: string | null
@@ -145,6 +167,8 @@ export interface MailingAudience {
   fallback_count: number
   /** Messages remis au serveur d'envoi, copies comprises. */
   envelope_count: number
+  /** Gabarit de l'édition à présélectionner : l'envoi écrit à ses déposants. */
+  suggested_mail_template_id: Uuid | null
   entries: MailingAudienceEntry[]
 }
 
@@ -171,7 +195,10 @@ export interface MailingPayload {
   /** Chaîne vide : retirer l'adresse de réponse. */
   reply_to?: string
   event_id?: EventId
+  /** Un modèle par défaut ; seul, il retire le gabarit personnalisé. */
   template?: MailingTemplate
+  /** Un gabarit personnalisé ; chaîne vide : aucun. */
+  mail_template_id?: string
   variable_fallbacks?: Record<string, string>
   reply_button?: boolean
   /** Deux chaînes vides retirent le bouton d'action. */
@@ -201,8 +228,55 @@ export interface ComposerOptionsValue {
   replyTo: string
   eventId: Uuid
   template: MailingTemplate
+  /** Gabarit personnalisé choisi ; chaîne vide : un modèle par défaut. */
+  customTemplateId: string
   fallbacks: Record<string, string>
   replyButton: boolean
   ctaLabel: string
   ctaUrl: string
+}
+
+// ---------------------------------------------------------------------------
+// Gabarits personnalisés (29/10), `engagement.mail_templates`
+// ---------------------------------------------------------------------------
+
+/** Un gabarit personnalisé, tel que `/admin/mail-templates` le rend. */
+export interface MailTemplate {
+  id: Uuid
+  name: string
+  layout: MailingTemplate
+  /** À défaut, le nom de l'édition de l'envoi. */
+  title: string | null
+  /** À défaut, les dates et le lieu de l'édition. */
+  subtitle: string | null
+  /** Voile sombre sous le texte posé sur l'image. */
+  gradient: boolean
+  /** Nul : commun à toutes les éditions. */
+  event_id: EventId | null
+  preselect_for_submitters: boolean
+  created_by_name: string | null
+  created_at: string
+  updated_at: string
+  /** Rôle `background` (3:1), tel que `media.attached_image()` le rend. */
+  background: AttachedImage | null
+  logo: AttachedImage | null
+  /** Faux : commun à toutes les éditions, sans la permission globale. */
+  can_edit: boolean
+}
+
+/** Écriture complète d'un gabarit. */
+export interface MailTemplatePayload {
+  name: string
+  layout: MailingTemplate
+  title: string | null
+  subtitle: string | null
+  gradient: boolean
+  event_id: EventId | null
+  preselect_for_submitters: boolean
+}
+
+/** L'aperçu d'un gabarit, rendu par la fonction du worker sur un texte d'exemple. */
+export interface MailTemplatePreview {
+  subject: string
+  html: string
 }

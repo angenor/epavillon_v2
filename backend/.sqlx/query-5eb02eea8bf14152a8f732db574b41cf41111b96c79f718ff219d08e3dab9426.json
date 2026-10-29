@@ -1,0 +1,157 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id, t.name, t.layout, t.title, t.subtitle, t.gradient, t.event_id,\n                  t.preselect_for_submitters,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = t.created_by) AS created_by_name,\n                  t.created_at, t.updated_at,\n                  media.attached_image('engagement', 'mail_templates', t.id, 'background') AS background,\n                  media.attached_image('engagement', 'mail_templates', t.id, 'logo') AS logo\n             FROM engagement.mail_templates t\n            WHERE t.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "layout",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "layout"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "subtitle",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "subtitle"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "gradient",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "gradient"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "preselect_for_submitters",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "preselect_for_submitters"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "created_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_templates",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "background",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "logo",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      null,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "5eb02eea8bf14152a8f732db574b41cf41111b96c79f718ff219d08e3dab9426"
+}

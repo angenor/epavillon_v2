@@ -1,22 +1,23 @@
 //! **Courriels d'essai des gabarits, écrits en `.eml`, jamais envoyés** (29/10).
 //!
 //! Rendus par le vrai code (`composer` du travail d'envoi, `kernel::mail::composer`
-//! pour le MIME), sur la CdP31. Les images de l'édition, pas encore en ligne,
-//! sont intégrées au message pour l'essai seulement ; en production, elles
-//! partent par leur adresse publique.
+//! pour le MIME), sur la CdP31. Les images, pas encore en ligne, sont intégrées
+//! au message pour l'essai seulement ; en production, elles partent par leur
+//! adresse publique.
 //!
 //! ```text
 //! ESSAI_SORTIE=<dossier> \
-//! ESSAI_BANNIERE=<banniere.jpeg>:1600x897 ESSAI_LOGO=<logo.jpeg>:320x397 \
+//! ESSAI_FOND=<bannière 3:1>.jpeg:1200x400 ESSAI_LOGO=<logo>.jpeg:320x397 \
+//! ESSAI_FOND_PERSO=<fond déposé>.jpeg:1200x400 ESSAI_LOGO_PERSO=<logo déposé>.png:LxH \
 //! cargo test -p engagement --test gabarits_essai -- --ignored
 //! ```
 
-use engagement::domain::gabarits::{self, images_integrees, Edition, ImageEdition};
+use engagement::domain::gabarits::{self, images_integrees, ImageEdition, Visuels};
 use engagement::domain::mailing;
-use engagement::jobs::send_mailing::composer;
+use engagement::jobs::send_mailing::{composer, Apparence};
 use engagement::repo::mailings::{Habillage, LigneEnvoi};
 use kernel::mail::{Extras, InlineImage};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use time::macros::date;
 use uuid::Uuid;
 
@@ -49,13 +50,13 @@ fn image(variable: &str, cid: &str) -> (ImageEdition, InlineImage) {
     )
 }
 
-fn envoi(gabarit: &str, nom: &str) -> LigneEnvoi {
+fn envoi(sujet: &str) -> LigneEnvoi {
     let maintenant = time::OffsetDateTime::now_utc();
     LigneEnvoi {
         id: Uuid::nil(),
         event_id: Uuid::nil(),
         status: "draft".into(),
-        subject: format!("[Essai] Gabarit « {nom} »"),
+        subject: format!("[Essai] Gabarit « {sujet} »"),
         body_html: CORPS.into(),
         audience: vec![],
         extra_addresses: vec![],
@@ -71,13 +72,60 @@ fn envoi(gabarit: &str, nom: &str) -> LigneEnvoi {
         created_at: maintenant,
         updated_at: maintenant,
         habillage: Habillage {
-            template: gabarit.into(),
+            template: "institutionnel".into(),
             variable_fallbacks: serde_json::json!({ "prenom": "Madame, Monsieur" }),
             reply_button: false,
             cta_label: None,
             cta_url: None,
+            mail_template_id: None,
         },
     }
+}
+
+fn ecrire(
+    sortie: &Path,
+    fichier: &str,
+    sujet: &str,
+    apparence: &Apparence,
+    images: &[InlineImage],
+) {
+    let valeurs = mailing::valeurs(
+        &serde_json::json!({ "prenom": "Angenor" }),
+        &serde_json::json!({}),
+    );
+    let message = composer(
+        format!("essai-{fichier}"),
+        "angenor99@gmail.com",
+        &envoi(sujet),
+        &valeurs,
+        apparence,
+    )
+    .expect("message rendu");
+    let html = message.html.as_deref().unwrap_or_default();
+    let mut integrees = images_integrees(&apparence.gabarit, apparence.visuels.as_ref());
+    for image in images {
+        if html.contains(&format!("cid:{}", image.content_id)) {
+            integrees.push(image.clone());
+        }
+    }
+    let extras = Extras {
+        inline_images: integrees,
+        ..Extras::default()
+    };
+    let brut = kernel::mail::composer(
+        "ePavillon <epavillonclimatique@francophonie.org>"
+            .parse()
+            .expect("expéditeur"),
+        &message,
+        &extras,
+    )
+    .expect("MIME composé")
+    .formatted();
+    std::fs::write(sortie.join(fichier), brut).expect("fichier écrit");
+    // Le HTML seul, pour le regarder au navigateur (images intégrées absentes).
+    let apercus = sortie.join("apercus");
+    std::fs::create_dir_all(&apercus).expect("dossier des aperçus");
+    std::fs::write(apercus.join(fichier.replace(".eml", ".html")), html).expect("HTML écrit");
 }
 
 #[test]
@@ -85,69 +133,70 @@ fn envoi(gabarit: &str, nom: &str) -> LigneEnvoi {
 fn ecrire_les_courriels_dessai() {
     let sortie = PathBuf::from(std::env::var("ESSAI_SORTIE").expect("ESSAI_SORTIE manquante"));
     std::fs::create_dir_all(&sortie).expect("dossier de sortie");
-    let (banniere, banniere_integree) = image("ESSAI_BANNIERE", "banniere-cdp31");
+    let (fond, fond_integre) = image("ESSAI_FOND", "fond-cdp31");
     let (logo, logo_integre) = image("ESSAI_LOGO", "logo-cdp31");
-    let edition = Edition {
-        nom: "31e conférence des Nations Unies sur le climat".into(),
-        dates: Some(format!(
+    let (fond_perso, fond_perso_integre) = image("ESSAI_FOND_PERSO", "fond-gabarit");
+    let (logo_perso, logo_perso_integre) = image("ESSAI_LOGO_PERSO", "logo-gabarit");
+    let images = [
+        fond_integre,
+        logo_integre,
+        fond_perso_integre,
+        logo_perso_integre,
+    ];
+
+    // Ce que `apparence()` construit pour la CdP31 : nom, période et ville, page
+    // publique, variante `courriel` du bandeau et logo.
+    let cdp31 = Visuels {
+        titre: "31e conférence des Nations Unies sur le climat".into(),
+        sous_titre: Some(format!(
             "{}, Antalya",
             gabarits::periode(date!(2026 - 11 - 09), date!(2026 - 11 - 20))
         )),
         lien: "https://epavillonclimatique.francophonie.org/evenements/cdp31-antalya-2026".into(),
-        banniere: Some(banniere),
+        fond: Some(fond),
         logo: Some(logo),
+        degrade: true,
     };
-    let valeurs = mailing::valeurs(
-        &serde_json::json!({ "prenom": "Angenor" }),
-        &serde_json::json!({}),
-    );
+    // Un gabarit personnalisé rattaché à la CdP31 : ses textes et ses images
+    // remplacent ceux de l'édition, sur la mise en page « texte sur l'image ».
+    let perso = Visuels {
+        titre: "Pavillon de la Francophonie à la CdP31".into(),
+        sous_titre: Some("Appel à propositions : ce qu'il faut savoir".into()),
+        fond: Some(fond_perso),
+        logo: Some(logo_perso),
+        ..cdp31.clone()
+    };
 
-    for (gabarit, nom, fichier) in [
+    for (fichier, sujet, gabarit, visuels) in [
         (
-            "banniere_edition",
+            "1-banniere-basse.eml",
             "Bannière de l'édition",
-            "1-banniere-de-ledition.eml",
+            "banniere",
+            &cdp31,
         ),
         (
-            "institutionnel_edition",
-            "Institutionnel + logo de l'édition",
-            "2-institutionnel-logo-de-ledition.eml",
+            "2-texte-sur-limage.eml",
+            "Texte sur l'image",
+            "texte_sur_image",
+            &cdp31,
         ),
-        ("institutionnel", "Institutionnel", "3-institutionnel.eml"),
+        (
+            "3-institutionnel-logo-de-ledition.eml",
+            "Institutionnel + logo de l'édition",
+            "institutionnel_logo",
+            &cdp31,
+        ),
+        (
+            "4-gabarit-personnalise-cdp31.eml",
+            "Gabarit personnalisé CdP31",
+            "texte_sur_image",
+            &perso,
+        ),
     ] {
-        let e = envoi(gabarit, nom);
-        let message = composer(
-            format!("essai-{gabarit}"),
-            "angenor99@gmail.com",
-            &e,
-            &valeurs,
-            Some(&edition),
-        )
-        .expect("message rendu");
-        let html = message.html.as_deref().unwrap_or_default();
-        let mut images = images_integrees(gabarit, Some(&edition));
-        for integree in [&banniere_integree, &logo_integre] {
-            if html.contains(&format!("cid:{}", integree.content_id)) {
-                images.push(integree.clone());
-            }
-        }
-        let extras = Extras {
-            inline_images: images,
-            ..Extras::default()
+        let apparence = Apparence {
+            gabarit: gabarit.into(),
+            visuels: Some(visuels.clone()),
         };
-        let brut = kernel::mail::composer(
-            "ePavillon <epavillonclimatique@francophonie.org>"
-                .parse()
-                .expect("expéditeur"),
-            &message,
-            &extras,
-        )
-        .expect("MIME composé")
-        .formatted();
-        std::fs::write(sortie.join(fichier), brut).expect("fichier écrit");
-        // Le HTML seul, pour le regarder au navigateur (images intégrées absentes).
-        let apercus = sortie.join("apercus");
-        std::fs::create_dir_all(&apercus).expect("dossier des aperçus");
-        std::fs::write(apercus.join(fichier.replace(".eml", ".html")), html).expect("HTML écrit");
+        ecrire(&sortie, fichier, sujet, &apparence, &images);
     }
 }

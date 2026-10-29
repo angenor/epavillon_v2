@@ -2,6 +2,7 @@
   "title": "Courriels",
   "subtitle": "Ce qui a été écrit aux participants de l'édition, à qui, et ce qu'il est advenu de chaque message. La boîte d'envoi de la plateforme ne se consulte pas : cet historique la remplace.",
   "new": "Écrire un courriel",
+  "templates": "Gabarits",
   "forbidden": "Écrire aux participants de cette édition",
   "empty": {
     "title": "Aucun courriel pour cette édition",

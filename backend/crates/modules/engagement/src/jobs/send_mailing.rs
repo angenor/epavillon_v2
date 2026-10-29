@@ -32,11 +32,12 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::domain::gabarits::{
-    self, choisir_image, images_integrees, mailto_reponse, mettre_en_page, Edition, MiseEnPage,
+    self, choisir_fond, choisir_image, images_integrees, mailto_reponse, mettre_en_page,
+    MiseEnPage, Visuels,
 };
 use crate::domain::mailing::{self, echapper_html, texte_brut};
 use crate::domain::render;
-use crate::repo::{cross, mailings};
+use crate::repo::{cross, mail_templates, mailings};
 
 pub const SEND_MAILING: &str = "engagement.send_mailing";
 pub const SEND_MAILING_TEST: &str = "engagement.send_mailing_test";
@@ -58,32 +59,90 @@ fn mailing_id(job: &ClaimedJob) -> Result<Uuid> {
         .ok_or_else(|| ApiError::internal("charge sans mailing_id"))
 }
 
-/// L'édition de l'envoi telle que ses gabarits la montrent : la bannière en
-/// JPEG ou PNG d'environ 1200 px de large, le logo d'au moins 120 px de haut
-/// (affiché en 40 à 48), par leur adresse publique. Lue seulement pour les
-/// gabarits qui s'en servent.
-pub async fn edition_de_lenvoi(
+/// La mise en page qu'un envoi prend vraiment, et ce qu'elle montre.
+#[derive(Debug, Clone)]
+pub struct Apparence {
+    pub gabarit: String,
+    pub visuels: Option<Visuels>,
+}
+
+/// Les visuels d'une édition, remplacés par ceux d'un gabarit personnalisé :
+/// titre et sous-titre (à défaut, nom et période de l'édition), fond 3:1 et
+/// logo (à défaut, la bannière et le logo de l'édition, par leur adresse
+/// publique, en JPEG ou PNG).
+pub async fn apparence(
+    db: &Db,
+    event_id: Uuid,
+    gabarit: &str,
+    perso: Option<&mail_templates::LigneGabarit>,
+    site: &str,
+) -> Result<Apparence> {
+    let gabarit = perso.map_or(gabarit, |g| g.layout.as_str()).to_owned();
+    if !matches!(
+        gabarit.as_str(),
+        "banniere" | "texte_sur_image" | "institutionnel_logo"
+    ) {
+        return Ok(Apparence {
+            gabarit,
+            visuels: None,
+        });
+    }
+    let Some(v) = cross::visuels_edition(db.pool(), event_id).await? else {
+        return Ok(Apparence {
+            gabarit,
+            visuels: None,
+        });
+    };
+    let periode = gabarits::periode(v.debut, v.fin);
+    let dates = match v.ville.filter(|c| !c.trim().is_empty()) {
+        Some(ville) => format!("{periode}, {ville}"),
+        None => periode,
+    };
+    let texte = |t: Option<&String>| t.map(|t| t.trim().to_owned()).filter(|t| !t.is_empty());
+    let fond = perso
+        .and_then(|g| g.background.as_ref())
+        .and_then(choisir_fond)
+        .or_else(|| v.banniere.as_ref().and_then(choisir_fond));
+    let logo = perso
+        .and_then(|g| g.logo.as_ref())
+        .and_then(|i| choisir_image(i, 0, 120))
+        .or_else(|| v.logo.as_ref().and_then(|i| choisir_image(i, 0, 120)));
+    Ok(Apparence {
+        gabarit,
+        visuels: Some(Visuels {
+            titre: perso.and_then(|g| texte(g.title.as_ref())).unwrap_or(v.nom),
+            sous_titre: Some(
+                perso
+                    .and_then(|g| texte(g.subtitle.as_ref()))
+                    .unwrap_or(dates),
+            ),
+            lien: format!("{}/evenements/{}", site.trim_end_matches('/'), v.slug),
+            fond,
+            logo,
+            degrade: perso.is_none_or(|g| g.gradient),
+        }),
+    })
+}
+
+/// L'apparence d'un envoi : son gabarit personnalisé s'il en a un, sinon sa
+/// mise en page, sur son édition.
+pub async fn apparence_de_lenvoi(
     db: &Db,
     envoi: &mailings::LigneEnvoi,
     site: &str,
-) -> Result<Option<Edition>> {
-    if !envoi.habillage.template.ends_with("_edition") {
-        return Ok(None);
-    }
-    let Some(v) = cross::visuels_edition(db.pool(), envoi.event_id).await? else {
-        return Ok(None);
+) -> Result<Apparence> {
+    let perso = match envoi.habillage.mail_template_id {
+        Some(id) => mail_templates::lire(db.pool(), id).await?,
+        None => None,
     };
-    let periode = gabarits::periode(v.debut, v.fin);
-    Ok(Some(Edition {
-        nom: v.nom,
-        dates: Some(match v.ville.filter(|c| !c.trim().is_empty()) {
-            Some(ville) => format!("{periode}, {ville}"),
-            None => periode,
-        }),
-        lien: format!("{}/evenements/{}", site.trim_end_matches('/'), v.slug),
-        banniere: v.banniere.as_ref().and_then(|i| choisir_image(i, 1200, 0)),
-        logo: v.logo.as_ref().and_then(|i| choisir_image(i, 0, 120)),
-    }))
+    apparence(
+        db,
+        envoi.event_id,
+        &envoi.habillage.template,
+        perso.as_ref(),
+        site,
+    )
+    .await
 }
 
 /// Le message d'un destinataire : variables brutes dans l'objet, échappées dans
@@ -94,7 +153,7 @@ pub fn composer(
     to: &str,
     envoi: &mailings::LigneEnvoi,
     valeurs: &HashMap<String, String>,
-    edition: Option<&Edition>,
+    apparence: &Apparence,
 ) -> Result<OutgoingMail> {
     let echappees: HashMap<String, String> = valeurs
         .iter()
@@ -117,11 +176,11 @@ pub fn composer(
     let html = mettre_en_page(
         &corps,
         &MiseEnPage {
-            gabarit: &h.template,
+            gabarit: &apparence.gabarit,
             sujet: &sujet,
             action,
             repondre,
-            edition,
+            visuels: apparence.visuels.as_ref(),
         },
     );
     let mut texte = texte_brut(&corps);
@@ -224,13 +283,13 @@ impl JobHandler for SendMailing {
             return Ok(());
         }
 
-        let edition = edition_de_lenvoi(&self.db, &envoi, &self.site).await?;
+        let apparence = apparence_de_lenvoi(&self.db, &envoi, &self.site).await?;
         let copies = Extras {
             cc: envoi.cc.clone(),
             bcc: envoi.bcc.clone(),
             reply_to: envoi.reply_to.clone(),
             attachments: lire_les_pieces(&self.db, &self.entrepots, id).await?,
-            inline_images: images_integrees(&envoi.habillage.template, edition.as_ref()),
+            inline_images: images_integrees(&apparence.gabarit, apparence.visuels.as_ref()),
         };
 
         for _ in 0..LOT {
@@ -258,7 +317,7 @@ impl JobHandler for SendMailing {
                 &pris.email,
                 &envoi,
                 &valeurs,
-                edition.as_ref(),
+                &apparence,
             ) {
                 Ok(m) => m,
                 Err(e) => {
@@ -364,19 +423,13 @@ impl JobHandler for SendMailingTest {
             &envoi.habillage.variable_fallbacks,
         );
 
-        let edition = edition_de_lenvoi(&self.db, &envoi, &self.site).await?;
-        let mut message = composer(
-            job.id.to_string(),
-            &adresse,
-            &envoi,
-            &valeurs,
-            edition.as_ref(),
-        )?;
+        let apparence = apparence_de_lenvoi(&self.db, &envoi, &self.site).await?;
+        let mut message = composer(job.id.to_string(), &adresse, &envoi, &valeurs, &apparence)?;
         message.subject = format!("[Essai] {}", message.subject);
         let copies = Extras {
             reply_to: envoi.reply_to.clone(),
             attachments: lire_les_pieces(&self.db, &self.entrepots, id).await?,
-            inline_images: images_integrees(&envoi.habillage.template, edition.as_ref()),
+            inline_images: images_integrees(&apparence.gabarit, apparence.visuels.as_ref()),
             ..Extras::default()
         };
         self.mailer
@@ -417,7 +470,15 @@ mod tests {
                 reply_button: true,
                 cta_label: None,
                 cta_url: None,
+                mail_template_id: None,
             },
+        }
+    }
+
+    fn sobre() -> Apparence {
+        Apparence {
+            gabarit: "sobre".into(),
+            visuels: None,
         }
     }
 
@@ -428,7 +489,7 @@ mod tests {
             &serde_json::json!({ "prenom": "A<b>", "nom": "O'Neil" }),
             &e.habillage.variable_fallbacks,
         );
-        let m = composer("x".into(), "a@example.org", &e, &valeurs, None).unwrap();
+        let m = composer("x".into(), "a@example.org", &e, &valeurs, &sobre()).unwrap();
         assert_eq!(m.subject, "Pour A<b>");
         let html = m.html.unwrap();
         assert!(html.contains("Bonjour A&lt;b&gt; O&#39;Neil"), "{html}");
@@ -440,7 +501,7 @@ mod tests {
     fn sans_compte_la_valeur_de_secours_sert() {
         let e = envoi("Objet", "<p>Bonjour {{prenom}},</p>");
         let valeurs = mailing::valeurs(&serde_json::json!({}), &e.habillage.variable_fallbacks);
-        let m = composer("x".into(), "a@example.org", &e, &valeurs, None).unwrap();
+        let m = composer("x".into(), "a@example.org", &e, &valeurs, &sobre()).unwrap();
         assert!(
             m.text.starts_with("Bonjour Madame, Monsieur,"),
             "{}",

@@ -1,0 +1,42 @@
+{
+  "crumb": "Gabarit",
+  "title": "Gabarit",
+  "saving": "Enregistrement…",
+  "saved": "Enregistré automatiquement.",
+  "readOnly": "Gabarit commun à toutes les éditions : la permission globale est nécessaire pour le modifier.",
+  "delete": "Supprimer le gabarit",
+  "back": "Retour aux gabarits",
+  "name": "Nom du gabarit",
+  "layout": "Mise en page",
+  "titleField": "Titre",
+  "titleHint": "À défaut, le nom de l'édition.",
+  "subtitle": "Sous-titre",
+  "subtitleHint": "À défaut, les dates et le lieu de l'édition.",
+  "gradient": "Voile sombre sous le texte",
+  "gradientHint": "Rend lisible un texte blanc posé sur une image claire (mise en page « Texte sur l'image »).",
+  "scope": {
+    "label": "Rattachement",
+    "hint": "Un gabarit commun à toutes les éditions demande la permission globale.",
+    "edition": "Cette édition",
+    "all": "Toutes les éditions"
+  },
+  "preselect": "Présélectionner pour les déposants de cet événement",
+  "preselectHint": "Retenu d'office quand un envoi écrit aux déposants des dossiers de l'édition ; l'auteur peut le changer.",
+  "images": "Images",
+  "imagesHint": "À défaut, la bannière et le logo de l'édition.",
+  "imagesUnused": "Cette mise en page n'affiche pas d'image de fond ; le logo sert à « Institutionnel + logo de l'édition ».",
+  "background": "Image de fond",
+  "backgroundUse": "affichée 600 x 200 en tête du courriel",
+  "logo": "Logo",
+  "logoUse": "sur fond blanc, 40 à 56 px de haut",
+  "preview": "Aperçu",
+  "previewHint": "Le courriel tel que le serveur l'enverrait, sur un texte d'exemple.",
+  "notFound": {
+    "title": "Gabarit introuvable",
+    "description": "Il a été supprimé, ou il n'appartient pas à une édition que vous administrez."
+  },
+  "deleteConfirm": {
+    "title": "Supprimer ce gabarit ?",
+    "description": "Les courriels qui l'utilisent gardent sa mise en page, sans ses textes ni ses images."
+  }
+}

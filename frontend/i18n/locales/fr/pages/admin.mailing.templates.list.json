@@ -1,0 +1,24 @@
+{
+  "crumb": "Gabarits",
+  "title": "Gabarits de courriel",
+  "subtitle": "Des mises en page aux textes et aux images de votre choix, proposées dans la fenêtre de rédaction après les modèles par défaut. Ceux de l'édition, puis les communs à toutes.",
+  "new": "Nouveau gabarit",
+  "defaultName": "Nouveau gabarit",
+  "caption": "Gabarits de courriel de l'édition",
+  "columns": {
+    "name": "Nom",
+    "layout": "Mise en page",
+    "scope": "Rattachement",
+    "date": "Modifié ({zone})"
+  },
+  "scope": {
+    "edition": "Cette édition",
+    "all": "Toutes les éditions"
+  },
+  "preselected": "Pour les déposants",
+  "readOnly": "Commun : se choisit, ne se modifie pas",
+  "empty": {
+    "title": "Aucun gabarit",
+    "description": "Créez un gabarit pour habiller vos courriels de l'image et du logo de votre choix."
+  }
+}

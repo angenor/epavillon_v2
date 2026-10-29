@@ -1,0 +1,42 @@
+{
+  "crumb": "Template",
+  "title": "Template",
+  "saving": "Saving…",
+  "saved": "Saved automatically.",
+  "readOnly": "Template shared by all editions: the global permission is needed to edit it.",
+  "delete": "Delete the template",
+  "back": "Back to templates",
+  "name": "Template name",
+  "layout": "Layout",
+  "titleField": "Title",
+  "titleHint": "Defaults to the edition name.",
+  "subtitle": "Subtitle",
+  "subtitleHint": "Defaults to the edition dates and place.",
+  "gradient": "Dark veil under the text",
+  "gradientHint": "Keeps white text readable on a light image (“Text on the image” layout).",
+  "scope": {
+    "label": "Scope",
+    "hint": "A template shared by all editions requires the global permission.",
+    "edition": "This edition",
+    "all": "All editions"
+  },
+  "preselect": "Preselect for this event's submitters",
+  "preselectHint": "Chosen by default when an email goes to the submitters of the edition's proposals; the author can change it.",
+  "images": "Images",
+  "imagesHint": "Defaults to the edition banner and logo.",
+  "imagesUnused": "This layout shows no background image; the logo is used by “Institutional + edition logo”.",
+  "background": "Background image",
+  "backgroundUse": "shown 600 x 200 at the top of the email",
+  "logo": "Logo",
+  "logoUse": "on white, 40 to 56 px high",
+  "preview": "Preview",
+  "previewHint": "The email as the server would send it, on sample text.",
+  "notFound": {
+    "title": "Template not found",
+    "description": "It was deleted, or it does not belong to an edition you administer."
+  },
+  "deleteConfirm": {
+    "title": "Delete this template?",
+    "description": "Emails using it keep its layout, without its texts or images."
+  }
+}

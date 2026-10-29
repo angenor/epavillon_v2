@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO platform.jobs (queue, task, payload, idempotency_key, priority)\n         SELECT 'media', 'media.process_asset',\n                jsonb_build_object('asset_id', a.id, 'bucket', a.bucket,\n                                   'object_key', a.object_key, 'mime_type', a.mime_type),\n                'courriel:' || a.id, 50\n         FROM media.assets a WHERE a.id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0336e9cc6784f72a6e223b1ee4134abdfa2b111f86a95898242dcf36d8eb25e7"
+}

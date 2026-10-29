@@ -70,6 +70,12 @@ pub enum Garde {
     /// dépôt est toujours privé : un fichier joint n'est jamais servi au public.
     EnvoiAdministre { permission: &'static str },
 
+    /// La permission **sur la portée de l'édition du gabarit de courriel**, ET
+    /// le périmètre d'administration ; la portée globale pour un gabarit commun
+    /// à toutes les éditions. Ses images (fond, logo) partent par leur adresse
+    /// publique dans les courriels : le dépôt n'est pas privé.
+    GabaritDeCourriel { permission: &'static str },
+
     /// La personne elle-même, **ou** la permission. Une photo de profil
     /// appartient à qui elle représente.
     PersonneElleMeme { permission: &'static str },
@@ -177,6 +183,13 @@ const TABLE: &[((&str, &str), Garde)] = &[
         // Pièces jointes d'un envoi de courriels (28/10). Même droit que l'envoi.
         ("engagement", "mailings"),
         Garde::EnvoiAdministre {
+            permission: "engagement.mailing.send",
+        },
+    ),
+    (
+        // Fond et logo d'un gabarit de courriel personnalisé (29/10).
+        ("engagement", "mail_templates"),
+        Garde::GabaritDeCourriel {
             permission: "engagement.mailing.send",
         },
     ),
@@ -318,6 +331,23 @@ mod tests {
         );
         assert!(garde.impose_le_prive());
         assert!(garde.types_admis().is_none());
+    }
+
+    /// Le fond et le logo d'un gabarit de courriel : la permission d'envoyer,
+    /// sur l'édition du gabarit ; un dépôt public, servi dans les courriels.
+    #[test]
+    fn les_images_dun_gabarit_de_courriel_sont_gardees_par_lenvoi() {
+        for role in ["background", "logo"] {
+            let garde = garde_pour_role("engagement", "mail_templates", Some(role))
+                .expect("garde déclarée");
+            assert_eq!(
+                garde,
+                Garde::GabaritDeCourriel {
+                    permission: "engagement.mailing.send",
+                }
+            );
+            assert!(!garde.impose_le_prive());
+        }
     }
 
     /// La galerie d'une séance n'a pas la porte de l'adhésion que sa couverture

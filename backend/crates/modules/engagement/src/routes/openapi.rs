@@ -48,6 +48,12 @@ pub struct ApiErrorBody {
         crate::routes::mailings::envoyer,
         crate::routes::mailings::annuler,
         crate::routes::mailings::dupliquer,
+        crate::routes::mail_templates::lister,
+        crate::routes::mail_templates::creer,
+        crate::routes::mail_templates::detail,
+        crate::routes::mail_templates::modifier,
+        crate::routes::mail_templates::supprimer,
+        crate::routes::mail_templates::apercu,
     ),
     components(schemas(ApiErrorBody)),
     tags(

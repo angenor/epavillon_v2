@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.mailings\n               (event_id, subject, body_html, audience, extra_addresses, cc, bcc, reply_to,\n                duplicated_from, created_by, template, variable_fallbacks, reply_button,\n                cta_label, cta_url, mail_template_id)\n           VALUES ($1, $2, $3, $4, $5::text[]::platform.email[], $6::text[]::platform.email[],\n                   $7::text[]::platform.email[], $8::text::platform.email, $9, $10,\n                   $11, $12, $13, $14, $15::text::platform.url, $16)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb",
+        "TextArray",
+        "TextArray",
+        "TextArray",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Bool",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8b03b58133553873550dbe29d11c7eacf19cac362edad12215ea73fd41ec812c"
+}

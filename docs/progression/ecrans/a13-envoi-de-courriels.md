@@ -82,6 +82,17 @@ Lot 101 (`ops/reprise-v1/lots/101-visuels-editions.sh` et `.sql`) : bandeau (pho
 
 Non vérifié : rendu réel dans Outlook et Microsoft 365 (les `.eml` d'essai sont à envoyer par le commanditaire) ; dépôt du logo au navigateur ; le rôle `banner` annonce un 32:9 et les bandeaux CdP30 et CdP31 sont des 16:9 (la forme ne se contrôle qu'à la pose, quand les dimensions sont connues : une nouvelle pose de ces fichiers depuis le back-office serait refusée).
 
+## Retours sur les essais, gabarits personnalisés (29/10, second passage)
+
+- **Mises en page** (codes définitifs) : `sobre`, `institutionnel`, `annonce`, `banniere` (image 600 x 200 puis bande blanche logo, nom, dates), `texte_sur_image` (nom et dates en blanc sur l'image ; image de fond CSS, rectangle VML pour Outlook bureau, aplat bleu nuit sans prise en charge ; voile comme `.scrim-fade-bottom`, facultatif), `institutionnel_logo` (logo de 56 px sur tuile blanche, marges de la bande réduites à 4 px : en-tête de 72 px comme sans logo). Sans image 3:1 ou sans logo : l'institutionnel.
+- **Image de tête** : seulement un fichier 3:1 (`choisir_fond`) : la variante media `courriel` (1200 x 400, JPEG qualité 62, `media/domain/variants.rs`, `imaging::decliner`) ou un fond déposé déjà recadré. Le worker complète un objet déjà servable (variante manquante, sans nouvelle analyse) ; la migration met en file les bandeaux d'édition existants. Bannière CdP31 : 113 Ko au lieu des 416 Ko de `lg`.
+- **Gabarits personnalisés** : `engagement.mail_templates` ; `GET/POST /admin/mail-templates`, `GET/PUT/DELETE /admin/mail-templates/{id}`, `GET …/{id}/preview` (`service/mail_templates.rs`) ; fond et logo rattachés par le module media (garde `GabaritDeCourriel`). Textes et images du gabarit remplacent ceux de l'édition (`send_mailing::apparence`). Page `/admin/courriels/gabarits` (`pages/admin/courriels/gabarits/index.vue`, `[id].vue`) : liste de l'édition et des communs, formulaire, `MediaImageField` (fond 3:1 imposé par la règle, 1200 px, JPEG ou PNG, qualité 70 ; logo 400 px), aperçu en direct rendu par le worker. `UiImageEditor` et `MediaImageField` gagnent `maxWidth`, `formats`, `defaultQuality`.
+- **Fenêtre de rédaction** : modèles par défaut, puis gabarits de l'édition ; `mail_template_id` sur l'envoi (« Dupliquer » le garde) ; présélection quand `MailingAudience.suggested_mail_template_id` est rempli et que l'auteur n'a rien choisi.
+- **Tests** : `engagement/tests/gabarits_personnalises.rs` (2), unitaires des gabarits, `media/tests/traitement.rs` (variante `courriel`, objet servable complété), garde (unitaire).
+- **Essais** : quatre `.eml` sur la CdP31 (bannière basse, texte sur l'image, institutionnel avec logo, gabarit personnalisé), images intégrées pour l'essai ; la variante `courriel` produite par `cargo run -p media --example declinaison_courriel`.
+
+Non vérifié : rendu Outlook (VML compris) et Microsoft 365 ; la page des gabarits au navigateur ; le dépôt d'un fond par l'éditeur borné.
+
 ## Le parcours
 
 1. **Historique** (`/admin/courriels`) : les envois de l'édition choisie, filtrables par état (onglets) et par objet ou

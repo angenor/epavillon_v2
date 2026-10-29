@@ -54,6 +54,11 @@ const showAttachments = ref(false)
 const audience = ref<MailingAudience | null>(null)
 const refreshKey = ref(0)
 const sessions = ref<ShowcaseSessionOption[]>([])
+// PRÉSÉLECTION (29/10) : tant que l'auteur n'a pas choisi lui-même de gabarit
+// dans cette fenêtre, celui de l'édition « pour les déposants » est retenu dès
+// que l'envoi leur écrit. Un choix à la main l'emporte ensuite.
+const templateChosen = ref(false)
+const preselected = ref(false)
 
 function formOf(m: Mailing): Form {
   return {
@@ -67,6 +72,7 @@ function formOf(m: Mailing): Form {
       replyTo: m.reply_to ?? '',
       eventId: m.event_id,
       template: m.template,
+      customTemplateId: m.mail_template_id ?? '',
       fallbacks: { ...m.variable_fallbacks },
       replyButton: m.reply_button,
       ctaLabel: m.cta_label ?? '',
@@ -88,6 +94,7 @@ function payloadOf(f: Form): MailingPayload {
     reply_to: isEmailAddress(reply) ? reply : '',
     event_id: f.options.eventId,
     template: f.options.template,
+    mail_template_id: f.options.customTemplateId,
     variable_fallbacks: f.options.fallbacks,
     reply_button: f.options.replyButton,
     cta_label: f.options.ctaLabel,
@@ -112,6 +119,8 @@ async function start(): Promise<void> {
   showOptions.value = false
   confirming.value = false
   testMessage.value = null
+  templateChosen.value = false
+  preselected.value = false
   try {
     let m: Mailing | null
     if (store.mailingId) {
@@ -161,6 +170,12 @@ async function save(): Promise<boolean> {
   try {
     const eventChanged = payload.event_id !== mailing.value.event_id
     mailing.value = await api.adminMailings.update(mailing.value.id, payload)
+    // Un gabarit personnalisé porte sa mise en page : l'API la recopie, l'écran
+    // la reprend (le champ du bouton d'action en dépend).
+    const f = form.value
+    if (f && mailing.value.mail_template_id && f.options.customTemplateId === mailing.value.mail_template_id) {
+      f.options = { ...f.options, template: mailing.value.template }
+    }
     lastSaved.value = snapshot
     if (eventChanged) void loadSessions(mailing.value.event_id)
     void refreshAudience()
@@ -190,7 +205,20 @@ async function refreshAudience(): Promise<void> {
   } catch {
     audience.value = null
   }
+  preselect(audience.value?.suggested_mail_template_id ?? null)
   refreshKey.value += 1
+}
+
+function preselect(suggested: string | null): void {
+  const f = form.value
+  if (!f || templateChosen.value || !suggested || f.options.customTemplateId === suggested) return
+  f.options = { ...f.options, customTemplateId: suggested }
+  preselected.value = true
+}
+
+function onTemplateChosen(): void {
+  templateChosen.value = true
+  preselected.value = false
 }
 
 async function reloadAttachments(): Promise<void> {
@@ -435,7 +463,9 @@ watch(
           :refresh-key="refreshKey"
           :testing="testing"
           :test-message="testMessage"
+          :preselected="preselected"
           @test="sendTest"
+          @template-chosen="onTemplateChosen"
         />
       </div>
     </div>

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.mail_templates\n              SET name = $2, layout = $3, title = $4, subtitle = $5, gradient = $6,\n                  event_id = $7, preselect_for_submitters = $8\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "18b14a31795cee9a8512b103c206be35a210e34865667196f920ac806b7434ff"
+}

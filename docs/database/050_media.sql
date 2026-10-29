@@ -93,6 +93,8 @@ CREATE TYPE media.rendition_status AS ENUM ('pending', 'generating', 'ready', 'f
 -- propre rendu, texte et logos déjà incrustés.
 CREATE TYPE media.attachment_role AS ENUM (
     'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'video', 'thumbnail', 'attachment',
+    -- 29/10 : l'image de fond d'un gabarit de courriel (engagement.mail_templates).
+    'background',
     'cover_source'
 );
 

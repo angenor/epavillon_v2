@@ -1,6 +1,7 @@
 {
   "title": "Emails",
   "subtitle": "What was written to the participants of this edition, to whom, and what became of each message. The platform's outbox cannot be read: this history replaces it.",
+  "templates": "Templates",
   "new": "Write an email",
   "forbidden": "Email the participants of this edition",
   "empty": {

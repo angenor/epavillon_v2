@@ -127,9 +127,14 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
           <h1 class="text-3xl leading-tight font-semibold text-balance">{{ t('admin.mailing.list.title') }}</h1>
           <p class="mt-1 max-w-(--measure) text-text-muted">{{ t('admin.mailing.list.subtitle') }}</p>
         </div>
-        <UiButton v-if="canSend" icon="plus" @click="create">
-          {{ t('admin.mailing.list.new') }}
-        </UiButton>
+        <div v-if="canSend" class="flex flex-wrap gap-3">
+          <UiButton variant="secondary" icon="grid" :to="localePath('/admin/courriels/gabarits')">
+            {{ t('admin.mailing.list.templates') }}
+          </UiButton>
+          <UiButton icon="plus" @click="create">
+            {{ t('admin.mailing.list.new') }}
+          </UiButton>
+        </div>
       </header>
 
       <UiAlert v-if="createError" class="mt-6" intent="danger" live :message="createError" />
