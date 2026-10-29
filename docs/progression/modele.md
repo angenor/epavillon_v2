@@ -352,3 +352,12 @@ Fiche d'un dossier, phase 2 : une fois le dossier retenu, l'organisation prépar
 Aucune des trois tables n'est auditée : seul le dossier l'est. Présentations : rôle `document` de `programme.proposals` inchangé, `{application/pdf,application/vnd.*}` couvre PowerPoint (`.ppt`, `.pptx`).
 
 **Migration** : `ops/migrations/2026-10-29-fiche-jour-j.sql`, rejouable et additive, jouée deux fois en local sur `epavillon` ; `cross_module_fk_report` conforme. **En production** : avant de démarrer l'API qui sert `/proposals/{id}/day-plan`.
+
+## 29/10/2026, `070_programme_proposals.sql` et `050_media.sql` : l'atelier de l'image de couverture
+
+Fiche d'un dossier, phase 3 : le site dessine l'image de couverture (modèle, couleur de la charte, date, visages, logos, bandeau et icône de l'édition, photo de départ) et la rattache en `cover` du dossier par le module média.
+
+- **`programme.proposal_cover_designs`** (070 § 4 ter) : les choix de l'atelier, une ligne par dossier (clé `proposal_id`, `ON DELETE CASCADE`), absente tant qu'il n'a jamais été enregistré. `template_code` et `accent` contraints dans leur forme seule (`ck_proposal_cover_designs_template`, `-_accent`, `^[a-z][a-z0-9-]{1,40}$`) : **modèles et couleurs vivent dans le code du site**, pas en base (arbitrage du 29/10, option A : un modèle est du dessin, une ligne sans son code ne dessinerait rien). `options jsonb` objet (`ck_proposal_cover_designs_options`), clé absente lue fausse, écrit complet par l'API. `updated_at` (`tg_set_updated_at`), `updated_by` (`xmod_fk_proposal_cover_designs_updater`). Non auditée, comme le jour J.
+- **`media.attachment_role` gagne `cover_source`** (050 § 1, en dernière valeur) et la table blanche la ligne `(programme, proposals, cover_source)` : image, 10 Mo, une seule. La photo de départ est gardée à part de l'image fabriquée pour que l'atelier reparte d'elle, pas de son propre rendu. Garde : celle du couple `programme.proposals` (`OrganisationDuDossier`), rien à ajouter ; l'énumération Rust du crate media suit.
+
+**Migration** : `ops/migrations/2026-10-29-atelier-couverture.sql`, rejouable et additive ; l'`ALTER TYPE … ADD VALUE IF NOT EXISTS` est hors de la transaction (une valeur ajoutée ne sert qu'une fois validée). Jouée deux fois en local sur `epavillon`. **En production** : avant de démarrer l'API qui sert `/proposals/{id}/cover-studio` et `/cover-design`.

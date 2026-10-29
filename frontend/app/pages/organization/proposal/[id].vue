@@ -225,6 +225,15 @@ async function attachCover(assetId: AssetId | null): Promise<void> {
   }
 }
 
+/** L'atelier a-t-il déjà servi ? « Modifier » le rouvre là où on l'a laissé. */
+const { data: coverStudio } = useAsyncData(
+  () => `proposal-file-cover-studio-${proposalId.value}`,
+  () => api.proposals.coverStudio(proposalId.value),
+  { lazy: true, server: false, watch: [proposalId] },
+)
+
+const studioTo = computed(() => localePath(`/mon-organisation/dossiers/${proposalId.value}/couverture`))
+
 async function refreshAll(): Promise<void> {
   await Promise.all([refresh(), editor.refresh()])
 }
@@ -590,15 +599,17 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
                   {{ t('organization.workspace.proposal.cover.title') }}
                 </h2>
                 <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.proposal.cover.description') }}</p>
-                <UiButton
-                  v-if="canEditMedia && !changingCover"
-                  class="mt-4"
-                  variant="secondary"
-                  icon="image"
-                  @click="changingCover = true"
-                >
-                  {{ t('organization.workspace.proposal.cover.change') }}
-                </UiButton>
+                <div v-if="canEditMedia && !changingCover" class="mt-4 flex flex-wrap gap-3">
+                  <UiButton variant="secondary" icon="image" @click="changingCover = true">
+                    {{ t('organization.workspace.proposal.cover.change') }}
+                  </UiButton>
+                  <UiButton v-if="coverStudio?.design" variant="secondary" icon="edit" :to="studioTo">
+                    {{ t('organization.workspace.proposal.cover.edit') }}
+                  </UiButton>
+                  <UiButton variant="primary" :to="`${studioTo}?nouveau=1`">
+                    {{ t('organization.workspace.proposal.cover.create') }}
+                  </UiButton>
+                </div>
                 <MediaImageField
                   v-if="canEditMedia && changingCover"
                   class="mt-4 max-w-xl"

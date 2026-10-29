@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_cover_designs\n             (proposal_id, template_code, accent, options, updated_by)\n         VALUES ($1, $2, $3, $4, $5)\n         ON CONFLICT (proposal_id) DO UPDATE\n            SET template_code = EXCLUDED.template_code,\n                accent = EXCLUDED.accent,\n                options = EXCLUDED.options,\n                updated_by = EXCLUDED.updated_by",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9e74cee25db994737cc38c3f8e8e82d07cde5526f124cf690073ebf77d648829"
+}

@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposals\n               (event_id, call_id, organization_id, slug, title,\n                objectives, detailed_presentation, format, submitted_by)\n           VALUES ($1, $2, $3, 'atelier'::platform.slug,\n                   '{\"fr\":\"Les mangroves\"}'::jsonb, '{\"fr\":\"Des objectifs.\"}'::jsonb,\n                   '{\"fr\":\"<p>Une présentation.</p>\"}'::jsonb,\n                   'hybrid', $4)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ebd85577de2836cb1fc6e81ece3ab055f773ebe2eaa85ca7537a63ebd09c116a"
+}

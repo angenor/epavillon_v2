@@ -205,7 +205,9 @@
   "cover": {
     "title": "Cover image",
     "description": "It illustrates your activity on the platform and is the preview when the link is shared.",
-    "change": "Change the image"
+    "change": "Change the image",
+    "edit": "Edit",
+    "create": "Create or choose a template"
   },
   "sections": {
     "presentation": "Presentation",

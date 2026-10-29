@@ -66,7 +66,8 @@ pub fn routes(cfg: &mut ServiceConfig) {
             .configure(routes::detail::chemins_de_dossier)
             .configure(routes::admin_desk::chemins_de_dossier)
             .configure(routes::workspace::chemins_de_dossier)
-            .configure(routes::day_plan::chemins_de_dossier),
+            .configure(routes::day_plan::chemins_de_dossier)
+            .configure(routes::cover_design::chemins_de_dossier),
     );
 }
 

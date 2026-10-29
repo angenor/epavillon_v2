@@ -74,6 +74,8 @@ export type AttachmentRole =
   | 'video'
   | 'thumbnail'
   | 'attachment'
+  /** Photo de départ de l'atelier de couverture, gardée à part de l'image fabriquée. */
+  | 'cover_source'
 
 // ---------------------------------------------------------------------------
 // Les trois déclinaisons d'une édition

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT template_code, accent, options, updated_at\n           FROM programme.proposal_cover_designs\n          WHERE proposal_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "template_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_cover_designs",
+            "name": "template_code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "accent",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_cover_designs",
+            "name": "accent"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "options",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_cover_designs",
+            "name": "options"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_cover_designs",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c57f816da9fd4288def8a664170eafbc28611ae0a96a45ceed86af66cfac7380"
+}

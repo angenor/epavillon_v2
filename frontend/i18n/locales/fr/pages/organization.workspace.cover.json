@@ -1,0 +1,46 @@
+{
+  "title": "Atelier de l'image de couverture",
+  "back": "Revenir au dossier",
+  "save": "Enregistrer comme image de couverture",
+  "eyebrow": "Pavillon de la Francophonie · {edition}",
+  "steps": {
+    "template": "1. Choisissez un modèle",
+    "content": "2. Ce qui figure sur l'image",
+    "color": "3. La couleur"
+  },
+  "catalogHint": "Les modèles sont préparés par l'IFDD et suivent la charte de la Francophonie.",
+  "contentHint": "Tout vient de votre dossier : modifiez-le là-bas, l'image suit.",
+  "templates": {
+    "texte-photo": "Texte et photo",
+    "typographique": "Typographique",
+    "visages": "Visages",
+    "photo-pleine": "Photo pleine"
+  },
+  "options": {
+    "show_date": "Date, heure et salle",
+    "show_speakers": "Visages des intervenants",
+    "show_logos": "Logos (IFDD, OIF, votre organisation)",
+    "show_event_banner": "Bannière de l'événement ({edition})",
+    "show_event_icon": "Icône de l'événement ({edition})"
+  },
+  "accents": {
+    "bleu": "Bleu nuit",
+    "cyan": "Cyan",
+    "vert": "Vert",
+    "violet": "Violet",
+    "rouge": "Rouge"
+  },
+  "photoSet": "Ce modèle utilise votre photo.",
+  "photoMissing": "Ce modèle met une photo en valeur : ajoutez-en une.",
+  "addPhoto": "Ajouter une photo",
+  "changePhoto": "Changer la photo",
+  "photoField": "Photo de départ",
+  "previewLabel": "Aperçu de l’image de couverture : {title}",
+  "logoMissing": "sa place reste vide sur l'image.",
+  "share": {
+    "title": "Quand on partage le lien",
+    "description": "WhatsApp, LinkedIn, Facebook, courriel : l'aperçu reprend cette image.",
+    "site": "epavillonclimatique.francophonie.org"
+  },
+  "renderFailed": "L'image n'a pas pu être fabriquée. Réessayez ; si cela recommence, changez de navigateur."
+}

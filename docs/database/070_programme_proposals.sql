@@ -695,6 +695,57 @@ COMMENT ON TABLE programme.proposal_social_posts IS
 -- sont chargées après ce fichier.
 
 -- -----------------------------------------------------------------------------
+-- 4 ter. L'atelier de l'image de couverture (29/10)
+--
+-- La v1 laissait chaque organisation fabriquer son visuel hors de la
+-- plateforme : tailles fausses, logos écrasés, couleurs sans rapport avec la
+-- charte, et une programmation qui ressemblait à un patchwork. L'atelier fait
+-- dessiner l'image par le SITE (modèle, couleur de la charte, date, visages
+-- des intervenants, logos, bandeau et icône de l'édition, photo de départ
+-- facultative) ; l'image produite est un fichier comme un autre, rattachée au
+-- dossier sous le rôle `cover`. La photo de départ est gardée à part, sous le
+-- rôle `cover_source` (050), pour être reprise à la modification suivante.
+--
+-- Cette table ne garde que les CHOIX, pour que « Modifier » rouvre l'atelier
+-- là où on l'a laissé. Elle ne sert ni à l'affichage, ni à la publication :
+-- seule l'image rattachée compte.
+--
+-- LES MODÈLES ET LES COULEURS NE SONT PAS EN BASE (arbitrage du 29/10,
+-- option A). Un modèle est du dessin (positions, tailles, superpositions), il
+-- vit avec le code qui le dessine ; une ligne de table sans ce code ne
+-- dessinerait rien, et un modèle ajouté en base sans lui casserait l'atelier.
+-- La base ne garde donc que des CODES, contraints dans leur forme seulement :
+-- un code inconnu du site (modèle retiré depuis) rouvre l'atelier sur le
+-- modèle par défaut, sans erreur.
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE programme.proposal_cover_designs (
+    proposal_id   uuid        PRIMARY KEY REFERENCES programme.proposals(id) ON DELETE CASCADE,
+    -- Code d'un modèle défini dans le site (`frontend/app/utils/cover-studio`).
+    template_code text        NOT NULL,
+    -- Code d'une couleur de la charte, défini dans le site au même endroit.
+    accent        text        NOT NULL,
+    -- Ce qui figure sur l'image : `show_date`, `show_speakers`, `show_logos`,
+    -- `show_event_banner`, `show_event_icon`, booléens. Une clé absente vaut
+    -- faux à la lecture : l'API écrit l'objet complet, une option ajoutée plus
+    -- tard ne demande pas de reprise des lignes existantes.
+    options       jsonb       NOT NULL DEFAULT '{}',
+    updated_at    timestamptz NOT NULL DEFAULT now(),
+    updated_by    uuid        CONSTRAINT xmod_fk_proposal_cover_designs_updater
+                              REFERENCES identity.people(id) ON DELETE SET NULL,
+    CONSTRAINT ck_proposal_cover_designs_template CHECK (template_code ~ '^[a-z][a-z0-9-]{1,40}$'),
+    CONSTRAINT ck_proposal_cover_designs_accent   CHECK (accent ~ '^[a-z][a-z0-9-]{1,40}$'),
+    CONSTRAINT ck_proposal_cover_designs_options  CHECK (jsonb_typeof(options) = 'object')
+);
+
+CREATE TRIGGER tg_proposal_cover_designs_updated_at
+    BEFORE UPDATE ON programme.proposal_cover_designs
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+COMMENT ON TABLE programme.proposal_cover_designs IS
+    'Choix de l''atelier de l''image de couverture d''un dossier, pour le rouvrir tel qu''on l''a laissé. L''image produite est le rattachement `cover` ; modèles et couleurs vivent dans le code du site, la base n''en garde que les codes.';
+
+-- -----------------------------------------------------------------------------
 -- 5. Évaluation
 -- -----------------------------------------------------------------------------
 

@@ -5305,6 +5305,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposals/{id}/cover-design": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Enregistrer les choix de l'atelier.
+         * @description `SaveCoverDesignPayload` → `CoverStudioContext`. Remplace les choix ; la ligne naît au premier enregistrement. Les options sont écrites complètes, une option absente du corps vaut faux. L'image elle-même se dépose et se rattache par le module média (`cover`, et `cover_source` pour la photo de départ) : cette route n'en garde que la recette. Organisation porteuse (adhésion active, ou la déposante en attente pour son propre dossier) ou `programme.proposal.decide` sur l'édition, dans le périmètre ; refusé sur un dossier rejeté, retiré ou annulé ; **permis après la fin de l'édition**.
+         */
+        put: operations["propositions_enregistrer_atelier_couverture"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/cover-studio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ce que lit l'atelier de l'image de couverture.
+         * @description `CoverStudioContext` : les choix enregistrés de l'atelier (`design`, nul tant qu'il n'a jamais été enregistré), la photo de départ du dossier (rôle `cover_source`), le bandeau et la vignette de l'édition (rôles `banner` et `thumbnail`), le logo de l'organisation porteuse (rôle `logo`). Chaque image a la forme `AttachedImage`, nulle sans image servable. Les codes de modèle et de couleur sont ceux du site : la base n'en garde que la forme. Une option absente de la ligne se lit fausse. Accès de la fiche : adhésion active à l'organisation porteuse (ou la déposante en attente), ou lecture générale dans le périmètre.
+         */
+        get: operations["propositions_atelier_couverture"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposals/{id}/day-plan": {
         parameters: {
             query?: never;
@@ -21035,6 +21075,101 @@ export interface operations {
             };
             /** @description Brouillon, dossier clos ou édition terminée (PROPOSAL_NOT_EDITABLE), champ vidé, bornes de l'appel */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_enregistrer_atelier_couverture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description CoverStudioContext */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Code de modèle ou de couleur mal formé : VALIDATION_FAILED ; dossier rejeté, retiré ou annulé : PROPOSAL_NOT_EDITABLE */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_atelier_couverture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CoverStudioContext */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors d'accès** */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

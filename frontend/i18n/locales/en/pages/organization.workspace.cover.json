@@ -1,0 +1,46 @@
+{
+  "title": "Cover image studio",
+  "back": "Back to the submission",
+  "save": "Save as cover image",
+  "eyebrow": "Francophonie Pavilion · {edition}",
+  "steps": {
+    "template": "1. Choose a template",
+    "content": "2. What appears on the image",
+    "color": "3. The colour"
+  },
+  "catalogHint": "Templates are prepared by IFDD and follow the Francophonie brand guidelines.",
+  "contentHint": "Everything comes from your submission: edit it there, the image follows.",
+  "templates": {
+    "texte-photo": "Text and photo",
+    "typographique": "Typographic",
+    "visages": "Faces",
+    "photo-pleine": "Full photo"
+  },
+  "options": {
+    "show_date": "Date, time and room",
+    "show_speakers": "Speakers’ faces",
+    "show_logos": "Logos (IFDD, OIF, your organisation)",
+    "show_event_banner": "Event banner ({edition})",
+    "show_event_icon": "Event icon ({edition})"
+  },
+  "accents": {
+    "bleu": "Night blue",
+    "cyan": "Cyan",
+    "vert": "Green",
+    "violet": "Purple",
+    "rouge": "Red"
+  },
+  "photoSet": "This template uses your photo.",
+  "photoMissing": "This template features a photo: add one.",
+  "addPhoto": "Add a photo",
+  "changePhoto": "Change the photo",
+  "photoField": "Source photo",
+  "previewLabel": "Cover image preview: {title}",
+  "logoMissing": "its place stays empty on the image.",
+  "share": {
+    "title": "When the link is shared",
+    "description": "WhatsApp, LinkedIn, Facebook, email: the preview uses this image.",
+    "site": "epavillonclimatique.francophonie.org"
+  },
+  "renderFailed": "The image could not be made. Try again; if it happens again, use another browser."
+}

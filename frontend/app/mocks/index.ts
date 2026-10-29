@@ -192,6 +192,8 @@ export {
   removeProposalDocument,
 } from './proposals/day-plan'
 
+export { proposalCoverStudio, saveProposalCoverDesign } from './proposals/cover-design'
+
 export {
   editableProposal,
   editedProposal,

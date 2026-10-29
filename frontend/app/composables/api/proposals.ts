@@ -34,6 +34,7 @@ import type {
   SaveFocalPointsPayload,
   SaveTechnicalNeedsPayload,
 } from '~/types/programme/day-plan'
+import type { CoverStudioContext, SaveCoverDesignPayload } from '~/types/programme/cover-design'
 import type { ScheduleThemeBadge } from '~/types/views'
 import type {
   EditableProposal,
@@ -187,6 +188,17 @@ export function createProposalsApi({ call, callOrNull, send, assertEventInScope 
     send(`/proposals/${id}/social-posts`, payload, (m) => m.addProposalSocialPost(id, payload)),
   removeSocialPost: (id: Uuid, postId: Uuid): Promise<ProposalDayPlan> =>
     send(`/proposals/${id}/social-posts/${postId}`, {}, (m) => m.removeProposalSocialPost(id, postId), 'DELETE'),
+
+  /**
+   * L'ATELIER DE L'IMAGE DE COUVERTURE : les choix enregistrés (nuls tant que
+   * l'atelier n'a jamais servi), la photo de départ, le bandeau et la vignette
+   * de l'édition, le logo de l'organisation. L'image se dépose par le module
+   * média (`cover`, `cover_source`) ; seule la recette passe ici.
+   */
+  coverStudio: (id: Uuid): Promise<CoverStudioContext> =>
+    call(`/proposals/${id}/cover-studio`, (m) => m.proposalCoverStudio(id)),
+  saveCoverDesign: (id: Uuid, payload: SaveCoverDesignPayload): Promise<CoverStudioContext> =>
+    send(`/proposals/${id}/cover-design`, payload, (m) => m.saveProposalCoverDesign(id, payload), 'PUT'),
 
   /**
    * LE FIL D'ÉCHANGES, filtré À LA SOURCE et lu par une personne.

@@ -281,6 +281,32 @@ async fn garde_ecriture(
     dossier: ProposalId,
     geste: Geste,
 ) -> Result<()> {
+    let ligne = porteuse_ou_equipe(state, acteur, dossier).await?;
+
+    if ligne.status != "accepted" {
+        return Err(ApiError::with_message(
+            ErrorCode::ProposalNotEditable,
+            "Seule une activité retenue se prépare ici : ce dossier n'est pas retenu.",
+        ));
+    }
+    if geste == Geste::Preparation && ligne.edition_terminee {
+        return Err(ApiError::with_message(
+            ErrorCode::ProposalNotEditable,
+            "Cette édition est terminée : le point focal et les besoins techniques ne se modifient plus.",
+        ));
+    }
+    Ok(())
+}
+
+/// Qui écrit sur la fiche : l'organisation porteuse (adhésion active, ou la
+/// déposante en attente pour son propre dossier), ou l'équipe qui décide sur
+/// l'édition, dans son périmètre. Le refus est celui d'un dossier inexistant.
+/// L'état du dossier reste à la garde de chaque geste.
+pub(crate) async fn porteuse_ou_equipe(
+    state: &ProgrammeState,
+    acteur: Uuid,
+    dossier: ProposalId,
+) -> Result<repo::DossierDuJourJ> {
     let pool = state.pool();
     let ligne = repo::dossier(pool, dossier)
         .await?
@@ -302,20 +328,7 @@ async fn garde_ecriture(
     if !par_lorganisation && !par_lequipe {
         return Err(ApiError::not_found());
     }
-
-    if ligne.status != "accepted" {
-        return Err(ApiError::with_message(
-            ErrorCode::ProposalNotEditable,
-            "Seule une activité retenue se prépare ici : ce dossier n'est pas retenu.",
-        ));
-    }
-    if geste == Geste::Preparation && ligne.edition_terminee {
-        return Err(ApiError::with_message(
-            ErrorCode::ProposalNotEditable,
-            "Cette édition est terminée : le point focal et les besoins techniques ne se modifient plus.",
-        ));
-    }
-    Ok(())
+    Ok(ligne)
 }
 
 /// Un point focal saisi, complété depuis la base. L'intervenant et la personne

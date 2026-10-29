@@ -137,6 +137,19 @@ useHead(() => ({
   title: session.value ? tr(session.value.title) : t('activity.notFound.title'),
   meta: summary.value ? [{ name: 'description', content: summary.value }] : [],
 }))
+
+// L'aperçu d'un lien partagé (29/10) : l'image de couverture, celle que l'atelier
+// de l'organisation fabrique, à défaut celle que l'IFDD a posée sur la séance.
+const requestUrl = useRequestURL()
+useSeoMeta({
+  ogType: 'website',
+  ogUrl: () => requestUrl.href,
+  ogTitle: () => (session.value ? tr(session.value.title) : undefined),
+  ogDescription: () => summary.value || undefined,
+  ogImage: () => (session.value?.cover ? new URL(session.value.cover.url, requestUrl.origin).href : undefined),
+  ogImageAlt: () => (session.value?.cover ? tr(session.value.title) : undefined),
+  twitterCard: 'summary_large_image',
+})
 </script>
 
 <template>

@@ -205,7 +205,9 @@
   "cover": {
     "title": "Image de couverture",
     "description": "Elle illustre votre activité sur la plateforme et sert d'aperçu quand on partage le lien.",
-    "change": "Changer l'image"
+    "change": "Changer l'image",
+    "edit": "Modifier",
+    "create": "Créer ou choisir un modèle"
   },
   "sections": {
     "presentation": "Présentation",

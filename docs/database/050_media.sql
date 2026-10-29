@@ -84,8 +84,16 @@ CREATE TYPE media.rendition_status AS ENUM ('pending', 'generating', 'ready', 'f
 -- de fichier : `attachable_roles.expected_aspect_ratio`. Nommer le rôle
 -- `square` aurait figé la forme dans le vocabulaire, et le jour où le réseau
 -- passe au 4:5 il aurait fallu un rôle de plus pour le même usage.
+--
+-- `cover_source` A ÉTÉ AJOUTÉ pour l'atelier de l'image de couverture (29/10) :
+-- la photo de départ choisie par l'organisation, d'où le site tire l'image
+-- fabriquée (`cover`). Deux rôles parce que ce sont deux usages : la
+-- couverture est ce que le public voit, la source ce que l'atelier reprend à
+-- la modification suivante. Les confondre ferait repartir l'atelier de son
+-- propre rendu, texte et logos déjà incrustés.
 CREATE TYPE media.attachment_role AS ENUM (
-    'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'video', 'thumbnail', 'attachment'
+    'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'video', 'thumbnail', 'attachment',
+    'cover_source'
 );
 
 -- -----------------------------------------------------------------------------
@@ -1056,6 +1064,11 @@ INSERT INTO media.attachable_roles
     ('event',       'events',        'gallery',   '{"fr":"Galerie","en":"Gallery"}',                  true,  '{image/*}',                      15728640, NULL),
     ('programme',   'proposals',     'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL),
     ('programme',   'proposals',     'document',  '{"fr":"Document joint","en":"Attached document"}', true,  '{application/pdf,application/vnd.*}', 26214400, NULL),
+    -- Photo de départ de l'atelier de couverture (29/10) : celle que
+    -- l'organisation a choisie, gardée à part de l'image fabriquée (`cover`)
+    -- pour être réutilisée à la prochaine modification. Même garde que la
+    -- couverture, celle du couple (backend/crates/modules/media/src/domain/guards.rs).
+    ('programme',   'proposals',     'cover_source', '{"fr":"Photo de départ de la couverture","en":"Cover source photo"}', false, '{image/*}', 10485760, NULL),
     ('identity',    'people',        'avatar',    '{"fr":"Photo de profil","en":"Profile picture"}',  false, '{image/*}',                       5242880, NULL),
     -- Photo d'un intervenant sur sa ligne du dossier (29/10), avec ou sans compte :
     -- l'organisation la pose (garde de l'organisation du dossier, comme le

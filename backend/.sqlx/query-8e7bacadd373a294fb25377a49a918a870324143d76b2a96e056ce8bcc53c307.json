@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.assets\n               (object_key, original_filename, mime_type, byte_size, checksum_sha256,\n                status, alt_text, owner_organization_id, scan_verdict, scanned_at)\n           VALUES ('atelier/' || gen_random_uuid()::text || '.jpg', 'image.jpg', 'image/jpeg', 120000,\n                   md5(gen_random_uuid()::text) || md5(gen_random_uuid()::text), 'ready',\n                   '{\"fr\":\"Une image\"}'::jsonb, $1, 'clean', now())\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8e7bacadd373a294fb25377a49a918a870324143d76b2a96e056ce8bcc53c307"
+}

@@ -11,6 +11,7 @@ pub mod assignments;
 pub mod comments;
 pub mod conflicts;
 pub mod consents;
+pub mod cover_design;
 pub mod cross;
 pub mod dashboard;
 pub mod day_plan;
