@@ -5,7 +5,6 @@
   "eyebrow": "Pavillon de la Francophonie · {edition}",
   "steps": {
     "template": "Choisissez un modèle",
-    "photo": "La photo de fond",
     "content": "Ce qui figure sur l'image",
     "color": "La couleur"
   },
@@ -51,10 +50,10 @@
   },
   "renderFailed": "L'image n'a pas pu être fabriquée. Réessayez ; si cela recommence, changez de navigateur.",
   "photo": {
-    "event": "Image de l'événement ({edition}), choisie d'office.",
-    "own": "Votre photo.",
-    "missing": "Aucune photo pour l'instant : ajoutez-en une, la couleur choisie la remplace en attendant.",
-    "change": "Changer la photo",
+    "event": "Image de fond : celle de l'événement ({edition}).",
+    "own": "Image de fond : votre image.",
+    "missing": "Pas encore d'image de fond : la couleur choisie la remplace.",
+    "change": "Changer l'image",
     "useOwn": "Reprendre ma photo",
     "useEvent": "Revenir à l'image de l'événement",
     "field": "Photo de fond"

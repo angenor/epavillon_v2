@@ -107,8 +107,8 @@ const toggles = computed<OptionKey[]>(() => [
   ...(hasIcon.value ? (['show_event_icon'] as const) : []),
 ])
 
-const steps = computed(() => ['template', ...(usesPhoto.value ? ['photo'] : []), 'content', 'color'])
-const stepTitle = (key: string) => `${steps.value.indexOf(key) + 1}. ${t(`organization.workspace.cover.steps.${key}`)}`
+const steps = ['template', 'content', 'color']
+const stepTitle = (key: string) => `${steps.indexOf(key) + 1}. ${t(`organization.workspace.cover.steps.${key}`)}`
 
 // ---------------------------------------------------------------------------
 // La photo de fond : celle de l'édition d'office, celle de l'organisation sur demande
@@ -324,41 +324,6 @@ async function save(): Promise<void> {
             <p class="mt-2 text-sm text-text-muted">{{ t('organization.workspace.cover.catalogHint') }}</p>
           </fieldset>
 
-          <fieldset v-if="usesPhoto">
-            <legend class="font-semibold text-heading">{{ stepTitle('photo') }}</legend>
-            <div class="mt-3 overflow-hidden rounded-md border border-border">
-              <UiImage v-if="backgroundPhoto" :image="backgroundPhoto" ratio="16 / 9" sizes="22rem" />
-              <div v-else class="grid aspect-video place-items-center bg-surface-sunken text-text-subtle">
-                <UiIcon name="image" size="2rem" />
-              </div>
-            </div>
-            <p class="mt-2 text-sm text-text-secondary">
-              <template v-if="!backgroundPhoto">{{ t('organization.workspace.cover.photo.missing') }}</template>
-              <template v-else-if="usingEventPhoto">{{ t('organization.workspace.cover.photo.event', { edition: editionName }) }}</template>
-              <template v-else>{{ t('organization.workspace.cover.photo.own') }}</template>
-            </p>
-            <div class="mt-3 flex flex-wrap gap-2">
-              <MediaImageField
-                role="cover_source"
-                :asset-id="null"
-                :label="t('organization.workspace.cover.photo.field')"
-                :alt-fallback="data.editable.draft.title"
-                :button-label="t('organization.workspace.cover.photo.change')"
-                :rule="photoRule ?? null"
-                :owner="{ schema: 'programme', table: 'proposals', id: proposalId }"
-                @update:asset-id="attachSourcePhoto"
-                @update:image="(image) => (uploadedPhoto = image)"
-              />
-              <UiButton v-if="usingEventPhoto && ownPhoto" variant="ghost" @click="options.show_event_banner = false">
-                {{ t('organization.workspace.cover.photo.useOwn') }}
-              </UiButton>
-              <UiButton v-else-if="!usingEventPhoto && eventPhoto" variant="ghost" @click="options.show_event_banner = true">
-                {{ t('organization.workspace.cover.photo.useEvent') }}
-              </UiButton>
-            </div>
-            <UiAlert v-if="photoError" class="mt-2" intent="danger" :message="photoError" live />
-          </fieldset>
-
           <fieldset>
             <legend class="font-semibold text-heading">{{ stepTitle('content') }}</legend>
             <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.cover.contentHint') }}</p>
@@ -406,7 +371,38 @@ async function save(): Promise<void> {
                 <div class="aspect-video bg-surface-sunken" />
               </template>
             </ClientOnly>
+            <!-- La photo se change là où on la voit : un bouton sous l'image ouvre le choix du fichier. -->
+            <div
+              v-if="usesPhoto"
+              class="flex flex-col gap-3 border-t border-border bg-surface-raised p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <p class="text-sm text-text-secondary">
+                <template v-if="!backgroundPhoto">{{ t('organization.workspace.cover.photo.missing') }}</template>
+                <template v-else-if="usingEventPhoto">{{ t('organization.workspace.cover.photo.event', { edition: editionName }) }}</template>
+                <template v-else>{{ t('organization.workspace.cover.photo.own') }}</template>
+              </p>
+              <div class="flex shrink-0 flex-wrap gap-2">
+                <UiButton v-if="usingEventPhoto && ownPhoto" variant="ghost" @click="options.show_event_banner = false">
+                  {{ t('organization.workspace.cover.photo.useOwn') }}
+                </UiButton>
+                <UiButton v-else-if="!usingEventPhoto && eventPhoto" variant="ghost" @click="options.show_event_banner = true">
+                  {{ t('organization.workspace.cover.photo.useEvent') }}
+                </UiButton>
+                <MediaImageField
+                  role="cover_source"
+                  :asset-id="null"
+                  :label="t('organization.workspace.cover.photo.field')"
+                  :alt-fallback="data.editable.draft.title"
+                  :button-label="t('organization.workspace.cover.photo.change')"
+                  :rule="photoRule ?? null"
+                  :owner="{ schema: 'programme', table: 'proposals', id: proposalId }"
+                  @update:asset-id="attachSourcePhoto"
+                  @update:image="(image) => (uploadedPhoto = image)"
+                />
+              </div>
+            </div>
           </div>
+          <UiAlert v-if="photoError" intent="danger" :message="photoError" live />
 
           <div
             v-if="!hasLogo && options.show_logos"

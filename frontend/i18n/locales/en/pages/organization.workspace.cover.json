@@ -5,7 +5,6 @@
   "eyebrow": "Francophonie Pavilion · {edition}",
   "steps": {
     "template": "Choose a template",
-    "photo": "Background photo",
     "content": "What appears on the image",
     "color": "Colour"
   },
@@ -51,10 +50,10 @@
   },
   "renderFailed": "The image could not be made. Try again; if it happens again, use another browser.",
   "photo": {
-    "event": "Event image ({edition}), selected by default.",
-    "own": "Your photo.",
-    "missing": "No photo yet: add one. The chosen colour fills in meanwhile.",
-    "change": "Change the photo",
+    "event": "Background: the event image ({edition}).",
+    "own": "Background: your image.",
+    "missing": "No background image yet: the chosen colour fills in.",
+    "change": "Change the image",
     "useOwn": "Use my photo again",
     "useEvent": "Back to the event image",
     "field": "Background photo"
