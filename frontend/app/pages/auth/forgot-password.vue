@@ -15,6 +15,10 @@
  * LE RENVOI OBÉIT AU MÊME DÉLAI QUE LA VÉRIFICATION D'ADRESSE — soixante
  * secondes. Deux écrans, une seule règle : c'est ce qui rend le comportement
  * prévisible, et c'est le même composable qui la tient.
+ *
+ * COMPTE REPRIS. La connexion d'un compte repris de la v1 arrive ici avec
+ * l'adresse dans le store (jamais dans l'URL) : formulaire rempli, un encadré
+ * dit pourquoi, un clic envoie le lien.
  */
 
 definePageMeta({ layout: 'auth', middleware: 'guest' })
@@ -23,10 +27,16 @@ defineI18nRoute({ paths: { fr: '/mot-de-passe-oublie', en: '/forgot-password' } 
 const { t } = useI18n()
 const localePath = useLocalePath()
 const api = useApi()
+const auth = useAuthStore()
 
-useHead(() => ({ title: t('auth.forgot-password.title') }))
+const resetRequiredFor = auth.takePasswordResetTarget()
+const isResetRequired = resetRequiredFor !== null
 
-const email = ref('')
+useHead(() => ({
+  title: isResetRequired ? t('auth.forgot-password.resetRequired.title') : t('auth.forgot-password.title'),
+}))
+
+const email = ref(resetRequiredFor ?? '')
 const fieldError = ref<string | undefined>(undefined)
 const isSubmitting = ref(false)
 const submitError = ref<Error | null>(null)
@@ -117,9 +127,16 @@ const resendLabel = computed(() =>
 
     <AuthCard
       v-else
-      :title="t('auth.forgot-password.title')"
-      :description="t('auth.forgot-password.description')"
+      :title="isResetRequired ? t('auth.forgot-password.resetRequired.title') : t('auth.forgot-password.title')"
+      :description="isResetRequired ? undefined : t('auth.forgot-password.description')"
     >
+      <UiAlert
+        v-if="isResetRequired"
+        class="mb-5"
+        intent="info"
+        :message="t('auth.forgot-password.resetRequired.message')"
+      />
+
       <UiAlert
         v-if="submitError"
         class="mb-5"

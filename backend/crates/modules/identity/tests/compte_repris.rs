@@ -2,9 +2,10 @@
 //! nouveau mot de passe exigé.
 //!
 //! Ce qui se vérifie ici : le modèle n'admet une ligne sans empreinte que si
-//! l'exigence est posée ; la connexion la traite comme un mot de passe faux ; la
-//! réinitialisation reprend **cette** ligne (pas une seconde), efface
-//! l'exigence et vaut vérification de l'adresse.
+//! l'exigence est posée ; la connexion rend « nouveau mot de passe exigé » quel
+//! que soit le mot de passe, sans compter d'échec ni verrouiller (décision du
+//! 29/10) ; la réinitialisation reprend **cette** ligne (pas une seconde),
+//! efface l'exigence et vaut vérification de l'adresse.
 
 mod commun;
 
@@ -134,14 +135,18 @@ async fn le_modele_refuse_une_ligne_sans_empreinte_ni_exigence() {
 }
 
 #[tokio::test]
-async fn un_compte_repris_rend_le_refus_ordinaire() {
+async fn un_compte_repris_est_envoye_vers_la_reinitialisation() {
     let bac = Bac::monter().await;
     let person_id = semer(&bac, Compte::repris(ADRESSE)).await;
+    let essais = bac.config.auth.lockout_threshold as usize + 2;
 
-    for essai in ["", "Belem2027!", NOUVEAU] {
+    // Mot de passe vide, quelconque, ou celui qu'elle choisira plus tard : tous
+    // rendent la même issue, et bien au-delà du seuil de verrouillage.
+    for essai in ["", "Belem2027!", NOUVEAU].iter().cycle().take(essais) {
+        let issue = tenter(&bac, essai).await;
         assert!(
-            matches!(tenter(&bac, essai).await, LoginOutcome::InvalidCredentials),
-            "un compte sans empreinte ne se distingue pas d'un mot de passe faux"
+            matches!(issue, LoginOutcome::PasswordResetRequired),
+            "issue inattendue : {issue:?}"
         );
     }
 
@@ -151,6 +156,26 @@ async fn un_compte_repris_rend_le_refus_ordinaire() {
         comptes[0].exigence.is_some(),
         "la connexion ne lève pas l'exigence"
     );
+
+    let (echecs, verrou): (i16, Option<OffsetDateTime>) =
+        sqlx::query_as("SELECT failed_attempts, locked_until FROM identity.accounts WHERE id = $1")
+            .bind(comptes[0].id)
+            .fetch_one(bac.base.pool())
+            .await
+            .expect("lecture du compteur");
+    assert_eq!(echecs, 0, "aucun échec compté");
+    assert!(verrou.is_none(), "aucun verrou posé");
+}
+
+#[tokio::test]
+async fn un_compte_ordinaire_garde_le_refus_ordinaire() {
+    let bac = Bac::monter().await;
+    semer(&bac, Compte::actif(ADRESSE)).await;
+
+    assert!(matches!(
+        tenter(&bac, "nimportequoi").await,
+        LoginOutcome::InvalidCredentials
+    ));
 }
 
 #[tokio::test]

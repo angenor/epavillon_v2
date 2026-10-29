@@ -172,7 +172,7 @@ CREATE TRIGGER tg_accounts_updated_at
 COMMENT ON COLUMN identity.accounts.password_hash IS
     'Empreinte Argon2id calculée par l''API. Aucune fonction SQL ne doit vérifier de mot de passe. NULL pour un compte ''password'' seulement si password_reset_required_at est posée.';
 COMMENT ON COLUMN identity.accounts.password_reset_required_at IS
-    'Depuis quand ce compte doit choisir un nouveau mot de passe avant de se connecter (comptes repris de la v1, sans empreinte). La connexion le traite comme un mot de passe faux, sans rien dire de plus. L''enregistrement d''un mot de passe (réinitialisation) efface la date.';
+    'Depuis quand ce compte doit choisir un nouveau mot de passe avant de se connecter (comptes repris de la v1, sans empreinte). Quel que soit le mot de passe tapé, la connexion rend l''issue password_reset_required, ne compte aucun échec et l''écran envoie vers la réinitialisation (décision du commanditaire du 29/10 : révéler qu''une adresse est un compte repris vaut mieux que faire croire à une faute de frappe). L''enregistrement d''un mot de passe (réinitialisation) efface la date.';
 
 -- Le client d'où vient la session. ENUM fermé et technique, au même titre
 -- qu'auth_provider : ce n'est pas un vocabulaire métier ouvert. La coquille

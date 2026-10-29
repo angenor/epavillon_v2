@@ -7,8 +7,14 @@
  *
  * **La réponse est invariable** : adresse connue ou non, l'écran affiche la même
  * chose. Seul le courriel diffère, et il n'arrive que si le compte existe.
+ *
+ * `obligatoire` : la connexion d'un compte repris de la v1 ouvre la feuille, et
+ * le propos dit pourquoi un nouveau mot de passe est exigé.
  */
-const { adresse = '' } = defineProps<{ adresse?: string }>()
+const { adresse = '', obligatoire = false } = defineProps<{
+  adresse?: string
+  obligatoire?: boolean
+}>()
 const emit = defineEmits<{ annuler: [] }>()
 
 const { t } = useI18n()
@@ -53,7 +59,9 @@ async function envoyer(): Promise<void> {
     </template>
 
     <template v-else>
-      <p class="gn-oubli__propos">{{ t('gn-mot-de-passe-oublie.propos') }}</p>
+      <p class="gn-oubli__propos">
+        {{ obligatoire ? t('gn-mot-de-passe-oublie.obligatoire') : t('gn-mot-de-passe-oublie.propos') }}
+      </p>
 
       <form novalidate @submit.prevent="envoyer">
         <GnChamp

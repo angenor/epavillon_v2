@@ -75,11 +75,13 @@ function passwordAccount(
     // `ck_accounts_password_shape` : nul pour un compte mot de passe, c'est
     // l'adresse qui identifie la personne chez le fournisseur « nous-mêmes ».
     provider_subject: null,
-    password_changed_at: fields.password_changed_at ?? '2026-06-01T09:00:00Z',
+    password_changed_at:
+      fields.password_changed_at === undefined ? '2026-06-01T09:00:00Z' : fields.password_changed_at,
     mfa_enabled_at: fields.mfa_enabled_at ?? null,
     last_login_at: fields.last_login_at ?? '2026-08-12T07:40:00Z',
     failed_attempts: fields.failed_attempts ?? 0,
     locked_until: fields.locked_until ?? null,
+    password_reset_required_at: fields.password_reset_required_at ?? null,
     created_at: fields.created_at ?? '2026-01-14T08:30:00Z',
     updated_at: fields.updated_at ?? '2026-08-12T07:40:00Z',
   }
@@ -158,6 +160,16 @@ export const accounts = [
     last_login_at: '2026-08-17T14:05:00Z',
     created_at: '2026-08-03T08:25:00Z',
     updated_at: '2026-08-17T14:05:00Z',
+  }),
+
+  // COMPTE REPRIS DE LA V1, sans mot de passe. Quel que soit celui qu'on tape,
+  // la connexion envoie vers « Mot de passe oublié ».
+  passwordAccount(ACCOUNT(15), PERSON.mbayeNdiaye, {
+    password_changed_at: null,
+    last_login_at: '2025-11-18T09:12:00Z',
+    password_reset_required_at: '2026-10-27T08:00:00Z',
+    created_at: '2026-03-02T10:40:00Z',
+    updated_at: '2026-10-27T08:00:00Z',
   }),
 ] satisfies Account[]
 
@@ -269,6 +281,11 @@ export function authenticate(payload: LoginPayload): LoginResult {
   // `platform.email` est un `citext` : la comparaison ignore la casse.
   const person = people.find((p) => p.primary_email.toLowerCase() === email)
   const account = person ? accounts.find((a) => a.person_id === person.id) : undefined
+
+  // Seule issue rendue avant la vérification du mot de passe : il n'y en a pas.
+  if (account && account.password_reset_required_at !== null) {
+    return { status: 'password_reset_required' }
+  }
 
   const expected = demoPassword()
   if (!person || !account || !expected || payload.password !== expected) {

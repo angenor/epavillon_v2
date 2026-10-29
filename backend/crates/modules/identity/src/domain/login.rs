@@ -1,11 +1,17 @@
-//! Les six issues de connexion, et les énumérations du modèle qu'elles portent.
+//! Les sept issues de connexion, et les énumérations du modèle qu'elles portent.
 //!
 //! L'ordre dans lequel elles sont produites est une règle, pas un détail
 //! (FR-019 à FR-021) : tant que le mot de passe n'est pas juste, la seule issue
 //! possible est « identifiants invalides ». Verrou, suspension, adresse non
-//! vérifiée et second facteur ne se signalent qu'ensuite, et dans cet ordre —
+//! vérifiée et second facteur ne se signalent qu'ensuite, et dans cet ordre :
 //! chacun suppose que l'identité soit déjà prouvée, sans quoi la réponse
 //! renseignerait qui ne connaît pas le mot de passe.
+//!
+//! **Une exception, décidée par le commanditaire le 29/10** : le compte repris
+//! de la v1, sans empreinte, rend « nouveau mot de passe exigé » quel que soit
+//! le mot de passe tapé. Elle révèle qu'une adresse est un compte repris, en
+//! connaissance de cause : le refus ordinaire faisait croire à une faute de
+//! frappe, et les gens écrivaient à l'équipe au lieu de réinitialiser.
 
 use serde::Serialize;
 use time::OffsetDateTime;
@@ -96,7 +102,7 @@ pub enum MfaMethod {
 }
 
 /// Issue d'une tentative de connexion — l'union que `LoginResult` déclare côté
-/// site. **Les six sortent en 200** : un refus prévu par le contrat n'est pas
+/// site. **Les sept sortent en 200** : un refus prévu par le contrat n'est pas
 /// une erreur HTTP, et le client du front lève sur tout statut d'erreur.
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "status", rename_all = "snake_case")]
@@ -112,6 +118,9 @@ pub enum LoginOutcome {
         method: MfaMethod,
     },
     InvalidCredentials,
+    /// Compte repris sans empreinte : aucun mot de passe ne peut être juste,
+    /// l'écran envoie vers la réinitialisation.
+    PasswordResetRequired,
     Locked {
         #[serde(with = "time::serde::rfc3339")]
         until: OffsetDateTime,

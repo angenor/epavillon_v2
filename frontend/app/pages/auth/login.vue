@@ -12,13 +12,15 @@ import type { LoginResult } from '~/types/auth'
  * suspendue, une adresse non vérifiée ne se disent qu'à quelqu'un qui vient de
  * prouver son identité.
  *
- * UN SEUL MESSAGE POUR TROIS CAS. « L'adresse ou le mot de passe ne correspond
- * pas » couvre l'adresse inconnue, le mot de passe faux ET le compte repris qui
- * doit choisir un nouveau mot de passe (d'où le renvoi à « Mot de passe
- * oublié », dit à tous). C'est volontairement moins utile à
- * la personne qui se trompe, et c'est ce qui empêche d'énumérer les comptes de
- * la plateforme — sur une plateforme qui héberge des délégations nationales, la
- * seule existence d'un compte est déjà une information.
+ * UN SEUL MESSAGE POUR DEUX CAS. « L'adresse ou le mot de passe ne correspond
+ * pas » couvre l'adresse inconnue et le mot de passe faux. C'est volontairement
+ * moins utile à la personne qui se trompe, et c'est ce qui empêche d'énumérer
+ * les comptes de la plateforme.
+ *
+ * Exception décidée par le commanditaire le 29/10 : le compte repris de la v1,
+ * sans mot de passe, part vers « Mot de passe oublié », adresse remplie par le
+ * store (jamais dans l'URL). Le refus ordinaire lui faisait croire à une faute
+ * de frappe.
  *
  * `?redirect=` — le middleware `auth` y range la page demandée avant la
  * redirection ; on y revient une fois connecté. Le paramètre n'est jamais
@@ -90,6 +92,11 @@ async function submit(): Promise<void> {
 
     if (result.status === 'authenticated') {
       await router.push(redirectTo.value)
+      return
+    }
+    if (result.status === 'password_reset_required') {
+      auth.rememberPasswordResetTarget(email.value.trim())
+      await router.push(localePath('auth-forgot-password'))
       return
     }
     if (result.status === 'email_unverified') {

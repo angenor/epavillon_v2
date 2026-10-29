@@ -103,6 +103,12 @@ export const useAuthStore = defineStore('auth', () => {
   const pendingVerificationEmail = ref<string | null>(null)
 
   /**
+   * Adresse d'un compte repris qui doit choisir un nouveau mot de passe, de la
+   * connexion à « Mot de passe oublié ». Hors de l'URL pour la même raison.
+   */
+  const pendingPasswordResetEmail = ref<string | null>(null)
+
+  /**
    * Charge la personne connectée, une seule fois. Idempotent : les middlewares,
    * le layout et les pages l'appellent tous sans se coordonner.
    */
@@ -158,7 +164,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Tentative de connexion. Rend l'issue TELLE QUELLE : c'est l'écran qui décide
-   * quoi en dire, et le compilateur qui l'oblige à traiter les six branches.
+   * quoi en dire, et le compilateur qui l'oblige à traiter les sept branches.
    * Seule `authenticated` ouvre la session.
    */
   async function signIn(payload: LoginPayload): Promise<LoginResult> {
@@ -191,6 +197,17 @@ export const useAuthStore = defineStore('auth', () => {
     pendingVerificationEmail.value = email
   }
 
+  /** Rend l'adresse une seule fois : une visite suivante de l'écran part vide. */
+  function rememberPasswordResetTarget(email: string): void {
+    pendingPasswordResetEmail.value = email
+  }
+
+  function takePasswordResetTarget(): string | null {
+    const email = pendingPasswordResetEmail.value
+    pendingPasswordResetEmail.value = null
+    return email
+  }
+
   /**
    * Rattachement principal, après une adhésion ACTIVE (prompt A2).
    *
@@ -216,12 +233,15 @@ export const useAuthStore = defineStore('auth', () => {
     loadError,
     isResolved,
     pendingVerificationEmail,
+    pendingPasswordResetEmail,
     ensureLoaded,
     retryLoad,
     signIn,
     signOut,
     register,
     rememberVerificationTarget,
+    rememberPasswordResetTarget,
+    takePasswordResetTarget,
     attachOrganization,
   }
 })

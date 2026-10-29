@@ -4,5 +4,6 @@
   "envoyer": "Send the link",
   "annuler": "Cancel",
   "fermer": "Close",
-  "envoye": "If an account exists for {adresse}, a link has just been sent. It stays valid for one hour."
+  "envoye": "If an account exists for {adresse}, a link has just been sent. It stays valid for one hour.",
+  "obligatoire": "For security reasons, you need to choose a new password. Get a link by email to create it."
 }

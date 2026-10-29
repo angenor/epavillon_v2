@@ -1,6 +1,6 @@
 //! Routes d'authentification.
 //!
-//! **Les six issues de connexion sortent en 200.** Un refus prévu par le contrat
+//! **Les sept issues de connexion sortent en 200.** Un refus prévu par le contrat
 //! du site n'est pas une erreur HTTP : son client lève une exception sur tout
 //! statut d'erreur, et rendre 401 sur un mot de passe faux ferait afficher un
 //! écran en panne au lieu du message attendu. Ce n'est pas un adoucissement —
@@ -186,13 +186,13 @@ struct Statut {
 
 #[utoipa::path(
     post,
-    description = "`LoginPayload` → `LoginResult`. **Les six issues sortent en 200.**",
+    description = "`LoginPayload` → `LoginResult`. **Les sept issues sortent en 200.**",
     path = "/auth/login",
     tag = "Authentification",
     operation_id = "login",
     request_body = Object,
     responses(
-        (status = 200, description = "LoginResult — authenticated, mfa_required, invalid_credentials, locked, suspended, email_unverified", body = Object),
+        (status = 200, description = "LoginResult : authenticated, mfa_required, invalid_credentials, password_reset_required, locked, suspended, email_unverified", body = Object),
         (status = 422, description = "Requête invalide", body = crate::routes::openapi::ApiErrorBody),
     )
 )]

@@ -393,3 +393,11 @@ Le commanditaire ne pouvait supprimer ni ses brouillons ni ses envois partis.
 - **Aucun ENUM touché** : la machine à états reste `draft`, `queued`, `sent`, `cancelled`. L'API supprime tout sauf `queued` (nouveau code `ENGAGEMENT_MAILING_IN_PROGRESS`, 409) : on arrête l'envoi d'abord.
 
 **Migration** : `ops/migrations/2026-10-29-suppression-des-envois.sql`, rejouable et additive ; elle retire aussi les rattachements laissés par les brouillons supprimés avant elle. Jouée deux fois en local sur `epavillon`. **En production** : à jouer, de préférence avant l'API ; sans elle, la suppression marche mais laisse des rattachements orphelins.
+
+## 29/10/2026, `030_identity.sql` : un compte repris est envoyé vers la réinitialisation
+
+Décision du commanditaire, en connaissance de cause (cela révèle qu'une adresse est un compte repris) : le refus ordinaire faisait croire à une faute de frappe, et les gens écrivaient à l'équipe. **Commentaire seulement** : `COMMENT ON COLUMN identity.accounts.password_reset_required_at` décrit la nouvelle issue, aucune structure ne change.
+
+Côté code (crate `identity`) : un compte `password` sans empreinte rend une septième issue de connexion, `password_reset_required`, quel que soit le mot de passe tapé, sans compter d'échec ni verrouiller. Un compte avec empreinte garde `invalid_credentials`. Test `discretion_compte_repris` retiré (la mesure de temps n'a plus d'objet), `compte_repris` réécrit. Le site renvoie vers « Mot de passe oublié », adresse remplie par l'état ; Guide Négo ouvre sa feuille « Mot de passe oublié », adresse remplie. Le refus d'un mauvais mot de passe redevient « L'adresse ou le mot de passe ne correspond pas. »
+
+**En production** : aucune migration ; la colonne garde le commentaire de `2026-10-27-compte-sans-mot-de-passe.sql`, écart sans effet visible seulement à une comparaison de schémas.

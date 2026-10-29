@@ -3017,7 +3017,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description `LoginPayload` → `LoginResult`. **Les six issues sortent en 200.** */
+        /** @description `LoginPayload` → `LoginResult`. **Les sept issues sortent en 200.** */
         post: operations["login"];
         delete?: never;
         options?: never;
@@ -16193,7 +16193,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description LoginResult — authenticated, mfa_required, invalid_credentials, locked, suspended, email_unverified */
+            /** @description LoginResult : authenticated, mfa_required, invalid_credentials, password_reset_required, locked, suspended, email_unverified */
             200: {
                 headers: {
                     [name: string]: unknown;

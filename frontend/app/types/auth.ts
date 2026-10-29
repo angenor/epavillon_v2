@@ -19,6 +19,11 @@
  *   · `locked`, `suspended`, `email_unverified` et `mfa_required` supposent
  *     TOUS que le mot de passe ait été vérifié, donc que l'identité soit prouvée.
  *     Les renvoyer n'apprend rien à qui ne connaît pas déjà le mot de passe ;
+ *   · seule exception, décidée par le commanditaire le 29/10 en connaissance de
+ *     cause : `password_reset_required`, rendu au compte repris de la v1 (sans
+ *     mot de passe) quel que soit le mot de passe tapé. Il dit qu'une adresse
+ *     est un compte repris ; le refus ordinaire faisait croire à une faute de
+ *     frappe ;
  *   · l'inscription et la demande de réinitialisation renvoient TOUJOURS la même
  *     issue, compte existant ou non. C'est le courriel envoyé qui diffère.
  */
@@ -98,6 +103,8 @@ export type LoginResult =
   | { status: 'authenticated'; person: Person }
   | { status: 'mfa_required'; challenge_id: Uuid; method: 'totp' }
   | { status: 'invalid_credentials' }
+  /** Compte repris sans mot de passe : l'écran envoie vers la réinitialisation. */
+  | { status: 'password_reset_required' }
   | { status: 'locked'; until: IsoDateTime }
   | { status: 'suspended'; until: IsoDateTime | null }
   | { status: 'email_unverified'; email: Email }

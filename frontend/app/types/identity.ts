@@ -110,6 +110,8 @@ export interface Account {
   last_login_at: IsoDateTime | null
   failed_attempts: number
   locked_until: IsoDateTime | null
+  /** Compte repris de la v1, sans mot de passe : il doit en choisir un. */
+  password_reset_required_at: IsoDateTime | null
   created_at: IsoDateTime
   updated_at: IsoDateTime
 }

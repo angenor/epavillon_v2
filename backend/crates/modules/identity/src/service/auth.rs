@@ -41,7 +41,7 @@ pub struct LoginRequest<'a> {
 
 pub struct LoginResponse {
     pub outcome: LoginOutcome,
-    /// Renseignée pour la seule issue « authentifié » : aucune des cinq autres
+    /// Renseignée pour la seule issue « authentifié » : aucune des six autres
     /// ne pose de cookie.
     pub session: Option<IssuedSession>,
 }
@@ -67,10 +67,17 @@ pub async fn login(
         return Ok(LoginResponse::refus(LoginOutcome::InvalidCredentials));
     };
 
-    let (Some(account_id), Some(empreinte)) = (candidat.account_id, candidat.password_hash.clone())
-    else {
+    let Some(account_id) = candidat.account_id else {
         verifier(state, requete.password, None).await?;
         return Ok(LoginResponse::refus(LoginOutcome::InvalidCredentials));
+    };
+
+    // Compte repris sans empreinte (`ck_accounts_password_shape` garantit que
+    // l'exigence est posée) : rien à vérifier, rien à compter. L'échec n'en est
+    // pas un, et le compter verrouillerait qui cherche seulement à entrer.
+    let Some(empreinte) = candidat.password_hash.clone() else {
+        verifier(state, requete.password, None).await?;
+        return Ok(LoginResponse::refus(LoginOutcome::PasswordResetRequired));
     };
 
     let maintenant = OffsetDateTime::now_utc();

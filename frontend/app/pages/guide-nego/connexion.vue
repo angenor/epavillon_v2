@@ -10,9 +10,11 @@ import { CLE_OUVERTURE_VUE, CLE_RETOUR_APRES_CONNEXION, lireCle, poserCle } from
  * Douze heures déconnecteraient une négociatrice en salle, là où aucun réseau ne
  * permet de se reconnecter — le pire moment possible.
  *
- * Les six issues de la connexion sortent en 200 avec leur discriminant ; chacune
+ * Les sept issues de la connexion sortent en 200 avec leur discriminant ; chacune
  * laisse une action possible. Seule `invalid_credentials` ne dit rien de plus :
  * adresse inconnue et mot de passe faux sont indiscernables, et c'est voulu.
+ * Un compte repris de la v1 (`password_reset_required`) ouvre la feuille
+ * « Mot de passe oublié », adresse remplie.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -32,6 +34,12 @@ const envoi = ref(false)
 const refus = ref<string | null>(null)
 const adresseAConfirmer = ref<string | null>(null)
 const feuilleOuverte = ref(false)
+const oubliObligatoire = ref(false)
+
+function ouvrirLOubli(obligatoire: boolean): void {
+  oubliObligatoire.value = obligatoire
+  feuilleOuverte.value = true
+}
 
 async function envoyer(): Promise<void> {
   refus.value = null
@@ -56,6 +64,10 @@ async function envoyer(): Promise<void> {
         break
       case 'invalid_credentials':
         refus.value = t('guide-nego.connexion.refus.identifiants')
+        break
+      case 'password_reset_required':
+        motDePasse.value = ''
+        ouvrirLOubli(true)
         break
       case 'locked':
         refus.value = t('guide-nego.connexion.refus.verrouille')
@@ -104,7 +116,7 @@ useHead({ title: t('guide-nego.connexion.titre') })
         autocomplete="current-password"
       />
 
-      <GnBouton variante="discret" largeur="demie" @clic="feuilleOuverte = true">
+      <GnBouton variante="discret" largeur="demie" @clic="ouvrirLOubli(false)">
         {{ t('guide-nego.connexion.mot-de-passe-oublie') }}
       </GnBouton>
 
@@ -135,7 +147,11 @@ useHead({ title: t('guide-nego.connexion.titre') })
       v-model="feuilleOuverte"
       :titre="t('guide-nego.connexion.oubli.titre')"
     >
-      <GnMotDePasseOublie :adresse="adresse" @annuler="feuilleOuverte = false" />
+      <GnMotDePasseOublie
+        :adresse="adresse"
+        :obligatoire="oubliObligatoire"
+        @annuler="feuilleOuverte = false"
+      />
     </GnFeuilleBasse>
   </GnEcran>
 </template>
