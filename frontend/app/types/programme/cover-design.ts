@@ -13,6 +13,7 @@ export interface CoverDesignOptions {
   show_date: boolean
   show_speakers: boolean
   show_logos: boolean
+  /** Le nom est d'origine : vrai, la photo de fond est l'image de l'édition ; faux, celle de l'organisation (`cover_source`). */
   show_event_banner: boolean
   show_event_icon: boolean
 }
@@ -32,6 +33,8 @@ export interface CoverStudioContext {
   design: CoverDesign | null
   /** Rôle `cover_source` du dossier. */
   source_photo: AttachedImage | null
+  /** Rôle `cover` (16:9) de l'édition : la photo de fond par défaut. */
+  edition_cover: AttachedImage | null
   /** Rôle `banner` de l'édition (event.events). */
   edition_banner: AttachedImage | null
   /** Rôle `thumbnail` de l'édition. */

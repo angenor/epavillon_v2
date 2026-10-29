@@ -7,7 +7,6 @@
   "processing": "En traitement",
   "unsaved": "Modifications non enregistrées.",
   "saved": "Galerie enregistrée.",
-  "missingAlt": "Une photo sans description en français ne peut pas être enregistrée. | {count} photos sans description en français ne peuvent pas être enregistrées.",
   "actions": {
     "add": "Ajouter une photo",
     "save": "Enregistrer la galerie",
@@ -17,8 +16,7 @@
   },
   "altText": {
     "label": "Description de la photo",
-    "hint": "Ce que montre la photo, pour qui ne la voit pas. Obligatoire.",
-    "required": "Une description en français est obligatoire."
+    "hint": "Ce que montre la photo, pour qui ne la voit pas. Facultative."
   },
   "caption": {
     "label": "Légende",

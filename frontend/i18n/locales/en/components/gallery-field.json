@@ -7,7 +7,6 @@
   "processing": "Processing",
   "unsaved": "Unsaved changes.",
   "saved": "Gallery saved.",
-  "missingAlt": "A photo without a French description cannot be saved. | {count} photos without a French description cannot be saved.",
   "actions": {
     "add": "Add a photo",
     "save": "Save gallery",
@@ -17,8 +16,7 @@
   },
   "altText": {
     "label": "Photo description",
-    "hint": "What the photo shows, for those who cannot see it. Required.",
-    "required": "A French description is required."
+    "hint": "What the photo shows, for those who cannot see it. Optional."
   },
   "caption": {
     "label": "Caption",

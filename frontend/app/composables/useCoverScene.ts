@@ -7,9 +7,9 @@ export interface CoverSceneSource {
   dateLine: string | null
   placeLine: string | null
   speakers: { name: string; imageUrl: string | null }[]
+  /** La photo de fond retenue : celle de l'édition ou celle de l'organisation. */
   photoUrl: string | null
   organizationLogoUrl: string | null
-  bannerUrl: string | null
   iconUrl: string | null
 }
 
@@ -71,11 +71,10 @@ export function useCoverScene(source: Ref<CoverSceneSource | null>, accentToken:
         scene.value = null
         return
       }
-      const [photo, platformLogo, organizationLogo, banner, icon, ...faces] = await Promise.all([
+      const [photo, platformLogo, organizationLogo, icon, ...faces] = await Promise.all([
         loadImage(current.photoUrl),
         loadImage(PLATFORM_LOGO),
         loadImage(current.organizationLogoUrl),
-        loadImage(current.bannerUrl),
         loadImage(current.iconUrl),
         ...current.speakers.map((speaker) => loadImage(speaker.imageUrl)),
       ])
@@ -93,7 +92,6 @@ export function useCoverScene(source: Ref<CoverSceneSource | null>, accentToken:
         photo,
         platformLogo,
         organizationLogo,
-        banner,
         icon,
         colors: resolveColors(token),
         fontFamily: getComputedStyle(document.body).fontFamily,

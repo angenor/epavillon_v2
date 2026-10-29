@@ -103,6 +103,7 @@ async fn composer(state: &ProgrammeState, dossier: ProposalId) -> Result<CoverSt
     Ok(CoverStudioContext {
         design: repo::choix(pool, dossier).await?,
         source_photo: images.source_photo,
+        edition_cover: images.edition_cover,
         edition_banner: images.edition_banner,
         edition_thumbnail: images.edition_thumbnail,
         organization_logo: images.organization_logo,

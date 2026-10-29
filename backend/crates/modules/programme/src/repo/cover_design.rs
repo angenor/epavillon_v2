@@ -62,6 +62,7 @@ pub async fn ecrire(
 /// Les images que l'atelier compose, `AttachedImage` ou nulles.
 pub struct ImagesDeLatelier {
     pub source_photo: Option<serde_json::Value>,
+    pub edition_cover: Option<serde_json::Value>,
     pub edition_banner: Option<serde_json::Value>,
     pub edition_thumbnail: Option<serde_json::Value>,
     pub organization_logo: Option<serde_json::Value>,
@@ -73,6 +74,7 @@ pub async fn images<'e>(
 ) -> Result<ImagesDeLatelier> {
     let ligne = sqlx::query!(
         r#"SELECT media.attached_image('programme', 'proposals', p.id, 'cover_source') AS "source_photo",
+                  media.attached_image('event', 'events', p.event_id, 'cover') AS "edition_cover",
                   media.attached_image('event', 'events', p.event_id, 'banner') AS "edition_banner",
                   media.attached_image('event', 'events', p.event_id, 'thumbnail') AS "edition_thumbnail",
                   media.attached_image('org', 'organizations', p.organization_id, 'logo') AS "organization_logo"
@@ -85,6 +87,7 @@ pub async fn images<'e>(
 
     Ok(ImagesDeLatelier {
         source_photo: ligne.source_photo,
+        edition_cover: ligne.edition_cover,
         edition_banner: ligne.edition_banner,
         edition_thumbnail: ligne.edition_thumbnail,
         organization_logo: ligne.organization_logo,

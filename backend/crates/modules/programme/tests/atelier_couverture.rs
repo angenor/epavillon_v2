@@ -67,12 +67,14 @@ async fn la_lecture_est_vide_puis_rend_les_choix_et_les_images() {
         .expect("lecture");
     assert!(vide.design.is_none());
     assert!(vide.source_photo.is_none());
+    assert!(vide.edition_cover.is_none());
     assert!(vide.edition_banner.is_none());
     assert!(vide.edition_thumbnail.is_none());
     assert!(vide.organization_logo.is_none());
 
     let id = dossier.as_uuid();
     image(&bac, &terrain, "programme", "proposals", id, "cover_source").await;
+    image(&bac, &terrain, "event", "events", terrain.edition, "cover").await;
     image(&bac, &terrain, "event", "events", terrain.edition, "banner").await;
     image(
         &bac,
@@ -114,6 +116,7 @@ async fn la_lecture_est_vide_puis_rend_les_choix_et_les_images() {
     assert_eq!(design.options, options);
     for image in [
         &lu.source_photo,
+        &lu.edition_cover,
         &lu.edition_banner,
         &lu.edition_thumbnail,
         &lu.organization_logo,

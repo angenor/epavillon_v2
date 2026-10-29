@@ -9,11 +9,10 @@
   },
   "altText": {
     "label": "Description de l'image",
-    "hint": "Ce que montre l'image, pour qui ne la voit pas. Obligatoire : sans elle, l'image ne peut pas être servie.",
-    "required": "Une description de l'image en français est obligatoire pour la déposer — c'est la langue de repli quand une autre manque."
+    "hint": "Ce que montre l'image, pour qui ne la voit pas. Facultatif : sans elle, le nom de l'emplacement sert de description."
   },
   "editor": {
-    "title": "{slot} — recadrage",
+    "title": "{slot} : recadrage",
     "description": "Le fichier n'est pas envoyé tel quel : ce qui part est ce que montre l'aperçu, à la forme exigée par cet emplacement.",
     "apply": "Téléverser"
   },

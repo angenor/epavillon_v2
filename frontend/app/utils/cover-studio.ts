@@ -32,10 +32,10 @@ export interface CoverScene {
   dateLine: string | null
   placeLine: string | null
   speakers: CoverSpeaker[]
+  /** La photo de fond : celle de l'édition par défaut, ou celle de l'organisation. */
   photo: CanvasImageSource | null
   platformLogo: CanvasImageSource | null
   organizationLogo: CanvasImageSource | null
-  banner: CanvasImageSource | null
   icon: CanvasImageSource | null
   colors: CoverColors
   fontFamily: string
@@ -56,7 +56,7 @@ export const DEFAULT_COVER_OPTIONS: CoverDesignOptions = {
   show_date: true,
   show_speakers: true,
   show_logos: true,
-  show_event_banner: false,
+  show_event_banner: true,
   show_event_icon: true,
 }
 
@@ -205,18 +205,11 @@ function drawLogoBar(ctx: CanvasRenderingContext2D, scene: CoverScene): void {
   if (scene.organizationLogo) drawContained(ctx, scene.organizationLogo, COVER_WIDTH - 48 - 300, y + 18, 300, LOGO_BAR - 36)
 }
 
-const BANNER = 150
-
-function drawBanner(ctx: CanvasRenderingContext2D, scene: CoverScene): void {
-  if (!scene.banner) return
-  drawCovering(ctx, scene.banner, 0, 0, COVER_WIDTH, BANNER)
-}
-
-function drawIcon(ctx: CanvasRenderingContext2D, scene: CoverScene, top: number): void {
+function drawIcon(ctx: CanvasRenderingContext2D, scene: CoverScene): void {
   if (!scene.icon) return
   const size = 132
   const x = COVER_WIDTH - size - 40
-  const y = top + 40
+  const y = 40
   ctx.save()
   roundedRect(ctx, x, y, size, size, 20)
   ctx.fillStyle = scene.colors.paper
@@ -227,23 +220,37 @@ function drawIcon(ctx: CanvasRenderingContext2D, scene: CoverScene, top: number)
   ctx.restore()
 }
 
-/** Le cadre utile une fois posés la bannière (en haut) et les logos (en bas). */
-interface Frame {
-  top: number
-  bottom: number
+/** Le bas de la zone utile : au-dessus du bandeau de logos quand il est montré. */
+function bottomOf(options: CoverDesignOptions): number {
+  return options.show_logos ? COVER_HEIGHT - LOGO_BAR : COVER_HEIGHT
 }
 
-function frameOf(scene: CoverScene, options: CoverDesignOptions): Frame {
-  return {
-    top: options.show_event_banner && scene.banner ? BANNER : 0,
-    bottom: options.show_logos ? COVER_HEIGHT - LOGO_BAR : COVER_HEIGHT,
+function drawChrome(ctx: CanvasRenderingContext2D, scene: CoverScene, options: CoverDesignOptions): void {
+  if (options.show_logos) drawLogoBar(ctx, scene)
+  if (options.show_event_icon) drawIcon(ctx, scene)
+}
+
+/** La photo en plein cadre, ou l'aplat de la couleur choisie sans photo. */
+function drawBackdrop(ctx: CanvasRenderingContext2D, scene: CoverScene, bottom: number): void {
+  if (scene.photo) drawCovering(ctx, scene.photo, 0, 0, COVER_WIDTH, bottom)
+  else {
+    ctx.fillStyle = scene.colors.accent
+    ctx.fillRect(0, 0, COVER_WIDTH, bottom)
   }
 }
 
-function drawChrome(ctx: CanvasRenderingContext2D, scene: CoverScene, options: CoverDesignOptions, frame: Frame): void {
-  if (options.show_event_banner) drawBanner(ctx, scene)
-  if (options.show_logos) drawLogoBar(ctx, scene)
-  if (options.show_event_icon) drawIcon(ctx, scene, frame.top)
+/** Un dégradé sur toute la zone utile ; `stops` : position de 0 à 1, couleur, opacité. */
+function drawFade(
+  ctx: CanvasRenderingContext2D,
+  bottom: number,
+  direction: 'horizontal' | 'vertical',
+  stops: [number, string, number][],
+): void {
+  const gradient =
+    direction === 'horizontal' ? ctx.createLinearGradient(0, 0, COVER_WIDTH, 0) : ctx.createLinearGradient(0, 0, 0, bottom)
+  for (const [at, color, alpha] of stops) gradient.addColorStop(at, withAlpha(color, alpha))
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, COVER_WIDTH, bottom)
 }
 
 /** Bloc de texte commun : surtitre, titre, date et lieu, à partir de `y`. */
@@ -292,32 +299,129 @@ export interface CoverTemplate {
   draw(ctx: CanvasRenderingContext2D, scene: CoverScene, options: CoverDesignOptions): void
 }
 
+// Dégradés et voiles : seulement sur une photo (exception arbitrée du guide, § « Le verre »).
+
+const fullPhoto: CoverTemplate = {
+  code: 'photo-pleine',
+  usesPhoto: true,
+  draw(ctx, scene, options) {
+    const bottom = bottomOf(options)
+    const { accent, scrim, onAccent } = scene.colors
+    drawBackdrop(ctx, scene, bottom)
+    // La couleur monte de la gauche, le voile du bas : le texte blanc reste lisible sur une photo claire.
+    drawFade(ctx, bottom, 'horizontal', [
+      [0, accent, 0.7],
+      [0.55, accent, 0],
+    ])
+    drawFade(ctx, bottom, 'vertical', [
+      [0, scrim, 0.1],
+      [0.4, scrim, 0.15],
+      [1, scrim, 0.82],
+    ])
+
+    const faces = options.show_speakers ? scene.speakers.slice(0, 4) : []
+    const facesWidth = faces.length > 0 ? faces.length * 116 + 40 : 0
+    const title = fitText(ctx, scene.title, {
+      maxWidth: COVER_WIDTH - 112 - 72 - facesWidth,
+      maxLines: 3,
+      max: 80,
+      min: 40,
+      weight: 700,
+      family: scene.fontFamily,
+    })
+    const dateHeight = options.show_date && scene.dateLine ? 30 * 1.3 + 18 : 0
+    const blockHeight = 26 * 1.3 + 16 + title.lines.length * title.size * 1.1 + dateHeight
+    const top = bottom - 72 - blockHeight
+
+    ctx.fillStyle = accent
+    ctx.fillRect(72, top, 12, blockHeight)
+    ctx.fillStyle = onAccent
+    ctx.font = `600 26px ${scene.fontFamily}`
+    let y = drawLines(ctx, [scene.eyebrow.toUpperCase()], 112, top, 26, 1.3) + 16
+    ctx.font = `700 ${title.size}px ${scene.fontFamily}`
+    y = drawLines(ctx, title.lines, 112, y, title.size, 1.1) + 18
+    if (options.show_date && scene.dateLine) {
+      ctx.font = `500 30px ${scene.fontFamily}`
+      drawLines(ctx, [scene.dateLine], 112, y, 30, 1.3)
+    }
+    faces.forEach((speaker, index) => {
+      const cx = COVER_WIDTH - 72 - 52 - (faces.length - 1 - index) * 116
+      drawFace(ctx, scene, speaker, cx, bottom - 72 - 52, 52, onAccent)
+    })
+    drawChrome(ctx, scene, options)
+  },
+}
+
 const splitPhoto: CoverTemplate = {
   code: 'texte-photo',
   usesPhoto: true,
   draw(ctx, scene, options) {
-    const frame = frameOf(scene, options)
-    const split = Math.round(COVER_WIDTH * 0.56)
-    ctx.fillStyle = scene.colors.accent
-    ctx.fillRect(0, frame.top, split, frame.bottom - frame.top)
-    if (scene.photo) drawCovering(ctx, scene.photo, split, frame.top, COVER_WIDTH - split, frame.bottom - frame.top)
-    else {
-      ctx.fillStyle = scene.colors.muted
-      ctx.fillRect(split, frame.top, COVER_WIDTH - split, frame.bottom - frame.top)
-    }
+    const bottom = bottomOf(options)
+    const { accent, onAccent } = scene.colors
+    drawBackdrop(ctx, scene, bottom)
+    // L'aplat porte le texte à gauche et se fond dans la photo, sans coupure nette.
+    drawFade(ctx, bottom, 'horizontal', [
+      [0, accent, 1],
+      [0.44, accent, 1],
+      [0.74, accent, 0],
+    ])
     const y = drawTextBlock(
       ctx,
       scene,
       options,
-      { x: 72, y: frame.top + 64, width: split - 144, maxTitleLines: 4, titleMax: 76 },
-      { title: scene.colors.onAccent, text: scene.colors.onAccent, eyebrow: scene.colors.onAccent },
+      { x: 72, y: 64, width: Math.round(COVER_WIDTH * 0.46) - 72, maxTitleLines: 4, titleMax: 76 },
+      { title: onAccent, text: onAccent, eyebrow: onAccent },
     )
     if (options.show_speakers) {
       scene.speakers.slice(0, 5).forEach((speaker, index) => {
-        drawFace(ctx, scene, speaker, 72 + 46 + index * 104, Math.min(y + 70, frame.bottom - 70), 46, scene.colors.onAccent)
+        drawFace(ctx, scene, speaker, 72 + 46 + index * 104, Math.min(y + 70, bottom - 70), 46, onAccent)
       })
     }
-    drawChrome(ctx, scene, options, frame)
+    drawChrome(ctx, scene, options)
+  },
+}
+
+const faces: CoverTemplate = {
+  code: 'visages',
+  usesPhoto: true,
+  draw(ctx, scene, options) {
+    const bottom = bottomOf(options)
+    const { accent, onAccent } = scene.colors
+    drawBackdrop(ctx, scene, bottom)
+    // La photo reste une texture sous la couleur : les visages portent l'image.
+    drawFade(ctx, bottom, 'horizontal', [
+      [0, accent, 0.97],
+      [0.55, accent, 0.9],
+      [1, accent, 0.72],
+    ])
+    const textWidth = options.show_speakers && scene.speakers.length > 0 ? 820 : COVER_WIDTH - 144
+    drawTextBlock(
+      ctx,
+      scene,
+      options,
+      { x: 72, y: 64, width: textWidth, maxTitleLines: 4, titleMax: 80 },
+      { title: onAccent, text: onAccent, eyebrow: onAccent },
+    )
+    if (options.show_speakers) {
+      const shown = scene.speakers.slice(0, 4)
+      const columns = shown.length > 2 ? 2 : shown.length
+      const radius = 96
+      const middle = bottom / 2
+      shown.forEach((speaker, index) => {
+        const column = index % 2
+        const row = Math.floor(index / 2)
+        const rows = Math.ceil(shown.length / columns)
+        const cx = 1000 + radius + column * 270
+        const cy = middle - ((rows - 1) * 250) / 2 + row * 250 - 20
+        drawFace(ctx, scene, speaker, cx, cy, radius, onAccent)
+        ctx.fillStyle = onAccent
+        ctx.font = `600 24px ${scene.fontFamily}`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.fillText(wrapLines(ctx, speaker.name, 250)[0] ?? '', cx, cy + radius + 14)
+      })
+    }
+    drawChrome(ctx, scene, options)
   },
 }
 
@@ -325,106 +429,32 @@ const typographic: CoverTemplate = {
   code: 'typographique',
   usesPhoto: false,
   draw(ctx, scene, options) {
-    const frame = frameOf(scene, options)
+    const bottom = bottomOf(options)
     ctx.fillStyle = scene.colors.paper
-    ctx.fillRect(0, frame.top, COVER_WIDTH, frame.bottom - frame.top)
+    ctx.fillRect(0, 0, COVER_WIDTH, bottom)
     ctx.fillStyle = scene.colors.accent
-    ctx.fillRect(72, frame.top + 64, 140, 16)
+    ctx.fillRect(72, 64, 140, 16)
     const y = drawTextBlock(
       ctx,
       scene,
       options,
-      { x: 72, y: frame.top + 112, width: COVER_WIDTH - 144 - (options.show_event_icon ? 160 : 0), maxTitleLines: 3, titleMax: 104 },
+      { x: 72, y: 112, width: COVER_WIDTH - 144 - (options.show_event_icon ? 160 : 0), maxTitleLines: 3, titleMax: 104 },
       { title: scene.colors.accent, text: scene.colors.ink, eyebrow: scene.colors.muted },
     )
-    if (options.show_speakers && scene.speakers.length > 0 && y < frame.bottom - 60) {
+    if (options.show_speakers && scene.speakers.length > 0 && y < bottom - 60) {
       ctx.fillStyle = scene.colors.muted
       ctx.font = `500 28px ${scene.fontFamily}`
       const names = scene.speakers.map((speaker) => speaker.name).join(', ')
       drawLines(ctx, wrapLines(ctx, names, COVER_WIDTH - 144).slice(0, 2), 72, y + 8, 28, 1.35)
     }
-    drawChrome(ctx, scene, options, frame)
+    drawChrome(ctx, scene, options)
   },
 }
 
-const faces: CoverTemplate = {
-  code: 'visages',
-  usesPhoto: false,
-  draw(ctx, scene, options) {
-    const frame = frameOf(scene, options)
-    ctx.fillStyle = scene.colors.accent
-    ctx.fillRect(0, frame.top, COVER_WIDTH, frame.bottom - frame.top)
-    const textWidth = options.show_speakers && scene.speakers.length > 0 ? 820 : COVER_WIDTH - 144
-    drawTextBlock(
-      ctx,
-      scene,
-      options,
-      { x: 72, y: frame.top + 64, width: textWidth, maxTitleLines: 4, titleMax: 80 },
-      { title: scene.colors.onAccent, text: scene.colors.onAccent, eyebrow: scene.colors.onAccent },
-    )
-    if (options.show_speakers) {
-      const shown = scene.speakers.slice(0, 4)
-      const columns = shown.length > 2 ? 2 : shown.length
-      const radius = 96
-      const middle = (frame.top + frame.bottom) / 2
-      shown.forEach((speaker, index) => {
-        const column = index % 2
-        const row = Math.floor(index / 2)
-        const rows = Math.ceil(shown.length / columns)
-        const cx = 1000 + radius + column * 270
-        const cy = middle - ((rows - 1) * 250) / 2 + row * 250 - 20
-        drawFace(ctx, scene, speaker, cx, cy, radius, scene.colors.onAccent)
-        ctx.fillStyle = scene.colors.onAccent
-        ctx.font = `600 24px ${scene.fontFamily}`
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'top'
-        ctx.fillText(wrapLines(ctx, speaker.name, 250)[0] ?? '', cx, cy + radius + 14)
-      })
-    }
-    drawChrome(ctx, scene, options, frame)
-  },
-}
-
-const fullPhoto: CoverTemplate = {
-  code: 'photo-pleine',
-  usesPhoto: true,
-  draw(ctx, scene, options) {
-    const frame = frameOf(scene, options)
-    const height = frame.bottom - frame.top
-    if (scene.photo) drawCovering(ctx, scene.photo, 0, frame.top, COVER_WIDTH, height)
-    else {
-      ctx.fillStyle = scene.colors.accent
-      ctx.fillRect(0, frame.top, COVER_WIDTH, height)
-    }
-    // Voile sur le média seulement (exception arbitrée du guide) : le texte blanc reste lisible sur une photo claire.
-    const veil = ctx.createLinearGradient(0, frame.top, 0, frame.bottom)
-    veil.addColorStop(0, withAlpha(scene.colors.scrim, 0.15))
-    veil.addColorStop(1, withAlpha(scene.colors.scrim, 0.72))
-    ctx.fillStyle = veil
-    ctx.fillRect(0, frame.top, COVER_WIDTH, height)
-    ctx.fillStyle = scene.colors.accent
-    ctx.fillRect(72, frame.bottom - 360, 12, 280)
-    ctx.save()
-    const lines = fitText(ctx, scene.title, { maxWidth: COVER_WIDTH - 260, maxLines: 3, max: 72, min: 40, weight: 700, family: scene.fontFamily })
-    const top = frame.bottom - 360
-    ctx.fillStyle = scene.colors.onAccent
-    ctx.font = `600 26px ${scene.fontFamily}`
-    let y = drawLines(ctx, [scene.eyebrow.toUpperCase()], 112, top, 26, 1.3) + 16
-    ctx.font = `700 ${lines.size}px ${scene.fontFamily}`
-    y = drawLines(ctx, lines.lines, 112, y, lines.size, 1.1) + 18
-    if (options.show_date && scene.dateLine) {
-      ctx.font = `500 30px ${scene.fontFamily}`
-      drawLines(ctx, [scene.dateLine], 112, y, 30, 1.3)
-    }
-    ctx.restore()
-    drawChrome(ctx, scene, options, frame)
-  },
-}
-
-export const COVER_TEMPLATES: CoverTemplate[] = [splitPhoto, typographic, faces, fullPhoto]
+export const COVER_TEMPLATES: CoverTemplate[] = [fullPhoto, splitPhoto, faces, typographic]
 
 export function findCoverTemplate(code: string | null | undefined): CoverTemplate {
-  return COVER_TEMPLATES.find((template) => template.code === code) ?? splitPhoto
+  return COVER_TEMPLATES.find((template) => template.code === code) ?? fullPhoto
 }
 
 export function drawCover(ctx: CanvasRenderingContext2D, scene: CoverScene, templateCode: string, options: CoverDesignOptions): void {

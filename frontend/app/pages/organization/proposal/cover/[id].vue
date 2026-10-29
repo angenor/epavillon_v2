@@ -3,6 +3,7 @@ import type { ProposalFile } from '~/types/organization-workspace'
 import type { EditableProposal } from '~/types/proposal-form'
 import type { CoverDesignOptions, CoverStudioContext } from '~/types/programme/cover-design'
 import type { AssetId } from '~/types/shared'
+import type { AttachedImage } from '~/types/media'
 import type { CoverSceneSource } from '~/composables/useCoverScene'
 import type { CoverAccent } from '~/utils/cover-studio'
 import { findCoverTemplate } from '~/utils/cover-studio'
@@ -92,7 +93,6 @@ watch(
 )
 
 const usesPhoto = computed(() => findCoverTemplate(template.value).usesPhoto)
-const hasBanner = computed(() => Boolean(data.value?.studio.edition_banner))
 const hasIcon = computed(() => Boolean(data.value?.studio.edition_thumbnail))
 const hasLogo = computed(() => Boolean(data.value?.studio.organization_logo))
 
@@ -102,9 +102,28 @@ const toggles = computed<OptionKey[]>(() => [
   'show_date',
   'show_speakers',
   'show_logos',
-  ...(hasBanner.value ? (['show_event_banner'] as const) : []),
   ...(hasIcon.value ? (['show_event_icon'] as const) : []),
 ])
+
+const steps = computed(() => ['template', ...(usesPhoto.value ? ['photo'] : []), 'content', 'color'])
+const stepTitle = (key: string) => `${steps.value.indexOf(key) + 1}. ${t(`organization.workspace.cover.steps.${key}`)}`
+
+// ---------------------------------------------------------------------------
+// La photo de fond : celle de l'édition d'office, celle de l'organisation sur demande
+// ---------------------------------------------------------------------------
+
+// `show_event_banner` dit laquelle sert ; la photo de l'organisation reste
+// rattachée quand on revient à celle de l'édition, pour y retourner sans la redéposer.
+const eventPhoto = computed(() => data.value?.studio.edition_cover ?? data.value?.studio.edition_banner ?? null)
+// La photo déposée à l'instant compte avant que son traitement la rende servable.
+const uploadedPhoto = ref<AttachedImage | null>(null)
+const ownPhoto = computed(() => data.value?.studio.source_photo ?? uploadedPhoto.value)
+const usingEventPhoto = computed(() => Boolean(eventPhoto.value) && (options.value.show_event_banner || !ownPhoto.value))
+const backgroundPhoto = computed(() => (usingEventPhoto.value ? eventPhoto.value : ownPhoto.value))
+const editionName = computed(() => {
+  const edition = data.value?.file.tracking.edition
+  return edition ? (edition.acronym ?? tr(edition.title)) : ''
+})
 
 // ---------------------------------------------------------------------------
 // La scène
@@ -127,9 +146,8 @@ const source = computed<CoverSceneSource | null>(() => {
       name: speakerName(speaker),
       imageUrl: speaker.photo_image?.url ?? null,
     })),
-    photoUrl: studio.source_photo?.url ?? null,
+    photoUrl: backgroundPhoto.value?.url ?? null,
     organizationLogoUrl: studio.organization_logo?.url ?? null,
-    bannerUrl: studio.edition_banner?.url ?? null,
     iconUrl: studio.edition_thumbnail?.url ?? null,
   }
 })
@@ -139,11 +157,6 @@ const scene = useCoverScene(source, accentToken)
 
 const preview = ref<{ toBlob: () => Promise<Blob | null> } | null>(null)
 
-// ---------------------------------------------------------------------------
-// La photo de départ, gardée à part de l'image fabriquée
-// ---------------------------------------------------------------------------
-
-const changingPhoto = ref(false)
 const photoError = ref<string | null>(null)
 
 async function attachSourcePhoto(assetId: AssetId | null): Promise<void> {
@@ -156,7 +169,7 @@ async function attachSourcePhoto(assetId: AssetId | null): Promise<void> {
       owner_id: proposalId.value,
       assignments: [{ role: 'cover_source', asset_id: assetId }],
     })
-    changingPhoto.value = false
+    options.value.show_event_banner = false
     await refresh()
   } catch (thrown) {
     photoError.value = apiErrorMessage(thrown, (key) => t(key))
@@ -248,7 +261,7 @@ async function save(): Promise<void> {
           <h1 class="mt-1 text-2xl leading-tight font-semibold text-balance">{{ tr(data.file.tracking.proposal.title) }}</h1>
         </div>
         <div class="flex shrink-0 flex-wrap gap-3">
-          <UiButton variant="secondary" :to="fileTo">{{ t('organization.workspace.cover.back') }}</UiButton>
+          <UiButton variant="secondary" icon="arrow-left" :to="fileTo">{{ t('organization.workspace.cover.back') }}</UiButton>
           <UiButton variant="primary" icon="check" :loading="saving" :disabled="!scene" @click="save">
             {{ t('organization.workspace.cover.save') }}
           </UiButton>
@@ -261,7 +274,7 @@ async function save(): Promise<void> {
         <!-- LES CHOIX -->
         <div class="flex flex-col gap-8 rounded-lg border border-border bg-surface-raised p-5">
           <fieldset>
-            <legend class="font-semibold text-heading">{{ t('organization.workspace.cover.steps.template') }}</legend>
+            <legend class="font-semibold text-heading">{{ stepTitle('template') }}</legend>
             <div class="mt-3 grid grid-cols-2 gap-3">
               <button
                 v-for="entry in templates"
@@ -285,8 +298,43 @@ async function save(): Promise<void> {
             <p class="mt-2 text-sm text-text-muted">{{ t('organization.workspace.cover.catalogHint') }}</p>
           </fieldset>
 
+          <fieldset v-if="usesPhoto">
+            <legend class="font-semibold text-heading">{{ stepTitle('photo') }}</legend>
+            <div class="mt-3 overflow-hidden rounded-md border border-border">
+              <UiImage v-if="backgroundPhoto" :image="backgroundPhoto" ratio="16 / 9" sizes="22rem" />
+              <div v-else class="grid aspect-video place-items-center bg-surface-sunken text-text-subtle">
+                <UiIcon name="image" size="2rem" />
+              </div>
+            </div>
+            <p class="mt-2 text-sm text-text-secondary">
+              <template v-if="!backgroundPhoto">{{ t('organization.workspace.cover.photo.missing') }}</template>
+              <template v-else-if="usingEventPhoto">{{ t('organization.workspace.cover.photo.event', { edition: editionName }) }}</template>
+              <template v-else>{{ t('organization.workspace.cover.photo.own') }}</template>
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <MediaImageField
+                role="cover_source"
+                :asset-id="null"
+                :label="t('organization.workspace.cover.photo.field')"
+                :alt-fallback="data.editable.draft.title"
+                :button-label="t('organization.workspace.cover.photo.change')"
+                :rule="photoRule ?? null"
+                :owner="{ schema: 'programme', table: 'proposals', id: proposalId }"
+                @update:asset-id="attachSourcePhoto"
+                @update:image="(image) => (uploadedPhoto = image)"
+              />
+              <UiButton v-if="usingEventPhoto && ownPhoto" variant="ghost" @click="options.show_event_banner = false">
+                {{ t('organization.workspace.cover.photo.useOwn') }}
+              </UiButton>
+              <UiButton v-else-if="!usingEventPhoto && eventPhoto" variant="ghost" @click="options.show_event_banner = true">
+                {{ t('organization.workspace.cover.photo.useEvent') }}
+              </UiButton>
+            </div>
+            <UiAlert v-if="photoError" class="mt-2" intent="danger" :message="photoError" live />
+          </fieldset>
+
           <fieldset>
-            <legend class="font-semibold text-heading">{{ t('organization.workspace.cover.steps.content') }}</legend>
+            <legend class="font-semibold text-heading">{{ stepTitle('content') }}</legend>
             <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.cover.contentHint') }}</p>
             <div class="mt-3 flex flex-col gap-2">
               <UiCheckbox
@@ -297,29 +345,10 @@ async function save(): Promise<void> {
                 :label="t(`organization.workspace.cover.options.${key}`, { edition: data.file.tracking.edition.acronym ?? '' })"
               />
             </div>
-            <template v-if="usesPhoto">
-              <p class="mt-4 text-sm text-text-secondary">
-                {{ data.studio.source_photo ? t('organization.workspace.cover.photoSet') : t('organization.workspace.cover.photoMissing') }}
-              </p>
-              <UiButton v-if="!changingPhoto" class="mt-2" variant="secondary" icon="image" @click="changingPhoto = true">
-                {{ data.studio.source_photo ? t('organization.workspace.cover.changePhoto') : t('organization.workspace.cover.addPhoto') }}
-              </UiButton>
-              <MediaImageField
-                v-else
-                class="mt-2"
-                role="cover_source"
-                :asset-id="null"
-                :label="t('organization.workspace.cover.photoField')"
-                :rule="photoRule ?? null"
-                :owner="{ schema: 'programme', table: 'proposals', id: proposalId }"
-                @update:asset-id="attachSourcePhoto"
-              />
-              <UiAlert v-if="photoError" class="mt-2" intent="danger" :message="photoError" live />
-            </template>
           </fieldset>
 
           <fieldset>
-            <legend class="font-semibold text-heading">{{ t('organization.workspace.cover.steps.color') }}</legend>
+            <legend class="font-semibold text-heading">{{ stepTitle('color') }}</legend>
             <div class="mt-3 flex flex-wrap gap-3">
               <button
                 v-for="[code, token] in accents"

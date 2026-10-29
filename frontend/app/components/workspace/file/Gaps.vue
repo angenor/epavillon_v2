@@ -27,7 +27,6 @@ const emit = defineEmits<{ logoSet: [] }>()
 const { t } = useI18n()
 const api = useApi()
 
-const addingLogo = ref(false)
 const logoAssetId = ref<AssetId | null>(null)
 const logoError = ref<string | null>(null)
 
@@ -42,7 +41,6 @@ async function attachLogo(assetId: AssetId | null): Promise<void> {
       owner_id: props.organizationId,
       assignments: [{ role: 'logo', asset_id: assetId }],
     })
-    addingLogo.value = false
     emit('logoSet')
   } catch (thrown) {
     logoError.value = apiErrorMessage(thrown, (key) => t(key))
@@ -86,20 +84,20 @@ function labelOf(gap: ProposalFileGap): string {
             </p>
           </div>
         </div>
-        <UiButton v-if="props.canSetLogo && !addingLogo" variant="danger" class="shrink-0" @click="addingLogo = true">
-          {{ t('organization.workspace.proposal.gaps.logo.action') }}
-        </UiButton>
+        <MediaImageField
+          v-if="props.canSetLogo"
+          class="shrink-0"
+          role="logo"
+          :asset-id="logoAssetId"
+          :label="t('organization.workspace.proposal.gaps.logo.field')"
+          :button-label="t('organization.workspace.proposal.gaps.logo.action')"
+          button-icon="upload"
+          button-variant="danger"
+          :rule="props.logoRule"
+          :owner="{ schema: 'org', table: 'organizations', id: props.organizationId }"
+          @update:asset-id="attachLogo"
+        />
       </div>
-      <MediaImageField
-        v-if="addingLogo"
-        class="mt-4 max-w-md"
-        role="logo"
-        :asset-id="logoAssetId"
-        :label="t('organization.workspace.proposal.gaps.logo.field')"
-        :rule="props.logoRule"
-        :owner="{ schema: 'org', table: 'organizations', id: props.organizationId }"
-        @update:asset-id="attachLogo"
-      />
       <UiAlert v-if="logoError" class="mt-3" intent="danger" :message="logoError" live />
     </div>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AssetId, I18nText, Uuid } from '~/types/shared'
 import type { AttachableRoleRule, AttachedImage, AttachmentRole } from '~/types/media'
+import type { ButtonVariant } from '~/types/ui'
 
 /**
  * UN EMPLACEMENT D'IMAGE, DU DISQUE JUSQU'À L'OBJET DÉPOSÉ.
@@ -17,14 +18,14 @@ import type { AttachableRoleRule, AttachedImage, AttachmentRole } from '~/types/
  * exigé par le rôle et le réencode au poids voulu. Ce qui traverse le réseau est
  * donc recevable par construction — la forme n'est plus apprise par le refus.
  *
- * ── LE TEXTE ALTERNATIF EST OBLIGATOIRE, ET IL SE SAISIT ICI ────────────────
+ * ── LE TEXTE ALTERNATIF SE SAISIT ICI, ET IL EST FACULTATIF ─────────────────
  *
  * `ck_assets_alt_text_required` interdit à une image d'atteindre l'état servable
- * sans lui, et le dépôt le refuse AVANT de lire le flux. Le demander après le
- * téléversement ferait perdre le fichier ; le demander avant le recadrage ferait
- * décrire une image qu'on n'a pas encore cadrée. Il se saisit donc DANS
- * l'éditeur, à côté de l'aperçu de ce qui partira. C'est une DONNÉE multilingue,
- * pas une traduction d'interface.
+ * sans lui, et le dépôt le refuse AVANT de lire le flux. Il se saisit DANS
+ * l'éditeur, à côté de l'aperçu de ce qui partira. Laissé vide, il prend
+ * `altFallback` (ou le libellé de l'emplacement) : depuis le 29/10, le
+ * commanditaire ne veut plus qu'il bloque un dépôt. C'est une DONNÉE
+ * multilingue, pas une traduction d'interface.
  *
  * ── LE DÉPÔT ET LE RATTACHEMENT SONT DEUX GESTES ────────────────────────────
  *
@@ -60,8 +61,28 @@ const props = withDefaults(
     maxWidth?: number | null
     formats?: Array<'jpeg' | 'webp' | 'png'> | null
     defaultQuality?: number | null
+    /** Description déposée quand personne n'en saisit. Défaut : `label`. */
+    altFallback?: string
+    /**
+     * Un bouton seul au lieu de l'emplacement : il ouvre directement le choix du
+     * fichier, l'éditeur suit. Pour un écran qui montre déjà l'image ailleurs.
+     */
+    buttonLabel?: string
+    buttonIcon?: string
+    buttonVariant?: ButtonVariant
   }>(),
-  { rule: null, image: null, owner: null, maxWidth: null, formats: null, defaultQuality: null },
+  {
+    rule: null,
+    image: null,
+    owner: null,
+    maxWidth: null,
+    formats: null,
+    defaultQuality: null,
+    altFallback: undefined,
+    buttonLabel: undefined,
+    buttonIcon: 'image',
+    buttonVariant: 'secondary',
+  },
 )
 
 const emit = defineEmits<{
@@ -145,8 +166,7 @@ async function upload(result: {
   mimeType: string
   filename: string
 }): Promise<void> {
-  const description = altText.value
-  if (!description?.fr) return
+  const description: I18nText = altText.value?.fr ? altText.value : { fr: props.altFallback ?? props.label }
   const asset = await deposer({
     file: result.blob,
     filename: result.filename,
@@ -182,80 +202,84 @@ function clear(): void {
   emit('update:image', null)
 }
 
-/**
- * LE MESSAGE NOMME LA LANGUE, et ce n'est pas un détail.
- *
- * Le champ de description a DEUX ONGLETS et le français est la langue de repli
- * du modèle : une description saisie en anglais SEULEMENT laisse la valeur nulle
- * et l'envoi fermé. Le composant de saisie ne remonte rien tant que le français
- * manque — l'écran ne peut donc pas distinguer « rien saisi » de « saisi dans
- * l'autre onglet ». Un message qui dirait « une description est obligatoire » à
- * quelqu'un qui vient d'en écrire une le ferait tourner en rond ; celui-ci dit
- * la langue, et couvre les deux cas.
- */
 const maxLabel = computed(() =>
   props.rule?.max_byte_size ? formatByteSize(props.rule.max_byte_size, locale.value) : null,
 )
 </script>
 
 <template>
-  <section class="flex flex-col gap-3 rounded-lg border border-border-subtle bg-surface p-4">
-    <header>
-      <h3 class="text-sm font-semibold">{{ props.label }}</h3>
-      <p class="mt-0.5 text-xs text-text-subtle">
-        <template v-if="props.shapeLabel">
-          {{ t('image-field.shape', { ratio: props.shapeLabel }) }}
-        </template>
-        <template v-if="props.use"> — {{ props.use }}</template>
-        <template v-if="maxLabel"> — {{ t('image-field.max', { max: maxLabel }) }}</template>
-      </p>
-    </header>
-
-    <UiImage
-      v-if="shown"
-      :image="shown"
-      :ratio="aspectRatio ? String(aspectRatio) : 'auto'"
-      rounded="rounded-md"
-      sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
-    />
-    <!-- L'EMPLACEMENT VIDE GARDE LA FORME du fichier attendu : c'est ce qui fait
-         comprendre « très large » ou « carré » sans avoir à le lire. -->
-    <p
-      v-else
-      class="flex items-center justify-center rounded-md border border-dashed border-border px-3 text-center text-xs text-text-subtle"
-      :style="{ aspectRatio: aspectRatio ?? 1.7778 }"
+  <div :class="props.buttonLabel ? 'inline-flex flex-col items-start gap-2' : 'flex flex-col'">
+    <UiButton
+      v-if="props.buttonLabel"
+      :variant="props.buttonVariant"
+      :icon="props.buttonIcon"
+      :loading="busy"
+      :disabled="props.disabled"
+      @click="pick"
     >
-      {{ t('image-field.empty') }}
-    </p>
+      {{ props.buttonLabel }}
+    </UiButton>
+    <section v-else class="flex flex-1 flex-col gap-3 rounded-lg border border-border-subtle bg-surface p-4">
+      <header>
+        <h3 class="text-sm font-semibold">{{ props.label }}</h3>
+        <p class="mt-0.5 text-xs text-text-subtle">
+          <template v-if="props.shapeLabel">
+            {{ t('image-field.shape', { ratio: props.shapeLabel }) }}
+          </template>
+          <template v-if="props.use"> — {{ props.use }}</template>
+          <template v-if="maxLabel"> — {{ t('image-field.max', { max: maxLabel }) }}</template>
+        </p>
+      </header>
 
-    <div class="flex flex-wrap items-center gap-2">
-      <UiButton
-        variant="secondary"
-        size="sm"
-        icon="upload"
-        :disabled="props.disabled || busy"
-        @click="pick"
+      <UiImage
+        v-if="shown"
+        :image="shown"
+        :ratio="aspectRatio ? String(aspectRatio) : 'auto'"
+        rounded="rounded-md"
+        sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
+      />
+      <!-- L'EMPLACEMENT VIDE GARDE LA FORME du fichier attendu : c'est ce qui fait
+           comprendre « très large » ou « carré » sans avoir à le lire. -->
+      <p
+        v-else
+        class="flex items-center justify-center rounded-md border border-dashed border-border px-3 text-center text-xs text-text-subtle"
+        :style="{ aspectRatio: aspectRatio ?? 1.7778 }"
       >
-        {{ shown ? t('image-field.actions.replace') : t('image-field.actions.choose') }}
-      </UiButton>
-      <UiButton
-        v-if="props.assetId"
-        variant="ghost"
-        size="sm"
-        icon="trash"
-        :disabled="props.disabled || busy"
-        @click="clear"
-      >
-        {{ t('image-field.actions.remove') }}
-      </UiButton>
-    </div>
+        {{ t('image-field.empty') }}
+      </p>
 
-    <UiAlert v-if="failure" intent="danger" live compact :message="failure" />
+      <div class="flex flex-wrap items-center gap-2">
+        <UiButton
+          variant="secondary"
+          size="sm"
+          icon="upload"
+          :disabled="props.disabled || busy"
+          @click="pick"
+        >
+          {{ shown ? t('image-field.actions.replace') : t('image-field.actions.choose') }}
+        </UiButton>
+        <UiButton
+          v-if="props.assetId"
+          variant="ghost"
+          size="sm"
+          icon="trash"
+          :disabled="props.disabled || busy"
+          @click="clear"
+        >
+          {{ t('image-field.actions.remove') }}
+        </UiButton>
+      </div>
+
+      <UiAlert v-if="failure" intent="danger" live compact :message="failure" />
+    </section>
+    <UiAlert v-if="props.buttonLabel && failure" intent="danger" live compact :message="failure" />
 
     <input
       ref="input"
       type="file"
       class="sr-only"
+      tabindex="-1"
+      aria-hidden="true"
       :accept="accept"
       :aria-label="props.label"
       @change="onFileChosen"
@@ -276,8 +300,6 @@ const maxLabel = computed(() =>
       :formats="props.formats"
       :default-quality="props.defaultQuality"
       :busy="busy"
-      :apply-disabled="!altText?.fr"
-      :apply-hint="t('image-field.altText.required')"
       :apply-label="t('image-field.editor.apply')"
       @apply="upload"
       @cancel="cancelEditing"
@@ -288,12 +310,11 @@ const maxLabel = computed(() =>
           :label="t('image-field.altText.label')"
           :hint="t('image-field.altText.hint')"
           :disabled="busy"
-          required
           multiline
           :rows="3"
           :maxlength="300"
         />
       </template>
     </UiImageEditor>
-  </section>
+  </div>
 </template>

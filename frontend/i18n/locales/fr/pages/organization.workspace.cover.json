@@ -4,9 +4,10 @@
   "save": "Enregistrer comme image de couverture",
   "eyebrow": "Pavillon de la Francophonie · {edition}",
   "steps": {
-    "template": "1. Choisissez un modèle",
-    "content": "2. Ce qui figure sur l'image",
-    "color": "3. La couleur"
+    "template": "Choisissez un modèle",
+    "photo": "La photo de fond",
+    "content": "Ce qui figure sur l'image",
+    "color": "La couleur"
   },
   "catalogHint": "Les modèles sont préparés par l'IFDD et suivent la charte de la Francophonie.",
   "contentHint": "Tout vient de votre dossier : modifiez-le là-bas, l'image suit.",
@@ -20,7 +21,6 @@
     "show_date": "Date, heure et salle",
     "show_speakers": "Visages des intervenants",
     "show_logos": "Logos (IFDD, OIF, votre organisation)",
-    "show_event_banner": "Bannière de l'événement ({edition})",
     "show_event_icon": "Icône de l'événement ({edition})"
   },
   "accents": {
@@ -30,11 +30,6 @@
     "violet": "Violet",
     "rouge": "Rouge"
   },
-  "photoSet": "Ce modèle utilise votre photo.",
-  "photoMissing": "Ce modèle met une photo en valeur : ajoutez-en une.",
-  "addPhoto": "Ajouter une photo",
-  "changePhoto": "Changer la photo",
-  "photoField": "Photo de départ",
   "previewLabel": "Aperçu de l’image de couverture : {title}",
   "logoMissing": "sa place reste vide sur l'image.",
   "share": {
@@ -42,5 +37,14 @@
     "description": "WhatsApp, LinkedIn, Facebook, courriel : l'aperçu reprend cette image.",
     "site": "epavillonclimatique.francophonie.org"
   },
-  "renderFailed": "L'image n'a pas pu être fabriquée. Réessayez ; si cela recommence, changez de navigateur."
+  "renderFailed": "L'image n'a pas pu être fabriquée. Réessayez ; si cela recommence, changez de navigateur.",
+  "photo": {
+    "event": "Image de l'événement ({edition}), choisie d'office.",
+    "own": "Votre photo.",
+    "missing": "Aucune photo pour l'instant : ajoutez-en une, la couleur choisie la remplace en attendant.",
+    "change": "Changer la photo",
+    "useOwn": "Reprendre ma photo",
+    "useEvent": "Revenir à l'image de l'événement",
+    "field": "Photo de fond"
+  }
 }

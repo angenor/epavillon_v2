@@ -75,6 +75,8 @@ pub struct CoverStudioContext {
     /// Nul tant que l'atelier n'a jamais été enregistré pour ce dossier.
     pub design: Option<CoverDesign>,
     pub source_photo: Option<Value>,
+    /// Rôle `cover` (16:9) de l'édition : la photo de fond par défaut.
+    pub edition_cover: Option<Value>,
     pub edition_banner: Option<Value>,
     pub edition_thumbnail: Option<Value>,
     pub organization_logo: Option<Value>,

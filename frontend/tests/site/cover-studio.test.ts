@@ -45,6 +45,6 @@ test('le voile dose l’opacité d’un jeton opaque', () => {
 })
 
 test('un code de modèle inconnu retombe sur le premier modèle du catalogue', () => {
-  assert.equal(findCoverTemplate('disparu').code, 'texte-photo')
+  assert.equal(findCoverTemplate('disparu').code, 'photo-pleine')
   assert.equal(findCoverTemplate('visages').code, 'visages')
 })

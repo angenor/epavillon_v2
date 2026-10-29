@@ -206,7 +206,6 @@ const { data: mediaRules } = useAsyncData(
 )
 
 const coverError = ref<string | null>(null)
-const changingCover = ref(false)
 
 async function attachCover(assetId: AssetId | null): Promise<void> {
   if (!assetId || !file.value) return
@@ -218,7 +217,6 @@ async function attachCover(assetId: AssetId | null): Promise<void> {
       owner_id: file.value.tracking.proposal.id,
       assignments: [{ role: 'cover', asset_id: assetId }],
     })
-    changingCover.value = false
     await refresh()
   } catch (thrown) {
     coverError.value = apiErrorMessage(thrown, (key) => t(key))
@@ -599,10 +597,17 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
                   {{ t('organization.workspace.proposal.cover.title') }}
                 </h2>
                 <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.proposal.cover.description') }}</p>
-                <div v-if="canEditMedia && !changingCover" class="mt-4 flex flex-wrap gap-3">
-                  <UiButton variant="secondary" icon="image" @click="changingCover = true">
-                    {{ t('organization.workspace.proposal.cover.change') }}
-                  </UiButton>
+                <div v-if="canEditMedia" class="mt-4 flex flex-wrap gap-3">
+                  <MediaImageField
+                    role="cover"
+                    :asset-id="null"
+                    :label="t('organization.workspace.proposal.cover.title')"
+                    :alt-fallback="tr(file.tracking.proposal.title)"
+                    :button-label="t('organization.workspace.proposal.cover.change')"
+                    :rule="mediaRules?.cover ?? null"
+                    :owner="{ schema: 'programme', table: 'proposals', id: file.tracking.proposal.id }"
+                    @update:asset-id="attachCover"
+                  />
                   <UiButton v-if="coverStudio?.design" variant="secondary" icon="edit" :to="studioTo">
                     {{ t('organization.workspace.proposal.cover.edit') }}
                   </UiButton>
@@ -610,16 +615,6 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
                     {{ t('organization.workspace.proposal.cover.create') }}
                   </UiButton>
                 </div>
-                <MediaImageField
-                  v-if="canEditMedia && changingCover"
-                  class="mt-4 max-w-xl"
-                  role="cover"
-                  :asset-id="null"
-                  :label="t('organization.workspace.proposal.cover.change')"
-                  :rule="mediaRules?.cover ?? null"
-                  :owner="{ schema: 'programme', table: 'proposals', id: file.tracking.proposal.id }"
-                  @update:asset-id="attachCover"
-                />
                 <UiAlert v-if="coverError" class="mt-3" intent="danger" :message="coverError" live />
               </div>
             </section>

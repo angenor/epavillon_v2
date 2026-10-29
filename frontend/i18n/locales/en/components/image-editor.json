@@ -18,7 +18,8 @@
     "pngHint": "Lossless, transparency kept. Far heavier on a photograph."
   },
   "quality": {
-    "label": "Quality"
+    "label": "Quality",
+    "lowered": "Lowered automatically to keep the file under {max}."
   },
   "width": {
     "label": "Width",
@@ -26,8 +27,8 @@
   },
   "weight": {
     "label": "File size",
-    "max": "Maximum accepted for this slot: {max}.",
-    "tooHeavy": "The file exceeds the accepted size. Lower the quality or the width."
+    "max": "Maximum: {max}. Above it, quality is lowered automatically.",
+    "tooHeavy": "The file exceeds the accepted weight. Choose WebP or JPEG, or reduce the width."
   },
   "errors": {
     "unreadable": "This file could not be read as an image.",

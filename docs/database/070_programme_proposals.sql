@@ -726,7 +726,9 @@ CREATE TABLE programme.proposal_cover_designs (
     -- Code d'une couleur de la charte, défini dans le site au même endroit.
     accent        text        NOT NULL,
     -- Ce qui figure sur l'image : `show_date`, `show_speakers`, `show_logos`,
-    -- `show_event_banner`, `show_event_icon`, booléens. Une clé absente vaut
+    -- `show_event_banner`, `show_event_icon`, booléens. `show_event_banner`
+    -- choisit la photo de fond (29/10) : vrai, l'image de l'édition ; faux,
+    -- la photo `cover_source` du dossier. Une clé absente vaut
     -- faux à la lecture : l'API écrit l'objet complet, une option ajoutée plus
     -- tard ne demande pas de reprise des lignes existantes.
     options       jsonb       NOT NULL DEFAULT '{}',

@@ -18,7 +18,8 @@
     "pngHint": "Sans perte, transparence gardée. Beaucoup plus lourd sur une photographie."
   },
   "quality": {
-    "label": "Qualité"
+    "label": "Qualité",
+    "lowered": "Abaissée d'elle-même pour que le fichier reste sous {max}."
   },
   "width": {
     "label": "Largeur",
@@ -26,8 +27,8 @@
   },
   "weight": {
     "label": "Poids du fichier",
-    "max": "Maximum accepté pour cet emplacement : {max}.",
-    "tooHeavy": "Le fichier dépasse le poids accepté. Baissez la qualité ou la largeur."
+    "max": "Maximum : {max}. Au-delà, la qualité baisse d'elle-même.",
+    "tooHeavy": "Le fichier dépasse le poids accepté. Choisissez WebP ou JPEG, ou réduisez la largeur."
   },
   "errors": {
     "unreadable": "Ce fichier n'a pas pu être lu comme une image.",

@@ -41,6 +41,7 @@ export function proposalCoverStudio(proposalId: Uuid): CoverStudioContext {
   return {
     design: designs.get(proposalId) ?? null,
     source_photo: attachedImage('programme', 'proposals', proposal.id, 'cover_source'),
+    edition_cover: attachedImage('event', 'events', proposal.event_id, 'cover'),
     edition_banner: attachedImage('event', 'events', proposal.event_id, 'banner'),
     edition_thumbnail: attachedImage('event', 'events', proposal.event_id, 'thumbnail'),
     organization_logo: attachedImage('org', 'organizations', proposal.organization_id, 'logo'),

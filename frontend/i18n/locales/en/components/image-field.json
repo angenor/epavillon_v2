@@ -9,11 +9,10 @@
   },
   "altText": {
     "label": "Image description",
-    "hint": "What the image shows, for those who cannot see it. Required: without it the image cannot be served.",
-    "required": "A French image description is required before uploading — it is the fallback language when another is missing."
+    "hint": "What the image shows, for those who cannot see it. Optional: without it, the slot name is used as the description."
   },
   "editor": {
-    "title": "{slot} — cropping",
+    "title": "{slot}: cropping",
     "description": "The file is not sent as is: what leaves is what the preview shows, in the shape this slot requires.",
     "apply": "Upload"
   },

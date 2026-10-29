@@ -27,8 +27,6 @@ const emit = defineEmits<{ photoSet: []; toggleFocal: [speakerId: string, on: bo
 const { t } = useI18n()
 const api = useApi()
 
-const openPhoto = ref<string | null>(null)
-
 // Une case refusée (le dernier point focal) garde sa valeur : sans nouveau rendu, le navigateur la laisserait décochée.
 const focalRender = ref(0)
 
@@ -50,7 +48,6 @@ async function attachPhoto(speakerId: string, assetId: AssetId | null): Promise<
       owner_id: speakerId,
       assignments: [{ role: 'avatar', asset_id: assetId }],
     })
-    openPhoto.value = null
     emit('photoSet')
   } catch (thrown) {
     photoError.value = apiErrorMessage(thrown, (key) => t(key))
@@ -107,28 +104,19 @@ async function attachPhoto(speakerId: string, assetId: AssetId | null): Promise<
           :label="t('organization.workspace.proposal.focal.checkbox')"
           @update:model-value="(on) => toggleFocal(speaker.speaker_id as string, on)"
         />
-
-        <MediaImageField
-          v-if="openPhoto === speaker.speaker_id && speaker.speaker_id"
-          class="mt-3 max-w-md"
-          role="avatar"
-          :asset-id="null"
-          :label="t('organization.workspace.proposal.speakers.photoField', { name: speakerName(speaker) })"
-          :rule="props.photoRule"
-          :owner="{ schema: 'programme', table: 'proposal_speakers', id: speaker.speaker_id }"
-          @update:asset-id="(assetId) => attachPhoto(speaker.speaker_id as string, assetId)"
-        />
       </div>
 
-      <UiButton
-        v-if="props.canSetPhoto && speaker.speaker_id && openPhoto !== speaker.speaker_id"
-        variant="secondary"
-        icon="image"
+      <MediaImageField
+        v-if="props.canSetPhoto && speaker.speaker_id"
         class="shrink-0 self-start"
-        @click="openPhoto = speaker.speaker_id ?? null"
-      >
-        {{ speaker.photo_image ? t('organization.workspace.proposal.speakers.changePhoto') : t('organization.workspace.proposal.speakers.addPhoto') }}
-      </UiButton>
+        role="avatar"
+        :asset-id="null"
+        :label="t('organization.workspace.proposal.speakers.photoField', { name: speakerName(speaker) })"
+        :button-label="speaker.photo_image ? t('organization.workspace.proposal.speakers.changePhoto') : t('organization.workspace.proposal.speakers.addPhoto')"
+        :rule="props.photoRule"
+        :owner="{ schema: 'programme', table: 'proposal_speakers', id: speaker.speaker_id }"
+        @update:asset-id="(assetId) => attachPhoto(speaker.speaker_id as string, assetId)"
+      />
     </li>
   </ul>
   <UiAlert v-if="photoError" class="mt-3" intent="danger" :message="photoError" live />

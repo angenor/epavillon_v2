@@ -56,14 +56,14 @@ const props = withDefaults(
      * la base compare ; il ne dit rien à qui cadre une photographie.
      */
     ratioLabel?: string
-    /** Plafond du rôle, en octets. Le bouton refuse au-delà. */
+    /** Plafond du rôle, en octets. Le plafond appliqué est le plus bas de celui-ci et de `BYTE_BUDGET`. */
     maxByteSize?: number | null
     /**
      * Largeur de sortie maximale, en pixels : le fond d'un courriel ne dépasse
      * pas 1200 (affiché en 600). Nulle : celle de la sélection.
      */
     maxWidth?: number | null
-    /** Formats proposés, le premier par défaut. Un courriel n'accepte ni WebP. */
+    /** Formats proposés ; WebP par défaut s'il en est, sinon le premier. Un courriel n'accepte pas WebP. */
     formats?: Array<'jpeg' | 'webp' | 'png'> | null
     /** Qualité proposée d'emblée (JPEG, WebP), en pourcentage. */
     defaultQuality?: number | null
@@ -102,6 +102,9 @@ const HANDLE_RADIUS = 7
 /** Largeur de sortie proposée par défaut. Au-delà, le poids ne paie plus. */
 const DEFAULT_OUTPUT_WIDTH = 2000
 const MIN_OUTPUT_WIDTH = 320
+/** Aucune image ne part au-delà (demande du commanditaire, 29/10) : la qualité baisse d'elle-même pour tenir. */
+const BYTE_BUDGET = 500 * 1024
+const MIN_QUALITY = 30
 
 // ---------------------------------------------------------------------------
 // État
@@ -129,8 +132,10 @@ const crop = reactive({ x: 0, y: 0, w: 0, h: 0 })
 /** Taille du cadre de dessin, en pixels CSS. Tenue par l'observateur de taille. */
 const view = reactive({ w: 0, h: 0 })
 
-const format = ref<Format>(FORMATS.value[0] ?? 'jpeg')
-const quality = ref(props.defaultQuality ?? 82)
+const format = ref<Format>(FORMATS.value.includes('webp') ? 'webp' : (FORMATS.value[0] ?? 'jpeg'))
+/** La qualité demandée au curseur ; `quality` est celle du fichier, abaissée s'il le faut pour tenir sous le plafond. */
+const wantedQuality = ref(props.defaultQuality ?? 82)
+const quality = ref(wantedQuality.value)
 const outputWidth = ref(DEFAULT_OUTPUT_WIDTH)
 
 const output = ref<{ blob: Blob; width: number; height: number } | null>(null)
@@ -578,27 +583,22 @@ function scheduleEncode(): void {
   encodeTimer = setTimeout(() => void encode(), 160)
 }
 
-async function encode(): Promise<void> {
-  const source = image.value
-  encoding.value = false
-  if (!source) return
-  encodeFailed.value = false
+const byteBudget = computed(() => Math.min(props.maxByteSize ?? BYTE_BUDGET, BYTE_BUDGET))
 
-  const width = Math.max(1, Math.round(Math.min(outputWidth.value, crop.w)))
+type Rendered = { blob: Blob; width: number; height: number }
+
+async function render(source: HTMLImageElement, width: number, at: number): Promise<Rendered | null> {
   const height = Math.max(1, Math.round(width / (crop.w / crop.h)))
-
   const target = document.createElement('canvas')
   target.width = width
   target.height = height
   const ctx = target.getContext('2d')
-  if (!ctx) {
-    encodeFailed.value = true
-    return
-  }
+  if (!ctx) return null
 
   // LE FOND BLANC N'EST PAS DÉCORATIF : un PNG transparent aplati en JPEG donne
   // du NOIR là où il n'y avait rien, et le défaut ne se voit qu'après le dépôt.
-  if (format.value !== 'png') {
+  // WebP garde la transparence : un logo y reste détouré.
+  if (format.value === 'jpeg') {
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, width, height)
   }
@@ -607,30 +607,77 @@ async function encode(): Promise<void> {
   // `drawImage` LÈVE sur une sélection de largeur ou de hauteur nulle, et la
   // gravure d'un format peut manquer au navigateur — `toBlob` rend alors `null`.
   // Les deux se disent, plutôt que de laisser le bouton fermé sans raison.
-  let blob: Blob | null = null
   try {
     ctx.drawImage(source, crop.x, crop.y, crop.w, crop.h, 0, 0, width, height)
-    blob = await new Promise<Blob | null>((resolve) => {
-      target.toBlob(
-        resolve,
-        mimeOf[format.value],
-        format.value === 'png' ? undefined : quality.value / 100,
-      )
+    const blob = await new Promise<Blob | null>((resolve) => {
+      target.toBlob(resolve, mimeOf[format.value], format.value === 'png' ? undefined : at / 100)
     })
+    return blob ? { blob, width, height } : null
   } catch {
-    blob = null
+    return null
   }
-  if (!blob) {
+}
+
+// Un réglage changé pendant un encodage relance le suivant : seul le dernier écrit le résultat.
+let encodeRun = 0
+
+async function encode(): Promise<void> {
+  const source = image.value
+  const run = ++encodeRun
+  if (!source) {
+    encoding.value = false
+    return
+  }
+  encodeFailed.value = false
+
+  const budget = byteBudget.value
+  let width = Math.max(1, Math.round(Math.min(outputWidth.value, crop.w)))
+  let used = wantedQuality.value
+  let result = await render(source, width, used)
+
+  if (result && format.value !== 'png' && result.blob.size > budget) {
+    // La plus haute qualité qui tient, par dichotomie : six encodages au plus.
+    let best: Rendered | null = null
+    let low = MIN_QUALITY
+    let high = used - 1
+    used = MIN_QUALITY
+    while (low <= high) {
+      const middle = Math.floor((low + high) / 2)
+      const attempt = await render(source, width, middle)
+      if (!attempt) break
+      if (attempt.blob.size <= budget) {
+        best = attempt
+        used = middle
+        low = middle + 1
+      } else {
+        high = middle - 1
+      }
+    }
+    // Trop lourd même à la qualité la plus basse : la largeur cède à son tour.
+    while (!best && width > MIN_OUTPUT_WIDTH) {
+      width = Math.max(MIN_OUTPUT_WIDTH, Math.round(width * 0.8))
+      const attempt = await render(source, width, MIN_QUALITY)
+      if (!attempt) break
+      result = attempt
+      if (attempt.blob.size <= budget) best = attempt
+    }
+    result = best ?? result
+  }
+
+  if (run !== encodeRun) return
+  encoding.value = false
+  if (!result) {
     encodeFailed.value = true
     return
   }
 
+  quality.value = used
   if (outputUrl.value) URL.revokeObjectURL(outputUrl.value)
-  output.value = { blob, width, height }
-  outputUrl.value = URL.createObjectURL(blob)
+  output.value = result
+  outputUrl.value = URL.createObjectURL(result.blob)
 }
 
-watch([format, quality, outputWidth], scheduleEncode)
+watch([format, wantedQuality, outputWidth], scheduleEncode)
 watch(maxOutputWidth, (max) => {
   if (outputWidth.value > max) outputWidth.value = max
 })
@@ -640,7 +687,7 @@ watch(maxOutputWidth, (max) => {
 // ---------------------------------------------------------------------------
 
 const tooHeavy = computed(
-  () => props.maxByteSize !== null && !!output.value && output.value.blob.size > props.maxByteSize,
+  () => !!output.value && output.value.blob.size > byteBudget.value,
 )
 
 const sizeLabel = computed(() =>
@@ -793,13 +840,17 @@ function apply(): void {
           </div>
           <input
             id="image-editor-quality"
-            v-model.number="quality"
+            :value="quality"
             type="range"
             min="30"
             max="100"
             step="1"
             class="mt-2 w-full accent-accent-solid"
+            @input="wantedQuality = Number(($event.target as HTMLInputElement).value)"
           >
+          <p v-if="quality < wantedQuality" class="mt-1 text-xs text-text-subtle">
+            {{ t('image-editor.quality.lowered', { max: formatByteSize(byteBudget, locale) }) }}
+          </p>
         </section>
 
         <section>
@@ -831,8 +882,8 @@ function apply(): void {
               :class="tooHeavy ? 'text-danger' : 'text-text-muted'"
             >{{ encoding ? '…' : sizeLabel }}</span>
           </div>
-          <p v-if="props.maxByteSize" class="mt-1 text-xs text-text-subtle">
-            {{ t('image-editor.weight.max', { max: formatByteSize(props.maxByteSize, locale) }) }}
+          <p class="mt-1 text-xs text-text-subtle">
+            {{ t('image-editor.weight.max', { max: formatByteSize(byteBudget, locale) }) }}
           </p>
         </section>
 

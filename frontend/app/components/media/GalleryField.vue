@@ -115,8 +115,7 @@ watch(
 )
 
 const isDirty = computed(() => snapshot(items.value) !== baseline.value)
-const missingAlt = computed(() => items.value.filter((item) => !item.alt_text?.fr).length)
-const canSave = computed(() => props.editable && isDirty.value && missingAlt.value === 0 && !uploading.value)
+const canSave = computed(() => props.editable && isDirty.value && !uploading.value)
 const maxLabel = computed(() =>
   rule.value?.max_byte_size ? formatByteSize(rule.value.max_byte_size, locale.value) : null,
 )
@@ -180,8 +179,8 @@ function cancelEditing(): void {
 }
 
 async function upload(result: { blob: Blob; width: number; height: number; mimeType: string; filename: string }): Promise<void> {
-  const description = newAlt.value
-  if (!description?.fr) return
+  // Description facultative depuis le 29/10 : vide, le libellé de la galerie la remplace (la base en exige une).
+  const description: I18nText = newAlt.value?.fr ? newAlt.value : { fr: props.label }
   const asset = await deposer({
     file: result.blob,
     filename: result.filename,
@@ -230,7 +229,7 @@ async function save(): Promise<void> {
           ? items.value.map((item) => ({
               role: props.role,
               asset_id: item.asset_id,
-              alt_text_override: item.alt_text,
+              alt_text_override: item.alt_text?.fr ? item.alt_text : null,
               caption_override: item.caption,
             }))
           : [{ role: props.role, asset_id: null }],
@@ -332,8 +331,6 @@ function previewOf(item: GalleryItem) {
           <AdminEventsI18nField
             :model-value="item.alt_text"
             :label="t('gallery-field.altText.label')"
-            :hint="item.alt_text?.fr ? undefined : t('gallery-field.altText.required')"
-            required
             :maxlength="300"
             :disabled="!props.editable || saving"
             @update:model-value="(value: I18nText | null) => setText(index, 'alt_text', value)"
@@ -355,10 +352,7 @@ function previewOf(item: GalleryItem) {
         <UiButton icon="check" :loading="saving" :disabled="!canSave" @click="save">
           {{ t('gallery-field.actions.save') }}
         </UiButton>
-        <p v-if="isDirty && missingAlt > 0" class="w-full text-xs text-text-muted">
-          {{ t('gallery-field.missingAlt', missingAlt) }}
-        </p>
-        <p v-else-if="isDirty" class="w-full text-xs text-text-muted">{{ t('gallery-field.unsaved') }}</p>
+        <p v-if="isDirty" class="w-full text-xs text-text-muted">{{ t('gallery-field.unsaved') }}</p>
         <p v-else-if="saved" class="w-full text-xs text-success" role="status">{{ t('gallery-field.saved') }}</p>
       </div>
 
@@ -375,8 +369,6 @@ function previewOf(item: GalleryItem) {
       :description="t('gallery-field.editor.description')"
       :max-byte-size="rule?.max_byte_size ?? null"
       :busy="uploading"
-      :apply-disabled="!newAlt?.fr"
-      :apply-hint="t('gallery-field.altText.required')"
       :apply-label="t('gallery-field.editor.apply')"
       @apply="upload"
       @cancel="cancelEditing"
@@ -387,7 +379,6 @@ function previewOf(item: GalleryItem) {
           :label="t('gallery-field.altText.label')"
           :hint="t('gallery-field.altText.hint')"
           :disabled="uploading"
-          required
           multiline
           :rows="3"
           :maxlength="300"
