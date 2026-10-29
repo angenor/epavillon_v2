@@ -10,8 +10,10 @@ import type { ShowcaseSessionOption } from '~/types/admin-showcase'
 
 /**
  * LA FENÊTRE DE RÉDACTION D'UN COURRIEL (28/10), sur le modèle de Gmail : une
- * fenêtre, pas d'étapes. Destinataires, objet, message, pièces jointes et
- * Envoyer d'emblée ; le reste sous « Plus d'options ».
+ * fenêtre, pas d'étapes. Gabarits en bande au-dessus, bouton Répondre,
+ * destinataires, objet, message, pièces jointes et Envoyer d'emblée ; le reste
+ * sous « Plus d'options ». Sur grand écran (29/10), l'aperçu en direct à
+ * droite ; en dessous, il s'affiche à la demande sous la rédaction.
  *
  * BROUILLON TOUJOURS ENREGISTRÉ. La fenêtre crée le brouillon à l'ouverture
  * (l'API y propose la copie de l'équipe), l'enregistre à chaque pause de frappe,
@@ -50,7 +52,8 @@ const lastSaved = ref('')
 const showCc = ref(false)
 const showBcc = ref(false)
 const showOptions = ref(false)
-const showAttachments = ref(false)
+const showPreview = ref(false)
+const previewBox = ref<HTMLElement | null>(null)
 const audience = ref<MailingAudience | null>(null)
 const refreshKey = ref(0)
 const sessions = ref<ShowcaseSessionOption[]>([])
@@ -117,6 +120,7 @@ async function start(): Promise<void> {
   mailing.value = null
   form.value = null
   showOptions.value = false
+  showPreview.value = false
   confirming.value = false
   testMessage.value = null
   templateChosen.value = false
@@ -234,6 +238,33 @@ async function reloadAttachments(): Promise<void> {
 }
 
 const size = (bytes: number) => formatByteSize(bytes, locale.value)
+
+// Deux colonnes à partir de `xl` (80rem) : l'aperçu n'est chargé que s'il se voit.
+const wide = ref(false)
+let wideQuery: MediaQueryList | null = null
+const onWideChange = () => {
+  wide.value = wideQuery?.matches ?? false
+}
+onMounted(() => {
+  wideQuery = window.matchMedia('(min-width: 80rem)')
+  onWideChange()
+  wideQuery.addEventListener('change', onWideChange)
+})
+onBeforeUnmount(() => wideQuery?.removeEventListener('change', onWideChange))
+
+async function togglePreview(): Promise<void> {
+  showPreview.value = !showPreview.value
+  if (!showPreview.value) return
+  await nextTick()
+  // Le corps de la fenêtre seul défile : `scrollIntoView` déplacerait aussi la
+  // fenêtre plein écran du téléphone et laisserait son pied au milieu.
+  const box = previewBox.value
+  let scroller = box?.parentElement ?? null
+  while (scroller && !/(auto|scroll)/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement
+  if (!box || !scroller) return
+  const top = scroller.scrollTop + box.getBoundingClientRect().top - scroller.getBoundingClientRect().top
+  scroller.scrollTo({ top, behavior: 'smooth' })
+}
 
 const unknownVariables = computed(() => {
   if (!form.value) return []
@@ -370,102 +401,138 @@ watch(
     :open="store.isOpen"
     :title="form?.subject.trim() || t('admin.mailing.composer.title')"
     size="xl"
+    class="xl:max-w-[96rem]"
     fullscreen-mobile
     @update:open="(open: boolean) => { if (!open) void close() }"
   >
     <UiErrorState v-if="loadError" compact :description="loadError" />
     <UiLoadingState v-else-if="!form || !mailing" variant="text" :lines="5" />
 
-    <div v-else class="space-y-1">
-      <AdminMailingsAddressField
-        v-model:addresses="form.addresses"
-        v-model:groups="form.groups"
-        :label="t('admin.mailing.composer.to')"
-        :sessions="sessions"
-      >
-        <template #end>
-          <button v-if="!showCc" type="button" class="min-h-(--target-min) cursor-pointer px-2 text-sm text-text-link" @click="showCc = true">
-            {{ t('admin.mailing.composer.cc') }}
-          </button>
-          <button v-if="!showBcc" type="button" class="min-h-(--target-min) cursor-pointer px-2 text-sm text-text-link" @click="showBcc = true">
-            {{ t('admin.mailing.composer.bcc') }}
-          </button>
-        </template>
-      </AdminMailingsAddressField>
-      <AdminMailingsAddressField v-if="showCc" v-model:addresses="form.cc" :label="t('admin.mailing.composer.cc')" />
-      <AdminMailingsAddressField v-if="showBcc" v-model:addresses="form.bcc" :label="t('admin.mailing.composer.bcc')" />
-
-      <p class="py-1.5 text-xs text-text-subtle" aria-live="polite">
-        {{ summary || t('admin.mailing.composer.summary.none') }}
-      </p>
-
-      <div class="flex items-center gap-2 border-b border-border">
-        <label for="composer-subject" class="w-12 shrink-0 text-sm text-text-subtle">{{ t('admin.mailing.composer.subject') }}</label>
-        <input
-          id="composer-subject"
-          v-model="form.subject"
-          type="text"
-          maxlength="250"
-          class="min-h-(--target-min) flex-1 bg-transparent text-sm font-semibold text-text outline-none"
-        >
-      </div>
-
-      <div class="pt-3">
-        <ClientOnly>
-          <UiRichText v-model="form.body" :label="t('admin.mailing.composer.body')" required :rows="10" buttons />
-        </ClientOnly>
-      </div>
-
-      <div class="space-y-2 pt-2" role="status">
-        <UiAlert v-if="subjectEmpty" intent="warning" compact :message="t('admin.mailing.composer.alerts.subject')" />
-        <UiAlert
-          v-if="unknownVariables.length"
-          intent="danger"
-          compact
-          :message="t('admin.mailing.composer.alerts.variables', { names: unknownVariables.join(', ') })"
-        />
-        <UiAlert
-          v-if="invalidAddresses.length"
-          intent="danger"
-          compact
-          :message="t('admin.mailing.composer.alerts.addresses', { list: invalidAddresses.join(', ') })"
-        />
-        <UiAlert v-if="tooHeavy" intent="danger" compact :message="t('admin.mailing.composer.alerts.heavy')" />
-        <UiAlert v-if="saveError" intent="danger" compact live :message="saveError" />
-      </div>
-
-      <div v-if="showAttachments || mailing.attachments.length" class="pt-3">
-        <AdminMailingsAttachments
-          :mailing-id="mailing.id"
-          :attachments="mailing.attachments"
-          :total-bytes="mailing.attachments_total_bytes"
-          :max-bytes="mailing.attachments_max_bytes"
-          editable
-          @changed="reloadAttachments"
-        />
-      </div>
-
-      <div class="pt-3">
-        <button
-          type="button"
-          class="inline-flex min-h-(--target-min) cursor-pointer items-center gap-2 text-sm text-text-secondary hover:text-text"
-          :aria-expanded="showOptions"
-          @click="showOptions = !showOptions"
-        >
-          <UiIcon :name="showOptions ? 'chevron-up' : 'chevron-down'" size="1rem" />
-          {{ t('admin.mailing.composer.more') }}
-        </button>
-        <AdminMailingsComposerOptions
-          v-if="showOptions"
+    <div v-else class="grid gap-x-8 gap-y-4 xl:grid-cols-2">
+      <div class="min-w-0 space-y-3 border-b border-border pb-3 xl:col-span-2">
+        <AdminMailingsTemplateStrip
           v-model="form.options"
+          :preselected="preselected"
+          @template-chosen="onTemplateChosen"
+        />
+        <div v-if="form.options.template === 'annonce'" class="grid gap-4 md:grid-cols-2">
+          <UiInput v-model="form.options.ctaLabel" :label="t('admin.mailing.composer.options.ctaLabel')" block />
+          <UiInput
+            v-model="form.options.ctaUrl"
+            type="url"
+            :label="t('admin.mailing.composer.options.ctaUrl')"
+            placeholder="https://"
+            block
+          />
+        </div>
+        <UiCheckbox
+          v-model="form.options.replyButton"
+          :label="t('admin.mailing.composer.options.replyButton')"
+          :hint="t('admin.mailing.composer.options.replyButtonHint')"
+        />
+      </div>
+
+      <div class="min-w-0 space-y-1">
+        <AdminMailingsAddressField
+          v-model:addresses="form.addresses"
+          v-model:groups="form.groups"
+          :label="t('admin.mailing.composer.to')"
+          :sessions="sessions"
+        >
+          <template #end>
+            <button v-if="!showCc" type="button" class="min-h-(--target-min) cursor-pointer px-2 text-sm text-text-link" @click="showCc = true">
+              {{ t('admin.mailing.composer.cc') }}
+            </button>
+            <button v-if="!showBcc" type="button" class="min-h-(--target-min) cursor-pointer px-2 text-sm text-text-link" @click="showBcc = true">
+              {{ t('admin.mailing.composer.bcc') }}
+            </button>
+          </template>
+        </AdminMailingsAddressField>
+        <AdminMailingsAddressField v-if="showCc" v-model:addresses="form.cc" :label="t('admin.mailing.composer.cc')" />
+        <AdminMailingsAddressField v-if="showBcc" v-model:addresses="form.bcc" :label="t('admin.mailing.composer.bcc')" />
+
+        <p class="py-1.5 text-xs text-text-subtle" aria-live="polite">
+          {{ summary || t('admin.mailing.composer.summary.none') }}
+        </p>
+
+        <div class="flex items-center gap-2 border-b border-border">
+          <label for="composer-subject" class="w-12 shrink-0 text-sm text-text-subtle">{{ t('admin.mailing.composer.subject') }}</label>
+          <input
+            id="composer-subject"
+            v-model="form.subject"
+            type="text"
+            maxlength="250"
+            class="min-h-(--target-min) flex-1 bg-transparent text-sm font-semibold text-text outline-none"
+          >
+        </div>
+
+        <div class="pt-3">
+          <ClientOnly>
+            <UiRichText v-model="form.body" :label="t('admin.mailing.composer.body')" required :rows="10" buttons />
+          </ClientOnly>
+        </div>
+
+        <div class="space-y-2 pt-2" role="status">
+          <UiAlert v-if="subjectEmpty" intent="warning" compact :message="t('admin.mailing.composer.alerts.subject')" />
+          <UiAlert
+            v-if="unknownVariables.length"
+            intent="danger"
+            compact
+            :message="t('admin.mailing.composer.alerts.variables', { names: unknownVariables.join(', ') })"
+          />
+          <UiAlert
+            v-if="invalidAddresses.length"
+            intent="danger"
+            compact
+            :message="t('admin.mailing.composer.alerts.addresses', { list: invalidAddresses.join(', ') })"
+          />
+          <UiAlert v-if="tooHeavy" intent="danger" compact :message="t('admin.mailing.composer.alerts.heavy')" />
+          <UiAlert v-if="saveError" intent="danger" compact live :message="saveError" />
+        </div>
+
+        <div class="pt-3">
+          <AdminMailingsAttachments
+            :mailing-id="mailing.id"
+            :attachments="mailing.attachments"
+            :total-bytes="mailing.attachments_total_bytes"
+            :max-bytes="mailing.attachments_max_bytes"
+            editable
+            compact
+            @changed="reloadAttachments"
+          />
+        </div>
+
+        <div class="pt-3">
+          <button
+            type="button"
+            class="inline-flex min-h-(--target-min) cursor-pointer items-center gap-2 text-sm text-text-secondary hover:text-text"
+            :aria-expanded="showOptions"
+            @click="showOptions = !showOptions"
+          >
+            <UiIcon :name="showOptions ? 'chevron-up' : 'chevron-down'" size="1rem" />
+            {{ t('admin.mailing.composer.more') }}
+          </button>
+          <AdminMailingsComposerOptions
+            v-if="showOptions"
+            v-model="form.options"
+            :mailing-id="mailing.id"
+            :testing="testing"
+            :test-message="testMessage"
+            @test="sendTest"
+          />
+        </div>
+      </div>
+
+      <div
+        v-if="wide || showPreview"
+        ref="previewBox"
+        class="min-w-0 scroll-mt-4 border-t border-border pt-4 xl:sticky xl:top-0 xl:flex xl:h-[calc(85vh-11rem)] xl:flex-col xl:self-start xl:border-t-0 xl:pt-0"
+      >
+        <AdminMailingsComposerPreview
+          class="xl:flex-1"
           :mailing-id="mailing.id"
           :entries="audience?.entries ?? []"
           :refresh-key="refreshKey"
-          :testing="testing"
-          :test-message="testMessage"
-          :preselected="preselected"
-          @test="sendTest"
-          @template-chosen="onTemplateChosen"
         />
       </div>
     </div>
@@ -476,11 +543,13 @@ watch(
       </span>
       <UiButton
         variant="ghost"
-        icon="paperclip"
-        icon-only
-        :label="t('admin.mailing.composer.attach')"
-        @click="showAttachments = !showAttachments"
-      />
+        icon="eye"
+        class="xl:hidden"
+        :aria-expanded="showPreview"
+        @click="togglePreview"
+      >
+        {{ showPreview ? t('admin.mailing.composer.options.hidePreview') : t('admin.mailing.composer.options.showPreview') }}
+      </UiButton>
       <UiButton icon="mail" :loading="sending" :disabled="blocked" @click="send">
         {{ sendLabel }}
       </UiButton>

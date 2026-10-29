@@ -11,7 +11,8 @@ import type { Uuid } from '~/types/shared'
  * revérifie.
  *
  * En lecture seule (`editable` faux), la liste seule : la fiche d'un envoi
- * parti, l'étape de vérification.
+ * parti, l'étape de vérification. `compact` : le bouton seul tant que rien
+ * n'est joint, pour la fenêtre de rédaction.
  */
 interface Props {
   mailingId: Uuid
@@ -19,9 +20,10 @@ interface Props {
   totalBytes: number
   maxBytes: number | null
   editable?: boolean
+  compact?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), { editable: false })
+const props = withDefaults(defineProps<Props>(), { editable: false, compact: false })
 const emit = defineEmits<{ changed: [] }>()
 
 const { t, locale } = useI18n()
@@ -116,7 +118,13 @@ async function remove(attachment: MailingAttachment): Promise<void> {
 
 <template>
   <section class="space-y-3" :aria-label="t('admin.mailing.compose.attachments.title')">
-    <div class="flex flex-wrap items-end justify-between gap-2">
+    <div v-if="props.compact" class="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <UiButton v-if="props.editable" variant="secondary" icon="paperclip" :loading="enCours" @click="choose">
+        {{ t('admin.mailing.compose.attachments.add') }}
+      </UiButton>
+      <p v-if="props.attachments.length" class="text-xs text-text-subtle">{{ usage }}</p>
+    </div>
+    <div v-else class="flex flex-wrap items-end justify-between gap-2">
       <div>
         <h3 class="text-sm font-semibold text-text">{{ t('admin.mailing.compose.attachments.title') }}</h3>
         <p class="mt-0.5 text-xs text-text-subtle">{{ usage }}</p>
@@ -124,17 +132,17 @@ async function remove(attachment: MailingAttachment): Promise<void> {
       <UiButton v-if="props.editable" variant="secondary" icon="upload" :loading="enCours" @click="choose">
         {{ t('admin.mailing.compose.attachments.add') }}
       </UiButton>
-      <input
-        v-if="props.editable"
-        ref="input"
-        type="file"
-        class="sr-only"
-        :accept="accept"
-        tabindex="-1"
-        aria-hidden="true"
-        @change="onFile"
-      >
     </div>
+    <input
+      v-if="props.editable"
+      ref="input"
+      type="file"
+      class="sr-only"
+      :accept="accept"
+      tabindex="-1"
+      aria-hidden="true"
+      @change="onFile"
+    >
 
     <ul v-if="props.attachments.length" class="divide-y divide-border rounded-lg border border-border bg-surface-raised">
       <li v-for="a in props.attachments" :key="a.attachment_id" class="flex min-h-(--target-min) items-center gap-3 px-3 py-2">
@@ -158,7 +166,7 @@ async function remove(attachment: MailingAttachment): Promise<void> {
         />
       </li>
     </ul>
-    <p v-else class="rounded-md border border-dashed border-border px-3 py-2 text-sm text-text-subtle">
+    <p v-else-if="!props.compact" class="rounded-md border border-dashed border-border px-3 py-2 text-sm text-text-subtle">
       {{ t('admin.mailing.compose.attachments.none') }}
     </p>
 

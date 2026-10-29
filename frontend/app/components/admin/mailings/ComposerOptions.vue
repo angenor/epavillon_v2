@@ -1,46 +1,29 @@
 <script setup lang="ts">
-import type {
-  ComposerOptionsValue,
-  MailingAudienceEntry,
-  MailingPreview,
-  MailingTemplate,
-  MailTemplate,
-} from '~/types/admin-mailings'
-import { MAILING_TEMPLATES } from '~/types/admin-mailings'
+import type { ComposerOptionsValue } from '~/types/admin-mailings'
 import type { Uuid } from '~/types/shared'
 import type { SelectOption } from '~/types/ui'
 
 /**
- * « PLUS D'OPTIONS » de la fenêtre de rédaction : réponse à, édition, gabarit
- * et son aperçu, variables et leurs valeurs de secours, bouton Répondre,
- * bouton d'action de l'annonce, envoi d'essai.
- *
- * L'aperçu est rendu par l'API, par la fonction même du worker : ce qu'on voit
- * est ce qui part. Il se relit après chaque enregistrement (`refreshKey`).
+ * « PLUS D'OPTIONS » de la fenêtre de rédaction : réponse à, édition,
+ * variables et leurs valeurs de secours, envoi d'essai. Gabarits, bouton
+ * Répondre et aperçu sont en vue dans la fenêtre depuis le 29/10.
  */
 
 interface Props {
   modelValue: ComposerOptionsValue
   mailingId: Uuid | null
-  entries: MailingAudienceEntry[]
-  refreshKey: number
   testing: boolean
   testMessage: string | null
-  /** Le gabarit a été présélectionné pour les déposants, pas choisi. */
-  preselected?: boolean
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:modelValue': [value: ComposerOptionsValue]
   test: []
-  /** Un gabarit choisi à la main : la présélection ne le remplace plus. */
-  'template-chosen': []
 }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const api = useApi()
 const adminScope = useAdminScopeStore()
 
 function set<K extends keyof ComposerOptionsValue>(key: K, value: ComposerOptionsValue[K]): void {
@@ -55,71 +38,7 @@ const editions = computed<SelectOption[]>(() =>
   adminScope.events.map((e) => ({ value: e.id, label: e.acronym ? `${e.acronym}, ${tr(e.title)}` : tr(e.title) })),
 )
 
-const localePath = useLocalePath()
 const tokenOf = variableToken
-
-// Les gabarits personnalisés de l'édition de l'envoi, et les communs.
-const customTemplates = ref<MailTemplate[]>([])
-const customError = ref<string | null>(null)
-watch(
-  () => props.modelValue.eventId,
-  async (eventId) => {
-    customError.value = null
-    if (!eventId) return
-    try {
-      customTemplates.value = await api.adminMailings.templates.list(eventId, adminScope.scope)
-    } catch {
-      customTemplates.value = []
-      customError.value = t('admin.mailing.composer.options.customError')
-    }
-  },
-  { immediate: true },
-)
-
-function chooseDefault(template: MailingTemplate): void {
-  emit('template-chosen')
-  emit('update:modelValue', { ...props.modelValue, template, customTemplateId: '' })
-}
-
-function chooseCustom(custom: MailTemplate): void {
-  emit('template-chosen')
-  emit('update:modelValue', { ...props.modelValue, template: custom.layout, customTemplateId: custom.id })
-}
-
-const isDefaultChosen = (template: MailingTemplate) =>
-  !props.modelValue.customTemplateId && props.modelValue.template === template
-
-// « Vu par » : une personne avec compte et, s'il y en a, une sans, pour voir le secours.
-const viewers = computed<SelectOption[]>(() => {
-  const sendable = props.entries.filter((e) => !e.is_suppressed)
-  const withAccount = sendable.filter((e) => e.person_id).slice(0, 30)
-  const without = sendable.filter((e) => !e.person_id).slice(0, 30)
-  return [...without.slice(0, 1), ...withAccount, ...without.slice(1)].map((e) => ({
-    value: e.email,
-    label: [e.first_name, e.last_name].filter(Boolean).join(' ') || e.email,
-    description: e.person_id ? e.email : t('admin.mailing.composer.options.noAccount', { email: e.email }),
-  }))
-})
-const viewer = ref('')
-watch(viewers, (list) => {
-  if (!list.some((v) => v.value === viewer.value)) viewer.value = list[0]?.value ?? ''
-}, { immediate: true })
-
-const preview = ref<MailingPreview | null>(null)
-const previewError = ref<string | null>(null)
-watch(
-  () => [props.mailingId, viewer.value, props.refreshKey] as const,
-  async ([id, email]) => {
-    if (!id) return
-    try {
-      previewError.value = null
-      preview.value = await api.adminMailings.preview(id, email || undefined)
-    } catch (thrown) {
-      previewError.value = apiErrorMessage(thrown, t)
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>
@@ -145,91 +64,6 @@ watch(
     </div>
 
     <fieldset>
-      <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <legend class="text-sm font-semibold text-text">{{ t('admin.mailing.composer.options.template') }}</legend>
-        <NuxtLink :to="localePath('/admin/courriels/gabarits')" class="text-sm text-accent underline-offset-2 hover:underline">
-          {{ t('admin.mailing.composer.options.manage') }}
-        </NuxtLink>
-      </div>
-      <p v-if="props.preselected" class="mt-1 text-xs text-text-subtle" role="status">
-        {{ t('admin.mailing.composer.options.preselected') }}
-      </p>
-      <p class="mt-2 text-xs font-semibold text-text-muted">{{ t('admin.mailing.composer.options.defaults') }}</p>
-      <div class="mt-1 grid gap-2 sm:grid-cols-3">
-        <label
-          v-for="tpl in MAILING_TEMPLATES"
-          :key="tpl"
-          class="flex min-h-(--target-min) cursor-pointer flex-col rounded-lg border p-3"
-          :class="isDefaultChosen(tpl) ? 'border-accent bg-accent-surface' : 'border-border bg-surface-raised'"
-        >
-          <span class="flex items-center gap-2 text-sm font-semibold">
-            <input
-              type="radio"
-              name="mailing-template"
-              class="cursor-pointer"
-              :value="tpl"
-              :checked="isDefaultChosen(tpl)"
-              @change="chooseDefault(tpl)"
-            >
-            {{ t(`admin.mailing.composer.templates.${tpl}.name`) }}
-          </span>
-          <span class="mt-1 text-xs text-text-subtle">{{ t(`admin.mailing.composer.templates.${tpl}.hint`) }}</span>
-        </label>
-      </div>
-      <template v-if="customTemplates.length">
-        <p class="mt-4 text-xs font-semibold text-text-muted">{{ t('admin.mailing.composer.options.custom') }}</p>
-        <div class="mt-1 grid gap-2 sm:grid-cols-3">
-          <label
-            v-for="custom in customTemplates"
-            :key="custom.id"
-            class="flex min-h-(--target-min) cursor-pointer flex-col rounded-lg border p-3"
-            :class="props.modelValue.customTemplateId === custom.id ? 'border-accent bg-accent-surface' : 'border-border bg-surface-raised'"
-          >
-            <span class="flex items-center gap-2 text-sm font-semibold">
-              <input
-                type="radio"
-                name="mailing-template"
-                class="cursor-pointer"
-                :value="custom.id"
-                :checked="props.modelValue.customTemplateId === custom.id"
-                @change="chooseCustom(custom)"
-              >
-              {{ custom.name }}
-            </span>
-            <span class="mt-1 text-xs text-text-subtle">
-              {{ t('admin.mailing.composer.options.customHint', { layout: t(`admin.mailing.composer.templates.${custom.layout}.name`) }) }}
-            </span>
-          </label>
-        </div>
-      </template>
-      <UiAlert v-if="customError" class="mt-2" intent="warning" compact :message="customError" />
-    </fieldset>
-
-    <div v-if="props.modelValue.template === 'annonce'" class="grid gap-4 md:grid-cols-2">
-      <UiInput
-        :model-value="props.modelValue.ctaLabel"
-        :label="t('admin.mailing.composer.options.ctaLabel')"
-        block
-        @update:model-value="set('ctaLabel', $event)"
-      />
-      <UiInput
-        :model-value="props.modelValue.ctaUrl"
-        type="url"
-        :label="t('admin.mailing.composer.options.ctaUrl')"
-        placeholder="https://"
-        block
-        @update:model-value="set('ctaUrl', $event)"
-      />
-    </div>
-
-    <UiCheckbox
-      :model-value="props.modelValue.replyButton"
-      :label="t('admin.mailing.composer.options.replyButton')"
-      :hint="t('admin.mailing.composer.options.replyButtonHint')"
-      @update:model-value="set('replyButton', $event)"
-    />
-
-    <fieldset>
       <legend class="text-sm font-semibold text-text">{{ t('admin.mailing.composer.options.variables') }}</legend>
       <p class="mt-0.5 text-xs text-text-subtle">{{ t('admin.mailing.composer.options.variablesHint') }}</p>
       <div class="mt-2 grid gap-3 sm:grid-cols-2">
@@ -245,31 +79,6 @@ watch(
         />
       </div>
     </fieldset>
-
-    <section>
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <h3 class="text-sm font-semibold text-text">{{ t('admin.mailing.composer.options.preview') }}</h3>
-        <UiSelect
-          v-if="viewers.length > 1"
-          v-model="viewer"
-          class="w-full sm:w-80"
-          :options="viewers"
-          :label="t('admin.mailing.composer.options.seenBy')"
-          hide-optional
-        />
-      </div>
-      <p v-if="preview && !preview.has_account" class="mt-2 text-xs text-text-subtle">
-        {{ t('admin.mailing.composer.options.previewNoAccount') }}
-      </p>
-      <UiAlert v-if="previewError" class="mt-2" intent="danger" compact :message="previewError" />
-      <iframe
-        v-if="preview"
-        class="mt-2 h-[28rem] w-full rounded-lg border border-border bg-white"
-        :title="t('admin.mailing.composer.options.preview')"
-        sandbox=""
-        :srcdoc="preview.html"
-      />
-    </section>
 
     <div class="flex flex-wrap items-center gap-3">
       <UiButton variant="secondary" icon="mail" :loading="props.testing" :disabled="!props.mailingId" @click="emit('test')">
