@@ -573,6 +573,34 @@ CREATE TRIGGER tg_attachments_validate
     FOR EACH ROW EXECUTE FUNCTION media.tg_validate_attachment();
 
 
+-- L'ENTITÉ PORTEUSE SUPPRIMÉE EMPORTE SES RATTACHEMENTS (29/10). Le
+-- rattachement est polymorphe : aucune clé étrangère ne peut le faire tomber
+-- avec son porteur. Sans ce déclencheur, un rattachement orphelin désigne un
+-- porteur disparu, et l'objet n'est jamais candidat à la purge
+-- (find_orphan_assets() le croit utilisé). Une table porteuse dont les lignes
+-- se suppriment pose :
+--     CREATE TRIGGER tg_<table>_drop_attachments AFTER DELETE ON <schéma>.<table>
+--         FOR EACH ROW EXECUTE FUNCTION media.tg_drop_owner_attachments();
+-- Seul le rattachement tombe : l'objet stocké peut servir ailleurs (la
+-- déduplication le partage), la purge des orphelins s'en occupe ensuite.
+-- Fonction du module media, comme `media.attachments` : l'autre module ne
+-- l'écrit pas, il la déclenche.
+CREATE OR REPLACE FUNCTION media.tg_drop_owner_attachments()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM media.attachments
+     WHERE owner_schema = TG_TABLE_SCHEMA
+       AND owner_table  = TG_TABLE_NAME
+       AND owner_id     = OLD.id;
+    RETURN NULL;
+END;
+$$;
+
+COMMENT ON FUNCTION media.tg_drop_owner_attachments() IS
+    'Déclencheur AFTER DELETE d''une table porteuse : retire les rattachements de la ligne supprimée, jamais les objets (purgés plus tard s''ils sont orphelins).';
+
 -- Image rattachée à une entité pour un rôle donné, prête pour l'affichage.
 --
 -- POURQUOI UNE FONCTION PLUTÔT QU'UNE JOINTURE PAR VUE. Le rattachement est

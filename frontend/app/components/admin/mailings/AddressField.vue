@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { MailingCriterion } from '~/types/admin-mailings'
+import type { MailingAddressSuggestion, MailingCriterion } from '~/types/admin-mailings'
 import type { ShowcaseSessionOption } from '~/types/admin-showcase'
+import type { Uuid } from '~/types/shared'
 
 /**
  * UN CHAMP D'ADRESSES À PUCES, comme dans une messagerie : on tape ou on colle
@@ -10,6 +11,9 @@ import type { ShowcaseSessionOption } from '~/types/admin-showcase'
  * Avec `groups` (le champ « À »), le bouton « + Groupe » ajoute des puces de
  * critères (déposants, intervenants, inscrits, équipe), choisis dans le même
  * éditeur que l'ancienne étape Destinataires.
+ *
+ * Dès deux caractères, des personnes connues de la plateforme sont proposées
+ * (nom et adresse, huit au plus).
  */
 interface Props {
   label: string
@@ -17,26 +21,107 @@ interface Props {
   groups?: MailingCriterion[] | null
   sessions?: ShowcaseSessionOption[]
   disabled?: boolean
+  /** L'édition de l'envoi, qui garde la recherche de personnes ; à défaut, celle du back-office. */
+  eventId?: Uuid | null
 }
 
-const props = withDefaults(defineProps<Props>(), { groups: null, sessions: () => [], disabled: false })
+const props = withDefaults(defineProps<Props>(), { groups: null, sessions: () => [], disabled: false, eventId: null })
 const emit = defineEmits<{
   'update:addresses': [value: string[]]
   'update:groups': [value: MailingCriterion[]]
 }>()
 
 const { t } = useI18n()
+const api = useApi()
+const adminScope = useAdminScopeStore()
 const inputId = useId()
+const listId = useId()
 const draft = ref('')
 const groupsOpen = ref(false)
 
+// Saisie semi-automatique : des personnes connues, mais une adresse inconnue
+// reste permise (on écrit volontiers à des non-inscrits).
+const suggestions = ref<MailingAddressSuggestion[]>([])
+const highlighted = ref(-1)
+const listOpen = computed(() => suggestions.value.length > 0)
+let timer: ReturnType<typeof setTimeout> | null = null
+let lastRequest = 0
+
+function closeList(): void {
+  if (timer) clearTimeout(timer)
+  lastRequest += 1
+  suggestions.value = []
+  highlighted.value = -1
+}
+
+watch(draft, (value) => {
+  if (timer) clearTimeout(timer)
+  const query = value.trim()
+  const eventId = props.eventId ?? adminScope.currentEventId
+  if (query.length < 2 || !eventId || props.disabled) {
+    closeList()
+    return
+  }
+  timer = setTimeout(async () => {
+    const request = ++lastRequest
+    try {
+      const found = await api.adminMailings.addressSuggestions(eventId, query)
+      if (request !== lastRequest) return
+      suggestions.value = found.filter((s) => !props.addresses.includes(s.email))
+      highlighted.value = -1
+    } catch {
+      // Sans suggestions, la saisie libre suffit : rien à signaler.
+      if (request === lastRequest) suggestions.value = []
+    }
+  }, 250)
+})
+
+onBeforeUnmount(closeList)
+
+function optionId(index: number): string {
+  return `${listId}-${index}`
+}
+
+function choose(suggestion: MailingAddressSuggestion): void {
+  closeList()
+  draft.value = ''
+  if (!props.addresses.includes(suggestion.email)) emit('update:addresses', [...props.addresses, suggestion.email])
+}
+
 function commit(): void {
+  closeList()
   const added = parseAddressList(draft.value).filter((a) => !props.addresses.includes(a))
   draft.value = ''
   if (added.length) emit('update:addresses', [...props.addresses, ...added])
 }
 
+/** Flèches, Entrée et Échap pilotent la liste quand elle est ouverte. */
+function onListKey(event: KeyboardEvent): boolean {
+  if (!listOpen.value) return false
+  const total = suggestions.value.length
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault()
+    const step = event.key === 'ArrowDown' ? 1 : -1
+    highlighted.value = (highlighted.value + step + total) % total
+    return true
+  }
+  if (event.key === 'Enter' && highlighted.value >= 0) {
+    event.preventDefault()
+    const picked = suggestions.value[highlighted.value]
+    if (picked) choose(picked)
+    return true
+  }
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    closeList()
+    return true
+  }
+  return false
+}
+
 function onKeydown(event: KeyboardEvent): void {
+  if (onListKey(event)) return
   if ([',', ';', ' ', 'Enter', 'Tab'].includes(event.key) && draft.value.trim()) {
     if (event.key !== 'Tab') event.preventDefault()
     commit()
@@ -69,7 +154,7 @@ function groupLabel(group: MailingCriterion): string {
 </script>
 
 <template>
-  <div class="border-b border-border">
+  <div class="relative border-b border-border">
     <div class="flex flex-wrap items-center gap-1.5 py-1.5">
       <label :for="inputId" class="mr-1 w-12 shrink-0 text-sm text-text-subtle">{{ props.label }}</label>
 
@@ -116,6 +201,12 @@ function groupLabel(group: MailingCriterion): string {
         type="text"
         inputmode="email"
         autocomplete="off"
+        spellcheck="false"
+        role="combobox"
+        aria-autocomplete="list"
+        :aria-expanded="listOpen"
+        :aria-controls="listId"
+        :aria-activedescendant="listOpen && highlighted >= 0 ? optionId(highlighted) : undefined"
         class="min-h-(--target-min) min-w-40 flex-1 bg-transparent text-sm text-text outline-none placeholder:text-text-subtle"
         :placeholder="props.addresses.length || props.groups?.length ? '' : t('admin.mailing.composer.addressPlaceholder')"
         :disabled="props.disabled"
@@ -137,6 +228,32 @@ function groupLabel(group: MailingCriterion): string {
       </UiButton>
       <slot name="end" />
     </div>
+
+    <ul
+      v-show="listOpen"
+      :id="listId"
+      role="listbox"
+      :aria-label="t('admin-mailing-address-field.suggestions')"
+      class="absolute inset-x-0 top-full z-30 mt-1 max-h-72 overflow-y-auto rounded-md border border-border-strong bg-surface-raised py-1 shadow-lg"
+    >
+      <li
+        v-for="(suggestion, index) in suggestions"
+        :id="optionId(index)"
+        :key="suggestion.email"
+        role="option"
+        :aria-selected="index === highlighted"
+        class="flex min-h-(--target-min) cursor-pointer flex-col justify-center px-3 py-1.5 text-sm"
+        :class="index === highlighted ? 'bg-accent-surface' : ''"
+        @mousedown.prevent="choose(suggestion)"
+        @mouseenter="highlighted = index"
+      >
+        <span class="truncate font-semibold text-text">{{ suggestion.name }}</span>
+        <span class="truncate text-xs text-text-muted">{{ suggestion.email }}</span>
+      </li>
+    </ul>
+    <p aria-live="polite" class="sr-only">
+      {{ listOpen ? t('admin-mailing-address-field.results', suggestions.length) : '' }}
+    </p>
 
     <div v-if="props.groups && groupsOpen" class="mb-3 rounded-lg border border-border bg-surface-sunken p-3">
       <AdminMailingsAudienceEditor

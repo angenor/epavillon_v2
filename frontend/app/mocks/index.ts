@@ -276,6 +276,7 @@ export {
   deleteMailing,
   dispatchMailing,
   duplicateMailing,
+  mailingAddressSuggestions,
   mailingAudience,
   mailingById,
   mailingListScreen,

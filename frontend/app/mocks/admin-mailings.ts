@@ -9,6 +9,7 @@
 import type {
   CreateMailingPayload,
   Mailing,
+  MailingAddressSuggestion,
   MailingAudience,
   MailingAudienceEntry,
   MailingCounts,
@@ -237,7 +238,26 @@ export function updateMailing(id: Uuid, payload: MailingPayload): Mailing {
 }
 
 export function deleteMailing(id: Uuid): { deleted: boolean } {
+  if (found(id).status === 'queued') {
+    throw new Error("Cet envoi est en cours : il ne se supprime pas tant que les messages partent. Arrêtez-le d'abord, puis supprimez-le.")
+  }
   return { deleted: store.delete(id) }
+}
+
+const KNOWN_PEOPLE: MailingAddressSuggestion[] = [
+  { name: 'Awa Sow Fall', email: ME },
+  ...ENTRIES.filter((e) => e.person_id && !e.is_suppressed).map((e) => ({
+    name: `${e.first_name} ${e.last_name}`,
+    email: e.email,
+  })),
+]
+
+/** Même règle que l'API : chaque mot dans le nom ou l'adresse, accents et casse ignorés, huit au plus. */
+export function mailingAddressSuggestions(query: string): MailingAddressSuggestion[] {
+  const fold = (s: string): string => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+  const words = fold(query.trim()).split(/[\s,;]+/).filter(Boolean)
+  if (query.trim().length < 2) return []
+  return KNOWN_PEOPLE.filter((p) => words.every((w) => fold(`${p.name} ${p.email}`).includes(w))).slice(0, 8)
 }
 
 export function testMailing(id: Uuid): MailingTestResult {

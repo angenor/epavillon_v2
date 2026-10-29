@@ -13,6 +13,7 @@
 import type {
   CreateMailingPayload,
   Mailing,
+  MailingAddressSuggestion,
   MailingAudience,
   MailingListScreen,
   MailingPayload,
@@ -59,8 +60,16 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
     update: (mailingId: Uuid, payload: MailingPayload): Promise<Mailing> =>
       send(`/admin/mailings/${mailingId}`, payload, (m) => m.updateMailing(mailingId, payload), 'PUT'),
 
+    /** Brouillon, envoi terminé ou arrêté ; un envoi en cours est refusé (409). */
     remove: (mailingId: Uuid): Promise<{ deleted: boolean }> =>
       send(`/admin/mailings/${mailingId}`, {}, (m) => m.deleteMailing(mailingId), 'DELETE'),
+
+    /** Les personnes connues dont le nom ou l'adresse répondent à la saisie, huit au plus. */
+    addressSuggestions: (eventId: EventId, query: string): Promise<MailingAddressSuggestion[]> =>
+      call('/admin/mailings/address-suggestions', (m) => m.mailingAddressSuggestions(query), {
+        event_id: eventId,
+        q: query,
+      }),
 
     /** L'essai part à la personne connectée, par la file. */
     test: (mailingId: Uuid): Promise<MailingTestResult> =>

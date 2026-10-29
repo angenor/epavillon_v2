@@ -88,7 +88,17 @@ const columns = computed<TableColumn[]>(() => [
   { key: 'status', label: t('admin.mailing.list.columns.status') },
   { key: 'counts', label: t('admin.mailing.list.columns.recipients'), hideOnMobile: true },
   { key: 'date', label: t('admin.mailing.list.columns.date', { zone: t(zoneFormulaKey('zoneOf', zone.value), { zone: zone.value }) }), hideBelow: 'lg' },
+  { key: 'actions', label: t('admin.mailing.list.columns.actions'), align: 'end', width: '4.5rem' },
 ])
+
+// Un envoi en cours ne se supprime pas : on l'arrête d'abord, depuis sa fiche.
+const toDelete = ref<MailingSummary | null>(null)
+
+function onDeleted(id: string): void {
+  toDelete.value = null
+  if (screen.value) screen.value = { ...screen.value, rows: screen.value.rows.filter((r) => r.id !== id) }
+  void refresh()
+}
 
 // « Nouveau courriel » et les brouillons ouvrent la fenêtre de rédaction ; la
 // liste se relit quand elle se ferme.
@@ -228,11 +238,23 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
           <template #cell-date="{ row }">
             <span class="text-sm text-text-secondary">{{ dateOf(row) }}</span>
           </template>
+          <template #cell-actions="{ row }">
+            <UiButton
+              v-if="row.status !== 'queued'"
+              variant="ghost"
+              icon="trash"
+              icon-only
+              :label="t('admin.mailing.list.delete.actionFor', { subject: row.subject || t('admin.mailing.common.noSubject') })"
+              @click.stop="toDelete = row"
+            />
+          </template>
           <template #empty>
             <UiEmptyState compact icon="search" filtered :title="t('admin.mailing.list.noResults')" />
           </template>
         </UiTable>
       </template>
     </template>
+
+    <AdminMailingsDeleteDialog :target="toDelete" @close="toDelete = null" @deleted="onDeleted" />
   </div>
 </template>

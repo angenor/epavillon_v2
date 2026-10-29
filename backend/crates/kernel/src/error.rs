@@ -217,6 +217,8 @@ codes! {
         "Cet envoi est déjà parti : il ne se modifie plus. Dupliquez-le pour en préparer un nouveau.";
     EngagementMailingEmpty => "ENGAGEMENT_MAILING_EMPTY", StatusCode::UNPROCESSABLE_ENTITY,
         "Aucun destinataire joignable : ajoutez un critère ou une adresse avant d'envoyer.";
+    EngagementMailingInProgress => "ENGAGEMENT_MAILING_IN_PROGRESS", StatusCode::CONFLICT,
+        "Cet envoi est en cours : il ne se supprime pas tant que les messages partent. Arrêtez-le d'abord, puis supprimez-le.";
 
     // --- Direct (B9) ----------------------------------------------------------
     // Trois, et ils ne répondent JAMAIS sur le chemin nominal : le service

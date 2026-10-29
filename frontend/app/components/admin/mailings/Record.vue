@@ -16,7 +16,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ duplicate: []; cancel: []; refresh: [] }>()
+const emit = defineEmits<{ duplicate: []; cancel: []; refresh: []; delete: [] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -103,6 +103,15 @@ function sessionLabel(id: string | null): string {
           @click="emit('cancel')"
         >
           {{ t('admin.mailing.record.cancel') }}
+        </UiButton>
+        <UiButton
+          v-else
+          variant="ghost"
+          icon="trash"
+          :disabled="props.busy"
+          @click="emit('delete')"
+        >
+          {{ t('admin.mailing.list.delete.action') }}
         </UiButton>
       </div>
     </section>

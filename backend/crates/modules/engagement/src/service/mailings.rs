@@ -27,8 +27,9 @@ use uuid::Uuid;
 
 use crate::domain::gabarits::GABARITS;
 use crate::domain::mailing::{
-    normaliser_adresses, CreateMailingPayload, Mailing, MailingAudience, MailingCriterion,
-    MailingListScreen, MailingPayload, MailingPreview, MailingTestResult, KINDS, VARIABLES,
+    normaliser_adresses, CreateMailingPayload, Mailing, MailingAddressSuggestion, MailingAudience,
+    MailingCriterion, MailingListScreen, MailingPayload, MailingPreview, MailingTestResult, KINDS,
+    VARIABLES,
 };
 use crate::domain::{render, sanitize};
 use crate::jobs::send_mailing::{QUEUE, SEND_MAILING, SEND_MAILING_TEST};
@@ -579,6 +580,9 @@ pub async fn modifier(
     detail(state, acteur, id).await
 }
 
+/// Un brouillon, un envoi terminé ou arrêté disparaissent, destinataires et
+/// rattachements compris. Un envoi en cours se refuse : le travail d'envoi le
+/// sert encore, on l'arrête d'abord.
 pub async fn supprimer(
     state: &EngagementState,
     ctx: &RequestContext,
@@ -587,10 +591,63 @@ pub async fn supprimer(
 ) -> Result<()> {
     garder_envoi(state, acteur, id).await?;
     let mut tx = state.db().write(ctx).await?;
-    if !mailings::supprimer_brouillon(&mut tx, id).await? {
-        return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
+    if !mailings::supprimer(&mut tx, id).await? {
+        // Supprimé entre-temps par quelqu'un d'autre : il n'existe plus.
+        return Err(match mailings::lire(state.pool(), id).await? {
+            Some(_) => ApiError::new(ErrorCode::EngagementMailingInProgress),
+            None => ApiError::not_found(),
+        });
     }
     tx.commit().await
+}
+
+/// Au plus huit personnes à proposer pour un champ d'adresses.
+const SUGGESTIONS_MAX: i64 = 8;
+
+/// Les personnes connues de la plateforme dont le nom ou l'adresse
+/// correspondent à la saisie. Gardée comme l'historique : qui peut écrire aux
+/// participants de l'édition. Moins de deux caractères : rien.
+pub async fn suggestions(
+    state: &EngagementState,
+    acteur: Uuid,
+    event_id: Uuid,
+    saisie: &str,
+) -> Result<Vec<MailingAddressSuggestion>> {
+    garder_edition(state, acteur, event_id).await?;
+    let mots = mots_cherches(saisie);
+    if mots.is_empty() {
+        return Ok(Vec::new());
+    }
+    Ok(
+        cross::personnes_a_proposer(state.pool(), &mots, SUGGESTIONS_MAX)
+            .await?
+            .into_iter()
+            .map(|(name, email)| MailingAddressSuggestion { name, email })
+            .collect(),
+    )
+}
+
+/// Les mots d'une saisie, jokers de `LIKE` échappés. Vide sous deux
+/// caractères ; bornée à cinq mots de quarante caractères.
+fn mots_cherches(saisie: &str) -> Vec<String> {
+    let saisie = saisie.trim();
+    if saisie.chars().count() < 2 {
+        return Vec::new();
+    }
+    saisie
+        .split(|c: char| c.is_whitespace() || c == ',' || c == ';')
+        .filter(|m| !m.is_empty())
+        .take(5)
+        .map(|m| {
+            m.chars()
+                .take(40)
+                .flat_map(|c| match c {
+                    '\\' | '%' | '_' => vec!['\\', c],
+                    _ => vec![c],
+                })
+                .collect()
+        })
+        .collect()
 }
 
 /// Un nouveau brouillon reprenant tout d'un envoi passé : objet, corps,

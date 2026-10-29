@@ -230,6 +230,14 @@ pub struct MailingTestResult {
     pub to: String,
 }
 
+/// Une personne proposée en saisissant une adresse
+/// (`MailingAddressSuggestion`) : son nom et son adresse, rien de plus.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct MailingAddressSuggestion {
+    pub name: String,
+    pub email: String,
+}
+
 /// Le contrôle d'une adresse, celui du domaine `platform.email`. Le vérifier
 /// ici rend le refus sur le champ, avec l'adresse fautive.
 pub fn adresse_valide(adresse: &str) -> bool {

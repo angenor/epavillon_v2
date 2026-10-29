@@ -303,9 +303,12 @@ pub async fn modifier(
     Ok(n == 1)
 }
 
-pub async fn supprimer_brouillon(conn: &mut PgConnection, id: Uuid) -> Result<bool> {
+/// Supprime un envoi qui n'est pas en cours : destinataires par cascade,
+/// rattachements de pièces jointes par le déclencheur du module media. Rend
+/// faux si l'envoi est en cours (ou a disparu entre-temps).
+pub async fn supprimer(conn: &mut PgConnection, id: Uuid) -> Result<bool> {
     let n = sqlx::query!(
-        "DELETE FROM engagement.mailings WHERE id = $1 AND status = 'draft'",
+        "DELETE FROM engagement.mailings WHERE id = $1 AND status <> 'queued'",
         id
     )
     .execute(conn)

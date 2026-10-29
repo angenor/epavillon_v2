@@ -19,7 +19,7 @@
 //! | `programme.registrations` | quels destinataires, et dans quel état |
 //! | `event.events` | quelle édition porte la règle, et son périmètre |
 //! | `org.memberships` | l'organisation qui anime a-t-elle le droit de lire son calendrier |
-//! | `identity.people` | la langue préférée et l'adresse du destinataire |
+//! | `identity.people` | la langue préférée et l'adresse du destinataire ; nom et adresse des personnes proposées en saisissant un destinataire |
 //! | `platform.modules` | à quel module appartient un type de notification |
 //! | `media.attached_image()` | la bannière et le logo de l'édition d'un courriel (29/10) |
 //!
@@ -370,6 +370,49 @@ pub async fn motif_dannulation(
     .await?;
 
     Ok(motif.flatten())
+}
+
+/// Les personnes actives dont le prénom, le nom ou l'adresse contiennent
+/// chacun des mots cherchés, sans égard aux accents ni à la casse. Celles dont
+/// un champ COMMENCE par le premier mot passent devant. Nom et adresse
+/// seulement : la route sert à compléter un champ « À », rien de plus.
+///
+/// `mots` : non vide, jokers `%` `_` `\` déjà échappés.
+pub async fn personnes_a_proposer(
+    pool: &PgPool,
+    mots: &[String],
+    limite: i64,
+) -> Result<Vec<(String, String)>> {
+    let lignes = sqlx::query!(
+        r#"WITH m AS (
+               SELECT array_agg(platform.immutable_unaccent(lower(w)) ORDER BY n) AS mots
+                 FROM unnest($1::text[]) WITH ORDINALITY AS t(w, n)
+           ),
+           p AS (
+               SELECT p.display_name, p.primary_email::text AS email,
+                      platform.immutable_unaccent(lower(p.first_name)) AS prenom,
+                      platform.immutable_unaccent(lower(p.last_name)) AS nom,
+                      platform.immutable_unaccent(lower(p.primary_email::text)) AS adresse
+                 FROM identity.people p
+                WHERE p.status = 'active'
+           )
+           SELECT p.display_name AS "name!", p.email AS "email!"
+             FROM p, m
+            WHERE NOT EXISTS (
+                      SELECT 1 FROM unnest(m.mots) w
+                       WHERE p.prenom || ' ' || p.nom || ' ' || p.adresse
+                             NOT LIKE '%' || w || '%')
+            ORDER BY (p.prenom LIKE m.mots[1] || '%' OR p.nom LIKE m.mots[1] || '%'
+                      OR p.adresse LIKE m.mots[1] || '%') DESC,
+                     p.nom, p.prenom
+            LIMIT $2"#,
+        mots,
+        limite
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(lignes.into_iter().map(|l| (l.name, l.email)).collect())
 }
 
 /// Les séances d'une édition — de quoi rassembler les règles qui la

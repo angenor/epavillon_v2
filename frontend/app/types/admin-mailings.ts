@@ -186,6 +186,12 @@ export interface MailingTestResult {
   to: string
 }
 
+/** Une personne connue proposée en saisissant une adresse : nom et adresse seulement. */
+export interface MailingAddressSuggestion {
+  name: string
+  email: string
+}
+
 /** Écriture partielle d'un brouillon : un champ absent reste tel quel. */
 export interface MailingPayload {
   subject?: string

@@ -14,6 +14,11 @@ use crate::state::EngagementState;
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/admin/mailings", web::get().to(lister))
         .route("/admin/mailings", web::post().to(creer))
+        // Avant `{id}` : sinon « address-suggestions » serait lu comme un identifiant.
+        .route(
+            "/admin/mailings/address-suggestions",
+            web::get().to(suggestions),
+        )
         .route("/admin/mailings/{id}", web::get().to(detail))
         .route("/admin/mailings/{id}", web::put().to(modifier))
         .route("/admin/mailings/{id}", web::delete().to(supprimer))
@@ -139,10 +144,10 @@ pub(crate) async fn modifier(
         .json(mailings::modifier(&state, &ctx, acteur, id.into_inner(), &payload).await?))
 }
 
-/// Supprimer un brouillon.
+/// Supprimer un envoi.
 #[utoipa::path(
     delete,
-    description = "`{ deleted }` : seul un brouillon se supprime ; un envoi parti reste dans l'historique (409).",
+    description = "`{ deleted }` : un brouillon, un envoi terminé ou arrêté disparaît, avec ses destinataires ; ses pièces jointes sont détachées (les fichiers restent, purgés plus tard s'ils ne servent plus). Un envoi en cours se refuse (409, `ENGAGEMENT_MAILING_IN_PROGRESS`) : on l'arrête d'abord.",
     path = "/admin/mailings/{id}",
     tag = "Back-office : envois de courriels",
     operation_id = "engagement_envois_supprimer",
@@ -151,7 +156,7 @@ pub(crate) async fn modifier(
         (status = 200, description = "{ deleted }", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
         (status = 404, description = "Envoi inexistant ou hors droit", body = crate::routes::openapi::ApiErrorBody),
-        (status = 409, description = "ENGAGEMENT_MAILING_NOT_DRAFT", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "ENGAGEMENT_MAILING_IN_PROGRESS", body = crate::routes::openapi::ApiErrorBody),
     ),
     security(("session" = []))
 )]
@@ -164,6 +169,41 @@ pub(crate) async fn supprimer(
     let ctx = contexte_de(&requete, acteur);
     mailings::supprimer(&state, &ctx, acteur, id.into_inner()).await?;
     Ok(HttpResponse::Ok().json(Suppression { deleted: true }))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SuggestionsQuery {
+    pub event_id: Uuid,
+    #[serde(default)]
+    pub q: String,
+}
+
+/// Compléter une adresse.
+#[utoipa::path(
+    get,
+    description = "`MailingAddressSuggestion[]` : au plus huit personnes actives de la plateforme dont le prénom, le nom ou l'adresse contiennent chaque mot saisi, sans égard aux accents ni à la casse ; celles qui commencent par le premier mot d'abord. Nom et adresse seulement. Moins de deux caractères : liste vide.\n\nGardé par `engagement.mailing.send` **sur l'édition**, et borné au périmètre d'administration : hors périmètre, 404 ; dans le périmètre sans la permission, 403.",
+    path = "/admin/mailings/address-suggestions",
+    tag = "Back-office : envois de courriels",
+    operation_id = "engagement_envois_suggestions",
+    params(
+        ("event_id" = Uuid, Query, description = "L'édition de l'envoi"),
+        ("q" = String, Query, description = "La saisie"),
+    ),
+    responses(
+        (status = 200, description = "MailingAddressSuggestion[]", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Permission absente sur l'édition", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Édition inexistante ou hors périmètre", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn suggestions(
+    state: web::Data<EngagementState>,
+    Actor(acteur): Actor,
+    requete: web::Query<SuggestionsQuery>,
+) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok()
+        .json(mailings::suggestions(&state, acteur, requete.event_id, &requete.q).await?))
 }
 
 /// La liste avant envoi.

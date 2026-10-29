@@ -383,3 +383,12 @@ Retours du commanditaire sur les essais du jour, et page de création de gabarit
 Côté worker (pas de modèle) : variante `courriel` (1200 x 200, recadrée au centre en 6:1, JPEG de qualité 62) ; un objet déjà servable reçoit les variantes manquantes sans nouvelle analyse.
 
 **Migration** : `ops/migrations/2026-10-29-gabarits-personnalises.sql` (après celle du logo ; ajout de valeur d'énumération hors transaction), jouée deux fois en local sur `epavillon` ; elle met en file la variante `courriel` des bandeaux d'édition déjà servis. **En production** : avec l'API et le worker.
+## 29/10/2026, `050_media.sql` et `110_engagement.sql` : supprimer un envoi de courriels
+
+Le commanditaire ne pouvait supprimer ni ses brouillons ni ses envois partis.
+
+- **`media.tg_drop_owner_attachments()`** (050 § 4) : déclencheur `AFTER DELETE` générique d'une table porteuse, qui retire les rattachements de la ligne supprimée (`TG_TABLE_SCHEMA`, `TG_TABLE_NAME`, `OLD.id`). Le rattachement est polymorphe, aucune clé étrangère ne le faisait tomber : il désignait un porteur disparu et l'objet n'était jamais candidat à la purge. Les objets restent (la déduplication les partage, « Dupliquer » un envoi reprend les mêmes) ; `find_orphan_assets()` s'en occupe ensuite. Fonction du module media : l'autre module la déclenche, il n'écrit pas dans `media`.
+- **`engagement.tg_mailings_drop_attachments`** (110 § 12) la pose sur `engagement.mailings`. Destinataires : `ON DELETE CASCADE` existant ; `duplicated_from` : `ON DELETE SET NULL` existant ; l'audit garde la suppression.
+- **Aucun ENUM touché** : la machine à états reste `draft`, `queued`, `sent`, `cancelled`. L'API supprime tout sauf `queued` (nouveau code `ENGAGEMENT_MAILING_IN_PROGRESS`, 409) : on arrête l'envoi d'abord.
+
+**Migration** : `ops/migrations/2026-10-29-suppression-des-envois.sql`, rejouable et additive ; elle retire aussi les rattachements laissés par les brouillons supprimés avant elle. Jouée deux fois en local sur `epavillon`. **En production** : à jouer, de préférence avant l'API ; sans elle, la suppression marche mais laisse des rattachements orphelins.

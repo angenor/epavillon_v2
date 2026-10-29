@@ -145,3 +145,17 @@ Non vérifié : rendu Outlook (VML compris) et Microsoft 365 ; la page des gabar
   session, dont le worker aurait pu prendre les travaux).
 - L'envoi par le serveur SMTP de l'ancien hébergement, et sa limite horaire réelle.
 - Seul le thème sombre a été regardé ; le thème clair suit les jetons.
+
+## 29/10 : supprimer un envoi, compléter une adresse
+
+- **Suppression** (`DELETE /admin/mailings/{id}`, élargie) : brouillon, envoi terminé ou arrêté ; destinataires par
+  cascade, rattachements de pièces jointes par `media.tg_drop_owner_attachments()` (modèle : `modele.md`, 29/10). Un
+  envoi en cours : 409 `ENGAGEMENT_MAILING_IN_PROGRESS`, l'arrêter d'abord. Même garde que la lecture (permission sur
+  l'édition, périmètre ; hors droit, 404). Écran : icône corbeille par ligne de l'historique (absente sur un envoi en
+  cours), « Supprimer » sur la fiche (brouillon et envoi parti), confirmation `AdminMailingsDeleteDialog`.
+- **Saisie semi-automatique** (`GET /admin/mailings/address-suggestions?event_id=&q=`) : personnes actives, chaque mot
+  dans prénom, nom ou adresse, sans accents ni casse (`platform.immutable_unaccent`), huit au plus, nom et adresse
+  seulement ; gardée par `engagement.mailing.send` sur l'édition. `AddressField` : dès deux caractères, 250 ms, combobox
+  au clavier (flèches, Entrée, Échap) ; une adresse inconnue reste permise. L'édition vient de la prop `eventId`, à
+  défaut de l'édition courante du back-office : `Composer.vue` ne la passe pas encore (réorganisé en parallèle).
+- **Tests** : `engagement/tests/envois_suppression.rs` (six). Pas de parcours au navigateur.

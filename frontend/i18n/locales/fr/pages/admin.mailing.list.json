@@ -22,11 +22,20 @@
     "subject": "Objet",
     "status": "État",
     "recipients": "Destinataires",
-    "date": "Date ({zone})"
+    "date": "Date ({zone})",
+    "actions": "Actions"
   },
   "notSent": "Pas encore envoyé",
   "progress": "{sent} partis sur {total}",
   "failed": "aucun échec | {count} échec | {count} échecs",
   "noResults": "Aucun courriel ne correspond",
-  "attachments": "aucune pièce jointe | {count} pièce jointe | {count} pièces jointes"
+  "attachments": "aucune pièce jointe | {count} pièce jointe | {count} pièces jointes",
+  "delete": {
+    "action": "Supprimer",
+    "actionFor": "Supprimer « {subject} »",
+    "title": "Supprimer ce courriel ?",
+    "draft": "Le brouillon et ses pièces jointes sont supprimés définitivement.",
+    "sent": "Le courriel quitte l'historique, avec ses destinataires et l'état de chaque message. Les messages déjà partis ne sont pas rappelés.",
+    "confirm": "Supprimer définitivement"
+  }
 }

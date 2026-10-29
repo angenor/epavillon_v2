@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH m AS (\n               SELECT array_agg(platform.immutable_unaccent(lower(w)) ORDER BY n) AS mots\n                 FROM unnest($1::text[]) WITH ORDINALITY AS t(w, n)\n           ),\n           p AS (\n               SELECT p.display_name, p.primary_email::text AS email,\n                      platform.immutable_unaccent(lower(p.first_name)) AS prenom,\n                      platform.immutable_unaccent(lower(p.last_name)) AS nom,\n                      platform.immutable_unaccent(lower(p.primary_email::text)) AS adresse\n                 FROM identity.people p\n                WHERE p.status = 'active'\n           )\n           SELECT p.display_name AS \"name!\", p.email AS \"email!\"\n             FROM p, m\n            WHERE NOT EXISTS (\n                      SELECT 1 FROM unnest(m.mots) w\n                       WHERE p.prenom || ' ' || p.nom || ' ' || p.adresse\n                             NOT LIKE '%' || w || '%')\n            ORDER BY (p.prenom LIKE m.mots[1] || '%' OR p.nom LIKE m.mots[1] || '%'\n                      OR p.adresse LIKE m.mots[1] || '%') DESC,\n                     p.nom, p.prenom\n            LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true,
+      null
+    ]
+  },
+  "hash": "c53747357553263aff57900067acd8061d7fc8dbe3b1ab6b30fca4eea91dba91"
+}

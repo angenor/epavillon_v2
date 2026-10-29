@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM engagement.mailings WHERE id = $1 AND status <> 'queued'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "224c3df8935f90e7fbfee16604c304d8480bd2dd189d1d26b45523465a9063b9"
+}

@@ -71,6 +71,12 @@ watch(
 const busy = ref(false)
 const actionError = ref<string | null>(null)
 const cancelOpen = ref(false)
+const deleteOpen = ref(false)
+
+async function onDeleted(): Promise<void> {
+  deleteOpen.value = false
+  await navigateTo(localePath('/admin/courriels'))
+}
 
 async function duplicate(): Promise<void> {
   const source = mailing.value
@@ -141,9 +147,14 @@ async function cancelSending(): Promise<void> {
 
       <div v-if="isDraft" class="mt-8">
         <UiAlert intent="info" :message="t('admin.mailing.composer.draftHere')" />
-        <UiButton class="mt-4" icon="mail" @click="composer.open(mailing.id)">
-          {{ t('admin.mailing.composer.openDraft') }}
-        </UiButton>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <UiButton icon="mail" @click="composer.open(mailing.id)">
+            {{ t('admin.mailing.composer.openDraft') }}
+          </UiButton>
+          <UiButton variant="ghost" icon="trash" @click="deleteOpen = true">
+            {{ t('admin.mailing.list.delete.action') }}
+          </UiButton>
+        </div>
       </div>
 
       <AdminMailingsRecord
@@ -157,7 +168,10 @@ async function cancelSending(): Promise<void> {
         @duplicate="duplicate"
         @cancel="cancelOpen = true"
         @refresh="refresh()"
+        @delete="deleteOpen = true"
       />
+
+      <AdminMailingsDeleteDialog :target="deleteOpen ? mailing : null" @close="deleteOpen = false" @deleted="onDeleted" />
 
       <UiModal v-model:open="cancelOpen" :title="t('admin.mailing.record.cancelConfirm.title')" :description="t('admin.mailing.record.cancelConfirm.description')">
         <template #footer>

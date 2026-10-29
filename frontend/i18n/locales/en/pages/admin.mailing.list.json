@@ -22,11 +22,20 @@
     "subject": "Subject",
     "status": "Status",
     "recipients": "Recipients",
-    "date": "Date ({zone})"
+    "date": "Date ({zone})",
+    "actions": "Actions"
   },
   "notSent": "Not sent yet",
   "progress": "{sent} sent of {total}",
   "failed": "no failures | {count} failure | {count} failures",
   "noResults": "No email matches",
-  "attachments": "no attachments | {count} attachment | {count} attachments"
+  "attachments": "no attachments | {count} attachment | {count} attachments",
+  "delete": {
+    "action": "Delete",
+    "actionFor": "Delete “{subject}”",
+    "title": "Delete this email?",
+    "draft": "The draft and its attachments are permanently deleted.",
+    "sent": "The email leaves the history, with its recipients and the status of each message. Messages already sent are not recalled.",
+    "confirm": "Delete permanently"
+  }
 }

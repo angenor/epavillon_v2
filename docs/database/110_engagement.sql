@@ -1281,6 +1281,16 @@ CREATE TRIGGER tg_mailings_audit
     AFTER INSERT OR UPDATE OR DELETE ON engagement.mailings
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
 
+-- SUPPRESSION (29/10, demande du commanditaire) : un brouillon, un envoi
+-- terminé ou arrêté se suppriment, destinataires compris (ON DELETE CASCADE),
+-- pièces jointes détachées (ci-dessous) ; la ligne d'audit garde la trace de
+-- la suppression, `email_messages` celle de ce qui est parti. Un envoi
+-- 'queued' ne se supprime pas tant que le travail d'envoi le sert : on
+-- l'arrête d'abord (refus de l'API, ENGAGEMENT_MAILING_IN_PROGRESS).
+CREATE TRIGGER tg_mailings_drop_attachments
+    AFTER DELETE ON engagement.mailings
+    FOR EACH ROW EXECUTE FUNCTION media.tg_drop_owner_attachments();
+
 COMMENT ON TABLE engagement.mailings IS
     'Courriels écrits depuis le back-office à des participants d''une édition. Brouillon, puis envoi figé et historisé.';
 COMMENT ON COLUMN engagement.mailings.audience IS
