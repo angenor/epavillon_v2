@@ -15,9 +15,9 @@ use media::scan::{Scanner, Verdict};
 use std::sync::Arc;
 
 /// Le nombre de déclinaisons attendues d'une image de 1920 px : les trois
-/// tailles configurées lui sont toutes inférieures, et le recadrage `courriel`
-/// (1200 x 200) s'y ajoute.
-const DECLINAISONS_ATTENDUES: i64 = 4;
+/// tailles configurées lui sont toutes inférieures, et s'y ajoutent le
+/// recadrage `courriel` (1200 x 200) et l'aperçu `partage` (1200 px, 100 Ko).
+const DECLINAISONS_ATTENDUES: i64 = 5;
 
 /// **L'original est servi avant les déclinaisons.**
 ///
