@@ -13,8 +13,8 @@ import type { ProgrammeTrackIndex } from '~/utils/programme-tracks'
  * les colonnes ont une largeur relative (44 %, puis 30 %) pour que la suivante
  * dépasse toujours un peu du bord et invite à faire défiler.
  *
- * Une activité d'une journée spéciale publiée garde sa case, sur un fond
- * teinté de la couleur de la journée, et mène à sa place dans le déroulé de la
+ * Le jour d'une journée spéciale publiée est teinté de sa couleur sur toute la
+ * colonne ; chacune de ses activités mène à sa place dans le déroulé de la
  * journée. Le jour de l'atelier porte son encadré bleu nuit, sans déroulé.
  */
 
@@ -142,8 +142,9 @@ const columns = computed(() =>
 
 const shown = computed(() => columns.value.reduce((sum, column) => sum + column.cards.length, 0))
 
-const tint = (column: { isToday: boolean }, index: number) =>
-  column.isToday ? 'bg-accent/6' : index % 2 ? 'bg-text/3' : ''
+// Le jour d'une journée spéciale est teinté d'un bord à l'autre, en-tête compris.
+const tint = (column: { isToday: boolean; specialStyle?: Record<string, string> }, index: number) =>
+  column.specialStyle ? 'bg-(--color-day-surface-strong)' : column.isToday ? 'bg-accent/6' : index % 2 ? 'bg-text/3' : ''
 
 const root = useTemplateRef<HTMLElement>('root')
 const head = useTemplateRef<HTMLElement>('head')
@@ -232,6 +233,7 @@ async function next(): Promise<void> {
             type="button"
             class="group/day flex min-w-0 cursor-pointer flex-col border-l border-border-subtle px-4 text-left first:border-l-0"
             :class="tint(column, index)"
+            :style="column.specialStyle"
             :aria-label="t('programme.week.openDay', { day: column.label })"
             :aria-current="column.isToday ? 'date' : undefined"
             @click="emit('day', column.date)"
@@ -270,6 +272,7 @@ async function next(): Promise<void> {
           :key="column.date"
           class="min-w-0 border-l border-border-subtle px-4 pb-3 first:border-l-0"
           :class="tint(column, index)"
+          :style="column.specialStyle"
           :aria-label="column.label"
         >
         <div v-for="side in column.sides" :key="side.slug" class="group relative my-3.5 rounded-lg bg-surface-inverse p-3.5 text-text-on-inverse">
@@ -287,8 +290,6 @@ async function next(): Promise<void> {
             v-for="item in column.cards"
             :key="item.id"
             class="group relative border-b border-border-subtle py-3.5"
-            :class="item.dayColor ? 'my-1 rounded-md border-b-0 bg-(--color-day-surface) px-3' : ''"
-            :style="item.dayColor ? trackDayStyle(item.dayColor) : undefined"
             :title="item.dayTitle || undefined"
           >
             <div :class="{ 'opacity-60': item.faded }">
