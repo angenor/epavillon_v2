@@ -401,3 +401,17 @@ Décision du commanditaire, en connaissance de cause (cela révèle qu'une adres
 Côté code (crate `identity`) : un compte `password` sans empreinte rend une septième issue de connexion, `password_reset_required`, quel que soit le mot de passe tapé, sans compter d'échec ni verrouiller. Un compte avec empreinte garde `invalid_credentials`. Test `discretion_compte_repris` retiré (la mesure de temps n'a plus d'objet), `compte_repris` réécrit. Le site renvoie vers « Mot de passe oublié », adresse remplie par l'état ; Guide Négo ouvre sa feuille « Mot de passe oublié », adresse remplie. Le refus d'un mauvais mot de passe redevient « L'adresse ou le mot de passe ne correspond pas. »
 
 **En production** : aucune migration ; la colonne garde le commentaire de `2026-10-27-compte-sans-mot-de-passe.sql`, écart sans effet visible seulement à une comparaison de schémas.
+
+## 30/10/2026, `060_events.sql`, `075_programme_sessions.sql`, `050_media.sql` : la page publique d'un fil
+
+Les pages des journées spéciales et de l'atelier préparatoire (direction 2 des maquettes, `docs/maquettes/journees-speciales/`) affichaient ce que le modèle ne portait pas. Ajouts seulement :
+
+- **`event.programme_tracks`**, en queue : `tagline`, `target_audiences` (`i18n_text[]`, même forme que sur le dossier), `support_note`, encart mis en avant `feature_kicker`, `feature_title`, `feature_body`, `feature_link_label`, `feature_link_url` (adresse absolue ou chemin du site), `venue_id` (nul : le pavillon ; même édition, `tg_programme_tracks_check_venue`). Contraintes `ck_programme_tracks_feature_link`, `-_feature_link_url`, `-_feature_title`.
+- **`event.venues`**, en queue : `area` (« Zone bleue »), `access_note`, `latitude`, `longitude`, `ck_venues_coordinates`.
+- **`event.programme_track_parts`** (nom court, intitulé, résumé, rang ; `ux_programme_track_parts_track (id, track_id)` cible des clés composites), **`event.programme_track_moments`** (accueil, déjeuner, clôture : ni activité, ni inscription, ni conflit ; fin facultative ; partie de son fil par clé composite `ON DELETE SET NULL (part_id)`), **`event.programme_track_partners`** (`xmod_fk_programme_track_partners_org`, rôle dans la taxonomie ouverte **`track_partner_role`** : `organizer`, `partner`, `technical_partner`, `financial_support`, gardé par `tg_programme_track_partners_check_role` ; déclaré à `org.organization_references` avec `dedupe_on {track_id}`).
+- **`programme.session_tracks.part_id`** : la partie se pose sur le rattachement (une activité de deux fils n'est pas dans la même partie), clé composite `xmod_fk_session_tracks_part`.
+- **Médias** : `media.attached_documents()` (PDF publics et prêts) ; trois rôles pour `event.programme_tracks` : `cover` (photo du bandeau, sans forme), `thumbnail` (visuel de l'encart), `document` (multiple, PDF). Garde `FilAdministre` (permission `event.event.manage` sur l'édition du fil et périmètre).
+
+Non ajouté, déjà porté : fuseau (édition), couleur, temps fort (`is_highlight`), heures de la journée et des parties (lues sur le déroulé, jamais saisies : le PDF de l'atelier annonçait 16:00 pour une clôture à 15:00), intervenants (ceux des activités).
+
+**En production** : `ops/migrations/2026-10-30-journees-speciales.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API qui nomme ces colonnes.
