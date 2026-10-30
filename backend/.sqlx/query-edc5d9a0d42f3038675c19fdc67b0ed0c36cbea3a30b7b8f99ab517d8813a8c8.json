@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT engagement.fail_mailing($1, $2) AS \"passe!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "passe!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "edc5d9a0d42f3038675c19fdc67b0ed0c36cbea3a30b7b8f99ab517d8813a8c8"
+}

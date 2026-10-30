@@ -1129,11 +1129,24 @@ ON CONFLICT DO NOTHING;
 -- par envoi, ce qu'une table partitionnée par mois sans clé étrangère ne sait
 -- pas faire.
 -- -----------------------------------------------------------------------------
+--
+-- ENVOI EN ÉCHEC (31/10). Un serveur de courriel injoignable une minute
+-- épuisait les cinq essais du travail (`platform.fail_job()`, 2 à 32 s), qui
+-- mourait ; l'envoi restait `queued`, « en cours » pour toujours, sans que rien
+-- ne le dise : seule `mailing_recipients.last_error` existait, par
+-- destinataire. Une VALEUR de la machine à états plutôt que des colonnes
+-- seules : un envoi qui n'avance plus n'est pas « en cours », et la liste doit
+-- les distinguer d'un coup d'œil. Les colonnes `failed_at` et `failure_reason`
+-- portent la date et le motif lisible ; le nombre de destinataires partis et
+-- en échec se compte sur `mailing_recipients`, à jour à chaque destinataire,
+-- donc jamais recopié ici. Un envoi en échec se RELANCE (retour à `queued`,
+-- seuls les destinataires encore en file partent), s'arrête ou se supprime.
 CREATE TYPE engagement.mailing_status AS ENUM (
     'draft',      -- brouillon : tout se modifie, rien n'est parti
     'queued',     -- destinataires figés, l'envoi progresse par lots
     'sent',       -- chaque destinataire est traité (parti, écarté ou en échec)
-    'cancelled'   -- arrêté en cours de route : les destinataires restants ne reçoivent rien
+    'cancelled',  -- arrêté en cours de route : les destinataires restants ne reçoivent rien
+    'failed'      -- n'avance plus (serveur injoignable, travail mort) : à relancer, arrêter ou supprimer
 );
 
 -- GABARITS PERSONNALISÉS (29/10, demande du commanditaire). Une mise en page
@@ -1251,11 +1264,24 @@ CREATE TABLE engagement.mailings (
     queued_at       timestamptz,
     completed_at    timestamptz,
     cancelled_at    timestamptz,
+    -- DERNIER ÉCHEC (31/10) : posés par `fail_mailing()`, gardés après une
+    -- relance ou un arrêt (on voit qu'il y a eu un problème, et lequel).
+    failed_at       timestamptz,
+    -- En français, lu tel quel par l'équipe : la cause, pas une trace technique.
+    failure_reason  text,
+    -- Relances d'un envoi en échec ; nomme aussi le travail de chaque relance
+    -- (`mailing:<id>:relance:<n>`), qu'une clé déjà prise ne bloquerait pas.
+    relaunch_count  smallint    NOT NULL DEFAULT 0,
+    relaunched_at   timestamptz,
     created_at      timestamptz NOT NULL DEFAULT now(),
     updated_at      timestamptz NOT NULL DEFAULT now(),
 
     CONSTRAINT ck_mailings_audience_shape CHECK (jsonb_typeof(audience) = 'array'),
     CONSTRAINT ck_mailings_queued CHECK ((status = 'draft') = (queued_at IS NULL)),
+    -- Un échec a toujours sa date et son motif ; l'inverse non (voir ci-dessus).
+    CONSTRAINT ck_mailings_failed CHECK (
+        status <> 'failed' OR (failed_at IS NOT NULL AND length(btrim(failure_reason)) > 0)),
+    CONSTRAINT ck_mailings_relaunch CHECK ((relaunch_count = 0) = (relaunched_at IS NULL)),
     -- Un envoi parti a un objet et un corps : la base le garantit, pas l'écran.
     CONSTRAINT ck_mailings_ready CHECK (
         status = 'draft'
@@ -1286,7 +1312,8 @@ CREATE TRIGGER tg_mailings_audit
 -- pièces jointes détachées (ci-dessous) ; la ligne d'audit garde la trace de
 -- la suppression, `email_messages` celle de ce qui est parti. Un envoi
 -- 'queued' ne se supprime pas tant que le travail d'envoi le sert : on
--- l'arrête d'abord (refus de l'API, ENGAGEMENT_MAILING_IN_PROGRESS).
+-- l'arrête d'abord (refus de l'API, ENGAGEMENT_MAILING_IN_PROGRESS). Un envoi
+-- 'failed' (31/10) n'est servi par rien : il se supprime.
 CREATE TRIGGER tg_mailings_drop_attachments
     AFTER DELETE ON engagement.mailings
     FOR EACH ROW EXECUTE FUNCTION media.tg_drop_owner_attachments();
@@ -1333,6 +1360,89 @@ CREATE TRIGGER tg_mailing_recipients_updated_at
 
 COMMENT ON TABLE engagement.mailing_recipients IS
     'Destinataires figés d''un envoi du back-office, un par adresse, avec leur état. Remplace la boîte d''envoi illisible.';
+
+-- Passe un envoi en cours à l'échec, avec son motif. Un destinataire resté
+-- `sending` vient d'un travail mort entre le marquage et la réponse du
+-- serveur : rien ne dit s'il est parti, il passe en échec plutôt que de
+-- risquer un doublon à la relance. Les destinataires en file y restent : ce
+-- sont eux que la relance servira. Rend faux si l'envoi n'était pas en cours.
+CREATE OR REPLACE FUNCTION engagement.fail_mailing(p_mailing_id uuid, p_reason text)
+RETURNS boolean
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE engagement.mailings
+       SET status = 'failed', failed_at = now(), failure_reason = p_reason
+     WHERE id = p_mailing_id AND status = 'queued';
+    IF NOT FOUND THEN
+        RETURN false;
+    END IF;
+    UPDATE engagement.mailing_recipients
+       SET status = 'failed', last_error = 'envoi interrompu : départ non confirmé'
+     WHERE mailing_id = p_mailing_id AND status = 'sending';
+    RETURN true;
+END;
+$$;
+
+COMMENT ON FUNCTION engagement.fail_mailing IS
+    'Passe un envoi en cours à l''échec avec son motif ; les destinataires en file attendent une relance.';
+
+-- La vérification au relevé : un envoi `queued` sans travail d'envoi vivant
+-- (en file ou en cours) n'avancera plus. Cas du travail mort avant que le
+-- worker sache poser l'échec lui-même (envois bloqués en production avant le
+-- 31/10), d'un worker tué au mauvais moment, ou d'une chaîne de lots rompue.
+-- Le worker est la voie normale ; ceci est le filet, appelé par l'API avant de
+-- montrer la liste ou un envoi.
+--
+-- Les travaux d'un envoi se reconnaissent à leur clé (`mailing:<id>:…`) : la
+-- charge utile d'un travail réussi est vidée, la clé reste. Un envoi dont il ne
+-- reste personne à servir est clos comme le fait le travail.
+--
+-- Lit `platform.jobs` sans l'écrire : la file appartient au noyau.
+CREATE OR REPLACE FUNCTION engagement.fail_stalled_mailings(p_event_id uuid DEFAULT NULL)
+RETURNS SETOF uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    r record;
+BEGIN
+    FOR r IN
+        SELECT m.id,
+               (SELECT j.last_error FROM platform.jobs j
+                 WHERE j.task = 'engagement.send_mailing'
+                   AND j.idempotency_key LIKE 'mailing:' || m.id || ':%'
+                   AND j.status = 'dead'
+                 ORDER BY j.created_at DESC
+                 LIMIT 1) AS derniere_erreur
+          FROM engagement.mailings m
+         WHERE m.status = 'queued'
+           AND (p_event_id IS NULL OR m.event_id = p_event_id)
+           AND NOT EXISTS (SELECT 1 FROM platform.jobs j
+                            WHERE j.task = 'engagement.send_mailing'
+                              AND j.idempotency_key LIKE 'mailing:' || m.id || ':%'
+                              AND j.status IN ('queued', 'running'))
+           FOR UPDATE OF m SKIP LOCKED
+    LOOP
+        IF EXISTS (SELECT 1 FROM engagement.mailing_recipients q
+                    WHERE q.mailing_id = r.id AND q.status IN ('queued', 'sending')) THEN
+            PERFORM engagement.fail_mailing(r.id, CASE
+                WHEN r.derniere_erreur ILIKE '%injoignable%' THEN
+                    'Le serveur de courriel est resté injoignable : l''envoi s''est arrêté après plusieurs tentatives.'
+                WHEN r.derniere_erreur IS NOT NULL THEN
+                    'L''envoi s''est interrompu et ne reprenait plus. Dernière erreur : '
+                    || left(r.derniere_erreur, 300)
+                ELSE 'L''envoi s''est interrompu et ne reprenait plus.' END);
+        ELSE
+            UPDATE engagement.mailings SET status = 'sent', completed_at = now()
+             WHERE id = r.id AND status = 'queued';
+        END IF;
+        RETURN NEXT r.id;
+    END LOOP;
+END;
+$$;
+
+COMMENT ON FUNCTION engagement.fail_stalled_mailings IS
+    'Filet : passe à l''échec (ou clôt) les envois en cours qu''aucun travail vivant ne sert plus. Rend les envois touchés.';
 
 -- La liste des destinataires d'un envoi, telle qu'elle partirait maintenant.
 --

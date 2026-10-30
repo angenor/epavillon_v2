@@ -48,6 +48,7 @@ pub struct ApiErrorBody {
         crate::routes::mailings::essai,
         crate::routes::mailings::envoyer,
         crate::routes::mailings::annuler,
+        crate::routes::mailings::relancer,
         crate::routes::mailings::dupliquer,
         crate::routes::mail_templates::lister,
         crate::routes::mail_templates::creer,

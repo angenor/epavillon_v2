@@ -19,6 +19,14 @@
 //! Le destinataire revient en file et le travail échoue : `fail_job()` le
 //! reprend avec un délai croissant. Un refus du serveur (adresse rejetée) est,
 //! lui, définitif pour ce destinataire, et l'envoi continue.
+//!
+//! # Au dernier essai, l'envoi passe en échec (31/10)
+//!
+//! Le travail mort laissait l'envoi « en cours » pour toujours. Au dernier
+//! essai, quelle qu'en soit la cause, l'envoi passe à `failed` avec un motif
+//! lisible ; les destinataires encore en file y restent, pour la relance.
+//! `engagement.fail_stalled_mailings()` rattrape au relevé ce que ce passage
+//! n'a pas pu écrire (worker tué, base indisponible à ce moment-là).
 
 use async_trait::async_trait;
 use kernel::context::RequestContext;
@@ -49,6 +57,43 @@ const LOT: usize = 10;
 
 fn contexte() -> RequestContext {
     RequestContext::background("engagement.send_mailing")
+}
+
+/// Ce qui arrête un passage : le serveur d'envoi injoignable, à reprendre plus
+/// tard, ou toute autre erreur.
+enum Arret {
+    Injoignable(String),
+    Erreur(ApiError),
+}
+
+impl From<ApiError> for Arret {
+    fn from(e: ApiError) -> Self {
+        Self::Erreur(e)
+    }
+}
+
+impl Arret {
+    /// Le motif que l'équipe lit quand l'envoi passe en échec.
+    fn motif(&self, essais: i16) -> String {
+        match self {
+            Self::Injoignable(_) => format!(
+                "Le serveur de courriel est resté injoignable malgré {essais} tentatives en une minute environ."
+            ),
+            Self::Erreur(e) => format!(
+                "L'envoi s'est arrêté sur une erreur, répétée à {essais} tentatives : {}.",
+                e.detail.as_deref().unwrap_or(&e.message).trim_end_matches('.')
+            ),
+        }
+    }
+
+    fn en_erreur(self) -> ApiError {
+        match self {
+            Self::Injoignable(detail) => ApiError::internal(format!(
+                "serveur d'envoi injoignable, reprise plus tard : {detail}"
+            )),
+            Self::Erreur(e) => e,
+        }
+    }
 }
 
 fn mailing_id(job: &ClaimedJob) -> Result<Uuid> {
@@ -275,10 +320,28 @@ impl JobHandler for SendMailing {
 
     async fn run(&self, job: &ClaimedJob) -> Result<()> {
         let id = mailing_id(job)?;
+        let Err(arret) = self.passage(id).await else {
+            return Ok(());
+        };
+        // `claim_jobs()` a déjà compté cet essai ; `fail_job()` tuera le
+        // travail au même seuil.
+        if job.attempts >= job.max_attempts {
+            let mut tx = self.db.write(&contexte()).await?;
+            let _echoue = mailings::echouer(&mut tx, id, &arret.motif(job.attempts)).await?;
+            tx.commit().await?;
+            // Signal à émettre ici si `_echoue` : `mailing:<id>`,
+            // `event:<id>:mailings`, `person:<auteur>` (`queued_by` de l'envoi).
+        }
+        Err(arret.en_erreur())
+    }
+}
+
+impl SendMailing {
+    async fn passage(&self, id: Uuid) -> std::result::Result<(), Arret> {
         let Some(envoi) = mailings::lire(self.db.pool(), id).await? else {
             return Ok(());
         };
-        // Arrêté ou déjà clos : le passage arrive après la décision.
+        // Arrêté, en échec ou déjà clos : le passage arrive après la décision.
         if envoi.status != "queued" {
             return Ok(());
         }
@@ -330,23 +393,28 @@ impl JobHandler for SendMailing {
                 Ok(()) => self.clore(pris.id, "sent", None).await?,
                 Err(MailError::Unreachable(detail)) => {
                     self.clore(pris.id, "queued", None).await?;
-                    return Err(ApiError::internal(format!(
-                        "serveur d'envoi injoignable, reprise plus tard : {detail}"
-                    )));
+                    return Err(Arret::Injoignable(detail));
                 }
                 Err(e) => self.clore(pris.id, "failed", Some(&e.to_string())).await?,
             }
         }
 
+        // L'avancement (partis, en échec) est à jour à chaque destinataire, sur
+        // `mailing_recipients`. Signal à émettre ici, à chaque lot :
+        // `mailing:<id>`, `event:<id>:mailings`.
+        // Signal à émettre après la validation ci-dessous si `parti` :
+        // `person:<auteur>` (`queued_by` de l'envoi) en plus des deux autres.
         let mut tx = self.db.write(&contexte()).await?;
-        if !mailings::clore_si_fini(&mut tx, id).await? {
+        let parti = mailings::clore_si_fini(&mut tx, id).await?;
+        if !parti {
             let suivant = sqlx::query_scalar!(
                 r#"SELECT min(id::text) AS suivant FROM engagement.mailing_recipients
                     WHERE mailing_id = $1 AND status = 'queued'"#,
                 id
             )
             .fetch_one(&mut *tx)
-            .await?
+            .await
+            .map_err(ApiError::from)?
             .unwrap_or_default();
             jobs::enqueue(
                 &mut tx,
@@ -360,7 +428,8 @@ impl JobHandler for SendMailing {
             )
             .await?;
         }
-        tx.commit().await
+        tx.commit().await?;
+        Ok(())
     }
 }
 
@@ -462,6 +531,7 @@ mod tests {
             queued_at: None,
             completed_at: None,
             cancelled_at: None,
+            echec: mailings::Echec::default(),
             created_at: maintenant,
             updated_at: maintenant,
             habillage: mailings::Habillage {

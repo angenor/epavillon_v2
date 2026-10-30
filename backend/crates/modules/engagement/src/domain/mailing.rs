@@ -80,7 +80,7 @@ pub struct MailingCounts {
 pub struct MailingSummary {
     pub id: Uuid,
     pub event_id: Uuid,
-    /// `draft`, `queued`, `sent`, `cancelled`.
+    /// `draft`, `queued`, `sent`, `cancelled`, `failed`.
     pub status: String,
     pub subject: String,
     pub created_by_name: Option<String>,
@@ -89,6 +89,10 @@ pub struct MailingSummary {
     pub queued_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339::option")]
     pub completed_at: Option<OffsetDateTime>,
+    /// Le dernier échec, gardé après une relance ou un arrêt.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub failed_at: Option<OffsetDateTime>,
+    pub failure_reason: Option<String>,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
@@ -135,6 +139,13 @@ pub struct Mailing {
     pub completed_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339::option")]
     pub cancelled_at: Option<OffsetDateTime>,
+    /// Le dernier échec (motif en français), gardé après une relance ou un arrêt.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub failed_at: Option<OffsetDateTime>,
+    pub failure_reason: Option<String>,
+    pub relaunch_count: i16,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub relaunched_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]

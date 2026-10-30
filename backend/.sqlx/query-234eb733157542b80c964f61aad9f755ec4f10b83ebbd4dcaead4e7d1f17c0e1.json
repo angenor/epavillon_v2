@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs\n            SET status = 'dead', attempts = max_attempts,\n                last_error = 'INTERNAL: erreur interne (serveur d''envoi injoignable, reprise plus tard : délai dépassé)'\n          WHERE task = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "234eb733157542b80c964f61aad9f755ec4f10b83ebbd4dcaead4e7d1f17c0e1"
+}

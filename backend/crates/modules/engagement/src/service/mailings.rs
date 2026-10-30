@@ -18,6 +18,13 @@
 //!
 //! L'envoi et l'essai passent par la file « email » du worker, qui suit la
 //! par lots, sans limite d'envoi (décision du commanditaire, 28/10).
+//!
+//! # Un envoi qui n'avance plus le dit (31/10)
+//!
+//! Le worker passe l'envoi en échec à son dernier essai. Au relevé (liste,
+//! fiche), `engagement.fail_stalled_mailings()` rattrape celui qu'aucun travail
+//! ne sert plus. Un envoi en échec se relance (ses seuls destinataires encore en
+//! file), s'arrête ou se supprime.
 
 use kernel::auth::{administered_events, has_permission, Scope};
 use kernel::error::{ApiError, ErrorCode, Result};
@@ -93,12 +100,27 @@ async fn garder_envoi(
 // Lectures
 // -----------------------------------------------------------------------------
 
+/// Le filet du relevé : n'ouvre une écriture que s'il y a un envoi en cours.
+async fn verifier_les_envois_en_cours(state: &EngagementState, event_id: Uuid) -> Result<()> {
+    if !mailings::a_des_envois_en_cours(state.pool(), event_id).await? {
+        return Ok(());
+    }
+    let ctx = RequestContext::background("engagement.mailing_check");
+    let mut tx = state.db().write(&ctx).await?;
+    let _bascules = mailings::basculer_les_bloques(&mut tx, event_id).await?;
+    tx.commit().await?;
+    // Signal à émettre ici pour chaque envoi de `_bascules` : `mailing:<id>`,
+    // `event:<id>:mailings`, `person:<auteur>` (`queued_by` de l'envoi).
+    Ok(())
+}
+
 pub async fn ecran(
     state: &EngagementState,
     acteur: Uuid,
     event_id: Uuid,
 ) -> Result<MailingListScreen> {
     garder_edition(state, acteur, event_id).await?;
+    verifier_les_envois_en_cours(state, event_id).await?;
     let team_cc = mailings::equipe_en_copie(state.pool()).await?;
     Ok(MailingListScreen {
         rows: mailings::lister(state.pool(), event_id).await?,
@@ -108,7 +130,13 @@ pub async fn ecran(
 }
 
 pub async fn detail(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result<Mailing> {
-    let envoi = garder_envoi(state, acteur, id).await?;
+    let mut envoi = garder_envoi(state, acteur, id).await?;
+    if envoi.status == "queued" {
+        verifier_les_envois_en_cours(state, envoi.event_id).await?;
+        envoi = mailings::lire(state.pool(), id)
+            .await?
+            .ok_or_else(ApiError::not_found)?;
+    }
     assembler(state, envoi).await
 }
 
@@ -147,6 +175,10 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
         queued_at: e.queued_at,
         completed_at: e.completed_at,
         cancelled_at: e.cancelled_at,
+        failed_at: e.echec.failed_at,
+        failure_reason: e.echec.failure_reason,
+        relaunch_count: e.echec.relaunch_count,
+        relaunched_at: e.echec.relaunched_at,
         created_at: e.created_at,
         updated_at: e.updated_at,
     })
@@ -580,7 +612,7 @@ pub async fn modifier(
     detail(state, acteur, id).await
 }
 
-/// Un brouillon, un envoi terminé ou arrêté disparaissent, destinataires et
+/// Un brouillon, un envoi terminé, arrêté ou en échec disparaissent, destinataires et
 /// rattachements compris. Un envoi en cours se refuse : le travail d'envoi le
 /// sert encore, on l'arrête d'abord.
 pub async fn supprimer(
@@ -786,8 +818,8 @@ pub async fn envoyer(
     detail(state, acteur, id).await
 }
 
-/// Arrête un envoi en cours : ce qui est parti reste parti, le reste ne part
-/// pas.
+/// Arrête un envoi en cours ou en échec : ce qui est parti reste parti, le
+/// reste ne part pas.
 pub async fn annuler(
     state: &EngagementState,
     ctx: &RequestContext,
@@ -798,10 +830,52 @@ pub async fn annuler(
     let mut tx = state.db().write(ctx).await?;
     if !mailings::annuler(&mut tx, id).await? {
         return Err(ApiError::validation(
-            "Seul un envoi en cours peut être arrêté.",
+            "Seul un envoi en cours ou en échec peut être arrêté.",
             "status",
         ));
     }
     tx.commit().await?;
+    // Signal à émettre ici : `mailing:<id>`, `event:<id>:mailings`.
+    detail(state, acteur, id).await
+}
+
+/// Relance un envoi en échec : seuls ses destinataires encore en file partent.
+/// Ceux qui sont partis ne reçoivent rien de plus ; ceux en échec ou au départ
+/// non confirmé non plus (un doublon parti ne se rattrape pas).
+pub async fn relancer(
+    state: &EngagementState,
+    ctx: &RequestContext,
+    acteur: Uuid,
+    id: Uuid,
+) -> Result<Mailing> {
+    let envoi = garder_envoi(state, acteur, id).await?;
+    if envoi.status != "failed" {
+        return Err(ApiError::validation(
+            "Seul un envoi en échec peut être relancé.",
+            "status",
+        ));
+    }
+    exiger_des_pieces_pretes(state, id).await?;
+
+    let mut tx = state.db().write(ctx).await?;
+    let Some(numero) = mailings::relancer(&mut tx, id).await? else {
+        return Err(ApiError::validation(
+            "Plus aucun destinataire n'attend : rien à relancer.",
+            "status",
+        ));
+    };
+    jobs::enqueue(
+        &mut tx,
+        NewJob {
+            queue: QUEUE,
+            task: SEND_MAILING,
+            payload: serde_json::json!({ "mailing_id": id }),
+            idempotency_key: Some(format!("mailing:{id}:relance:{numero}")),
+            run_at: None,
+        },
+    )
+    .await?;
+    tx.commit().await?;
+    // Signal à émettre ici : `mailing:<id>`, `event:<id>:mailings`.
     detail(state, acteur, id).await
 }

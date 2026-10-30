@@ -36,9 +36,19 @@ pub struct LigneEnvoi {
     pub queued_at: Option<OffsetDateTime>,
     pub completed_at: Option<OffsetDateTime>,
     pub cancelled_at: Option<OffsetDateTime>,
+    pub echec: Echec,
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
     pub habillage: Habillage,
+}
+
+/// Le dernier échec d'un envoi et ses relances (31/10).
+#[derive(Debug, Clone, Default)]
+pub struct Echec {
+    pub failed_at: Option<OffsetDateTime>,
+    pub failure_reason: Option<String>,
+    pub relaunch_count: i16,
+    pub relaunched_at: Option<OffsetDateTime>,
 }
 
 /// Le gabarit et ce qui l'accompagne (28/10).
@@ -79,6 +89,7 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,
                   m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at,
+                  m.failed_at, m.failure_reason, m.relaunch_count, m.relaunched_at,
                   m.template, m.variable_fallbacks, m.reply_button, m.cta_label,
                   m.cta_url::text AS cta_url, m.mail_template_id
              FROM engagement.mailings m
@@ -105,6 +116,12 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
         queued_at: l.queued_at,
         completed_at: l.completed_at,
         cancelled_at: l.cancelled_at,
+        echec: Echec {
+            failed_at: l.failed_at,
+            failure_reason: l.failure_reason,
+            relaunch_count: l.relaunch_count,
+            relaunched_at: l.relaunched_at,
+        },
         created_at: l.created_at,
         updated_at: l.updated_at,
         habillage: Habillage {
@@ -124,6 +141,7 @@ pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,
                   m.queued_at, m.completed_at, m.created_at, m.updated_at,
+                  m.failed_at, m.failure_reason,
                   COALESCE(c.total, 0) AS "total!", COALESCE(c.queued, 0) AS "queued!",
                   COALESCE(c.sending, 0) AS "sending!", COALESCE(c.sent, 0) AS "sent!",
                   COALESCE(c.failed, 0) AS "failed!", COALESCE(c.suppressed, 0) AS "suppressed!",
@@ -161,6 +179,8 @@ pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>
             queued_by_name: l.queued_by_name,
             queued_at: l.queued_at,
             completed_at: l.completed_at,
+            failed_at: l.failed_at,
+            failure_reason: l.failure_reason,
             created_at: l.created_at,
             updated_at: l.updated_at,
             counts: MailingCounts {
@@ -399,11 +419,12 @@ pub async fn figer(conn: &mut PgConnection, id: Uuid, acteur: Uuid) -> Result<Op
     Ok(Some(partiront))
 }
 
-/// Arrête un envoi en cours. Rend faux s'il n'était pas en file.
+/// Arrête un envoi en cours ou en échec. Rend faux s'il n'était ni l'un ni
+/// l'autre.
 pub async fn annuler(conn: &mut PgConnection, id: Uuid) -> Result<bool> {
     let n = sqlx::query!(
         "UPDATE engagement.mailings SET status = 'cancelled', cancelled_at = now()
-          WHERE id = $1 AND status = 'queued'",
+          WHERE id = $1 AND status IN ('queued', 'failed')",
         id
     )
     .execute(&mut *conn)
@@ -420,6 +441,50 @@ pub async fn annuler(conn: &mut PgConnection, id: Uuid) -> Result<bool> {
     .execute(&mut *conn)
     .await?;
     Ok(true)
+}
+
+/// Remet en file un envoi en échec, pour ses seuls destinataires encore en
+/// file : ceux qui sont partis, en échec ou écartés ne sont pas repris. Rend
+/// le numéro de la relance, ou `None` si l'envoi n'était pas en échec (deux
+/// clics, deux onglets) ou que personne n'attend plus.
+pub async fn relancer(conn: &mut PgConnection, id: Uuid) -> Result<Option<i16>> {
+    let numero = sqlx::query_scalar!(
+        "UPDATE engagement.mailings m
+            SET status = 'queued', relaunch_count = m.relaunch_count + 1, relaunched_at = now()
+          WHERE m.id = $1 AND m.status = 'failed'
+            AND EXISTS (SELECT 1 FROM engagement.mailing_recipients r
+                         WHERE r.mailing_id = m.id AND r.status = 'queued')
+        RETURNING m.relaunch_count",
+        id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(numero)
+}
+
+/// Le filet de `engagement.fail_stalled_mailings()` : les envois de l'édition
+/// qu'aucun travail ne sert plus passent en échec. Rend ceux qui ont changé.
+pub async fn basculer_les_bloques(conn: &mut PgConnection, event_id: Uuid) -> Result<Vec<Uuid>> {
+    let ids = sqlx::query_scalar!(
+        r#"SELECT id AS "id!" FROM engagement.fail_stalled_mailings($1) AS id"#,
+        event_id
+    )
+    .fetch_all(conn)
+    .await?;
+    Ok(ids)
+}
+
+/// Y a-t-il, dans l'édition, un envoi en cours ? Évite d'ouvrir une écriture
+/// à chaque relevé quand il n'y a rien à vérifier.
+pub async fn a_des_envois_en_cours(pool: &PgPool, event_id: Uuid) -> Result<bool> {
+    let oui = sqlx::query_scalar!(
+        r#"SELECT EXISTS (SELECT 1 FROM engagement.mailings
+                           WHERE event_id = $1 AND status = 'queued') AS "oui!""#,
+        event_id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(oui)
 }
 
 /// La copie de l'équipe proposée par défaut. Un réglage absent ou illisible
@@ -516,6 +581,19 @@ pub async fn clore(
     .execute(conn)
     .await?;
     Ok(())
+}
+
+/// Passe l'envoi en échec avec son motif (`engagement.fail_mailing()`). Rend
+/// faux s'il n'était plus en cours.
+pub async fn echouer(conn: &mut PgConnection, mailing_id: Uuid, motif: &str) -> Result<bool> {
+    let passe = sqlx::query_scalar!(
+        r#"SELECT engagement.fail_mailing($1, $2) AS "passe!""#,
+        mailing_id,
+        motif
+    )
+    .fetch_one(conn)
+    .await?;
+    Ok(passe)
 }
 
 /// Clôt l'envoi s'il ne reste personne en file. Rend vrai s'il est clos.

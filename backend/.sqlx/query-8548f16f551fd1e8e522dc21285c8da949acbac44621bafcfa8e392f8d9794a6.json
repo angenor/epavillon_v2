@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.mailing_recipients SET status = 'sending'\n          WHERE id = (SELECT min(id::text)::uuid FROM engagement.mailing_recipients\n                       WHERE mailing_id = $1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8548f16f551fd1e8e522dc21285c8da949acbac44621bafcfa8e392f8d9794a6"
+}

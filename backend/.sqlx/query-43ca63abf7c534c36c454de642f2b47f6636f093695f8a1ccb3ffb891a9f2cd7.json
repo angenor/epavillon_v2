@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.mailings SET status = 'cancelled', cancelled_at = now()\n          WHERE id = $1 AND status IN ('queued', 'failed')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "43ca63abf7c534c36c454de642f2b47f6636f093695f8a1ccb3ffb891a9f2cd7"
+}

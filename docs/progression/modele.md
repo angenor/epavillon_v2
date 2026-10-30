@@ -433,3 +433,16 @@ Permission `programme.proposal.act_for_organization`, testée en portée globale
 `event.programme_tracks.icon_code text`, facultatif, en queue de table après `venue_id` (§ 4 ter). Forme seule contrainte (`ck_programme_tracks_icon_code`, `^[a-z][a-z0-9-]{1,40}$`) : **la liste des dessins vit dans le code du site** (`frontend/app/utils/track-icons.ts`, tracés dans `UiIcon`), comme les modèles de l'atelier de couverture (arbitrage du 29/10). Un code que le site ne connaît plus ne dessine rien. Remplace les emoji de la v1 (sac d'argent pour la finance, pousse pour la jeunesse). Lu et écrit avec les autres réglages du fil (`EditionTrackPayload`), servi par `ProgrammeTrack`, `PublicTrackHeader` et `PublicTrackSummary` (`/schedule/tracks`, `other_tracks`). Pas dans `programme.v_public_schedule` : les cadres de `/programmations` lisent le fil dans `/schedule/tracks`.
 
 **En production** : `ops/migrations/2026-10-31-pictogramme-fil.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API ; puis `ops/contenu/2026-10-31-pictogrammes-cdp31.sql` (livre, pièces, pousse sur les trois fils de `cdp31-antalya-2026`), rejouable, ne touche qu'un fil sans pictogramme.
+
+## 31/10/2026, `110_engagement.sql` : un envoi de courriels en échec
+
+Un serveur de courriel injoignable environ une minute épuisait les cinq essais du travail d'envoi (`fail_job()`, 2 à 32 s), qui mourait ; l'envoi restait `queued`, « en cours » pour toujours, sans erreur au niveau de l'envoi ([étude du temps réel](decisions/2026-10-31-temps-reel.md) § 1).
+
+- **Valeur `failed` ajoutée à `engagement.mailing_status`**, plutôt que des colonnes seules : un envoi qui n'avance plus n'est pas « en cours », et la liste les distingue d'un coup d'œil.
+- **`engagement.mailings`**, en queue : `failed_at`, `failure_reason` (en français, montré tel quel), gardés après une relance ou un arrêt ; `relaunch_count`, `relaunched_at`. `ck_mailings_failed` (un échec a sa date et son motif), `ck_mailings_relaunch`. Partis et en échec se comptent sur `mailing_recipients`, à jour à chaque destinataire : rien n'est recopié.
+- **`engagement.fail_mailing(id, motif)`** : `queued` → `failed` ; un destinataire resté `sending` passe en échec (départ non confirmé : pas de doublon à la relance) ; ceux en file y restent pour la relance.
+- **`engagement.fail_stalled_mailings(event_id)`**, le filet : un envoi `queued` sans travail vivant (clé `mailing:<id>:…` en file ou en cours) passe en échec, motif tiré du dernier travail mort ; s'il ne reste personne, il est clos `sent`. Lit `platform.jobs` sans l'écrire.
+
+Côté code (crate `engagement`) : au dernier essai, le travail pose l'échec avec son motif ; l'API appelle le filet avant la liste et la fiche d'un envoi en cours ; `POST /admin/mailings/{id}/retry` relance un envoi en échec (seuls les destinataires en file, travail `mailing:<id>:relance:<n>`) ; `cancel` accepte aussi un envoi en échec ; la suppression l'accepte déjà (`status <> 'queued'`).
+
+**En production** : `ops/migrations/2026-10-31-envoi-en-echec.sql`, rejouable (`ADD VALUE` hors transaction), jouée deux fois en local, **avant** de démarrer l'API et le worker. Elle passe en échec les envois déjà bloqués (en cours sans travail vivant) et affiche leur nombre.

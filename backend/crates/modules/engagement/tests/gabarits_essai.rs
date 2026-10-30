@@ -69,6 +69,7 @@ fn envoi(sujet: &str) -> LigneEnvoi {
         queued_at: None,
         completed_at: None,
         cancelled_at: None,
+        echec: engagement::repo::mailings::Echec::default(),
         created_at: maintenant,
         updated_at: maintenant,
         habillage: Habillage {

@@ -91,6 +91,8 @@ pub struct BoiteAuxLettres {
     remis: Mutex<Vec<OutgoingMail>>,
     /// Les copies de chaque message remis, dans le même ordre.
     copies: Mutex<Vec<Extras>>,
+    /// Le serveur tombe une fois ce nombre de messages remis.
+    panne_apres: Mutex<Option<usize>>,
 }
 
 impl BoiteAuxLettres {
@@ -104,6 +106,12 @@ impl BoiteAuxLettres {
 
     pub fn compte(&self) -> usize {
         self.remis.lock().expect("boîte lisible").len()
+    }
+
+    /// Au-delà de `n` messages remis, toute remise rend « injoignable » ;
+    /// `None` rétablit le serveur.
+    pub fn tomber_apres(&self, n: Option<usize>) {
+        *self.panne_apres.lock().expect("boîte inscriptible") = n;
     }
 
     pub fn vider(&self) {
@@ -123,6 +131,10 @@ impl Mailer for BoiteAuxLettres {
         mail: &OutgoingMail,
         copies: &Extras,
     ) -> Result<(), MailError> {
+        let panne = *self.panne_apres.lock().expect("boîte lisible");
+        if panne.is_some_and(|n| self.compte() >= n) {
+            return Err(MailError::Unreachable("connexion refusée".into()));
+        }
         self.remis
             .lock()
             .expect("boîte inscriptible")

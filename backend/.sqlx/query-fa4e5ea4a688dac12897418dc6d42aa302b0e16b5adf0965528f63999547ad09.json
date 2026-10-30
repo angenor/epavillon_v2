@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.mailings m\n            SET status = 'queued', relaunch_count = m.relaunch_count + 1, relaunched_at = now()\n          WHERE m.id = $1 AND m.status = 'failed'\n            AND EXISTS (SELECT 1 FROM engagement.mailing_recipients r\n                         WHERE r.mailing_id = m.id AND r.status = 'queued')\n        RETURNING m.relaunch_count",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "relaunch_count",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "relaunch_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fa4e5ea4a688dac12897418dc6d42aa302b0e16b5adf0965528f63999547ad09"
+}

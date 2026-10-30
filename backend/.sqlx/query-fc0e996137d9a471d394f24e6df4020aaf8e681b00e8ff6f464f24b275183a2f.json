@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM engagement.mailings\n                           WHERE event_id = $1 AND status = 'queued') AS \"oui!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "oui!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fc0e996137d9a471d394f24e6df4020aaf8e681b00e8ff6f464f24b275183a2f"
+}

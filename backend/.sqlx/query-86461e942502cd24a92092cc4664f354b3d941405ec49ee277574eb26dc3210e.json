@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT engagement.fail_mailing($1, 'Le serveur de courriel est resté injoignable.') AS \"pose!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pose!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "86461e942502cd24a92092cc4664f354b3d941405ec49ee277574eb26dc3210e"
+}
