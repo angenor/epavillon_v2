@@ -37,6 +37,7 @@ pub struct FilPublie {
     pub starts_on: Option<Date>,
     pub ends_on: Option<Date>,
     pub color_hex: Option<String>,
+    pub icon_code: Option<String>,
     pub themes: Value,
     pub target_audiences: Value,
     pub support_note: Option<Value>,
@@ -97,7 +98,7 @@ pub async fn fil_publie<'e>(
                   f.id AS "id!", f.slug::text AS "slug!", f.code AS "code!",
                   f.kind::text AS "kind!", f.title AS "title!: Value",
                   f.subtitle AS "subtitle: Value", f.description AS "description: Value",
-                  f.tagline AS "tagline: Value", f.starts_on, f.ends_on, f.color_hex,
+                  f.tagline AS "tagline: Value", f.starts_on, f.ends_on, f.color_hex, f.icon_code,
                   reference.term_badges('event', 'programme_tracks', f.id, 'activity_theme')
                       AS "themes!: Value",
                   to_jsonb(f.target_audiences) AS "target_audiences!: Value",
@@ -257,7 +258,7 @@ pub async fn fils_publies_de_ledition<'e>(
                 WHERE t.event_id = $1
            )
            SELECT t.id, t.slug::text AS "slug!", t.kind::text AS "kind!",
-                  t.title AS "title!: Value", t.color_hex, t.starts_on, t.ends_on,
+                  t.title AS "title!: Value", t.color_hex, t.icon_code, t.starts_on, t.ends_on,
                   (SELECT min(b.debut) FROM bornes b WHERE b.track_id = t.id) AS starts_at,
                   (SELECT max(b.fin)   FROM bornes b WHERE b.track_id = t.id) AS ends_at,
                   COALESCE(v.name, (
@@ -284,6 +285,7 @@ pub async fn fils_publies_de_ledition<'e>(
             kind: l.kind,
             title: l.title,
             color_hex: l.color_hex,
+            icon_code: l.icon_code,
             starts_on: l.starts_on,
             ends_on: l.ends_on,
             starts_at: l.starts_at,

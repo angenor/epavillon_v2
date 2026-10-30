@@ -78,6 +78,7 @@ pub struct EditionTrack {
     pub starts_on: Option<Date>,
     pub ends_on: Option<Date>,
     pub color_hex: Option<String>,
+    pub icon_code: Option<String>,
     pub curated_by: Option<Uuid>,
     /// Nom du responsable, résolu — l'écran n'affiche pas un identifiant.
     pub curator_name: Option<String>,

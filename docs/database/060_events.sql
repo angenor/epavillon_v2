@@ -475,6 +475,25 @@ CREATE TRIGGER tg_programme_tracks_check_venue
     BEFORE INSERT OR UPDATE OF venue_id, event_id ON event.programme_tracks
     FOR EACH ROW EXECUTE FUNCTION event.tg_check_track_venue();
 
+-- PICTOGRAMME DU FIL (31/10). Un petit dessin au trait posé dans un rond blanc
+-- à gauche du nom de la journée : pièces pour la finance, pousse pour la
+-- jeunesse. La v1 mettait un emoji dans le titre (sac d'argent, pousse), que la charte
+-- interdit comme icône. L'équipe le choisit au back-office dans une liste
+-- fixe, réutilisable d'une COP à l'autre.
+--
+-- La liste des dessins vit dans le CODE DU SITE, pas dans une taxonomie : un
+-- pictogramme est du dessin, une ligne sans son tracé ne dessinerait rien
+-- (même arbitrage que les modèles de l'atelier de couverture, 29/10). La base
+-- n'en contraint que la forme ; un code que le site ne connaît plus ne dessine
+-- rien, et le fil s'affiche comme sans pictogramme. NULL : pas de pictogramme.
+-- En queue de table, après venue_id, comme en production.
+ALTER TABLE event.programme_tracks
+    ADD COLUMN icon_code text
+        CONSTRAINT ck_programme_tracks_icon_code CHECK (icon_code ~ '^[a-z][a-z0-9-]{1,40}$');
+
+COMMENT ON COLUMN event.programme_tracks.icon_code IS
+    'Pictogramme du fil, code d''un dessin connu du site (« coins », « sprout »). NULL : aucun. Forme seule contrainte : la liste vit dans le code du site.';
+
 -- Parties du déroulé. `label` est le nom court (« Matin », « S'inspirer ») ;
 -- nul, l'écran écrit « Partie N ». `title` est l'intitulé long, `summary` sa
 -- version d'une ligne pour le sommaire « La journée en trois temps ». Les trois

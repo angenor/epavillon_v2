@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, event_id, code, slug::text AS \"slug!\", kind::text AS \"kind!\",\n                  title, subtitle, description, starts_on, ends_on, color_hex,\n                  curated_by, published_at, sort_order, created_at, updated_at\n             FROM event.programme_tracks\n            WHERE event_id = $1 AND published_at IS NOT NULL\n            ORDER BY sort_order, starts_on NULLS LAST, code",
+  "query": "SELECT id, event_id, code, slug::text AS \"slug!\", kind::text AS \"kind!\",\n                  title, subtitle, description, starts_on, ends_on, color_hex, icon_code,\n                  curated_by, published_at, sort_order, created_at, updated_at\n             FROM event.programme_tracks\n            WHERE event_id = $1 AND published_at IS NOT NULL\n            ORDER BY sort_order, starts_on NULLS LAST, code",
   "describe": {
     "columns": [
       {
@@ -116,6 +116,17 @@
       },
       {
         "ordinal": 11,
+        "name": "icon_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "icon_code"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
         "name": "curated_by",
         "type_info": "Uuid",
         "origin": {
@@ -126,7 +137,7 @@
         }
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
         "name": "published_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -137,7 +148,7 @@
         }
       },
       {
-        "ordinal": 13,
+        "ordinal": 14,
         "name": "sort_order",
         "type_info": "Int2",
         "origin": {
@@ -148,7 +159,7 @@
         }
       },
       {
-        "ordinal": 14,
+        "ordinal": 15,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -159,7 +170,7 @@
         }
       },
       {
-        "ordinal": 15,
+        "ordinal": 16,
         "name": "updated_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -189,10 +200,11 @@
       true,
       true,
       true,
+      true,
       false,
       false,
       false
     ]
   },
-  "hash": "014325a2425fa613e2f9b271ead022de22b448178e7c0653021e9b18ee9435d4"
+  "hash": "2b7b60710d8bcc9d6d011a31c85f85451aea07ddccb54f694e8c75a93301bdc3"
 }

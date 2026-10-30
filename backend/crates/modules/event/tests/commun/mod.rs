@@ -443,6 +443,7 @@ pub fn formulaire_fil(event_id: Uuid, code: &str) -> event::domain::tabs::Editio
         starts_on: None,
         ends_on: None,
         color_hex: None,
+        icon_code: None,
         curated_by: None,
         is_published: false,
         sort_order: 10,

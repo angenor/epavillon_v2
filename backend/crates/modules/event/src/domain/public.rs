@@ -158,6 +158,7 @@ pub struct PublicTrack {
     pub starts_on: Option<Date>,
     pub ends_on: Option<Date>,
     pub color_hex: Option<String>,
+    pub icon_code: Option<String>,
     pub curated_by: Option<Uuid>,
     #[serde(with = "time::serde::rfc3339::option")]
     pub published_at: Option<OffsetDateTime>,

@@ -137,6 +137,8 @@ pub struct PublicTrackSummary {
     pub kind: String,
     pub title: Value,
     pub color_hex: Option<String>,
+    /// Pictogramme, code d'un dessin connu du site ; nul : aucun.
+    pub icon_code: Option<String>,
     pub starts_on: Option<Date>,
     pub ends_on: Option<Date>,
     /// Première et dernière heure de son déroulé publié ; nulles s'il est vide.
@@ -186,6 +188,8 @@ pub struct PublicTrackHeader {
     pub starts_on: Option<Date>,
     pub ends_on: Option<Date>,
     pub color_hex: Option<String>,
+    /// Pictogramme, code d'un dessin connu du site ; nul : aucun.
+    pub icon_code: Option<String>,
     /// `ScheduleThemeBadge[]`.
     pub themes: Value,
 }

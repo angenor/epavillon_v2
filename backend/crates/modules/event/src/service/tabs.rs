@@ -78,7 +78,8 @@ fn traduire(erreur: &sqlx::Error) -> Option<TabErrorCode> {
         "programme_tracks_code_check"
         | "broadcast_channels_code_check"
         | "event_days_color_hex_check"
-        | "programme_tracks_color_hex_check" => Some(Required),
+        | "programme_tracks_color_hex_check"
+        | "ck_programme_tracks_icon_code" => Some(Required),
         // **Une violation de DOMAINE ne nomme pas sa colonne** : le nom de
         // contrainte y est celui du domaine. Une adresse d'URL ou une adresse de
         // page mal formée est un champ obligatoire mal renseigné, et le contrat

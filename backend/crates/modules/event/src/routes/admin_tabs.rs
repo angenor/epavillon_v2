@@ -521,7 +521,7 @@ pub(crate) async fn habiller_une_journee(
 /// Créer un fil.
 #[utoipa::path(
     post,
-    description = "`EditionTrackPayload` → `EditionTabResult`. L'édition vient du corps **et elle est vérifiée**. Le fil, ses **thématiques** et sa page publique sont écrits dans le même geste : les séparer laisserait exister un fil publié sans ses pastilles. Les thématiques passent par le référentiel partagé, avec leur libellé et leur couleur — ce sont des **données**, jamais des traductions.",
+    description = "`EditionTrackPayload` → `EditionTabResult`. L'édition vient du corps **et elle est vérifiée**. Le fil, ses **thématiques** et sa page publique sont écrits dans le même geste : les séparer laisserait exister un fil publié sans ses pastilles. Les thématiques passent par le référentiel partagé, avec leur libellé et leur couleur : ce sont des **données**, jamais des traductions. Le pictogramme (`icon_code`, nul : aucun) est le code d'un dessin connu du site : la base n'en vérifie que la forme, un code mal formé rend `required`.",
     path = "/admin/tracks",
     tag = "Back-office — événements",
     operation_id = "admin_fil_creer",

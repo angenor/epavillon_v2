@@ -27,7 +27,7 @@ pub async fn de_l_edition<'e>(
     let lignes = sqlx::query!(
         r#"SELECT id, code, slug::text AS "slug!", kind::text AS "kind!",
                   title, subtitle, description,
-                  starts_on, ends_on, color_hex,
+                  starts_on, ends_on, color_hex, icon_code,
                   curated_by, published_at, sort_order
              FROM event.programme_tracks
             WHERE event_id = $1
@@ -50,6 +50,7 @@ pub async fn de_l_edition<'e>(
             starts_on: l.starts_on,
             ends_on: l.ends_on,
             color_hex: l.color_hex,
+            icon_code: l.icon_code,
             curated_by: l.curated_by,
             published_at: l.published_at,
             sort_order: l.sort_order,
@@ -75,10 +76,10 @@ pub async fn creer(
     let id = sqlx::query_scalar!(
         r#"INSERT INTO event.programme_tracks
                (event_id, code, slug, kind, title, subtitle, description,
-                starts_on, ends_on, color_hex, curated_by, published_at, sort_order)
+                starts_on, ends_on, color_hex, curated_by, published_at, sort_order, icon_code)
            VALUES ($1, $2, $3::text::platform.slug, $4::text::event.track_kind,
                    $5::jsonb, $6::jsonb, $7::jsonb, $8, $9, $10, $11,
-                   CASE WHEN $12 THEN now() END, $13)
+                   CASE WHEN $12 THEN now() END, $13, $14)
         RETURNING id"#,
         event_id.as_uuid(),
         p.code,
@@ -92,7 +93,8 @@ pub async fn creer(
         p.color_hex,
         p.curated_by,
         p.is_published,
-        p.sort_order
+        p.sort_order,
+        p.icon_code
     )
     .fetch_one(&mut *conn)
     .await?;
@@ -124,7 +126,8 @@ pub async fn modifier(
                color_hex    = $10,
                curated_by   = $11,
                published_at = CASE WHEN $12 THEN COALESCE(published_at, now()) END,
-               sort_order   = $13
+               sort_order   = $13,
+               icon_code    = $14
          WHERE id = $1"#,
         id.as_uuid(),
         p.code,
@@ -138,7 +141,8 @@ pub async fn modifier(
         p.color_hex,
         p.curated_by,
         p.is_published,
-        p.sort_order
+        p.sort_order,
+        p.icon_code
     )
     .execute(&mut *conn)
     .await?

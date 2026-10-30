@@ -427,3 +427,9 @@ Non ajouté, déjà porté : fuseau (édition), couleur, temps fort (`is_highlig
 Permission `programme.proposal.act_for_organization`, testée en portée globale, donnée au seul `super_admin` par `tg_permissions_grant_super_admin`. Elle ouvre la fiche d'un dossier (`GET /proposals/{id}/file`, `acting_for_organization` vrai) et son enregistrement comme l'organisation (`draft_write::enregistrer`, dossier existant seulement, contact conservé). `programme.proposal.edit`, détenue par `admin`, n'y suffisait pas : l'accès est réservé.
 
 **En production** : `ops/migrations/2026-10-30-agir-pour-une-organisation.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API.
+
+## 31/10/2026, `060_events.sql` : le pictogramme d'un fil
+
+`event.programme_tracks.icon_code text`, facultatif, en queue de table après `venue_id` (§ 4 ter). Forme seule contrainte (`ck_programme_tracks_icon_code`, `^[a-z][a-z0-9-]{1,40}$`) : **la liste des dessins vit dans le code du site** (`frontend/app/utils/track-icons.ts`, tracés dans `UiIcon`), comme les modèles de l'atelier de couverture (arbitrage du 29/10). Un code que le site ne connaît plus ne dessine rien. Remplace les emoji de la v1 (sac d'argent pour la finance, pousse pour la jeunesse). Lu et écrit avec les autres réglages du fil (`EditionTrackPayload`), servi par `ProgrammeTrack`, `PublicTrackHeader` et `PublicTrackSummary` (`/schedule/tracks`, `other_tracks`). Pas dans `programme.v_public_schedule` : les cadres de `/programmations` lisent le fil dans `/schedule/tracks`.
+
+**En production** : `ops/migrations/2026-10-31-pictogramme-fil.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API ; puis `ops/contenu/2026-10-31-pictogrammes-cdp31.sql` (livre, pièces, pousse sur les trois fils de `cdp31-antalya-2026`), rejouable, ne touche qu'un fil sans pictogramme.

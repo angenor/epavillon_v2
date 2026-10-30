@@ -215,7 +215,7 @@ pub async fn fils_publies<'e>(
 ) -> Result<Vec<PublicTrack>> {
     let lignes = sqlx::query!(
         r#"SELECT id, event_id, code, slug::text AS "slug!", kind::text AS "kind!",
-                  title, subtitle, description, starts_on, ends_on, color_hex,
+                  title, subtitle, description, starts_on, ends_on, color_hex, icon_code,
                   curated_by, published_at, sort_order, created_at, updated_at
              FROM event.programme_tracks
             WHERE event_id = $1 AND published_at IS NOT NULL
@@ -239,6 +239,7 @@ pub async fn fils_publies<'e>(
             starts_on: l.starts_on,
             ends_on: l.ends_on,
             color_hex: l.color_hex,
+            icon_code: l.icon_code,
             curated_by: l.curated_by,
             published_at: l.published_at,
             sort_order: l.sort_order,

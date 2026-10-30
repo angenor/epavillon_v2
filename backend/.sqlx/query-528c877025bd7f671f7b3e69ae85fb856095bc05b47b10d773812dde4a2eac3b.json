@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, code, slug::text AS \"slug!\", kind::text AS \"kind!\",\n                  title, subtitle, description,\n                  starts_on, ends_on, color_hex,\n                  curated_by, published_at, sort_order\n             FROM event.programme_tracks\n            WHERE event_id = $1\n            ORDER BY sort_order, starts_on NULLS LAST, code",
+  "query": "SELECT id, code, slug::text AS \"slug!\", kind::text AS \"kind!\",\n                  title, subtitle, description,\n                  starts_on, ends_on, color_hex, icon_code,\n                  curated_by, published_at, sort_order\n             FROM event.programme_tracks\n            WHERE event_id = $1\n            ORDER BY sort_order, starts_on NULLS LAST, code",
   "describe": {
     "columns": [
       {
@@ -105,6 +105,17 @@
       },
       {
         "ordinal": 10,
+        "name": "icon_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "icon_code"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
         "name": "curated_by",
         "type_info": "Uuid",
         "origin": {
@@ -115,7 +126,7 @@
         }
       },
       {
-        "ordinal": 11,
+        "ordinal": 12,
         "name": "published_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -126,7 +137,7 @@
         }
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
         "name": "sort_order",
         "type_info": "Int2",
         "origin": {
@@ -155,8 +166,9 @@
       true,
       true,
       true,
+      true,
       false
     ]
   },
-  "hash": "0e22625870f4ec46d0d2d2f484fd211bff36eda255a2ef4614ade2548115719c"
+  "hash": "528c877025bd7f671f7b3e69ae85fb856095bc05b47b10d773812dde4a2eac3b"
 }

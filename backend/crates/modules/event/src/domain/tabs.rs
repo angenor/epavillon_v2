@@ -166,6 +166,10 @@ pub struct EditionTrackPayload {
     pub ends_on: Option<Date>,
     #[serde(default)]
     pub color_hex: Option<String>,
+    /// Pictogramme, code d'un dessin connu du site ; la base n'en vérifie que la
+    /// forme. Absent ou nul : aucun.
+    #[serde(default)]
+    pub icon_code: Option<String>,
     #[serde(default)]
     pub curated_by: Option<Uuid>,
     /// Ouvrir ou refermer la **page publique** du fil : c'est le même
