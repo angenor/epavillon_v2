@@ -13,8 +13,8 @@ import type { ProgrammeTrackIndex } from '~/utils/programme-tracks'
  * les colonnes ont une largeur relative (44 %, puis 30 %) pour que la suivante
  * dépasse toujours un peu du bord et invite à faire défiler.
  *
- * Une activité d'une journée spéciale publiée garde sa case, bordée d'un
- * liseré à la couleur de la journée, et mène à sa place dans le déroulé de la
+ * Une activité d'une journée spéciale publiée garde sa case, sur un fond
+ * teinté de la couleur de la journée, et mène à sa place dans le déroulé de la
  * journée. Le jour de l'atelier porte son encadré bleu nuit, sans déroulé.
  */
 
@@ -287,8 +287,8 @@ async function next(): Promise<void> {
             v-for="item in column.cards"
             :key="item.id"
             class="group relative border-b border-border-subtle py-3.5"
-            :class="item.dayColor ? 'border-l-4 pl-3' : ''"
-            :style="item.dayColor ? { borderLeftColor: item.dayColor } : undefined"
+            :class="item.dayColor ? 'my-1 rounded-md border-b-0 bg-(--color-day-surface) px-3' : ''"
+            :style="item.dayColor ? trackDayStyle(item.dayColor) : undefined"
             :title="item.dayTitle || undefined"
           >
             <div :class="{ 'opacity-60': item.faded }">
