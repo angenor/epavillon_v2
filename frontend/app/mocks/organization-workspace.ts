@@ -53,6 +53,7 @@ import type {
 } from '~/types/organization-workspace'
 import { MEMBERSHIP, PERSON_INVITED, PROPOSAL_COMMENT } from './ids'
 import { resolveToken } from './auth'
+import { hasReadComment, sessionProposalComments } from './proposal-comments'
 import { events } from './event'
 import { attachedImage } from './covers'
 import { rooms } from './rooms'
@@ -81,7 +82,7 @@ import { sessionReminderSchedule } from './reminders'
 // ---------------------------------------------------------------------------
 
 /** Messages écrits pendant la session. */
-const sessionComments: ProposalComment[] = []
+const sessionComments: ProposalComment[] = sessionProposalComments()
 /** Adhésions tranchées pendant la session, par identifiant. */
 const sessionMembershipDecisions = new Map<string, Membership>()
 /** Résolutions posées ou retirées pendant la session, par identifiant de message. */
@@ -191,8 +192,18 @@ function trackedSessions(proposalId: string, at: number): TrackedSession[] {
     })
 }
 
+function unreadComments(proposalId: string, personId: string): number {
+  return commentsWithSession().filter(
+    (comment) =>
+      comment.proposal_id === proposalId &&
+      comment.visibility === 'submitter' &&
+      comment.author_id !== personId &&
+      !hasReadComment(comment.id, personId),
+  ).length
+}
+
 /** Un dossier et tout ce qui permet d'en suivre l'avancement. */
-function trackingOf(proposalId: string, at: number): ProposalTracking | null {
+function trackingOf(proposalId: string, personId: string, at: number): ProposalTracking | null {
   const stored = allProposals.find((p) => p.id === proposalId)
   if (!stored) return null
   // Les modifications faites pendant la session s'appliquent par-dessus le
@@ -210,6 +221,7 @@ function trackingOf(proposalId: string, at: number): ProposalTracking | null {
       .filter((transition) => transition.proposal_id === proposalId)
       .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at)),
     open_change_requests: openChangeRequests(proposalId),
+    unread_comments: unreadComments(proposalId, personId),
     sessions: proposal.status === 'accepted' ? trackedSessions(proposalId, at) : [],
     cover: attachedImage('programme', 'proposals', proposalId, 'cover'),
     edition_thumbnail: attachedImage('event', 'events', edition.id, 'thumbnail'),
@@ -365,7 +377,7 @@ export function workspaceOverview(
   const trackings = allProposals
     .filter((proposal) => proposal.organization_id === organizationId && proposal.deleted_at === null)
     .filter((proposal) => !ownOnly || proposal.submitted_by === personId)
-    .map((proposal) => trackingOf(proposal.id, at))
+    .map((proposal) => trackingOf(proposal.id, personId, at))
     .filter((tracking) => tracking !== null)
     // Le plus récemment touché en tête : c'est celui dont on vient s'occuper.
     .sort((a, b) => b.proposal.updated_at.localeCompare(a.proposal.updated_at))
@@ -399,7 +411,7 @@ export function proposalFile(
   personId: string,
   at: number = Date.now(),
 ): ProposalFile | null {
-  const tracking = trackingOf(proposalId, at)
+  const tracking = trackingOf(proposalId, personId, at)
   if (!tracking) return null
   // L'accès se décide comme dans l'API : le dossier désigne l'organisation qui
   // le porte, et le lecteur doit y avoir une adhésion active — ou une demande

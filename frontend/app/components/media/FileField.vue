@@ -55,8 +55,20 @@ const affiche = computed(() => {
   return envoye.value ?? props.current
 })
 
+/** Les formats bureautiques par leur nom courant : le type MIME complet déborde d'un écran de téléphone. */
+const NOMS_COURANTS: Record<string, string> = {
+  'application/vnd.ms-powerpoint': 'PPT',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PPTX',
+  'application/msword': 'DOC',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
+  'application/vnd.ms-excel': 'XLS',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'XLSX',
+  'application/vnd.oasis.opendocument.presentation': 'ODP',
+  'application/vnd.oasis.opendocument.text': 'ODT',
+}
+
 const typesLisibles = computed(() =>
-  props.types.map((type) => (type.split('/')[1] ?? type).toUpperCase()).join(', '),
+  props.types.map((type) => NOMS_COURANTS[type] ?? (type.split('/')[1] ?? type).toUpperCase()).join(', '),
 )
 const plafond = computed(() =>
   props.maxByteSize ? formatByteSize(props.maxByteSize, locale.value) : null,
@@ -124,7 +136,7 @@ function retirer(): void {
       <h3 class="text-sm font-semibold">{{ props.label }}</h3>
       <p class="mt-0.5 text-xs text-text-subtle">
         {{ t('file-field.types', { types: typesLisibles }) }}
-        <template v-if="plafond"> — {{ t('file-field.max', { max: plafond }) }}</template>
+        <template v-if="plafond"> · {{ t('file-field.max', { max: plafond }) }}</template>
         <template v-if="props.hint"> — {{ props.hint }}</template>
       </p>
     </header>

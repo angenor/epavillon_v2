@@ -104,6 +104,10 @@ const nextStep = computed<{ text: string; mine: boolean } | null>(() => {
         <p class="mt-0.5 font-mono text-xs text-text-subtle">
           {{ t('organization.workspace.proposals.reference', { code: props.tracking.proposal.reference_code }) }}
         </p>
+        <p v-if="props.tracking.unread_comments > 0" class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-accent">
+          <UiIcon name="chat" size="1rem" />
+          {{ t('organization.workspace.proposals.unread', props.tracking.unread_comments) }}
+        </p>
       </div>
     </div>
 

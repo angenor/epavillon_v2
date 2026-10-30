@@ -5051,7 +5051,11 @@ export interface paths {
         };
         /** @description `Person | null` — soi-même, ou `identity.person.read`. */
         get: operations["fiche"];
-        put?: never;
+        /**
+         * Le profil, modifié par la personne elle-même.
+         * @description `UpdateProfilePayload` → `Person`. Soi-même seulement ; l'adresse principale ne se change pas ici.
+         */
+        put: operations["modifier_son_profil"];
         post?: never;
         delete?: never;
         options?: never;
@@ -20974,6 +20978,60 @@ export interface operations {
             };
             /** @description Permission ou portée insuffisante */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    modifier_son_profil: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la personne connectée */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Person */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Ce n'est pas votre profil */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Champ refusé, nommé dans la réponse */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -18,7 +18,8 @@
  * l'API. Les écrans du jalon n'en consomment aucun champ.
  */
 
-import type { Person, PersonStatus, RoleAssignment } from '~/types/identity'
+import type { Person, PersonStatus, RoleAssignment, UpdateProfilePayload } from '~/types/identity'
+import type { PersonId } from '~/types/shared'
 import { COUNTRY, EVENT, ORG, PERSON, ROLE_ASSIGNMENT } from './ids'
 
 /** Raccourci d'écriture : les champs constants d'une personne active. */
@@ -560,3 +561,24 @@ export const roleAssignments = [
     revoked_reason: 'Édition clôturée ; les accès de programmation sont retirés au bilan.',
   },
 ] satisfies RoleAssignment[]
+
+/** `PUT /people/{id}` : la fiche est modifiée en place, jusqu'au rechargement. */
+export function updateProfile(personId: PersonId, payload: UpdateProfilePayload): Person {
+  const index = people.findIndex((entry) => entry.id === personId)
+  const current = people[index]
+  if (!current) throw new Error('Personne introuvable.')
+  const blank = (value: string | null): string | null => (value?.trim() ? value.trim() : null)
+  const updated: Person = {
+    ...current,
+    ...payload,
+    first_name: payload.first_name.trim(),
+    last_name: payload.last_name.trim(),
+    display_name: `${payload.first_name.trim()} ${payload.last_name.trim()}`,
+    job_title: blank(payload.job_title),
+    phone: blank(payload.phone),
+    city: blank(payload.city),
+    updated_at: new Date().toISOString(),
+  }
+  people[index] = updated
+  return updated
+}

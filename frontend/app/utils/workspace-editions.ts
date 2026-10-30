@@ -84,6 +84,12 @@ export function workspaceEditionTabs(overview: WorkspaceOverview, at: number = D
   return ordered
 }
 
+/** La pastille d'un onglet : ce qui attend l'organisation (actions de l'édition en cours) et les messages non lus. */
+export function editionTabAttention(tab: WorkspaceEditionTab): number {
+  const unread = tab.proposals.reduce((sum, tracking) => sum + tracking.unread_comments, 0)
+  return (tab.over ? 0 : tab.actions.length) + unread
+}
+
 /** L'onglet ouvert à l'arrivée : l'édition demandée, sinon la plus récente non terminée. */
 export function defaultEditionTab(tabs: WorkspaceEditionTab[], requested?: string | null): WorkspaceEditionTab | null {
   return (

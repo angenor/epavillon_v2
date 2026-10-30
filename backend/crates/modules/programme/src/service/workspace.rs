@@ -57,6 +57,9 @@ pub struct SuiviDeDossier {
     /// Demandes de correction **encore ouvertes** — c'est LE nombre que l'écran
     /// crie.
     pub open_change_requests: i64,
+    /// Messages de l'équipe partagés avec l'organisation, écrits par un autre
+    /// et pas encore lus par le lecteur : la pastille de l'onglet les compte.
+    pub unread_comments: i64,
     /// Les séances programmées, **vides tant que le dossier n'est pas retenu**.
     /// Trois nombres par séance, et jamais un nom.
     pub sessions: Vec<crate::domain::sessions::TrackedSession>,
@@ -164,7 +167,7 @@ pub async fn espace(
         if a_elle_seule && dossier.submitted_by != lecteur {
             continue;
         }
-        proposals_suivis.push(suivre(state, dossier).await?);
+        proposals_suivis.push(suivre(state, dossier, lecteur).await?);
     }
 
     let membres: Vec<LigneDAdhesion> =
@@ -247,7 +250,7 @@ pub async fn dossier(
     let Some(fiche) = proposals::fiche(state.pool(), id).await? else {
         return Ok(None);
     };
-    let tracking = suivre(state, fiche).await?;
+    let tracking = suivre(state, fiche, lecteur).await?;
 
     // **Filtré à la source, côté organisation** : ce qui n'est pas envoyé ne
     // peut pas fuiter, et c'est le MÊME filtre que celui du comité — l'écrire
@@ -367,7 +370,7 @@ async fn adhesion_ouverte(
 
 /// Composer le suivi d'un dossier — **et lui retirer ce qui appartient au
 /// comité**.
-async fn suivre(state: &ProgrammeState, dossier: Fiche) -> Result<SuiviDeDossier> {
+async fn suivre(state: &ProgrammeState, dossier: Fiche, lecteur: Uuid) -> Result<SuiviDeDossier> {
     let id = ProposalId(dossier.id);
     let edition = cross::fiche_edition(state.pool(), EventId(dossier.event_id))
         .await?
@@ -378,6 +381,19 @@ async fn suivre(state: &ProgrammeState, dossier: Fiche) -> Result<SuiviDeDossier
             WHERE proposal_id = $1 AND is_change_request
               AND resolved_at IS NULL AND deleted_at IS NULL"#,
         dossier.id
+    )
+    .fetch_one(state.pool())
+    .await?;
+
+    // Même filtre que le fil côté organisation (`comments::fil`).
+    let non_lus = sqlx::query_scalar!(
+        r#"SELECT count(*) AS "n!" FROM programme.proposal_comments c
+            WHERE c.proposal_id = $1 AND c.visibility = 'submitter'
+              AND c.deleted_at IS NULL AND c.author_id <> $2
+              AND NOT EXISTS (SELECT 1 FROM programme.proposal_comment_reads r
+                               WHERE r.comment_id = c.id AND r.person_id = $2)"#,
+        dossier.id,
+        lecteur
     )
     .fetch_one(state.pool())
     .await?;
@@ -395,6 +411,7 @@ async fn suivre(state: &ProgrammeState, dossier: Fiche) -> Result<SuiviDeDossier
         edition,
         transitions: transitions::journal(state.pool(), id).await?,
         open_change_requests: ouvertes,
+        unread_comments: non_lus,
         sessions: crate::repo::sessions::seances_suivies(state.pool(), id.as_uuid()).await?,
         cover: crate::repo::documents::couverture(state.pool(), id).await?,
         edition_thumbnail: images.thumbnail,

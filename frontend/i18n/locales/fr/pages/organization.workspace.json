@@ -50,6 +50,7 @@
     "title": "Mes dossiers",
     "count": "Aucun dossier | Un dossier | {count} dossiers",
     "reference": "Dossier {code}",
+    "unread": "Aucun message non lu | Un message non lu | {count} messages non lus",
     "timeline": {
       "label": "Avancement du dossier",
       "draft": "Brouillon",
@@ -138,6 +139,7 @@
     },
     "todo": "rien à faire | une chose à faire | {count} choses à faire",
     "missingReports": "Aucun compte rendu attendu | Un compte rendu attendu | {count} comptes rendus attendus",
+    "unread": "aucun message non lu | un message non lu | {count} messages non lus",
     "showMissingReports": "Voir les activités concernées"
   },
   "filters": {

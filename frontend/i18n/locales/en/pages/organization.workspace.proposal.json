@@ -9,7 +9,6 @@
   "tabs": {
     "label": "Submission views",
     "tracking": "My submission",
-    "exchanges": "Messages",
     "history": "History"
   },
   "tracking": {
@@ -54,11 +53,9 @@
     }
   },
   "exchanges": {
-    "title": "Messages from the committee",
-    "description": "Here are the messages the committee sends you, and your replies. The committee's internal notes are never shown to you.",
     "empty": {
       "title": "No messages yet",
-      "description": "The committee will write here if it needs a clarification. You will receive an email at that point."
+      "description": "Write to the IFDD team here. They will answer in this window, and you will receive an email."
     },
     "changeRequest": "Change request",
     "openRequests": "One change request is still open | One change request is still open | {count} change requests are still open",
@@ -66,13 +63,19 @@
     "markResolved": "Mark as resolved",
     "unmarkResolved": "Reopen this point",
     "reply": "Reply",
-    "replyPlaceholder": "Write your reply to the committee…",
-    "send": "Send reply",
-    "sending": "Sending",
+    "send": "Send",
     "cancel": "Cancel",
-    "emptyReply": "Write your reply before sending it.",
     "edited": "Edited",
-    "you": "You"
+    "you": "You",
+    "launcher": "Messages with the team",
+    "launcherUnread": "Messages with the team, no unread message | Messages with the team, one unread message | Messages with the team, {count} unread messages",
+    "windowTitle": "Messages · {reference}",
+    "team": "The IFDD team",
+    "newMessages": "New messages",
+    "replyingTo": "Reply to {name}",
+    "messageLabel": "Your message",
+    "messagePlaceholder": "Write to the team…",
+    "sendHint": "Enter to send, Shift + Enter for a new line."
   },
   "sessions": {
     "title": "When and where",

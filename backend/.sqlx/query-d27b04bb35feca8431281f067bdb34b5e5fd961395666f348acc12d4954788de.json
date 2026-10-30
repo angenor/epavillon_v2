@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM programme.proposal_comments c\n            WHERE c.proposal_id = $1 AND c.visibility = 'submitter'\n              AND c.deleted_at IS NULL AND c.author_id <> $2\n              AND NOT EXISTS (SELECT 1 FROM programme.proposal_comment_reads r\n                               WHERE r.comment_id = c.id AND r.person_id = $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d27b04bb35feca8431281f067bdb34b5e5fd961395666f348acc12d4954788de"
+}

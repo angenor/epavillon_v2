@@ -111,7 +111,7 @@ export {
   duplicateCandidates,
 } from './org'
 export { memberships } from './memberships'
-export { people, roleAssignments } from './people'
+export { people, roleAssignments, updateProfile } from './people'
 
 export {
   publicEmailDomains,

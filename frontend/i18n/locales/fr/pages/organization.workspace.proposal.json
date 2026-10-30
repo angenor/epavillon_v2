@@ -9,7 +9,6 @@
   "tabs": {
     "label": "Vues du dossier",
     "tracking": "Mon dossier",
-    "exchanges": "Échanges",
     "history": "Historique"
   },
   "tracking": {
@@ -54,11 +53,9 @@
     }
   },
   "exchanges": {
-    "title": "Échanges avec le comité",
-    "description": "Vous voyez ici les messages que le comité vous adresse, et vos réponses. Les notes internes au comité ne vous sont jamais montrées.",
     "empty": {
       "title": "Aucun échange pour l'instant",
-      "description": "Le comité vous écrira ici s'il a besoin d'une précision. Vous recevrez alors un courriel."
+      "description": "Écrivez ici à l'équipe de l'IFDD. Elle vous répondra dans cette fenêtre, et vous recevrez un courriel."
     },
     "changeRequest": "Demande de correction",
     "openRequests": "Une demande de correction reste ouverte | Une demande de correction reste ouverte | {count} demandes de correction restent ouvertes",
@@ -66,13 +63,19 @@
     "markResolved": "Marquer comme résolu",
     "unmarkResolved": "Rouvrir ce point",
     "reply": "Répondre",
-    "replyPlaceholder": "Écrivez votre réponse au comité…",
-    "send": "Envoyer la réponse",
-    "sending": "Envoi en cours",
+    "send": "Envoyer",
     "cancel": "Annuler",
-    "emptyReply": "Écrivez votre réponse avant de l'envoyer.",
     "edited": "Modifié",
-    "you": "Vous"
+    "you": "Vous",
+    "launcher": "Échanges avec l'équipe",
+    "launcherUnread": "Échanges avec l'équipe, aucun message non lu | Échanges avec l'équipe, un message non lu | Échanges avec l'équipe, {count} messages non lus",
+    "windowTitle": "Échanges · {reference}",
+    "team": "L'équipe IFDD",
+    "newMessages": "Nouveaux messages",
+    "replyingTo": "Réponse à {name}",
+    "messageLabel": "Votre message",
+    "messagePlaceholder": "Écrivez à l'équipe…",
+    "sendHint": "Entrée pour envoyer, Maj + Entrée pour aller à la ligne."
   },
   "sessions": {
     "title": "Quand et où",

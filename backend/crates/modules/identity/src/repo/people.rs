@@ -14,7 +14,7 @@ use uuid::Uuid;
 
 use crate::domain::ids::{AccountId, PersonId};
 use crate::domain::login::PersonStatus;
-use crate::domain::person::PersonView;
+use crate::domain::person::{PersonView, ProfileChanges};
 
 /// Ce que la connexion a besoin de savoir, en une seule lecture : la personne,
 /// et son compte mot de passe s'il existe.
@@ -351,4 +351,56 @@ pub async fn email_of(conn: &mut PgConnection, person_id: PersonId) -> Result<Op
     .await?;
 
     Ok(email)
+}
+
+/// Le profil modifié par la personne elle-même. Un texte facultatif vide part
+/// nul ; les refus de la base (nom vide, pays, langue, fuseau inconnus) sont
+/// rendus en message sur le champ fautif.
+pub async fn update_profile(
+    conn: &mut PgConnection,
+    person_id: PersonId,
+    changes: &ProfileChanges,
+) -> Result<bool> {
+    let ecriture = sqlx::query!(
+        "UPDATE identity.people
+            SET civility = nullif(btrim($2), ''),
+                first_name = btrim($3),
+                last_name = btrim($4),
+                job_title = nullif(btrim($5), ''),
+                phone = nullif(btrim($6), ''),
+                country_id = $7,
+                city = nullif(btrim($8), ''),
+                preferred_locale = $9,
+                timezone = $10::text::platform.timezone_name,
+                is_directory_visible = $11
+          WHERE id = $1",
+        person_id.as_uuid(),
+        changes.civility.as_deref(),
+        changes.first_name,
+        changes.last_name,
+        changes.job_title.as_deref(),
+        changes.phone.as_deref(),
+        changes.country_id,
+        changes.city.as_deref(),
+        changes.preferred_locale,
+        changes.timezone,
+        changes.is_directory_visible
+    )
+    .execute(conn)
+    .await;
+
+    match ecriture {
+        Ok(fait) => Ok(fait.rows_affected() == 1),
+        Err(e) => Err(match kernel::pg_error::constraint(&e) {
+            Some("people_first_name_check") => ApiError::validation("Le prénom est obligatoire.", "first_name"),
+            Some("people_last_name_check") => ApiError::validation("Le nom est obligatoire.", "last_name"),
+            Some("people_civility_check") => ApiError::validation("Cette civilité n'existe pas.", "civility"),
+            Some("people_country_id_fkey") => ApiError::validation("Ce pays est inconnu.", "country_id"),
+            Some("people_preferred_locale_fkey") => {
+                ApiError::validation("Cette langue n'est pas proposée.", "preferred_locale")
+            }
+            Some("timezone_name_check") => ApiError::validation("Ce fuseau horaire est inconnu.", "timezone"),
+            _ => kernel::pg_error::translate(&e),
+        }),
+    }
 }

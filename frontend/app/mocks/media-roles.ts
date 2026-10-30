@@ -82,6 +82,18 @@ export const attachableRoles: AttachableRoleRule[] = [
     aspect_ratio_tolerance: '0.02',
     is_active: true,
   },
+  {
+    owner_schema: 'identity',
+    owner_table: 'people',
+    role: 'avatar',
+    label: { fr: 'Photo de profil', en: 'Profile photo' },
+    is_multiple: false,
+    allowed_mime_prefixes: ['image/*'],
+    max_byte_size: 5 * MIO,
+    expected_aspect_ratio: null,
+    aspect_ratio_tolerance: '0.02',
+    is_active: true,
+  },
 ]
 
 /**

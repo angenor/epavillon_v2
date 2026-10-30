@@ -75,6 +75,23 @@ export interface Person {
   updated_at: IsoDateTime
 }
 
+/**
+ * `PUT /people/{id}` : ce qu'une personne modifie d'elle-même. Ni l'adresse
+ * principale (nouvelle vérification), ni ce qui appartient à l'équipe (statut).
+ */
+export interface UpdateProfilePayload {
+  civility: Civility | null
+  first_name: string
+  last_name: string
+  job_title: string | null
+  phone: string | null
+  country_id: CountryId | null
+  city: string | null
+  preferred_locale: string
+  timezone: TimeZoneName
+  is_directory_visible: boolean
+}
+
 /** Contrainte `ck` sur `identity.person_emails.label`. */
 export type PersonEmailLabel = 'secondary' | 'professional' | 'legacy'
 

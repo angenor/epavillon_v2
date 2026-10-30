@@ -54,6 +54,7 @@ pub struct ApiErrorBody {
         crate::routes::auth::reset_password,
         crate::routes::people::lister,
         crate::routes::people::fiche,
+        crate::routes::people::modifier,
         crate::routes::people::roles,
         crate::routes::people::permissions,
         crate::routes::people::perimetre,

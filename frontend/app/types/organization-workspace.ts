@@ -136,6 +136,8 @@ export interface ProposalTracking {
   transitions: ProposalTransition[]
   /** Demandes de correction encore ouvertes — c'est LE nombre que l'écran crie. */
   open_change_requests: number
+  /** Messages de l'équipe pas encore lus par la personne connectée. */
+  unread_comments: number
   /** Séances programmées. Vide tant que le dossier n'est pas retenu. */
   sessions: TrackedSession[]
   /** Couverture du dossier ; nulle sans image servable. */
@@ -292,8 +294,8 @@ export type AcceptInvitationResult =
 /** Réponse à un message du comité. */
 export interface ReplyToCommentPayload {
   proposal_id: ProposalId
-  /** Message auquel on répond — la racine du fil, jamais une réponse. */
-  parent_id: Uuid
+  /** Message auquel on répond (la racine du fil, jamais une réponse) ; nul : un nouveau fil. */
+  parent_id: Uuid | null
   body: string
 }
 

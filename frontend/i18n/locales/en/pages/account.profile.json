@@ -1,0 +1,53 @@
+{
+  "title": "My profile",
+  "save": "Save",
+  "saved": "Your profile has been saved.",
+  "photo": {
+    "label": "Profile photo",
+    "add": "Add a photo",
+    "change": "Change the photo"
+  },
+  "identity": {
+    "title": "Your details"
+  },
+  "fields": {
+    "civility": "Title",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "jobTitle": "Position",
+    "phone": "Phone",
+    "country": "Country",
+    "city": "City",
+    "locale": "Email language",
+    "localeHint": "The language the platform writes to you in.",
+    "timezone": "Time zone",
+    "timezoneHint": "Times in emails are given in this time zone.",
+    "directory": "Appear in the directory",
+    "directoryHint": "Other participants can find your name, position and organization."
+  },
+  "locales": {
+    "fr": "Français",
+    "en": "English"
+  },
+  "access": {
+    "title": "Sign-in",
+    "email": "Email address",
+    "verifiedOn": "verified on {date}",
+    "unverified": "not verified yet",
+    "emailHint": "This is your sign-in address. To change it, write to the IFDD team.",
+    "verify": "Get the verification link",
+    "password": "Password",
+    "passwordHint": "A link is emailed to you to choose a new one. You will then be signed out of your other devices.",
+    "passwordAction": "Change my password",
+    "sent": {
+      "verification": "A verification link has been sent to {email}.",
+      "password": "A link to change your password has been sent to {email}."
+    }
+  },
+  "organizations": {
+    "title": "My organizations",
+    "open": "My activities",
+    "none": "You are not linked to any organization.",
+    "join": "Link my organization"
+  }
+}

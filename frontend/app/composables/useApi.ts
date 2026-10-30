@@ -36,7 +36,7 @@
  * garde-fou de mille lignes de `CLAUDE.md`.
  */
 
-import type { AdministeredEvents, EffectivePermission, Person } from '~/types/identity'
+import type { AdministeredEvents, EffectivePermission, Person, UpdateProfilePayload } from '~/types/identity'
 import type { PublicEditionRow } from '~/types/views'
 import type { PublicCall } from '~/types/event/call'
 import type { SimilarOrganization } from '~/types/org'
@@ -458,6 +458,9 @@ export function useApi() {
     identity: {
       people: () => call('/people', (m) => m.people),
       byId: (id: Uuid) => call(`/people/${id}`, (m) => m.people.find((p) => p.id === id) ?? null),
+      /** Son propre profil : l'API refuse toute autre personne. */
+      updateProfile: (personId: Uuid, payload: UpdateProfilePayload): Promise<Person> =>
+        send(`/people/${personId}`, payload, (m) => m.updateProfile(personId, payload), 'PUT'),
       /**
        * Les attributions EN COURS d'une personne, **avec leur portée résolue**.
        *

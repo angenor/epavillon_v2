@@ -50,6 +50,7 @@
     "title": "My submissions",
     "count": "No submission | One submission | {count} submissions",
     "reference": "Submission {code}",
+    "unread": "No unread message | One unread message | {count} unread messages",
     "timeline": {
       "label": "Submission progress",
       "draft": "Draft",
@@ -138,6 +139,7 @@
     },
     "todo": "nothing to do | one thing to do | {count} things to do",
     "missingReports": "No report expected | One report expected | {count} reports expected",
+    "unread": "no unread message | one unread message | {count} unread messages",
     "showMissingReports": "Show the activities concerned"
   },
   "filters": {

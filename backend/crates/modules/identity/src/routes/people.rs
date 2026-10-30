@@ -6,16 +6,18 @@
 //! l'intergiciel, et un identifiant qui ne lui correspond pas retombe sur la
 //! permission — qu'il faut alors détenir.
 
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpMessage, HttpRequest, HttpResponse};
 use kernel::auth::Actor;
+use kernel::context::RequestContext;
 use kernel::error::Result;
 use uuid::Uuid;
 
 use crate::domain::ids::PersonId;
 use crate::domain::permissions::PERSON_READ;
+use crate::domain::person::ProfileChanges;
 use crate::repo::people;
 use crate::routes::locale_de;
-use crate::service::rbac;
+use crate::service::{profile, rbac};
 use crate::state::IdentityState;
 
 /// Les routes de lecture d'identité, **sans leur scope**.
@@ -28,6 +30,7 @@ use crate::state::IdentityState;
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("", web::get().to(lister))
         .route("/{id}", web::get().to(fiche))
+        .route("/{id}", web::put().to(modifier))
         .route("/{id}/roles", web::get().to(roles))
         .route("/{id}/permissions", web::get().to(permissions))
         .route("/{id}/administered-events", web::get().to(perimetre));
@@ -149,6 +152,38 @@ pub(crate) async fn perimetre(
     let cible = soi_meme_ou_permission(&state, acteur, chemin.into_inner()).await?;
     let administre = rbac::administered_events(state.pool(), cible).await?;
     Ok(HttpResponse::Ok().json(administre))
+}
+
+/// Le profil, modifié par la personne elle-même.
+#[utoipa::path(
+    put,
+    description = "`UpdateProfilePayload` → `Person`. Soi-même seulement ; l'adresse principale ne se change pas ici.",
+    path = "/people/{id}",
+    tag = "Identité",
+    operation_id = "modifier_son_profil",
+    params(("id" = Uuid, Path, description = "Identifiant de la personne connectée")),
+    request_body = Object,
+    responses(
+        (status = 200, description = "Person", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Ce n'est pas votre profil", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Champ refusé, nommé dans la réponse", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn modifier(
+    requete: HttpRequest,
+    state: web::Data<IdentityState>,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+    corps: web::Json<ProfileChanges>,
+) -> Result<HttpResponse> {
+    let ctx = requete
+        .extensions()
+        .get::<RequestContext>()
+        .cloned()
+        .unwrap_or_else(|| RequestContext::new(RequestContext::generated_request_id(), "fr"));
+    let personne = profile::update(&state, &ctx, acteur.0, chemin.into_inner(), &corps).await?;
+    Ok(HttpResponse::Ok().json(personne))
 }
 
 /// Soi-même, ou la permission de lire les personnes. Le refus est un 403 : la

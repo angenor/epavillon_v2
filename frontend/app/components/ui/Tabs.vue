@@ -44,6 +44,8 @@ interface Props {
   to?: (item: TabItem) => string
   /** Identifiant du panneau commandé, quand il est rendu hors de ce composant. */
   panelId?: (item: TabItem) => string
+  /** L'onglet actif prend aussi un fond teinté : onglets riches (vignette, seconde ligne) où le filet seul se perd. */
+  filled?: boolean
 }
 
 const props = defineProps<Props>()
@@ -117,7 +119,7 @@ defineExpose({ tabId })
         class="-mb-px inline-flex min-h-(--target-min) shrink-0 items-center gap-2 border-b-(length:--border-thick) px-4 text-sm font-semibold whitespace-nowrap no-underline transition-colors duration-(--duration-fast)"
         :class="[
           item.value === props.modelValue
-            ? 'border-accent text-accent'
+            ? ['border-accent text-accent', props.filled ? 'rounded-t-md bg-accent-surface' : '']
             : 'border-transparent text-text-secondary hover:border-border-strong hover:text-text',
           // L'onglet indisponible s'estompe et refuse le curseur : la couleur
           // seule ne dit pas qu'un volet n'est pas encore ouvert.

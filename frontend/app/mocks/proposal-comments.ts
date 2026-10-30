@@ -289,6 +289,10 @@ export function addCommentRecipients(
   recipientsByRoot.set(commentId, [...new Set([...current, ...added])])
 }
 
+export function hasReadComment(commentId: Uuid, personId: PersonId): boolean {
+  return reads.has(readKey(commentId, personId))
+}
+
 /** `POST /proposals/{id}/comments/read` : idempotent, la première lecture reste. */
 export function markCommentsRead(personId: PersonId, payload: MarkCommentsReadPayload): void {
   const at = new Date().toISOString()

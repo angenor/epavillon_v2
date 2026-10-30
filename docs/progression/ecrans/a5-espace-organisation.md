@@ -155,3 +155,14 @@ Retours du commanditaire. La photo de fond occupe tout le cadre et la couleur s'
 ## 29/10 : seize modèles, images légères
 
 Douze modèles de plus, un fichier chacun dans `utils/cover-templates/` (briques dans `draw.ts`, registre dans `utils/cover-studio.ts`). L'image enregistrée est un JPEG sous 300 Ko ; l'aperçu de partage lit la déclinaison `partage` du worker (JPEG sous 100 Ko). Ajouter un modèle : un fichier, une entrée de `COVER_TEMPLATES`, son libellé.
+
+## 30/10 : sept retours du commanditaire
+
+- **Dossier clos ou édition passée** : ni « Il manque… » ni liste à cocher (`isFileOpen`), plus rien n'y est attendu.
+- **Onglets d'édition** : l'onglet actif prend un fond teinté (`UiTabs` prop `filled`, les autres écrans gardent le filet seul). Pastille `editionTabAttention` : actions de l'édition en cours plus messages non lus ; une édition terminée ne compte que ses messages, pas ses comptes rendus attendus. Le serveur rend `unread_comments` par dossier (messages `submitter` d'un autre auteur sans lecture du lecteur).
+- **Menu « Mon espace »** : Profil, Mes activités, déconnexion. La pastille compte comme les onglets et son nombre se relit en face de « Mes activités ». Sur téléphone, les deux liens dans le pied du menu.
+- **Échanges** : fenêtre flottante `WorkspaceCommentsDesk` sur `UiFloatingPanel` (plein écran sur téléphone). Fil chronologique, ses messages à droite, citation du message auquel on répond, demande de correction étiquetée avec « Marquer comme résolu », ligne « Nouveaux messages » figée à l'ouverture. Sans réponse choisie, un message ouvre un nouveau fil (l'API l'acceptait déjà). Pas de flux temps réel dans l'API : `usePolling` relit les messages toutes les 15 s fenêtre ouverte, toutes les minutes sinon, rien quand l'onglet du navigateur est caché.
+- **Profil** `/mon-profil` (`pages/account/profile.vue`) : civilité, nom, fonction, téléphone, pays, ville, langue, fuseau, annuaire ; photo (`avatar` sur `identity.people`, garde existante) ; vérification de l'adresse et changement de mot de passe par lien. `PUT /people/{id}` refuse toute autre personne.
+- **Page publique d'une activité** : nombre d'inscrits caché (`isAttendanceShown`, à repasser à `true`). L'API le sert toujours.
+
+Vérifié au navigateur sur les données d'exemple, à 1400 et 375 px : pastilles, menu, envoi par Entrée et passage en lu, profil, aucun défilement horizontal.

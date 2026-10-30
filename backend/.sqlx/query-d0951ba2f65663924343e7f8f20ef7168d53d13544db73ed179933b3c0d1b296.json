@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.people\n            SET civility = nullif(btrim($2), ''),\n                first_name = btrim($3),\n                last_name = btrim($4),\n                job_title = nullif(btrim($5), ''),\n                phone = nullif(btrim($6), ''),\n                country_id = $7,\n                city = nullif(btrim($8), ''),\n                preferred_locale = $9,\n                timezone = $10::text::platform.timezone_name,\n                is_directory_visible = $11\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d0951ba2f65663924343e7f8f20ef7168d53d13544db73ed179933b3c0d1b296"
+}

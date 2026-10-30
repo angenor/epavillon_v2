@@ -155,6 +155,8 @@ function editionMeta(tab: WorkspaceEditionTab): string {
   } else if (!tab.over && tab.actions.length > 0) {
     parts.push(t('organization.workspace.editions.todo', tab.actions.length))
   }
+  const unread = tab.proposals.reduce((sum, tracking) => sum + tracking.unread_comments, 0)
+  if (unread > 0) parts.push(t('organization.workspace.editions.unread', unread))
   return parts.join(' · ')
 }
 
@@ -342,6 +344,7 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
         :items="tabItems"
         :model-value="activeTab.edition.slug"
         :label="t('organization.workspace.editions.label')"
+        filled
         @update:model-value="selectTab"
       >
         <template #tab="{ item }">
@@ -371,7 +374,10 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
               {{ initialsOf(editionName(tab.edition)) }}
             </span>
             <span class="flex flex-col items-start text-left">
-              <span>{{ editionName(tab.edition) }}</span>
+              <span class="flex items-center gap-2">
+                {{ editionName(tab.edition) }}
+                <UiCounter v-if="editionTabAttention(tab) > 0" :value="editionTabAttention(tab)" tone="accent" />
+              </span>
               <span class="text-xs font-normal text-text-muted">{{ editionMeta(tab) }}</span>
             </span>
           </span>

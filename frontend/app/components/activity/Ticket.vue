@@ -42,6 +42,9 @@ const dialogOpen = ref(false)
 const cancelling = ref(false)
 const { copied: shared, share, url: requestUrl } = useShareLink(() => tr(props.session.title))
 
+/** Nombre d'inscrits caché au public pour le moment (demande du 30/10) : repasser à `true` pour le rendre. */
+const isAttendanceShown = false
+
 const capacity = computed(() => props.session.capacity)
 const registered = computed(() => props.session.registered_count)
 const full = computed(() => capacity.value !== null && registered.value >= capacity.value)
@@ -91,7 +94,7 @@ const note = computed(() => {
     case 'watch':
       return t('activity.ticket.note.live')
     default:
-      return props.state === 'past' ? t('activity.ticket.note.past', { count: registered.value }) : ''
+      return props.state === 'past' && isAttendanceShown ? t('activity.ticket.note.past', { count: registered.value }) : ''
   }
 })
 
@@ -213,7 +216,7 @@ function downloadCalendar(): void {
       class="mt-5 flex flex-col gap-5 border-t border-border-subtle pt-5"
     >
       <ActivityCountdown :starts-at="props.session.starts_at" @elapsed="emit('started')" />
-      <div v-if="capacity !== null">
+      <div v-if="isAttendanceShown && capacity !== null">
         <p class="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
           <span><b class="text-lg font-bold tabular-nums">{{ registered }}</b> {{ t('activity.ticket.ofCapacity', { capacity }) }}</span>
           <span class="text-text-muted">{{ remaining }}</span>

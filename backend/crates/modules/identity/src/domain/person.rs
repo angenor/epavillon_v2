@@ -5,7 +5,7 @@
 //! `display_name` et `search_vector` sont des colonnes générées ; la première se
 //! lit, la seconde n'a aucune représentation côté client.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -42,4 +42,20 @@ pub struct PersonView {
     pub created_at: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
+}
+
+/// Ce qu'une personne modifie d'elle-même depuis son profil — `UpdateProfilePayload`.
+/// L'adresse principale n'y est pas : la changer demande une nouvelle vérification.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ProfileChanges {
+    pub civility: Option<String>,
+    pub first_name: String,
+    pub last_name: String,
+    pub job_title: Option<String>,
+    pub phone: Option<String>,
+    pub country_id: Option<Uuid>,
+    pub city: Option<String>,
+    pub preferred_locale: String,
+    pub timezone: String,
+    pub is_directory_visible: bool,
 }

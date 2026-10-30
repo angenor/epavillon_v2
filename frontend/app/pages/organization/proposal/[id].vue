@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ProposalFile } from '~/types/organization-workspace'
-import type { ProposalOrganization, ProposalStatus } from '~/types/programme/proposal'
+import type { ProposalCommentView, ProposalOrganization, ProposalStatus } from '~/types/programme/proposal'
 import type { Organization } from '~/types/org'
 import type { AttachableRoleRule } from '~/types/media'
 import type { Intent, SelectOption, TabItem } from '~/types/ui'
@@ -82,7 +82,7 @@ const editor = useProposalFileEditor(proposalId, async () => {
 const activeTab = computed<string>(() => {
   const requested = route.query.vue
   const asked = String(Array.isArray(requested) ? requested[0] : requested)
-  return ['exchanges', 'history'].includes(asked) ? asked : 'tracking'
+  return asked === 'history' ? asked : 'tracking'
 })
 
 function selectTab(value: string): void {
@@ -91,11 +91,6 @@ function selectTab(value: string): void {
 
 const tabs = computed<TabItem[]>(() => [
   { value: 'tracking', label: t('organization.workspace.proposal.tabs.tracking') },
-  {
-    value: 'exchanges',
-    label: t('organization.workspace.proposal.tabs.exchanges'),
-    count: file.value?.comments.filter((comment) => comment.parent_id === null).length,
-  },
   { value: 'history', label: t('organization.workspace.proposal.tabs.history') },
 ])
 
@@ -257,8 +252,15 @@ const facts = computed(() =>
     : null,
 )
 
-const gaps = computed(() => (facts.value ? proposalFileGaps(facts.value) : []))
-const checklist = computed(() => (facts.value ? proposalFileChecklist(facts.value) : []))
+/** Un dossier clos ou d'une édition passée n'attend plus rien : « il manque » n'y a plus de sens. */
+const isFileOpen = computed(() => {
+  const edition = file.value?.tracking.edition
+  if (!edition) return false
+  return !['rejected', 'withdrawn', 'cancelled'].includes(proposalStatus.value) && !isEditionOver(edition)
+})
+
+const gaps = computed(() => (facts.value && isFileOpen.value ? proposalFileGaps(facts.value) : []))
+const checklist = computed(() => (facts.value && isFileOpen.value ? proposalFileChecklist(facts.value) : []))
 
 // ---------------------------------------------------------------------------
 // Le jour J : activité retenue seulement
@@ -443,18 +445,43 @@ function sectionProps(section: ProposalFileSection) {
 }
 
 // ---------------------------------------------------------------------------
-// Écritures du fil
+// Les échanges, en fenêtre flottante : relus toutes les 15 s fenêtre ouverte,
+// toutes les minutes sinon, pour que la pastille du bouton reste juste.
 // ---------------------------------------------------------------------------
 
-const busy = ref(false)
+const deskOpen = ref(route.query.vue === 'exchanges' || route.hash === '#echanges')
 
-async function reply(parentId: Uuid, body: string): Promise<void> {
+const {
+  data: comments,
+  status: commentsStatus,
+  error: commentsError,
+  refresh: refreshComments,
+} = useAsyncData<ProposalCommentView[]>(
+  () => `workspace-proposal-comments-${proposalId.value}`,
+  () => {
+    const person = auth.person
+    return person ? api.proposals.comments(proposalId.value, person.id) : Promise.resolve([])
+  },
+  { watch: [proposalId, () => auth.person?.id], lazy: true, server: false, default: () => [] },
+)
+
+usePolling(refreshComments, () => (deskOpen.value ? 15_000 : 60_000))
+
+const busy = ref(false)
+const sendError = ref<string | null>(null)
+
+async function sendMessage(parentId: Uuid | null, body: string): Promise<boolean> {
   const person = auth.person
-  if (!person || !file.value) return
+  if (!person || !file.value) return false
   busy.value = true
+  sendError.value = null
   try {
     await api.workspace.reply(person.id, { proposal_id: file.value.tracking.proposal.id, parent_id: parentId, body })
-    await refresh()
+    await refreshComments()
+    return true
+  } catch (thrown) {
+    sendError.value = apiErrorMessage(thrown, (key) => t(key))
+    return false
   } finally {
     busy.value = false
   }
@@ -465,6 +492,7 @@ async function markCommentsRead(ids: Uuid[]): Promise<void> {
   const person = auth.person
   if (!person || !file.value) return
   await api.proposals.markCommentsRead(person.id, file.value.tracking.proposal.id, ids)
+  for (const comment of comments.value) if (ids.includes(comment.id)) comment.is_read = true
 }
 
 async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
@@ -473,7 +501,7 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
   busy.value = true
   try {
     await api.workspace.resolve(person.id, { comment_id: commentId, resolved })
-    await refresh()
+    await Promise.all([refreshComments(), refresh()])
   } finally {
     busy.value = false
   }
@@ -566,7 +594,7 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
             </p>
 
             <WorkspaceFileGaps
-              v-if="facts"
+              v-if="facts && isFileOpen"
               :gaps="gaps"
               :has-logo="facts.hasLogo"
               :organization-id="file.tracking.proposal.organization_id"
@@ -872,21 +900,25 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
           <WorkspaceFileChecklist v-if="checklist.length > 0" :items="checklist" />
         </div>
 
-        <!-- ÉCHANGES -->
-        <WorkspaceCommentThread
-          v-else-if="activeTab === 'exchanges'"
-          :comments="file.comments"
-          :participants="file.participants"
-          :viewer-id="auth.person?.id ?? ''"
-          :busy="busy"
-          :mark-read="markCommentsRead"
-          @reply="reply"
-          @resolve="resolve"
-        />
-
         <!-- HISTORIQUE -->
         <WorkspaceHistoryList v-else :entries="file.history" :timezone="timezone" />
       </UiTabs>
+
+      <WorkspaceCommentsDesk
+        v-model:open="deskOpen"
+        :reference-code="file.tracking.proposal.reference_code"
+        :comments="comments"
+        :participants="file.participants"
+        :viewer-id="auth.person?.id ?? ''"
+        :loading="commentsStatus === 'pending'"
+        :failed="Boolean(commentsError) && comments.length === 0"
+        :busy="busy"
+        :error="sendError"
+        :submit="sendMessage"
+        :mark-read="markCommentsRead"
+        @resolve="resolve"
+        @retry="refreshComments()"
+      />
     </template>
   </div>
 </template>

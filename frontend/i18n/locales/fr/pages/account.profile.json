@@ -1,0 +1,53 @@
+{
+  "title": "Mon profil",
+  "save": "Enregistrer",
+  "saved": "Votre profil est enregistré.",
+  "photo": {
+    "label": "Photo de profil",
+    "add": "Ajouter une photo",
+    "change": "Changer la photo"
+  },
+  "identity": {
+    "title": "Vos informations"
+  },
+  "fields": {
+    "civility": "Civilité",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "jobTitle": "Fonction",
+    "phone": "Téléphone",
+    "country": "Pays",
+    "city": "Ville",
+    "locale": "Langue des courriels",
+    "localeHint": "La langue dans laquelle la plateforme vous écrit.",
+    "timezone": "Fuseau horaire",
+    "timezoneHint": "Les heures des courriels vous sont données dans ce fuseau.",
+    "directory": "Apparaître dans l'annuaire",
+    "directoryHint": "Les autres participantes et participants peuvent trouver votre nom, votre fonction et votre organisation."
+  },
+  "locales": {
+    "fr": "Français",
+    "en": "English"
+  },
+  "access": {
+    "title": "Connexion",
+    "email": "Adresse électronique",
+    "verifiedOn": "vérifiée le {date}",
+    "unverified": "pas encore vérifiée",
+    "emailHint": "C'est l'adresse de connexion. Pour la changer, écrivez à l'équipe de l'IFDD.",
+    "verify": "Recevoir le lien de vérification",
+    "password": "Mot de passe",
+    "passwordHint": "Un lien vous est envoyé par courriel pour en choisir un nouveau. Vos autres appareils seront ensuite déconnectés.",
+    "passwordAction": "Changer mon mot de passe",
+    "sent": {
+      "verification": "Un lien de vérification est parti vers {email}.",
+      "password": "Un lien pour changer votre mot de passe est parti vers {email}."
+    }
+  },
+  "organizations": {
+    "title": "Mes organisations",
+    "open": "Mes activités",
+    "none": "Aucune organisation n'est rattachée à votre compte.",
+    "join": "Rattacher mon organisation"
+  }
+}

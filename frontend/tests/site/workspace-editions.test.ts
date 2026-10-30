@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   defaultEditionTab,
+  editionTabAttention,
   matchesProposalFilter,
   matchesProposalQuery,
   proposalActionIndex,
@@ -18,10 +19,11 @@ const edition = (id: string, starts_at: string, ends_at: string, status = 'annou
 const cop31 = edition('cop31', '2026-11-09T08:00:00Z', '2026-11-20T18:00:00Z')
 const cdp30 = edition('cdp30', '2025-11-10T08:00:00Z', '2025-11-21T18:00:00Z', 'completed')
 
-const tracking = (id: string, ed: EventEdition, status = 'submitted', title = id) =>
+const tracking = (id: string, ed: EventEdition, status = 'submitted', title = id, unread_comments = 0) =>
   ({
     proposal: { id, status, title: { fr: title }, reference_code: `P-${id}` },
     edition: ed,
+    unread_comments,
     sessions: [],
     cover: null,
     edition_thumbnail: null,
@@ -73,4 +75,16 @@ test('le filtre « à vous d’agir » réunit corrections, brouillons et compte
   assert.ok(matchesProposalFilter(tracking('b', cdp30, 'accepted'), 'todo', index))
   assert.ok(matchesProposalFilter(tracking('b', cdp30, 'accepted'), 'report', index))
   assert.ok(!matchesProposalFilter(tracking('c', cop31, 'submitted'), 'todo', index))
+})
+
+test("la pastille d'un onglet compte ses actions en cours et ses messages non lus", () => {
+  const tabs = workspaceEditionTabs(
+    overview(
+      [tracking('a', cop31, 'changes_requested', 'a', 2), tracking('b', cdp30, 'accepted', 'b', 1)],
+      [action('changes_requested', 'a'), action('session_report_missing', 'b')],
+    ),
+    NOW,
+  )
+  // Édition terminée : les comptes rendus attendus n'allument pas la pastille, les messages si.
+  assert.deepEqual(tabs.map((tab) => editionTabAttention(tab)), [3, 1])
 })
