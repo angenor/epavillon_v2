@@ -45,6 +45,7 @@ use crate::domain::gabarits::{
 };
 use crate::domain::mailing::{self, echapper_html, texte_brut};
 use crate::domain::render;
+use crate::realtime::{self, Auteur};
 use crate::repo::{cross, mail_templates, mailings};
 
 pub const SEND_MAILING: &str = "engagement.send_mailing";
@@ -324,14 +325,13 @@ impl JobHandler for SendMailing {
             return Ok(());
         };
         // `claim_jobs()` a déjà compté cet essai ; `fail_job()` tuera le
-        // travail au même seuil.
-        if job.attempts >= job.max_attempts {
-            let mut tx = self.db.write(&contexte()).await?;
-            let _echoue = mailings::echouer(&mut tx, id, &arret.motif(job.attempts)).await?;
-            tx.commit().await?;
-            // Signal à émettre ici si `_echoue` : `mailing:<id>`,
-            // `event:<id>:mailings`, `person:<auteur>` (`queued_by` de l'envoi).
-        }
+        // travail au même seuil. Avant le dernier, le lot interrompu a pu
+        // avancer : l'écran le relit.
+        let mut tx = self.db.write(&contexte()).await?;
+        let echoue = job.attempts >= job.max_attempts
+            && mailings::echouer(&mut tx, id, &arret.motif(job.attempts)).await?;
+        realtime::signaler(&mut tx, id, Auteur::si(echoue)).await?;
+        tx.commit().await?;
         Err(arret.en_erreur())
     }
 }
@@ -399,13 +399,11 @@ impl SendMailing {
             }
         }
 
-        // L'avancement (partis, en échec) est à jour à chaque destinataire, sur
-        // `mailing_recipients`. Signal à émettre ici, à chaque lot :
-        // `mailing:<id>`, `event:<id>:mailings`.
-        // Signal à émettre après la validation ci-dessous si `parti` :
-        // `person:<auteur>` (`queued_by` de l'envoi) en plus des deux autres.
+        // L'avancement (partis, en échec) est à jour à chaque destinataire :
+        // un signal par lot suffit à l'écran ; l'auteur, seulement à la fin.
         let mut tx = self.db.write(&contexte()).await?;
         let parti = mailings::clore_si_fini(&mut tx, id).await?;
+        realtime::signaler(&mut tx, id, Auteur::si(parti)).await?;
         if !parti {
             let suivant = sqlx::query_scalar!(
                 r#"SELECT min(id::text) AS suivant FROM engagement.mailing_recipients

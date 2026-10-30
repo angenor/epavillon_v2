@@ -33,12 +33,14 @@ pub mod consumers;
 pub mod domain;
 pub mod jobs;
 pub mod mail;
+pub mod realtime;
 pub mod repo;
 pub mod routes;
 pub mod service;
 pub mod state;
 
 pub use mail::GardedMailer;
+pub use realtime::topic_authorizers;
 pub use state::EngagementState;
 
 /// Routes exposées par le module, sous les préfixes qui n'appartiennent qu'à

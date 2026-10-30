@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event_id, queued_by FROM engagement.mailings WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "queued_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "queued_by"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "9483437fe576f1b71567f47e9c55c4f79348afe25ece491bd87c6cc7b57bceb5"
+}

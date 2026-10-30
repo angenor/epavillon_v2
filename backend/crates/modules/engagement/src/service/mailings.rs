@@ -40,6 +40,7 @@ use crate::domain::mailing::{
 };
 use crate::domain::{render, sanitize};
 use crate::jobs::send_mailing::{QUEUE, SEND_MAILING, SEND_MAILING_TEST};
+use crate::realtime::{self, Auteur};
 use crate::repo::{cross, mailings};
 use crate::state::EngagementState;
 
@@ -81,19 +82,22 @@ async fn garder_envoi(
     let Some(envoi) = mailings::lire(state.pool(), id).await? else {
         return Err(ApiError::not_found());
     };
-    let perimetre = administered_events(state.pool(), acteur).await?;
-    let autorise = has_permission(
-        state.pool(),
-        acteur,
-        PERMISSION,
-        Scope::Event(envoi.event_id),
-    )
-    .await?;
-    if perimetre.allows(envoi.event_id) && autorise {
+    if droit_sur_l_edition(state.pool(), acteur, envoi.event_id).await? {
         Ok(envoi)
     } else {
         Err(ApiError::not_found())
     }
+}
+
+/// Le droit d'écrire aux participants de l'édition : la garde d'un envoi, et
+/// celle de ses sujets de temps réel (`realtime.rs`).
+pub(crate) async fn droit_sur_l_edition(
+    pool: &sqlx::PgPool,
+    acteur: Uuid,
+    event_id: Uuid,
+) -> Result<bool> {
+    Ok(administered_events(pool, acteur).await?.allows(event_id)
+        && has_permission(pool, acteur, PERMISSION, Scope::Event(event_id)).await?)
 }
 
 // -----------------------------------------------------------------------------
@@ -107,11 +111,10 @@ async fn verifier_les_envois_en_cours(state: &EngagementState, event_id: Uuid) -
     }
     let ctx = RequestContext::background("engagement.mailing_check");
     let mut tx = state.db().write(&ctx).await?;
-    let _bascules = mailings::basculer_les_bloques(&mut tx, event_id).await?;
-    tx.commit().await?;
-    // Signal à émettre ici pour chaque envoi de `_bascules` : `mailing:<id>`,
-    // `event:<id>:mailings`, `person:<auteur>` (`queued_by` de l'envoi).
-    Ok(())
+    for id in mailings::basculer_les_bloques(&mut tx, event_id).await? {
+        realtime::signaler(&mut tx, id, Auteur::Prevenu).await?;
+    }
+    tx.commit().await
 }
 
 pub async fn ecran(
@@ -623,6 +626,8 @@ pub async fn supprimer(
 ) -> Result<()> {
     garder_envoi(state, acteur, id).await?;
     let mut tx = state.db().write(ctx).await?;
+    // Avant le `DELETE` : la ligne porte l'édition à prévenir.
+    realtime::signaler(&mut tx, id, Auteur::Tenu).await?;
     if !mailings::supprimer(&mut tx, id).await? {
         // Supprimé entre-temps par quelqu'un d'autre : il n'existe plus.
         return Err(match mailings::lire(state.pool(), id).await? {
@@ -814,6 +819,7 @@ pub async fn envoyer(
         },
     )
     .await?;
+    realtime::signaler(&mut tx, id, Auteur::Tenu).await?;
     tx.commit().await?;
     detail(state, acteur, id).await
 }
@@ -834,8 +840,8 @@ pub async fn annuler(
             "status",
         ));
     }
+    realtime::signaler(&mut tx, id, Auteur::Tenu).await?;
     tx.commit().await?;
-    // Signal à émettre ici : `mailing:<id>`, `event:<id>:mailings`.
     detail(state, acteur, id).await
 }
 
@@ -875,7 +881,7 @@ pub async fn relancer(
         },
     )
     .await?;
+    realtime::signaler(&mut tx, id, Auteur::Tenu).await?;
     tx.commit().await?;
-    // Signal à émettre ici : `mailing:<id>`, `event:<id>:mailings`.
     detail(state, acteur, id).await
 }
