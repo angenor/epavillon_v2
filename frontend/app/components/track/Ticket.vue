@@ -235,13 +235,14 @@ const partnerLogo = (logo: PublicTrackPage['partners'][number]['logo']) => (logo
       <p class="text-xs font-bold text-text-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
         {{ t('track.ticket.map') }}
       </p>
+      <!-- 4/3 : l'attribution d'OpenStreetMap, obligatoire, couvrait un tiers du cadre en 16/10 à 375 px. -->
       <iframe
         v-if="mapEmbed"
         :src="mapEmbed"
         :title="t('track.ticket.mapOf', { place: venueName })"
         loading="lazy"
         referrerpolicy="no-referrer"
-        class="mt-3 aspect-16/10 w-full rounded-lg border border-border-subtle bg-surface-sunken"
+        class="mt-3 aspect-4/3 w-full rounded-lg border border-border-subtle bg-surface-sunken"
       />
       <address class="mt-3 leading-snug not-italic">
         <b class="block">{{ venueName }}</b>
