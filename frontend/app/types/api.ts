@@ -6043,6 +6043,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/realtime/pulse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `RealtimePulse` — version courante des sujets demandés (`topics`, séparés par des virgules, 32 au plus). Sujets publics (`edition:<id>:public…`) sans session ; un sujet refusé est listé dans `denied`, et sans session c'est un 401 (le site rafraîchit puis réessaie). `Cache-Control: no-cache` et ETag : `If-None-Match` rend 304 tant que rien n'a changé. */
+        get: operations["realtime_pulse"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/realtime/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Flux `text/event-stream` des sujets demandés (`topics`, séparés par des virgules, 32 au plus), pour une session connectée. Ne transporte aucune donnée : un `signal` nomme les sujets changés, la page relit sa route. Événements : `ready` (`RealtimeReady`), `signal` (`RealtimeSignal`), `resync`, `revoked`, `reauth`, `evicted`, `restart`. Sujets refusés listés dans `ready` ; aucun accordé : 403. Cinq flux par session, le plus ancien fermé. */
+        get: operations["realtime_stream"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reference/countries": {
         parameters: {
             query?: never;
@@ -23584,6 +23618,104 @@ export interface operations {
             };
             /** @description Base injoignable */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    realtime_pulse: {
+        parameters: {
+            query: {
+                /** @description Sujets, séparés par des virgules */
+                topics: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RealtimePulse */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Inchangé depuis l'ETag présenté */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sujet privé demandé sans session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sujet mal formé ou trop de sujets */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    realtime_stream: {
+        parameters: {
+            query: {
+                /** @description Sujets, séparés par des virgules */
+                topics: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Flux SSE */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucun sujet accordé */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sujet mal formé ou trop de sujets */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

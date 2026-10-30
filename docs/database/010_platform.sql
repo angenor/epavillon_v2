@@ -360,6 +360,71 @@ COMMENT ON TABLE platform.inbox_events IS
     'Garde-fou d''idempotence : trace (consommateur, événement) déjà traité.';
 
 -- -----------------------------------------------------------------------------
+-- 3 bis. Signal d'écran (temps réel, 31/10/2026)
+--
+-- Annonce « tel sujet a changé » aux pages ouvertes, qui relisent alors la route
+-- REST qu'elles appellent déjà. Le signal ne porte JAMAIS la donnée :
+-- l'autorisation de la donnée reste celle de sa route.
+--
+-- Pourquoi pas l'outbox : l'outbox porte des faits métier, durables, rejoués à
+-- des consommateurs idempotents ; un message interne au comité n'y émet rien, et
+-- un signal par lot de dix courriels encombrerait une table faite pour être
+-- relue. Le signal est éphémère : perdu si personne n'écoute, rattrapé par la
+-- relecture complète que la page fait à chaque reconnexion.
+--
+-- `pg_notify` est transactionnel : livré AU COMMIT de la transaction appelante,
+-- jamais pour une transaction annulée. On l'appelle donc dans la transaction du
+-- changement, comme `emit_event()`. Deux appels identiques dans une transaction
+-- n'en livrent qu'un (PostgreSQL dédoublonne), ce qui convient.
+--
+-- Écouté par l'API (`LISTEN platform_signal`, un concentrateur en mémoire) :
+-- voir `backend/crates/api/src/realtime/` et
+-- `docs/progression/decisions/2026-10-31-temps-reel.md`.
+--
+-- Sujet : nom en minuscules puis segments séparés par « : »
+-- (`proposal:<uuid>`, `event:<uuid>:mailings`, `edition:<uuid>:public:live`).
+-- Minuscules seulement : un uuid sort en minuscules de PostgreSQL comme de
+-- Rust, et deux casses pour un sujet feraient deux sujets.
+-- Charge utile : objet JSON facultatif, petit (`kind`, `audience`). L'API lit
+-- `audience` pour ne jamais annoncer au déposant un échange interne au comité.
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION platform.signal(p_topic text, p_payload jsonb DEFAULT NULL)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_message text;
+BEGIN
+    IF p_topic IS NULL
+       OR length(p_topic) > 200
+       OR p_topic !~ '^[a-z][a-z_]*(:[a-z0-9_-]+)+$' THEN
+        RAISE EXCEPTION 'sujet de signal invalide : %', coalesce(p_topic, 'NULL')
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    IF p_payload IS NOT NULL AND jsonb_typeof(p_payload) <> 'object' THEN
+        RAISE EXCEPTION 'charge d''un signal : objet JSON attendu'
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    v_message := jsonb_build_object('topic', p_topic, 'payload', p_payload)::text;
+
+    -- `pg_notify` refuse au-delà de 8000 octets ; la marge laisse un message
+    -- d'erreur lisible plutôt que celui du serveur.
+    IF octet_length(v_message) > 7500 THEN
+        RAISE EXCEPTION 'signal trop volumineux (% octets) : un signal annonce, il ne transporte pas',
+            octet_length(v_message)
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    PERFORM pg_notify('platform_signal', v_message);
+END;
+$$;
+
+COMMENT ON FUNCTION platform.signal(text, jsonb) IS
+    'Signal d''écran : annonce qu''un sujet a changé (pg_notify sur platform_signal, livré au commit). Ne porte jamais la donnée ; les pages relisent leur route REST.';
+
+-- -----------------------------------------------------------------------------
 -- 4. File de travaux
 --
 -- PostgreSQL sert de courtier en phase 1 (SKIP LOCKED) : pas de Redis, pas de

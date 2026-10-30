@@ -8,6 +8,7 @@
 pub mod middleware;
 pub mod modules;
 pub mod openapi;
+pub mod realtime;
 pub mod routes;
 pub mod state;
 
@@ -52,7 +53,10 @@ pub fn build_app(
         // liste des pays du formulaire d'inscription avec lui.
         .configure(routes::reference::configurer)
         .configure(routes::platform::configurer)
-        .configure(routes::legal::configurer);
+        .configure(routes::legal::configurer)
+        // Le socle du temps réel ne dépend d'aucun module : `person:` et
+        // `edition:…:public` sont servis même quand tout le reste est démonté.
+        .configure(realtime::configurer);
 
     // Servie partout sauf en production, où le document décrirait la totalité
     // de la surface d'appel à qui sonde le port.
@@ -250,6 +254,8 @@ pub fn build_app(
         .app_data(web::Data::new(etat.analytics.clone()))
         .app_data(web::Data::new(etat.negotiation.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
+        .app_data(web::Data::from(etat.realtime.clone()))
+        .app_data(web::Data::new(etat.topics.clone()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())
         // À l'intérieur de la session : le verrou a besoin de savoir qui écrit.

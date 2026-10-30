@@ -34,6 +34,7 @@
  *   negotiation-meetings.ts    100_negotiations.sql § 4, 4 bis — réunions de la Francophonie, inscriptions
  *   analytics.ts               130_analytics.sql — les projections du tableau de bord
  *   views.ts                   les cinq vues consommées telles quelles
+ *   realtime.ts                010_platform.sql § 3 bis — le pouls et le flux du temps réel
  *
  * Modules hors du jalon en cours — Publications, Négociations, Formations,
  * Outils — : leurs types viendront avec leurs écrans, dans leur propre fichier.
@@ -86,3 +87,4 @@ export type * from './negotiation-reports'
 export type * from './negotiation-meetings'
 export type * from './analytics'
 export type * from './views'
+export type * from './realtime'

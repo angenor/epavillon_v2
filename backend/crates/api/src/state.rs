@@ -32,6 +32,11 @@ pub struct AppState {
     pub live: live::LiveState,
     pub analytics: analytics::AnalyticsState,
     pub negotiation: negotiation::NegotiationState,
+    /// Concentrateur du temps réel. Son écoute de la base est lancée par le
+    /// binaire (`Hub::ecouter`), pas ici : un test qui n'en a pas besoin ne
+    /// tient pas de connexion de plus.
+    pub realtime: Arc<crate::realtime::Hub>,
+    pub topics: kernel::realtime::TopicRegistry,
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre —
     /// schéma et autorité, sans le chemin de base.
     pub allowed_origins: Vec<String>,
@@ -86,6 +91,8 @@ impl AppState {
             live,
             analytics,
             negotiation,
+            realtime: crate::realtime::Hub::new(),
+            topics: crate::realtime::autorisations(),
             allowed_origins,
         })
     }

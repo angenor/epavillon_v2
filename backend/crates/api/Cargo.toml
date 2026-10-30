@@ -37,3 +37,5 @@ uuid.workspace = true
 
 [dev-dependencies]
 kernel = { workspace = true, features = ["testing"] }
+# Une autorisation de sujet factice, pour éprouver le filtre d'audience du flux.
+async-trait.workspace = true

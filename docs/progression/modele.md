@@ -446,3 +446,8 @@ Un serveur de courriel injoignable environ une minute épuisait les cinq essais 
 Côté code (crate `engagement`) : au dernier essai, le travail pose l'échec avec son motif ; l'API appelle le filet avant la liste et la fiche d'un envoi en cours ; `POST /admin/mailings/{id}/retry` relance un envoi en échec (seuls les destinataires en file, travail `mailing:<id>:relance:<n>`) ; `cancel` accepte aussi un envoi en échec ; la suppression l'accepte déjà (`status <> 'queued'`).
 
 **En production** : `ops/migrations/2026-10-31-envoi-en-echec.sql`, rejouable (`ADD VALUE` hors transaction), jouée deux fois en local, **avant** de démarrer l'API et le worker. Elle passe en échec les envois déjà bloqués (en cours sans travail vivant) et affiche leur nombre.
+## 31/10/2026, `010_platform.sql` : le signal d'écran du temps réel
+
+`platform.signal(topic text, payload jsonb DEFAULT NULL)` (§ 3 bis) : `pg_notify` sur le canal unique `platform_signal`, dans la transaction appelante, donc **livré au commit, jamais au rollback**. Sujet en minuscules, `nom:segment[:segment…]` (`^[a-z][a-z_]*(:[a-z0-9_-]+)+$`, 200 caractères au plus), charge facultative et objet JSON, message entier sous 7500 octets (`pg_notify` refuse au-delà de 8000) ; tout écart lève `check_violation`. Ne porte jamais la donnée : la page relit sa route. Pas l'outbox (faits métier durables et rejoués) ; le canal `negotiation_channel_message` de Guide Négo reste à part. Écouté par l'API (`crates/api/src/realtime/`), étude `decisions/2026-10-31-temps-reel.md`.
+
+**En production** : `ops/migrations/2026-10-31-temps-reel.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API qui écoute le canal.
