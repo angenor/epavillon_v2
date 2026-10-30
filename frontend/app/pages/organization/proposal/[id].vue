@@ -459,8 +459,8 @@ function sectionProps(section: ProposalFileSection) {
 }
 
 // ---------------------------------------------------------------------------
-// Les échanges, en fenêtre flottante : relus toutes les 15 s fenêtre ouverte,
-// toutes les minutes sinon, pour que la pastille du bouton reste juste.
+// Les échanges, en fenêtre flottante : relus dès que l'équipe écrit (temps
+// réel), pour que le fil et la pastille du bouton restent justes.
 // ---------------------------------------------------------------------------
 
 const deskOpen = ref(route.query.vue === 'exchanges' || route.hash === '#echanges')
@@ -479,7 +479,36 @@ const {
   { watch: [proposalId, () => auth.person?.id], lazy: true, server: false, default: () => [] },
 )
 
-usePolling(refreshComments, () => (deskOpen.value ? 15_000 : 60_000))
+const toast = useToast()
+
+/** Relit le fil ; fenêtre fermée, un message de l'équipe se signale en bref. */
+async function rereadComments(): Promise<void> {
+  const loaded = commentsStatus.value === 'success'
+  const known = new Set(comments.value.map((comment) => comment.id))
+  await refreshComments()
+  if (!loaded || deskOpen.value || document.visibilityState !== 'visible' || !file.value) return
+  if (commentArrivals(known, comments.value, auth.person?.id).length === 0) return
+  toast.info(t('organization.workspace.proposal.exchanges.arrived.title'), {
+    message: t('organization.workspace.proposal.exchanges.arrived.message', {
+      reference: file.value.tracking.proposal.reference_code,
+    }),
+  })
+}
+
+// L'équipe qui agit pour l'organisation lit les échanges au back-office : seul l'état se suit ici.
+useRealtime(
+  () => [
+    `proposal:${proposalId.value}:status`,
+    ...(file.value?.acting_for_organization ? [] : [`proposal:${proposalId.value}`]),
+  ],
+  async (topics) => {
+    await Promise.all([
+      topics.includes(`proposal:${proposalId.value}`) ? rereadComments() : null,
+      // L'état du dossier change sous les yeux : la saisie en cours vit à part (`editor`).
+      topics.includes(`proposal:${proposalId.value}:status`) ? refresh() : null,
+    ])
+  },
+)
 
 const busy = ref(false)
 const sendError = ref<string | null>(null)
@@ -537,7 +566,7 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
       ]"
     />
 
-    <UiLoadingState v-if="status === 'pending'" class="mt-10" variant="card" :lines="5" />
+    <UiLoadingState v-if="status === 'pending' && file?.tracking.proposal.id !== proposalId" class="mt-10" variant="card" :lines="5" />
 
     <UiErrorState v-else-if="error" class="mt-10" :retry-label="t('common.actions.retry')" @retry="refresh()" />
 

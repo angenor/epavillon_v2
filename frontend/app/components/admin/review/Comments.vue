@@ -106,10 +106,18 @@ function stopComposing(): void {
 }
 
 // Un message envoyé s'ajoute en bas du fil : la liste y descend pour le montrer.
+// Arrivé d'ailleurs (temps réel), il ne déplace la lecture que si l'on était en bas.
 watch(
   () => props.comments.length,
   async (count, previous) => {
     if (count <= previous) return
+    const element = list.value
+    const atBottom = !element || element.scrollHeight - element.scrollTop - element.clientHeight < 120
+    const newest = props.comments.reduce<ProposalCommentView | null>(
+      (latest, comment) => (!latest || comment.created_at > latest.created_at ? comment : latest),
+      null,
+    )
+    if (!atBottom && newest?.author_id !== props.viewerId) return
     await nextTick()
     list.value?.scrollTo({ top: list.value.scrollHeight, behavior: 'smooth' })
   },

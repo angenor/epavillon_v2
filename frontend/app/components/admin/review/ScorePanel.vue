@@ -107,10 +107,15 @@ const privateNote = ref(props.myReview.review?.private_note ?? '')
 const openComments = ref<Set<CriterionId>>(new Set(Object.keys(props.myReview.comments)))
 const dirty = ref(false)
 
-/** Une revue rechargée depuis le serveur écrase la saisie : c'est elle qui fait foi. */
+/**
+ * Une revue rechargée depuis le serveur écrase la saisie : c'est elle qui fait foi.
+ * Sauf si elle n'a pas changé : la fiche se relit aussi quand un collègue décide
+ * (temps réel), et la note en cours ne doit pas s'effacer pour autant.
+ */
 watch(
   () => props.myReview,
-  (mine) => {
+  (mine, before) => {
+    if (dirty.value && JSON.stringify(mine) === JSON.stringify(before)) return
     if (mine.review) mode.value = mine.review.mode
     quickScore.value = quickScoreOf(mine)
     generalComment.value = mine.review?.comment ?? ''

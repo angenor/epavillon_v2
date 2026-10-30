@@ -79,7 +79,11 @@
     "topicLabel": "Exchange topic",
     "topicPlaceholder": "Exchange topic…",
     "topicOtherLabel": "Specify the topic",
-    "topicOtherPlaceholder": "Specify (80 characters max)"
+    "topicOtherPlaceholder": "Specify (80 characters max)",
+    "arrived": {
+      "title": "New message from the team",
+      "message": "Submission {reference}: open the exchanges to read it."
+    }
   },
   "sessions": {
     "title": "When and where",

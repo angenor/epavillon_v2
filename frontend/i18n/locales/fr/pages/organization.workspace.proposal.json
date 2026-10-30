@@ -79,7 +79,11 @@
     "topicLabel": "Nature de l'échange",
     "topicPlaceholder": "Nature de l'échange…",
     "topicOtherLabel": "Précisez la nature de l'échange",
-    "topicOtherPlaceholder": "Précisez (80 caractères au plus)"
+    "topicOtherPlaceholder": "Précisez (80 caractères au plus)",
+    "arrived": {
+      "title": "Nouveau message de l'équipe",
+      "message": "Dossier {reference} : ouvrez les échanges pour le lire."
+    }
   },
   "sessions": {
     "title": "Quand et où",

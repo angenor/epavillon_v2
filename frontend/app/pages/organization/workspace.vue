@@ -116,6 +116,12 @@ const {
   { watch: [currentOrganizationId], lazy: true },
 )
 
+// Un message de l'équipe, un dossier qui change d'état : la liste et ses pastilles suivent.
+useRealtime(
+  () => (currentOrganizationId.value ? [`organization:${currentOrganizationId.value}`] : []),
+  () => refresh(),
+)
+
 // ---------------------------------------------------------------------------
 // Une édition à la fois (28/10), dans l'URL (`?edition=slug`) pour qu'un lien
 // envoyé ouvre le même onglet.
@@ -313,7 +319,7 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
       </div>
     </header>
 
-    <UiLoadingState v-if="status === 'pending'" class="mt-10" variant="card" :lines="4" />
+    <UiLoadingState v-if="status === 'pending' && overview?.organization.id !== currentOrganizationId" class="mt-10" variant="card" :lines="4" />
 
     <UiErrorState
       v-else-if="error"

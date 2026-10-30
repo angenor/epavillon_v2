@@ -505,6 +505,83 @@ onMounted(() => {
 
 /** Onglet actif sur écran étroit : la liste ou la grille, jamais les deux. */
 const mobileTab = ref<'unplaced' | 'calendar'>('unplaced')
+
+// ---------------------------------------------------------------------------
+// À plusieurs : le placement d'un collègue apparaît sans recharger
+// ---------------------------------------------------------------------------
+
+/**
+ * Relecture SILENCIEUSE : `refresh()` passerait l'écran en chargement et
+ * viderait le panneau le temps de la réponse. Aucune protection contre
+ * l'écrasement (décision du 31/10) : la dernière écriture gagne.
+ */
+async function reread(): Promise<void> {
+  const eventId = adminScope.currentEventId
+  if (!eventId) return
+  try {
+    screen.value = await api.planner.screen(eventId, adminScope.scope)
+  } catch {
+    // Le prochain signal, ou le retour sur l'onglet, rattrape.
+  }
+  if (publishOpen.value) await refreshReadiness()
+}
+
+/**
+ * Un glisser-déposer ou un redimensionnement en cours : la grille ne change pas
+ * sous le curseur. La relecture attend le lâcher, et la fin de l'écriture.
+ */
+const dragging = ref(false)
+const pressing = ref(false)
+const rereadOwed = ref(false)
+const gesture = computed(() => dragging.value || pressing.value || busy.value)
+
+function settle(): void {
+  if (!rereadOwed.value || gesture.value) return
+  rereadOwed.value = false
+  void reread()
+}
+
+watch(gesture, (active) => {
+  if (!active) setTimeout(settle, 300)
+})
+
+useRealtime(
+  () => (adminScope.currentEventId ? [`event:${adminScope.currentEventId}:planner`] : []),
+  () => {
+    rereadOwed.value = true
+    settle()
+  },
+)
+
+function onPointerDown(event: PointerEvent): void {
+  if (event.target instanceof Element && event.target.closest('.vuecal__event, [draggable="true"]')) pressing.value = true
+}
+const onPointerUp = (): void => {
+  pressing.value = false
+}
+const onDragStart = (): void => {
+  dragging.value = true
+}
+const onDragEnd = (): void => {
+  dragging.value = false
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', onPointerDown, true)
+  document.addEventListener('pointerup', onPointerUp, true)
+  document.addEventListener('pointercancel', onPointerUp, true)
+  document.addEventListener('dragstart', onDragStart, true)
+  document.addEventListener('dragend', onDragEnd, true)
+  document.addEventListener('drop', onDragEnd, true)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onPointerDown, true)
+  document.removeEventListener('pointerup', onPointerUp, true)
+  document.removeEventListener('pointercancel', onPointerUp, true)
+  document.removeEventListener('dragstart', onDragStart, true)
+  document.removeEventListener('dragend', onDragEnd, true)
+  document.removeEventListener('drop', onDragEnd, true)
+})
 </script>
 
 <template>

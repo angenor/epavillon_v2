@@ -321,7 +321,11 @@
     },
     "launcher": "Open the exchanges",
     "launcherUnread": "Open the exchanges | Open the exchanges, one unread message | Open the exchanges, {count} unread messages",
-    "windowTitle": "Exchanges · {reference}"
+    "windowTitle": "Exchanges · {reference}",
+    "arrived": {
+      "title": "New message",
+      "message": "{author}, on submission {reference}."
+    }
   },
   "mode": {
     "label": "How to score",

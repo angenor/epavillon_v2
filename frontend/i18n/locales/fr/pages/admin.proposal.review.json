@@ -321,7 +321,11 @@
     },
     "launcher": "Ouvrir les échanges",
     "launcherUnread": "Ouvrir les échanges | Ouvrir les échanges, un message non lu | Ouvrir les échanges, {count} messages non lus",
-    "windowTitle": "Échanges · {reference}"
+    "windowTitle": "Échanges · {reference}",
+    "arrived": {
+      "title": "Nouveau message",
+      "message": "{author}, sur le dossier {reference}."
+    }
   },
   "mode": {
     "label": "Façon de noter",

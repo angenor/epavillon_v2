@@ -399,6 +399,45 @@ async function addCommentRecipients(rootId: Uuid, personIds: PersonId[]): Promis
   }
 }
 
+// ---------------------------------------------------------------------------
+// Temps réel : un message, un changement d'état ou la liste bougent sans recharger
+// ---------------------------------------------------------------------------
+
+const toast = useToast()
+
+/** Relit le fil ; fenêtre fermée, un message d'autrui se signale en bref. */
+async function rereadComments(): Promise<void> {
+  const loaded = commentsStatus.value === 'success'
+  const known = new Set(comments.value.map((comment) => comment.id))
+  await refreshComments()
+  if (!loaded || desk.value === 'comments' || document.visibilityState !== 'visible') return
+  const last = commentArrivals(known, comments.value, auth.person?.id).at(-1)
+  if (!last || !screen.value) return
+  toast.info(t('admin.proposal.review.comments.arrived.title'), {
+    message: t('admin.proposal.review.comments.arrived.message', {
+      author: personName(last.author_id) ?? leadOrganizationName.value,
+      reference: screen.value.proposal.reference_code,
+    }),
+  })
+}
+
+useRealtime(
+  () => {
+    const id = proposalId.value
+    const eventId = adminScope.currentEventId
+    return [`proposal:${id}`, `proposal:${id}:status`, ...(eventId ? [`event:${eventId}:proposals`] : [])]
+  },
+  async (topics) => {
+    const id = proposalId.value
+    await Promise.all([
+      topics.includes(`proposal:${id}`) ? rereadComments() : null,
+      // La fiche entière : une note en cours de saisie reste (`AdminReviewScorePanel`).
+      topics.includes(`proposal:${id}:status`) ? refresh() : null,
+      topics.some((topic) => topic.endsWith(':proposals')) ? nav.refresh() : null,
+    ])
+  },
+)
+
 function openDecision(option: DecisionOption): void {
   pendingDecision.value = option
   decisionError.value = null
