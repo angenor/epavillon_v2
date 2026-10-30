@@ -74,9 +74,9 @@
   },
   "list": {
     "until": "→ {end} · {duration}",
-    "minutes": "{minutes} min",
-    "hours": "{hours} h",
-    "hoursMinutes": "{hours} h {minutes}",
+    "minutes": "{minutes} min",
+    "hours": "{hours} h",
+    "hoursMinutes": "{hours} h {minutes}",
     "live": "En direct",
     "visited": "Consultée",
     "emptyFiltered": "Aucune activité ce jour-là avec ces filtres.",
