@@ -21,6 +21,8 @@ import type { TimeZoneName } from '~/types/shared'
 interface Props {
   /** Fils publiés de l'édition, journées spéciales d'abord. */
   tracks: ProgrammeTrack[]
+  /** Chaque carte mène à la page du fil. */
+  editionSlug: string
   timezone: TimeZoneName
   zoneLabel?: string
   /** Nombre d'activités rattachées, par identifiant de fil. */
@@ -32,6 +34,10 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { dateRange, date } = useDateTime()
+const localePath = useLocalePath()
+
+const trackTo = (track: ProgrammeTrack) =>
+  localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: track.slug } })
 
 function period(track: ProgrammeTrack): string {
   if (!track.starts_on) return ''
@@ -55,7 +61,7 @@ function period(track: ProgrammeTrack): string {
       <li
         v-for="track in props.tracks"
         :key="track.id"
-        class="relative overflow-hidden rounded-xl border border-border bg-surface-raised p-5 pl-6"
+        class="group relative overflow-hidden rounded-xl border border-border bg-surface-raised p-5 pl-6 transition-colors hover:border-border-strong"
       >
         <!-- LE LISERÉ PORTE LA COULEUR DE LA DONNÉE, jamais le fond : une teinte
              saisie au back-office n'a aucune garantie de contraste avec le
@@ -67,7 +73,12 @@ function period(track: ProgrammeTrack): string {
           aria-hidden="true"
         />
 
-        <h3 class="font-display text-lg">{{ tr(track.title) }}</h3>
+        <h3 class="font-display text-lg">
+          <!-- Lien couvrant : toute la carte mène à la page de la journée. -->
+          <NuxtLink :to="trackTo(track)" class="text-text no-underline after:absolute after:inset-0 group-hover:underline">
+            {{ tr(track.title) }}
+          </NuxtLink>
+        </h3>
         <p v-if="track.subtitle" class="mt-1 text-sm font-semibold text-text-secondary">
           {{ tr(track.subtitle) }}
         </p>

@@ -194,6 +194,7 @@ useHead(() => ({
 
           <EventSpecialDays
             :tracks="data.tracks"
+            :edition-slug="data.edition.slug"
             :timezone="data.edition.timezone"
             :zone-label="data.edition.city ?? undefined"
             :session-counts="trackCounts"

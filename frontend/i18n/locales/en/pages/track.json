@@ -1,0 +1,108 @@
+{
+  "back": "{edition} programme",
+  "loading": "Loading the day",
+  "eve": "Eve of {edition}",
+  "before": "Before {edition}",
+  "offSite": "Away from the pavilion",
+  "audiences": "Audience",
+  "error": {
+    "title": "Page unavailable",
+    "description": "This day could not be loaded."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "It does not exist, or has not been published yet.",
+    "back": "See the programme"
+  },
+  "trail": {
+    "before": "Before the conference",
+    "special_day": "Special days",
+    "side_programme": "Side programme",
+    "thematic_track": "Thematic tracks"
+  },
+  "kind": {
+    "special_day": "Special day",
+    "side_programme": "Side programme",
+    "thematic_track": "Thematic track"
+  },
+  "state": {
+    "day": {
+      "before": "Upcoming",
+      "during": "Day in progress",
+      "after": "Day over"
+    },
+    "other": {
+      "before": "Upcoming",
+      "during": "In progress",
+      "after": "Over"
+    }
+  },
+  "ticket": {
+    "label": "Date and access",
+    "zone": "{zone}, {offset}",
+    "opens": "doors open at {time}",
+    "home": "Your time ({zone}): {range}",
+    "now": "Right now, since {time}",
+    "liveSince": "Live since {time}",
+    "notStreamed": "In the room only, not streamed.",
+    "watch": "Watch live",
+    "calendar": "Add to my calendar",
+    "route": "Directions to the venue",
+    "replays": "Watch the recordings",
+    "share": "Share",
+    "copied": "Link copied",
+    "access": "Getting there",
+    "accessShort": "Access",
+    "map": "Getting there",
+    "mapOf": "Map: {place}",
+    "itinerary": "Directions",
+    "copyAddress": "Copy the address",
+    "addressCopied": "Address copied",
+    "with": "With"
+  },
+  "overview": {
+    "day": "The day in {count} parts",
+    "other": "In {count} parts"
+  },
+  "about": {
+    "day": "The day",
+    "other": "Overview"
+  },
+  "part": {
+    "default": "Part {number}",
+    "hours": "{start} to {end}"
+  },
+  "agenda": {
+    "title": {
+      "day": "Running order",
+      "other": "Agenda"
+    },
+    "zone": "All times: {zone} ({offset}). Each activity has its own page: speakers, live stream and recording.",
+    "until": "→ {end}",
+    "empty": {
+      "title": "Running order to come",
+      "description": "The activities of this day will be announced here."
+    }
+  },
+  "highlight": {
+    "mark": "Highlight",
+    "kicker": "Highlight · {start} to {end}",
+    "by": "Hosted by {organization}.",
+    "open": "Activity page"
+  },
+  "documents": {
+    "title": "Documents",
+    "untitled": "Document"
+  },
+  "organizations": {
+    "title": "Organisations",
+    "lead": {
+      "day": "The organisations leading the activities of the day.",
+      "other": "The organisations leading the activities."
+    }
+  },
+  "others": {
+    "title": "Other Francophone highlights at {edition}",
+    "here": "You are here"
+  }
+}

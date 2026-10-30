@@ -1,0 +1,108 @@
+{
+  "back": "Programmation de la {edition}",
+  "loading": "Chargement de la journée",
+  "eve": "Veille de la {edition}",
+  "before": "Avant la {edition}",
+  "offSite": "Hors du pavillon",
+  "audiences": "Public",
+  "error": {
+    "title": "Page indisponible",
+    "description": "Cette journée n'a pas pu être chargée."
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "description": "Elle n'existe pas, ou n'est pas encore publiée.",
+    "back": "Voir la programmation"
+  },
+  "trail": {
+    "before": "Avant la conférence",
+    "special_day": "Journées spéciales",
+    "side_programme": "Programme parallèle",
+    "thematic_track": "Fils thématiques"
+  },
+  "kind": {
+    "special_day": "Journée spéciale",
+    "side_programme": "Programme parallèle",
+    "thematic_track": "Fil thématique"
+  },
+  "state": {
+    "day": {
+      "before": "À venir",
+      "during": "Journée en cours",
+      "after": "Journée terminée"
+    },
+    "other": {
+      "before": "À venir",
+      "during": "En cours",
+      "after": "Terminé"
+    }
+  },
+  "ticket": {
+    "label": "Date et accès",
+    "zone": "{zone}, {offset}",
+    "opens": "accueil dès {time}",
+    "home": "Chez vous ({zone}) : {range}",
+    "now": "En ce moment, depuis {time}",
+    "liveSince": "En direct depuis {time}",
+    "notStreamed": "En salle, sans diffusion.",
+    "watch": "Suivre le direct",
+    "calendar": "Ajouter à mon agenda",
+    "route": "Itinéraire vers le lieu",
+    "replays": "Revoir les enregistrements",
+    "share": "Partager",
+    "copied": "Lien copié",
+    "access": "Plan d'accès",
+    "accessShort": "Accès",
+    "map": "Plan d'accès",
+    "mapOf": "Plan : {place}",
+    "itinerary": "Itinéraire",
+    "copyAddress": "Copier l'adresse",
+    "addressCopied": "Adresse copiée",
+    "with": "Avec"
+  },
+  "overview": {
+    "day": "La journée en {count} temps",
+    "other": "En {count} temps"
+  },
+  "about": {
+    "day": "La journée",
+    "other": "Présentation"
+  },
+  "part": {
+    "default": "Partie {number}",
+    "hours": "{start} à {end}"
+  },
+  "agenda": {
+    "title": {
+      "day": "Déroulé",
+      "other": "Ordre du jour"
+    },
+    "zone": "Toutes les heures : {zone} ({offset}). Chaque activité a sa fiche : intervenants, direct et enregistrement.",
+    "until": "→ {end}",
+    "empty": {
+      "title": "Déroulé à venir",
+      "description": "Les activités de cette journée seront annoncées ici."
+    }
+  },
+  "highlight": {
+    "mark": "Temps fort",
+    "kicker": "Temps fort · {start} à {end}",
+    "by": "Proposé par {organization}.",
+    "open": "Fiche de l'activité"
+  },
+  "documents": {
+    "title": "Documents",
+    "untitled": "Document"
+  },
+  "organizations": {
+    "title": "Organisations",
+    "lead": {
+      "day": "Les organisations porteuses des activités de la journée.",
+      "other": "Les organisations porteuses des activités."
+    }
+  },
+  "others": {
+    "title": "Les autres temps forts francophones de la {edition}",
+    "here": "Vous y êtes"
+  }
+}

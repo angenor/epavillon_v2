@@ -58,6 +58,7 @@ import type {
   InviteMemberResult,
 } from '~/types/organization-workspace'
 import type { RegistrationRow } from '~/types/programme/registration'
+import type { PublicTrackPage } from '~/types/programme/track-page'
 import type { Uuid } from '~/types/shared'
 import { ApiRequestError, ForbiddenError } from '~/utils/api-error'
 import { createApiHttp, creerAppelsEtiquetes, readMocks } from './api/http'
@@ -671,6 +672,13 @@ export function useApi() {
         ),
       tracks: (sessionId: Uuid) =>
         call(`/sessions/${sessionId}/tracks`, (m) => m.sessionTracks.filter((s) => s.session_id === sessionId)),
+
+      /** La page publique d'un fil (journée spéciale, atelier). Nulle : adresse inconnue ou fil non publié. */
+      trackPage: (editionSlug: string, trackSlug: string) =>
+        callOrNull<PublicTrackPage>(`/events/${encodeURIComponent(editionSlug)}/tracks/${encodeURIComponent(trackSlug)}`, (m) => {
+          const page = m.trackPages[trackSlug]
+          return page?.edition.slug === editionSlug ? page : null
+        }),
 
       /** Chevauchements SIGNALÉS, jamais bloqués (A9). */
       conflicts: (eventId: Uuid, scope: AdministeredEvents) => {
