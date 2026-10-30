@@ -138,7 +138,7 @@
     "endHint": "Optional: a closing may only have a start time.",
     "endBeforeStart": "The end must follow the start.",
     "description": "Detail",
-    "descriptionHint": "One line under the label: \"Address by the OIF\".",
+    "descriptionHint": "Under the label, one bullet per line: \"Address by the OIF\".",
     "part": "Part",
     "edit": "Edit {moment}",
     "remove": "Remove {moment}",

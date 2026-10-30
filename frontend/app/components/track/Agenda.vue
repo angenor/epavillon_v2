@@ -49,7 +49,7 @@ function row(entry: PublicTrackEntry, index: number) {
       faded: current === 'past',
       stateLabel,
     }
-    return { key: `m-${index}`, data, highlight: false, points: entry.moment.description ? [tr(entry.moment.description)] : [] }
+    return { key: `m-${index}`, data, highlight: false, points: lines(entry.moment.description ? tr(entry.moment.description) : '') }
   }
   const { session, organizations, is_highlight: highlight } = entry.activity
   const [lead, ...others] = organizations
@@ -68,13 +68,17 @@ function row(entry: PublicTrackEntry, index: number) {
     faded: current === 'cancelled' || current === 'past',
     stateLabel,
   }
-  const summary = session.summary ? tr(session.summary) : ''
   return {
     key: `a-${session.id}`,
     data,
     highlight,
-    points: summary.split('\n').map((line) => line.trim()).filter(Boolean),
+    points: lines(session.summary ? tr(session.summary) : ''),
   }
+}
+
+// Une précision par ligne : « Mot de l'OIF », « Mot du Secrétariat de la CCNUCC ».
+function lines(text: string): string[] {
+  return text.split('\n').map((line) => line.trim()).filter(Boolean)
 }
 
 const groups = computed(() => {

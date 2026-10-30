@@ -128,7 +128,9 @@ function submit(): void {
         v-model="description"
         :label="t('admin.event.track.moments.description')"
         :hint="t('admin.event.track.moments.descriptionHint')"
-        :maxlength="200"
+        multiline
+        :rows="3"
+        :maxlength="400"
       />
 
       <UiSelect

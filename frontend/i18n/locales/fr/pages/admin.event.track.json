@@ -138,7 +138,7 @@
     "endHint": "Facultative : une clôture peut n'avoir qu'une heure de début.",
     "endBeforeStart": "La fin doit suivre le début.",
     "description": "Précision",
-    "descriptionHint": "Une ligne sous le libellé : « Mot de l'OIF ».",
+    "descriptionHint": "Sous le libellé, une puce par ligne : « Mot de l'OIF ».",
     "part": "Partie",
     "edit": "Modifier {moment}",
     "remove": "Retirer {moment}",
