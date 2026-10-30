@@ -35,6 +35,8 @@ interface Props {
   /** Colonne de vignette ; l'atelier, sans images, s'en passe. */
   media?: boolean
   striped?: boolean
+  /** Dans le cadre d'une journée de `/programmations` : l'alternance prend la teinte de la journée, à bords droits. */
+  tone?: 'plain' | 'day'
   highlight?: boolean
   /** Le déroulé d'une journée tait « à venir » : seuls l'en cours et le passé se disent. */
   quietUpcoming?: boolean
@@ -44,6 +46,7 @@ const props = withDefaults(defineProps<Props>(), {
   density: 'list',
   media: true,
   striped: false,
+  tone: 'plain',
   highlight: false,
   quietUpcoming: false,
 })
@@ -57,7 +60,8 @@ const background = computed(() => {
   if (state === 'live') return 'bg-live-surface'
   if (day.value && state === 'ongoing') return props.highlight ? 'bg-live-surface' : 'bg-warning-surface'
   if (props.highlight) return 'bg-(--color-day-surface)'
-  return props.striped ? 'bg-text/3' : ''
+  if (!props.striped) return ''
+  return props.tone === 'day' ? 'bg-(--color-day-surface-strong)' : 'bg-text/3'
 })
 
 const grid = computed(() => {
@@ -76,8 +80,8 @@ const timeColor = computed(() => {
 
 <template>
   <article
-    class="group relative -ml-3 grid gap-x-4 gap-y-1.5 rounded-md px-3 lg:items-center lg:gap-y-0"
-    :class="[grid, background, day ? (isMoment ? 'py-3' : 'py-4') : 'py-4', day ? 'md:items-center md:gap-y-0' : '']"
+    class="group relative grid gap-x-4 gap-y-1.5 px-3 lg:items-center lg:gap-y-0"
+    :class="[grid, background, props.tone === 'day' ? '' : '-ml-3 rounded-md', day ? (isMoment ? 'py-3' : 'py-4') : 'py-4', day ? 'md:items-center md:gap-y-0' : '']"
   >
     <p
       class="row-start-1 self-start"

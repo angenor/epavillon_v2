@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProgrammeData, ProgrammeStripDay, ProgrammeView } from '~/types/event-programme'
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
+import type { PublicScheduleTrack } from '~/types/programme/track-page'
 import type { IsoDate } from '~/types/shared'
 import type { LocationQueryRaw } from 'vue-router'
 
@@ -42,19 +43,20 @@ const selectedEdition = computed(() => editionById.value.get(selectedId.value) ?
 const loaded = reactive(new Map<string, ProgrammeData>([[props.edition.id, props.initial]]))
 const loading = ref(false)
 const failed = ref(false)
-const data = computed<ProgrammeData>(() => loaded.get(selectedId.value) ?? { schedule: [], days: [], rooms: [] })
+const data = computed<ProgrammeData>(() => loaded.get(selectedId.value) ?? { schedule: [], days: [], rooms: [], tracks: [] })
 
 async function load(eventId: string): Promise<void> {
   if (loaded.has(eventId)) return
   loading.value = true
   failed.value = false
   try {
-    const [schedule, days, rooms] = await Promise.all([
+    const [schedule, days, rooms, tracks] = await Promise.all([
       api.sessions.schedule(eventId),
       api.events.days(eventId),
       api.events.rooms(eventId),
+      api.sessions.scheduleTracks(eventId).catch(() => []),
     ])
-    loaded.set(eventId, { schedule, days, rooms })
+    loaded.set(eventId, { schedule, days, rooms, tracks })
   } catch {
     failed.value = true
   } finally {
@@ -91,7 +93,17 @@ const subtitle = computed(() => {
 
 const dayOf = (session: PublicScheduleRow): IsoDate => dayKeyInZone(session.starts_at, timezone.value)
 
-const programmeDays = computed(() => [...new Set(data.value.schedule.map(dayOf))].sort())
+const trackIndex = computed(() => indexTracks(data.value.tracks))
+
+/** Le jour de l'atelier compte, même sans activité : son encadré y vit. */
+const sideDays = computed(() =>
+  trackIndex.value.sides.flatMap((side) => {
+    const day = trackDayOf(side, timezone.value)
+    return day ? [day] : []
+  }),
+)
+
+const programmeDays = computed(() => [...new Set([...data.value.schedule.map(dayOf), ...sideDays.value])].sort())
 
 /** Le jour ouvert : celui de l'URL s'il porte des activités, sinon le premier. */
 const selectedDay = computed<IsoDate>(() => {
@@ -99,10 +111,20 @@ const selectedDay = computed<IsoDate>(() => {
   return day.value && days.includes(day.value) ? day.value : (days[0] ?? dayKeyInZone(selectedEdition.value.starts_at, timezone.value))
 })
 
+const searching = computed(() => foldText(search.value.trim()) !== '')
+
+/** Le nom d'une journée retrouve toutes ses activités : chercher « finance durable » ouvre son cadre entier. */
 function matches(session: PublicScheduleRow): boolean {
   const needle = foldText(search.value.trim())
   if (!needle) return true
-  return foldText([tr(session.title), session.organization_name ?? '', session.organization_acronym ?? ''].join(' ')).includes(needle)
+  const tracks = session.tracks.map((track) => tr(track.title))
+  return foldText([tr(session.title), session.organization_name ?? '', session.organization_acronym ?? '', ...tracks].join(' ')).includes(needle)
+}
+
+function matchesTrack(track: PublicScheduleTrack): boolean {
+  const needle = foldText(search.value.trim())
+  if (!needle) return true
+  return foldText([tr(track.title), track.venue_name ? tr(track.venue_name) : ''].join(' ')).includes(needle)
 }
 
 // L'horloge ne vit que dans le navigateur : l'heure du rendu serveur serait périmée à l'hydratation.
@@ -150,12 +172,17 @@ watch(timezone, tick)
 
 const stripDays = computed<ProgrammeStripDay[]>(() =>
   programmeDays.value.map((date, index) => {
-    const kept = data.value.schedule.filter((session) => dayOf(session) === date && matches(session))
+    const tracks = trackIndex.value
+    const own = data.value.schedule.filter((session) => dayOf(session) === date)
+    const kept = own.filter((session) => matches(session) && !sideOf(session, tracks))
     const previous = programmeDays.value[index - 1]
+    const special = own.map((session) => specialOf(session, tracks)).find((track) => track !== null) ?? null
     return {
       date,
       count: kept.length,
       colors: kept.map((session) => session.themes[0]?.color ?? null),
+      dayColor: special?.color_hex ?? null,
+      isSide: sideDays.value.includes(date),
       isToday: date === today.value,
       gapBefore: previous ? daysBetween(previous, date) - 1 : 0,
     }
@@ -236,7 +263,7 @@ const views = computed(() => [
           </h2>
           <p class="mt-1.5 text-base text-text-muted">{{ subtitle }}</p>
         </div>
-        <div v-if="isPublished && data.schedule.length" class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
+        <div v-if="isPublished && (data.schedule.length || sideDays.length)" class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
           <UiSearchInput
             v-model="search"
             class="min-w-0 sm:w-[300px]"
@@ -287,7 +314,7 @@ const views = computed(() => [
       />
 
       <UiEmptyState
-        v-else-if="!data.schedule.length"
+        v-else-if="!data.schedule.length && !sideDays.length"
         class="mt-8"
         icon="calendar"
         :title="t('programme.empty.title')"
@@ -299,6 +326,8 @@ const views = computed(() => [
         :days="weekDays"
         :sessions="weekSessions"
         :matches="matches"
+        :tracks="trackIndex"
+        :matches-track="matchesTrack"
         :timezone="timezone"
         :selected="selectedDay"
         :today="today"
@@ -336,6 +365,10 @@ const views = computed(() => [
           :days="programmeDays"
           :sessions="sortedSchedule"
           :matches="matches"
+          :tracks="trackIndex"
+          :matches-track="matchesTrack"
+          :searching="searching"
+          :edition-start="dayKeyInZone(selectedEdition.starts_at, timezone)"
           :timezone="timezone"
           :today="today"
           :hide-past="hasPast && pastHidden"

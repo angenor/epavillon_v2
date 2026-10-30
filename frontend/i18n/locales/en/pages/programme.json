@@ -86,5 +86,19 @@
     "label": "Featured: live now",
     "watch": "Watch live",
     "open": "View activity"
+  },
+  "tracks": {
+    "kicker": "Special day",
+    "kickerHours": "Special day · {start} to {end}",
+    "open": "The day's programme",
+    "eve": "the day before",
+    "before": "before the opening",
+    "side": {
+      "kicker": "Preparatory workshop",
+      "kickerVenue": "Preparatory workshop · {venue}",
+      "hours": "{start} to {end}",
+      "audience": "mainly for negotiators",
+      "open": "See the workshop"
+    }
   }
 }

@@ -17,6 +17,7 @@ import type { AttachedImage } from '~/types/media'
 import type { PublicScheduleRow } from '~/types/views'
 import type { PublicSessionSpeaker, SessionOrganization } from '~/types/programme/session'
 import type {
+  PublicScheduleTrack,
   PublicTrackEntry,
   PublicTrackPage,
   PublicTrackPart,
@@ -208,7 +209,7 @@ const intervenants = (x: Activite): PublicSessionSpeaker[] =>
     avatar: null,
   }))
 
-interface Moment { n: number; jour: number; debut: string; fin: string | null; libelle: string; partie: string | null }
+interface Moment { n: number; jour: number; debut: string; fin: string | null; libelle: string; partie: string | null; points?: string[] }
 
 interface Source {
   id: string
@@ -359,11 +360,6 @@ const finance: Source = {
   ],
   activites: [
     {
-      n: 11, jour: 13, debut: '09:00', fin: '09:15', titre: 'Ouverture de la journée',
-      points: ["Mot d'ouverture, OIF", "Lancement officiel de l'appel à manifestation d'intérêt des États membres de l'OIF pour l'accompagnement à l'accès à la finance durable", 'Présentation de la plateforme francophone de la finance durable'],
-      orgs: [O.oif], partie: 'p1',
-    },
-    {
       n: 12, jour: 13, debut: '09:15', fin: '10:00', titre: 'Panel de partenaires et d\'experts : solutions et synergies par les partenaires en Francophonie',
       points: ["Présentation de l'étude OIF-OCDE sur l'accès à la finance climat et biodiversité", 'Discussions'],
       orgs: [O.oif, O.ocde, O.fondsAdaptation, O.fondsVert, O.cif], partie: 'p1',
@@ -377,6 +373,10 @@ const finance: Source = {
   ],
   moments: [
     { n: 11, jour: 13, debut: '08:00', fin: '08:45', libelle: 'Accueil et installation', partie: 'p1' },
+    {
+      n: 13, jour: 13, debut: '09:00', fin: '09:15', libelle: 'Ouverture de la journée', partie: 'p1',
+      points: ["Mot d'ouverture, OIF", "Lancement officiel de l'appel à manifestation d'intérêt des États membres de l'OIF pour l'accompagnement à l'accès à la finance durable", 'Présentation de la plateforme francophone de la finance durable'],
+    },
     { n: 12, jour: 13, debut: '18:00', fin: null, libelle: 'Clôture', partie: 'p3' },
   ],
 }
@@ -411,18 +411,18 @@ const jeunesse: Source = {
     { cle: 'agir', label: "S'engager", title: null, summary: 'Compétences vertes et leadership' },
   ],
   activites: [
-    { n: 21, jour: 14, debut: '09:00', fin: '09:20', titre: 'Ouverture officielle', orgs: [O.oif, O.quebec], partie: 'inspirer' },
     {
       n: 22, jour: 14, debut: '09:20', fin: '10:20', titre: '« Les 10 minutes qui inspirent » : pitchs des organisations',
       orgs: [O.greenOpenLab, O.jveRca, O.youthCenter, O.airEtMoi, O.youthVoices, O.dakiFarm], partie: 'inspirer',
     },
     { n: 23, jour: 14, debut: '10:20', fin: '11:20', titre: "Hackathon francophone sur l'IA appliquée au climat, à la biodiversité et à la finance durable", orgs: [O.greenOpenLab], partie: 'creer', tempsFort: true },
-    { n: 24, jour: 14, debut: '11:20', fin: '12:00', titre: 'Jeu concours « Info ou Intox Climat » : qui sera le Champion ou la Championne CdP 31 / OIF ?', partie: 'creer' },
-    { n: 25, jour: 14, debut: '12:00', fin: '13:00', titre: 'Les ClimArtistes en scène', points: ['Expression artistique'], partie: 'creer' },
     { n: 26, jour: 14, debut: '13:00', fin: '14:00', titre: 'Des compétences vertes au leadership des jeunes et des femmes pour une transition climatique juste et inclusive', orgs: [O.cegepGaspesie, O.genreClimatSn], partie: 'agir' },
   ],
   moments: [
     { n: 21, jour: 14, debut: '08:00', fin: '09:00', libelle: 'Arrivée des jeunes et des participant-e-s, animation', partie: 'inspirer' },
+    { n: 22, jour: 14, debut: '09:00', fin: '09:20', libelle: 'Ouverture officielle', partie: 'inspirer', points: ['OIF', 'Gouvernement du Québec'] },
+    { n: 23, jour: 14, debut: '11:20', fin: '12:00', libelle: 'Jeu concours « Info ou Intox Climat » : qui sera le Champion ou la Championne CdP 31 / OIF ?', partie: 'creer' },
+    { n: 24, jour: 14, debut: '12:00', fin: '13:00', libelle: 'Les ClimArtistes en scène', partie: 'creer', points: ['Expression artistique'] },
   ],
 }
 
@@ -440,7 +440,7 @@ const deroule = (s: Source): PublicTrackEntry[] => {
       starts_at: a(m.jour, m.debut),
       ends_at: m.fin ? a(m.jour, m.fin) : null,
       part_id: m.partie ? partId(s, m.partie) : null,
-      moment: { id: TRACK_PAGE_MOMENT(m.n), label: fr(m.libelle), description: null },
+      moment: { id: TRACK_PAGE_MOMENT(m.n), label: fr(m.libelle), description: m.points ? fr(m.points.join('\n')) : null },
     })),
     ...s.activites.map((x): PublicTrackEntry => ({
       kind: 'activity',
@@ -464,7 +464,7 @@ function partId(s: Source, cle: string): string {
   return TRACK_PAGE_PART(SOURCES.indexOf(s) * 10 + s.parties.findIndex((p) => p.cle === cle) + 1)
 }
 
-const resume = (s: Source, courant: Source): PublicTrackSummary => {
+const resume = (s: Source, courant: Source | null): PublicTrackSummary => {
   const e = deroule(s)
   return {
     slug: s.slug,
@@ -591,3 +591,27 @@ export const trackPageSettings: Record<string, TrackPageSettings> = Object.fromE
 
 /** Les vingt-quatre organisations du jeu, pour un sélecteur de partenaire. */
 export const trackPageOrganizations = Object.values(O)
+
+// --- La programmation de l'édition ------------------------------------------
+
+/** Activités d'aucun fil : elles restent des lignes ordinaires, sous le cadre d'une journée. */
+const HORS_FIL: Activite[] = [
+  { n: 31, jour: 10, debut: '10:00', fin: '11:00', titre: "Lancement du rapport francophone sur l'adaptation des villes côtières", orgs: [O.airf], partie: null },
+  { n: 32, jour: 11, debut: '14:00', fin: '15:00', titre: 'Guide Négo : prise en main pour les délégations francophones', orgs: [O.oif], partie: null },
+  { n: 33, jour: 13, debut: '18:30', fin: '19:30', titre: 'Dialogue des bailleurs et des collectivités sur la finance locale', orgs: [O.sakete], partie: null },
+  { n: 34, jour: 14, debut: '15:00', fin: '16:00', titre: "Femmes et transition énergétique en Afrique de l'Ouest", orgs: [O.genreClimatSn], partie: null },
+]
+
+/** `GET /schedule?event_id=` de la CdP31 d'Antalya : les activités des trois fils et celles d'aucun fil. */
+export const trackPagesSchedule: PublicScheduleRow[] = [
+  ...Object.values(trackPages).flatMap((p) => p.agenda.flatMap((e) => (e.kind === 'activity' ? [e.activity.session] : []))),
+  ...HORS_FIL.map((x) => ({ ...ligne(x, { slug: '', title: fr(''), color: null, kind: 'special_day' }), tracks: [] })),
+].sort((g, d) => g.starts_at.localeCompare(d.starts_at))
+
+/** `GET /schedule/tracks?event_id=` de la CdP31 d'Antalya. */
+export const trackPagesScheduleTracks: PublicScheduleTrack[] = SOURCES.map((s) => ({
+  ...resume(s, null),
+  moments: s.moments
+    .map((m) => ({ starts_at: a(m.jour, m.debut), ends_at: m.fin ? a(m.jour, m.fin) : null, label: fr(m.libelle) }))
+    .sort((g, d) => g.starts_at.localeCompare(d.starts_at)),
+}))

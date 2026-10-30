@@ -17,6 +17,7 @@ import type { EventDay } from './event/edition'
 import type { Room } from './event/venue'
 import type { EventId, IsoDate } from './shared'
 import type { PublicScheduleRow } from './views'
+import type { PublicScheduleTrack } from './programme/track-page'
 
 /** Ce qu'il faut charger pour afficher le programme d'une édition. */
 export interface ProgrammeData {
@@ -26,6 +27,12 @@ export interface ProgrammeData {
   days: EventDay[]
   /** `event.rooms` de l'édition, pour le filtre par salle. */
   rooms: Room[]
+  /**
+   * Les fils publiés et leurs moments (`GET /schedule/tracks`) : un cadre par
+   * journée spéciale, un encadré pour l'atelier. Vide si leur lecture échoue :
+   * le programme reste lisible, en lignes ordinaires.
+   */
+  tracks: PublicScheduleTrack[]
 }
 
 export type ProgrammeView = 'week' | 'list'
@@ -37,6 +44,10 @@ export interface ProgrammeStripDay {
   count: number
   /** Couleur de la première thématique de chaque activité retenue, `null` sans couleur en base. */
   colors: (string | null)[]
+  /** Couleur d'une journée spéciale publiée ce jour-là : ses points la prennent. */
+  dayColor: string | null
+  /** Le jour de l'atelier préparatoire : un point bleu nuit. */
+  isSide: boolean
   isToday: boolean
   /** Jours sans programme entre ce jour et le précédent. */
   gapBefore: number

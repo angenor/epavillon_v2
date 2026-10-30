@@ -43,8 +43,12 @@ const tiles = computed(() =>
       past: day.date < today.value,
       weekday: format(day.date, { weekday: 'short' }),
       number: format(day.date, { day: 'numeric' }),
-      dots: Math.min(day.count, MAX_DOTS),
-      label: `${dayLong(at(day.date), props.timezone)}, ${t('programme.days.count', { count: day.count }, day.count)}`,
+      // L'atelier a son point bleu nuit, même sans activité ; une journée spéciale colore les siens.
+      dots: day.isSide ? Math.max(1, Math.min(day.count, MAX_DOTS)) : Math.min(day.count, MAX_DOTS),
+      dotColor: day.isSide ? 'var(--color-heading)' : day.dayColor,
+      label: `${dayLong(at(day.date), props.timezone)}, ${
+        day.isSide ? t('programme.tracks.side.kicker') : t('programme.days.count', { count: day.count }, day.count)
+      }`,
     }
   }),
 )
@@ -92,7 +96,13 @@ watch(() => props.selected, () => nextTick(reveal))
           <span class="text-[11px] font-normal tracking-[0.06em] uppercase opacity-80">{{ tile.weekday }}</span>
           <span class="text-[20px] leading-[1.1] tabular-nums">{{ tile.number }}</span>
           <span class="mt-0.75 flex h-1 gap-0.5" aria-hidden="true">
-            <span v-for="dot in tile.dots" :key="dot" class="size-1 rounded-full bg-current opacity-70" />
+            <span
+              v-for="dot in tile.dots"
+              :key="dot"
+              class="rounded-full"
+              :class="tile.dotColor && !tile.selected ? 'size-1.25 -mt-px' : 'size-1 bg-current opacity-70'"
+              :style="tile.dotColor && !tile.selected ? { backgroundColor: tile.dotColor } : undefined"
+            />
           </span>
         </button>
       </template>

@@ -34,7 +34,7 @@ export type Intent = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
  * les jetons `--color-glass-*` ; elle existe ici pour qu'aucun écran n'écrive
  * son propre bouton translucide.
  */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link' | 'glass' | 'inverse' | 'institutional'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link' | 'glass' | 'inverse' | 'institutional' | 'on-inverse'
 
 /** Trois tailles suffisent : `sm` est la version compacte des barres d'outils. */
 export type Size = 'sm' | 'md' | 'lg'

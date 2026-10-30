@@ -2,6 +2,8 @@
 import type { PublicScheduleRow } from '~/types/views'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
+import type { PublicScheduleTrack } from '~/types/programme/track-page'
+import type { ProgrammeTrackIndex } from '~/utils/programme-tracks'
 
 /**
  * La semaine en colonnes : une par journée, les activités retenues par la
@@ -10,12 +12,18 @@ import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
  * étroit pour toutes les colonnes, le tableau défile à l'horizontale ; sous `lg`,
  * les colonnes ont une largeur relative (44 %, puis 30 %) pour que la suivante
  * dépasse toujours un peu du bord et invite à faire défiler.
+ *
+ * Une activité d'une journée spéciale publiée garde sa case, bordée d'un
+ * liseré à la couleur de la journée, et mène à sa place dans le déroulé de la
+ * journée. Le jour de l'atelier porte son encadré bleu nuit, sans déroulé.
  */
 
 interface Props {
   days: IsoDate[]
   sessions: PublicScheduleRow[]
   matches: (session: PublicScheduleRow) => boolean
+  tracks: ProgrammeTrackIndex
+  matchesTrack: (track: PublicScheduleTrack) => boolean
   timezone: TimeZoneName
   selected: IsoDate
   today: IsoDate | null
@@ -37,6 +45,10 @@ const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time, intlLocale } = useDateTime()
 const { state, link, duration, titleParts } = useProgrammeSession()
+const localePath = useLocalePath()
+
+const trackTo = (slug: string, hash?: string) =>
+  localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: slug }, hash })
 
 const NOTE_TONES: Partial<Record<ProgrammeSessionState, string>> = {
   ongoing: 'text-warning',
@@ -74,9 +86,12 @@ const heading = computed(() => {
 function card(session: PublicScheduleRow) {
   const current = state(session)
   const { lead, rest } = titleParts(tr(session.title))
+  const special = specialOf(session, props.tracks)
   return {
     id: session.id,
-    to: link(props.editionSlug, session),
+    to: special ? trackTo(special.slug, `#${trackActivityAnchor(session.slug)}`) : link(props.editionSlug, session),
+    dayColor: special?.color_hex ?? null,
+    dayTitle: special ? tr(special.title) : '',
     current,
     faded: current === 'cancelled' || (current === 'past' && !props.editionPast),
     cover: session.cover,
@@ -96,8 +111,11 @@ const columns = computed(() =>
     const own = props.sessions
       .filter((session) => dayKeyInZone(session.starts_at, props.timezone) === day)
       .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at))
-    const kept = own.filter(props.matches)
-    const special = own.flatMap((session) => session.tracks).find((track) => track.kind === 'special_day')
+    const kept = own.filter((session) => props.matches(session) && !sideOf(session, props.tracks))
+    const sides = props.tracks.sides
+      .filter((side) => trackDayOf(side, props.timezone) === day)
+      .filter((side) => props.matchesTrack(side) || own.some((session) => props.matches(session) && sideOf(session, props.tracks)?.slug === side.slug))
+    const special = own.map((session) => specialOf(session, props.tracks)).find((track) => track !== null) ?? null
     return {
       date: day,
       number: format(day, { day: 'numeric' }),
@@ -105,8 +123,18 @@ const columns = computed(() =>
       label: format(day, { weekday: 'long', day: 'numeric', month: 'long' }),
       isToday: day === props.today,
       isPast: !props.editionPast && props.today !== null && day < props.today,
-      count: t('programme.days.count', { count: kept.length }, kept.length),
-      special: special ? tr(special.title) : '',
+      count: !kept.length && sides.length ? '' : t('programme.days.count', { count: kept.length }, kept.length),
+      special: special ? tr(special.title) : sides[0] ? t('programme.tracks.side.kicker') : '',
+      specialStyle: special ? trackDayStyle(special.color_hex) : undefined,
+      sides: sides.map((side) => ({
+        slug: side.slug,
+        title: tr(side.title),
+        to: trackTo(side.slug),
+        hours:
+          side.starts_at && side.ends_at
+            ? t('programme.tracks.side.hours', { start: time(side.starts_at, props.timezone), end: time(side.ends_at, props.timezone) })
+            : '',
+      })),
       cards: kept.map(card),
     }
   }),
@@ -223,8 +251,9 @@ async function next(): Promise<void> {
               </span>
               <span
                 v-if="!stuck || hasSpecial"
-                class="text-[11px] leading-4 font-bold tracking-caps text-accent uppercase"
-                :class="stuck ? 'mt-1 line-clamp-1 h-4' : 'mt-2 line-clamp-2 h-8'"
+                class="text-[11px] leading-4 font-bold tracking-caps uppercase"
+                :class="[column.specialStyle ? 'text-(--color-day)' : 'text-accent', stuck ? 'mt-1 line-clamp-1 h-4' : 'mt-2 line-clamp-2 h-8']"
+                :style="column.specialStyle"
               >
                 {{ column.special }}
               </span>
@@ -243,8 +272,25 @@ async function next(): Promise<void> {
           :class="tint(column, index)"
           :aria-label="column.label"
         >
+        <div v-for="side in column.sides" :key="side.slug" class="group relative my-3.5 rounded-lg bg-surface-inverse p-3.5 text-text-on-inverse">
+          <p class="text-[11px] font-bold tracking-caps text-text-on-inverse/75 uppercase">{{ t('programme.tracks.side.kicker') }}</p>
+          <NuxtLink
+            :to="side.to"
+            class="mt-1 line-clamp-4 block text-[15px] leading-[1.3] font-bold text-pretty text-text-on-inverse no-underline after:absolute after:inset-0 group-hover:underline"
+          >
+            {{ side.title }}
+          </NuxtLink>
+          <p v-if="side.hours" class="mt-1.5 text-xs text-text-on-inverse/80 tabular-nums">{{ side.hours }}</p>
+        </div>
         <ol v-if="column.cards.length">
-          <li v-for="item in column.cards" :key="item.id" class="group relative border-b border-border-subtle py-3.5">
+          <li
+            v-for="item in column.cards"
+            :key="item.id"
+            class="group relative border-b border-border-subtle py-3.5"
+            :class="item.dayColor ? 'border-l-4 pl-3' : ''"
+            :style="item.dayColor ? { borderLeftColor: item.dayColor } : undefined"
+            :title="item.dayTitle || undefined"
+          >
             <div :class="{ 'opacity-60': item.faded }">
               <div
                 class="relative aspect-video overflow-hidden rounded-[6px] bg-surface-inverse"
@@ -302,7 +348,7 @@ async function next(): Promise<void> {
             </div>
           </li>
         </ol>
-        <p v-else class="py-3.5 text-[13px] text-text-muted">{{ t('programme.week.emptyDay') }}</p>
+        <p v-else-if="!column.sides.length" class="py-3.5 text-[13px] text-text-muted">{{ t('programme.week.emptyDay') }}</p>
         </section>
       </div>
     </div>

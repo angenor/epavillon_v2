@@ -58,7 +58,7 @@ import type {
   InviteMemberResult,
 } from '~/types/organization-workspace'
 import type { RegistrationRow } from '~/types/programme/registration'
-import type { PublicTrackPage } from '~/types/programme/track-page'
+import type { PublicScheduleTrack, PublicTrackPage } from '~/types/programme/track-page'
 import type { Uuid } from '~/types/shared'
 import { ApiRequestError, ForbiddenError } from '~/utils/api-error'
 import { createApiHttp, creerAppelsEtiquetes, readMocks } from './api/http'
@@ -651,9 +651,12 @@ export function useApi() {
     sessions: {
       /** Programmation PUBLIQUE : séances publiées seulement. */
       schedule: (eventId: Uuid) =>
-        call('/schedule', (m) => m.publicSchedule().filter((row) => row.event_id === eventId), {
+        call('/schedule', (m) => m.publicScheduleOf(eventId), {
           event_id: eventId,
         }),
+      /** Les fils publiés de l'édition et leurs moments : cadres de journée et atelier de `/programmations`. */
+      scheduleTracks: (eventId: Uuid) =>
+        call<PublicScheduleTrack[]>('/schedule/tracks', (m) => m.scheduleTracks(eventId), { event_id: eventId }),
       /** Vue du planificateur (A9) : publiées ou non, filtrée par périmètre. */
       planner: (eventId: Uuid, scope: AdministeredEvents) => {
         assertEventInScope(eventId, scope)

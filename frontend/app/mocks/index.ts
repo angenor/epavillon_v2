@@ -241,7 +241,7 @@ export {
 export { attachableRoles, attachableRolesOf } from './media-roles'
 export { registrationForms, registrationFormFields } from './registration-form'
 export { registrations, registrationRowsOf } from './registrations'
-export { publicSchedule, proposalDashboard } from './views'
+export { publicSchedule, publicScheduleOf, scheduleTracks, proposalDashboard } from './views'
 export { detectConflicts, publicationReadiness } from './conflicts'
 export { incidents } from './incidents'
 export {

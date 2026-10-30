@@ -70,13 +70,14 @@ const { data, status, error, refresh } = await useAsyncData('programme-page', as
 
   if (!edition) return null
 
-  const [schedule, days, rooms] = await Promise.all([
+  const [schedule, days, rooms, tracks] = await Promise.all([
     api.sessions.schedule(edition.id),
     api.events.days(edition.id),
     api.events.rooms(edition.id),
+    api.sessions.scheduleTracks(edition.id).catch(() => []),
   ])
 
-  return { editions, edition, programme: { schedule, days, rooms } satisfies ProgrammeData }
+  return { editions, edition, programme: { schedule, days, rooms, tracks } satisfies ProgrammeData }
 }, { lazy: true })
 
 const current = ref<PublicEditionRow | null>(null)

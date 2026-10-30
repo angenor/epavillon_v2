@@ -4,10 +4,13 @@ import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
 import type { ProgrammeRowData } from '~/components/event/ProgrammeRow.vue'
 
 /**
- * Le déroulé d'une journée spéciale : une partie = un grand numéro à la couleur
- * de la journée, puis les lignes de la liste éditoriale (`EventProgrammeRow`).
- * Activités et moments sans activité y sont mêlés, dans l'ordre de l'heure ; ce
- * qui n'appartient à aucune partie vient en tête.
+ * Le déroulé d'un fil (journée spéciale, atelier) : une partie = un grand
+ * numéro à la couleur de la journée, puis les lignes de la liste éditoriale
+ * (`EventProgrammeRow`). Activités et moments sans activité y sont mêlés, dans
+ * l'ordre de l'heure ; ce qui n'appartient à aucune partie vient en tête.
+ *
+ * Chaque activité porte une ancre (`trackActivityAnchor`) : `/programmations`
+ * y mène, et l'activité visée s'encadre quelques secondes à l'arrivée.
  */
 
 interface Props {
@@ -21,6 +24,7 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
 const { link, duration, titleParts } = useProgrammeSession()
+const route = useRoute()
 
 const timezone = computed(() => props.page.edition.timezone)
 
@@ -49,7 +53,7 @@ function row(entry: PublicTrackEntry, index: number) {
       faded: current === 'past',
       stateLabel,
     }
-    return { key: `m-${index}`, data, highlight: false, points: lines(entry.moment.description ? tr(entry.moment.description) : '') }
+    return { key: `m-${index}`, anchor: undefined, data, highlight: false, points: lines(entry.moment.description ? tr(entry.moment.description) : '') }
   }
   const { session, organizations, is_highlight: highlight } = entry.activity
   const [lead, ...others] = organizations
@@ -70,6 +74,7 @@ function row(entry: PublicTrackEntry, index: number) {
   }
   return {
     key: `a-${session.id}`,
+    anchor: trackActivityAnchor(session.slug),
     data,
     highlight,
     points: lines(session.summary ? tr(session.summary) : ''),
@@ -99,12 +104,40 @@ const groups = computed(() => {
   }))
   return { loose, parts: parts.filter((part) => part.rows.length) }
 })
+
+const FLASH_MS = 3500
+const flashed = ref<string | null>(null)
+let flashTimer: ReturnType<typeof setTimeout> | undefined
+
+/** Arrivée par une ancre d'activité : on y descend, puis l'encadré s'efface. */
+async function reach(hash: string): Promise<void> {
+  const id = decodeURIComponent(hash.replace(/^#/, ''))
+  if (!id.startsWith(trackActivityAnchor(''))) return
+  await nextTick()
+  const element = document.getElementById(id)
+  if (!element) return
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  element.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' })
+  flashed.value = id
+  clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => (flashed.value = null), FLASH_MS)
+}
+
+onMounted(() => reach(route.hash))
+watch(() => route.hash, reach)
+onBeforeUnmount(() => clearTimeout(flashTimer))
 </script>
 
 <template>
   <div>
     <ol v-if="groups.loose.length" class="mt-8">
-      <li v-for="(item, index) in groups.loose" :key="item.key" :class="{ 'border-t border-separator': index > 0 && !item.highlight }">
+      <li
+        v-for="(item, index) in groups.loose"
+        :id="item.anchor"
+        :key="item.key"
+        class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
+        :class="[{ 'border-t border-separator': index > 0 && !item.highlight }, flashed && flashed === item.anchor ? 'rounded-md outline-accent' : 'outline-transparent']"
+      >
         <EventProgrammeRow :entry="item.data" density="day" :media="media" :highlight="item.highlight" quiet-upcoming>
           <template v-if="item.highlight" #kicker>
             <TrackHighlightMark />
@@ -137,8 +170,13 @@ const groups = computed(() => {
       <ol :class="part.title ? '' : 'mt-4'">
         <li
           v-for="(item, index) in part.rows"
+          :id="item.anchor"
           :key="item.key"
-          :class="{ 'border-t border-separator': index > 0 && !item.highlight && !part.rows[index - 1]?.highlight }"
+          class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
+          :class="[
+            { 'border-t border-separator': index > 0 && !item.highlight && !part.rows[index - 1]?.highlight },
+            flashed && flashed === item.anchor ? 'rounded-md outline-accent' : 'outline-transparent',
+          ]"
         >
           <EventProgrammeRow :entry="item.data" density="day" :media="media" :highlight="item.highlight" quiet-upcoming>
             <template v-if="item.highlight" #kicker>

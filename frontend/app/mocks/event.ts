@@ -35,7 +35,7 @@
 import type { EventDay, EventEdition } from '~/types/event/edition'
 import type { EventSeries } from '~/types/event/series'
 import type { IsoDate } from '~/types/shared'
-import { COUNTRY, EVENT, EVENT_DAY, EVENT_DAY_COP29, EVENT_DAY_COP30, PERSON, SERIES } from './ids'
+import { COUNTRY, EVENT, EVENT_DAY, EVENT_DAY_COP29, EVENT_DAY_COP30, PERSON, SERIES, TRACK_PAGE } from './ids'
 import { countries } from './reference'
 
 // ---------------------------------------------------------------------------
@@ -130,6 +130,38 @@ const editionsSansPays = [
     created_by: PERSON.bakayoko,
     created_at: '2026-02-10T10:00:00Z',
     updated_at: '2026-08-03T14:00:00Z',
+  },
+
+  // La CdP31 d'Antalya, celle de la production : ses trois fils publiés
+  // (`mocks/track-pages.ts`) donnent à `/programmations` ses cadres de journée
+  // et l'encadré de l'atelier, et mènent à de vraies pages de journée.
+  {
+    id: TRACK_PAGE.edition,
+    series_id: SERIES.copClimate,
+    edition_label: 'CdP31',
+    edition_year: 2026,
+    title: { fr: 'CdP31, Antalya', en: 'COP31, Antalya' },
+    acronym: 'CdP31',
+    slug: 'cop31-antalya',
+    description: {
+      fr: "Trente et unième Conférence des Parties à la CCNUCC, à Antalya. Le pavillon de la Francophonie y accueille deux journées spéciales ; l'atelier préparatoire des négociateurs se tient la veille.",
+    },
+    status: 'announced',
+    participation_mode: 'hybrid',
+    timezone: 'Europe/Istanbul',
+    starts_at: '2026-11-09T09:00:00+03:00',
+    ends_at: '2026-11-20T18:00:00+03:00',
+    country_id: null,
+    city: 'Antalya',
+    address: null,
+    latitude: null,
+    longitude: null,
+    has_pavilion: true,
+    programme_published_at: '2026-10-20T10:00:00Z',
+    highlights: null,
+    created_by: PERSON.bakayoko,
+    created_at: '2026-06-01T10:00:00Z',
+    updated_at: '2026-10-20T10:00:00Z',
   },
 
   // -------------------------------------------------------------------------

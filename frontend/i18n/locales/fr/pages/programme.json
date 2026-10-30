@@ -86,5 +86,19 @@
     "label": "À la une : en direct",
     "watch": "Suivre le direct",
     "open": "Voir l'activité"
+  },
+  "tracks": {
+    "kicker": "Journée spéciale",
+    "kickerHours": "Journée spéciale · {start} à {end}",
+    "open": "Programme de la journée",
+    "eve": "la veille",
+    "before": "avant l'ouverture",
+    "side": {
+      "kicker": "Atelier préparatoire",
+      "kickerVenue": "Atelier préparatoire · {venue}",
+      "hours": "{start} à {end}",
+      "audience": "réservé principalement aux négociateurs et négociatrices",
+      "open": "Voir l'atelier"
+    }
   }
 }

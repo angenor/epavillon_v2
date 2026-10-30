@@ -164,6 +164,13 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'border-transparent bg-surface-inverse text-text-on-inverse ' +
     'hover:bg-surface-inverse-raised active:bg-surface-inverse-raised',
 
+  // L'action principale d'un encadré institutionnel : aplat blanc, texte bleu nuit
+  // (l'atelier préparatoire dans `/programmations`).
+  'on-inverse':
+    'border-transparent bg-surface-inverse-selected text-text-on-inverse-selected ' +
+    'hover:bg-[color-mix(in_srgb,var(--color-surface-inverse-selected)_86%,var(--color-surface-inverse))] ' +
+    'active:bg-[color-mix(in_srgb,var(--color-surface-inverse-selected)_78%,var(--color-surface-inverse))]',
+
   // Action qui se fond dans une phrase. Souligné au survol, comme un lien.
   link:
     'border-transparent bg-transparent px-0! text-text-link underline-offset-4 ' +

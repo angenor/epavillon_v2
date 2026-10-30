@@ -45,6 +45,9 @@ import { allSessions, sessionTracks } from './sessions'
 import { attachedImage } from './covers'
 import { registrations } from './registrations'
 import { reviewAssignments, reviews } from './reviews'
+import { trackPagesSchedule, trackPagesScheduleTracks } from './track-pages'
+import { TRACK_PAGE } from './ids'
+import type { PublicScheduleTrack } from '~/types/programme/track-page'
 
 const organizationById = new Map(organizations.map((o) => [o.id, o]))
 const countryById = new Map(countries.map((c) => [c.id, c]))
@@ -160,6 +163,40 @@ export function publicSchedule(): PublicScheduleRow[] {
       }
     })
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+}
+
+/** `GET /schedule?event_id=` : la CdP31 d'Antalya a son jeu à part (`track-pages.ts`). */
+export function publicScheduleOf(eventId: string): PublicScheduleRow[] {
+  return eventId === TRACK_PAGE.edition ? trackPagesSchedule : publicSchedule().filter((row) => row.event_id === eventId)
+}
+
+/**
+ * `GET /schedule/tracks?event_id=` : les fils publiés et leurs moments. Hors
+ * Antalya, les fils de `tracks.ts` n'ont pas de moment : leurs heures sont
+ * celles de leurs activités publiées.
+ */
+export function scheduleTracks(eventId: string): PublicScheduleTrack[] {
+  if (eventId === TRACK_PAGE.edition) return trackPagesScheduleTracks
+  const rows = publicSchedule().filter((row) => row.event_id === eventId)
+  return programmeTracks
+    .filter((track) => track.event_id === eventId && track.published_at !== null)
+    .map((track) => {
+      const own = rows.filter((row) => row.tracks.some((badge) => badge.slug === track.slug))
+      return {
+        slug: track.slug,
+        kind: track.kind,
+        title: track.title,
+        color_hex: track.color_hex,
+        starts_on: track.starts_on,
+        ends_on: track.ends_on,
+        starts_at: own.map((row) => row.starts_at).sort()[0] ?? null,
+        ends_at: own.map((row) => row.ends_at).sort().at(-1) ?? null,
+        venue_name: null,
+        is_off_site: false,
+        is_current: false,
+        moments: [],
+      }
+    })
 }
 
 /**
