@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.meeting_participants\n                 (meeting_id, display_name, email, sync_status, last_error, external_registrant_id,\n                  last_attempt_at)\n             VALUES ($1, $2, lower($2) || '@exemple.org', $3::text::live.sync_status,\n                     NULLIF($4, ''), CASE WHEN $3 = 'synced' THEN 'reg-' || $2 END, now())",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "af7bf49aef71dc90c0e6ea88687f148aec4cfbf0ca8f7de0a830ef0567e4ce6c"
+}

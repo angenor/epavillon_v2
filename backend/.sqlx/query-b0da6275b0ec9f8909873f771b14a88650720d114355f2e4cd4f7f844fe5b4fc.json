@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.meetings (session_id, event_id, external_id, status, sync_status)\n         SELECT id, event_id, $2, 'scheduled', 'synced' FROM programme.sessions WHERE id = $1\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b0da6275b0ec9f8909873f771b14a88650720d114355f2e4cd4f7f844fe5b4fc"
+}

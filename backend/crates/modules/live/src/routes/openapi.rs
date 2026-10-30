@@ -32,6 +32,7 @@ pub struct ApiErrorBody {
         crate::routes::admin::publier,
         crate::routes::admin::depublier,
         crate::routes::public::actifs,
+        crate::routes::public::actifs_de_la_seance,
         crate::routes::public::flux,
         crate::routes::meeting::publique,
         crate::routes::meeting::acces,

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM live.provider_webhook_events\n                           WHERE event_type = 'meeting.participant_joined'\n                             AND signature_verified) AS \"recu!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "recu!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9a9cfdfb1630f3b056a9c6d4360f59c43bb744577e2fe922a1509a99df20e992"
+}

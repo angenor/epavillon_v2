@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.meeting_presences\n             (meeting_id, occurrence, participant_key, last_joined_at, last_left_at)\n         VALUES ($1,\n                 COALESCE($2, (SELECT external_uuid FROM live.meetings WHERE id = $1), ''),\n                 $3,\n                 CASE WHEN $4 THEN $5::timestamptz END,\n                 CASE WHEN $4 THEN NULL ELSE $5::timestamptz END)\n         ON CONFLICT (meeting_id, occurrence, participant_key) DO UPDATE\n            SET last_joined_at = GREATEST(live.meeting_presences.last_joined_at, EXCLUDED.last_joined_at),\n                last_left_at   = GREATEST(live.meeting_presences.last_left_at, EXCLUDED.last_left_at),\n                updated_at     = now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Bool",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cbf12c243584889b63ded44f039129c66356c0f33d17abe8b92326e53cbf1861"
+}

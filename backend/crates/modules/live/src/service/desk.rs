@@ -28,9 +28,9 @@ use std::collections::HashMap;
 use time::Date;
 use uuid::Uuid;
 
-use crate::domain::desk::{LiveDesk, LiveDeskSession};
+use crate::domain::desk::{LiveDesk, LiveDeskMeeting, LiveDeskSession};
 use crate::repo::cross::programme;
-use crate::repo::incidents;
+use crate::repo::{incidents, poste};
 
 /// Le nombre d'activités montrées en repli. Règle d'écran : aucune notion de
 /// repli n'existe en base.
@@ -40,6 +40,7 @@ pub async fn composer(
     conn: &mut PgConnection,
     event_id: Uuid,
     aujourdhui: Date,
+    meetings_visible: bool,
 ) -> Result<LiveDesk> {
     let du_jour = programme::du_jour(&mut *conn, event_id, aujourdhui).await?;
     let is_fallback = du_jour.is_empty();
@@ -57,9 +58,26 @@ pub async fn composer(
         .into_iter()
         .collect();
 
+    let mut reunions: HashMap<Uuid, LiveDeskMeeting> = HashMap::new();
+    if meetings_visible {
+        let ids: Vec<Uuid> = activites.iter().map(|a| a.session_id).collect();
+        reunions = poste::reunions(&mut *conn, &ids)
+            .await?
+            .into_iter()
+            .collect();
+        let par_reunion: Vec<Uuid> = reunions.values().map(|r| r.meeting_id).collect();
+        for (meeting_id, echec) in poste::echecs(&mut *conn, &par_reunion).await? {
+            if let Some(r) = reunions.values_mut().find(|r| r.meeting_id == meeting_id) {
+                r.failures.push(echec);
+            }
+        }
+    }
+    let presence_notifications = poste::presences_recues(&mut *conn).await?;
+
     let sessions = activites
         .into_iter()
         .map(|a| LiveDeskSession {
+            meeting: reunions.remove(&a.session_id),
             active_incident_count: compteurs.get(&a.session_id).copied().unwrap_or(0),
             session_id: a.session_id,
             title: a.title,
@@ -76,5 +94,7 @@ pub async fn composer(
         day: aujourdhui,
         sessions,
         is_fallback,
+        meetings_visible,
+        presence_notifications,
     })
 }

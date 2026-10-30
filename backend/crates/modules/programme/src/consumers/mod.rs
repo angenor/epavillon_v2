@@ -9,4 +9,5 @@
 //! consommateur deux fois pour le même événement. Le test qui rejoue l'annonce
 //! mesure l'absence d'effet, pas la présence d'un code (research.md § R13).
 
+pub mod direct;
 pub mod publication;

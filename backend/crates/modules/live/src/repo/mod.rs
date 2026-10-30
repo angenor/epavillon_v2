@@ -5,6 +5,7 @@ pub mod cross;
 pub mod incidents;
 pub mod kinds;
 pub mod meetings;
+pub mod poste;
 pub mod streams;
 pub mod webhooks;
 

@@ -77,10 +77,13 @@ pub async fn traiter(conn: &mut PgConnection, id: Uuid) -> Result<()> {
     };
 
     let participant = &objet["participant"];
+    let occurrence = objet["uuid"].as_str().filter(|u| !u.is_empty());
     let applique = match w.event_type.as_str() {
+        // La séance suit par la base : `live.tg_meetings_follow_status()` émet
+        // `live.meeting.started` / `.ended`, que le module Programmation consomme.
         "meeting.started" => {
             let debut = instant(&objet["start_time"]);
-            webhooks::demarrer(conn, meeting_id, objet["uuid"].as_str(), debut).await?;
+            webhooks::demarrer(conn, meeting_id, occurrence, debut).await?;
             true
         }
         "meeting.ended" => {
@@ -88,6 +91,12 @@ pub async fn traiter(conn: &mut PgConnection, id: Uuid) -> Result<()> {
             true
         }
         "meeting.participant_joined" => {
+            if let Some(cle) = cle_de_connexion(participant) {
+                let quand = instant(&participant["join_time"]);
+                webhooks::noter_un_mouvement(conn, meeting_id, occurrence, &cle, true, quand)
+                    .await?;
+                // Signal à émettre ici : `edition:<event_id>:desk` (présents du poste de direct).
+            }
             let inscription = webhooks::participant_entre(
                 conn,
                 meeting_id,
@@ -105,6 +114,12 @@ pub async fn traiter(conn: &mut PgConnection, id: Uuid) -> Result<()> {
             true
         }
         "meeting.participant_left" => {
+            if let Some(cle) = cle_de_connexion(participant) {
+                let quand = instant(&participant["leave_time"]);
+                webhooks::noter_un_mouvement(conn, meeting_id, occurrence, &cle, false, quand)
+                    .await?;
+                // Signal à émettre ici : `edition:<event_id>:desk` (présents du poste de direct).
+            }
             webhooks::participant_sorti(
                 conn,
                 meeting_id,
@@ -122,6 +137,17 @@ pub async fn traiter(conn: &mut PgConnection, id: Uuid) -> Result<()> {
 
     let statut = if applique { "processed" } else { "ignored" };
     webhooks::clore(conn, id, statut, Some(meeting_id), None).await
+}
+
+/// Ce qui désigne une connexion d'une occurrence à l'autre de ses notifications.
+pub fn cle_de_connexion(participant: &Value) -> Option<String> {
+    ["participant_uuid", "user_id", "id", "email"]
+        .iter()
+        .find_map(|champ| match &participant[*champ] {
+            Value::String(s) if !s.is_empty() => Some(format!("{champ}:{s}")),
+            Value::Number(n) => Some(format!("{champ}:{n}")),
+            _ => None,
+        })
 }
 
 fn instant(valeur: &Value) -> OffsetDateTime {

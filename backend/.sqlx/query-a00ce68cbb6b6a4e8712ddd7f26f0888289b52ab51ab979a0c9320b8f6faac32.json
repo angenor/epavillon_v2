@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT x.incident_id     AS \"incident_id!\",\n                  x.scope::text     AS \"scope!\",\n                  x.severity::text  AS \"severity!\",\n                  x.kind_code       AS \"kind_code!\",\n                  x.title           AS \"title?: Value\",\n                  x.message         AS \"message!: Value\",\n                  x.action_url::text AS \"action_url?\",\n                  x.is_dismissible  AS \"is_dismissible!\",\n                  x.display_from    AS \"display_from!\",\n                  x.display_until,\n                  x.target_id,\n                  x.target_label\n             FROM programme.sessions s\n            CROSS JOIN LATERAL live.active_incidents_for_sessions(s.event_id, ARRAY[s.id], now()) x\n            WHERE s.id = $1 AND s.published_at IS NOT NULL\n            ORDER BY x.severity DESC, x.display_from DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "incident_id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "scope!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "severity!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "kind_code!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "title?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "message!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "action_url?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_dismissible!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "display_from!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "display_until",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "target_id",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "target_label",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "a00ce68cbb6b6a4e8712ddd7f26f0888289b52ab51ab979a0c9320b8f6faac32"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n            SET starts_at = now() + make_interval(mins => $2),\n                ends_at   = now() + make_interval(mins => $2 + 90)\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "457e169ab8454f65449f4743a79f84ad7b313504f99603f90fb5645122074c4a"
+}

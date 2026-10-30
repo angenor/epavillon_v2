@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings SET status = $2::text::live.meeting_status, external_uuid = $3\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0c8937f91262b3222a121a2f682bc84b57e7d0a5dc485e6dd3873e909099aaf8"
+}

@@ -3433,11 +3433,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description `ActiveIncident[]` — les messages actifs de l'édition, **le plus grave en tête**, dans l'ordre où `live.active_incidents_for_event()` les rend. Les cinq portées y remontent : édition, journée, activité, organisation **qui y anime**, et les messages globaux.
+         * @description `ActiveIncident[]` : les messages actifs de l'édition, **le plus grave en tête**, dans l'ordre où `live.active_incidents_for_event()` les rend. Les cinq portées y remontent : édition, journée, activité, organisation **qui y anime**, et les messages globaux.
          *
-         *     **Chaque ligne porte `target_label` déjà résolu** par le modèle — « Atelier de négociation », « Journée finance », le nom légal d'une organisation : le bandeau nomme son sujet, et un message de portée `session` reste lisible sur une page qui parle de trente activités.
+         *     Avec `track_id` (page d'une journée spéciale) : les messages globaux et de l'édition, plus ceux qui visent une activité publiée du fil, sa journée ou son organisation porteuse (`live.active_incidents_for_sessions()`).
          *
-         *     **Aucune garde**, et **jamais 404** : une édition inconnue rend une liste vide. Le site n'en affiche que trois, le reste replié en « +N » — c'est la règle des pastilles de la charte ; l'API, elle, rend tout.
+         *     **Chaque ligne porte `target_label` déjà résolu** par le modèle (« Atelier de négociation », « Journée finance », le nom légal d'une organisation) : le bandeau nomme son sujet, et un message de portée `session` reste lisible sur une page qui parle de trente activités.
+         *
+         *     **Aucune garde**, et **jamais 404** : une édition inconnue rend une liste vide. Le site n'en affiche que trois, le reste replié en « +N », la règle des pastilles de la charte ; l'API, elle, rend tout.
          */
         get: operations["evenement_incidents_actifs"];
         put?: never;
@@ -6536,6 +6538,27 @@ export interface paths {
          * @description `SessionTracksPayload` → `PlannerMutationResult`. **Manuel et indépendant de la date** : toutes les activités du 12 novembre ne relèvent pas de la « Journée finance durable ». La liste envoyée **remplace** la précédente, et la base retient qui a rattaché quoi. Un fil d'une **autre édition** est refusé par un déclencheur du modèle, traduit ici en code stable.
          */
         put: operations["seances_rattacher"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{session_id}/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `ActiveIncident[]` : les messages actifs qui concernent l'activité, **le plus grave en tête** : globaux, de son édition, de sa journée, d'elle-même, de son organisation porteuse (`live.active_incidents_for_sessions()`). Page d'une activité et sa salle.
+         *
+         *     **Aucune garde**, et **jamais 404** : une activité inconnue ou non publiée rend une liste vide.
+         */
+        get: operations["seance_incidents_actifs"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -17369,7 +17392,10 @@ export interface operations {
     };
     evenement_incidents_actifs: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Fil (journée spéciale) dont on affiche la page */
+                track_id?: string;
+            };
             header?: never;
             path: {
                 /** @description Édition affichée */
@@ -24849,6 +24875,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    seance_incidents_actifs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Activité affichée */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ActiveIncident[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

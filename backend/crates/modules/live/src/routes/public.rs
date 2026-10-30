@@ -14,6 +14,7 @@
 
 use actix_web::{web, HttpResponse};
 use kernel::error::Result;
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::repo::{active, streams};
@@ -25,23 +26,57 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
 
 /// Sous le scope `/sessions`, que l'API compose avec `programme` et `engagement`.
 pub fn chemins_de_seance(cfg: &mut web::ServiceConfig) {
-    cfg.route("/{session_id}/streams", web::get().to(flux));
+    cfg.route("/{session_id}/streams", web::get().to(flux))
+        .route(
+            "/{session_id}/incidents",
+            web::get().to(actifs_de_la_seance),
+        );
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FiltreFil {
+    pub track_id: Option<Uuid>,
 }
 
 #[utoipa::path(
     get,
-    description = "`ActiveIncident[]` — les messages actifs de l'édition, **le plus grave en tête**, dans l'ordre où `live.active_incidents_for_event()` les rend. Les cinq portées y remontent : édition, journée, activité, organisation **qui y anime**, et les messages globaux.\n\n**Chaque ligne porte `target_label` déjà résolu** par le modèle — « Atelier de négociation », « Journée finance », le nom légal d'une organisation : le bandeau nomme son sujet, et un message de portée `session` reste lisible sur une page qui parle de trente activités.\n\n**Aucune garde**, et **jamais 404** : une édition inconnue rend une liste vide. Le site n'en affiche que trois, le reste replié en « +N » — c'est la règle des pastilles de la charte ; l'API, elle, rend tout.",
+    description = "`ActiveIncident[]` : les messages actifs de l'édition, **le plus grave en tête**, dans l'ordre où `live.active_incidents_for_event()` les rend. Les cinq portées y remontent : édition, journée, activité, organisation **qui y anime**, et les messages globaux.\n\nAvec `track_id` (page d'une journée spéciale) : les messages globaux et de l'édition, plus ceux qui visent une activité publiée du fil, sa journée ou son organisation porteuse (`live.active_incidents_for_sessions()`).\n\n**Chaque ligne porte `target_label` déjà résolu** par le modèle (« Atelier de négociation », « Journée finance », le nom légal d'une organisation) : le bandeau nomme son sujet, et un message de portée `session` reste lisible sur une page qui parle de trente activités.\n\n**Aucune garde**, et **jamais 404** : une édition inconnue rend une liste vide. Le site n'en affiche que trois, le reste replié en « +N », la règle des pastilles de la charte ; l'API, elle, rend tout.",
     path = "/events/{event_id}/incidents",
     tag = "Direct",
     operation_id = "evenement_incidents_actifs",
-    params(("event_id" = Uuid, Path, description = "Édition affichée")),
+    params(
+        ("event_id" = Uuid, Path, description = "Édition affichée"),
+        ("track_id" = Option<Uuid>, Query, description = "Fil (journée spéciale) dont on affiche la page"),
+    ),
     responses((status = 200, description = "ActiveIncident[]", body = Object))
 )]
 pub(crate) async fn actifs(
     state: web::Data<LiveState>,
     chemin: web::Path<Uuid>,
+    filtre: web::Query<FiltreFil>,
 ) -> Result<HttpResponse> {
-    let lignes = active::pour_ledition(state.pool(), chemin.into_inner()).await?;
+    let event_id = chemin.into_inner();
+    let lignes = match filtre.track_id {
+        Some(track_id) => active::pour_le_fil(state.pool(), event_id, track_id).await?,
+        None => active::pour_ledition(state.pool(), event_id).await?,
+    };
+    Ok(HttpResponse::Ok().json(lignes))
+}
+
+#[utoipa::path(
+    get,
+    description = "`ActiveIncident[]` : les messages actifs qui concernent l'activité, **le plus grave en tête** : globaux, de son édition, de sa journée, d'elle-même, de son organisation porteuse (`live.active_incidents_for_sessions()`). Page d'une activité et sa salle.\n\n**Aucune garde**, et **jamais 404** : une activité inconnue ou non publiée rend une liste vide.",
+    path = "/sessions/{session_id}/incidents",
+    tag = "Direct",
+    operation_id = "seance_incidents_actifs",
+    params(("session_id" = Uuid, Path, description = "Activité affichée")),
+    responses((status = 200, description = "ActiveIncident[]", body = Object))
+)]
+pub(crate) async fn actifs_de_la_seance(
+    state: web::Data<LiveState>,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let lignes = active::pour_la_seance(state.pool(), chemin.into_inner()).await?;
     Ok(HttpResponse::Ok().json(lignes))
 }
 

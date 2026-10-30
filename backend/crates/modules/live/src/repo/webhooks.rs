@@ -106,11 +106,14 @@ pub async fn demarrer(
     occurrence: Option<&str>,
     debut: OffsetDateTime,
 ) -> Result<()> {
+    // Un démarrage reçu après la fin de la même occurrence (Zoom ne garantit
+    // pas l'ordre) ne rallume rien.
     sqlx::query!(
         "UPDATE live.meetings
             SET status = 'started', actual_start_at = COALESCE(actual_start_at, $2),
                 actual_end_at = NULL, external_uuid = COALESCE($3, external_uuid)
-          WHERE id = $1 AND status IN ('scheduled', 'started', 'ended')",
+          WHERE id = $1 AND status IN ('scheduled', 'started', 'ended')
+            AND NOT (status = 'ended' AND COALESCE(external_uuid = $3, false))",
         meeting_id,
         debut,
         occurrence
@@ -163,6 +166,40 @@ pub async fn participant_entre(
     .fetch_optional(conn)
     .await?;
     Ok(ligne)
+}
+
+/// Une connexion vue par Zoom, entrée (`entree`) ou sortie. L'occurrence par
+/// défaut est celle que la réunion porte : une notification sans `uuid` compte
+/// dans la salle ouverte.
+pub async fn noter_un_mouvement(
+    conn: &mut PgConnection,
+    meeting_id: Uuid,
+    occurrence: Option<&str>,
+    participant_key: &str,
+    entree: bool,
+    instant: OffsetDateTime,
+) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO live.meeting_presences
+             (meeting_id, occurrence, participant_key, last_joined_at, last_left_at)
+         VALUES ($1,
+                 COALESCE($2, (SELECT external_uuid FROM live.meetings WHERE id = $1), ''),
+                 $3,
+                 CASE WHEN $4 THEN $5::timestamptz END,
+                 CASE WHEN $4 THEN NULL ELSE $5::timestamptz END)
+         ON CONFLICT (meeting_id, occurrence, participant_key) DO UPDATE
+            SET last_joined_at = GREATEST(live.meeting_presences.last_joined_at, EXCLUDED.last_joined_at),
+                last_left_at   = GREATEST(live.meeting_presences.last_left_at, EXCLUDED.last_left_at),
+                updated_at     = now()",
+        meeting_id,
+        occurrence,
+        participant_key,
+        entree,
+        instant
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
 }
 
 pub async fn participant_sorti(

@@ -9,7 +9,7 @@
 //! lecture ne peut donc pas apparaître actif dans la liste et absent du
 //! compteur.
 
-use kernel::auth::Perimeter;
+use kernel::auth::{has_permission, Perimeter, Scope};
 use kernel::error::{ApiError, Result};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -21,6 +21,7 @@ use crate::domain::desk::{
 use crate::domain::incident::ManagedIncident;
 use crate::repo;
 use crate::repo::cross::{event, org, programme};
+use crate::service::meeting::MEETING_MANAGE;
 use crate::service::write;
 use crate::state::LiveState;
 
@@ -36,7 +37,16 @@ pub async fn ecran(
     locale: &str,
 ) -> Result<IncidentListScreen> {
     write::assurer_le_perimetre(perimetre, event_id)?;
-    composer(state.pool(), event_id, locale).await
+    // Les réunions du poste portent les adresses des inscrits en échec : elles
+    // suivent la permission des réunions, pas le seul périmètre.
+    let reunions = has_permission(
+        state.pool(),
+        perimetre.person_id,
+        MEETING_MANAGE,
+        Scope::Event(event_id),
+    )
+    .await?;
+    composer_pour(state.pool(), event_id, locale, reunions).await
 }
 
 /// Le gabarit du raccourci « Signaler un débordement ».
@@ -77,7 +87,17 @@ pub async fn relire(state: &LiveState, perimetre: &Perimeter, id: Uuid) -> Resul
         .ok_or_else(ApiError::not_found)
 }
 
+/// L'écran sans les réunions Zoom du poste.
 pub async fn composer(pool: &PgPool, event_id: Uuid, locale: &str) -> Result<IncidentListScreen> {
+    composer_pour(pool, event_id, locale, false).await
+}
+
+pub async fn composer_pour(
+    pool: &PgPool,
+    event_id: Uuid,
+    locale: &str,
+    reunions: bool,
+) -> Result<IncidentListScreen> {
     let mut tx = repo::lecture(pool).await?;
 
     let entete = event::entete(&mut tx, event_id, locale)
@@ -97,7 +117,8 @@ pub async fn composer(pool: &PgPool, event_id: Uuid, locale: &str) -> Result<Inc
         *counts.entry(ligne.state.clone()).or_insert(0) += 1;
     }
 
-    let desk = crate::service::desk::composer(&mut tx, event_id, entete.aujourdhui).await?;
+    let desk =
+        crate::service::desk::composer(&mut tx, event_id, entete.aujourdhui, reunions).await?;
     let kinds = repo::kinds::natures(&mut tx).await?;
 
     let targets = IncidentTargets {

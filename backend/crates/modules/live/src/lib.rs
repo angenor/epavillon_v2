@@ -8,7 +8,8 @@
 //! `080_live.sql`), la lecture publique de `live.current_streams`, et depuis le
 //! 17/10 les **réunions Zoom** des séances : `live.meetings`, leurs inscrits
 //! (`live.meeting_participants`), le journal des notifications
-//! (`live.provider_webhook_events`), six travaux de la file « live » et deux
+//! (`live.provider_webhook_events`), depuis le 31/10 les présents dans la salle
+//! (`live.meeting_presences`), sept travaux de la file « live » et deux
 //! consommateurs (inscriptions, séances annulées ou déplacées). Zoom s'éteint entièrement sans sa
 //! configuration (`ZOOM_*`, `LIVE_SECRETS_KEY`) : ni travaux, ni consommateur,
 //! et les routes qui en ont besoin répondent 503.
@@ -20,7 +21,9 @@
 //! `live.incident.resolved`, toutes deux **dans la transaction de l'appelant**.
 //! Ajouter un `kernel::events::emit` « pour faire comme les autres modules »
 //! doublerait chaque ligne d'outbox, donc chaque réveil de tout consommateur
-//! futur. Un test compte les lignes et exige exactement une.
+//! futur. Un test compte les lignes et exige exactement une. Même chose pour
+//! `live.meeting.started` / `.ended` (31/10) : la base les émet, le module
+//! Programmation en fait passer la séance en direct.
 //!
 //! **2. LE PÉRIMÈTRE NE PEUT PAS ÊTRE UN `WHERE event_id`.** `live.incidents`
 //! n'a aucune colonne d'édition pour les portées `session`, `event_day` et
@@ -93,7 +96,7 @@ pub fn zoom_webhook_configure(config: &Config) -> bool {
         .is_some_and(|z| z.webhook_secret_token.is_some())
 }
 
-/// Les six travaux de la file « live ». Aucun sans Zoom : les travaux
+/// Les sept travaux de la file « live ». Aucun sans Zoom : les travaux
 /// déposés attendent alors en file, sans échouer, qu'il soit configuré.
 pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
     let Some(zoom) = state::zoom_depuis(config) else {
@@ -114,6 +117,7 @@ pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
         )),
         Arc::new(jobs::cancel_meeting::CancelMeeting::new(db.clone(), zoom)),
         Arc::new(jobs::filet::RequeueParticipants::new(db.clone())),
+        Arc::new(jobs::annonce::AnnounceMeetingStart::new(db.clone())),
         Arc::new(jobs::webhook::ProcessWebhook::new(db)),
     ]
 }

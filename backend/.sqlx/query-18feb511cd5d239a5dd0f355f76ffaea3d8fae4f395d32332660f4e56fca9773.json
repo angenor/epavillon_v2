@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings\n            SET status = $2::text::live.meeting_status, external_uuid = $3,\n                actual_start_at = COALESCE(actual_start_at, now())\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "18feb511cd5d239a5dd0f355f76ffaea3d8fae4f395d32332660f4e56fca9773"
+}

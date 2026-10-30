@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT present_count AS \"p!\", joined_count AS \"j!\"\n             FROM live.meeting_room_counts WHERE meeting_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "p!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_room_counts",
+            "name": "present_count"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "j!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_room_counts",
+            "name": "joined_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "eda21e3b1f2cc61867a67bbeb06e5df3591b2eecdd15f5b069d3441356adb2b8"
+}

@@ -63,6 +63,69 @@ pub struct LiveDeskSession {
     /// Messages **déjà actifs de portée `session`** visant cette activité : ne
     /// pas publier deux fois la même panne.
     pub active_incident_count: i64,
+    /// La réunion Zoom de l'activité, la plus récente. Nulle sans réunion, et
+    /// pour qui n'a pas `live.meeting.manage` sur l'édition (`LiveDesk::meetings_visible`) :
+    /// elle porte les adresses des inscrits en échec.
+    pub meeting: Option<LiveDeskMeeting>,
+}
+
+/// La réunion Zoom d'une activité, vue du poste de direct (31/10).
+#[derive(Debug, Clone, Serialize)]
+pub struct LiveDeskMeeting {
+    pub meeting_id: Uuid,
+    /// `live.meeting_status`.
+    pub status: String,
+    /// `live.sync_status` de la réunion elle-même : `failed`, la réunion n'existe pas chez Zoom.
+    pub sync_status: String,
+    pub last_sync_error: Option<String>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub actual_start_at: Option<OffsetDateTime>,
+    /// Personnes dans la salle, dans l'occurrence en cours (`live.meeting_room_counts`).
+    pub present_count: i64,
+    /// Personnes passées par la salle depuis le démarrage.
+    pub joined_count: i64,
+    /// Inscrits enregistrés chez Zoom.
+    pub registered_count: i64,
+    pub failure_count: i64,
+    /// Les dix échecs les plus récents ; `failure_count` dit s'il y en a d'autres.
+    pub failures: Vec<RegistrationFailure>,
+}
+
+/// Une inscription que Zoom n'a pas acceptée.
+#[derive(Debug, Clone, Serialize)]
+pub struct RegistrationFailure {
+    pub participant_id: Uuid,
+    pub display_name: String,
+    pub email: String,
+    /// `failed` (nouvel essai prévu) ou `abandoned` (à relancer à la main).
+    pub sync_status: String,
+    /// Motif lisible, voir [`motif_d_echec`].
+    pub reason: &'static str,
+    /// Le texte de l'erreur, tel que Zoom l'a donné.
+    pub detail: Option<String>,
+    pub attempts: i16,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub next_retry_at: Option<OffsetDateTime>,
+}
+
+/// Le motif d'un échec d'inscription, d'après `last_error`, que ce crate écrit
+/// seul (`ZoomError` et deux textes fixes) : `meeting_not_created`,
+/// `meeting_changed`, `quota`, `unreachable`, `refused`, `other`.
+pub fn motif_d_echec(erreur: Option<&str>) -> &'static str {
+    let Some(e) = erreur else { return "other" };
+    if e == crate::jobs::sync_participant::PAS_ENCORE_CREEE {
+        "meeting_not_created"
+    } else if e == crate::repo::meetings::REUNION_CHANGEE {
+        "meeting_changed"
+    } else if e.starts_with("quota Zoom") {
+        "quota"
+    } else if e.starts_with("Zoom momentanément injoignable") {
+        "unreachable"
+    } else if e.starts_with("Zoom refuse") {
+        "refused"
+    } else {
+        "other"
+    }
 }
 
 /// Ce que le poste montre, et **de quel jour il parle**.
@@ -80,6 +143,11 @@ pub struct LiveDesk {
     pub day: Date,
     pub sessions: Vec<LiveDeskSession>,
     pub is_fallback: bool,
+    /// `live.meeting.manage` sur l'édition : sans elle, `meeting` reste nul partout.
+    pub meetings_visible: bool,
+    /// Zoom a déjà envoyé au moins une entrée en salle signée. Faux : le compte
+    /// des présents n'est pas fiable, l'abonnement manque chez Zoom.
+    pub presence_notifications: bool,
 }
 
 /// Compteurs de la barre d'états — établis **avant tout filtrage**, comme

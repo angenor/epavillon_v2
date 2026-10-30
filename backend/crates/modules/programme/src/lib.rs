@@ -149,9 +149,10 @@ pub fn public_schedule_routes(cfg: &mut ServiceConfig) {
 /// `(consommateur, événement)` **avant** d'appeler `handle`, et n'appelle pas le
 /// consommateur une seconde fois (research.md § R13).
 pub fn event_consumers() -> Vec<std::sync::Arc<dyn kernel::events::EventConsumer>> {
-    vec![std::sync::Arc::new(
-        consumers::publication::PublicationConsumer,
-    )]
+    vec![
+        std::sync::Arc::new(consumers::publication::PublicationConsumer),
+        std::sync::Arc::new(consumers::direct::DirectConsumer),
+    ]
 }
 
 /// Les deux scopes **propres à ce module** : personne d'autre n'y dépose, il

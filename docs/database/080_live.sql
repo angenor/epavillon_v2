@@ -50,6 +50,29 @@
 --       générique (global, événement, journée, session, organisation), message
 --       en `platform.i18n_text`, fenêtre d'affichage bornée dans le temps, et
 --       publication/dépublication horodatées et attribuées.
+--
+-- LE DIRECT D'UNE SÉANCE SUIT SA RÉUNION ZOOM (décidé le 31/10/2026, § 2 bis)
+--
+--   Le site lit « en direct » dans `programme.sessions.status = 'live'`, que
+--   rien n'écrivait : le webhook `meeting.started` ne touchait que
+--   `live.meetings`. Deux voies : faire lire au site l'état de la réunion, ou
+--   reporter cet état sur la séance. La seconde est retenue : le statut de la
+--   séance est déjà lu par le programme public, l'accueil, la page d'une
+--   journée et l'outbox (`programme.session.live`), et un second « en direct »
+--   calculé à côté finirait par contredire le premier.
+--
+--   `live` n'écrit pas dans `programme` : la base émet `live.meeting.started`
+--   et `live.meeting.ended` (déclencheur de `live.meetings`), et le module
+--   Programmation les consomme. Ses règles, tenues par le consommateur :
+--   - démarrage : `scheduled` ou `completed` (réunion relancée) → `live` ;
+--   - fin : `live` → `completed`, rien d'autre ;
+--   - une séance annulée, reportée ou non programmée ne bouge jamais ;
+--   - une séance sans réunion garde son statut : le site affiche alors son
+--     état temporel (« en cours »), jamais « en direct ».
+--   Une RÉPÉTITION n'allume rien : une réunion démarrée plus d'un quart d'heure
+--   avant le début prévu n'est annoncée qu'à début − 15 min, si elle tourne
+--   encore (travail `live.announce_meeting_start`). Seule borne horaire du
+--   direct, et elle ne ferme rien : la salle reste joignable à toute heure.
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -267,6 +290,93 @@ COMMENT ON VIEW live.meetings_public IS
     'Projection sans secret de live.meetings. Interdire tout SELECT * sur la table depuis les couches exposées.';
 
 -- -----------------------------------------------------------------------------
+-- 2 bis. La séance suit sa réunion (31/10/2026, voir l'en-tête)
+--
+-- `live.announce_meeting_start()` décide si un démarrage vaut direct, et sinon
+-- se reprogramme : appelée par le déclencheur au démarrage, puis par le travail
+-- `live.announce_meeting_start` à début − 15 min. Elle relit la réunion :
+-- arrêtée entre-temps, ou relancée (autre occurrence Zoom), elle ne dit rien.
+-- Une séance déplacée entre-temps donne une nouvelle échéance, d'où une clé
+-- d'idempotence qui la porte.
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION live.announce_meeting_start(
+    p_meeting_id uuid,
+    p_occurrence text DEFAULT NULL
+)
+RETURNS boolean
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_meeting live.meetings%ROWTYPE;
+    v_opens   timestamptz;
+BEGIN
+    SELECT * INTO v_meeting FROM live.meetings WHERE id = p_meeting_id;
+    IF NOT FOUND OR v_meeting.status <> 'started'
+       OR (p_occurrence IS NOT NULL AND v_meeting.external_uuid IS DISTINCT FROM p_occurrence) THEN
+        RETURN false;
+    END IF;
+
+    SELECT s.starts_at - interval '15 minutes' INTO v_opens
+      FROM programme.sessions s WHERE s.id = v_meeting.session_id;
+
+    IF v_opens IS NOT NULL AND now() < v_opens THEN
+        INSERT INTO platform.jobs (queue, task, payload, idempotency_key, run_at)
+        VALUES ('live', 'live.announce_meeting_start',
+                jsonb_build_object('meeting_id', v_meeting.id, 'occurrence', v_meeting.external_uuid),
+                v_meeting.id::text || ':' || COALESCE(v_meeting.external_uuid, '')
+                    || ':' || extract(epoch FROM v_opens)::bigint,
+                v_opens)
+        ON CONFLICT DO NOTHING;
+        RETURN false;
+    END IF;
+
+    PERFORM platform.emit_event(
+        'live', 'meeting', v_meeting.id, 'live.meeting.started',
+        jsonb_build_object(
+            'session_id', v_meeting.session_id,
+            'event_id',   v_meeting.event_id,
+            'occurrence', v_meeting.external_uuid,
+            'started_at', v_meeting.actual_start_at
+        )
+    );
+    RETURN true;
+END;
+$$;
+
+COMMENT ON FUNCTION live.announce_meeting_start(uuid, text) IS
+    'Émet live.meeting.started si la réunion tourne et que sa séance commence dans moins d''un quart d''heure ; sinon (répétition) se reprogramme à début − 15 min. Faux si rien n''est émis.';
+
+-- Un démarrage, une relance (nouvelle occurrence Zoom sans fin reçue entre les
+-- deux) ou une fin. `meeting.ended` ne dépend d'aucune heure : une séance qui
+-- n'était pas en direct ne bouge pas, le consommateur s'en charge.
+CREATE OR REPLACE FUNCTION live.tg_meetings_follow_status()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NEW.status = 'started'
+       AND (OLD.status IS DISTINCT FROM 'started' OR NEW.external_uuid IS DISTINCT FROM OLD.external_uuid) THEN
+        PERFORM live.announce_meeting_start(NEW.id);
+    ELSIF NEW.status = 'ended' AND OLD.status IS DISTINCT FROM 'ended' THEN
+        PERFORM platform.emit_event(
+            'live', 'meeting', NEW.id, 'live.meeting.ended',
+            jsonb_build_object(
+                'session_id', NEW.session_id,
+                'event_id',   NEW.event_id,
+                'occurrence', NEW.external_uuid,
+                'ended_at',   NEW.actual_end_at
+            )
+        );
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_meetings_follow_status
+    AFTER UPDATE OF status, external_uuid ON live.meetings
+    FOR EACH ROW EXECUTE FUNCTION live.tg_meetings_follow_status();
+
+-- -----------------------------------------------------------------------------
 -- 3. D2 — Participants et synchronisation fournisseur
 --
 -- Une ligne = « cette inscription doit exister chez le fournisseur ». Elle est
@@ -471,6 +581,50 @@ $$;
 
 COMMENT ON FUNCTION live.requeue_failed_participants IS
     'Remet en file les enregistrements fournisseur en échec ou abandonnés, après correction de la cause (D2).';
+
+-- -----------------------------------------------------------------------------
+-- 3 bis. Présence dans la salle (31/10/2026)
+--
+-- Le poste de direct affiche combien de personnes sont dans la réunion. La
+-- table précédente ne le dit pas : elle ne connaît que les inscrits, alors que
+-- l'hôte, les intervenants et l'entrée libre passent aussi par la salle. Une
+-- ligne par connexion vue par Zoom (`meeting.participant_joined` / `_left`),
+-- dans une OCCURRENCE de la réunion (`live.meetings.external_uuid`) : une
+-- réunion relancée repart de zéro.
+--
+-- Les notifications arrivent en désordre et parfois en double : on garde la
+-- dernière entrée et la dernière sortie vues, et une personne est présente si
+-- elle est entrée après sa dernière sortie. Ni nom ni adresse : un compte n'en
+-- a pas besoin.
+-- -----------------------------------------------------------------------------
+CREATE TABLE live.meeting_presences (
+    id               uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    meeting_id       uuid        NOT NULL REFERENCES live.meetings(id) ON DELETE CASCADE,
+    -- Zoom `payload.object.uuid` ; vide si la notification ne le porte pas.
+    occurrence       text        NOT NULL DEFAULT '',
+    -- Zoom `participant_uuid`, à défaut `user_id`, `id`, l'adresse.
+    participant_key  text        NOT NULL,
+    last_joined_at   timestamptz,
+    last_left_at     timestamptz,
+    updated_at       timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ux_meeting_presences_participant UNIQUE (meeting_id, occurrence, participant_key)
+);
+
+COMMENT ON TABLE live.meeting_presences IS
+    'Connexions à une réunion vues par les notifications Zoom, par occurrence. Sert au compte des présents du poste de direct.';
+
+CREATE VIEW live.meeting_room_counts AS
+SELECT m.id AS meeting_id,
+       count(p.id) FILTER (WHERE p.last_joined_at IS NOT NULL
+                             AND (p.last_left_at IS NULL OR p.last_joined_at > p.last_left_at)) AS present_count,
+       count(p.id) FILTER (WHERE p.last_joined_at IS NOT NULL) AS joined_count
+FROM live.meetings m
+LEFT JOIN live.meeting_presences p
+       ON p.meeting_id = m.id AND p.occurrence = COALESCE(m.external_uuid, '')
+GROUP BY m.id;
+
+COMMENT ON VIEW live.meeting_room_counts IS
+    'Par réunion, dans son occurrence en cours : personnes dans la salle (present_count) et passées par la salle (joined_count). Ne vaut que pour une réunion démarrée.';
 
 -- -----------------------------------------------------------------------------
 -- 4. D4 — Journal des webhooks entrants
@@ -1094,6 +1248,53 @@ $$;
 
 COMMENT ON FUNCTION live.active_incidents_for_event(uuid, timestamptz) IS
     'Incidents actifs d''une édition, toutes portées confondues (globale, édition, journée, séance, organisation qui y anime). Part active de live.event_incidents().';
+
+-- La page d'une activité, sa salle, la page d'une journée spéciale (31/10) :
+-- les messages actifs qui concernent CES activités. Le global et l'édition
+-- toujours ; une journée, une séance, une organisation seulement si l'une des
+-- activités s'y rattache. Écrite sur active_incidents_for_event() pour garder
+-- la même cible résolue que la page de programmation. Les activités non
+-- publiées ou d'une autre édition sont ignorées : rien n'en fuit.
+CREATE OR REPLACE FUNCTION live.active_incidents_for_sessions(
+    p_event_id    uuid,
+    p_session_ids uuid[],
+    p_at          timestamptz DEFAULT now()
+)
+RETURNS TABLE (
+    incident_id    uuid,
+    scope          live.incident_scope,
+    severity       live.incident_severity,
+    kind_code      text,
+    title          platform.i18n_text,
+    message        platform.i18n_text,
+    action_url     platform.url,
+    is_dismissible boolean,
+    display_from   timestamptz,
+    display_until  timestamptz,
+    target_id      uuid,
+    target_label   text
+)
+LANGUAGE sql
+STABLE
+AS $$
+    WITH cibles AS (
+        SELECT s.id, s.event_day_id, s.organization_id
+          FROM programme.sessions s
+         WHERE s.event_id = p_event_id
+           AND s.id = ANY (p_session_ids)
+           AND s.published_at IS NOT NULL
+    )
+    SELECT x.*
+      FROM live.active_incidents_for_event(p_event_id, p_at) x
+     WHERE x.scope IN ('global', 'event')
+        OR (x.scope = 'session'      AND x.target_id IN (SELECT id FROM cibles))
+        OR (x.scope = 'event_day'    AND x.target_id IN (SELECT event_day_id FROM cibles))
+        OR (x.scope = 'organization' AND x.target_id IN (SELECT organization_id FROM cibles))
+     ORDER BY x.severity DESC, x.display_from DESC;
+$$;
+
+COMMENT ON FUNCTION live.active_incidents_for_sessions(uuid, uuid[], timestamptz) IS
+    'Incidents actifs concernant des activités publiées d''une édition : globaux, de l''édition, de leurs journées, d''elles-mêmes, de leurs organisations porteuses. Page d''une activité et d''une journée spéciale.';
 
 -- -----------------------------------------------------------------------------
 -- 7. Intégration inter-modules

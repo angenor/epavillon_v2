@@ -16,6 +16,7 @@ pub const SYNC_PARTICIPANT: &str = "live.sync_meeting_participant";
 pub const CANCEL_PARTICIPANT: &str = "live.cancel_meeting_participant";
 pub const CANCEL_MEETING: &str = "live.cancel_meeting";
 pub const PROCESS_WEBHOOK: &str = "live.process_webhook_event";
+pub const REUNION_CHANGEE: &str = "réunion Zoom changée";
 
 pub struct ReunionResume {
     pub id: Uuid,
@@ -101,9 +102,10 @@ pub async fn rattacher(conn: &mut PgConnection, meeting_id: Uuid, external_id: &
     sqlx::query!(
         "UPDATE live.meeting_participants
             SET external_registrant_id = NULL, personal_join_url = NULL, synced_at = NULL,
-                sync_status = 'failed', last_error = 'réunion Zoom changée'
+                sync_status = 'failed', last_error = $2
           WHERE meeting_id = $1 AND cancelled_at IS NULL",
-        meeting_id
+        meeting_id,
+        REUNION_CHANGEE
     )
     .execute(conn)
     .await?;

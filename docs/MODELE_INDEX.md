@@ -28,7 +28,7 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 | **Programmation publique** | `075_programme_sessions.sql` | `v_public_schedule` (vue prête à l'emploi, état temporel calculé) |
 | **Inscriptions** | `075_programme_sessions.sql` | `registration_forms`, `registration_form_fields`, `registrations` · `record_join()`, `promote_from_waitlist()` |
 | **Questions du public** | `075_programme_sessions.sql` | `session_questions`, `session_question_answers`, `session_question_votes` |
-| **Visio, diffusion, incidents** | `080_live.sql` | `live.meetings`, `meeting_participants`, `streams`, `incidents`, `provider_webhook_events` · `active_incidents()`, `build_embed_url()` |
+| **Visio, diffusion, incidents** | `080_live.sql` | `live.meetings`, `meeting_participants`, `meeting_presences`, `streams`, `incidents`, `provider_webhook_events` · `meeting_room_counts` · `active_incidents()`, `active_incidents_for_sessions()`, `announce_meeting_start()`, `build_embed_url()` |
 | **Téléversement, images, quotas de stockage** | `050_media.sql` | `media.assets`, `renditions`, `attachments`, `attachable_roles` (**la forme exigée par rôle : `expected_aspect_ratio`**), `storage_quotas` · `object_url()`, `find_orphan_assets()` |
 | **Notifications, courriels, rappels** | `110_engagement.sql` | `notification_types`, `notifications`, `notification_preferences`, `message_templates`, `email_messages`, `reminder_rules`, `scheduled_reminders` · `schedule_session_reminders()` |
 | **Commentaires publics, réactions** | `110_engagement.sql` | `comments`, `commentable_subjects`, `reactions` |

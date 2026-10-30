@@ -7,6 +7,7 @@
 pub mod engagement;
 pub mod event;
 pub mod identity;
+pub mod live;
 pub mod media;
 pub mod negotiation;
 pub mod org;

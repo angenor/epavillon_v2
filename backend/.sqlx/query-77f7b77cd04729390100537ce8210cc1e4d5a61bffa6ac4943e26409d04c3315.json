@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT run_at FROM platform.jobs\n          WHERE task = 'live.announce_meeting_start' AND (payload->>'meeting_id')::uuid = $1\n          ORDER BY run_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "run_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "run_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "77f7b77cd04729390100537ce8210cc1e4d5a61bffa6ac4943e26409d04c3315"
+}
