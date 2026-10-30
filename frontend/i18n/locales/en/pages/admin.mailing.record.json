@@ -3,7 +3,7 @@
   "completedAt": "Completed {date}",
   "cancelledAt": "Stopped {date}",
   "failedAt": "Failed {date}",
-  "inProgress": "Sending in progress, in batches. Refresh to follow progress.",
+  "inProgress": "Sending in progress, in batches: progress updates by itself.",
   "failure": {
     "title": "Sending stopped",
     "partial": "Sent: {sent} of {total}. Waiting for a retry: {waiting}.",
