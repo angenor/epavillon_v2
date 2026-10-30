@@ -829,6 +829,12 @@ export function useApi() {
        */
       forEvent: (eventId: Uuid): Promise<ActiveIncident[]> =>
         call(`/events/${eventId}/incidents`, (m) => m.publicIncidents(eventId)),
+      /** Page d'une journée spéciale : l'édition, plus ce qui vise ses activités. */
+      forTrack: (eventId: Uuid, trackId: Uuid): Promise<ActiveIncident[]> =>
+        call(`/events/${eventId}/incidents`, (m) => m.publicTrackIncidents(eventId, trackId), { track_id: trackId }),
+      /** Page d'une activité et sa salle. Liste vide pour une activité inconnue. */
+      forSession: (sessionId: Uuid): Promise<ActiveIncident[]> =>
+        call(`/sessions/${sessionId}/incidents`, (m) => m.publicSessionIncidents(sessionId)),
     },
 
     // Le lecteur de la page d'une séance : un flux par langue, le principal en

@@ -21,6 +21,35 @@
       "overrun": "Débordement",
       "technical_issue": "Panne technique",
       "connection_issue": "Diffusion interrompue"
+    },
+    "meeting": {
+      "none": "Pas de réunion Zoom pour cette activité.",
+      "notCreated": "Réunion Zoom non créée",
+      "started": "Réunion en cours",
+      "present": "{count} personne dans la salle | {count} personne dans la salle | {count} personnes dans la salle",
+      "joined": "{count} passée depuis le début | {count} passée depuis le début | {count} passées depuis le début",
+      "noPresence": "Nombre de présents indisponible : Zoom n'envoie pas encore les entrées en salle.",
+      "registered": "{count} inscrit chez Zoom | {count} inscrit chez Zoom | {count} inscrits chez Zoom",
+      "status": {
+        "draft": "Réunion en préparation",
+        "scheduled": "Réunion programmée",
+        "ended": "Réunion terminée",
+        "cancelled": "Réunion annulée",
+        "failed": "Réunion Zoom non créée",
+        "started": "Réunion en cours"
+      },
+      "failures": "{count} inscription refusée par Zoom | {count} inscription refusée par Zoom | {count} inscriptions refusées par Zoom",
+      "reason": {
+        "meeting_not_created": "La réunion n'existait pas encore chez Zoom.",
+        "meeting_changed": "La réunion Zoom a été remplacée.",
+        "quota": "Trop de demandes envoyées à Zoom en même temps.",
+        "unreachable": "Zoom ne répondait pas.",
+        "refused": "Zoom a refusé l'inscription.",
+        "other": "Erreur inconnue."
+      },
+      "retryAt": "nouvel essai à {time}",
+      "abandoned": "à relancer depuis le planificateur",
+      "more": "et {count} autre | et {count} autre | et {count} autres"
     }
   },
   "forbidden": {

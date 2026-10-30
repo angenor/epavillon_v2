@@ -30,9 +30,11 @@ import type {
   IncidentTargets,
   IncidentWriteResult,
   LiveDesk,
+  LiveDeskMeeting,
   LiveDeskSession,
   ManagedIncident,
   OverrunTemplate,
+  RegistrationFailure,
   UnpublishIncidentPayload,
   UpdateIncidentPayload,
 } from '~/types/admin-incidents'
@@ -52,6 +54,7 @@ import { people } from './people'
 import { taxonomyTerms } from './reference'
 import { rooms } from './rooms'
 import { allSessions } from './sessions'
+import { trackPages } from './track-pages'
 
 // ---------------------------------------------------------------------------
 // Le journal d'écritures de la session de démonstration
@@ -153,6 +156,34 @@ export function publicIncidents(eventId: string, at: number = Date.now()): Activ
       target_id: incident.target_id,
       target_label: incident.target_label,
     }))
+}
+
+/**
+ * `live.active_incidents_for_sessions()` : le global et l'édition, plus ce qui
+ * vise ces activités, leurs journées ou leurs organisations porteuses.
+ */
+export function publicSessionsIncidents(eventId: string, sessionIds: string[], at: number = Date.now()): ActiveIncident[] {
+  const targets = allSessions.filter((s) => s.event_id === eventId && sessionIds.includes(s.id))
+  return publicIncidents(eventId, at).filter((incident) => {
+    if (incident.scope === 'global' || incident.scope === 'event') return true
+    return targets.some(
+      (s) =>
+        (incident.scope === 'session' && incident.target_id === s.id) ||
+        (incident.scope === 'event_day' && incident.target_id === s.event_day_id) ||
+        (incident.scope === 'organization' && incident.target_id === s.organization_id),
+    )
+  })
+}
+
+export function publicTrackIncidents(eventId: string, trackId: string, at: number = Date.now()): ActiveIncident[] {
+  const page = Object.values(trackPages).find((p) => p.track.id === trackId)
+  const ids = (page?.agenda ?? []).flatMap((entry) => (entry.kind === 'activity' ? [entry.activity.session.id] : []))
+  return publicSessionsIncidents(eventId, ids, at)
+}
+
+export function publicSessionIncidents(sessionId: string, at: number = Date.now()): ActiveIncident[] {
+  const session = allSessions.find((s) => s.id === sessionId)
+  return session ? publicSessionsIncidents(session.event_id, [sessionId], at) : []
 }
 
 function managedIncident(incident: Incident, at: number): ManagedIncident {
@@ -404,7 +435,10 @@ function liveDesk(
   return {
     day: today,
     is_fallback: ofToday.length === 0,
+    meetings_visible: true,
+    presence_notifications: true,
     sessions: retained.map((session) => ({
+      meeting: deskMeeting(session, retained.filter((s) => s.is_streamed).indexOf(session), at),
       session_id: session.id,
       title: session.title,
       starts_at: session.starts_at,
@@ -419,6 +453,54 @@ function liveDesk(
         (row) => row.state === 'active' && row.scope === 'session' && row.target_id === session.id,
       ).length,
     })),
+  }
+}
+
+/** La réunion d'une activité diffusée : la première en cours a du monde et deux inscriptions refusées. */
+function deskMeeting(
+  session: (typeof allSessions)[number],
+  index: number,
+  at: number,
+): LiveDeskMeeting | null {
+  if (!session.is_streamed || session.status === 'cancelled') return null
+  const state = temporalStateOf(session.status, session.starts_at, session.ends_at, at)
+  const status = state === 'ongoing' ? 'started' : state === 'past' ? 'ended' : 'scheduled'
+  const failures: RegistrationFailure[] =
+    index === 0
+      ? [
+          {
+            participant_id: '01a04136-0000-7000-8000-00000000f001',
+            display_name: 'Awa Diallo',
+            email: 'awa.diallo@exemple.org',
+            sync_status: 'abandoned',
+            reason: 'refused',
+            detail: 'Zoom refuse (400, code 300) : Invalid email',
+            attempts: 1,
+            next_retry_at: null,
+          },
+          {
+            participant_id: '01a04136-0000-7000-8000-00000000f002',
+            display_name: 'Karim Ilboudo',
+            email: 'karim.ilboudo@exemple.org',
+            sync_status: 'failed',
+            reason: 'quota',
+            detail: 'quota Zoom atteint, nouvel essai dans 30 s',
+            attempts: 2,
+            next_retry_at: new Date(at + 5 * 60_000).toISOString(),
+          },
+        ]
+      : []
+  return {
+    meeting_id: `01a04136-0000-7000-8000-${String(index).padStart(12, '0')}`,
+    status,
+    sync_status: 'synced',
+    last_sync_error: null,
+    actual_start_at: status === 'scheduled' ? null : session.starts_at,
+    present_count: status === 'started' ? 37 - index * 5 : 0,
+    joined_count: status === 'scheduled' ? 0 : 52 - index * 5,
+    registered_count: 120 - index * 10,
+    failure_count: failures.length,
+    failures,
   }
 }
 

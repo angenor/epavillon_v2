@@ -281,6 +281,8 @@ export {
   incidentListScreen,
   overrunTemplate,
   publicIncidents,
+  publicSessionIncidents,
+  publicTrackIncidents,
   publishIncident,
   unpublishIncident,
   updateIncident,

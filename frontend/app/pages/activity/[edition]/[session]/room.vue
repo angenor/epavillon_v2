@@ -27,6 +27,8 @@ const activityTo = computed(() =>
 )
 const leaveUrl = computed(() => new URL(activityTo.value, requestUrl.origin).href)
 const zoneLabel = computed(() => edition.value?.city ?? undefined)
+// Visibles avant d'entrer ; une fois dans la réunion, la vue de Zoom couvre la page.
+const { incidents } = useSessionIncidents(session)
 
 // Une fois entré, on reste, même si la réunion change d'état sous la personne.
 const inMeeting = ref(false)
@@ -88,6 +90,12 @@ useHead(() => ({
       />
 
       <ClientOnly v-else>
+        <EventIncidentBanners
+          class="mb-4"
+          :incidents="incidents"
+          :timezone="session.timezone"
+          :zone-label="zoneLabel"
+        />
         <UiLoadingState v-if="!meetingLoaded" :label="t('activity.room.checking')">
           <UiSkeletonLoader height="20rem" />
         </UiLoadingState>

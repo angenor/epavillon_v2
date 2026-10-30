@@ -59,7 +59,7 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const localePath = useLocalePath()
-const { setLive } = useLiveSession()
+const { declareFrom } = useLiveSession()
 
 const nextThree = computed(() =>
   nextEditions(
@@ -72,14 +72,7 @@ const nextThree = computed(() =>
 )
 
 /** La séance en direct, déclarée UNE fois pour toute l'application. */
-watch(
-  () => props.sessions,
-  (sessions) => {
-    const live = sessions.find((session) => session.status === 'live')
-    if (live) setLive(live.id)
-  },
-  { immediate: true },
-)
+watch(() => props.sessions, declareFrom, { immediate: true })
 
 const isEmpty = computed(() => props.sessions.length === 0 && nextThree.value.length === 0)
 </script>

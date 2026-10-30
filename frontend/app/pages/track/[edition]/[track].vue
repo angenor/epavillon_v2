@@ -38,7 +38,22 @@ const { data, status, error, refresh } = await useAsyncData(
 if (import.meta.server && status.value === 'success' && !data.value) setResponseStatus(useRequestEvent()!, 404)
 
 const page = computed(() => data.value ?? null)
+
+const { declareFrom } = useLiveSession()
+// Signal à écouter ici : `edition:<id>:public:live`, puis `refresh()`.
+watch(
+  page,
+  (value) => value && declareFrom(value.agenda.flatMap((entry) => (entry.kind === 'activity' ? [entry.activity.session] : []))),
+  { immediate: true },
+)
 const { mounted, timezone, phase, countdown, entryState, current } = useTrackDay(page)
+
+// Signal à écouter ici : `edition:<id>:public:incidents`, puis relire.
+const { data: incidents } = useLazyAsyncData(
+  () => `journee-incidents-${page.value?.track.id ?? 'aucune'}`,
+  async () => (page.value ? api.incidents.forTrack(page.value.edition.id, page.value.track.id).catch(() => []) : []),
+  { default: () => [], watch: [page] },
+)
 
 const editionLabel = computed(() => (page.value ? (page.value.edition.acronym ?? tr(page.value.edition.title)) : ''))
 const title = computed(() => (page.value ? tr(page.value.track.title) : ''))
@@ -170,6 +185,9 @@ useSeoMeta({
     </div>
 
     <template v-else>
+      <div v-if="incidents.length" class="mx-auto max-w-[1280px] px-4 pt-6 pb-4 sm:px-6">
+        <EventIncidentBanners :incidents="incidents" :timezone="timezone" :zone-label="page.edition.city ?? undefined" />
+      </div>
       <TrackHero :page="page" :phase="phase" :back-to="programmeTo" :eve="eve" />
 
       <div class="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6">

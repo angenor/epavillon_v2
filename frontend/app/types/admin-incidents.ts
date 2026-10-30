@@ -40,7 +40,7 @@ import type {
   Url,
   Uuid,
 } from './shared'
-import type { IncidentScope, IncidentSeverity } from './live'
+import type { IncidentScope, IncidentSeverity, MeetingStatus, MeetingSyncStatus } from './live'
 import type { SessionStatus } from './programme/session'
 import type { TaxonomyTerm } from './reference'
 import type { TemporalState } from './views'
@@ -145,6 +145,43 @@ export interface LiveDeskSession {
   temporal_state: TemporalState
   /** Messages DÉJÀ actifs sur cette activité : ne pas publier deux fois la même panne. */
   active_incident_count: number
+  /** La réunion Zoom la plus récente ; nulle sans réunion ou sans `live.meeting.manage`. */
+  meeting: LiveDeskMeeting | null
+}
+
+/** Motif d'un échec d'inscription chez Zoom, classé par l'API d'après le texte de l'erreur. */
+export type ZoomFailureReason = 'meeting_not_created' | 'meeting_changed' | 'quota' | 'unreachable' | 'refused' | 'other'
+
+/** Une inscription que Zoom n'a pas acceptée (`live.meeting_participants`, `failed` ou `abandoned`). */
+export interface RegistrationFailure {
+  participant_id: Uuid
+  display_name: string
+  email: string
+  /** `failed` : nouvel essai prévu. `abandoned` : à relancer à la main. */
+  sync_status: Extract<MeetingSyncStatus, 'failed' | 'abandoned'>
+  reason: ZoomFailureReason
+  /** Le texte de l'erreur, tel que Zoom l'a donné. */
+  detail: string | null
+  attempts: number
+  next_retry_at: IsoDateTime | null
+}
+
+/** La réunion Zoom d'une activité, vue du poste de direct (080 § 2 et § 3 bis). */
+export interface LiveDeskMeeting {
+  meeting_id: Uuid
+  status: MeetingStatus
+  sync_status: MeetingSyncStatus
+  last_sync_error: string | null
+  actual_start_at: IsoDateTime | null
+  /** Personnes dans la salle, dans l'occurrence en cours (`live.meeting_room_counts`). */
+  present_count: number
+  /** Personnes passées par la salle depuis le démarrage. */
+  joined_count: number
+  /** Inscrits enregistrés chez Zoom. */
+  registered_count: number
+  failure_count: number
+  /** Les dix échecs les plus récents ; `failure_count` dit s'il y en a d'autres. */
+  failures: RegistrationFailure[]
 }
 
 /**
@@ -159,6 +196,10 @@ export interface LiveDesk {
   day: IsoDate
   sessions: LiveDeskSession[]
   is_fallback: boolean
+  /** `live.meeting.manage` sur l'édition : sans elle, aucune réunion n'est montrée. */
+  meetings_visible: boolean
+  /** Zoom a déjà envoyé une entrée en salle : sans quoi « 0 présent » ne veut rien dire. */
+  presence_notifications: boolean
 }
 
 // ---------------------------------------------------------------------------

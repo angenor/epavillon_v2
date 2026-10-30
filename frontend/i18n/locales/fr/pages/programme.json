@@ -29,9 +29,6 @@
     "title": "Aucune programmation publiée",
     "description": "Les programmes des conférences et des cycles de webinaires apparaîtront ici dès leur publication."
   },
-  "incidents": {
-    "more": "+{count} autre message | +{count} autre message | +{count} autres messages"
-  },
   "hero": {
     "overline": "Programmation",
     "titlePavilion": "Programme du Pavillon de la Francophonie à la {edition}",

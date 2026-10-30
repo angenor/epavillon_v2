@@ -21,6 +21,35 @@
       "overrun": "Overrun",
       "technical_issue": "Technical issue",
       "connection_issue": "Broadcast down"
+    },
+    "meeting": {
+      "none": "No Zoom meeting for this activity.",
+      "notCreated": "Zoom meeting not created",
+      "started": "Meeting in progress",
+      "present": "{count} person in the room | {count} person in the room | {count} people in the room",
+      "joined": "{count} joined since the start | {count} joined since the start | {count} joined since the start",
+      "noPresence": "Attendance unavailable: Zoom is not sending room entries yet.",
+      "registered": "{count} registered with Zoom | {count} registered with Zoom | {count} registered with Zoom",
+      "status": {
+        "draft": "Meeting being prepared",
+        "scheduled": "Meeting scheduled",
+        "ended": "Meeting ended",
+        "cancelled": "Meeting cancelled",
+        "failed": "Zoom meeting not created",
+        "started": "Meeting in progress"
+      },
+      "failures": "{count} registration refused by Zoom | {count} registration refused by Zoom | {count} registrations refused by Zoom",
+      "reason": {
+        "meeting_not_created": "The meeting did not exist on Zoom yet.",
+        "meeting_changed": "The Zoom meeting was replaced.",
+        "quota": "Too many requests sent to Zoom at once.",
+        "unreachable": "Zoom was not responding.",
+        "refused": "Zoom refused the registration.",
+        "other": "Unknown error."
+      },
+      "retryAt": "next attempt at {time}",
+      "abandoned": "to be retried from the planner",
+      "more": "and {count} more | and {count} more | and {count} more"
     }
   },
   "forbidden": {

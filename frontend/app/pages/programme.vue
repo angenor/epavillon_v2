@@ -39,13 +39,9 @@ import type { ProgrammeData } from '~/types/event-programme'
  * ── LE BANDEAU D'INCIDENT ───────────────────────────────────────────────────
  *
  * Publier un message d'incident ne servait à rien tant qu'aucune page publique
- * ne le montrait. C'est ici qu'il atteint quelqu'un — à l'échelle de l'ÉDITION,
- * par la fonction descendante du modèle, et non sur la page d'une activité, qui
- * n'existe pas.
- *
- * TROIS AU PLUS, le plus grave en tête, le reste replié en « +N » : c'est la
- * règle des pastilles de la charte, appliquée à un cas qu'elle décrit. L'API
- * rend tout ; l'écran décide de ce qu'il montre.
+ * ne le montrait. Ici, à l'échelle de l'ÉDITION, par la fonction descendante du
+ * modèle ; la page d'une activité, sa salle et celle d'une journée spéciale
+ * montrent le leur (31/10). Trois au plus : `EventIncidentBanners`.
  *
  * Il se charge À PART du programme, et une panne de sa lecture ne casse pas la
  * page : un bandeau absent se lit comme une édition sans incident, ce qui est le
@@ -95,13 +91,9 @@ const { data: incidents } = await useAsyncData(
     if (!eventId) return []
     return api.incidents.forEvent(eventId).catch(() => [])
   },
+  // Signal à écouter ici : `edition:<id>:public:incidents`, puis relire.
   { default: () => [], lazy: true },
 )
-
-/** Trois au plus — la règle des pastilles de la charte. */
-const AFFICHES = 3
-const bandeaux = computed(() => (incidents.value ?? []).slice(0, AFFICHES))
-const replies = computed(() => Math.max((incidents.value ?? []).length - AFFICHES, 0))
 
 useHead(() => ({ title: t('programme.title') }))
 </script>
@@ -125,26 +117,7 @@ useHead(() => ({ title: t('programme.title') }))
     </header>
 
     <!-- Juste sous le bandeau : ce qui ne se passe pas comme prévu se lit avant le programme. -->
-    <div v-if="bandeaux.length" class="flex flex-col gap-2">
-      <UiIncidentBanner
-        v-for="incident in bandeaux"
-        :key="incident.incident_id"
-        :severity="incident.severity"
-        :title="incident.title"
-        :message="incident.message"
-        :scope="incident.scope"
-        :action-url="incident.action_url"
-        :target-label="incident.target_label"
-        :dismissible="incident.is_dismissible"
-        :display-until="incident.display_until"
-        :timezone="shown?.timezone"
-        :zone-label="shown?.city ?? undefined"
-        standalone
-      />
-      <p v-if="replies" class="text-sm text-text-muted">
-        {{ t('programme.incidents.more', { count: replies }) }}
-      </p>
-    </div>
+    <EventIncidentBanners :incidents="incidents ?? []" :timezone="shown?.timezone" :zone-label="shown?.city ?? undefined" />
 
     <UiLoadingState v-if="status === 'pending'" :label="t('programme.loading')">
       <EventProgrammeSkeleton />

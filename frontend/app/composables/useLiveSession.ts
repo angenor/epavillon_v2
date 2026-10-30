@@ -49,5 +49,16 @@ export function useLiveSession() {
     clearLive: (sessionId: SessionId): void => {
       if (liveSessionId.value === sessionId) liveSessionId.value = null
     },
+
+    /**
+     * Déclare la séance que la base dit en direct (`status = 'live'`, posé par
+     * la réunion Zoom). Une liste relue où la séance déclarée n'est plus en
+     * direct éteint le repère ; une liste qui ne la contient pas n'y touche pas.
+     */
+    declareFrom: (sessions: readonly { id: SessionId; status: string }[]): void => {
+      const live = sessions.find((session) => session.status === 'live')
+      if (live) liveSessionId.value = live.id
+      else if (sessions.some((session) => session.id === liveSessionId.value)) liveSessionId.value = null
+    },
   }
 }

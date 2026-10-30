@@ -36,6 +36,10 @@ import type { TimeZoneName } from '~/types/shared'
  * IL DIT AUSSI CE QUI EST DÉJÀ DIT. Une activité qui porte déjà un message actif
  * l'annonce : republier la même panne est le meilleur moyen que le public cesse
  * de lire les bandeaux.
+ *
+ * ET LA SALLE ZOOM (31/10), pour qui gère les réunions : présents, inscriptions
+ * refusées (`LiveDeskMeeting`). Signal à écouter ici : `edition:<id>:desk`,
+ * puis relire l'écran.
  */
 
 interface Props {
@@ -149,6 +153,20 @@ const dayLabel = computed(() => formatDate(props.desk.day, props.timezone))
           >
             <UiIcon name="warning" size="0.85rem" />
             {{ t('admin.incident.list.desk.alreadyPublished', { count: session.active_incident_count }) }}
+          </p>
+
+          <AdminIncidentsLiveDeskMeeting
+            v-if="session.meeting"
+            :meeting="session.meeting"
+            :timezone="timezone"
+            :zone-label="zoneLabel"
+            :presence-notifications="desk.presence_notifications"
+          />
+          <p
+            v-else-if="desk.meetings_visible && session.is_streamed"
+            class="mt-2 text-sm text-text-muted"
+          >
+            {{ t('admin.incident.list.desk.meeting.none') }}
           </p>
         </div>
 

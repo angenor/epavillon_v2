@@ -36,8 +36,12 @@ if (import.meta.server && status.value === 'success' && !data.value) setResponse
 const edition = computed(() => data.value?.edition ?? null)
 const detail = computed(() => data.value?.detail ?? null)
 const session = computed(() => detail.value?.session ?? null)
+const { declareFrom } = useLiveSession()
+// Signal à écouter ici : `session:<id>` (direct allumé ou éteint), puis `refresh()`.
+watch(session, (current) => current && declareFrom([current]), { immediate: true })
 const state = computed(() => (session.value ? stateOf(session.value) : 'upcoming'))
 const timezone = computed(() => session.value?.timezone ?? 'UTC')
+const { incidents } = useSessionIncidents(session)
 
 const { data: schedule } = useLazyAsyncData(
   () => `activite-programme-${edition.value?.id ?? 'aucune'}`,
@@ -178,6 +182,9 @@ useSeoMeta({
     </div>
 
     <template v-else>
+      <div v-if="incidents.length" class="mx-auto max-w-[1280px] px-4 pt-6 pb-4 sm:px-6">
+        <EventIncidentBanners :incidents="incidents" :timezone="timezone" :zone-label="edition.city ?? undefined" />
+      </div>
       <ActivityHero
         :session="session"
         :edition="edition"

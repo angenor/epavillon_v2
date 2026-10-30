@@ -29,7 +29,7 @@ const emit = defineEmits<{ 'update:edition': [edition: PublicEditionRow] }>()
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { zoneLabel, zoneOffsetShort, dateRange } = useDateTime()
-const { isLive, setLive } = useLiveSession()
+const { isLive, declareFrom } = useLiveSession()
 const api = useApi()
 const route = useRoute()
 const router = useRouter()
@@ -236,14 +236,8 @@ const hasPast = computed(() => {
 })
 
 // Même règle que l'accueil : la séance marquée en direct est déclarée une fois pour toute l'application.
-watch(
-  () => data.value.schedule,
-  (schedule) => {
-    const live = schedule.find((session) => session.status === 'live')
-    if (live) setLive(live.id)
-  },
-  { immediate: true },
-)
+// Signal à écouter ici : `edition:<id>:public:live`, puis relire le programme.
+watch(() => data.value.schedule, declareFrom, { immediate: true })
 
 const liveSession = computed(() => data.value.schedule.find((session) => isLive(session.id)) ?? null)
 
