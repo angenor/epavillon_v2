@@ -21,7 +21,7 @@
     "locale": "Email language",
     "localeHint": "The language the platform writes to you in.",
     "timezone": "Time zone",
-    "timezoneHint": "Times in emails are given in this time zone.",
+    "timezoneHint": "The time zone you are usually in. Activity times are still given in the event's time zone.",
     "directory": "Appear in the directory",
     "directoryHint": "Other participants can find your name, position and organization."
   },

@@ -21,7 +21,7 @@
     "locale": "Langue des courriels",
     "localeHint": "La langue dans laquelle la plateforme vous écrit.",
     "timezone": "Fuseau horaire",
-    "timezoneHint": "Les heures des courriels vous sont données dans ce fuseau.",
+    "timezoneHint": "Le fuseau où vous vous trouvez d'habitude. Les heures des activités restent données dans celui de l'événement.",
     "directory": "Apparaître dans l'annuaire",
     "directoryHint": "Les autres participantes et participants peuvent trouver votre nom, votre fonction et votre organisation."
   },
