@@ -1,0 +1,148 @@
+{
+  "breadcrumb": "Track page",
+  "backToEdition": "Back to the edition",
+  "viewPublic": "View public page",
+  "editTrack": "Edit track details",
+  "unpublishedNotice": "This track's public page is closed: what you enter here will only show once it is opened, from the track details.",
+  "toc": "Page contents",
+  "unsaved": "Unsaved changes",
+  "saved": "Page saved",
+  "save": "Save page",
+  "discard": "Discard changes",
+  "leaveConfirm": "Some changes to the page are not saved. Leave anyway?",
+  "sections": {
+    "place": {
+      "title": "Venue and presentation",
+      "intro": "Where the track takes place, the tagline under its title and the audiences it addresses."
+    },
+    "media": {
+      "title": "Header and documents",
+      "intro": "The header photo and the documents to download: programme, summary, guide."
+    },
+    "feature": {
+      "title": "Featured block",
+      "intro": "One block per page, for what must stand out: the Negotiators' Guide for the workshop, for instance."
+    },
+    "partners": {
+      "title": "Partners",
+      "intro": "Organisations behind or supporting the day, distinct from those of its activities. The list order is the page order."
+    },
+    "agenda": {
+      "title": "Agenda",
+      "intro": "The parts of the day, the track's activities and the moments without an activity. Each change is saved at once."
+    }
+  },
+  "place": {
+    "venue": "Venue",
+    "venueHint": "With no choice, the edition's pavilion. Another venue (the workshop hotel) is declared in the \"Venues and rooms\" tab.",
+    "pavilion": "The edition's pavilion",
+    "pavilionNamed": "The edition's pavilion ({name})",
+    "manageVenues": "Add or edit a venue",
+    "map": "View on map",
+    "noAddress": "No address and no map link: the page will show no access map.",
+    "tagline": "Tagline",
+    "taglineHint": "A few words under the title: \"Hackathon, pitches, game, stage\"."
+  },
+  "audiences": {
+    "label": "Target audiences",
+    "hint": "One audience per line. French is required, English optional.",
+    "fr": "Audience {n}, in French",
+    "en": "Audience {n}, in English",
+    "frRequired": "The French label is required.",
+    "add": "Add an audience",
+    "remove": "Remove audience {audience}"
+  },
+  "media": {
+    "cover": "Header photo",
+    "coverUse": "cropped to the screen width",
+    "documents": "Documents",
+    "documentsHint": "As PDF. The label is the link text on the page: \"Programme (PDF)\", \"Guide summary\".",
+    "addDocument": "Add a document",
+    "caption": "Link label",
+    "captionHint": "Without a label, the page shows the file name.",
+    "removeDocument": "Remove {name}",
+    "untitled": "Document"
+  },
+  "feature": {
+    "kicker": "Kicker",
+    "kickerHint": "One line above the title: \"Presented during the workshop\".",
+    "title": "Block title",
+    "titleMissing": "A featured block needs a title: without it, nothing shows.",
+    "body": "Text",
+    "linkLabel": "Link label",
+    "linkUrl": "Link address",
+    "linkUrlHint": "Full address (https://…) or site path (/guide-nego).",
+    "urlInvalid": "Full address (https://…) or a site path starting with \"/\".",
+    "urlMissing": "A link label needs its address.",
+    "labelMissing": "An address needs its label.",
+    "visual": "Block visual",
+    "visualUse": "the Guide cover, for instance"
+  },
+  "partners": {
+    "empty": "No partner yet.",
+    "add": "Add a partner",
+    "duplicate": "{name} is already a partner.",
+    "role": "Role of {name}",
+    "remove": "Remove {name}",
+    "supportNote": "Support statement",
+    "supportNoteHint": "One sentence printed under the logos, in the funder's words: \"With financial support from the Government of Québec\"."
+  },
+  "parts": {
+    "heading": "Parts",
+    "intro": "An editorial grouping (\"Morning\", \"Part 1: financing adaptation\"); its times are read from what it contains.",
+    "add": "Add a part",
+    "empty": "No part: the agenda will show as a single block.",
+    "numbered": "Part {n}",
+    "createTitle": "New part",
+    "editTitle": "Edit part",
+    "dialogHint": "A short name, a heading, or both.",
+    "label": "Short name",
+    "labelHint": "\"Morning\", \"Get inspired\". Without a name, the page writes \"Part 1\".",
+    "title": "Heading",
+    "summary": "One-line summary",
+    "summaryHint": "For the overview at the top of the page.",
+    "headingMissing": "Give a short name or a heading.",
+    "edit": "Edit {part}",
+    "remove": "Remove {part}",
+    "removeTitle": "Remove this part?",
+    "removeDescription": "Its activities and moments stay in the agenda, outside any part.",
+    "removeAction": "Remove part"
+  },
+  "agenda": {
+    "title": "Activities and moments",
+    "intro": "Time zone: {zone}. Activities are attached to the track from the planner; here, you place them in a part and pick the highlights.",
+    "attach": "Attach activities",
+    "noPart": "Outside any part",
+    "partEmpty": "Nothing in this part yet.",
+    "partOf": "Part of {title}",
+    "activity": "Activity",
+    "moment": "Moment without activity",
+    "unpublished": "Unpublished, not on the page",
+    "highlight": "Highlight",
+    "empty": {
+      "title": "Empty agenda",
+      "description": "Attach activities to the track from the planner, or add a moment (welcome, lunch, closing)."
+    }
+  },
+  "moments": {
+    "add": "Add a moment",
+    "createTitle": "New moment",
+    "editTitle": "Edit moment",
+    "dialogHint": "Welcome, lunch, break, closing: not an activity, no registration nor broadcast.",
+    "label": "Label",
+    "labelHint": "\"Lunch\", \"Closing\".",
+    "labelMissing": "The label is required.",
+    "start": "Start",
+    "startMissing": "The start time is required.",
+    "end": "End",
+    "endHint": "Optional: a closing may only have a start time.",
+    "endBeforeStart": "The end must follow the start.",
+    "description": "Detail",
+    "descriptionHint": "One line under the label: \"Address by the OIF\".",
+    "part": "Part",
+    "edit": "Edit {moment}",
+    "remove": "Remove {moment}",
+    "removeTitle": "Remove this moment from the agenda?",
+    "removeAction": "Remove moment"
+  }
+}

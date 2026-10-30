@@ -70,6 +70,7 @@
     "composition": "No activity linked | {count} activity linked | {count} activities linked",
     "compositionHint": "Composed in the planner",
     "openPlanner": "Compose in the planner",
+    "editPage": "Public page content",
     "published": "Public page opened on {date}",
     "unpublished": "Public page closed",
     "curator": "Curator: {name}",
@@ -97,7 +98,9 @@
       "color": "Colour",
       "curatedBy": "Curator",
       "curatedByNone": "None",
-      "publish": "Open the public page of the track"
+      "publish": "Open the public page of the track",
+      "themes": "Themes",
+      "themesHint": "The list replaces the track’s: unticking removes the theme."
     },
     "remove": {
       "action": "Delete track",
@@ -145,7 +148,13 @@
       "nameField": "Name",
       "kindField": "Kind of venue",
       "addressField": "Address",
-      "mapUrlField": "Map link"
+      "mapUrlField": "Map link",
+      "areaField": "Area",
+      "areaHint": "Short, next to the name: \"Blue zone\".",
+      "accessNoteField": "Access note",
+      "accessNoteHint": "One sentence: \"In town, outside the blue zone.\"",
+      "latitude": "Latitude",
+      "longitude": "Longitude"
     },
     "roomForm": {
       "createTitle": "New room",

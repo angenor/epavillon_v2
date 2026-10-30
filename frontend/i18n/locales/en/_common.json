@@ -30,7 +30,9 @@
     "submit": "Submit",
     "upload": "Upload",
     "enlarge": "Enlarge window",
-    "reduce": "Reduce window"
+    "reduce": "Reduce window",
+    "moveUp": "Move {item} up",
+    "moveDown": "Move {item} down"
   },
   "states": {
     "loading": {

@@ -70,6 +70,7 @@
     "composition": "Aucune activité rattachée | {count} activité rattachée | {count} activités rattachées",
     "compositionHint": "Composition faite au planificateur",
     "openPlanner": "Composer au planificateur",
+    "editPage": "Contenu de la page publique",
     "published": "Page publique ouverte le {date}",
     "unpublished": "Page publique fermée",
     "curator": "Responsable : {name}",
@@ -97,7 +98,9 @@
       "color": "Couleur",
       "curatedBy": "Responsable",
       "curatedByNone": "Aucun",
-      "publish": "Ouvrir la page publique du fil"
+      "publish": "Ouvrir la page publique du fil",
+      "themes": "Thématiques",
+      "themesHint": "La liste remplace celle du fil : décocher retire la thématique."
     },
     "remove": {
       "action": "Supprimer le fil",
@@ -145,7 +148,13 @@
       "nameField": "Nom",
       "kindField": "Nature du lieu",
       "addressField": "Adresse",
-      "mapUrlField": "Lien vers la carte"
+      "mapUrlField": "Lien vers la carte",
+      "areaField": "Secteur",
+      "areaHint": "Court, à côté du nom : « Zone bleue ».",
+      "accessNoteField": "Consigne d’accès",
+      "accessNoteHint": "Une phrase : « En ville, hors de la zone bleue. »",
+      "latitude": "Latitude",
+      "longitude": "Longitude"
     },
     "roomForm": {
       "createTitle": "Nouvelle salle",

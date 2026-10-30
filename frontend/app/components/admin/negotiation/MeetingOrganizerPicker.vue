@@ -5,6 +5,9 @@ import type { Uuid } from '~/types/shared'
 /**
  * L'organisation qui tient la réunion, cherchée par la recherche unique de la
  * plateforme — toutes dénominations confondues (règle métier n° 1).
+ *
+ * Sert aussi aux partenaires d'une journée spéciale : `chosen` rend la fiche
+ * entière, et l'écran qui ajoute à une liste garde `modelValue` à nul.
  */
 
 const props = defineProps<{
@@ -13,8 +16,12 @@ const props = defineProps<{
   currentName?: string | null
   error?: string
   disabled?: boolean
+  label?: string
+  hint?: string
+  /** Ajout à une liste, qui peut rester vide : le champ n'est pas obligatoire. */
+  optional?: boolean
 }>()
-const emit = defineEmits<{ 'update:modelValue': [value: Uuid | null] }>()
+const emit = defineEmits<{ 'update:modelValue': [value: Uuid | null]; chosen: [match: SimilarOrganization] }>()
 
 const { t } = useI18n()
 const api = useApi()
@@ -55,6 +62,7 @@ async function search(value: string): Promise<void> {
 function choose(match: SimilarOrganization): void {
   chosenName.value = match.acronym ? `${match.legal_name} (${match.acronym})` : match.legal_name
   emit('update:modelValue', match.organization_id)
+  emit('chosen', match)
   results.value = []
   searched.value = false
   query.value = ''
@@ -83,13 +91,13 @@ function clear(): void {
     <template v-else>
       <UiSearchInput
         :model-value="query"
-        :label="t('admin.negociations.reunions.form.organizer.search')"
-        :hint="t('admin.negociations.reunions.form.organizer.searchHint')"
+        :label="props.label ?? t('admin.negociations.reunions.form.organizer.search')"
+        :hint="props.hint ?? t('admin.negociations.reunions.form.organizer.searchHint')"
         :error="props.error"
         :loading="searching"
         :disabled="props.disabled"
         :result-count="searched ? results.length : null"
-        required
+        :required="!props.optional"
         @search="search"
       />
 

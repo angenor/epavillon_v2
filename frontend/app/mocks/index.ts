@@ -23,6 +23,7 @@
  *   rooms.ts             les pavillons, leurs salles, leurs canaux de diffusion
  *   tracks.ts            les trois journées spéciales
  *   track-pages.ts       pages publiques des fils de la CdP31 (atelier, finance, jeunesse)
+ *   track-page-writes.ts les écritures de la page d'un fil, hors ligne
  *   calls.ts             l'appel ouvert, les deux appels clos et le comité
  *   criteria.ts          les six critères pondérés, dont un éliminatoire
  *   proposals/           41 dossiers, découpés par statut, plus l'historique
@@ -141,6 +142,18 @@ export { eventSeries, events, eventDays } from './event'
 export { venues, rooms, broadcastChannels } from './rooms'
 export { programmeTracks } from './tracks'
 export { trackPages, trackPageSettings, trackPageOrganizations } from './track-pages'
+export {
+  createTrackMoment,
+  createTrackPart,
+  placeSessionInTrack,
+  readTrackPage,
+  removeTrackMoment,
+  removeTrackPart,
+  saveTrackPage,
+  trackPartnerRoles,
+  updateTrackMoment,
+  updateTrackPart,
+} from './track-page-writes'
 export { callsForProposals, callReviewers } from './calls'
 export { reviewCriteria, maxWeightedScore, maxWeightedScoreOf, seedDefaultCriteria } from './criteria'
 

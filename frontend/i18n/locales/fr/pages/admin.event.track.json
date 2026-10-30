@@ -1,0 +1,148 @@
+{
+  "breadcrumb": "Page d'un fil",
+  "backToEdition": "Retour à l'édition",
+  "viewPublic": "Voir la page publique",
+  "editTrack": "Modifier la fiche du fil",
+  "unpublishedNotice": "La page publique de ce fil est fermée : ce qui se saisit ici ne se verra qu'à son ouverture, depuis la fiche du fil.",
+  "toc": "Sommaire de la page",
+  "unsaved": "Modifications non enregistrées",
+  "saved": "Page enregistrée",
+  "save": "Enregistrer la page",
+  "discard": "Annuler les modifications",
+  "leaveConfirm": "Des modifications de la page ne sont pas enregistrées. Quitter quand même ?",
+  "sections": {
+    "place": {
+      "title": "Lieu et présentation",
+      "intro": "Où se tient le fil, l'accroche posée sous son titre et les publics à qui il s'adresse."
+    },
+    "media": {
+      "title": "Bandeau et documents",
+      "intro": "La photo du bandeau de la page et les documents à télécharger : programme, résumé, guide."
+    },
+    "feature": {
+      "title": "Encart mis en avant",
+      "intro": "Un seul encart par page, pour ce qui doit sortir du lot : le Guide des négociations pour l'atelier, par exemple."
+    },
+    "partners": {
+      "title": "Partenaires",
+      "intro": "Les organisations qui portent ou soutiennent la journée, distinctes de celles de ses activités. L'ordre de la liste est celui de la page."
+    },
+    "agenda": {
+      "title": "Déroulé",
+      "intro": "Les parties de la journée, les activités du fil et les moments sans activité. Chaque modification est enregistrée aussitôt."
+    }
+  },
+  "place": {
+    "venue": "Lieu",
+    "venueHint": "Sans choix, le pavillon de l'édition. Un autre lieu (l'hôtel de l'atelier) se déclare à l'onglet « Lieux et salles ».",
+    "pavilion": "Le pavillon de l'édition",
+    "pavilionNamed": "Le pavillon de l'édition ({name})",
+    "manageVenues": "Ajouter ou modifier un lieu",
+    "map": "Voir sur la carte",
+    "noAddress": "Ni adresse ni lien de carte : la page n'affichera pas de plan d'accès.",
+    "tagline": "Accroche",
+    "taglineHint": "Quelques mots posés sous le titre : « Hackathon, pitchs, jeu, scène »."
+  },
+  "audiences": {
+    "label": "Publics cibles",
+    "hint": "Un public par ligne. Le français est obligatoire, l'anglais facultatif.",
+    "fr": "Public {n}, en français",
+    "en": "Public {n}, en anglais",
+    "frRequired": "Le libellé français est obligatoire.",
+    "add": "Ajouter un public",
+    "remove": "Retirer le public {audience}"
+  },
+  "media": {
+    "cover": "Photo du bandeau",
+    "coverUse": "recadrée selon la largeur de l'écran",
+    "documents": "Documents",
+    "documentsHint": "En PDF. Le libellé est celui du lien sur la page : « Programme (PDF) », « Résumé du Guide ».",
+    "addDocument": "Ajouter un document",
+    "caption": "Libellé du lien",
+    "captionHint": "Sans libellé, la page affiche le nom du fichier.",
+    "removeDocument": "Retirer {name}",
+    "untitled": "Document"
+  },
+  "feature": {
+    "kicker": "Surtitre",
+    "kickerHint": "Une ligne au-dessus du titre : « Présenté pendant l'atelier ».",
+    "title": "Titre de l'encart",
+    "titleMissing": "Un encart demande un titre : sans lui, rien ne s'affiche.",
+    "body": "Texte",
+    "linkLabel": "Libellé du lien",
+    "linkUrl": "Adresse du lien",
+    "linkUrlHint": "Adresse complète (https://…) ou chemin du site (/guide-nego).",
+    "urlInvalid": "Adresse complète (https://…) ou chemin du site commençant par « / ».",
+    "urlMissing": "Un libellé de lien demande son adresse.",
+    "labelMissing": "Une adresse demande son libellé.",
+    "visual": "Visuel de l'encart",
+    "visualUse": "la couverture du Guide, par exemple"
+  },
+  "partners": {
+    "empty": "Aucun partenaire pour l'instant.",
+    "add": "Ajouter un partenaire",
+    "duplicate": "{name} figure déjà parmi les partenaires.",
+    "role": "Rôle de {name}",
+    "remove": "Retirer {name}",
+    "supportNote": "Mention de soutien",
+    "supportNoteHint": "Une phrase imprimée sous les logos, dans les mots du bailleur : « Avec le soutien financier du gouvernement du Québec »."
+  },
+  "parts": {
+    "heading": "Parties",
+    "intro": "Un regroupement éditorial (« Matin », « Partie 1 : financer l'adaptation ») ; ses heures se lisent sur ce qu'il contient.",
+    "add": "Ajouter une partie",
+    "empty": "Aucune partie : le déroulé s'affichera d'un seul tenant.",
+    "numbered": "Partie {n}",
+    "createTitle": "Nouvelle partie",
+    "editTitle": "Modifier la partie",
+    "dialogHint": "Un nom court, un intitulé, ou les deux.",
+    "label": "Nom court",
+    "labelHint": "« Matin », « S'inspirer ». Sans nom, la page écrit « Partie 1 ».",
+    "title": "Intitulé",
+    "summary": "Résumé d'une ligne",
+    "summaryHint": "Pour le sommaire en tête de page.",
+    "headingMissing": "Donnez un nom court ou un intitulé.",
+    "edit": "Modifier {part}",
+    "remove": "Retirer {part}",
+    "removeTitle": "Retirer cette partie ?",
+    "removeDescription": "Ses activités et ses moments restent dans le déroulé, hors partie.",
+    "removeAction": "Retirer la partie"
+  },
+  "agenda": {
+    "title": "Activités et moments",
+    "intro": "Fuseau : {zone}. Les activités se rattachent au fil depuis le planificateur ; ici, on les range dans une partie et on choisit les temps forts.",
+    "attach": "Rattacher des activités",
+    "noPart": "Hors partie",
+    "partEmpty": "Rien dans cette partie pour l'instant.",
+    "partOf": "Partie de {title}",
+    "activity": "Activité",
+    "moment": "Moment sans activité",
+    "unpublished": "Non publiée, absente de la page",
+    "highlight": "Temps fort",
+    "empty": {
+      "title": "Déroulé vide",
+      "description": "Rattachez des activités au fil depuis le planificateur, ou ajoutez un moment (accueil, déjeuner, clôture)."
+    }
+  },
+  "moments": {
+    "add": "Ajouter un moment",
+    "createTitle": "Nouveau moment",
+    "editTitle": "Modifier le moment",
+    "dialogHint": "Accueil, déjeuner, pause, clôture : pas une activité, ni inscription ni diffusion.",
+    "label": "Libellé",
+    "labelHint": "« Déjeuner », « Clôture ».",
+    "labelMissing": "Le libellé est obligatoire.",
+    "start": "Début",
+    "startMissing": "L'heure de début est obligatoire.",
+    "end": "Fin",
+    "endHint": "Facultative : une clôture peut n'avoir qu'une heure de début.",
+    "endBeforeStart": "La fin doit suivre le début.",
+    "description": "Précision",
+    "descriptionHint": "Une ligne sous le libellé : « Mot de l'OIF ».",
+    "part": "Partie",
+    "edit": "Modifier {moment}",
+    "remove": "Retirer {moment}",
+    "removeTitle": "Retirer ce moment du déroulé ?",
+    "removeAction": "Retirer le moment"
+  }
+}

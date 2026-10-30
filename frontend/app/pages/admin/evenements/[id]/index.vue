@@ -770,6 +770,7 @@ const periodLabel = computed(() => {
             :busy="busy"
             :error="tabError"
             :planner-to="plannerTo"
+            :page-to="(trackId: string) => localePath(`/admin/evenements/${eventId}/journees/${trackId}`)"
             @save="(payload: EditionTrackPayload) => runTabWrite('tracksTab', () =>
               api.adminEvents.saveTrack(payload, adminScope.scope))"
             @remove="(trackId: string) => runTabWrite('tracksTab', () =>

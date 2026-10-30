@@ -74,6 +74,10 @@ function openVenueCreate(): void {
     kind: 'pavilion',
     address: props.detail.edition.address,
     map_url: null,
+    area: null,
+    access_note: null,
+    latitude: null,
+    longitude: null,
   }
 }
 
@@ -85,6 +89,11 @@ function openVenueEdit(venue: EditionVenue): void {
     kind: venue.kind,
     address: venue.address,
     map_url: venue.map_url,
+    // L'écriture d'un lieu est totale : omis, ces champs seraient effacés.
+    area: venue.area,
+    access_note: venue.access_note,
+    latitude: venue.latitude,
+    longitude: venue.longitude,
   }
 }
 
@@ -190,7 +199,9 @@ watch(
                 :label="t('admin.event.tabs.venuesTab.kind.' + venue.kind)"
               />
             </div>
+            <p v-if="venue.area" class="mt-1 text-sm text-text-secondary">{{ tr(venue.area) }}</p>
             <p v-if="venue.address" class="mt-1 text-sm text-text-muted">{{ venue.address }}</p>
+            <p v-if="venue.access_note" class="mt-1 text-sm text-text-muted">{{ tr(venue.access_note) }}</p>
             <UiButton
               v-if="venue.map_url"
               variant="link"
@@ -350,6 +361,47 @@ watch(
           :label="t('admin.event.tabs.venuesTab.venueForm.mapUrlField')"
           @update:model-value="(next: string) => (venueDraft!.map_url = next || null)"
         />
+
+        <AdminEventsI18nField
+          :model-value="venueDraft.area ?? null"
+          :label="t('admin.event.tabs.venuesTab.venueForm.areaField')"
+          :hint="t('admin.event.tabs.venuesTab.venueForm.areaHint')"
+          :maxlength="80"
+          @update:model-value="(next) => (venueDraft!.area = next)"
+        />
+
+        <AdminEventsI18nField
+          :model-value="venueDraft.access_note ?? null"
+          :label="t('admin.event.tabs.venuesTab.venueForm.accessNoteField')"
+          :hint="t('admin.event.tabs.venuesTab.venueForm.accessNoteHint')"
+          multiline
+          :rows="2"
+          @update:model-value="(next) => (venueDraft!.access_note = next)"
+        />
+
+        <!-- Les deux ou aucune (`ck_venues_coordinates`) : l'API le refuse sinon. -->
+        <div class="grid gap-4 sm:grid-cols-2">
+          <UiInput
+            :model-value="venueDraft.latitude ?? ''"
+            type="number"
+            step="0.000001"
+            :min="-90"
+            :max="90"
+            inputmode="decimal"
+            :label="t('admin.event.tabs.venuesTab.venueForm.latitude')"
+            @update:model-value="(next: string | number) => (venueDraft!.latitude = next === '' ? null : Number(next))"
+          />
+          <UiInput
+            :model-value="venueDraft.longitude ?? ''"
+            type="number"
+            step="0.000001"
+            :min="-180"
+            :max="180"
+            inputmode="decimal"
+            :label="t('admin.event.tabs.venuesTab.venueForm.longitude')"
+            @update:model-value="(next: string | number) => (venueDraft!.longitude = next === '' ? null : Number(next))"
+          />
+        </div>
 
         <div class="flex flex-wrap gap-3 border-t border-border pt-4">
           <UiButton type="submit" :loading="props.busy">{{ t('common.actions.save') }}</UiButton>

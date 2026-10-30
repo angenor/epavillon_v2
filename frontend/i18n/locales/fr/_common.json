@@ -30,7 +30,9 @@
     "submit": "Soumettre",
     "upload": "Téléverser",
     "enlarge": "Agrandir la fenêtre",
-    "reduce": "Réduire la fenêtre"
+    "reduce": "Réduire la fenêtre",
+    "moveUp": "Monter {item}",
+    "moveDown": "Descendre {item}"
   },
   "states": {
     "loading": {

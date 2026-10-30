@@ -66,6 +66,7 @@ import { createProposalReviewApi } from './api/proposal-review'
 import { createProposalsApi } from './api/proposals'
 import { createPlannerApi } from './api/planner'
 import { createAdminEventsApi } from './api/admin-events'
+import { createAdminTrackPageApi } from './api/admin-track-page'
 import { createAdminOrganizationsApi } from './api/admin-organizations'
 import { createInvitationApi } from './api/invitation'
 import { createAdminUsersApi } from './api/admin-users'
@@ -721,6 +722,9 @@ export function useApi() {
     // chevauchement de créneaux, qui reste toujours écrivable.
     // -----------------------------------------------------------------------
     adminEvents: createAdminEventsApi(deps),
+
+    // La page publique d'un fil (30/10) : lieu, encart, partenaires, parties, moments.
+    adminTrackPage: createAdminTrackPageApi(deps),
 
     // -----------------------------------------------------------------------
     // Organisations et fusion des doublons (A11)
