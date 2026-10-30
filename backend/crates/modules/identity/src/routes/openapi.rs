@@ -178,8 +178,8 @@ mod tests {
         }
     }
 
-    /// Les vingt-quatre routes du module sont décrites — une opération par
-    /// chemin, aucun chemin partagé. Le compte est écrit pour qu'une route
+    /// Les vingt-cinq routes du module sont décrites sur vingt-quatre chemins :
+    /// `/people/{id}` porte la lecture et la modification du profil. Le compte est écrit pour qu'une route
     /// ajoutée sans son annotation fasse échouer ce test plutôt que de passer
     /// inaperçue.
     #[test]
@@ -195,6 +195,6 @@ mod tests {
             .values()
             .map(|c| c.as_object().expect("un chemin").len())
             .sum();
-        assert_eq!(operations, 24);
+        assert_eq!(operations, 25);
     }
 }

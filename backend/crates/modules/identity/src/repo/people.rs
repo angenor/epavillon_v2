@@ -392,14 +392,24 @@ pub async fn update_profile(
     match ecriture {
         Ok(fait) => Ok(fait.rows_affected() == 1),
         Err(e) => Err(match kernel::pg_error::constraint(&e) {
-            Some("people_first_name_check") => ApiError::validation("Le prénom est obligatoire.", "first_name"),
-            Some("people_last_name_check") => ApiError::validation("Le nom est obligatoire.", "last_name"),
-            Some("people_civility_check") => ApiError::validation("Cette civilité n'existe pas.", "civility"),
-            Some("people_country_id_fkey") => ApiError::validation("Ce pays est inconnu.", "country_id"),
+            Some("people_first_name_check") => {
+                ApiError::validation("Le prénom est obligatoire.", "first_name")
+            }
+            Some("people_last_name_check") => {
+                ApiError::validation("Le nom est obligatoire.", "last_name")
+            }
+            Some("people_civility_check") => {
+                ApiError::validation("Cette civilité n'existe pas.", "civility")
+            }
+            Some("people_country_id_fkey") => {
+                ApiError::validation("Ce pays est inconnu.", "country_id")
+            }
             Some("people_preferred_locale_fkey") => {
                 ApiError::validation("Cette langue n'est pas proposée.", "preferred_locale")
             }
-            Some("timezone_name_check") => ApiError::validation("Ce fuseau horaire est inconnu.", "timezone"),
+            Some("timezone_name_check") => {
+                ApiError::validation("Ce fuseau horaire est inconnu.", "timezone")
+            }
             _ => kernel::pg_error::translate(&e),
         }),
     }

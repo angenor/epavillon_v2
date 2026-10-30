@@ -29,5 +29,7 @@ pub async fn update(
     }
     tx.commit().await?;
 
-    people::view(state.pool(), PersonId(acteur)).await?.ok_or_else(ApiError::not_found)
+    people::view(state.pool(), PersonId(acteur))
+        .await?
+        .ok_or_else(ApiError::not_found)
 }

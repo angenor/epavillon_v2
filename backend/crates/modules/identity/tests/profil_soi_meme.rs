@@ -32,7 +32,10 @@ async fn la_personne_modifie_son_profil() {
         .await
         .expect("son propre profil");
 
-    assert_eq!(fiche.first_name, "Aïssatou", "les blancs autour du prénom tombent");
+    assert_eq!(
+        fiche.first_name, "Aïssatou",
+        "les blancs autour du prénom tombent"
+    );
     assert_eq!(fiche.display_name, "Aïssatou Diallo");
     assert_eq!(fiche.job_title, None, "un texte facultatif vide part nul");
     assert_eq!(fiche.preferred_locale, "en");
