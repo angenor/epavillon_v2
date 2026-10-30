@@ -37,10 +37,13 @@ const details = computed(() => {
     class="flex flex-col gap-4 rounded-[10px] lg:-ml-3 bg-surface-inverse px-5 py-5 text-text-on-inverse sm:flex-row sm:items-center sm:justify-between sm:px-6"
     :aria-label="tr(props.track.title)"
   >
-    <div class="min-w-0">
-      <p class="text-xs font-bold text-text-on-inverse/75 uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">{{ kicker }}</p>
-      <p class="mt-1.5 text-lg leading-snug font-bold text-balance text-text-on-inverse sm:text-xl">{{ tr(props.track.title) }}</p>
-      <p class="mt-1.5 text-sm text-text-on-inverse/80 tabular-nums">{{ details }}</p>
+    <div class="flex min-w-0 items-start gap-4">
+      <TrackIconBadge :code="props.track.icon_code" :color="props.track.color_hex" class="mt-0.5" />
+      <div class="min-w-0">
+        <p class="text-xs font-bold text-text-on-inverse/75 uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">{{ kicker }}</p>
+        <p class="mt-1.5 text-lg leading-snug font-bold text-balance text-text-on-inverse sm:text-xl">{{ tr(props.track.title) }}</p>
+        <p class="mt-1.5 text-sm text-text-on-inverse/80 tabular-nums">{{ details }}</p>
+      </div>
     </div>
     <UiButton variant="on-inverse" :to="props.to" icon-trailing="arrow-right" class="shrink-0 self-start sm:self-center">
       {{ t('programme.tracks.side.open') }}

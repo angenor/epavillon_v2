@@ -145,6 +145,8 @@ export interface ProgrammeTrack {
   starts_on: IsoDate | null
   ends_on: IsoDate | null
   color_hex: ColorHex | null
+  /** Pictogramme, code d'un dessin de `utils/track-icons.ts` ; nul : aucun. */
+  icon_code: string | null
   /** Responsable du fil au sein de l'IFDD. */
   curated_by: PersonId | null
   /** Page publique du fil ; `null` tant qu'elle n'est pas ouverte. */

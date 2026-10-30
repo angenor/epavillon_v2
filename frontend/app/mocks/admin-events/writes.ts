@@ -503,6 +503,7 @@ export function saveTrack(payload: EditionTrackPayload): EditionTabResult {
       starts_on: null,
       ends_on: null,
       color_hex: null,
+      icon_code: null,
       curated_by: null,
       published_at: null,
       sort_order: payload.sort_order,
@@ -520,6 +521,7 @@ export function saveTrack(payload: EditionTrackPayload): EditionTabResult {
     starts_on: payload.starts_on,
     ends_on: payload.ends_on,
     color_hex: payload.color_hex,
+    icon_code: payload.icon_code,
     curated_by: payload.curated_by,
     // La date de première ouverture est conservée : refermer puis rouvrir ne
     // réécrit pas l'histoire de la page.

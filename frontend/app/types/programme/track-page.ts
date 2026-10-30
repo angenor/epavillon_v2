@@ -54,6 +54,8 @@ export interface PublicTrackHeader {
   starts_on: IsoDate | null
   ends_on: IsoDate | null
   color_hex: string | null
+  /** Pictogramme, code d'un dessin de `utils/track-icons.ts` ; nul : aucun. */
+  icon_code: string | null
   themes: ScheduleThemeBadge[]
 }
 
@@ -138,6 +140,8 @@ export interface PublicTrackSummary {
   kind: TrackKind
   title: I18nText
   color_hex: string | null
+  /** Pictogramme, code d'un dessin de `utils/track-icons.ts` ; nul : aucun. */
+  icon_code: string | null
   starts_on: IsoDate | null
   ends_on: IsoDate | null
   starts_at: IsoDateTime | null

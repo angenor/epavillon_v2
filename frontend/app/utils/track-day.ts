@@ -43,6 +43,17 @@ export function trackDayStyle(colorHex: string | null): Record<string, string> {
 }
 
 /**
+ * Le trait d'un pictogramme de fil sur son rond blanc (`TrackIconBadge`) : la
+ * couleur du fil foncée de bleu nuit, pour tenir 3:1 sur blanc même sur un vert
+ * clair saisi. Le rond ne s'inverse pas en sombre, le trait non plus.
+ */
+export function trackGlyphColor(colorHex: string | null): string {
+  return colorHex && parseColor(colorHex)
+    ? `color-mix(in srgb, ${colorHex} 70%, var(--color-text-on-inverse-selected))`
+    : 'var(--color-text-on-inverse-selected)'
+}
+
+/**
  * L'ancre d'une activité dans le déroulé d'une journée (`TrackAgenda`) : un
  * lien de `/programmations` y descend, et l'activité s'y encadre un instant.
  */

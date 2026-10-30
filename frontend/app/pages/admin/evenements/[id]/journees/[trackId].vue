@@ -229,6 +229,7 @@ const trackPayload = computed<EditionTrackPayload | null>(() => {
     starts_on: current.starts_on,
     ends_on: current.ends_on,
     color_hex: current.color_hex,
+    icon_code: current.icon_code,
     curated_by: current.curated_by,
     is_published: current.published_at !== null,
     sort_order: current.sort_order,

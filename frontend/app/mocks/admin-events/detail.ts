@@ -133,6 +133,7 @@ export function editionTracks(eventId: Uuid): EditionTrack[] {
       starts_on: t.starts_on,
       ends_on: t.ends_on,
       color_hex: t.color_hex,
+      icon_code: t.icon_code,
       curated_by: t.curated_by,
       curator_name: t.curated_by ? (personById.get(t.curated_by)?.display_name ?? null) : null,
       published_at: t.published_at,

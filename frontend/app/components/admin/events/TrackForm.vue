@@ -25,8 +25,10 @@ const { t } = useI18n()
 
 const KINDS: TrackKind[] = ['special_day', 'thematic_track', 'side_programme']
 const PALETTE = ['#0B6C9E', '#1F5F8B', '#8C6D1F', '#2E6B45', '#7A3E6B', '#8B3A2E']
+const ICONS = TRACK_ICONS
 
 const draft = ref<EditionTrackPayload>({ ...props.initial })
+const previewIcon = computed(() => trackIcon(draft.value.icon_code))
 watch(
   () => props.initial,
   (next) => (draft.value = { ...next }),
@@ -146,6 +148,48 @@ const curatorOptions = computed<SelectOption[]>(() => [
           :aria-label="color"
           @click="draft.color_hex = color"
         />
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend class="mb-1 text-sm font-bold text-text">
+        {{ t('admin.event.tabs.tracksTab.form.icon') }}
+      </legend>
+      <p class="mb-3 text-sm text-text-muted">{{ t('admin.event.tabs.tracksTab.form.iconHint') }}</p>
+      <div class="flex flex-wrap items-start gap-5">
+        <div class="flex max-w-md flex-wrap gap-2">
+          <button
+            type="button"
+            class="inline-flex min-h-(--target-min) cursor-pointer items-center rounded-md border-2 px-3 text-sm font-bold text-text-secondary hover:bg-surface-sunken"
+            :class="draft.icon_code === null ? 'border-text' : 'border-border'"
+            :aria-pressed="draft.icon_code === null"
+            @click="draft.icon_code = null"
+          >
+            {{ t('admin.event.tabs.tracksTab.form.icons.none') }}
+          </button>
+          <button
+            v-for="code in ICONS"
+            :key="code"
+            type="button"
+            class="inline-flex size-(--target-min) cursor-pointer items-center justify-center rounded-md border-2 text-text hover:bg-surface-sunken"
+            :class="draft.icon_code === code ? 'border-text' : 'border-border'"
+            :aria-pressed="draft.icon_code === code"
+            :aria-label="t(`admin.event.tabs.tracksTab.form.icons.${code}`)"
+            :title="t(`admin.event.tabs.tracksTab.form.icons.${code}`)"
+            @click="draft.icon_code = code"
+          >
+            <UiIcon :name="code" size="22px" :stroke-width="1.9" />
+          </button>
+        </div>
+        <div v-if="previewIcon" class="flex flex-col items-center gap-1.5">
+          <span
+            class="flex size-18 items-center justify-center rounded-full bg-(--color-day-solid)"
+            :style="trackDayStyle(draft.color_hex)"
+          >
+            <TrackIconBadge :code="draft.icon_code" :color="draft.color_hex" />
+          </span>
+          <span class="text-xs text-text-muted">{{ t('admin.event.tabs.tracksTab.form.iconPreview') }}</span>
+        </div>
       </div>
     </fieldset>
 

@@ -126,6 +126,8 @@ const columns = computed(() =>
       count: !kept.length && sides.length ? '' : t('programme.days.count', { count: kept.length }, kept.length),
       special: special ? tr(special.title) : sides[0] ? t('programme.tracks.side.kicker') : '',
       specialStyle: special ? trackDayStyle(special.color_hex) : undefined,
+      specialIcon: special ? special.icon_code : (sides[0]?.icon_code ?? null),
+      specialColor: special ? special.color_hex : null,
       sides: sides.map((side) => ({
         slug: side.slug,
         title: tr(side.title),
@@ -253,11 +255,12 @@ async function next(): Promise<void> {
               </span>
               <span
                 v-if="!stuck || hasSpecial"
-                class="text-[11px] leading-4 font-bold tracking-caps uppercase"
-                :class="[column.specialStyle ? 'text-(--color-day)' : 'text-accent', stuck ? 'mt-1 line-clamp-1 h-4' : 'mt-2 line-clamp-2 h-8']"
+                class="flex items-start gap-1.5 text-[11px] leading-4 font-bold tracking-caps uppercase"
+                :class="[column.specialStyle ? 'text-(--color-day)' : 'text-accent', stuck ? 'mt-1 h-4' : 'mt-2 h-8']"
                 :style="column.specialStyle"
               >
-                {{ column.special }}
+                <TrackIconBadge v-if="!stuck" :code="column.specialIcon" :color="column.specialColor" size="sm" class="-mt-0.5" />
+                <span class="min-w-0" :class="stuck ? 'line-clamp-1' : 'line-clamp-2'">{{ column.special }}</span>
               </span>
             </span>
           </button>

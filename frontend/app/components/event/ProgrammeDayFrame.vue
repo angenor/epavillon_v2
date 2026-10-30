@@ -47,11 +47,14 @@ const kicker = computed(() => {
       :to="props.to"
       class="flex flex-wrap items-center justify-between gap-x-6 gap-y-1.5 bg-(--color-day-solid) px-4 py-3 text-(--color-day-on-solid) no-underline after:absolute after:inset-0 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-(--color-day-on-solid) sm:px-5"
     >
-      <span class="min-w-0">
-        <span class="block text-xs font-bold uppercase opacity-85 tabular-nums" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-          {{ kicker }}
+      <span class="flex min-w-0 items-center gap-3.5">
+        <TrackIconBadge :code="props.frame.track.icon_code" :color="props.frame.track.color_hex" />
+        <span class="min-w-0">
+          <span class="block text-xs font-bold uppercase opacity-85 tabular-nums" :style="{ letterSpacing: 'var(--tracking-caps)' }">
+            {{ kicker }}
+          </span>
+          <span class="mt-0.5 block text-lg leading-snug font-bold text-balance">{{ title }}</span>
         </span>
-        <span class="mt-0.5 block text-lg leading-snug font-bold text-balance">{{ title }}</span>
       </span>
       <span class="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold group-hover/frame:underline">
         {{ t('programme.tracks.open') }}

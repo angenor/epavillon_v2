@@ -79,13 +79,16 @@ const stateLabel = computed(() => t(`track.state.${isDay.value ? 'day' : 'other'
         <b class="text-xl leading-none font-bold tracking-normal tabular-nums sm:text-[2.75rem] sm:font-light">{{ block.day }}</b>
         <span>{{ block.month }}</span>
       </p>
-      <div class="min-w-0">
-        <h1 class="max-w-240 font-sans text-[2rem] leading-[1.08] font-light text-balance text-text-on-inverse sm:text-[2.625rem] lg:text-[3.25rem]">
-          <b class="font-bold">{{ title.lead }}</b>{{ title.rest }}
-        </h1>
-        <p v-if="props.page.track.subtitle" class="mt-4 max-w-3xl text-lg leading-snug sm:text-xl">
-          {{ tr(props.page.track.subtitle) }}
-        </p>
+      <div class="flex min-w-0 items-start gap-4 sm:gap-5">
+        <TrackIconBadge :code="props.page.track.icon_code" :color="isDay ? props.page.track.color_hex : null" size="lg" class="mt-0.5 sm:mt-1" />
+        <div class="min-w-0">
+          <h1 class="max-w-240 font-sans text-[2rem] leading-[1.08] font-light text-balance text-text-on-inverse sm:text-[2.625rem] lg:text-[3.25rem]">
+            <b class="font-bold">{{ title.lead }}</b>{{ title.rest }}
+          </h1>
+          <p v-if="props.page.track.subtitle" class="mt-4 max-w-3xl text-lg leading-snug sm:text-xl">
+            {{ tr(props.page.track.subtitle) }}
+          </p>
+        </div>
       </div>
     </div>
 

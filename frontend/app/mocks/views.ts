@@ -187,6 +187,7 @@ export function scheduleTracks(eventId: string): PublicScheduleTrack[] {
         kind: track.kind,
         title: track.title,
         color_hex: track.color_hex,
+        icon_code: track.icon_code,
         starts_on: track.starts_on,
         ends_on: track.ends_on,
         starts_at: own.map((row) => row.starts_at).sort()[0] ?? null,

@@ -401,6 +401,8 @@ export interface EditionTrack {
   starts_on: IsoDate | null
   ends_on: IsoDate | null
   color_hex: ColorHex | null
+  /** Pictogramme, code d'un dessin de `utils/track-icons.ts` ; nul : aucun. */
+  icon_code: string | null
   curated_by: PersonId | null
   /** Nom du responsable, résolu — l'écran n'affiche pas un identifiant. */
   curator_name: string | null
@@ -426,6 +428,8 @@ export interface EditionTrackPayload {
   starts_on: IsoDate | null
   ends_on: IsoDate | null
   color_hex: ColorHex | null
+  /** Pictogramme, code d'un dessin de `utils/track-icons.ts` ; nul : aucun. */
+  icon_code: string | null
   curated_by: PersonId | null
   /** Ouvrir ou refermer la page publique du fil. */
   is_published: boolean

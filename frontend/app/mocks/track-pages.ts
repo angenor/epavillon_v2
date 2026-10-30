@@ -222,6 +222,7 @@ interface Source {
   tagline: I18nText | null
   jour: number
   color: string | null
+  icon: string | null
   venue: PublicTrackVenue
   cover: AttachedImage | null
   publics: string[]
@@ -269,6 +270,7 @@ const atelier: Source = {
   tagline: null,
   jour: 8,
   color: null,
+  icon: 'book',
   venue: hotel,
   cover: null,
   publics: PUBLICS,
@@ -323,6 +325,7 @@ const finance: Source = {
   tagline: null,
   jour: 13,
   color: '#00A1E4',
+  icon: 'coins',
   venue: pavillon,
   cover: photo(20, 'Le pavillon de la Francophonie pendant une table ronde'),
   publics: [],
@@ -385,6 +388,7 @@ const jeunesse: Source = {
   tagline: fr('Hackathon, pitchs, jeu, scène'),
   jour: 14,
   color: '#8FBF2F',
+  icon: 'sprout',
   venue: pavillon,
   cover: photo(30, 'Des jeunes délégués au pavillon de la Francophonie'),
   publics: [],
@@ -462,6 +466,7 @@ const resume = (s: Source, courant: Source | null): PublicTrackSummary => {
     kind: s.kind,
     title: s.title,
     color_hex: s.color,
+    icon_code: s.icon,
     starts_on: `2026-11-${s.jour}`.replace(/-(\d)$/, '-0$1'),
     ends_on: `2026-11-${s.jour}`.replace(/-(\d)$/, '-0$1'),
     starts_at: min(e.map((x) => x.starts_at)),
@@ -503,6 +508,7 @@ const page = (s: Source): PublicTrackPage => {
       starts_on: resume(s, s).starts_on,
       ends_on: resume(s, s).ends_on,
       color_hex: s.color,
+      icon_code: s.icon,
       themes: [],
     },
     venue: s.venue,
