@@ -196,6 +196,13 @@ Une à la fois, dans cet ordre. Elles complètent celles de l'étude (§ 4), don
 
 ---
 
+## 7. Décisions du commanditaire (31/10)
+
+- **Retenus pour la COP31** : 2.1 échanges d'un dossier, 2.2 envois de courriels, 2.3 planificateur, 2.4 direct sur les pages publiques, 2.5 messages d'incident, 2.6 changements du programme public ; s'y ajoutent, du groupe « utile ensuite », les questions du public pendant une activité et le poste de direct (présents dans la salle Zoom, échecs d'inscription). Guide Négo (2.7, 2.8) n'est pas retenu à ce stade.
+- **Question 1 : A.** Le public suit par le pouls, 30 s au plus.
+- **Question 2 : B.** Instantané dès la COP pour l'équipe et les organisations connectées : ligne ouverte, repli sur le pouls. Mesure du serveur le 31/10 : Apache MPM `event`, `MaxRequestWorkers 1000`, HTTP/2 non chargé ; marge suffisante pour 200 à 400 lignes.
+- **Question 3 : B.** Pas de protection contre l'écrasement dans le planificateur : une seule personne corrige le programme, en général.
+
 ## Annexe technique
 
 **Sujets nécessaires au premier groupe.** « Signal » au sens de l'étude (§ 2.2) : le navigateur relit la route REST qu'il appelle déjà.
