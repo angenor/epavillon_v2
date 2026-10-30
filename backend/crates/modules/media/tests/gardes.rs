@@ -131,6 +131,36 @@ async fn une_edition_exige_la_permission_et_le_perimetre() {
     assert_eq!(erreur.code, ErrorCode::NotFound);
 }
 
+/// **La photo d'un fil (journée spéciale) se garde comme le fil** : permission
+/// sur son édition et périmètre. Une organisation n'y pose rien.
+#[tokio::test]
+async fn un_fil_exige_la_permission_et_le_perimetre_de_son_edition() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let fil = sqlx::query_scalar!(
+        r#"INSERT INTO event.programme_tracks (event_id, code, slug, kind, title)
+           VALUES ($1, 'journee_finance', 'journee-finance'::platform.slug, 'special_day',
+                   '{"fr":"Journée finance durable"}'::jsonb)
+        RETURNING id"#,
+        terrain.edition
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("fil");
+    let photo = commun::bandeau_32_9();
+
+    let erreur = commun::deposer(
+        &bac,
+        terrain.referente,
+        &photo,
+        commun::metadonnees_pour(&photo, "event", "programme_tracks", fil, "cover"),
+    )
+    .await
+    .expect_err("une organisation n'administre aucun fil");
+
+    assert_eq!(erreur.code, ErrorCode::NotFound);
+}
+
 /// **Une combinaison sans garde est REFUSÉE, jamais autorisée par défaut.**
 ///
 /// C'est ce qui fait qu'une table blanche qui s'allonge ne devient jamais une
