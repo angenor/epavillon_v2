@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aperçu bureau et téléphone</title>
+<link rel="stylesheet" href="commun/jetons.css">
+<link rel="stylesheet" href="commun/base.css">
+<style>
+  body { padding: var(--space-6) var(--space-4) var(--space-12); }
+  .barre { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin-bottom: var(--space-6); }
+  .barre h1 { font-size: var(--font-size-xl); margin-right: auto; }
+  .groupe { display: flex; gap: var(--space-1); align-items: center; font-size: var(--font-size-sm); }
+  .groupe button { min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface-raised); color: var(--color-text); font: inherit; font-weight: 700; cursor: pointer; }
+  .groupe button[aria-pressed="true"] { background: var(--color-surface-inverse); color: var(--color-text-on-inverse); border-color: var(--color-surface-inverse); }
+  .ecrans { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: flex-start; }
+  .ecran p { margin-bottom: var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-muted); font-weight: 700; }
+  .bureau { width: 640px; height: 900px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-raised); }
+  .bureau iframe { width: 1280px; height: 1800px; border: 0; transform: scale(0.5); transform-origin: 0 0; }
+  .tel iframe { width: 375px; height: 812px; border: 1px solid var(--color-border); border-radius: var(--radius-xl); background: var(--color-surface-raised); }
+  @media (max-width: 720px) { .bureau { display: none; } }
+</style>
+</head>
+<body>
+<div class="barre">
+  <h1 id="titre">Aperçu</h1>
+  <div class="groupe">Moment :
+    <button type="button" data-etat="avant">Avant</button><button type="button" data-etat="jour">Jour J</button><button type="button" data-etat="apres">Après</button>
+  </div>
+  <div class="groupe">Thème :
+    <button type="button" data-theme="light">Clair</button><button type="button" data-theme="dark">Sombre</button>
+  </div>
+  <a class="lien" href="index.html">Sommaire</a>
+</div>
+<div class="ecrans">
+  <div class="ecran bureau-col"><p>Bureau, 1280 px (réduit de moitié)</p><div class="bureau"><iframe id="f-bureau" title="Bureau"></iframe></div></div>
+  <div class="ecran tel"><p>Téléphone, 375 px</p><iframe id="f-tel" title="Téléphone"></iframe></div>
+</div>
+<script>
+  const params = new URLSearchParams(location.search)
+  const page = params.get('p') || '2-bandeau-et-billet/finance.html'
+  const state = { etat: params.get('etat') || 'avant', theme: params.get('theme') || 'light' }
+  document.getElementById('titre').textContent = page
+  function load() {
+    const q = `?nu=1&etat=${state.etat}&theme=${state.theme}`
+    document.getElementById('f-bureau').src = page + q
+    document.getElementById('f-tel').src = page + q
+    document.querySelectorAll('[data-etat]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.etat === state.etat)))
+    document.querySelectorAll('[data-theme]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.theme === state.theme)))
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return
+    if (b.dataset.etat) state.etat = b.dataset.etat
+    if (b.dataset.theme) state.theme = b.dataset.theme
+    load()
+  })
+  load()
+</script>
+</body>
+</html>

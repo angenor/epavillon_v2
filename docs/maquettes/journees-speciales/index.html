@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journées spéciales · maquettes</title>
+<link rel="stylesheet" href="commun/jetons.css">
+<link rel="stylesheet" href="commun/base.css">
+<style>
+  main.wrap { padding-top: var(--space-12); padding-bottom: var(--space-16); }
+  h1 { font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem); }
+  .lede { margin-top: var(--space-3); max-width: var(--measure); font-size: var(--font-size-lg); color: var(--color-text-secondary); }
+  section { margin-top: var(--space-16); }
+  h2 { font-size: var(--font-size-2xl); }
+  .famille { display: grid; gap: var(--space-2); margin-top: var(--space-4); max-width: 60rem; }
+  .famille li { padding-left: var(--space-4); position: relative; }
+  .famille li::before { content: ""; position: absolute; left: 0; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); }
+  .couleurs { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+  .couleurs span { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); font-weight: 700; }
+  .couleurs i { width: 28px; height: 28px; border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle); }
+  .directions { display: grid; gap: var(--space-5); margin-top: var(--space-6); }
+  @media (min-width: 1024px) { .directions { grid-template-columns: repeat(3, 1fr); } }
+  .direction { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--color-surface-raised); border: 1px solid var(--color-border-subtle); }
+  .direction.reco { border: 2px solid var(--color-success-border); }
+  .direction .n { font-size: 48px; line-height: 0.9; font-weight: 300; color: var(--color-text-muted); }
+  .direction h3 { font-size: var(--font-size-xl); }
+  .direction .idee { font-size: var(--font-size-lg); color: var(--color-text-secondary); }
+  .direction dl { display: grid; gap: var(--space-3); font-size: var(--font-size-sm); }
+  .direction dt { font-weight: 700; color: var(--color-text); }
+  .direction dd { color: var(--color-text-secondary); }
+  .pages { display: grid; gap: var(--space-1); margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--color-separator); }
+  .pages li { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-4); }
+  .pages b { min-width: 9rem; }
+  .reco-badge { align-self: flex-start; }
+  .texte { margin-top: var(--space-4); max-width: var(--measure); }
+  .texte + .texte { margin-top: var(--space-3); }
+  table { margin-top: var(--space-4); width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+  th, td { padding: var(--space-3); border-bottom: 1px solid var(--color-border-subtle); text-align: left; vertical-align: top; }
+  th { background: var(--color-surface-sunken); font-weight: 700; }
+  td:nth-child(2) { white-space: nowrap; font-weight: 700; }
+  .table-wrap { overflow-x: auto; }
+  code { font-size: 0.92em; }
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap"><span><b>Institut de la Francophonie pour le développement durable</b><span class="long"> · OIF</span></span><span>Maquettes · 30 octobre 2026</span></div></div>
+<div class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+<main class="wrap">
+  <p class="eyebrow">ePavillon · CdP31, Antalya · propositions à arbitrer</p>
+  <h1>Journées spéciales et atelier préparatoire</h1>
+  <p class="lede">Trois directions artistiques pour les pages de l'atelier préparatoire francophone (dimanche 8 novembre, la veille, à l'hôtel) et des deux journées du pavillon (finance durable le 13, jeunesse le 14). Maquettes statiques au vrai contenu ; rien n'est encore dans le site.</p>
+  <p class="texte">Dans chaque page, une barre en pointillés rouges (hors maquette) simule le moment : <b>avant</b>, <b>le jour J</b> (atelier et finance à 11:40, jeunesse à 10:40) ou <b>après</b>, et bascule le thème clair ou sombre. Le lien « téléphone » ouvre la page à 375 px à côté de la version bureau. « Ajouter à mon agenda » produit un vrai fichier d'agenda.</p>
+
+  <section aria-labelledby="t-famille">
+    <h2 id="t-famille">Ce qui est commun aux trois</h2>
+    <ul class="famille">
+      <li>La barre du site, son liseré aux couleurs du logo, les jetons de la charte, les polices du site. Aucune couleur hors charte, aucun verre ni dégradé hors photo, rien de l'ancienne direction « affiche ».</li>
+      <li>Toutes les heures sont celles d'Antalya, écrites « 09:00 à 18:00, heure d'Antalya (UTC+3) », avec la conversion chez le lecteur en second.</li>
+      <li>Le jour J : la page porte « En cours » en jaune ; l'activité diffusée du moment porte « En direct » en rouge et prend la tête de page ; ce qui est passé passe au gris « Terminé ».</li>
+      <li>Chaque activité de la journée mène à sa fiche (inscription, direct, enregistrement). Accueil, déjeuner et clôture restent des lignes discrètes, sans lien.</li>
+      <li>L'atelier se distingue par ce qu'il n'a pas : pas de photo, pas de couleur de journée, le bleu nuit institutionnel seul. Il a ce dont on a besoin la veille : plan d'accès, adresse copiable, le Guide des négociations.</li>
+      <li>Chaque page finit sur les deux autres rendez-vous : on passe de l'atelier aux journées sans revenir à la programmation.</li>
+    </ul>
+    <div class="couleurs">
+      <span><i style="background:var(--ifdd-bleu-900)"></i>Atelier : bleu nuit institutionnel</span>
+      <span><i style="background:var(--ifdd-cyan-500)"></i>Finance durable : cyan</span>
+      <span><i style="background:var(--ifdd-vert-500)"></i>Jeunesse : vert</span>
+    </div>
+    <p class="texte">Le jaune et le rouge sont écartés comme couleurs de journée : le jour J, ils disent déjà « en cours » et « en direct » sur la même page. Le bloc date vert du PDF de l'atelier n'est pas repris, pour laisser le vert à la jeunesse.</p>
+  </section>
+
+  <section aria-labelledby="t-directions">
+    <h2 id="t-directions">Les trois directions</h2>
+    <div class="directions">
+      <article class="direction">
+        <p class="n">1</p>
+        <h3>Ordre du jour</h3>
+        <p class="idee">Un document de séance : une feuille, une fiche en filets, un ordre du jour numéroté.</p>
+        <dl>
+          <dt>Atelier</dt><dd>C'est sa forme naturelle : on y lit un ordre du jour diplomatique, le sommaire reste à gauche.</dd>
+          <dt>Journées</dt><dd>Seules la couleur et une bande photo les distinguent. La finance y est à l'aise ; la jeunesse y perd son énergie.</dd>
+          <dt>Coût</dt><dd>Le plus faible : une page, une fiche, la liste existante. Environ deux jours de développement.</dd>
+        </dl>
+        <ul class="pages">
+          <li><b>Atelier</b><a class="lien" href="1-ordre-du-jour/atelier.html">Bureau</a><a class="lien" href="apercu.html?p=1-ordre-du-jour/atelier.html">Téléphone</a></li>
+          <li><b>Finance durable</b><a class="lien" href="1-ordre-du-jour/finance.html">Bureau</a><a class="lien" href="apercu.html?p=1-ordre-du-jour/finance.html">Téléphone</a></li>
+        </ul>
+      </article>
+
+      <article class="direction reco">
+        <span class="etat etat-past reco-badge" style="color:var(--color-success);background:var(--color-success-surface);border-color:var(--color-success-border)">Recommandée</span>
+        <p class="n">2</p>
+        <h3>Bandeau et billet</h3>
+        <p class="idee">La grande sœur de la page d'une activité : bandeau photo voilé, billet qui remonte sur le bandeau, liste de la programmation.</p>
+        <dl>
+          <dt>Atelier</dt><dd>Bandeau en aplat bleu nuit, sans photo ; le billet porte l'heure, l'agenda et le plan d'accès ; le Guide des négociations vient en tête.</dd>
+          <dt>Journées</dt><dd>Photo de la journée, bloc date à sa couleur, parties numérotées. La jeunesse ajoute un temps fort en pleine couleur (le hackathon) et la rangée des six pitchs.</dd>
+          <dt>Coût</dt><dd>Faible à moyen : on étend par des props le bandeau, le billet et la liste déjà en production. Trois à quatre jours.</dd>
+        </dl>
+        <ul class="pages">
+          <li><b>Atelier</b><a class="lien" href="2-bandeau-et-billet/atelier.html">Bureau</a><a class="lien" href="apercu.html?p=2-bandeau-et-billet/atelier.html">Téléphone</a></li>
+          <li><b>Finance durable</b><a class="lien" href="2-bandeau-et-billet/finance.html">Bureau</a><a class="lien" href="apercu.html?p=2-bandeau-et-billet/finance.html">Téléphone</a></li>
+          <li><b>Jeunesse</b><a class="lien" href="2-bandeau-et-billet/jeunesse.html">Bureau</a><a class="lien" href="apercu.html?p=2-bandeau-et-billet/jeunesse.html">Téléphone</a></li>
+        </ul>
+      </article>
+
+      <article class="direction">
+        <p class="n">3</p>
+        <h3>La journée d'un coup d'œil</h3>
+        <p class="idee">Une frise horaire proportionnelle d'abord, le détail ensuite : la version web des PDF.</p>
+        <dl>
+          <dt>Atelier</dt><dd>Frise sobre en bleus ; les trous du programme restent visibles. Plan d'accès et Guide à droite.</dd>
+          <dt>Journées</dt><dd>Frise verte pour la jeunesse, le hackathon marqué « Temps fort » ; le jour J, un trait jaune montre l'heure. Sur téléphone, la frise devient verticale.</dd>
+          <dt>Coût</dt><dd>Le plus élevé : un composant neuf (proportions, trait de l'heure, version verticale, lecture au clavier). Cinq à six jours, et des programmes complets exigés de l'IFDD, faute de quoi la frise montre les trous.</dd>
+        </dl>
+        <ul class="pages">
+          <li><b>Atelier</b><a class="lien" href="3-coup-d-oeil/atelier.html">Bureau</a><a class="lien" href="apercu.html?p=3-coup-d-oeil/atelier.html">Téléphone</a></li>
+          <li><b>Jeunesse</b><a class="lien" href="3-coup-d-oeil/jeunesse.html">Bureau</a><a class="lien" href="apercu.html?p=3-coup-d-oeil/jeunesse.html">Téléphone</a></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-reco">
+    <h2 id="t-reco">Recommandation</h2>
+    <p class="texte">La direction 2. Elle prolonge la page d'activité et la programmation, déjà validées : la journée devient le parent naturel de ses activités, sans nouvelle grammaire à apprendre. Elle distingue l'atelier par l'absence de photo et la présence du plan, et laisse la jeunesse plus vive que la finance sans changer de système. C'est aussi la moins chère après la direction 1, car elle étend des composants en production au lieu d'en créer.</p>
+    <p class="texte">La frise de la direction 3 peut venir plus tard, en complément, quand les programmes seront complets.</p>
+  </section>
+
+  <section aria-labelledby="t-contenu">
+    <h2 id="t-contenu">Points relevés dans les programmes</h2>
+    <ul class="famille">
+      <li>Atelier : deux créneaux sans contenu (09:15 à 09:45, 13:30 à 14:15), et une fin annoncée à 16:00 alors que la clôture finit à 15:00.</li>
+      <li>Finance : « GCF » et « Fonds vert climat » désignent le même fonds, cité deux fois parmi les partenaires.</li>
+      <li>Finance : « Bienvenue et ouverture » est rendu par « Mot d'ouverture, OIF ».</li>
+      <li>Jeunesse : le programme n'a pas de parties ; les trois temps (« S'inspirer », « Créer et jouer », « S'engager ») sont une proposition.</li>
+      <li>Les textes de présentation des deux journées sont provisoires, rédigés à partir des programmes.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="t-modele">
+    <h2 id="t-modele">Ce que le modèle porte déjà, et ce qui manque</h2>
+    <p class="texte">Une journée spéciale est une ligne de <code>event.programme_tracks</code> (genre <code>special_day</code>), composée par <code>programme.session_tracks</code>. L'atelier y trouve sa place en <code>side_programme</code> (« programme parallèle, atelier hors pavillon »), rattaché à l'édition de la CdP31.</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Besoin de la page</th><th>État</th><th>Où, ou ce qu'il faudrait</th></tr></thead>
+      <tbody>
+        <tr><td>Titre, sous-titre, présentation, couleur, adresse publique</td><td>Porté</td><td><code>title</code>, <code>subtitle</code>, <code>description</code>, <code>color_hex</code>, <code>slug</code>, <code>published_at</code></td></tr>
+        <tr><td>Activités dans l'ordre, temps fort</td><td>Porté</td><td><code>session_tracks.sort_order</code>, <code>is_highlight</code></td></tr>
+        <tr><td>Date, heures, fuseau</td><td>En partie</td><td><code>starts_on</code> / <code>ends_on</code> indicatifs ; les heures se déduisent des activités ; fuseau de l'événement</td></tr>
+        <tr><td>Accueil, déjeuner, clôture</td><td>En partie</td><td>Seulement comme activités créées par l'IFDD, qui passent alors par inscription et détection de conflits</td></tr>
+        <tr><td>Lieu hors du pavillon (hôtel, plan)</td><td>En partie</td><td><code>event.venues</code> de genre <code>other</code> avec adresse et lien de carte, sans coordonnées ; le fil lui-même n'a pas de lieu</td></tr>
+        <tr><td>Partenaires de la journée</td><td>Manque</td><td>Seulement par activité (<code>session_organizations</code>) ; il faut une table fil et organisations avec rôle</td></tr>
+        <tr><td>Parties du déroulé</td><td>Manque</td><td>Ni table ni colonne de regroupement dans <code>session_tracks</code></td></tr>
+        <tr><td>Publics cibles</td><td>Manque</td><td>Seulement sur les propositions (<code>target_audiences</code>)</td></tr>
+        <tr><td>Image de couverture, Guide en PDF</td><td>Manque</td><td>Rôles <code>cover</code> et <code>document</code> existants, mais non déclarés pour <code>programme_tracks</code> dans <code>media.attachable_roles</code></td></tr>
+        <tr><td>Page publique</td><td>Manque</td><td>Aucune route ; la vue publique n'expose du fil que slug, titre, couleur et genre</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,153 @@
+/* Socle commun des maquettes : ce que le site a déjà (barres, boutons, pastilles d'état)
+   et la couleur de chaque journée. Les directions n'ajoutent que leur mise en page. */
+
+/* Couleur de la journée : en production, programme_tracks.color_hex. Ici, une teinte
+   de la charte par page, déclinée en rôles comme les autres couleurs. */
+.jour-atelier {
+  --color-day: var(--ifdd-bleu-800);
+  --color-day-solid: var(--ifdd-bleu-900);
+  --color-day-on-solid: var(--ifdd-gris-0);
+  --color-day-surface: var(--ifdd-bleu-50);
+  --color-day-line: var(--ifdd-bleu-900);
+  --color-day-mark: var(--ifdd-gris-0);
+  --color-day-on-mark: var(--ifdd-bleu-900);
+}
+.jour-finance {
+  --color-day: var(--ifdd-cyan-800);
+  --color-day-solid: var(--ifdd-cyan-700);
+  --color-day-on-solid: var(--ifdd-gris-0);
+  --color-day-surface: var(--ifdd-cyan-50);
+  --color-day-line: var(--ifdd-cyan-500);
+  --color-day-mark: var(--ifdd-cyan-500);
+  --color-day-on-mark: var(--ifdd-bleu-900);
+}
+.jour-jeunesse {
+  --color-day: var(--ifdd-vert-800);
+  --color-day-solid: var(--ifdd-vert-500);
+  --color-day-on-solid: var(--ifdd-bleu-900);
+  --color-day-surface: var(--ifdd-vert-50);
+  --color-day-line: var(--ifdd-vert-500);
+  --color-day-mark: var(--ifdd-vert-500);
+  --color-day-on-mark: var(--ifdd-bleu-900);
+}
+:root[data-theme="dark"].jour-atelier {
+  --color-day: var(--ifdd-bleu-200);
+  --color-day-solid: var(--ifdd-bleu-800);
+  --color-day-surface: color-mix(in srgb, var(--ifdd-bleu-900) 70%, var(--ifdd-noir));
+  --color-day-line: var(--ifdd-bleu-400);
+}
+:root[data-theme="dark"].jour-finance {
+  --color-day: var(--ifdd-cyan-300);
+  --color-day-solid: var(--ifdd-cyan-500);
+  --color-day-on-solid: var(--ifdd-gris-950);
+  --color-day-surface: var(--ifdd-cyan-900);
+}
+:root[data-theme="dark"].jour-jeunesse {
+  --color-day: var(--ifdd-vert-400);
+  --color-day-surface: var(--ifdd-vert-900);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--leading-normal);
+  overflow-x: hidden;
+}
+h1, h2, h3, h4 { margin: 0; color: var(--color-heading); font-family: var(--font-sans); line-height: var(--leading-tight); letter-spacing: var(--tracking-title); }
+p, ol, ul, dl, dd, figure { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+a { color: var(--color-text-link); }
+a:hover { color: var(--color-text-link-hover); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { max-width: 80rem; margin: 0 auto; padding: 0 var(--space-4); }
+@media (min-width: 640px) { .wrap { padding: 0 var(--space-6); } }
+.eyebrow { font-size: var(--font-size-xs); font-weight: 700; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--color-text-muted); }
+.ico { width: 1.125rem; height: 1.125rem; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Bandeau institutionnel et barre du site, tels qu'en production (aplat et liseré). */
+.topbar { background: var(--color-surface-inverse); color: var(--color-text-on-inverse-muted); font-size: var(--font-size-sm); border-bottom: 1px solid var(--color-border-on-inverse); }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; min-height: var(--topbar-height); gap: var(--space-4); }
+.topbar b { color: var(--color-text-on-inverse); font-weight: 700; }
+.topbar .lang { display: flex; gap: var(--space-3); }
+.topbar .lang span[aria-current] { color: var(--color-text-on-inverse); font-weight: 700; }
+@media (max-width: 639px) { .topbar .long { display: none; } }
+.navbar { position: sticky; top: 0; z-index: 20; background: var(--color-surface-inverse); color: var(--color-text-on-inverse); }
+.navbar .wrap { display: flex; align-items: center; justify-content: space-between; height: calc(var(--nav-height) - 4px); gap: var(--space-4); }
+.navbar .brand { font-weight: 700; font-size: var(--font-size-lg); color: var(--color-text-on-inverse); text-decoration: none; letter-spacing: var(--tracking-title); }
+.navbar .capsule { display: none; gap: var(--space-1); padding: var(--space-1); border-radius: var(--radius-full); background: var(--color-surface-inverse-raised); }
+.navbar .capsule a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-full); color: var(--color-text-on-inverse); text-decoration: none; font-size: var(--font-size-sm); font-weight: 700; }
+.navbar .capsule a[aria-current] { background: var(--color-surface-inverse-selected); color: var(--color-text-on-inverse-selected); }
+.navbar .menu { display: inline-flex; align-items: center; justify-content: center; width: var(--target-min); height: var(--target-min); border: 1px solid var(--color-border-on-inverse); border-radius: var(--radius-md); background: none; color: var(--color-text-on-inverse); cursor: pointer; }
+@media (min-width: 1024px) { .navbar .capsule { display: flex; } .navbar .menu { display: none; } }
+.stripe { display: grid; grid-template-columns: repeat(5, 1fr); height: 4px; }
+.stripe i:nth-child(1) { background: var(--color-stripe-1); }
+.stripe i:nth-child(2) { background: var(--color-stripe-2); }
+.stripe i:nth-child(3) { background: var(--color-stripe-3); }
+.stripe i:nth-child(4) { background: var(--color-stripe-4); }
+.stripe i:nth-child(5) { background: var(--color-stripe-5); }
+
+.site-footer { margin-top: var(--space-24); background: var(--color-surface-inverse); color: var(--color-text-on-inverse-muted); font-size: var(--font-size-sm); padding: var(--space-10) 0; }
+.site-footer b { color: var(--color-text-on-inverse); }
+
+/* Boutons : un seul principal par zone ; le lien déplace, le bouton engage. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--target-min); padding: 0 var(--space-5); border-radius: var(--radius-md); border: 1px solid transparent; font: inherit; font-weight: 700; font-size: var(--font-size-base); text-decoration: none; cursor: pointer; white-space: nowrap; }
+.btn-primary { background: var(--color-accent-solid); color: var(--color-accent-contrast); }
+.btn-primary:hover { background: var(--color-accent-solid-hover); color: var(--color-accent-contrast); }
+.btn-secondary { background: var(--color-surface-raised); color: var(--color-text); border-color: var(--color-border-strong); }
+.btn-secondary:hover { background: var(--color-surface-sunken); color: var(--color-text); }
+.btn-inverse { background: var(--color-surface-inverse-selected); color: var(--color-text-on-inverse-selected); }
+.btn-inverse:hover { background: var(--ifdd-bleu-50); color: var(--color-text-on-inverse-selected); }
+.btn-ghost-inverse { background: none; color: var(--color-text-on-inverse); border-color: var(--color-border-on-inverse); }
+.btn-ghost-inverse:hover { background: var(--color-surface-inverse-raised); color: var(--color-text-on-inverse); }
+.btn-live { background: var(--color-danger-solid); color: var(--color-danger-contrast); }
+.btn-live:hover { background: var(--color-danger-solid-hover); color: var(--color-danger-contrast); }
+.lien { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--target-min); font-weight: 700; color: var(--color-text-link); text-decoration: none; }
+.lien:hover { text-decoration: underline; }
+@media (max-width: 639px) { .btn-block-sm { width: 100%; } }
+
+/* Pastilles d'état : couleur ET mot (règle 3). Jaune « en cours », rouge direct. */
+.etat { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 28px; padding: 0 var(--space-3); border-radius: var(--radius-full); border: 1px solid; font-size: var(--font-size-sm); font-weight: 700; white-space: nowrap; }
+.etat::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.etat[hidden] { display: none; }
+.etat-upcoming { color: var(--color-info); background: var(--color-info-surface); border-color: var(--color-info-border); }
+.etat-ongoing { color: var(--color-warning); background: var(--color-warning-surface); border-color: var(--color-warning-border); }
+.etat-ongoing::before { background: var(--color-warning-solid); box-shadow: 0 0 0 1px var(--color-warning); }
+.etat-live { color: var(--color-live-contrast); background: var(--color-live); border-color: var(--color-live); }
+.etat-past { color: var(--color-neutral); background: var(--color-neutral-surface); border-color: var(--color-neutral-border); }
+.on-inverse .etat-upcoming { color: var(--color-text-on-inverse); background: var(--color-surface-inverse-raised); border-color: var(--color-border-on-inverse); }
+.on-inverse .etat-upcoming::before { background: var(--color-accent-on-inverse); }
+.on-inverse .etat-ongoing { color: var(--color-text-on-warning-inverse); background: var(--color-warning-on-inverse); border-color: var(--color-warning-on-inverse); }
+.on-inverse .etat-ongoing::before { background: var(--color-text-on-warning-inverse); box-shadow: none; }
+.on-inverse .etat-past { color: var(--color-text-on-inverse); background: var(--color-surface-inverse-raised); border-color: var(--color-border-on-inverse); }
+.on-inverse .etat-past::before { background: var(--color-text-on-inverse-muted); }
+
+/* Ce qui n'existe qu'à un moment de la journée (data-si="avant|jour|apres"). */
+[data-si] { display: none !important; }
+html[data-etat="avant"] [data-si~="avant"],
+html[data-etat="jour"] [data-si~="jour"],
+html[data-etat="apres"] [data-si~="apres"] { display: revert !important; }
+html[data-etat="avant"] [data-si~="avant"].flex,
+html[data-etat="jour"] [data-si~="jour"].flex,
+html[data-etat="apres"] [data-si~="apres"].flex { display: flex !important; }
+
+/* Cadres neutres à la place des images qu'on n'a pas encore. */
+.cadre { position: relative; display: flex; align-items: center; justify-content: center; padding: var(--space-4); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg); background: var(--color-surface-sunken); color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center; }
+.cadre-photo { border: 0; border-radius: 0; background: var(--ifdd-gris-700); color: var(--ifdd-gris-200); }
+.cadre-photo span { position: absolute; right: var(--space-4); bottom: var(--space-4); padding: var(--space-1) var(--space-2); border: 1px dashed var(--ifdd-gris-400); border-radius: var(--radius-sm); font-size: var(--font-size-xs); }
+.logo-tuile { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 72px; padding: var(--space-3); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--ifdd-gris-0); color: var(--ifdd-gris-700); font-size: var(--font-size-sm); font-weight: 700; text-align: center; line-height: var(--leading-snug); }
+.logo-tuile small { display: block; font-weight: 400; font-size: var(--font-size-xs); color: var(--ifdd-gris-650); }
+.avatar { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; flex: none; border-radius: 50%; background: var(--color-surface-sunken); border: 1px dashed var(--color-border-strong); color: var(--color-text-muted); font-weight: 700; font-size: var(--font-size-sm); }
+
+/* Plan d'accès : cadre neutre, l'adresse reste du texte copiable. */
+.plan { aspect-ratio: 16 / 10; }
+.plan .epingle { position: absolute; left: 52%; top: 44%; width: 18px; height: 18px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--color-danger-solid); border: 2px solid var(--ifdd-gris-0); }
+html[data-etat="avant"] .btn[data-si~="avant"],
+html[data-etat="jour"] .btn[data-si~="jour"],
+html[data-etat="apres"] .btn[data-si~="apres"] { display: inline-flex !important; }
