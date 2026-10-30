@@ -415,3 +415,15 @@ Les pages des journées spéciales et de l'atelier préparatoire (direction 2 de
 Non ajouté, déjà porté : fuseau (édition), couleur, temps fort (`is_highlight`), heures de la journée et des parties (lues sur le déroulé, jamais saisies : le PDF de l'atelier annonçait 16:00 pour une clôture à 15:00), intervenants (ceux des activités).
 
 **En production** : `ops/migrations/2026-10-30-journees-speciales.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API qui nomme ces colonnes.
+
+## 30/10/2026, `070_programme_proposals.sql` : la nature d'un échange
+
+`programme.proposal_comments` gagne `topic_term_id` (taxonomie système `proposal_comment_topic` : question, problème technique, documents, intervenants, créneau, commentaire, réclamation, autre) et `topic_other` (intitulé libre de « Autre », 80 caractères). Posés sur le message qui ouvre un fil, nuls sur une réponse (`ck_proposal_comments_topic_on_root`) ; `tg_check_proposal_comment_topic` vérifie la taxonomie et que l'intitulé accompagne « Autre » et lui seul. Le service exige la nature de l'organisation qui ouvre un fil ; le comité peut s'en passer.
+
+**En production** : `ops/migrations/2026-10-30-nature-des-echanges.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API qui lit ces colonnes.
+
+## 30/10/2026, `030_identity.sql` : agir dans l'espace d'une organisation
+
+Permission `programme.proposal.act_for_organization`, testée en portée globale, donnée au seul `super_admin` par `tg_permissions_grant_super_admin`. Elle ouvre la fiche d'un dossier (`GET /proposals/{id}/file`, `acting_for_organization` vrai) et son enregistrement comme l'organisation (`draft_write::enregistrer`, dossier existant seulement, contact conservé). `programme.proposal.edit`, détenue par `admin`, n'y suffisait pas : l'accès est réservé.
+
+**En production** : `ops/migrations/2026-10-30-agir-pour-une-organisation.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API.

@@ -166,3 +166,14 @@ Douze modèles de plus, un fichier chacun dans `utils/cover-templates/` (briques
 - **Page publique d'une activité** : nombre d'inscrits caché (`isAttendanceShown`, à repasser à `true`). L'API le sert toujours.
 
 Vérifié au navigateur sur les données d'exemple, à 1400 et 375 px : pastilles, menu, envoi par Entrée et passage en lu, profil, aucun défilement horizontal.
+
+## 30/10 (soir) : quatre retours du commanditaire
+
+- **Pastilles éteintes une fois vues** : relevé par onglet (`useWorkspaceSeen`, `editionTabSnapshot`, `unseenAttention`), gardé dans le navigateur par personne. Ouvrir l'onglet éteint sa pastille, ouvrir « Mes activités » éteint celle de « Mon espace » ; seul ce qui arrive ensuite la rallume. Un autre appareil la rallume une fois.
+- **Éléments à compléter qui clignotent** (`.attention-blink`) : pastilles de « Votre dossier », icône du logo manquant et des manques. Quatre fois à l'arrivée puis immobiles (WCAG 2.2.2), rien avec « moins d'animations ».
+- **Nature des échanges** : choix obligatoire pour ouvrir un fil (taxonomie `proposal_comment_topic`, « Autre » avec intitulé), affichée en tête du fil. Entrée sans nature : le curseur va sur le choix.
+- **Super-administrateur dans l'espace d'un dossier** : bouton « Ouvrir l'espace de l'organisation » dans la fiche admin, bandeau « Vous agissez pour… » ; lecture et enregistrement comme l'organisation, contact conservé, trace à son nom. Pas de fenêtre d'échanges (lus au back-office), pas de logo à poser, la porteuse ne change pas. Non ouvert : la vue d'ensemble `/mon-organisation`, le formulaire de dépôt (`/deposer-une-proposition`, un brouillon se dépose donc encore par l'organisation), le retrait.
+- **QR code** téléchargé en PNG (entier de pixels par module), plus en SVG.
+- **Image floue** (hors espace, toutes les images) : `UiImage` mêlait au `srcset` la déclinaison `courriel` (6:1) ; écartée, original ajouté sans `lg`. En production le 30/10.
+
+Vérifié au navigateur sur les données d'exemple : pastilles éteintes, clignotement, deux fils avec nature, bouton admin puis bandeau en super-administrateur (compte de démonstration ajouté le temps de l'essai, retiré).
