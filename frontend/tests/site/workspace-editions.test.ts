@@ -3,9 +3,11 @@ import assert from 'node:assert/strict'
 import {
   defaultEditionTab,
   editionTabAttention,
+  editionTabSnapshot,
   matchesProposalFilter,
   matchesProposalQuery,
   proposalActionIndex,
+  unseenAttention,
   workspaceEditionTabs,
 } from '../../app/utils/workspace-editions.ts'
 import type { EventEdition } from '../../app/types/event/edition.ts'
@@ -87,4 +89,13 @@ test("la pastille d'un onglet compte ses actions en cours et ses messages non lu
   )
   // Édition terminée : les comptes rendus attendus n'allument pas la pastille, les messages si.
   assert.deepEqual(tabs.map((tab) => editionTabAttention(tab)), [3, 1])
+})
+
+test("une pastille vue s'éteint, et seul ce qui arrive ensuite la rallume", () => {
+  const before = workspaceEditionTabs(overview([tracking('a', cop31, 'changes_requested', 'a', 2)], [action('changes_requested', 'a')]), NOW)[0]!
+  const seen = editionTabSnapshot(before)
+  assert.equal(unseenAttention(seen, seen), 0)
+
+  const after = workspaceEditionTabs(overview([tracking('a', cop31, 'changes_requested', 'a', 3)], [action('changes_requested', 'a')]), NOW)[0]!
+  assert.equal(unseenAttention(editionTabSnapshot(after), seen), 1, 'un message de plus')
 })

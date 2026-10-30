@@ -75,7 +75,11 @@
     "replyingTo": "Réponse à {name}",
     "messageLabel": "Votre message",
     "messagePlaceholder": "Écrivez à l'équipe…",
-    "sendHint": "Entrée pour envoyer, Maj + Entrée pour aller à la ligne."
+    "sendHint": "Entrée pour envoyer, Maj + Entrée pour aller à la ligne.",
+    "topicLabel": "Nature de l'échange",
+    "topicPlaceholder": "Nature de l'échange…",
+    "topicOtherLabel": "Précisez la nature de l'échange",
+    "topicOtherPlaceholder": "Précisez (80 caractères au plus)"
   },
   "sessions": {
     "title": "Quand et où",

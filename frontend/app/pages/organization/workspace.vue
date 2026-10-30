@@ -128,6 +128,18 @@ const activeTab = computed(() => {
   return defaultEditionTab(tabs.value, Array.isArray(requested) ? requested[0] : requested)
 })
 
+// Ouvrir un onglet, c'est l'avoir vu : sa pastille et celle du compte s'éteignent.
+const seen = useWorkspaceSeen()
+watch(
+  activeTab,
+  (tab) => {
+    if (!tab) return
+    seen.markTab(tab)
+    seen.markNav(tabs.value)
+  },
+  { immediate: true },
+)
+
 const tabItems = computed<TabItem[]>(() =>
   tabs.value.map((tab) => ({ value: tab.edition.slug, label: editionName(tab.edition) })),
 )
@@ -376,7 +388,7 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
             <span class="flex flex-col items-start text-left">
               <span class="flex items-center gap-2">
                 {{ editionName(tab.edition) }}
-                <UiCounter v-if="editionTabAttention(tab) > 0" :value="editionTabAttention(tab)" tone="accent" />
+                <UiCounter v-if="seen.tabUnseen(tab) > 0" :value="seen.tabUnseen(tab)" tone="accent" />
               </span>
               <span class="text-xs font-normal text-text-muted">{{ editionMeta(tab) }}</span>
             </span>

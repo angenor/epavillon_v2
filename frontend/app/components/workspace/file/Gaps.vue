@@ -72,7 +72,7 @@ function labelOf(gap: ProposalFileGap): string {
     >
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-start gap-3">
-          <UiIcon name="warning" class="mt-0.5 shrink-0 text-danger" size="1.25rem" />
+          <UiIcon name="warning" class="attention-blink mt-0.5 shrink-0 text-danger" size="1.25rem" />
           <div>
             <p class="font-semibold text-danger">{{ t('organization.workspace.proposal.gaps.logo.title') }}</p>
             <p class="mt-1 max-w-(--measure) text-sm text-text-secondary">
@@ -111,7 +111,10 @@ function labelOf(gap: ProposalFileGap): string {
             :href="ANCHORS[gap.kind]"
             class="flex min-h-(--target-min) items-center justify-between gap-4 text-sm text-text no-underline hover:text-accent"
           >
-            <span>{{ labelOf(gap) }}</span>
+            <span class="flex items-center gap-2.5">
+              <UiIcon name="warning" class="attention-blink shrink-0 text-warning" size="1rem" />
+              {{ labelOf(gap) }}
+            </span>
             <span class="shrink-0 font-semibold text-accent">{{ t(`organization.workspace.proposal.gaps.cta.${gap.kind}`) }}</span>
           </a>
         </li>

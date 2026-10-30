@@ -45,8 +45,8 @@ const ratio = computed(() => (props.items.length === 0 ? 0 : Math.round((done.va
               item.done
                 ? 'bg-success-surface text-success'
                 : item.danger
-                  ? 'bg-danger text-danger-contrast'
-                  : 'border border-warning-border bg-warning-surface text-warning'
+                  ? 'attention-blink bg-danger text-danger-contrast'
+                  : 'attention-blink border border-warning-border bg-warning-surface text-warning'
             "
           >
             <UiIcon v-if="item.done" name="check" size="0.75rem" />

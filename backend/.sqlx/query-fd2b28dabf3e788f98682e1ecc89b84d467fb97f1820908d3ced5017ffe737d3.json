@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO programme.proposal_comments\n               (proposal_id, parent_id, author_id, visibility, body, is_change_request)\n           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6)\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at",
+  "query": "UPDATE programme.proposal_comments\n              SET resolved_at = CASE WHEN $2 THEN now() END,\n                  resolved_by = CASE WHEN $2 THEN $3::uuid END\n            WHERE id = $1 AND deleted_at IS NULL\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other",
   "describe": {
     "columns": [
       {
@@ -118,16 +118,30 @@
             "name": "created_at"
           }
         }
+      },
+      {
+        "ordinal": 11,
+        "name": "topic",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "topic_other",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "topic_other"
+          }
+        }
       }
     ],
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid",
-        "Uuid",
-        "Text",
-        "Text",
-        "Bool"
+        "Bool",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -141,8 +155,10 @@
       true,
       true,
       true,
-      false
+      false,
+      null,
+      true
     ]
   },
-  "hash": "90f396a130d71af7b57c4a0fe705bd7aec70c02bad88e048ae70ee473e80d96a"
+  "hash": "fd2b28dabf3e788f98682e1ecc89b84d467fb97f1820908d3ced5017ffe737d3"
 }

@@ -312,6 +312,19 @@
   pointer-events: none;
 }
 
+/* Un élément du dossier à compléter clignote à l'arrivée (30/10), puis se tient
+   immobile : au-delà de cinq secondes, un clignotement doit pouvoir s'arrêter
+   (WCAG 2.2.2), et il finirait par ne plus rien signaler. */
+@keyframes attention-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.attention-blink {
+  animation: attention-blink 1.2s ease-in-out 4;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

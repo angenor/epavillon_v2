@@ -46,6 +46,10 @@ pub struct Message {
     pub edited_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
+    /// Nature du fil (code de `proposal_comment_topic`), sur le message qui l'ouvre.
+    pub topic: Option<String>,
+    /// Intitulé libre de la nature « Autre ».
+    pub topic_other: Option<String>,
 }
 
 macro_rules! message_depuis {
@@ -62,6 +66,8 @@ macro_rules! message_depuis {
             resolved_by: $l.resolved_by,
             edited_at: $l.edited_at,
             created_at: $l.created_at,
+            topic: $l.topic,
+            topic_other: $l.topic_other,
         }
     };
 }
@@ -92,7 +98,9 @@ pub async fn fil<'e>(
     let lignes = sqlx::query!(
         r#"SELECT id, proposal_id, parent_id, author_id,
                   visibility::text AS "visibility!", body, is_change_request,
-                  resolved_at, resolved_by, edited_at, created_at
+                  resolved_at, resolved_by, edited_at, created_at,
+                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
+                  topic_other
              FROM programme.proposal_comments
             WHERE proposal_id = $1
               AND deleted_at IS NULL
@@ -115,6 +123,9 @@ pub struct NouveauMessage<'a> {
     pub visibility: &'a str,
     pub body: &'a str,
     pub is_change_request: bool,
+    /// Terme de `proposal_comment_topic`, résolu par le service.
+    pub topic_term_id: Option<Uuid>,
+    pub topic_other: Option<&'a str>,
 }
 
 /// Écrire un message. **Le corps est refusé vide par la base** — `length(btrim(
@@ -127,22 +138,41 @@ pub async fn ecrire(
 ) -> Result<Message> {
     let ligne = sqlx::query!(
         r#"INSERT INTO programme.proposal_comments
-               (proposal_id, parent_id, author_id, visibility, body, is_change_request)
-           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6)
+               (proposal_id, parent_id, author_id, visibility, body, is_change_request,
+                topic_term_id, topic_other)
+           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6, $7, $8)
         RETURNING id, proposal_id, parent_id, author_id,
                   visibility::text AS "visibility!", body, is_change_request,
-                  resolved_at, resolved_by, edited_at, created_at"#,
+                  resolved_at, resolved_by, edited_at, created_at,
+                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
+                  topic_other"#,
         dossier.as_uuid(),
         nouveau.parent_id,
         auteur,
         nouveau.visibility,
         nouveau.body,
-        nouveau.is_change_request
+        nouveau.is_change_request,
+        nouveau.topic_term_id,
+        nouveau.topic_other
     )
     .fetch_one(conn)
     .await?;
 
     Ok(message_depuis!(ligne))
+}
+
+/// Le terme d'une nature d'échange par son code, s'il existe et reste actif.
+pub async fn terme_de_nature<'e>(
+    executor: impl PgExecutor<'e>,
+    code: &str,
+) -> Result<Option<Uuid>> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT id FROM reference.taxonomy_terms
+            WHERE taxonomy_code = 'proposal_comment_topic' AND code = $1 AND is_active"#,
+        code
+    )
+    .fetch_optional(executor)
+    .await?)
 }
 
 /// Un message par son identifiant, **effacé exclu** — ce qu'il faut connaître
@@ -154,7 +184,9 @@ pub async fn par_id<'e>(
     let ligne = sqlx::query!(
         r#"SELECT id, proposal_id, parent_id, author_id,
                   visibility::text AS "visibility!", body, is_change_request,
-                  resolved_at, resolved_by, edited_at, created_at
+                  resolved_at, resolved_by, edited_at, created_at,
+                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
+                  topic_other
              FROM programme.proposal_comments
             WHERE id = $1 AND deleted_at IS NULL"#,
         message.as_uuid()

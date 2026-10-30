@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE programme.proposal_comments\n              SET resolved_at = CASE WHEN $2 THEN now() END,\n                  resolved_by = CASE WHEN $2 THEN $3::uuid END\n            WHERE id = $1 AND deleted_at IS NULL\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at",
+  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other\n             FROM programme.proposal_comments\n            WHERE proposal_id = $1\n              AND deleted_at IS NULL\n              AND CASE WHEN $2 THEN programme.comment_in_committee_circle(id, $3)\n                       ELSE visibility = 'submitter' END\n            ORDER BY created_at, id",
   "describe": {
     "columns": [
       {
@@ -118,6 +118,23 @@
             "name": "created_at"
           }
         }
+      },
+      {
+        "ordinal": 11,
+        "name": "topic",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "topic_other",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "topic_other"
+          }
+        }
       }
     ],
     "parameters": {
@@ -138,8 +155,10 @@
       true,
       true,
       true,
-      false
+      false,
+      null,
+      true
     ]
   },
-  "hash": "f036d94815536459875ebe50b0df353eee88b45a86e16727c8bab2d6a5ee6c56"
+  "hash": "ba6f89ecbe69093bad9c2c42b02c6f8d20fb49c7e8922ab324ee2668ac1a35e3"
 }

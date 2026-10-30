@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at\n             FROM programme.proposal_comments\n            WHERE proposal_id = $1\n              AND deleted_at IS NULL\n              AND CASE WHEN $2 THEN programme.comment_in_committee_circle(id, $3)\n                       ELSE visibility = 'submitter' END\n            ORDER BY created_at, id",
+  "query": "INSERT INTO programme.proposal_comments\n               (proposal_id, parent_id, author_id, visibility, body, is_change_request,\n                topic_term_id, topic_other)\n           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6, $7, $8)\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other",
   "describe": {
     "columns": [
       {
@@ -118,13 +118,35 @@
             "name": "created_at"
           }
         }
+      },
+      {
+        "ordinal": 11,
+        "name": "topic",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "topic_other",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "topic_other"
+          }
+        }
       }
     ],
     "parameters": {
       "Left": [
         "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
         "Bool",
-        "Uuid"
+        "Uuid",
+        "Text"
       ]
     },
     "nullable": [
@@ -138,8 +160,10 @@
       true,
       true,
       true,
-      false
+      false,
+      null,
+      true
     ]
   },
-  "hash": "f39b34af1949da4aa22bed98ff3571ecd54ba7be874cf55d48dd038ed780a70e"
+  "hash": "2a73748be1ef3bb5440f120f9d5a93427043970c7901b6a367d4ff59a05febdd"
 }

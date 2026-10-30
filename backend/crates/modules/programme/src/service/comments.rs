@@ -70,6 +70,63 @@ pub struct PostCommentPayload {
     /// Le fil n'est alors lu que d'elles et de son auteur.
     #[serde(default)]
     pub recipient_ids: Vec<Uuid>,
+    /// Nature du fil (code de `proposal_comment_topic`) : exigée de l'organisation
+    /// quand elle ouvre un fil, ignorée sur une réponse, qui hérite de la racine.
+    #[serde(default)]
+    pub topic: Option<String>,
+    /// Intitulé libre, exigé avec la nature « Autre » et seulement avec elle.
+    #[serde(default)]
+    pub topic_other: Option<String>,
+}
+
+/// Le code de la nature qui appelle un intitulé libre.
+const NATURE_AUTRE: &str = "other";
+const NATURE_AUTRE_MAX: usize = 80;
+
+/// La nature d'un fil qui s'ouvre : (terme, intitulé libre). Une réponse n'en
+/// porte pas, la base le refuserait.
+async fn nature_du_fil(
+    state: &ProgrammeState,
+    cote: Cote,
+    ouvre_un_fil: bool,
+    payload: &PostCommentPayload,
+) -> Result<(Option<Uuid>, Option<String>)> {
+    let code = payload
+        .topic
+        .as_deref()
+        .map(str::trim)
+        .filter(|c| !c.is_empty());
+    if !ouvre_un_fil {
+        return Ok((None, None));
+    }
+    let Some(code) = code else {
+        if cote == Cote::Organisation {
+            return Err(ApiError::validation(
+                "Choisissez la nature de l'échange.",
+                "topic",
+            ));
+        }
+        return Ok((None, None));
+    };
+    let terme = comments::terme_de_nature(state.pool(), code)
+        .await?
+        .ok_or_else(|| ApiError::validation("Cette nature d'échange n'existe pas.", "topic"))?;
+    if code != NATURE_AUTRE {
+        return Ok((Some(terme), None));
+    }
+    let libre = payload
+        .topic_other
+        .as_deref()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .ok_or_else(|| ApiError::validation("Précisez la nature de l'échange.", "topic_other"))?;
+    if libre.chars().count() > NATURE_AUTRE_MAX {
+        return Err(ApiError::validation(
+            "La nature de l'échange tient en 80 caractères.",
+            "topic_other",
+        ));
+    }
+    Ok((Some(terme), Some(libre.to_owned())))
 }
 
 /// Écrire un message sur un dossier.
@@ -136,6 +193,9 @@ pub async fn ecrire(
         }
     }
 
+    let (topic_term_id, topic_other) =
+        nature_du_fil(state, cote, payload.parent_id.is_none(), &payload).await?;
+
     let etat = proposals::etat(state.pool(), dossier)
         .await?
         .ok_or_else(ApiError::not_found)?;
@@ -150,6 +210,8 @@ pub async fn ecrire(
             visibility: visibilite,
             body: corps,
             is_change_request: demande_de_correction,
+            topic_term_id,
+            topic_other: topic_other.as_deref(),
         },
     )
     .await?;
@@ -348,7 +410,9 @@ pub async fn resoudre(
             WHERE id = $1 AND deleted_at IS NULL
         RETURNING id, proposal_id, parent_id, author_id,
                   visibility::text AS "visibility!", body, is_change_request,
-                  resolved_at, resolved_by, edited_at, created_at"#,
+                  resolved_at, resolved_by, edited_at, created_at,
+                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
+                  topic_other"#,
         message.as_uuid(),
         resolu,
         acteur
@@ -369,5 +433,7 @@ pub async fn resoudre(
         resolved_by: mise_a_jour.resolved_by,
         edited_at: mise_a_jour.edited_at,
         created_at: mise_a_jour.created_at,
+        topic: mise_a_jour.topic,
+        topic_other: mise_a_jour.topic_other,
     })
 }

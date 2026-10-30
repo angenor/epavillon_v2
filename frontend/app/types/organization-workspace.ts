@@ -297,6 +297,10 @@ export interface ReplyToCommentPayload {
   /** Message auquel on répond (la racine du fil, jamais une réponse) ; nul : un nouveau fil. */
   parent_id: Uuid | null
   body: string
+  /** Nature du fil, exigée quand on en ouvre un (code de `proposal_comment_topic`). */
+  topic?: string | null
+  /** Intitulé libre, avec la nature « Autre » seulement. */
+  topic_other?: string | null
 }
 
 /**

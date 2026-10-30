@@ -680,6 +680,19 @@ export const taxonomyTerms = [
   term(TERM.glossaryMeetings, 'glossary_family', 'meetings', { fr: 'Réunions', en: 'Meetings' }, 10),
   term(TERM.glossaryTexts, 'glossary_family', 'texts', { fr: 'Textes', en: 'Texts' }, 20),
   term(TERM.glossaryThemes, 'glossary_family', 'themes', { fr: 'Thématiques', en: 'Themes' }, 30),
+  // Nature d'un échange sur un dossier — même semis que 070_programme_proposals.sql
+  ...(
+    [
+      ['question', { fr: 'Question', en: 'Question' }, 10],
+      ['technical_issue', { fr: 'Problème technique', en: 'Technical issue' }, 20],
+      ['documents', { fr: 'Documents et pièces', en: 'Documents' }, 30],
+      ['speakers', { fr: 'Intervenants', en: 'Speakers' }, 40],
+      ['schedule', { fr: 'Créneau et horaire', en: 'Slot and schedule' }, 50],
+      ['comment', { fr: 'Commentaire', en: 'Comment' }, 60],
+      ['complaint', { fr: 'Réclamation', en: 'Complaint' }, 70],
+      ['other', { fr: 'Autre', en: 'Other' }, 1000],
+    ] as const
+  ).map(([code, label, order]) => term(`comment-topic-${code}`, 'proposal_comment_topic', code, label, order)),
 ] satisfies TaxonomyTerm[]
 
 // ---------------------------------------------------------------------------

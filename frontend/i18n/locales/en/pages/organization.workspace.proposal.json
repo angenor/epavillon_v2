@@ -75,7 +75,11 @@
     "replyingTo": "Reply to {name}",
     "messageLabel": "Your message",
     "messagePlaceholder": "Write to the team…",
-    "sendHint": "Enter to send, Shift + Enter for a new line."
+    "sendHint": "Enter to send, Shift + Enter for a new line.",
+    "topicLabel": "Exchange topic",
+    "topicPlaceholder": "Exchange topic…",
+    "topicOtherLabel": "Specify the topic",
+    "topicOtherPlaceholder": "Specify (80 characters max)"
   },
   "sessions": {
     "title": "When and where",

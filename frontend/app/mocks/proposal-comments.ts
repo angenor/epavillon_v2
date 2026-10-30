@@ -262,6 +262,8 @@ export function postProposalComment(
     resolved_by: null,
     edited_at: null,
     created_at: new Date(at).toISOString(),
+    topic: null,
+    topic_other: null,
   }
   const recipients = [...new Set(payload.recipient_ids ?? [])].filter((id) => id !== personId)
   if (recipients.length > 0) {

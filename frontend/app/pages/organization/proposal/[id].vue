@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CommentsDeskMessage } from '~/components/workspace/CommentsDesk.vue'
 import type { ProposalFile } from '~/types/organization-workspace'
 import type { ProposalCommentView, ProposalOrganization, ProposalStatus } from '~/types/programme/proposal'
 import type { Organization } from '~/types/org'
@@ -470,13 +471,19 @@ usePolling(refreshComments, () => (deskOpen.value ? 15_000 : 60_000))
 const busy = ref(false)
 const sendError = ref<string | null>(null)
 
-async function sendMessage(parentId: Uuid | null, body: string): Promise<boolean> {
+async function sendMessage(message: CommentsDeskMessage): Promise<boolean> {
   const person = auth.person
   if (!person || !file.value) return false
   busy.value = true
   sendError.value = null
   try {
-    await api.workspace.reply(person.id, { proposal_id: file.value.tracking.proposal.id, parent_id: parentId, body })
+    await api.workspace.reply(person.id, {
+      proposal_id: file.value.tracking.proposal.id,
+      parent_id: message.parentId,
+      body: message.body,
+      topic: message.topic,
+      topic_other: message.topicOther,
+    })
     await refreshComments()
     return true
   } catch (thrown) {

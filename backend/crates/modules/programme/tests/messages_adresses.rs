@@ -56,6 +56,8 @@ fn charge(
         body: corps.to_owned(),
         is_change_request: false,
         recipient_ids: destinataires,
+        topic: None,
+        topic_other: None,
     }
 }
 

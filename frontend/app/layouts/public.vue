@@ -94,10 +94,11 @@ const mainNav: NavItem[] = [
 ]
 
 const space = useAccountSpace()
-/** Ce qui attend la personne, compté comme les onglets de son espace : actions des éditions en cours et messages non lus. */
+const seen = useWorkspaceSeen()
+/** Ce qui attend la personne et qu'elle n'a pas encore vu : ouvrir « Mes activités » éteint la pastille. */
 const attention = computed(() => {
   const overview = space.overview.value
-  return overview ? workspaceEditionTabs(overview).reduce((sum, tab) => sum + editionTabAttention(tab), 0) : 0
+  return overview ? seen.navUnseen(workspaceEditionTabs(overview)) : 0
 })
 const organizationLabel = computed(() => {
   const organization = space.organization.value

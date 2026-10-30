@@ -261,6 +261,10 @@ export interface ProposalComment {
   // ce qui n'a jamais transité — et laissait croire qu'un message effacé
   // voyage, ce qui est exactement ce qu'il ne doit pas faire.
   created_at: IsoDateTime
+  /** Nature du fil (code de `proposal_comment_topic`), sur le message qui l'ouvre ; ses réponses en héritent. */
+  topic: string | null
+  /** Intitulé libre de la nature « Autre ». */
+  topic_other: string | null
 }
 
 /** Une personne nommée dans un fil : destinataire, membre du comité. */

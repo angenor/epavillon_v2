@@ -86,8 +86,39 @@ export function workspaceEditionTabs(overview: WorkspaceOverview, at: number = D
 
 /** La pastille d'un onglet : ce qui attend l'organisation (actions de l'édition en cours) et les messages non lus. */
 export function editionTabAttention(tab: WorkspaceEditionTab): number {
-  const unread = tab.proposals.reduce((sum, tracking) => sum + tracking.unread_comments, 0)
-  return (tab.over ? 0 : tab.actions.length) + unread
+  return unseenAttention(editionTabSnapshot(tab), undefined)
+}
+
+/**
+ * CE QUE LA PASTILLE COMPTE, ÉLÉMENT PAR ÉLÉMENT (30/10) : une pastille vue
+ * s'éteint, et seul ce qui arrive ensuite la rallume. Chaque action et chaque
+ * dossier aux messages non lus a une clé et un nombre ; on garde le relevé vu,
+ * et la pastille ne compte que ce qui le dépasse.
+ */
+export type AttentionSnapshot = Record<string, number>
+
+export function editionTabSnapshot(tab: WorkspaceEditionTab): AttentionSnapshot {
+  const snapshot: AttentionSnapshot = {}
+  if (!tab.over) {
+    for (const action of tab.actions) {
+      const key = `action:${action.kind}:${action.proposal_id ?? ''}:${action.target}`
+      snapshot[key] = (snapshot[key] ?? 0) + 1
+    }
+  }
+  for (const tracking of tab.proposals) {
+    if (tracking.unread_comments > 0) snapshot[`unread:${tracking.proposal.id}`] = tracking.unread_comments
+  }
+  return snapshot
+}
+
+export function unseenAttention(current: AttentionSnapshot, seen: AttentionSnapshot | undefined): number {
+  let total = 0
+  for (const [key, count] of Object.entries(current)) total += Math.max(0, count - (seen?.[key] ?? 0))
+  return total
+}
+
+export function mergedSnapshot(tabs: WorkspaceEditionTab[]): AttentionSnapshot {
+  return Object.assign({}, ...tabs.map(editionTabSnapshot)) as AttentionSnapshot
 }
 
 /** L'onglet ouvert à l'arrivée : l'édition demandée, sinon la plus récente non terminée. */

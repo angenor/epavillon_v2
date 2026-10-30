@@ -6,8 +6,8 @@ import { encode } from 'uqr'
  *
  * Dessiné ici en SVG à partir de la matrice d'`uqr`, et non injecté : aucun
  * `v-html`. Tuile claire dans les deux thèmes, comme un logo : un QR code inversé
- * ne se lit plus. Le téléchargement rend le même SVG
- * sur fond blanc, à imprimer sur un support ou à afficher à l'entrée de la salle.
+ * ne se lit plus. Le téléchargement rend la même matrice en PNG sur fond blanc,
+ * à imprimer sur un support ou à afficher à l'entrée de la salle.
  */
 
 interface Props {
@@ -39,15 +39,27 @@ async function copy(): Promise<void> {
   setTimeout(() => (copied.value = false), 2500)
 }
 
+/** En PNG (30/10) : le SVG ne s'ouvrait pas dans les outils de mise en page courants. */
 function download(): void {
   const n = size.value
-  const body = cells.value.map(({ x, y }) => `<rect x="${x}" y="${y}" width="1" height="1"/>`).join('')
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" width="1024" height="1024" shape-rendering="crispEdges"><rect width="${n}" height="${n}" fill="#fff"/><g fill="#000">${body}</g></svg>`
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
-  link.download = `${props.fileName}.svg`
-  link.click()
-  URL.revokeObjectURL(link.href)
+  // Un nombre entier de pixels par module : un QR code lissé se lit mal.
+  const scale = Math.ceil(1024 / n)
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = n * scale
+  const context = canvas.getContext('2d')
+  if (!context) return
+  context.fillStyle = '#fff'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#000'
+  for (const { x, y } of cells.value) context.fillRect(x * scale, y * scale, scale, scale)
+  canvas.toBlob((blob) => {
+    if (!blob) return
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `${props.fileName}.png`
+    link.click()
+    URL.revokeObjectURL(link.href)
+  }, 'image/png')
 }
 </script>
 

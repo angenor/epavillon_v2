@@ -2,6 +2,14 @@
 import type { DisplayedPerson } from '~/types/organization-workspace'
 import type { ProposalCommentView } from '~/types/programme/proposal'
 import type { PersonId, Uuid } from '~/types/shared'
+import type { SelectOption } from '~/types/ui'
+
+export interface CommentsDeskMessage {
+  parentId: Uuid | null
+  body: string
+  topic: string | null
+  topicOther: string | null
+}
 
 /**
  * LES ÉCHANGES AVEC L'ÉQUIPE, EN FENÊTRE FLOTTANTE (30/10), comme la fiche du
@@ -13,7 +21,8 @@ import type { PersonId, Uuid } from '~/types/shared'
  *
  * La demande de correction reste un message à part : étiquetée, bordée de
  * jaune, avec « Marquer comme résolu ». Répondre à un message range la réponse
- * sous son fil ; écrire sans y répondre ouvre un nouveau fil.
+ * sous son fil ; écrire sans y répondre ouvre un nouveau fil, dont on nomme la
+ * nature (30/10) : « Problème technique », « Réclamation »… ou « Autre », précisé.
  */
 
 interface Props {
@@ -27,7 +36,7 @@ interface Props {
   busy?: boolean
   error?: string | null
   /** Rend vrai si le message est parti : le brouillon se vide alors. */
-  submit: (parentId: Uuid | null, body: string) => Promise<boolean>
+  submit: (message: CommentsDeskMessage) => Promise<boolean>
   markRead: (commentIds: Uuid[]) => Promise<void>
 }
 
@@ -39,7 +48,24 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { tr } = useI18nText()
 const { dateTime } = useDateTime()
+const api = useApi()
+
+const { data: topics } = useAsyncData('proposal-comment-topics', () => api.reference.terms('proposal_comment_topic'), {
+  server: false,
+  lazy: true,
+  default: () => [],
+})
+const topicOptions = computed<SelectOption[]>(() => topics.value.map((term) => ({ value: term.code, label: tr(term.label) })))
+
+/** La nature d'un fil, lue sur sa racine : « Autre » se dit par son intitulé. */
+function topicOf(comment: ProposalCommentView): string | null {
+  if (comment.parent_id || !comment.topic) return null
+  if (comment.topic === 'other' && comment.topic_other) return comment.topic_other
+  const term = topics.value.find((candidate) => candidate.code === comment.topic)
+  return term ? tr(term.label) : null
+}
 
 const viewerTimezone = computed(() => Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Paris')
 
@@ -128,6 +154,13 @@ useReadOnSight({
 const draft = ref('')
 const replyTo = ref<ProposalCommentView | null>(null)
 const composer = ref<HTMLElement | null>(null)
+const topic = ref<string | null>(null)
+const topicOther = ref('')
+
+/** Un nouveau fil part avec sa nature, et « Autre » avec son intitulé. */
+const missingTopic = computed(
+  () => replyTo.value === null && (topic.value === null || (topic.value === 'other' && topicOther.value.trim() === '')),
+)
 
 /** Une réponse se range sous la racine du fil, jamais sous une réponse. */
 function answer(comment: ProposalCommentView): void {
@@ -138,9 +171,22 @@ function answer(comment: ProposalCommentView): void {
 async function send(): Promise<void> {
   const body = draft.value.trim()
   if (body.length === 0 || props.busy) return
-  if (await props.submit(replyTo.value?.id ?? null, body)) {
+  if (missingTopic.value) {
+    composer.value?.querySelector<HTMLElement>(topic.value === 'other' ? 'input' : 'select')?.focus()
+    return
+  }
+  const opening = replyTo.value === null
+  const sent = await props.submit({
+    parentId: replyTo.value?.id ?? null,
+    body,
+    topic: opening ? topic.value : null,
+    topicOther: opening && topic.value === 'other' ? topicOther.value.trim() : null,
+  })
+  if (sent) {
     draft.value = ''
     replyTo.value = null
+    topic.value = null
+    topicOther.value = ''
   }
 }
 
@@ -219,6 +265,13 @@ function onKeydown(event: KeyboardEvent): void {
                     : 'border-border bg-surface-raised',
               ]"
             >
+              <p
+                v-if="topicOf(comment)"
+                class="mb-1.5 text-xs font-bold text-text-muted uppercase"
+                :style="{ letterSpacing: 'var(--tracking-caps)' }"
+              >
+                {{ topicOf(comment) }}
+              </p>
               <UiBadge
                 v-if="comment.is_change_request"
                 class="mb-2"
@@ -293,6 +346,31 @@ function onKeydown(event: KeyboardEvent): void {
         />
       </p>
 
+      <div v-if="!replyTo" class="flex flex-col gap-2 sm:flex-row">
+        <UiSelect
+          id="workspace-exchanges-topic"
+          :model-value="topic"
+          class="sm:flex-1"
+          :label="t('organization.workspace.proposal.exchanges.topicLabel')"
+          hide-label
+          required
+          :placeholder="t('organization.workspace.proposal.exchanges.topicPlaceholder')"
+          :options="topicOptions"
+          @update:model-value="(value: string) => (topic = value)"
+        />
+        <UiInput
+          v-if="topic === 'other'"
+          id="workspace-exchanges-topic-other"
+          v-model="topicOther"
+          class="sm:flex-1"
+          :label="t('organization.workspace.proposal.exchanges.topicOtherLabel')"
+          hide-label
+          required
+          :maxlength="80"
+          :placeholder="t('organization.workspace.proposal.exchanges.topicOtherPlaceholder')"
+        />
+      </div>
+
       <UiAlert v-if="props.error" intent="danger" :message="props.error" live />
 
       <div class="flex items-end gap-2">
@@ -314,7 +392,7 @@ function onKeydown(event: KeyboardEvent): void {
           icon-only
           :label="t('organization.workspace.proposal.exchanges.send')"
           :loading="props.busy"
-          :disabled="draft.trim().length === 0"
+          :disabled="draft.trim().length === 0 || missingTopic"
         />
       </div>
       <p class="text-xs text-text-subtle max-sm:hidden">{{ t('organization.workspace.proposal.exchanges.sendHint') }}</p>

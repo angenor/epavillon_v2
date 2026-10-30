@@ -669,6 +669,8 @@ export function replyToComment(authorId: string, payload: ReplyToCommentPayload)
     resolved_by: null,
     edited_at: null,
     created_at: now,
+    topic: payload.parent_id ? null : (payload.topic ?? null),
+    topic_other: payload.parent_id || payload.topic !== 'other' ? null : (payload.topic_other?.trim() ?? null),
   }
   sessionComments.push(reply)
   return reply
