@@ -51,3 +51,12 @@ export function icsCalendar(event: IcsEvent, now: number = Date.now()): string {
   ]
   return lines.filter(Boolean).map(fold).join('\r\n') + '\r\n'
 }
+
+/** Fait télécharger le fichier d'agenda, produit dans le navigateur. */
+export function downloadIcs(event: IcsEvent, filename: string): void {
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(new Blob([icsCalendar(event)], { type: 'text/calendar;charset=utf-8' }))
+  link.download = `${filename}.ics`
+  link.click()
+  URL.revokeObjectURL(link.href)
+}

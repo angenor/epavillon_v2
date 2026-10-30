@@ -84,6 +84,9 @@ defineEmits<{ click: [event: MouseEvent] }>()
 
 const isInert = computed(() => props.disabled || props.loading)
 
+/** Une ancre de la page (« #acces ») reste dans l'onglet ; une adresse externe en ouvre un. */
+const external = computed(() => Boolean(props.href) && !props.href?.startsWith('#'))
+
 const tag = computed(() => {
   if (props.to) return resolveComponent('NuxtLink')
   if (props.href) return 'a'
@@ -155,6 +158,12 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'border-border-on-inverse bg-transparent text-text-on-inverse ' +
     'hover:bg-surface-inverse-raised active:bg-surface-inverse-raised',
 
+  // L'APLAT INSTITUTIONNEL EN BOUTON, sur un fond de couleur dont on ne connaît
+  // pas le contraste avec l'accent : le temps fort d'une journée spéciale.
+  institutional:
+    'border-transparent bg-surface-inverse text-text-on-inverse ' +
+    'hover:bg-surface-inverse-raised active:bg-surface-inverse-raised',
+
   // Action qui se fond dans une phrase. Souligné au survol, comme un lien.
   link:
     'border-transparent bg-transparent px-0! text-text-link underline-offset-4 ' +
@@ -207,8 +216,8 @@ const iconSize = computed(() => (props.size === 'lg' ? '1.15em' : '1.05em'))
     :to="props.to"
     :href="props.href"
     :type="props.to || props.href ? undefined : props.type"
-    :target="props.href ? '_blank' : undefined"
-    :rel="props.href ? 'noopener noreferrer' : undefined"
+    :target="external ? '_blank' : undefined"
+    :rel="external ? 'noopener noreferrer' : undefined"
     :class="classes"
     :disabled="tag === 'button' ? isInert : undefined"
     :aria-disabled="tag !== 'button' && isInert ? 'true' : undefined"

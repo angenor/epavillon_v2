@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
+import type { ProgrammeRowData } from './ProgrammeRow.vue'
 
 /**
  * Tout le programme en liste, une section par journée. Au défilement, la journée
@@ -31,6 +32,7 @@ const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
 const { state, link, duration, titleParts } = useProgrammeSession()
+const localePath = useLocalePath()
 
 const at = (day: IsoDate) => new Date(`${day}T12:00:00Z`)
 const format = (day: IsoDate, options: Intl.DateTimeFormatOptions) =>
@@ -38,15 +40,14 @@ const format = (day: IsoDate, options: Intl.DateTimeFormatOptions) =>
 
 
 
-function row(session: PublicScheduleRow) {
+function row(session: PublicScheduleRow): ProgrammeRowData {
   const current = state(session)
   const faded = current === 'cancelled' || (current === 'past' && !props.editionPast)
   return {
     id: session.id,
     to: link(props.editionSlug, session),
     start: time(session.starts_at, props.timezone),
-    end: time(session.ends_at, props.timezone),
-    duration: duration(session),
+    until: t('programme.list.until', { end: time(session.ends_at, props.timezone), duration: duration(session) }),
     title: titleParts(tr(session.title)),
     acronym: session.organization_acronym,
     organization: session.organization_name,
@@ -82,7 +83,11 @@ const sections = computed(() =>
         month: format(day, { month: 'long', year: 'numeric' }),
         count: t('programme.days.count', { count: rows.length }, rows.length),
       }),
-      specials: [...specials.values()],
+      specials: [...specials].map(([slug, title]) => ({
+        slug,
+        title,
+        to: localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: slug } }),
+      })),
       rows,
       total: own.length,
     }
@@ -153,7 +158,11 @@ onBeforeUnmount(() => {
           class="mt-3.5 basis-full border-t-2 border-accent pt-2.5 text-xs font-bold text-accent uppercase lg:max-w-42"
           :style="{ letterSpacing: 'var(--tracking-caps)' }"
         >
-          <p v-for="special in section.specials" :key="special">{{ special }}</p>
+          <p v-for="special in section.specials" :key="special.slug">
+            <NuxtLink :to="special.to" class="inline-flex min-h-11 items-center text-accent no-underline hover:underline">
+              {{ special.title }}
+            </NuxtLink>
+          </p>
         </div>
       </header>
 
@@ -164,71 +173,7 @@ onBeforeUnmount(() => {
 
         <ol>
           <li v-for="(entry, index) in section.rows" :key="entry.id">
-            <article
-              class="group relative -ml-3 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-md px-3 py-4 lg:grid-cols-[112px_208px_minmax(0,1fr)_172px_24px] lg:items-center lg:gap-x-7 lg:gap-y-0 lg:py-4.5"
-              :class="entry.current === 'live' ? 'bg-live-surface' : index % 2 ? 'bg-text/3' : ''"
-            >
-              <p class="col-start-2 row-start-1 flex flex-wrap items-baseline gap-x-2 self-start lg:col-start-1 lg:block lg:pt-1">
-                <span
-                  class="block text-xl leading-none font-light tabular-nums lg:text-[38px]"
-                  :class="entry.faded ? 'text-text-subtle' : entry.current === 'live' ? 'text-live' : 'text-text'"
-                >
-                  {{ entry.start }}
-                </span>
-                <span class="block text-[13px] text-text-muted tabular-nums lg:mt-1.5">
-                  {{ t('programme.list.until', { end: entry.end, duration: entry.duration }) }}
-                </span>
-              </p>
-
-              <div
-                class="relative col-start-1 row-span-3 row-start-1 aspect-video self-start overflow-hidden rounded-lg bg-surface-inverse lg:col-start-2 lg:row-span-1 lg:w-52 lg:self-center"
-              >
-                <UiImage
-                  v-if="entry.cover"
-                  :image="entry.cover"
-                  ratio="auto"
-                  frame-class="size-full"
-                  class="absolute inset-0 transition duration-200 motion-safe:group-hover:scale-[1.03]"
-                  :class="{ grayscale: entry.faded }"
-                  sizes="(min-width: 1024px) 208px, 7rem"
-                />
-                <span
-                  v-else
-                  class="absolute inset-0 flex items-center justify-center text-sm font-bold text-text-on-inverse/20 lg:text-[22px]"
-                  aria-hidden="true"
-                >
-                  {{ entry.acronym }}
-                </span>
-              </div>
-
-              <div class="col-start-2 min-w-0 lg:col-start-3 lg:row-start-1">
-                <h4
-                  class="line-clamp-3 font-sans text-base leading-[1.25] text-pretty sm:text-lg lg:text-[21px]"
-                  :class="[entry.faded ? 'text-text-muted' : 'text-text', { 'line-through': entry.current === 'cancelled' }]"
-                >
-                  <!-- Lien couvrant : toute la ligne mène à l'activité, sans second lien à tabuler. -->
-                  <NuxtLink :to="entry.to" class="font-normal text-inherit no-underline after:absolute after:inset-0 hover:underline">
-                    <b class="font-bold">{{ entry.title.lead }}</b>{{ entry.title.rest }}
-                  </NuxtLink>
-                </h4>
-                <p v-if="entry.organization || entry.acronym" class="mt-1.5 text-sm text-text-muted">
-                  <b v-if="entry.acronym" class="font-bold text-text">{{ entry.acronym }}</b>
-                  <template v-if="entry.acronym && entry.organization"> — </template>{{ entry.organization }}<template v-if="entry.country"> · {{ entry.country }}</template>
-                </p>
-              </div>
-
-              <div class="col-start-2 justify-self-start lg:col-start-4 lg:row-start-1">
-                <UiStatusBadge :state="entry.current" size="sm" :label="entry.stateLabel" />
-              </div>
-
-              <span class="hidden text-accent lg:col-start-5 lg:row-start-1 lg:block" aria-hidden="true">
-                <UiIcon
-                  name="arrow-right"
-                  size="22px"
-                  class="transition-transform duration-200 motion-safe:group-hover:translate-x-1"
-                />
-              </span>
-            </article>
+            <EventProgrammeRow :entry="entry" :striped="index % 2 === 1" />
           </li>
         </ol>
       </div>
