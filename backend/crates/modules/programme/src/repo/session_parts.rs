@@ -283,11 +283,16 @@ pub async fn remplacer_les_fils(
     }
 
     sqlx::query!(
+        // `sort_order` est le rang de l'activité DANS LA PAGE DU FIL, pas celui du
+        // fil dans la liste de la séance : un rattachement conservé garde son
+        // rang et sa partie, un nouveau prend la fin de la liste du fil.
         "INSERT INTO programme.session_tracks (session_id, track_id, sort_order, added_by)
-         SELECT $1, f.track_id, f.rang, $3
-           FROM unnest($2::uuid[]) WITH ORDINALITY AS f(track_id, rang)
-         ON CONFLICT (session_id, track_id)
-         DO UPDATE SET sort_order = EXCLUDED.sort_order",
+         SELECT $1, f.track_id,
+                COALESCE((SELECT max(st.sort_order) FROM programme.session_tracks st
+                           WHERE st.track_id = f.track_id), 0) + 1,
+                $3
+           FROM unnest($2::uuid[]) AS f(track_id)
+         ON CONFLICT (session_id, track_id) DO NOTHING",
         session_id.as_uuid(),
         fils,
         acteur

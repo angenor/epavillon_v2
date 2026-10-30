@@ -154,3 +154,79 @@ async fn la_reponse_porte_la_seance_et_les_conflits() {
         "les conflits de l'édition accompagnent chaque écriture"
     );
 }
+
+/// **Modifier les fils d'une séance ne défait pas sa place dans la page d'un
+/// fil conservé** : rang et partie restent. Un nouveau rattachement prend la
+/// fin de la liste du fil, pas le rang du fil dans la liste de la séance.
+#[tokio::test]
+async fn un_rattachement_conserve_garde_son_rang_et_sa_partie() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let grille = seances::grille(&bac, terrain.edition).await;
+    let premiere = seance(&bac, &terrain, "Ouverture", "ouverture").await;
+    let id = seance(&bac, &terrain, "Panel", "panel").await;
+    let jeunesse =
+        seances::fil_publie(&bac, terrain.edition, "jeunesse", "Journée jeunesse").await;
+
+    seances::rattacher(&bac, terrain.edition, premiere, vec![grille.fil], None)
+        .await
+        .unwrap();
+    seances::rattacher(&bac, terrain.edition, id, vec![grille.fil], None)
+        .await
+        .unwrap();
+
+    let partie = sqlx::query_scalar!(
+        "INSERT INTO event.programme_track_parts (track_id, label) VALUES ($1, '{\"fr\":\"Partie 1\"}'::jsonb) RETURNING id",
+        grille.fil
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    sqlx::query!(
+        "UPDATE programme.session_tracks SET sort_order = 7, part_id = $1
+          WHERE session_id = $2 AND track_id = $3",
+        partie,
+        id,
+        grille.fil
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+
+    // Le fil conservé passe en SECOND dans la liste : son rang ne doit pas suivre.
+    seances::rattacher(&bac, terrain.edition, id, vec![jeunesse, grille.fil], None)
+        .await
+        .expect("nouvelle liste");
+
+    let place = sqlx::query!(
+        "SELECT sort_order, part_id FROM programme.session_tracks
+          WHERE session_id = $1 AND track_id = $2",
+        id,
+        grille.fil
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(place.sort_order, 7, "le rang dans la page du fil reste");
+    assert_eq!(place.part_id, Some(partie), "la partie reste");
+
+    let nouveau = sqlx::query_scalar!(
+        "SELECT sort_order FROM programme.session_tracks WHERE session_id = $1 AND track_id = $2",
+        id,
+        jeunesse
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(nouveau, 1, "fin de la liste d'un fil encore vide");
+
+    let premiere_place = sqlx::query_scalar!(
+        "SELECT sort_order FROM programme.session_tracks WHERE session_id = $1 AND track_id = $2",
+        premiere,
+        grille.fil
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert!(premiere_place < 7, "la première activité arrivée garde la tête");
+}
