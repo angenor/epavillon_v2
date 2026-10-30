@@ -1,5 +1,6 @@
 import type { CoverScene, CoverTemplate } from './draw.ts'
 import {
+  FACE_LIGHTEN,
   COVER_HEIGHT,
   COVER_WIDTH,
   drawContained,
@@ -23,7 +24,6 @@ const TEXT_WIDTH = 720 - PAD * 2
 
 /** Taille des initiales et des noms selon le nombre de bandes : plus elles sont étroites, plus le texte se resserre. */
 const INITIALS_SIZE = [0, 260, 220, 160, 120, 92]
-const TILE_LIGHTEN = [0, 0.14, 0.3]
 
 /** Recadrage qui garde le haut du portrait : un visage est rarement au centre exact d'une photo en pied. */
 function drawPortrait(ctx: CanvasRenderingContext2D, image: CanvasImageSource, x: number, y: number, w: number, h: number): void {
@@ -59,7 +59,7 @@ function drawSpeakerBands(ctx: CanvasRenderingContext2D, scene: CoverScene): voi
       ctx.fillStyle = fade
       ctx.fillRect(x, COVER_HEIGHT - 360, bandW, 360)
     } else {
-      ctx.fillStyle = withAlpha(paper, TILE_LIGHTEN[index % 3] ?? 0)
+      ctx.fillStyle = withAlpha(paper, FACE_LIGHTEN[index % FACE_LIGHTEN.length] ?? 0)
       ctx.fillRect(x, 0, bandW, COVER_HEIGHT)
       const initials = initialsOfName(speaker.name)
       let size = INITIALS_SIZE[count] ?? 92

@@ -1,5 +1,6 @@
 import type { CoverScene, CoverSpeaker, CoverTemplate } from './draw.ts'
 import {
+  FACE_LIGHTEN,
   COVER_HEIGHT,
   COVER_WIDTH,
   drawBlurred,
@@ -23,7 +24,6 @@ const STUB_X = TICKET.x + 1000
 const NOTCH = 28
 const LEFT = TICKET.x + 56
 const TEXT_WIDTH = 1000 - 56 * 2
-const TILE_LIGHTEN = [0, 0.14, 0.3]
 
 function ticketPath(ctx: CanvasRenderingContext2D): void {
   const { x, y, w, h, r } = TICKET
@@ -58,7 +58,7 @@ function drawDisc(ctx: CanvasRenderingContext2D, scene: CoverScene, speaker: Cov
   else {
     ctx.fillStyle = accent
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2)
-    ctx.fillStyle = withAlpha(paper, TILE_LIGHTEN[index % 3] ?? 0)
+    ctx.fillStyle = withAlpha(paper, FACE_LIGHTEN[index % FACE_LIGHTEN.length] ?? 0)
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2)
     ctx.fillStyle = onAccent
     ctx.font = `700 ${Math.round(r * 0.66)}px ${scene.fontFamily}`

@@ -50,7 +50,7 @@ export const fullPhoto: CoverTemplate = {
     }
     faces.forEach((speaker, index) => {
       const cx = COVER_WIDTH - 72 - 52 - (faces.length - 1 - index) * 116
-      drawFace(ctx, scene, speaker, cx, bottom - 72 - 52, 52, onAccent)
+      drawFace(ctx, scene, speaker, cx, bottom - 72 - 52, 52, onAccent, index)
     })
     drawChrome(ctx, scene, options)
   },
@@ -78,7 +78,7 @@ export const splitPhoto: CoverTemplate = {
     )
     if (options.show_speakers) {
       scene.speakers.slice(0, 5).forEach((speaker, index) => {
-        drawFace(ctx, scene, speaker, 72 + 46 + index * 104, Math.min(y + 70, bottom - 70), 46, onAccent)
+        drawFace(ctx, scene, speaker, 72 + 46 + index * 104, Math.min(y + 70, bottom - 70), 46, onAccent, index)
       })
     }
     drawChrome(ctx, scene, options)
@@ -117,7 +117,7 @@ export const faces: CoverTemplate = {
         const rows = Math.ceil(shown.length / columns)
         const cx = 1000 + radius + column * 270
         const cy = middle - ((rows - 1) * 250) / 2 + row * 250 - 20
-        drawFace(ctx, scene, speaker, cx, cy, radius, onAccent)
+        drawFace(ctx, scene, speaker, cx, cy, radius, onAccent, index)
         ctx.fillStyle = onAccent
         ctx.font = `600 24px ${scene.fontFamily}`
         ctx.textAlign = 'center'

@@ -92,7 +92,7 @@ function drawFaceStack(ctx: CanvasRenderingContext2D, scene: CoverScene, speaker
   const { accent, paper, onAccent } = scene.colors
   const fits = Math.max(1, Math.floor((width - 60) / 48) + 1)
   const shown = speakers.length > fits ? speakers.slice(0, fits - 1) : speakers
-  shown.forEach((speaker, index) => drawFace(ctx, scene, speaker, x + 30 + index * 48, cy, 30, paper))
+  shown.forEach((speaker, index) => drawFace(ctx, scene, speaker, x + 30 + index * 48, cy, 30, paper, index))
   const rest = speakers.length - shown.length
   if (rest > 0) {
     const cx = x + 30 + shown.length * 48

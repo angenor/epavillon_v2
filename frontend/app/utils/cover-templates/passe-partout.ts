@@ -121,7 +121,7 @@ export const passePartout: CoverTemplate = {
     const faces = speakers.slice(0, 6)
     faces.forEach((speaker, index) => {
       const cx = COVER_WIDTH - 96 - 56 - (faces.length - 1 - index) * 92
-      drawFace(ctx, scene, speaker, cx, 474 + 56, 56, paper)
+      drawFace(ctx, scene, speaker, cx, 474 + 56, 56, paper, index)
     })
 
     setTracking(ctx, 2.8)

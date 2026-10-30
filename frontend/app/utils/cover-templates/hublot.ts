@@ -100,7 +100,7 @@ export const hublot: CoverTemplate = {
     const speakers = options.show_speakers ? scene.speakers.slice(0, 7) : []
     speakers.forEach((speaker, index) => {
       const angle = ((180 + (index - (speakers.length - 1) / 2) * 21) * Math.PI) / 180
-      drawFace(ctx, scene, speaker, CX + RADIUS * Math.cos(angle), CY + RADIUS * Math.sin(angle), 50, paper)
+      drawFace(ctx, scene, speaker, CX + RADIUS * Math.cos(angle), CY + RADIUS * Math.sin(angle), 50, paper, index)
     })
 
     // En-tête : icône de l'édition et surtitre.

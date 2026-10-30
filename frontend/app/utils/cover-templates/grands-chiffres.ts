@@ -103,7 +103,7 @@ function drawLogoCapsule(ctx: CanvasRenderingContext2D, scene: CoverScene, right
 }
 
 function drawFaceStack(ctx: CanvasRenderingContext2D, scene: CoverScene, speakers: CoverSpeaker[], x: number, cy: number): number {
-  speakers.forEach((speaker, index) => drawFace(ctx, scene, speaker, x + 32 + index * 52, cy, 32, scene.colors.paper))
+  speakers.forEach((speaker, index) => drawFace(ctx, scene, speaker, x + 32 + index * 52, cy, 32, scene.colors.paper, index))
   return speakers.length > 0 ? 64 + (speakers.length - 1) * 52 : 0
 }
 

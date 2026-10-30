@@ -163,7 +163,7 @@ export const revue: CoverTemplate = {
     const speakers = options.show_speakers ? scene.speakers.slice(0, 6) : []
     if (speakers.length > 0) {
       const rowTop = y - 28 - 68
-      speakers.forEach((speaker, index) => drawFace(ctx, scene, speaker, LEFT + 34 + index * 54, rowTop + 34, 34, paper))
+      speakers.forEach((speaker, index) => drawFace(ctx, scene, speaker, LEFT + 34 + index * 54, rowTop + 34, 34, paper, index))
       const namesX = LEFT + 68 + (speakers.length - 1) * 54 + 22
       const names = fitText(ctx, scene.speakers.map((speaker) => speaker.name).join(', '), {
         maxWidth: LEFT + WIDTH - namesX,

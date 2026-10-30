@@ -166,7 +166,7 @@ export const diagonale: CoverTemplate = {
         drawLines(ctx, names.lines, LEFT, y, names.size, 1.35)
       }
       speakers.slice(0, 5).forEach((speaker, index) => {
-        drawFace(ctx, scene, speaker, COVER_WIDTH - 64 - 52, 64 + 52 + index * 120, 52, paper)
+        drawFace(ctx, scene, speaker, COVER_WIDTH - 64 - 52, 64 + 52 + index * 120, 52, paper, index)
       })
     }
 

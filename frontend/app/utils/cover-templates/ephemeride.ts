@@ -137,7 +137,7 @@ export const ephemeride: CoverTemplate = {
     const speakers = options.show_speakers ? scene.speakers.slice(0, 6) : []
     if (speakers.length > 0) {
       const rowTop = y - 84
-      speakers.forEach((speaker, index) => drawFace(ctx, scene, speaker, x + 42 + index * 68, rowTop + 42, 42, paper))
+      speakers.forEach((speaker, index) => drawFace(ctx, scene, speaker, x + 42 + index * 68, rowTop + 42, 42, paper, index))
       const namesX = x + 84 + (speakers.length - 1) * 68 + 24
       const names = fitText(ctx, scene.speakers.map((speaker) => speaker.name).join(', '), {
         maxWidth: x + width - namesX,

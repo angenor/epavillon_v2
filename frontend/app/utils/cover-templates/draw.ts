@@ -189,7 +189,10 @@ export function initialsOfName(name: string): string {
     .join('')
 }
 
-export function drawFace(ctx: CanvasRenderingContext2D, scene: CoverScene, speaker: CoverSpeaker, cx: number, cy: number, r: number, ring: string): void {
+/** Le papier posé sur l'accent d'un visage sans photo, selon son rang : trois nuances qui alternent. */
+export const FACE_LIGHTEN = [0, 0.14, 0.3]
+
+export function drawFace(ctx: CanvasRenderingContext2D, scene: CoverScene, speaker: CoverSpeaker, cx: number, cy: number, r: number, ring: string, index = 0): void {
   ctx.save()
   ctx.beginPath()
   ctx.arc(cx, cy, r, 0, Math.PI * 2)
@@ -202,7 +205,9 @@ export function drawFace(ctx: CanvasRenderingContext2D, scene: CoverScene, speak
   if (speaker.image) {
     drawCovering(ctx, speaker.image, cx - r, cy - r, r * 2, r * 2)
   } else {
-    ctx.fillStyle = scene.colors.muted
+    ctx.fillStyle = scene.colors.accent
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2)
+    ctx.fillStyle = withAlpha(scene.colors.paper, FACE_LIGHTEN[index % FACE_LIGHTEN.length] ?? 0)
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2)
     ctx.fillStyle = scene.colors.onAccent
     ctx.font = `700 ${Math.round(r * 0.7)}px ${scene.fontFamily}`

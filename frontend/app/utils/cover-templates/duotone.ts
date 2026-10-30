@@ -1,5 +1,6 @@
 import type { CoverScene, CoverSpeaker, CoverTemplate } from './draw.ts'
 import {
+  FACE_LIGHTEN,
   COVER_HEIGHT,
   COVER_WIDTH,
   drawContained,
@@ -21,7 +22,6 @@ const LEFT = 96
 const TEXT_WIDTH = 1000
 
 /** Les pastilles sans portrait alternent trois nuances de l'accent, éclaircies par le papier. */
-const TILE_LIGHTEN = [0, 0.14, 0.3]
 
 function drawDisc(ctx: CanvasRenderingContext2D, scene: CoverScene, speaker: CoverSpeaker, cx: number, cy: number, r: number, index: number): void {
   const { accent, paper, onAccent } = scene.colors
@@ -37,7 +37,7 @@ function drawDisc(ctx: CanvasRenderingContext2D, scene: CoverScene, speaker: Cov
   else {
     ctx.fillStyle = accent
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2)
-    ctx.fillStyle = withAlpha(paper, TILE_LIGHTEN[index % 3] ?? 0)
+    ctx.fillStyle = withAlpha(paper, FACE_LIGHTEN[index % FACE_LIGHTEN.length] ?? 0)
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2)
     ctx.fillStyle = onAccent
     ctx.font = `700 ${Math.round(r * 0.63)}px ${scene.fontFamily}`

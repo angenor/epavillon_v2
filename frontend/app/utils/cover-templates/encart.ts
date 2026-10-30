@@ -48,7 +48,7 @@ function drawSpeakers(ctx: CanvasRenderingContext2D, scene: CoverScene): void {
   const right = COVER_WIDTH - 64
   scene.speakers.slice(0, 5).forEach((speaker, index) => {
     const cy = 64 + 44 + index * 104
-    drawFace(ctx, scene, speaker, right - 44, cy, 44, paper)
+    drawFace(ctx, scene, speaker, right - 44, cy, 44, paper, index)
     ctx.font = font(scene, 700, 24)
     const name = fitText(ctx, speaker.name, { maxWidth: 310, maxLines: 1, max: 24, min: 24, weight: 700, family: scene.fontFamily }).lines[0] ?? ''
     const width = ctx.measureText(name).width + 32
