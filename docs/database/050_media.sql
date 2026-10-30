@@ -703,6 +703,43 @@ $$;
 COMMENT ON FUNCTION media.attached_images(text, text, uuid, media.attachment_role) IS
     'Images publiques et servables d''un rôle multiple (galerie), dans l''ordre réglé. Même forme d''élément que media.attached_image(). Tableau vide sans image.';
 
+-- Les DOCUMENTS d'un rôle (30/10, page d'un fil) : le PDF du programme, le
+-- Guide des négociations. Ce qu'un lien de téléchargement affiche et que
+-- l'image n'a pas : type, poids, nom du fichier ; pas de variantes ni de
+-- dimensions. Mêmes filtres que attached_images() : prêt ET public, pour une
+-- page ouverte à tous. Tableau vide sans document.
+CREATE OR REPLACE FUNCTION media.attached_documents(
+    p_owner_schema text,
+    p_owner_table  text,
+    p_owner_id     uuid,
+    p_role         media.attachment_role DEFAULT 'document'
+)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT COALESCE(jsonb_agg(jsonb_build_object(
+               'asset_id',  a.id,
+               'url',       media.object_url(a.bucket, a.object_key),
+               'mime_type', a.mime_type,
+               'bytes',     a.byte_size,
+               'filename',  a.original_filename,
+               'caption',   COALESCE(t.caption_override, a.caption))
+             ORDER BY t.sort_order, t.created_at), '[]'::jsonb)
+    FROM media.attachments t
+    JOIN media.assets a ON a.id = t.asset_id
+    WHERE t.owner_schema = p_owner_schema
+      AND t.owner_table  = p_owner_table
+      AND t.owner_id     = p_owner_id
+      AND t.role         = p_role
+      AND a.deleted_at IS NULL
+      AND a.status = 'ready'
+      AND a.visibility = 'public';
+$$;
+
+COMMENT ON FUNCTION media.attached_documents(text, text, uuid, media.attachment_role) IS
+    'Documents publics et servables d''un rôle (PDF), dans l''ordre réglé : adresse, type, poids, nom de fichier, légende résolue. Tableau vide sans document.';
+
 -- -----------------------------------------------------------------------------
 -- 5. Quotas de stockage
 --
@@ -1117,5 +1154,16 @@ INSERT INTO media.attachable_roles
     -- pour ce rôle-là, plus étroite que celle de la couverture de la séance
     -- (backend/crates/modules/media/src/domain/guards.rs).
     ('programme',   'sessions',      'gallery',   '{"fr":"Galerie de l''activité","en":"Activity gallery"}', true, '{image/*}',             15728640, NULL),
-    ('publication', 'articles',      'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL)
+    ('publication', 'articles',      'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL),
+    -- La page publique d'un fil (30/10, journées spéciales et atelier
+    -- préparatoire, 060 § 4 ter). La couverture est la photo du bandeau, recadrée
+    -- par le navigateur selon la largeur : aucune forme imposée. Les documents
+    -- sont le programme en PDF et le Guide des négociations ; leur libellé
+    -- (« Résumé (PDF) ») est la légende du rattachement. Le visuel de l'encart
+    -- mis en avant (la couverture du Guide) prend le rôle `thumbnail`, sans forme
+    -- non plus : une couverture de livre n'est pas carrée. Garde : l'équipe de
+    -- l'édition (backend/crates/modules/media/src/domain/guards.rs).
+    ('event',       'programme_tracks', 'cover',     '{"fr":"Photo du bandeau","en":"Header photo"}',  false, '{image/*}',              15728640, NULL),
+    ('event',       'programme_tracks', 'thumbnail', '{"fr":"Visuel de l''encart mis en avant","en":"Featured block visual"}', false, '{image/*}', 5242880, NULL),
+    ('event',       'programme_tracks', 'document',  '{"fr":"Document de la journée","en":"Day document"}', true, '{application/pdf}',   26214400, NULL)
 ON CONFLICT DO NOTHING;

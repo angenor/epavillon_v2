@@ -250,10 +250,52 @@ CREATE TABLE event.programme_tracks (
     sort_order    smallint    NOT NULL DEFAULT 0,
     created_at    timestamptz NOT NULL DEFAULT now(),
     updated_at    timestamptz NOT NULL DEFAULT now(),
+
+    -- LA PAGE PUBLIQUE DU FIL (30/10), en queue de table comme toute colonne
+    -- arrivée par ALTER. Voir § 4 ter pour le lieu, les parties, les moments et
+    -- les partenaires, qui ont chacun leur table.
+    --
+    -- Accroche courte posée en pastille sous le titre : « Hackathon, pitchs,
+    -- jeu, scène ». Distincte du sous-titre, qui est une phrase.
+    tagline       platform.i18n_text,
+    -- PUBLICS CIBLES, un par entrée : même forme que
+    -- programme.proposals.target_audiences, pour la même raison (une chaîne
+    -- « Négociateurs, ONG, experts » ne se compte ni ne se réaffiche). Texte
+    -- libre et non taxonomie, comme sur le dossier : les deux listes se
+    -- recopient l'une dans l'autre sans correspondance à tenir.
+    target_audiences platform.i18n_text[] NOT NULL DEFAULT '{}',
+    -- Mention de soutien imprimée sous les logos des partenaires : « Avec le
+    -- soutien financier du gouvernement du Québec, dans le cadre du Plan pour
+    -- une économie verte 2030 ». Une phrase rédigée, pas une liste : elle
+    -- engage le bailleur dans ses propres mots.
+    support_note  platform.i18n_text,
+    -- L'ENCART MIS EN AVANT : le Guide des négociations pour l'atelier
+    -- préparatoire. Un seul par fil. Surtitre (« Présenté pendant l'atelier »),
+    -- titre, texte, et un lien : adresse absolue, ou chemin du site (« /guide-nego »)
+    -- pour mener vers une autre page de la plateforme sans figer son nom d'hôte.
+    -- Son visuel et ses pièces passent par media.attachments (rôles
+    -- `thumbnail` et `document` de event.programme_tracks).
+    feature_kicker     platform.i18n_text,
+    feature_title      platform.i18n_text,
+    feature_body       platform.i18n_text,
+    feature_link_label platform.i18n_text,
+    feature_link_url   text,
+
     CONSTRAINT ux_programme_tracks_code UNIQUE (event_id, code),
     CONSTRAINT ux_programme_tracks_slug UNIQUE (event_id, slug),
     CONSTRAINT ck_programme_tracks_period
-        CHECK (ends_on IS NULL OR starts_on IS NULL OR ends_on >= starts_on)
+        CHECK (ends_on IS NULL OR starts_on IS NULL OR ends_on >= starts_on),
+    -- Un lien se donne avec son libellé, ou pas du tout : une adresse nue
+    -- s'afficherait telle quelle, un libellé seul ne mènerait nulle part.
+    CONSTRAINT ck_programme_tracks_feature_link
+        CHECK ((feature_link_url IS NULL) = (feature_link_label IS NULL)),
+    CONSTRAINT ck_programme_tracks_feature_link_url
+        CHECK (feature_link_url IS NULL
+               OR (feature_link_url ~ '^(https?://|/)[^\s]*$' AND length(feature_link_url) <= 2048)),
+    -- Un encart sans titre n'a pas de sujet : surtitre, texte ou lien exigent le titre.
+    CONSTRAINT ck_programme_tracks_feature_title
+        CHECK (feature_title IS NOT NULL
+               OR (feature_kicker IS NULL AND feature_body IS NULL AND feature_link_url IS NULL))
 );
 
 CREATE INDEX ix_programme_tracks_event ON event.programme_tracks (event_id, sort_order);
@@ -291,7 +333,19 @@ CREATE TABLE event.venues (
                             CHECK (kind IN ('pavilion', 'partner', 'plenary', 'virtual', 'other')),
     address     text,
     map_url     platform.url,
-    created_at  timestamptz NOT NULL DEFAULT now()
+    created_at  timestamptz NOT NULL DEFAULT now(),
+
+    -- 30/10, en queue de table : ce que le plan d'accès d'une page de fil
+    -- affiche (l'atelier préparatoire se tient dans un hôtel, hors du pavillon).
+    -- Secteur du site, court, à côté du nom : « Zone bleue ».
+    area        platform.i18n_text,
+    -- Consigne d'accès, une phrase : « En ville, hors de la zone bleue. »
+    access_note platform.i18n_text,
+    -- Point relevé, même parti que event.events : deux numeric et pas PostGIS,
+    -- aucun calcul spatial, seulement une épingle sur un plan.
+    latitude    numeric(9,6) CHECK (latitude  IS NULL OR latitude  BETWEEN -90  AND 90),
+    longitude   numeric(9,6) CHECK (longitude IS NULL OR longitude BETWEEN -180 AND 180),
+    CONSTRAINT ck_venues_coordinates CHECK ((latitude IS NULL) = (longitude IS NULL))
 );
 
 CREATE TABLE event.rooms (
@@ -356,6 +410,180 @@ $$;
 CREATE TRIGGER tg_events_default_venue
     AFTER INSERT ON event.events
     FOR EACH ROW EXECUTE FUNCTION event.tg_create_default_venue();
+
+-- -----------------------------------------------------------------------------
+-- 4 ter. La PAGE PUBLIQUE d'un fil (30/10)
+--
+-- Le commanditaire veut une page par journée spéciale (« Journée finance
+-- durable », « Journée action jeunesse pour le climat ») et une pour l'ATELIER
+-- PRÉPARATOIRE francophone, la veille de chaque COP, dans un hôtel : un fil
+-- `side_programme`. Les maquettes retenues (docs/maquettes/journees-speciales/,
+-- direction 2) affichaient quatre choses que le modèle ne portait pas :
+--
+--   1. LE LIEU DU FIL. L'atelier n'a pas lieu au pavillon. `venue_id` nul veut
+--      dire « le pavillon de l'édition » : c'est le cas de toutes les journées
+--      spéciales, et l'imposer forcerait à saisir deux fois le même lieu.
+--   2. LES PARTIES DU DÉROULÉ (« Partie 1 : Opportunités de financement… »,
+--      « Matin », « S'inspirer »). Un regroupement éditorial, ni horaire ni
+--      calendaire : ses heures se lisent sur ce qu'il contient.
+--   3. LES MOMENTS SANS ACTIVITÉ : accueil, déjeuner, pause, clôture. Ce ne
+--      sont PAS des activités. En faire des programme.sessions les ferait passer
+--      par l'inscription, la détection de conflits (« un seul stand » signalerait
+--      le déjeuner contre l'activité de 13 h) et la programmation publique, où
+--      « Déjeuner » n'a rien à faire entre deux tables rondes. Une ligne du
+--      déroulé du fil, sans lien, et rien d'autre.
+--   4. LES PARTENAIRES DE LA JOURNÉE (OIF, GIZ, Fonds pour l'adaptation),
+--      distincts des organisations des activités : le bailleur d'une journée
+--      n'anime souvent aucune activité. Une vraie référence à org.organizations
+--      (règle n° 1 : « GCF » et « Fonds vert pour le climat » sont une seule
+--      fiche, et l'unicité par fil empêche de la citer deux fois, comme le
+--      programme PDF de la journée finance l'a fait).
+--
+-- Ce qui n'a PAS été ajouté, parce que le modèle le porte déjà : le fuseau
+-- (event.events.timezone, celui de l'édition), la couleur (color_hex), les
+-- heures de la journée (lues sur son déroulé, jamais saisies : le PDF de
+-- l'atelier annonçait 16:00 quand sa clôture finissait à 15:00), le temps fort
+-- (programme.session_tracks.is_highlight), les intervenants (ceux des
+-- activités). L'appartenance d'une activité à une partie vit sur son
+-- rattachement au fil, programme.session_tracks.part_id (075).
+-- -----------------------------------------------------------------------------
+ALTER TABLE event.programme_tracks
+    ADD COLUMN venue_id uuid REFERENCES event.venues(id) ON DELETE SET NULL;
+
+COMMENT ON COLUMN event.programme_tracks.venue_id IS
+    'Lieu du fil quand il n''est pas le pavillon : l''atelier préparatoire à l''hôtel. NULL = le pavillon de l''édition.';
+
+-- Un fil ne se tient que dans un lieu de SON édition. Une clé composite
+-- demanderait un index unique (id, event_id) sur les lieux pour une seule
+-- vérification ; le déclencheur dit en français ce qui ne va pas.
+CREATE OR REPLACE FUNCTION event.tg_check_track_venue()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NEW.venue_id IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM event.venues v WHERE v.id = NEW.venue_id AND v.event_id = NEW.event_id
+    ) THEN
+        RAISE EXCEPTION 'Lieu refusé : il n''appartient pas à l''édition de ce fil.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_programme_tracks_check_venue
+    BEFORE INSERT OR UPDATE OF venue_id, event_id ON event.programme_tracks
+    FOR EACH ROW EXECUTE FUNCTION event.tg_check_track_venue();
+
+-- Parties du déroulé. `label` est le nom court (« Matin », « S'inspirer ») ;
+-- nul, l'écran écrit « Partie N ». `title` est l'intitulé long, `summary` sa
+-- version d'une ligne pour le sommaire « La journée en trois temps ». Les trois
+-- sont facultatifs, mais une partie sans nom ni intitulé n'aurait rien à dire.
+CREATE TABLE event.programme_track_parts (
+    id          uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    track_id    uuid        NOT NULL REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
+    label       platform.i18n_text,
+    title       platform.i18n_text,
+    summary     platform.i18n_text,
+    sort_order  smallint    NOT NULL DEFAULT 0,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_at  timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ck_programme_track_parts_heading CHECK (label IS NOT NULL OR title IS NOT NULL),
+    -- Cible des clés composites (part_id, track_id) : un moment ou une activité
+    -- ne peut appartenir qu'à une partie de SON fil.
+    CONSTRAINT ux_programme_track_parts_track UNIQUE (id, track_id)
+);
+
+CREATE INDEX ix_programme_track_parts_track ON event.programme_track_parts (track_id, sort_order);
+
+CREATE TRIGGER tg_programme_track_parts_updated_at
+    BEFORE UPDATE ON event.programme_track_parts
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+COMMENT ON TABLE event.programme_track_parts IS
+    'Parties du déroulé d''un fil (« Partie 1 », « Matin »). Regroupement éditorial : leurs heures se lisent sur leur contenu.';
+
+-- Moments sans activité. Heures absolues, converties dans le fuseau de
+-- l'édition à l'affichage comme celles des séances. Fin facultative : la
+-- clôture de la journée finance n'a qu'une heure de début.
+CREATE TABLE event.programme_track_moments (
+    id          uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    track_id    uuid        NOT NULL REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
+    part_id     uuid,
+    starts_at   timestamptz NOT NULL,
+    ends_at     timestamptz,
+    label       platform.i18n_text NOT NULL,
+    -- Précision facultative sous le libellé (« Mot de l'OIF »).
+    description platform.i18n_text,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_at  timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ck_programme_track_moments_period CHECK (ends_at IS NULL OR ends_at > starts_at),
+    -- Retirer une partie remet ses moments hors partie, sans toucher au fil :
+    -- SET NULL sur la seule colonne de la partie (PostgreSQL 15 et plus).
+    CONSTRAINT fk_programme_track_moments_part FOREIGN KEY (part_id, track_id)
+        REFERENCES event.programme_track_parts (id, track_id) ON DELETE SET NULL (part_id)
+);
+
+CREATE INDEX ix_programme_track_moments_track ON event.programme_track_moments (track_id, starts_at);
+
+CREATE TRIGGER tg_programme_track_moments_updated_at
+    BEFORE UPDATE ON event.programme_track_moments
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+COMMENT ON TABLE event.programme_track_moments IS
+    'Moments du déroulé d''un fil qui ne sont pas des activités : accueil, déjeuner, pause, clôture. Ni inscription, ni conflit, ni programmation publique.';
+
+-- Rôle d'un partenaire de fil : vocabulaire ouvert, jamais un ENUM (le rôle
+-- d'une co-organisation d'activité, programme.organization_role, est une
+-- machine fermée ; celui-ci se complète au back-office).
+INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_hierarchical, is_system) VALUES
+    ('track_partner_role', '{"fr":"Rôles des partenaires d''une journée","en":"Day partner roles"}',
+     '{"fr":"Ce qu''apporte une organisation à une journée spéciale ou à un atelier","en":"What an organisation brings to a special day or a workshop"}',
+     false, false, false)
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VALUES
+    ('track_partner_role', 'organizer',         '{"fr":"Organisateur","en":"Organiser"}', 10),
+    ('track_partner_role', 'partner',           '{"fr":"Partenaire","en":"Partner"}', 20),
+    ('track_partner_role', 'technical_partner', '{"fr":"Partenaire technique","en":"Technical partner"}', 30),
+    ('track_partner_role', 'financial_support', '{"fr":"Soutien financier","en":"Financial support"}', 40)
+ON CONFLICT (taxonomy_code, code) DO NOTHING;
+
+CREATE TABLE event.programme_track_partners (
+    track_id        uuid        NOT NULL REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
+    organization_id uuid        NOT NULL CONSTRAINT xmod_fk_programme_track_partners_org
+                                REFERENCES org.organizations(id) ON DELETE RESTRICT,
+    role_term_id    uuid        NOT NULL REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
+    sort_order      smallint    NOT NULL DEFAULT 0,
+    added_at        timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (track_id, organization_id)
+);
+
+CREATE INDEX ix_programme_track_partners_org ON event.programme_track_partners (organization_id);
+
+COMMENT ON TABLE event.programme_track_partners IS
+    'Partenaires d''un fil (« Avec » : OIF, GIZ…), distincts des organisations de ses activités. Une organisation au plus une fois par fil.';
+
+-- Le rôle relève de SA taxonomie : un CHECK ne lit pas une autre table.
+CREATE OR REPLACE FUNCTION event.tg_check_track_partner_role()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM reference.taxonomy_terms t
+        WHERE t.id = NEW.role_term_id AND t.taxonomy_code = 'track_partner_role'
+    ) THEN
+        RAISE EXCEPTION 'Rôle refusé : il ne relève pas des rôles de partenaire d''une journée.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_programme_track_partners_check_role
+    BEFORE INSERT OR UPDATE OF role_term_id ON event.programme_track_partners
+    FOR EACH ROW EXECUTE FUNCTION event.tg_check_track_partner_role();
 
 -- -----------------------------------------------------------------------------
 -- 4 bis. Canaux de diffusion
@@ -657,6 +885,12 @@ COMMENT ON TABLE event.call_reviewers IS
 -- -----------------------------------------------------------------------------
 INSERT INTO org.organization_references (ref_schema, ref_table, ref_column, strategy) VALUES
     ('event', 'event_series', 'organizer_organization_id', 'reassign')
+ON CONFLICT DO NOTHING;
+
+-- Partenaire d'un fil (30/10) : la fusion de « GCF » dans « Fonds vert pour le
+-- climat » ne doit pas laisser deux lignes pour le même fil.
+INSERT INTO org.organization_references (ref_schema, ref_table, ref_column, strategy, dedupe_on) VALUES
+    ('event', 'programme_track_partners', 'organization_id', 'reassign', '{track_id}')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------

@@ -386,7 +386,15 @@ CREATE TABLE programme.session_tracks (
     added_by   uuid        CONSTRAINT xmod_fk_session_tracks_actor
                            REFERENCES identity.people(id) ON DELETE SET NULL,
     added_at   timestamptz NOT NULL DEFAULT now(),
-    PRIMARY KEY (session_id, track_id)
+    -- PARTIE DU DÉROULÉ (30/10) : « Partie 2 : initiatives nationales ». Sur le
+    -- rattachement et non sur la séance, parce qu'une activité de deux fils
+    -- n'appartient pas à la même partie dans l'un et dans l'autre. La clé
+    -- composite garantit que la partie est celle de CE fil ; retirer la partie
+    -- remet l'activité hors partie sans la détacher du fil.
+    part_id    uuid,
+    PRIMARY KEY (session_id, track_id),
+    CONSTRAINT xmod_fk_session_tracks_part FOREIGN KEY (part_id, track_id)
+        REFERENCES event.programme_track_parts (id, track_id) ON DELETE SET NULL (part_id)
 );
 
 CREATE INDEX ix_session_tracks_track ON programme.session_tracks (track_id, sort_order);
