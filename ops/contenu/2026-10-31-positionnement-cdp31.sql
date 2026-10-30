@@ -43,7 +43,7 @@
 -- toute écriture.
 --
 -- RAPPROCHEMENT, À FAIRE VALIDER PAR LE COMMANDITAIRE
---   1. 67 dossiers retenus, 66 séances au stand. Trois déplacées : Mission
+--   1. 66 dossiers retenus, 65 séances au stand (CDP31-00213, retenu et placé à la main le 30/10 à 17:32 UTC au 9/11 11:00, retiré du lot). Trois déplacées : Mission
 --      Inclusion (20/11 09:00 -> 17/11 16:45), Initiative Femmes, Eau et
 --      Résilience (20/11 10:15 -> 09:00), Enda ECOPOP / PROMOVAL (20/11 14:15 ->
 --      10:15). Une créée : BAD, 17/11 14:15-15:15 (le Word donne une heure, le
@@ -134,8 +134,6 @@ INSERT INTO lc_position VALUES
         pg_temp.a(9, '09:00'), pg_temp.a(9, '11:15'), pg_temp.a(9, '09:00'), pg_temp.a(9, '11:15')),
     ('CDP31-00180', '01a17da1-9bda-7d81-b123-b14c35f3c8b7', 'Le vélo au quotidien comme levier abordable et', '01a17da1-9bea-7f38-92f4-e81b507f6d8e', 'under_review',
         pg_temp.a(9, '09:00'), pg_temp.a(9, '11:15'), pg_temp.a(9, '09:00'), pg_temp.a(9, '11:15')),
-    ('CDP31-00213', '01a17da1-9bda-7076-96f1-06f59fbceb58', 'Femmes, énergie et climat : accompagner', '01a17da1-9bea-767f-92bc-b063c6ad6146', 'under_review',
-        pg_temp.a(9, '11:30'), pg_temp.a(9, '12:30'), pg_temp.a(9, '11:30'), pg_temp.a(9, '12:30')),
     ('CDP31-00128', '01a17da1-9bd9-7e53-9289-72365d99ea81', 'La finance circulaire pour le climat -', '01a17da1-9bea-7117-bb78-e1e21a2e339f', 'under_review',
         pg_temp.a(9, '15:30'), pg_temp.a(9, '16:30'), pg_temp.a(9, '15:30'), pg_temp.a(9, '16:30')),
     ('CDP31-00245', '01a17da1-9bd6-7c5f-ac86-0e53f62bac6b', 'Femmes expertes en transparence climatique :', '01a17da1-9bea-7e9b-985c-924734a15d5e', 'under_review',
