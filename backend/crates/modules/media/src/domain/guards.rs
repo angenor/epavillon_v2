@@ -43,6 +43,10 @@ pub enum Garde {
     /// forge une URL.
     EditionAdministree { permission: &'static str },
 
+    /// La permission **sur la portée de l'édition du fil** (journée spéciale,
+    /// atelier), ET le périmètre d'administration : la garde même du fil.
+    FilAdministre { permission: &'static str },
+
     /// Adhésion **active** à l'organisation porteuse du dossier, **ou** la
     /// permission sur l'édition du dossier.
     ///
@@ -126,6 +130,14 @@ const TABLE: &[((&str, &str), Garde)] = &[
     (
         ("event", "events"),
         Garde::EditionAdministree {
+            permission: "event.event.manage",
+        },
+    ),
+    (
+        // Photo du bandeau, visuel de l'encart et documents de la page d'un fil
+        // (30/10). Même droit que le fil lui-même.
+        ("event", "programme_tracks"),
+        Garde::FilAdministre {
             permission: "event.event.manage",
         },
     ),
@@ -283,6 +295,7 @@ mod tests {
         for (schema, table) in [
             ("org", "organizations"),
             ("event", "events"),
+            ("event", "programme_tracks"),
             ("programme", "proposals"),
             ("programme", "sessions"),
             ("programme", "proposal_speakers"),

@@ -18,7 +18,9 @@ use crate::domain::tabs::{EditionRoomPayload, EditionVenuePayload};
 /// dont il faudrait ensuite démêler les lignes nulles.
 pub async fn de_l_edition(conn: &mut PgConnection, event_id: EventId) -> Result<Vec<EditionVenue>> {
     let lieux = sqlx::query!(
-        r#"SELECT id, name, kind, address, map_url::text AS "map_url?"
+        r#"SELECT id, name, kind, address, map_url::text AS "map_url?",
+                  area, access_note,
+                  latitude::float8 AS "latitude?", longitude::float8 AS "longitude?"
              FROM event.venues
             WHERE event_id = $1
             ORDER BY name->>'fr', id"#,
@@ -47,6 +49,10 @@ pub async fn de_l_edition(conn: &mut PgConnection, event_id: EventId) -> Result<
             kind: l.kind,
             address: l.address,
             map_url: l.map_url,
+            area: l.area,
+            access_note: l.access_note,
+            latitude: l.latitude,
+            longitude: l.longitude,
             rooms: salles
                 .iter()
                 .filter(|s| s.venue_id == l.id)
@@ -76,14 +82,20 @@ pub async fn creer_lieu(
     p: &EditionVenuePayload,
 ) -> std::result::Result<VenueId, sqlx::Error> {
     let id = sqlx::query_scalar!(
-        r#"INSERT INTO event.venues (event_id, name, kind, address, map_url)
-           VALUES ($1, $2::jsonb, $3, $4, $5::text::platform.url)
+        r#"INSERT INTO event.venues
+               (event_id, name, kind, address, map_url, area, access_note, latitude, longitude)
+           VALUES ($1, $2::jsonb, $3, $4, $5::text::platform.url, $6::jsonb, $7::jsonb,
+                   $8::float8::numeric(9,6), $9::float8::numeric(9,6))
         RETURNING id"#,
         event_id.as_uuid(),
         p.name,
         p.kind,
         p.address,
-        p.map_url
+        p.map_url,
+        p.area,
+        p.access_note,
+        p.latitude,
+        p.longitude
     )
     .fetch_one(&mut *conn)
     .await?;
@@ -103,13 +115,21 @@ pub async fn modifier_lieu(
                name    = $2::jsonb,
                kind    = $3,
                address = $4,
-               map_url = $5::text::platform.url
+               map_url = $5::text::platform.url,
+               area        = $6::jsonb,
+               access_note = $7::jsonb,
+               latitude    = $8::float8::numeric(9,6),
+               longitude   = $9::float8::numeric(9,6)
          WHERE id = $1"#,
         id.as_uuid(),
         p.name,
         p.kind,
         p.address,
-        p.map_url
+        p.map_url,
+        p.area,
+        p.access_note,
+        p.latitude,
+        p.longitude
     )
     .execute(&mut *conn)
     .await?

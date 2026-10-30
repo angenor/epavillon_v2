@@ -254,7 +254,9 @@ pub async fn lieux<'e>(
     event_id: EventId,
 ) -> Result<Vec<PublicVenue>> {
     let lignes = sqlx::query!(
-        r#"SELECT id, event_id, name, kind, address, map_url::text AS "map_url?", created_at
+        r#"SELECT id, event_id, name, kind, address, map_url::text AS "map_url?",
+                  area, access_note,
+                  latitude::float8 AS "latitude?", longitude::float8 AS "longitude?", created_at
              FROM event.venues
             WHERE event_id = $1
             ORDER BY name->>'fr', id"#,
@@ -272,6 +274,10 @@ pub async fn lieux<'e>(
             kind: l.kind,
             address: l.address,
             map_url: l.map_url,
+            area: l.area,
+            access_note: l.access_note,
+            latitude: l.latitude,
+            longitude: l.longitude,
             created_at: l.created_at,
         })
         .collect())

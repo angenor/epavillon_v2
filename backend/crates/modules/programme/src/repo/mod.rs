@@ -31,4 +31,5 @@ pub mod session_parts;
 pub mod sessions;
 pub mod speakers;
 pub mod themes;
+pub mod track_page;
 pub mod transitions;

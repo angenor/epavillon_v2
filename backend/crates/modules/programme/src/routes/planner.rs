@@ -26,7 +26,10 @@ pub struct EditionDemandee {
 
 /// Ce que ce module dépose sous `/admin/planner`, **sans le préfixe**.
 pub fn configurer(cfg: &mut web::ServiceConfig) {
-    cfg.route("", web::get().to(ecran));
+    cfg.route("", web::get().to(ecran)).route(
+        "/tracks/{trackId}/sessions/{sessionId}",
+        web::put().to(placer_dans_le_fil),
+    );
 }
 
 /// Le garde de l'écran : **ascendance, périmètre, puis permission de
@@ -61,7 +64,7 @@ pub(crate) async fn garder(
         (status = 200, description = "PlannerScreen", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
         (status = 403, description = "Permission de planifier absente, ou périmètre vide", body = crate::routes::openapi::ApiErrorBody),
-        (status = 404, description = "Édition inexistante **ou hors périmètre** — indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Édition inexistante **ou hors périmètre**, indiscernables", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn ecran(
@@ -81,4 +84,43 @@ pub(crate) async fn ecran(
         .ok_or_else(ApiError::not_found)?;
 
     Ok(HttpResponse::Ok().json(ecran))
+}
+
+/// Placer une activité dans le déroulé d'un fil (30/10).
+#[utoipa::path(
+    put,
+    description = "`TrackSessionPlacementPayload` → `TrackSessionPlacement`. Range une activité **déjà rattachée** au fil dans une partie de son déroulé (`part_id`, nul : hors partie), la marque temps fort (`is_highlight`) et règle son rang. La partie doit appartenir à **ce** fil. Gardé par la permission de planifier sur l'édition **de la séance**, et le périmètre d'administration. Une séance non rattachée au fil rend 404.",
+    path = "/admin/planner/tracks/{trackId}/sessions/{sessionId}",
+    tag = "Planificateur de séances",
+    operation_id = "seances_placer_dans_le_fil",
+    params(
+        ("trackId" = Uuid, Path, description = "Fil (journée spéciale, atelier)"),
+        ("sessionId" = Uuid, Path, description = "Séance rattachée au fil"),
+    ),
+    request_body = Object,
+    responses(
+        (status = 200, description = "TrackSessionPlacement", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Permission de planifier absente, ou périmètre vide", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Séance inexistante, hors périmètre ou non rattachée au fil, indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Partie inconnue ou d'un autre fil", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn placer_dans_le_fil(
+    requete: actix_web::HttpRequest,
+    state: web::Data<ProgrammeState>,
+    perimetre: Perimeter,
+    chemin: web::Path<(Uuid, Uuid)>,
+    corps: web::Json<crate::domain::track_page::TrackSessionPlacementPayload>,
+) -> Result<HttpResponse> {
+    let (track, session) = chemin.into_inner();
+    let session = crate::domain::ids::SessionId::from(session);
+    garder(&state, &perimetre, perimeter::Cible::Seance(session)).await?;
+
+    let ctx = crate::routes::contexte_de(&requete, perimetre.person_id);
+    let place =
+        crate::service::track_page::placer(&state, &ctx, session, track, corps.into_inner())
+            .await?;
+
+    Ok(HttpResponse::Ok().json(place))
 }

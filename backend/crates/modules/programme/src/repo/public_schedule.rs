@@ -41,6 +41,24 @@ pub async fn programmation<'e>(
     // PostgreSQL, ce qui évite de composer deux requêtes pour une seule lecture.
     limite: Option<i64>,
 ) -> Result<Vec<PublicScheduleRow>> {
+    lire(executor, event_id, limite, None).await
+}
+
+/// Les lignes publiées de ces séances, dans une édition : le déroulé d'un fil.
+pub async fn des_seances<'e>(
+    executor: impl PgExecutor<'e>,
+    event_id: EventId,
+    ids: &[uuid::Uuid],
+) -> Result<Vec<PublicScheduleRow>> {
+    lire(executor, Some(event_id), None, Some(ids)).await
+}
+
+async fn lire<'e>(
+    executor: impl PgExecutor<'e>,
+    event_id: Option<EventId>,
+    limite: Option<i64>,
+    ids: Option<&[uuid::Uuid]>,
+) -> Result<Vec<PublicScheduleRow>> {
     let lignes = sqlx::query!(
         r#"SELECT v.id AS "id!", v.event_id AS "event_id!", v.event_day_id,
                   v.proposal_id, v.slug::text AS "slug!", v.title AS "title!",
@@ -67,10 +85,12 @@ pub async fn programmation<'e>(
              FROM programme.v_public_schedule v
             WHERE ($1::uuid IS NULL OR v.event_id = $1)
               AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))
+              AND ($3::uuid[] IS NULL OR v.id = ANY($3))
             ORDER BY v.starts_at, v.id
             LIMIT $2"#,
         event_id.map(|e| e.0),
-        limite
+        limite,
+        ids as Option<&[uuid::Uuid]>
     )
     .fetch_all(executor)
     .await?;

@@ -157,6 +157,18 @@ pub async fn seance(pool: &PgPool, session_id: Uuid) -> Result<Option<DossierVis
     }))
 }
 
+/// L'édition d'un fil de programmation (journée spéciale, atelier), `None`
+/// s'il n'existe pas.
+pub async fn edition_du_fil(pool: &PgPool, track_id: Uuid) -> Result<Option<Uuid>> {
+    let edition = sqlx::query_scalar!(
+        "SELECT t.event_id FROM event.programme_tracks t WHERE t.id = $1",
+        track_id
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(edition)
+}
+
 /// L'édition d'un envoi de courriels du back-office, `None` s'il n'existe pas.
 pub async fn edition_de_lenvoi(pool: &PgPool, mailing_id: Uuid) -> Result<Option<Uuid>> {
     let edition = sqlx::query_scalar!(

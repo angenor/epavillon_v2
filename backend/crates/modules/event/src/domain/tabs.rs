@@ -195,6 +195,17 @@ pub struct EditionVenuePayload {
     pub address: Option<String>,
     #[serde(default)]
     pub map_url: Option<String>,
+    /// Secteur du site (« Zone bleue »), texte multilingue.
+    #[serde(default)]
+    pub area: Option<Value>,
+    /// Consigne d'accès, texte multilingue.
+    #[serde(default)]
+    pub access_note: Option<Value>,
+    /// Point relevé : les deux ou aucun (`ck_venues_coordinates`).
+    #[serde(default)]
+    pub latitude: Option<f64>,
+    #[serde(default)]
+    pub longitude: Option<f64>,
 }
 
 /// Une salle — `EditionRoomPayload`.

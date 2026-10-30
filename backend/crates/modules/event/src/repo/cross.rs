@@ -30,6 +30,9 @@
 //! | 8 | `identity` — personnes assignables, candidats au comité, `has_permission` sur l'édition | « qui peut curer un fil, qui peut siéger, et détient-il bien le droit d'évaluer ? » |
 //! | 9 | `reference` et `media` — `terms_of`, `term_badges`, pays, langues, `attached_image` | thématiques d'un fil, listes du formulaire, les trois déclinaisons d'une image |
 //!
+//! Les lectures n° 10 et 11, celles de l'éditeur de la page d'un fil
+//! (partenaires, composition), vivent dans `repo/cross_page.rs`.
+//!
 //! Le périmètre d'administration ne figure pas dans cette liste : il est lu par
 //! le garde du noyau (`kernel::auth`), jamais par une requête d'ici.
 //!

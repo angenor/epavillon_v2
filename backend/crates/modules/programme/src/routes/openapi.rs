@@ -89,6 +89,8 @@ pub struct ApiErrorBody {
         crate::routes::sessions::diffuser,
         crate::routes::public_schedule::programmation,
         crate::routes::public_schedule::seance,
+        crate::routes::public_schedule::page_du_fil,
+        crate::routes::planner::placer_dans_le_fil,
         crate::routes::registrations::formulaire,
         crate::routes::registrations::sinscrire,
         crate::routes::registrations::liste_nominative,

@@ -13,6 +13,7 @@ pub mod edition_write;
 pub mod public_read;
 pub mod publication;
 pub mod tabs;
+pub mod track_page;
 pub mod tracks;
 pub mod venues;
 

@@ -33,7 +33,35 @@ const LIMITE_MAX: i64 = 200;
 /// séance — c'est ainsi que le site les écrit.
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/schedule", web::get().to(programmation))
-        .route("/events/{event_id}/sessions/{slug}", web::get().to(seance));
+        .route("/events/{event_id}/sessions/{slug}", web::get().to(seance))
+        .route("/events/{event_slug}/tracks/{track_slug}", web::get().to(page_du_fil));
+}
+
+/// La page publique d'un fil : journée spéciale ou atelier préparatoire.
+#[utoipa::path(
+    get,
+    description = "`PublicTrackPage`, en une réponse et **sans session** : l'édition (fuseau de référence compris), le fil (titres, accroche, dates, couleur, thématiques), son lieu (celui du fil, à défaut le pavillon ; `is_off_site` quand il se tient ailleurs, avec adresse, lien de carte, secteur, consigne et coordonnées), la photo du bandeau (`AttachedImage`), les documents (`AttachedDocument[]`), l'encart mis en avant et son visuel, les publics cibles, les partenaires (logo, rôle) et la mention de soutien, les parties (heures lues sur leur contenu), le **déroulé** fusionnant moments sans activité (`kind: moment`) et activités **publiées** (`kind: activity` : ligne de `PublicScheduleRow`, intervenants, organisations avec logo, temps fort), trié par heure, les heures de la journée (`starts_at`, `ends_at`, `opens_at` pour l'accueil qui précède) et les autres fils publiés de l'édition (`PublicTrackSummary[]`, la page lue marquée). **Un fil non publié, une édition en brouillon ou annulée et une adresse inconnue rendent le même 404.**",
+    path = "/events/{event_slug}/tracks/{track_slug}",
+    tag = "Programmation publique",
+    operation_id = "programmation_page_du_fil",
+    params(
+        ("event_slug" = String, Path, description = "Adresse d'URL de l'édition"),
+        ("track_slug" = String, Path, description = "Adresse d'URL du fil"),
+    ),
+    responses(
+        (status = 200, description = "PublicTrackPage", body = Object),
+        (status = 404, description = "Adresse inconnue ou fil non publié, indiscernables", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn page_du_fil(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    chemin: web::Path<(String, String)>,
+) -> Result<HttpResponse> {
+    let (edition, fil) = chemin.into_inner();
+    let page = crate::service::track_page::page(state.pool(), &edition, &fil).await?;
+
+    crate::routes::json_revalide(&requete, &page, "public, no-cache")
 }
 
 /// La programmation d'une édition.

@@ -229,6 +229,24 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
             ApiError::new(ValidationFailed).field("edition_year")
         }
         ("23514", "ck_programme_tracks_period") => ApiError::new(ValidationFailed).field("ends_on"),
+        // Page d'un fil (30/10) : encart, lieu, parties, moments.
+        ("23514", "ck_programme_tracks_feature_link")
+        | ("23514", "ck_programme_tracks_feature_link_url") => {
+            ApiError::new(ValidationFailed).field("feature_link_url")
+        }
+        ("23514", "ck_programme_tracks_feature_title") => {
+            ApiError::new(ValidationFailed).field("feature_title")
+        }
+        ("23514", "ck_venues_coordinates") | ("23514", "venues_latitude_check") => {
+            ApiError::new(ValidationFailed).field("latitude")
+        }
+        ("23514", "venues_longitude_check") => ApiError::new(ValidationFailed).field("longitude"),
+        ("23514", "ck_programme_track_parts_heading") => {
+            ApiError::new(ValidationFailed).field("label")
+        }
+        ("23514", "ck_programme_track_moments_period") => {
+            ApiError::new(ValidationFailed).field("ends_at")
+        }
         ("23514", "rooms_capacity_check") => ApiError::new(ValidationFailed).field("capacity"),
         ("23514", "ck_calls_window") => ApiError::new(ValidationFailed).field("closes_at"),
         ("23514", "ck_calls_extension") => ApiError::new(ValidationFailed).field("extended_until"),
@@ -324,6 +342,19 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         }
         ("23503", "xmod_fk_call_reviewers_person") => {
             ApiError::new(EventUnknownReference).field("person_id")
+        }
+        ("23503", "xmod_fk_programme_track_partners_org") => {
+            ApiError::new(EventUnknownReference).field("organization_id")
+        }
+        ("23503", "programme_tracks_venue_id_fkey") => {
+            ApiError::new(EventUnknownReference).field("venue_id")
+        }
+        ("23503", "fk_programme_track_moments_part") => {
+            ApiError::new(EventUnknownReference).field("part_id")
+        }
+        // Partie d'un autre fil, ou inconnue : la clé composite le dit seule.
+        ("23503", "xmod_fk_session_tracks_part") => {
+            ApiError::new(ValidationFailed).field("part_id")
         }
         // Même contrainte pour un groupe supprimé qui porte des étapes et pour
         // une étape posée dans un groupe inconnu ; seul le message les sépare.

@@ -132,6 +132,15 @@ pub async fn intervenants_publics<'e>(
     executor: impl PgExecutor<'e>,
     session_id: SessionId,
 ) -> Result<Vec<serde_json::Value>> {
+    intervenants_publics_de(executor, &[session_id.as_uuid()]).await
+}
+
+/// Les mêmes, pour plusieurs séances d'un coup (le déroulé d'un fil), groupés
+/// par séance.
+pub async fn intervenants_publics_de<'e>(
+    executor: impl PgExecutor<'e>,
+    seances: &[Uuid],
+) -> Result<Vec<serde_json::Value>> {
     let lignes = sqlx::query_scalar!(
         r#"SELECT jsonb_build_object(
                       'id', s.id,
@@ -157,9 +166,9 @@ pub async fn intervenants_publics<'e>(
                                     media.attached_image('identity', 'people', p.id, 'avatar'))) AS "ligne!"
              FROM programme.session_speakers s
              LEFT JOIN identity.people p ON p.id = s.person_id
-            WHERE s.session_id = $1
-            ORDER BY s.sort_order, s.created_at"#,
-        session_id.as_uuid()
+            WHERE s.session_id = ANY($1)
+            ORDER BY s.session_id, s.sort_order, s.created_at"#,
+        seances
     )
     .fetch_all(executor)
     .await?;
@@ -167,11 +176,19 @@ pub async fn intervenants_publics<'e>(
     Ok(lignes)
 }
 
-/// Les organisations d'une séance **publiée**, pour le public, avec nom, sigle
-/// et pays — ce que `v_public_schedule` montre déjà du porteur.
+/// Les organisations d'une séance **publiée**, pour le public, avec nom, sigle,
+/// pays et logo : ce que `v_public_schedule` montre déjà du porteur.
 pub async fn organisations_publiques<'e>(
     executor: impl PgExecutor<'e>,
     session_id: SessionId,
+) -> Result<Vec<serde_json::Value>> {
+    organisations_publiques_de(executor, &[session_id.as_uuid()]).await
+}
+
+/// Les mêmes, pour plusieurs séances d'un coup, groupées par séance.
+pub async fn organisations_publiques_de<'e>(
+    executor: impl PgExecutor<'e>,
+    seances: &[Uuid],
 ) -> Result<Vec<serde_json::Value>> {
     let lignes = sqlx::query_scalar!(
         r#"SELECT jsonb_build_object(
@@ -183,13 +200,14 @@ pub async fn organisations_publiques<'e>(
                       'name', o.legal_name,
                       'acronym', o.acronym,
                       'country_code', c.iso2,
-                      'country', c.name) AS "ligne!"
+                      'country', c.name,
+                      'logo', media.attached_image('org', 'organizations', o.id, 'logo')) AS "ligne!"
              FROM programme.session_organizations so
              JOIN org.organizations o ON o.id = so.organization_id
              LEFT JOIN reference.countries c ON c.id = o.country_id
-            WHERE so.session_id = $1
-            ORDER BY so.role = 'lead' DESC, so.sort_order"#,
-        session_id.as_uuid()
+            WHERE so.session_id = ANY($1)
+            ORDER BY so.session_id, so.role = 'lead' DESC, so.sort_order"#,
+        seances
     )
     .fetch_all(executor)
     .await?;

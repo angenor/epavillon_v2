@@ -25,4 +25,5 @@ pub mod registration;
 pub mod sanitize;
 pub mod sessions;
 pub mod slug;
+pub mod track_page;
 pub mod transitions;

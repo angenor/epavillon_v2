@@ -54,7 +54,8 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         web::scope("/admin/tracks")
             .route("", web::post().to(creer_fil))
             .route("/{id}", web::put().to(modifier_fil))
-            .route("/{id}", web::delete().to(supprimer_fil)),
+            .route("/{id}", web::delete().to(supprimer_fil))
+            .configure(crate::routes::admin_track_page::configurer),
     );
 }
 

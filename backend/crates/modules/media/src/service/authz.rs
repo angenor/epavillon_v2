@@ -88,6 +88,17 @@ pub async fn exiger_le_droit(
             Ok(None)
         }
 
+        Garde::FilAdministre { permission } => {
+            let Some(event_id) = cross::edition_du_fil(pool, porteuse.owner_id).await? else {
+                return Err(ApiError::not_found());
+            };
+            // Permission ET périmètre (règle n° 8), comme le fil lui-même.
+            let autorise = has_permission(pool, acteur, permission, Scope::Event(event_id)).await?;
+            let perimetre = kernel::auth::administered_events(pool, acteur).await?;
+            refuser_sauf(autorise && perimetre.allows(event_id))?;
+            Ok(None)
+        }
+
         Garde::OrganisationDuDossier { permission } => {
             let Some(dossier) = cross::dossier(pool, porteuse.owner_id).await? else {
                 return Err(ApiError::not_found());

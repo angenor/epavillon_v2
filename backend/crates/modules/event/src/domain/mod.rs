@@ -9,3 +9,4 @@ pub mod ids;
 pub mod permissions;
 pub mod public;
 pub mod tabs;
+pub mod track_page;

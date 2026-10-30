@@ -13,7 +13,7 @@
 //! elles se relisent en un fichier, et **c'est ici qu'un ajout se discute**.
 //! C'est le patron de B3, repris sans être réinventé.
 //!
-//! # Les dix-sept lectures hors schéma autorisées
+//! # Les dix-huit lectures hors schéma autorisées
 //!
 //! | # | Lecture | Question de **ce** module |
 //! |---|---|---|
@@ -34,6 +34,7 @@
 //! | 15 | `event.broadcast_channels` | « quel canal cette séance occupe-t-elle ? » |
 //! | 16 | `reference.countries.iso2`, `reference.taxonomy_terms.code` | les valeurs admises d'une réponse « pays » ou d'un champ adossé à une taxonomie |
 //! | 17 | `live.streams`, `live.build_embed_url()` — par `v_public_schedule` | « cette séance a-t-elle une rediffusion, où, et de quelle durée ? » (Guide Négo, étape 5) |
+//! | 18 | `event.programme_tracks` et ses parties, moments, partenaires, lieu ; `org`, `reference`, `media` pour les résoudre | « que montre la page publique de cette journée ? » (`cross/fils.rs`, 30/10) |
 //!
 //! Les cinq dernières sont arrivées avec B5 et vivent dans `cross/grille.rs`,
 //! **dans le même espace de noms** : le découpage est un fait de fichier — le
@@ -923,3 +924,12 @@ pub use grille::*;
 mod comite;
 
 pub use comite::*;
+
+// -----------------------------------------------------------------------------
+// La page publique d'un fil (30/10) : le fil publié, son lieu, ses parties, ses
+// moments, ses partenaires, ses médias et les autres fils publiés. Lectures
+// seules, lecture n° 18.
+// -----------------------------------------------------------------------------
+mod fils;
+
+pub use fils::*;

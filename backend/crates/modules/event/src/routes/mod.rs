@@ -5,6 +5,7 @@ pub mod admin_call;
 pub mod admin_committee;
 pub mod admin_events;
 pub mod admin_tabs;
+pub mod admin_track_page;
 pub mod openapi;
 pub mod planner;
 pub mod public;

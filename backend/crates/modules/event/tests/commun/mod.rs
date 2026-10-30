@@ -359,6 +359,10 @@ pub fn formulaire_lieu(event_id: Uuid, nom: &str) -> event::domain::tabs::Editio
         kind: "pavilion".to_owned(),
         address: None,
         map_url: None,
+        area: None,
+        access_note: None,
+        latitude: None,
+        longitude: None,
     }
 }
 

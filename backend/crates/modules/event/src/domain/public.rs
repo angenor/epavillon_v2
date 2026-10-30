@@ -177,6 +177,10 @@ pub struct PublicVenue {
     pub kind: String,
     pub address: Option<String>,
     pub map_url: Option<String>,
+    pub area: Option<Value>,
+    pub access_note: Option<Value>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
 }
