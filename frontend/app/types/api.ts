@@ -2394,6 +2394,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/planner/tracks/{trackId}/sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Placer une activité dans le déroulé d'un fil (30/10).
+         * @description `TrackSessionPlacementPayload` → `TrackSessionPlacement`. Range une activité **déjà rattachée** au fil dans une partie de son déroulé (`part_id`, nul : hors partie), la marque temps fort (`is_highlight`) et règle son rang. La partie doit appartenir à **ce** fil. Gardé par la permission de planifier sur l'édition **de la séance**, et le périmètre d'administration. Une séance non rattachée au fil rend 404.
+         */
+        put: operations["seances_placer_dans_le_fil"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/platform/maintenance": {
         parameters: {
             query?: never;
@@ -2815,6 +2835,118 @@ export interface paths {
          * @description `EditionTabResult`. **Aucune séance n'est supprimée** : ce qui disparaît, ce sont les rattachements séance–fil, par cascade. `sessions_detached` compte ce travail éditorial perdu, **avant** l'ordre de suppression — après, le lien n'existe plus et le chiffre serait zéro. Le corps de la requête est ignoré.
          */
         delete: operations["admin_fil_supprimer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tracks/{id}/moments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ajouter un moment sans activité.
+         * @description `TrackMomentPayload` → `TrackPageSettings`. Accueil, déjeuner, pause, clôture : **pas une activité** (ni inscription, ni conflit, ni programmation publique). Début obligatoire, fin facultative et postérieure, libellé multilingue, précision et partie facultatives. Heures absolues (RFC 3339), affichées dans le fuseau de l'édition.
+         */
+        post: operations["admin_fil_moment_creer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tracks/{id}/moments/{momentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Modifier un moment.
+         * @description `TrackMomentPayload` → `TrackPageSettings`. Écriture totale du moment. Un moment d'un autre fil est introuvable.
+         */
+        put: operations["admin_fil_moment_modifier"];
+        post?: never;
+        /**
+         * Retirer un moment.
+         * @description `TrackPageSettings`.
+         */
+        delete: operations["admin_fil_moment_supprimer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tracks/{id}/page": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lire les réglages de la page d'un fil.
+         * @description `TrackPageSettings` : ce que la page publique du fil affiche au-delà du fil lui-même. Lieu (`venue_id` nul : le pavillon de l'édition), accroche, publics cibles (un texte multilingue par public), mention de soutien, encart mis en avant (surtitre, titre, texte, libellé et adresse du lien), parties du déroulé, moments sans activité, partenaires résolus (nom, sigle, logo, rôle et son libellé) et la **composition** : chaque activité rattachée, publiée ou non, avec sa partie, son temps fort et son rang. Les médias (photo du bandeau, visuel de l'encart, documents) se posent par le module Médias sur `event.programme_tracks`.
+         */
+        get: operations["admin_fil_page_lire"];
+        /**
+         * Enregistrer les réglages de la page et ses partenaires.
+         * @description `TrackPagePayload` → `TrackPageSettings`. Écriture **totale** des colonnes de la page et **remplacement** de la liste des partenaires (l'ordre envoyé est l'ordre affiché ; une organisation citée deux fois garde sa première place ; `role_code` relève de la taxonomie `track_partner_role`, `partner` par défaut). Le lieu doit appartenir à l'édition du fil. Le lien de l'encart est une adresse absolue ou un chemin du site (`/…`), donné avec son libellé. Parties et moments ont leurs propres routes.
+         */
+        put: operations["admin_fil_page_enregistrer"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tracks/{id}/parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ajouter une partie au déroulé.
+         * @description `TrackPartPayload` → `TrackPageSettings`. Nom court (`label`, « Matin » ; nul : « Partie N ») ou intitulé (`title`) exigé, résumé d'une ligne facultatif, rang.
+         */
+        post: operations["admin_fil_partie_creer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tracks/{id}/parts/{partId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Modifier une partie.
+         * @description `TrackPartPayload` → `TrackPageSettings`. Écriture totale de la partie. Une partie d'un autre fil est introuvable.
+         */
+        put: operations["admin_fil_partie_modifier"];
+        post?: never;
+        /**
+         * Retirer une partie.
+         * @description `TrackPageSettings`. Les moments et les activités de la partie **restent dans le fil**, hors partie.
+         */
+        delete: operations["admin_fil_partie_supprimer"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3308,6 +3440,26 @@ export interface paths {
          * @description `PublicSessionDetail` : `{ session, description, allows_questions, is_recorded, cancelled_reason, speakers, organizations, gallery }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, le motif de son annulation (texte multilingue, nul si elle ne l'est pas), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar`, **ni identifiant de personne, ni adresse, ni confirmation, ni présence**), ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`) et sa galerie (`AttachedImage[]`, photos **prêtes et publiques** seulement, dans l'ordre réglé par l'équipe ; tableau vide sans photo). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
          */
         get: operations["programmation_seance_publique"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{event_slug}/tracks/{track_slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * La page publique d'un fil : journée spéciale ou atelier préparatoire.
+         * @description `PublicTrackPage`, en une réponse et **sans session** : l'édition (fuseau de référence compris), le fil (titres, accroche, dates, couleur, thématiques), son lieu (celui du fil, à défaut le pavillon ; `is_off_site` quand il se tient ailleurs, avec adresse, lien de carte, secteur, consigne et coordonnées), la photo du bandeau (`AttachedImage`), les documents (`AttachedDocument[]`), l'encart mis en avant et son visuel, les publics cibles, les partenaires (logo, rôle) et la mention de soutien, les parties (heures lues sur leur contenu), le **déroulé** fusionnant moments sans activité (`kind: moment`) et activités **publiées** (`kind: activity` : ligne de `PublicScheduleRow`, intervenants, organisations avec logo, temps fort), trié par heure, les heures de la journée (`starts_at`, `ends_at`, `opens_at` pour l'accueil qui précède) et les autres fils publiés de l'édition (`PublicTrackSummary[]`, la page lue marquée). **Un fil non publié, une édition en brouillon ou annulée et une adresse inconnue rendent le même 404.**
+         */
+        get: operations["programmation_page_du_fil"];
         put?: never;
         post?: never;
         delete?: never;
@@ -14316,7 +14468,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description Édition inexistante **ou hors périmètre** — indiscernables */
+            /** @description Édition inexistante **ou hors périmètre**, indiscernables */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14419,6 +14571,71 @@ export interface operations {
             };
             /** @description Édition inexistante **ou hors périmètre** — indiscernables */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    seances_placer_dans_le_fil: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Fil (journée spéciale, atelier) */
+                trackId: string;
+                /** @description Séance rattachée au fil */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description TrackSessionPlacement */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission de planifier absente, ou périmètre vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante, hors périmètre ou non rattachée au fil, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Partie inconnue ou d'un autre fil */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -15705,6 +15922,479 @@ export interface operations {
             };
         };
     };
+    admin_fil_moment_creer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil inexistant **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Libellé absent, fin avant le début, partie d'un autre fil */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_fil_moment_modifier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+                /** @description Identifiant du moment */
+                momentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil ou moment inexistants **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Libellé absent, fin avant le début, partie d'un autre fil */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_fil_moment_supprimer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+                /** @description Identifiant du moment */
+                momentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil ou moment inexistants **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_fil_page_lire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil inexistant **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_fil_page_enregistrer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil inexistant **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Lieu d'une autre édition, organisation ou rôle inconnu, public sans français, lien sans libellé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_fil_partie_creer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil inexistant **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Ni nom ni intitulé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_fil_partie_modifier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+                /** @description Identifiant de la partie */
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil ou partie inexistants **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Ni nom ni intitulé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_fil_partie_supprimer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du fil */
+                id: string;
+                /** @description Identifiant de la partie */
+                partId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description TrackPageSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Fil ou partie inexistants **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     admin_utilisateur_liste: {
         parameters: {
             query?: never;
@@ -16594,6 +17284,40 @@ export interface operations {
                 };
             };
             /** @description Adresse inconnue **ou séance non publiée** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    programmation_page_du_fil: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Adresse d'URL de l'édition */
+                event_slug: string;
+                /** @description Adresse d'URL du fil */
+                track_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicTrackPage */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Adresse inconnue ou fil non publié, indiscernables */
             404: {
                 headers: {
                     [name: string]: unknown;
