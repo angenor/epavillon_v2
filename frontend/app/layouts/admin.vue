@@ -365,5 +365,7 @@ const sectionsVisibles = computed(() =>
         <AdminMailingsComposer v-if="mailComposer.isOpen" />
       </ClientOnly>
     </div>
+
+    <UiToastRegion top="calc(var(--admin-header-height) + var(--space-4))" />
   </div>
 </template>

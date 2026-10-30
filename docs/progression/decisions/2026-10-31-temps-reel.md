@@ -2,7 +2,7 @@
 
 > Extrait de la [progression](../../PROGRESSION.md). Ce qui a été tranché en cours de route, et pourquoi.
 
-**Statut : proposé.** Étude seule, rien n'est écrit ni tranché. Une fois arbitré, le choix d'architecture rejoint `CADRAGE.md` § 6 comme ADR.
+**Statut : en construction.** Arbitré le 31/10 (pouls pour le public, ligne ouverte pour les connectés, voir [les besoins](2026-10-31-temps-reel-besoins.md) § 7). Le socle est écrit (§ 5) ; aucun écran n'est encore branché. Le choix d'architecture rejoindra `CADRAGE.md` § 6 comme ADR une fois en ligne.
 
 **La demande (30/10).** Plusieurs données doivent se mettre à jour sans recharger. Les deux premières : les échanges d'un dossier (un message de l'organisation apparaît dans la fiche du back-office, compteur de non-lus compris, et réciproquement dans l'espace organisation) ; l'envoi d'un courriel du back-office (statut et nombre envoyé à jour, notification brève « envoi parti » ou « problème », même si la personne a changé de page). Le commanditaire suggère « un mécanisme WebSocket efficace et résilient ». D'autres usages suivront : direct, inscriptions, planificateur à plusieurs, peut-être Guide Négo.
 
@@ -184,3 +184,37 @@ Une à la fois, dans cet ordre.
 - A. Oui : une demi-journée de mesure et de réglage, avec un accès au serveur, avant la mise en ligne.
 - B. Non : on garde la relecture régulière (toutes les 15 secondes quand la fenêtre est ouverte) partout. Plus simple, mais un message met jusqu'à 15 secondes à apparaître et l'envoi de courriels se met à jour avec le même délai.
 - *Recommandation : A*, c'est la condition de tout le reste ; sans elle, on ne peut pas garantir que le site voisin ne sera jamais ralenti.
+
+---
+
+## 5. Le socle (31/10)
+
+Écrit, testé, non branché. Ce qui diffère de la proposition : le repli du site est le **pouls** (une question pour tous les sujets d'une page) et non `usePolling` ; la ligne se ferme **dès** que l'onglet est caché ; `boot` change aussi quand l'écoute de la base reprend (signaux perdus).
+
+| Pièce | Où |
+|---|---|
+| `platform.signal(topic, payload)`, canal `platform_signal` | `docs/database/010_platform.sql` § 3 bis, migration `ops/migrations/2026-10-31-temps-reel.sql` |
+| `Topic`, `signal()`, `TopicAuthorizer`, `TopicRegistry`, `Audience` ; `PersonTopics` (`person:<soi>`), `PublicEditionTopics` (`edition:<id>:public[:x]`, anonyme) | `backend/crates/kernel/src/realtime.rs` |
+| Concentrateur (écoute dédiée hors pool, versions par sujet et par audience, `boot`, compteurs journalisés toutes les 5 min, annonce d'arrêt sur SIGTERM) | `backend/crates/api/src/realtime/hub.rs` |
+| `GET /api/realtime/stream?topics=` : SSE, connecté seulement ; `ready`, `signal` (500 ms), `resync`, `revoked`, `reauth` (jeton échu ou session close), `evicted` (6e flux de la session), `restart` ; battement 25 s, revalidation 60 s ; 32 sujets, 403 si aucun accordé | `backend/crates/api/src/realtime/stream.rs` |
+| `GET /api/realtime/pulse?topics=` : `{ boot, versions, denied }`, anonyme pour le public, 401 pour un sujet privé sans session, ETag et 304 (suffixe `-br` d'Apache toléré), autorisation gardée 60 s par session | `backend/crates/api/src/realtime/pulse.rs` |
+| Enregistrement des autorisations des modules | `api::realtime::autorisations()` |
+| Règle Apache du flux, avant `/api/` (à déployer par `./deploy.sh vhost`) | `ops/apache-epavillon.conf` |
+| `useRealtime(topics, onChange)` ; pur et testé : `utils/realtime.ts` | `frontend/app/composables/useRealtime.ts`, `composables/api/realtime.ts` |
+| Notifications brèves : `useToast()`, `UiToast`, `UiToastRegion` (back-office et layout public) ; guide de style vivant, motifs n° 5 | `frontend/app/components/ui/` |
+
+**Audience.** Un signal porte `{"audience": "committee"}` quand il ne concerne que le comité. L'autorisation d'un sujet rend `Audience::All` (comité) ou `Audience::Only(["submitter"])` (déposant) : le flux ne livre pas, et la version du pouls ne compte pas, ce qui n'est pas admis.
+
+### Brancher un écran
+
+1. **Émettre**, dans la transaction du changement : `kernel::realtime::signal(&mut tx, &format!("proposal:{id}"), Some(json!({"kind": "comments", "audience": "committee"})))`, ou `PERFORM platform.signal('proposal:' || id)` dans un trigger. Le worker fait de même dans ses transactions.
+2. **Autoriser**, dans le module : un `TopicAuthorizer` dont `handles()` reconnaît ses sujets et `authorize()` reprend **la garde de la route que la page relit** (même permission, même portée, règle 8) ; exposé par une fonction `topic_authorizers()` du module, ajoutée à `api::realtime::autorisations()` par `.register_all(...)`.
+3. **Relire**, dans la page : `useRealtime(() => [`proposal:${id}`], () => refresh())`. Le rappel reçoit les sujets changés ; il relit la route REST, jamais autre chose.
+4. **Prévenir** ailleurs que sur la page : `useToast().success(titre, { message, link })` ou `.error(...)`, depuis un abonné de `person:<soi>`.
+5. **Tester** : un test d'API qui écrit puis vérifie `hub.version()` (voir `crates/api/tests/temps_reel.rs`), et un refus pour qui n'a pas le droit.
+
+### Reste
+
+- Brancher les écrans (étapes 2 et 3 de l'étude, usages 2.3 à 2.6 des besoins) : chaque module ajoute ses autorisations.
+- Appliquer la règle Apache (`./deploy.sh vhost`), puis `curl -N` à travers l'adresse publique : battement toutes les 25 s, aucun `Content-Encoding`.
+- Jouer la migration en production **avant** l'API.

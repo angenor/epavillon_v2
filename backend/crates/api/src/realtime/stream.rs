@@ -32,6 +32,9 @@ use uuid::Uuid;
 
 use super::hub::{Compteurs, Hub, HubMessage};
 
+/// Le battement sert aussi à voir partir un client : Actix ne lâche le corps
+/// qu'à une écriture refusée, donc un flux abandonné vit jusqu'à deux battements
+/// (mesuré le 31/10). Le plafond par session ferme d'abord ces plus anciens.
 pub const BATTEMENT: Duration = Duration::from_secs(25);
 pub const REVALIDATION: Duration = Duration::from_secs(60);
 pub const REGROUPEMENT: Duration = Duration::from_millis(500);
@@ -273,8 +276,14 @@ impl Tenue {
             // Base injoignable : on garde la ligne, la prochaine revalidation tranchera.
             Err(_) => return Suite::Continuer,
         }
-        let Ok((accordes, refuses)) =
-            super::trier(&self.registre, &self.pool, &self.viewer, self.sujets.clone(), None).await
+        let Ok((accordes, refuses)) = super::trier(
+            &self.registre,
+            &self.pool,
+            &self.viewer,
+            self.sujets.clone(),
+            None,
+        )
+        .await
         else {
             return Suite::Continuer;
         };
@@ -283,7 +292,8 @@ impl Tenue {
             .filter(|s| self.accordes.contains_key(s.as_str()))
             .collect();
         if !retires.is_empty() {
-            if let Suite::Fermer(c) = self.envoyer(evenement("revoked", &json!({ "topics": retires })))
+            if let Suite::Fermer(c) =
+                self.envoyer(evenement("revoked", &json!({ "topics": retires })))
             {
                 return Suite::Fermer(c);
             }

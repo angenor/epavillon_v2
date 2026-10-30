@@ -89,6 +89,7 @@ import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-docu
 import { createAdminNegotiationSavoirApi } from './api/admin-negotiation-savoir'
 import { createAuthApi } from './api/auth'
 import { createMeetingsApi } from './api/meetings'
+import { createRealtimeApi } from './api/realtime'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
 // erreurs de la couche d'accès : le client HTTP doit pouvoir la lever sur un
@@ -319,6 +320,8 @@ export function useApi() {
     negotiationMeetings: createNegotiationMeetingsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     pavillon: createPavillonApi({ callOrNull, send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     notifications: createNotificationsApi({ call, send }),
+    /** Pouls et flux, pour `useRealtime()` seulement : aucune page ne les appelle. */
+    realtime: createRealtimeApi(http),
 
     guideNegoSavoir: createGuideNegoSavoirApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     home: createHomeApi(deps),

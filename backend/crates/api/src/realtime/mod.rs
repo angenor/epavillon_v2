@@ -54,7 +54,10 @@ pub fn lire_sujets(brut: &str) -> Result<Vec<Topic>> {
     let mut sujets = Vec::new();
     for morceau in brut.split(',').map(str::trim).filter(|s| !s.is_empty()) {
         let sujet = Topic::parse(morceau).ok_or_else(|| {
-            ApiError::validation(format!("Sujet de mise à jour invalide : « {morceau} »."), "topics")
+            ApiError::validation(
+                format!("Sujet de mise à jour invalide : « {morceau} »."),
+                "topics",
+            )
         })?;
         sujets.push(sujet);
     }

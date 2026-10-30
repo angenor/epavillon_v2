@@ -87,7 +87,11 @@ async fn morceau<B: MessageBody>(corps: &mut Pin<Box<B>>, delai: Duration) -> Op
 }
 
 /// Lit jusqu'à trouver l'événement nommé.
-async fn attendre<B: MessageBody>(corps: &mut Pin<Box<B>>, nom: &str, delai: Duration) -> Option<String> {
+async fn attendre<B: MessageBody>(
+    corps: &mut Pin<Box<B>>,
+    nom: &str,
+    delai: Duration,
+) -> Option<String> {
     let fin = tokio::time::Instant::now() + delai;
     while let Some(m) = morceau(corps, fin - tokio::time::Instant::now()).await {
         if m.contains(&format!("event: {nom}\n")) {
@@ -164,9 +168,11 @@ async fn la_base_refuse_un_sujet_mal_forme() {
         .execute(base.pool())
         .await;
     assert!(refus.is_err());
-    let trop_gros = sqlx::query("SELECT platform.signal('person:x', jsonb_build_object('k', repeat('a', 8000)))")
-        .execute(base.pool())
-        .await;
+    let trop_gros = sqlx::query(
+        "SELECT platform.signal('person:x', jsonb_build_object('k', repeat('a', 8000)))",
+    )
+    .execute(base.pool())
+    .await;
     assert!(trop_gros.is_err());
 }
 
@@ -203,22 +209,33 @@ async fn le_flux_livre_ses_sujets_et_refuse_ceux_d_autrui() {
     let reponse = test::call_service(
         &app,
         test::TestRequest::get()
-            .uri(&format!("/api/realtime/stream?topics=person:{awa},person:{autre}"))
+            .uri(&format!(
+                "/api/realtime/stream?topics=person:{awa},person:{autre}"
+            ))
             .insert_header(("Cookie", cookie))
             .to_request(),
     )
     .await;
     assert_eq!(reponse.status(), StatusCode::OK);
     let entetes = reponse.headers().clone();
-    assert_eq!(entetes.get(header::CONTENT_TYPE).unwrap(), "text/event-stream");
-    assert_eq!(entetes.get(header::CACHE_CONTROL).unwrap(), "no-cache, no-transform");
+    assert_eq!(
+        entetes.get(header::CONTENT_TYPE).unwrap(),
+        "text/event-stream"
+    );
+    assert_eq!(
+        entetes.get(header::CACHE_CONTROL).unwrap(),
+        "no-cache, no-transform"
+    );
     assert_eq!(entetes.get("X-Accel-Buffering").unwrap(), "no");
 
     let mut corps = Box::pin(reponse.into_body());
     let pret = attendre(&mut corps, "ready", Duration::from_secs(2))
         .await
         .expect("événement ready");
-    assert!(pret.contains(&format!("person:{autre}")), "refus listé : {pret}");
+    assert!(
+        pret.contains(&format!("person:{autre}")),
+        "refus listé : {pret}"
+    );
     assert!(pret.contains(&etat.realtime.boot()));
 
     // Rafale : un seul événement, au bout du regroupement.
@@ -234,7 +251,9 @@ async fn le_flux_livre_ses_sujets_et_refuse_ceux_d_autrui() {
     assert_eq!(signal.matches("event: signal").count(), 1);
 
     etat.realtime.annoncer_arret();
-    assert!(attendre(&mut corps, "restart", Duration::from_secs(2)).await.is_some());
+    assert!(attendre(&mut corps, "restart", Duration::from_secs(2))
+        .await
+        .is_some());
 }
 
 /// Un sujet de test accordé côté déposant seulement.
@@ -245,7 +264,12 @@ impl TopicAuthorizer for CoteDeposant {
     fn handles(&self, topic: &Topic) -> bool {
         topic.kind() == "essai"
     }
-    async fn authorize(&self, _: &PgPool, viewer: &Viewer, _: &Topic) -> kernel::Result<TopicAccess> {
+    async fn authorize(
+        &self,
+        _: &PgPool,
+        viewer: &Viewer,
+        _: &Topic,
+    ) -> kernel::Result<TopicAccess> {
         Ok(if viewer.person_id.is_some() {
             TopicAccess::Granted(Audience::Only(vec!["submitter".into()]))
         } else {
@@ -273,10 +297,14 @@ async fn un_echange_interne_au_comite_n_atteint_pas_le_deposant() {
     .await;
     assert_eq!(reponse.status(), StatusCode::OK);
     let mut corps = Box::pin(reponse.into_body());
-    attendre(&mut corps, "ready", Duration::from_secs(2)).await.expect("ready");
+    attendre(&mut corps, "ready", Duration::from_secs(2))
+        .await
+        .expect("ready");
 
     etat.realtime.recevoir(&sujet, Some("committee"));
-    assert!(attendre(&mut corps, "signal", Duration::from_secs(1)).await.is_none());
+    assert!(attendre(&mut corps, "signal", Duration::from_secs(1))
+        .await
+        .is_none());
 
     // Le pouls ne trahit pas davantage l'échange interne.
     let pouls = test::call_service(
@@ -291,7 +319,9 @@ async fn un_echange_interne_au_comite_n_atteint_pas_le_deposant() {
     assert_eq!(lu["versions"][&sujet], 0);
 
     etat.realtime.recevoir(&sujet, Some("submitter"));
-    assert!(attendre(&mut corps, "signal", Duration::from_secs(2)).await.is_some());
+    assert!(attendre(&mut corps, "signal", Duration::from_secs(2))
+        .await
+        .is_some());
 }
 
 #[tokio::test]
@@ -312,7 +342,10 @@ async fn le_pouls_sert_le_public_sans_session_et_rend_304() {
         .to_str()
         .unwrap()
         .to_owned();
-    assert_eq!(premier.headers().get(header::CACHE_CONTROL).unwrap(), "no-cache");
+    assert_eq!(
+        premier.headers().get(header::CACHE_CONTROL).unwrap(),
+        "no-cache"
+    );
     let lu: Value = test::read_body_json(premier).await;
     assert_eq!(lu["boot"], etat.realtime.boot());
     assert_eq!(lu["versions"][&direct], 0);
@@ -345,7 +378,10 @@ async fn le_pouls_sert_le_public_sans_session_et_rend_304() {
     let prive = test::call_service(
         &app,
         test::TestRequest::get()
-            .uri(&format!("/api/realtime/pulse?topics=person:{}", Uuid::now_v7()))
+            .uri(&format!(
+                "/api/realtime/pulse?topics=person:{}",
+                Uuid::now_v7()
+            ))
             .to_request(),
     )
     .await;
@@ -380,5 +416,7 @@ async fn au_dela_de_cinq_flux_le_plus_ancien_est_ferme() {
         assert_eq!(reponse.status(), StatusCode::OK);
         corps.push(Box::pin(reponse.into_body()));
     }
-    assert!(attendre(&mut corps[0], "evicted", Duration::from_secs(2)).await.is_some());
+    assert!(attendre(&mut corps[0], "evicted", Duration::from_secs(2))
+        .await
+        .is_some());
 }

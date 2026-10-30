@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { IncidentSeverity } from '~/types/live'
 import type { PublicScheduleRow } from '~/types/views'
+import type { Toast } from '~/composables/useToast'
 
 /**
  * Section « Motifs transversaux » — ce qui traverse tous les écrans et que
@@ -9,7 +10,8 @@ import type { PublicScheduleRow } from '~/types/views'
  *   1. les quatre états d'écran, en composants de plein droit ;
  *   2. une date avec son fuseau ;
  *   3. le bandeau d'incident, sur toutes ses gravités ;
- *   4. la pastille « en direct » et sa règle d'usage.
+ *   4. la pastille « en direct » et sa règle d'usage ;
+ *   5. les notifications brèves (`UiToast`), en place et pour de vrai.
  *
  * CE SONT EUX QU'ON OUBLIE, et ils font mauvaise impression en production
  * précisément parce qu'ils n'apparaissent que lorsque quelque chose ne va pas —
@@ -34,6 +36,29 @@ const retrying = ref(false)
 function simulateRetry(): void {
   retrying.value = true
   setTimeout(() => (retrying.value = false), 1800)
+}
+
+const toast = useToast()
+const toastSamples = computed<Toast[]>(() => [
+  {
+    id: -1,
+    intent: 'success',
+    title: t('style-guide.patterns.toast.samples.success.title'),
+    message: t('style-guide.patterns.toast.samples.success.message'),
+    duration: null,
+  },
+  {
+    id: -2,
+    intent: 'danger',
+    title: t('style-guide.patterns.toast.samples.error.title'),
+    message: t('style-guide.patterns.toast.samples.error.message'),
+    link: { to: '/style-guide', label: t('style-guide.patterns.toast.samples.link') },
+    duration: null,
+  },
+])
+
+function showToast(sample: Toast): void {
+  toast.show({ intent: sample.intent, title: sample.title, message: sample.message, link: sample.link })
 }
 
 /** Dates de démonstration : un créneau ordinaire, un créneau qui franchit minuit. */
@@ -261,6 +286,27 @@ const overnight = { start: '2027-11-14T22:00:00-03:00', end: '2027-11-15T01:30:0
       <UiAlert intent="danger" class="mt-4" :title="t('style-guide.patterns.live.warningTitle')">
         {{ t('style-guide.patterns.live.warning') }}
       </UiAlert>
+    </StyleGuideDemo>
+
+    <!-- 5. LES NOTIFICATIONS BRÈVES -->
+    <StyleGuideDemo
+      :title="t('style-guide.patterns.toast.title')"
+      :note="t('style-guide.patterns.toast.note')"
+      surface
+    >
+      <div class="grid max-w-96 gap-2">
+        <UiToast v-for="sample in toastSamples" :key="sample.id" :toast="sample" />
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <UiButton
+          v-for="sample in toastSamples"
+          :key="sample.id"
+          variant="secondary"
+          @click="showToast(sample)"
+        >
+          {{ sample.intent === 'success' ? t('style-guide.patterns.toast.showSuccess') : t('style-guide.patterns.toast.showError') }}
+        </UiButton>
+      </div>
     </StyleGuideDemo>
   </StyleGuideSection>
 </template>

@@ -64,5 +64,22 @@
       "r3": "Il ne se déduit pas non plus du seul statut en base : c'est le registre partagé qui tranche.",
       "r4": "Côté modèle, la garantie porte sur le canal de diffusion, réservable comme une ressource. Si deux éditions ouvrent chacune le leur, deux directs simultanés redeviennent possibles en base — le point est en arbitrage. L'interface, elle, tranche déjà."
     }
+  },
+  "toast": {
+    "title": "Les notifications brèves",
+    "note": "Elles disent qu'une chose s'est passée hors de l'écran courant : un envoi parti, un envoi en échec. En haut à droite, sous la barre ; le bas à droite porte les fenêtres flottantes. Couleurs d'état : vert confirmé, rouge échec. Une bonne nouvelle disparaît seule après six secondes, survol et focus la retiennent ; un problème reste jusqu'à ce qu'on le ferme. Croix de 44 px. Un échec s'annonce aussitôt aux lecteurs d'écran, le reste attend la fin de la phrase.",
+    "showSuccess": "Montrer une réussite",
+    "showError": "Montrer un échec",
+    "samples": {
+      "success": {
+        "title": "Envoi parti",
+        "message": "312 messages envoyés, 3 en échec."
+      },
+      "error": {
+        "title": "L'envoi est bloqué",
+        "message": "Le serveur de courriel ne répond pas. Les messages restants partiront à sa reprise."
+      },
+      "link": "Voir l'envoi"
+    }
   }
 }

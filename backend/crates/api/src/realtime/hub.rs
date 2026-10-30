@@ -209,7 +209,11 @@ impl Hub {
         self.compteurs.flux_ouverts.fetch_sub(1, Ordering::Relaxed);
     }
 
-    pub fn autorisation_en_cache(&self, session: Option<Uuid>, topic: &Topic) -> Option<TopicAccess> {
+    pub fn autorisation_en_cache(
+        &self,
+        session: Option<Uuid>,
+        topic: &Topic,
+    ) -> Option<TopicAccess> {
         let cache = self.autorisations.lock().ok()?;
         let (quand, acces) = cache.get(&(session, topic.as_str().to_owned()))?;
         (quand.elapsed() < CACHE_AUTORISATION).then(|| acces.clone())
@@ -221,7 +225,10 @@ impl Hub {
                 cache.retain(|_, (quand, _)| quand.elapsed() < CACHE_AUTORISATION);
             }
             if cache.len() < CACHE_PLAFOND {
-                cache.insert((session, topic.as_str().to_owned()), (Instant::now(), acces));
+                cache.insert(
+                    (session, topic.as_str().to_owned()),
+                    (Instant::now(), acces),
+                );
             }
         }
     }
@@ -270,10 +277,7 @@ impl Hub {
 
 /// Une session d'écoute, jusqu'à sa rupture. `try_recv` plutôt que `recv` :
 /// `recv` se reconnecte seul et tairait la perte des signaux de l'intervalle.
-async fn ecoute(
-    hub: &Hub,
-    options: &sqlx::postgres::PgConnectOptions,
-) -> Result<(), sqlx::Error> {
+async fn ecoute(hub: &Hub, options: &sqlx::postgres::PgConnectOptions) -> Result<(), sqlx::Error> {
     let pool = PgPoolOptions::new()
         .max_connections(1)
         .connect_with(options.clone())

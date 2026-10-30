@@ -58,10 +58,7 @@ impl Topic {
         }
         let mut segments = brut.split(':');
         let nom = segments.next()?;
-        let nom_valide = nom
-            .bytes()
-            .next()
-            .is_some_and(|b| b.is_ascii_lowercase())
+        let nom_valide = nom.bytes().next().is_some_and(|b| b.is_ascii_lowercase())
             && nom.bytes().all(|b| b.is_ascii_lowercase() || b == b'_');
         if !nom_valide {
             return None;
@@ -91,7 +88,10 @@ impl Topic {
 
     /// Deuxième segment lu comme un identifiant, s'il en est un.
     pub fn id(&self) -> Option<Uuid> {
-        self.0.split(':').nth(1).and_then(|s| Uuid::parse_str(s).ok())
+        self.0
+            .split(':')
+            .nth(1)
+            .and_then(|s| Uuid::parse_str(s).ok())
     }
 
     /// Segments après l'identifiant : `["public", "live"]` pour
@@ -219,9 +219,8 @@ impl TopicAuthorizer for PersonTopics {
     }
 
     async fn authorize(&self, _: &PgPool, viewer: &Viewer, topic: &Topic) -> Result<TopicAccess> {
-        let soi = viewer.person_id.is_some()
-            && viewer.person_id == topic.id()
-            && topic.rest().is_empty();
+        let soi =
+            viewer.person_id.is_some() && viewer.person_id == topic.id() && topic.rest().is_empty();
         Ok(if soi {
             TopicAccess::Granted(Audience::All)
         } else {

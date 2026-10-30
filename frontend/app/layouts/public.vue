@@ -339,5 +339,8 @@ const currentYear = new Date().getFullYear()
         </p>
       </div>
     </footer>
+
+    <!-- L'espace organisation reçoit ses notifications brèves ici. -->
+    <UiToastRegion />
   </div>
 </template>

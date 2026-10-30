@@ -64,5 +64,22 @@
       "r3": "Nor is it inferred from the database status alone: the shared registry decides.",
       "r4": "In the model, the guarantee applies to the broadcast channel, bookable like a resource. If two editions each open their own, two simultaneous streams become possible again in the database — that point is awaiting arbitration. The interface has already decided."
     }
+  },
+  "toast": {
+    "title": "Toast notifications",
+    "note": "They say something happened outside the current screen: a mailing sent, a mailing failed. Top right, below the bar; the bottom right holds floating windows. State colours: green confirmed, red failure. Good news disappears on its own after six seconds, hover and focus hold it; a problem stays until it is closed. 44 px close button. A failure is announced at once to screen readers, the rest waits for the end of the sentence.",
+    "showSuccess": "Show a success",
+    "showError": "Show a failure",
+    "samples": {
+      "success": {
+        "title": "Mailing sent",
+        "message": "312 messages sent, 3 failed."
+      },
+      "error": {
+        "title": "The mailing is blocked",
+        "message": "The mail server is not responding. Remaining messages will go out when it is back."
+      },
+      "link": "See the mailing"
+    }
   }
 }

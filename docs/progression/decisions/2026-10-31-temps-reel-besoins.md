@@ -2,7 +2,7 @@
 
 > Extrait de la [progression](../../PROGRESSION.md). Ce qui a été tranché en cours de route, et pourquoi.
 
-**Statut : proposé.** Recensement seul, rien n'est écrit. Complète l'étude du mécanisme, [2026-10-31-temps-reel.md](2026-10-31-temps-reel.md), qui ne traitait que les deux premiers usages demandés.
+**Statut : en construction.** Arbitré le 31/10 (§ 7) ; le socle est écrit, voir l'étude du mécanisme § 5. Complète l'étude du mécanisme, [2026-10-31-temps-reel.md](2026-10-31-temps-reel.md), qui ne traitait que les deux premiers usages demandés.
 
 **La demande (30/10).** « Évalue toutes les données qui, si elles sont en temps réel, augmentent considérablement l'expérience utilisateur, et nous allons voir ce qu'on retient pour construire un socle solide. »
 
