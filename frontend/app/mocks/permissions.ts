@@ -166,6 +166,7 @@ export const permissions: Permission[] = [
   { code: 'programme.review.write', label: { fr: 'Noter et commenter une proposition', en: 'Score and comment a proposal' }, module_code: 'programme' },
   { code: 'programme.proposal.decide', label: { fr: 'Retenir ou rejeter une proposition', en: 'Accept or reject a proposal' }, module_code: 'programme' },
   { code: 'programme.proposal.edit', label: { fr: "Modifier le contenu d'une proposition", en: "Edit a proposal's content" }, module_code: 'programme' },
+  { code: 'programme.proposal.act_for_organization', label: { fr: "Agir dans l'espace d'une organisation", en: "Act in an organisation's space" }, module_code: 'programme' },
   { code: 'programme.session.schedule', label: { fr: 'Planifier les sessions', en: 'Schedule sessions' }, module_code: 'programme' },
   { code: 'programme.registration.manage', label: { fr: 'Gérer les inscriptions', en: 'Manage registrations' }, module_code: 'programme' },
   { code: 'live.meeting.manage', label: { fr: 'Gérer les réunions et diffusions', en: 'Manage meetings and streams' }, module_code: 'live' },

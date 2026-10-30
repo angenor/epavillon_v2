@@ -371,5 +371,6 @@
     "reviews": "{done}/{expected} revues",
     "previous": "Dossier précédent : {reference}",
     "next": "Dossier suivant : {reference}"
-  }
+  },
+  "actForOrganization": "Ouvrir l'espace de l'organisation"
 }

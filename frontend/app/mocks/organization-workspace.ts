@@ -67,6 +67,7 @@ import {
 } from './organization-search'
 import { allProposals, proposalComments, proposalOrganizations, proposalTransitions } from './proposals'
 import { proposalHistory } from './proposals/history'
+import { effectivePermissions } from './permissions'
 import { editedProposal } from './proposal-edit'
 import { allSessions } from './sessions'
 import { registrations } from './registrations'
@@ -422,8 +423,13 @@ export function proposalFile(
       m.person_id === personId &&
       isOpen(m),
   )
-  if (!membership) return null
-  if (membership.status !== 'active' && tracking.proposal.submitted_by !== personId) return null
+  const member = membership !== undefined && (membership.status === 'active' || tracking.proposal.submitted_by === personId)
+  const acting =
+    !member &&
+    effectivePermissions(personId).some(
+      (entry) => entry.permission_code === 'programme.proposal.act_for_organization' && entry.scope_type === 'global',
+    )
+  if (!member && !acting) return null
 
   const comments = commentsWithSession()
     .filter(
@@ -441,6 +447,7 @@ export function proposalFile(
     comments,
     participants,
     history: proposalHistory(proposalId),
+    acting_for_organization: acting,
   }
 }
 

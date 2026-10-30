@@ -119,6 +119,18 @@ pub enum Acces {
     BackOffice,
 }
 
+/// Cette personne peut-elle agir dans l'espace de n'importe quelle organisation ?
+/// Portée globale seulement : un administrateur d'édition ne le peut pas.
+pub async fn agit_pour_les_organisations(pool: &PgPool, personne: uuid::Uuid) -> Result<bool> {
+    kernel::auth::has_permission(
+        pool,
+        personne,
+        crate::domain::permissions::PROPOSAL_ACT_FOR_ORGANIZATION,
+        kernel::auth::Scope::Global,
+    )
+    .await
+}
+
 /// Résoudre l'accès à un dossier, **par l'une ou l'autre voie**.
 ///
 /// « Accès au dossier » signifie : adhésion active à l'organisation porteuse —

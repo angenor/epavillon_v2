@@ -22,6 +22,7 @@ definePageMeta({
   layout: 'public',
   middleware: ['auth', 'requires-organization'],
   organizationReason: 'organization-space',
+  actingForOrganization: true,
 })
 
 defineI18nRoute({
@@ -146,6 +147,16 @@ function dateParts(at: string, timezone: string, withTime: boolean): CoverDate {
   }
 }
 
+// Le super-administrateur qui agit pour l'organisation n'en est pas membre : son nom se lit sur sa fiche.
+const { data: actingOrganization } = useAsyncData(
+  () => `cover-studio-acting-organization-${proposalId.value}`,
+  async () => {
+    const file = data.value?.file
+    return file?.acting_for_organization ? api.organizations.byId(file.tracking.proposal.organization_id) : null
+  },
+  { server: false, lazy: true, default: () => null, watch: [() => data.value?.file.acting_for_organization] },
+)
+
 const source = computed<CoverSceneSource | null>(() => {
   const current = data.value
   if (!current) return null
@@ -164,7 +175,9 @@ const source = computed<CoverSceneSource | null>(() => {
     city: edition.city ?? null,
     organizationName:
       memberships.submittable.find((entry) => entry.organization.id === file.tracking.proposal.organization_id)?.organization
-        .legal_name ?? null,
+        .legal_name ??
+      actingOrganization.value?.legal_name ??
+      null,
     speakers: editable.draft.speakers.map((speaker) => ({
       name: speakerName(speaker),
       imageUrl: speaker.photo_image?.url ?? null,

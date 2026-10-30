@@ -309,5 +309,9 @@
       "tiktok": "TikTok",
       "other": "Lien"
     }
+  },
+  "acting": {
+    "title": "Vous agissez pour {organization}",
+    "description": "Vous voyez l'espace de ce dossier comme l'organisation. Chaque modification est enregistrée à votre nom dans son historique. Les échanges se lisent dans la fiche du back-office."
   }
 }

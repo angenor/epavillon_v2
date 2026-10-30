@@ -82,6 +82,9 @@ pub struct DossierDuDeposant {
     pub comments: Vec<Message>,
     pub participants: Vec<PersonneAffichee>,
     pub history: Vec<cross::EntreeDHistorique>,
+    /// Vrai quand le lecteur n'est pas membre et agit pour l'organisation
+    /// (super-administrateur, à sa demande) : l'écran le dit en bandeau.
+    pub acting_for_organization: bool,
 }
 
 /// Une ligne du bloc « ce qui attend une action de ma part » —
@@ -240,10 +243,13 @@ pub async fn dossier(
     let Some(etat) = proposals::etat(state.pool(), id).await? else {
         return Ok(None);
     };
-    let Some(adhesion) = adhesion_ouverte(state, lecteur, etat.organization_id).await? else {
-        return Ok(None);
+    let membre = match adhesion_ouverte(state, lecteur, etat.organization_id).await? {
+        Some(adhesion) => adhesion.status == "active" || etat.submitted_by == lecteur,
+        None => false,
     };
-    if adhesion.status != "active" && etat.submitted_by != lecteur {
+    if !membre
+        && !crate::service::perimeter::agit_pour_les_organisations(state.pool(), lecteur).await?
+    {
         return Ok(None);
     }
 
@@ -270,6 +276,7 @@ pub async fn dossier(
         participants: auteurs_nommables(state, &fil, etat.organization_id).await?,
         history: cross::historique_du_dossier(state.pool(), id).await?,
         comments: fil,
+        acting_for_organization: !membre,
     }))
 }
 

@@ -33,6 +33,7 @@ definePageMeta({
   layout: 'public',
   middleware: ['auth', 'requires-organization'],
   organizationReason: 'organization-space',
+  actingForOrganization: true,
 })
 
 defineI18nRoute({
@@ -400,7 +401,19 @@ const countryOptions = computed<SelectOption[]>(() =>
     .sort((a, b) => a.label.localeCompare(b.label, locale.value)),
 )
 
-const leadCandidates = computed<Organization[]>(() => memberships.submittable.map((entry) => entry.organization))
+// Pour l'organisation, la porteuse reste la seule candidate : on n'en change pas à sa place.
+const leadCandidates = computed<Organization[]>(() =>
+  file.value?.acting_for_organization
+    ? associated.value.flatMap(({ link, organization }) =>
+        organization && link.organization_id === file.value?.tracking.proposal.organization_id ? [organization] : [],
+      )
+    : memberships.submittable.map((entry) => entry.organization),
+)
+
+const leadName = computed(() => {
+  const lead = leadCandidates.value.find((organization) => organization.id === file.value?.tracking.proposal.organization_id)
+  return lead ? (lead.acronym ?? lead.legal_name) : null
+})
 
 function termLabels(codes: string[], kind: 'themes' | 'categories'): string {
   const terms = references.value?.[kind] ?? []
@@ -539,6 +552,14 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
     />
 
     <template v-else>
+      <UiAlert
+        v-if="file.acting_for_organization"
+        class="mt-6"
+        intent="warning"
+        :title="t('organization.workspace.proposal.acting.title', { organization: leadName ?? '' })"
+        :message="t('organization.workspace.proposal.acting.description')"
+      />
+
       <header class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-col gap-3">
           <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -605,7 +626,7 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
               :gaps="gaps"
               :has-logo="facts.hasLogo"
               :organization-id="file.tracking.proposal.organization_id"
-              :organization-name="leadOrganization?.organization.legal_name ?? ''"
+              :organization-name="leadOrganization?.organization.legal_name ?? leadName ?? ''"
               :can-set-logo="canSetLogo"
               :logo-rule="mediaRules?.logo ?? null"
               @logo-set="refresh()"
@@ -911,7 +932,9 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
         <WorkspaceHistoryList v-else :entries="file.history" :timezone="timezone" />
       </UiTabs>
 
+      <!-- L'équipe qui agit pour l'organisation lit ses échanges dans la fiche du back-office. -->
       <WorkspaceCommentsDesk
+        v-if="!file.acting_for_organization"
         v-model:open="deskOpen"
         :reference-code="file.tracking.proposal.reference_code"
         :comments="comments"

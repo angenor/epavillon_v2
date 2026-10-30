@@ -36,6 +36,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (memberships.hasSubmittableOrganization) return
 
+  if (to.meta.actingForOrganization === true) {
+    const person = useAuthStore().person
+    const granted = person ? await useApi().identity.permissions(person.id).catch(() => []) : []
+    if (hasPermission(granted, 'programme.proposal.act_for_organization')) return
+  }
+
   const localePath = useLocalePath()
   return navigateTo({
     path: localePath('organization-join'),

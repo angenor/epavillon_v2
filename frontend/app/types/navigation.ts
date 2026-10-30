@@ -57,6 +57,11 @@ declare module '#app' {
      * mais pas pour quoi faire, ce qui est le minimum utile et pas davantage.
      */
     organizationReason?: string
+    /**
+     * Le super-administrateur y entre sans adhésion, pour agir à la place de
+     * l'organisation à sa demande (30/10). L'API refuse tout autre non-membre.
+     */
+    actingForOrganization?: boolean
   }
 }
 

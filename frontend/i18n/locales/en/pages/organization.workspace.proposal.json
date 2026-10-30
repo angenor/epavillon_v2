@@ -309,5 +309,9 @@
       "tiktok": "TikTok",
       "other": "Link"
     }
+  },
+  "acting": {
+    "title": "You are acting for {organization}",
+    "description": "You see this submission's space as the organisation does. Every change is recorded under your name in its history. Exchanges are read in the back-office record."
   }
 }

@@ -21,6 +21,9 @@ pub const REVIEW_WRITE: &str = "programme.review.write";
 pub const PROPOSAL_DECIDE: &str = "programme.proposal.decide";
 /// Corriger un dossier déposé sans être membre de son organisation.
 pub const PROPOSAL_EDIT: &str = "programme.proposal.edit";
+/// Agir dans l'espace d'un dossier comme son organisation, à sa demande (30/10).
+/// Portée globale seulement : super_admin.
+pub const PROPOSAL_ACT_FOR_ORGANIZATION: &str = "programme.proposal.act_for_organization";
 
 /// **Permission d'un autre module, et cela ne crée aucune arête.**
 ///

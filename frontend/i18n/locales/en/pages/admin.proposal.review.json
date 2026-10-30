@@ -371,5 +371,6 @@
     "reviews": "{done}/{expected} reviews",
     "previous": "Previous dossier: {reference}",
     "next": "Next dossier: {reference}"
-  }
+  },
+  "actForOrganization": "Open the organisation's space"
 }

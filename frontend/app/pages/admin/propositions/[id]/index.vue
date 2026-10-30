@@ -283,6 +283,10 @@ const canEditContent = computed(() => {
 
 const editTo = computed(() => localePath(`/admin/propositions/${proposalId.value}/modifier`))
 
+/** Super-administrateur seulement : agir dans l'espace de l'organisation, à sa demande (30/10). */
+const canActForOrganization = computed(() => hasPermission(granted.value, 'programme.proposal.act_for_organization'))
+const organizationSpaceTo = computed(() => localePath(`/mon-organisation/dossiers/${proposalId.value}`))
+
 /**
  * Un refus de l'API s'affiche TEL QUEL : elle seule sait pourquoi elle refuse, et
  * son catalogue est déjà français. Le site ne reprend la parole que lorsqu'elle
@@ -532,6 +536,13 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
                 icon="edit"
                 :to="editTo"
                 :label="t('admin.proposal.edit.action')"
+              />
+              <UiButton
+                v-if="canActForOrganization"
+                variant="secondary"
+                icon="building"
+                :to="organizationSpaceTo"
+                :label="t('admin.proposal.review.actForOrganization')"
               />
               <UiButton
                 variant="ghost"

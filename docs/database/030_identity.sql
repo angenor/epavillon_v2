@@ -619,6 +619,10 @@ INSERT INTO identity.permissions (code, label, module_code) VALUES
     ('programme.review.write',      '{"fr":"Noter et commenter une proposition","en":"Score and comment a proposal"}', 'programme'),
     ('programme.proposal.decide',   '{"fr":"Retenir ou rejeter une proposition","en":"Accept or reject a proposal"}', 'programme'),
     ('programme.proposal.edit',     '{"fr":"Modifier le contenu d''une proposition","en":"Edit a proposal''s content"}', 'programme'),
+    -- Ouvrir l'espace d'un dossier et y agir comme l'organisation porteuse, à
+    -- sa demande (30/10). Testée en portée globale ; seul super_admin la reçoit
+    -- (tg_permissions_grant_super_admin). Chaque écriture reste à son nom.
+    ('programme.proposal.act_for_organization', '{"fr":"Agir dans l''espace d''une organisation","en":"Act in an organisation''s space"}', 'programme'),
     ('programme.session.schedule',  '{"fr":"Planifier les sessions","en":"Schedule sessions"}', 'programme'),
     ('programme.registration.manage','{"fr":"Gérer les inscriptions","en":"Manage registrations"}', 'programme'),
     ('live.meeting.manage',         '{"fr":"Gérer les réunions et diffusions","en":"Manage meetings and streams"}', 'live'),

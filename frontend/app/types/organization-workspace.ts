@@ -159,6 +159,8 @@ export interface ProposalFile {
   participants: DisplayedPerson[]
   /** `programme.proposal_history()` — champ par champ, auteur et date. */
   history: ProposalHistoryEntry[]
+  /** Le lecteur n'est pas membre : il agit pour l'organisation (super-administrateur, à sa demande). */
+  acting_for_organization: boolean
 }
 
 // ---------------------------------------------------------------------------

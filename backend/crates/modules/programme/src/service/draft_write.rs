@@ -58,10 +58,15 @@ pub async fn enregistrer(
     // L'adhésion est vérifiée sur l'organisation PORTEUSE, résolue en base pour
     // un dossier existant : le corps ne décide pas de qui peut écrire.
     let adhesion = cross::adhesion(state.pool(), porteur, acteur).await?;
-    ownership::exiger(match existant.as_ref() {
+    let membre = match existant.as_ref() {
         Some(etat) => ownership::peut_agir_sur(adhesion, etat.submitted_by == acteur),
         None => ownership::peut_deposer(adhesion),
-    })?;
+    };
+    // Pour l'organisation, sur un dossier qui existe : jamais une création en son nom.
+    let pour_lorganisation = !membre
+        && existant.is_some()
+        && crate::service::perimeter::agit_pour_les_organisations(state.pool(), acteur).await?;
+    ownership::exiger(membre || pour_lorganisation)?;
 
     // Après l'adhésion : un étranger au dossier n'apprend pas son état.
     if let Some(etat) = existant.as_ref() {
@@ -89,7 +94,11 @@ pub async fn enregistrer(
         &edition,
         existant.as_ref(),
         porteur,
-        Some(acteur),
+        // Agir pour l'organisation n'en fait pas le contact du dossier.
+        match existant.as_ref() {
+            Some(etat) if pour_lorganisation => etat.contact_person_id,
+            _ => Some(acteur),
+        },
     )
     .await
 }
