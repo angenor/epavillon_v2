@@ -1,0 +1,121 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id AS session_id, s.slug::text AS \"slug!\",\n                  s.title AS \"title!: serde_json::Value\",\n                  s.starts_at, s.ends_at, s.status::text AS \"status!\",\n                  (s.published_at IS NOT NULL) AS \"is_published!\",\n                  st.part_id, st.is_highlight, st.sort_order\n             FROM programme.session_tracks st\n             JOIN programme.sessions s ON s.id = st.session_id\n            WHERE st.track_id = $1\n            ORDER BY s.starts_at, st.sort_order, s.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "title!: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "is_published!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "part_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "part_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "is_highlight",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "is_highlight"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "sort_order"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false,
+      false,
+      null,
+      null,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "9303ed5b37e09e62ead13099b3765abf3f18f08b7b9dec8f316f3de8b645c6cf"
+}

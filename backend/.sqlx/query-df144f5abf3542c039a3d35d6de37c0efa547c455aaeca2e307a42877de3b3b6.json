@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_tracks\n               (event_id, code, slug, kind, title, starts_on, color_hex, published_at, venue_id)\n           VALUES ($1, replace($2, '-', '_'), $2::text::platform.slug, 'special_day',\n                   jsonb_build_object('fr', 'Journée ' || $2), '2027-11-13', '#00A1E4',\n                   CASE WHEN $3 THEN now() END, $4)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "df144f5abf3542c039a3d35d6de37c0efa547c455aaeca2e307a42877de3b3b6"
+}

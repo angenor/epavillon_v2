@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.session_tracks SET part_id = $1 WHERE session_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2a5b93563bf8d36637fae61b6d9e5edcbfde6466ac18fb48b6e3ff33ad8d545e"
+}

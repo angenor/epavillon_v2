@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.venues (event_id, name, kind, address)\n           VALUES ($1, '{\"fr\":\"Hôtel DoubleTree by Hilton\"}'::jsonb, 'other',\n                   'Etiler, Adnan Menderes Blv. No:61, 07010 Muratpaşa / Antalya')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "83b9691248f9fc7e23aed44a393b6ac2632f465b1d5f2d5ce3d31e2b86483cd9"
+}

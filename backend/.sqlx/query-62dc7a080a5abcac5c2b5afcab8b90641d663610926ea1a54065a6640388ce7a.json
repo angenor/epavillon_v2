@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM event.programme_track_parts WHERE id = $2 AND track_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "62dc7a080a5abcac5c2b5afcab8b90641d663610926ea1a54065a6640388ce7a"
+}

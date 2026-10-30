@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_tracks (event_id, code, slug, kind, title, published_at)\n               VALUES ($1, replace($2, '-', '_'), $2::text::platform.slug, 'special_day',\n                       '{\"fr\":\"Journée\"}'::jsonb, CASE WHEN $3 THEN now() END)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7fd8669ee3277028717728e5642873675ff74e08d6368ad4ccb89eb418919c0a"
+}

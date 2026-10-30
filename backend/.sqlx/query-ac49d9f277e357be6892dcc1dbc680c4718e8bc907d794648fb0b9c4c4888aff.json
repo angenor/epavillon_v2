@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sort_order FROM programme.session_tracks WHERE session_id = $1 AND track_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "sort_order"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ac49d9f277e357be6892dcc1dbc680c4718e8bc907d794648fb0b9c4c4888aff"
+}

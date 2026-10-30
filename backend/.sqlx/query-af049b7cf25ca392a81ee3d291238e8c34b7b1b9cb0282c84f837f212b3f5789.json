@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.programme_track_parts SET\n               label = $3::jsonb, title = $4::jsonb, summary = $5::jsonb, sort_order = $6\n         WHERE id = $2 AND track_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "af049b7cf25ca392a81ee3d291238e8c34b7b1b9cb0282c84f837f212b3f5789"
+}

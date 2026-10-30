@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, name, kind, address, map_url::text AS \"map_url?\"\n             FROM event.venues\n            WHERE event_id = $1\n            ORDER BY name->>'fr', id",
+  "query": "SELECT id, name, kind, address, map_url::text AS \"map_url?\",\n                  area, access_note,\n                  latitude::float8 AS \"latitude?\", longitude::float8 AS \"longitude?\"\n             FROM event.venues\n            WHERE event_id = $1\n            ORDER BY name->>'fr', id",
   "describe": {
     "columns": [
       {
@@ -52,6 +52,40 @@
         "name": "map_url?",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "area",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "area"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "access_note",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "access_note"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "latitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "longitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -64,8 +98,12 @@
       false,
       false,
       true,
+      null,
+      true,
+      true,
+      null,
       null
     ]
   },
-  "hash": "141c2fdc777af3573226c8a00d4809b35769c5ac6c036118b7af7ef1adfa8383"
+  "hash": "582a713704030068e651e4629228e832349e3f15c11c5b0217677c06f276664e"
 }

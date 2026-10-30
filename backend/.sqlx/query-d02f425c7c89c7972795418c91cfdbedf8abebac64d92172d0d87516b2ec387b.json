@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_track_partners (track_id, organization_id, role_term_id, sort_order)\n         SELECT $1, p.organization_id, t.id, p.rang\n           FROM unnest($2::uuid[], $3::text[]) WITH ORDINALITY AS p(organization_id, role_code, rang)\n           JOIN reference.taxonomy_terms t\n             ON t.taxonomy_code = 'track_partner_role' AND t.code = p.role_code\n         ON CONFLICT (track_id, organization_id)\n         DO UPDATE SET role_term_id = EXCLUDED.role_term_id, sort_order = EXCLUDED.sort_order",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d02f425c7c89c7972795418c91cfdbedf8abebac64d92172d0d87516b2ec387b"
+}

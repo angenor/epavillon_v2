@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sort_order, part_id FROM programme.session_tracks\n          WHERE session_id = $1 AND track_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "part_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "part_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "48cfe2a9e8a1ae7f0d39380d5a01f30703dab9de2bc8c43de6ef8a9a02f8f157"
+}

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.venues SET\n               name    = $2::jsonb,\n               kind    = $3,\n               address = $4,\n               map_url = $5::text::platform.url,\n               area        = $6::jsonb,\n               access_note = $7::jsonb,\n               latitude    = $8::float8::numeric(9,6),\n               longitude   = $9::float8::numeric(9,6)\n         WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ca15987cb21904b0e2d3e30145fbb08dbd27f126f39c321e19b6b2d1e191eaf9"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO event.venues (event_id, name, kind, address, map_url)\n           VALUES ($1, $2::jsonb, $3, $4, $5::text::platform.url)\n        RETURNING id",
+  "query": "INSERT INTO event.venues (event_id, name, kind)\n           VALUES ($1, '{\"fr\":\"Hôtel DoubleTree by Hilton\"}'::jsonb, 'other') RETURNING id",
   "describe": {
     "columns": [
       {
@@ -17,16 +17,12 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Jsonb",
-        "Text",
-        "Text",
-        "Text"
+        "Uuid"
       ]
     },
     "nullable": [
       false
     ]
   },
-  "hash": "5da94a417df6d8bea9782f34defb63767a164e0fdb031700a6e097749df9cc65"
+  "hash": "ac9325f63d023705e4c5a6334f7ac66355f79c787723c9a1ee21bfd44ed8ded1"
 }

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM event.programme_track_partners\n          WHERE track_id = $1 AND NOT (organization_id = ANY($2))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9eacb6d1fe71677f9fb9c41452f03c75a8930137e3d7a711022ac539cd3b0703"
+}

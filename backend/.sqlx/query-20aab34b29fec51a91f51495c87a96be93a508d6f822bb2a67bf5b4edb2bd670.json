@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_tracks (event_id, code, slug, kind, title)\n               VALUES ($1, 'atelier', 'atelier'::platform.slug, 'side_programme',\n                       '{\"fr\":\"Atelier préparatoire\"}'::jsonb)\n            RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "20aab34b29fec51a91f51495c87a96be93a508d6f822bb2a67bf5b4edb2bd670"
+}

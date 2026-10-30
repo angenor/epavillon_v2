@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.venues\n               (event_id, name, kind, address, map_url, area, access_note, latitude, longitude)\n           VALUES ($1, $2::jsonb, $3, $4, $5::text::platform.url, $6::jsonb, $7::jsonb,\n                   $8::float8::numeric(9,6), $9::float8::numeric(9,6))\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "537f98fb80d5059624c041fec3b509ed52b99ccd5d66d8bda190beeca997819f"
+}

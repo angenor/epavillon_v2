@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n                      'id', s.id,\n                      'session_id', s.session_id,\n                      'role', s.role,\n                      'job_title_snapshot', s.job_title_snapshot,\n                      'organization_snapshot', s.organization_snapshot,\n                      'bio', s.bio,\n                      'sort_order', s.sort_order,\n                      'created_at', s.created_at,\n                      'display_name', COALESCE(p.display_name,\n                                               btrim(s.first_name || ' ' || s.last_name)),\n                      'avatar', COALESCE(\n                                    (SELECT media.attached_image('programme', 'proposal_speakers', d.id, 'avatar')\n                                       FROM programme.sessions se\n                                       JOIN programme.proposal_speakers d ON d.proposal_id = se.proposal_id\n                                      WHERE se.id = s.session_id AND d.role = s.role\n                                        AND (d.person_id = s.person_id\n                                             OR (d.person_id IS NULL AND s.person_id IS NULL\n                                                 AND d.first_name = s.first_name\n                                                 AND d.last_name = s.last_name))\n                                      LIMIT 1),\n                                    media.attached_image('identity', 'people', p.id, 'avatar'))) AS \"ligne!\"\n             FROM programme.session_speakers s\n             LEFT JOIN identity.people p ON p.id = s.person_id\n            WHERE s.session_id = ANY($1)\n            ORDER BY s.session_id, s.sort_order, s.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "557f9af61f57004227d3d979a5068c08e1ec757509ed262591ea96de07f64700"
+}

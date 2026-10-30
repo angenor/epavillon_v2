@@ -1,0 +1,444 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH f AS (\n               SELECT t.*, e.slug::text AS e_slug, e.title AS e_title, e.acronym AS e_acronym,\n                      e.timezone::text AS e_timezone, e.starts_at AS e_starts_at,\n                      e.ends_at AS e_ends_at, e.city AS e_city, c.name AS e_country,\n                      COALESCE(t.venue_id, (\n                          SELECT v.id FROM event.venues v\n                           WHERE v.event_id = e.id AND v.kind = 'pavilion'\n                           ORDER BY v.created_at, v.id LIMIT 1)) AS lieu_id\n                 FROM event.programme_tracks t\n                 JOIN event.events e ON e.id = t.event_id\n                 LEFT JOIN reference.countries c ON c.id = e.country_id\n                WHERE e.slug = $1 AND t.slug = $2\n                  AND t.published_at IS NOT NULL\n                  AND e.status NOT IN ('draft', 'cancelled')\n           )\n           SELECT f.event_id AS \"event_id!\", f.e_slug AS \"event_slug!\",\n                  f.e_title AS \"event_title!: Value\", f.e_acronym AS event_acronym,\n                  f.e_timezone AS \"timezone!\", f.e_starts_at AS \"event_starts_at!\",\n                  f.e_ends_at AS \"event_ends_at!\", f.e_city AS city,\n                  f.e_country AS \"country_name: Value\",\n                  f.id AS \"id!\", f.slug::text AS \"slug!\", f.code AS \"code!\",\n                  f.kind::text AS \"kind!\", f.title AS \"title!: Value\",\n                  f.subtitle AS \"subtitle: Value\", f.description AS \"description: Value\",\n                  f.tagline AS \"tagline: Value\", f.starts_on, f.ends_on, f.color_hex,\n                  reference.term_badges('event', 'programme_tracks', f.id, 'activity_theme')\n                      AS \"themes!: Value\",\n                  to_jsonb(f.target_audiences) AS \"target_audiences!: Value\",\n                  f.support_note AS \"support_note: Value\",\n                  f.feature_kicker AS \"feature_kicker: Value\",\n                  f.feature_title AS \"feature_title: Value\",\n                  f.feature_body AS \"feature_body: Value\",\n                  f.feature_link_label AS \"feature_link_label: Value\",\n                  f.feature_link_url,\n                  media.attached_image('event', 'programme_tracks', f.id, 'cover') AS \"cover: Value\",\n                  media.attached_image('event', 'programme_tracks', f.id, 'thumbnail')\n                      AS \"feature_visual: Value\",\n                  media.attached_documents('event', 'programme_tracks', f.id, 'document')\n                      AS \"documents!: Value\",\n                  v.id AS \"venue_id?\", v.name AS \"venue_name?: Value\", v.kind AS \"venue_kind?\",\n                  v.address AS \"venue_address?\", v.map_url::text AS \"venue_map_url?\",\n                  v.area AS \"venue_area?: Value\", v.access_note AS \"venue_access_note?: Value\",\n                  v.latitude::float8 AS \"venue_latitude?\", v.longitude::float8 AS \"venue_longitude?\",\n                  (f.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS \"is_off_site!\"\n             FROM f\n             LEFT JOIN event.venues v ON v.id = f.lieu_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "event_title!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "event_acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "event_starts_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "event_ends_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "country_name: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "title!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "subtitle: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "subtitle"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "description: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "tagline: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "tagline"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "starts_on",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "starts_on"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "ends_on",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "ends_on"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "color_hex",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "color_hex"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "themes!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 21,
+        "name": "target_audiences!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "support_note: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "support_note"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "feature_kicker: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_kicker"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "feature_title: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_title"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "feature_body: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_body"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "feature_link_label: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_link_label"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "feature_link_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_link_url"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "cover: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 29,
+        "name": "feature_visual: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 30,
+        "name": "documents!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 31,
+        "name": "venue_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 32,
+        "name": "venue_name?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 33,
+        "name": "venue_kind?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 34,
+        "name": "venue_address?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "address"
+          }
+        }
+      },
+      {
+        "ordinal": 35,
+        "name": "venue_map_url?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 36,
+        "name": "venue_area?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "area"
+          }
+        }
+      },
+      {
+        "ordinal": 37,
+        "name": "venue_access_note?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "access_note"
+          }
+        }
+      },
+      {
+        "ordinal": 38,
+        "name": "venue_latitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 39,
+        "name": "venue_longitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 40,
+        "name": "is_off_site!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      true,
+      null,
+      false,
+      false,
+      true,
+      true,
+      false,
+      null,
+      false,
+      null,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "01ea0c6bcd0c32cf6539405ffbfed3396ade8f8ff6dd49523674d1ae785fa29b"
+}

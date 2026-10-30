@@ -1,0 +1,131 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event_id, venue_id,\n                  tagline AS \"tagline: serde_json::Value\",\n                  to_jsonb(target_audiences) AS \"target_audiences!: serde_json::Value\",\n                  support_note AS \"support_note: serde_json::Value\",\n                  feature_kicker AS \"feature_kicker: serde_json::Value\",\n                  feature_title AS \"feature_title: serde_json::Value\",\n                  feature_body AS \"feature_body: serde_json::Value\",\n                  feature_link_label AS \"feature_link_label: serde_json::Value\",\n                  feature_link_url\n             FROM event.programme_tracks\n            WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "venue_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "venue_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "tagline: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "tagline"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "target_audiences!: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "support_note: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "support_note"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "feature_kicker: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_kicker"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "feature_title: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_title"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "feature_body: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_body"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "feature_link_label: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_link_label"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "feature_link_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "feature_link_url"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "8f3a9b4ba6b5124252a37f2dd1fabb74d9ec79fcd7d220c2063fab8194226a54"
+}

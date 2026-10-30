@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_tracks (session_id, track_id, sort_order, added_by)\n         SELECT $1, f.track_id,\n                COALESCE((SELECT max(st.sort_order) FROM programme.session_tracks st\n                           WHERE st.track_id = f.track_id), 0) + 1,\n                $3\n           FROM unnest($2::uuid[]) AS f(track_id)\n         ON CONFLICT (session_id, track_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9e3ffff434e27eac3af2f828fe0827cdb1390525627e47a62106926e59c9a8a5"
+}

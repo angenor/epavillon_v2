@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_track_moments (track_id, part_id, label, starts_at, ends_at)\n         VALUES ($1, $2, jsonb_build_object('fr', $3::text),\n                 ($4::text)::timestamp AT TIME ZONE $6,\n                 ($5::text)::timestamp AT TIME ZONE $6)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2f7a8c85bfb362b47a0e885d2cbda4190eebcbc22ff0400e04af28013fb553fc"
+}

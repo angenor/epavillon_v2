@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (edition_label, edition_year, title, slug, description, status,\n                participation_mode, timezone, starts_at, ends_at, country_id, city, has_pavilion)\n           VALUES ('CdP31', 2026, '{\"fr\":\"CdP31\"}'::jsonb, 'cdp31-montage'::platform.slug,\n                   '{\"fr\":\"Pavillon.\"}'::jsonb, 'announced', 'hybrid',\n                   'Europe/Istanbul'::platform.timezone_name,\n                   timestamp '2026-11-09 09:00' AT TIME ZONE 'Europe/Istanbul',\n                   timestamp '2026-11-20 18:00' AT TIME ZONE 'Europe/Istanbul',\n                   (SELECT id FROM reference.countries WHERE iso3 = 'TUR'), 'Antalya', true)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e0335a198f9601b30bdd9861e41f9ba4e0145c725c596d73b9e3859504e6e385"
+}
