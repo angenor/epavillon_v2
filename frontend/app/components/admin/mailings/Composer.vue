@@ -319,6 +319,7 @@ async function send(): Promise<void> {
   saveError.value = null
   try {
     await api.adminMailings.dispatch(mailing.value.id)
+    trackLaunchedMailing(mailing.value.id)
     mailing.value = null
     store.close()
   } catch (thrown) {
@@ -328,6 +329,22 @@ async function send(): Promise<void> {
     confirming.value = false
   }
 }
+
+// Le brouillon envoyé ou supprimé ailleurs (autre onglet, collègue) : la fenêtre
+// cesse d'enregistrer et le dit, plutôt que d'écrire sur un envoi parti.
+useRealtime(
+  () => (mailing.value ? [`mailing:${mailing.value.id}`] : []),
+  async () => {
+    const id = mailing.value?.id
+    if (!id || sending.value) return
+    const current = await api.adminMailings.byId(id)
+    if (mailing.value?.id !== id || current?.status === 'draft') return
+    if (saveTimer) clearTimeout(saveTimer)
+    mailing.value = null
+    form.value = null
+    loadError.value = current ? t('admin.mailing.composer.alreadySent') : t('admin.mailing.compose.notFound.description')
+  },
+)
 
 async function sendTest(): Promise<void> {
   if (!mailing.value || !(await flush())) return

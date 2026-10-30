@@ -54,6 +54,8 @@ const features = useFeatureStore()
 const isMaintenanceOn = computed(() => features.isEnabled(PLATFORM_MAINTENANCE_FLAG))
 // La fenêtre de rédaction d'un courriel, ouverte d'ici, de l'historique ou d'un brouillon.
 const mailComposer = useMailComposerStore()
+// « Envoi parti », « Problème sur l'envoi », où qu'on soit dans le back-office.
+useMailingNotices()
 
 // SANS `await` : la garde d'accès du back-office a déjà résolu la session, cette
 // lecture ne coûte donc aucun appel de plus — mais le layout ne doit pas retarder

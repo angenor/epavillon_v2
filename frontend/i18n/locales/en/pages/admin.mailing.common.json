@@ -74,6 +74,14 @@
     "more": "Show 100 more",
     "shown": "{shown} of {total}"
   },
+  "notice": {
+    "sent": "Mailing sent: {count} recipient | Mailing sent: {count} recipients",
+    "subject": "“{subject}”",
+    "someFailed": "{count} failed | {count} failed",
+    "failed": "Problem with the mailing “{subject}”",
+    "failedUnknown": "The mailing stopped without a readable reason.",
+    "open": "View the mailing"
+  },
   "atZone": "{date}, {zone}",
   "noSubject": "No subject",
   "someone": "someone",

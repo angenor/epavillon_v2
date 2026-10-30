@@ -74,6 +74,14 @@
     "more": "Afficher 100 de plus",
     "shown": "{shown} sur {total}"
   },
+  "notice": {
+    "sent": "Envoi parti : {count} destinataire | Envoi parti : {count} destinataires",
+    "subject": "« {subject} »",
+    "someFailed": "{count} en échec | {count} en échec",
+    "failed": "Problème sur l'envoi « {subject} »",
+    "failedUnknown": "L'envoi s'est arrêté sans motif lisible.",
+    "open": "Voir l'envoi"
+  },
   "atZone": "{date}, {zone}",
   "noSubject": "Sans objet",
   "someone": "quelqu'un",

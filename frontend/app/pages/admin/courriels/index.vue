@@ -105,6 +105,10 @@ function onDeleted(id: string): void {
 const composer = useMailComposerStore()
 const createError = ref<string | null>(null)
 watch(() => composer.version, () => void refresh())
+useRealtime(
+  () => (adminScope.currentEventId && canSend.value ? [`event:${adminScope.currentEventId}:mailings`] : []),
+  () => refresh(),
+)
 
 function create(): void {
   composer.open()

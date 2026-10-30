@@ -49,6 +49,8 @@ watch(
   { immediate: true },
 )
 watch(() => composer.version, () => void refresh())
+// L'avancement et l'état se relisent seuls ; la notification de fin vient du layout.
+useRealtime(() => [`mailing:${mailingId.value}`], () => refresh())
 
 const edition = computed(() => adminScope.events.find((e) => e.id === mailing.value?.event_id) ?? null)
 const timezone = computed(() => edition.value?.timezone ?? 'UTC')
@@ -109,6 +111,7 @@ async function retrySending(): Promise<void> {
   actionError.value = null
   try {
     mailing.value = await api.adminMailings.retry(mailing.value.id)
+    trackLaunchedMailing(mailing.value.id)
   } catch (thrown) {
     actionError.value = apiErrorMessage(thrown, t)
   } finally {
