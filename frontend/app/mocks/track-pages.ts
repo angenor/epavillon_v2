@@ -298,23 +298,14 @@ const atelier: Source = {
     { cle: 'matin', label: 'Matin', title: null, summary: 'Où en sont les négociations, thème par thème' },
     { cle: 'apres-midi', label: 'Après-midi', title: null, summary: 'Le Guide des négociations et le Programme de la Francophonie' },
   ],
-  activites: [
-    { n: 1, jour: 8, debut: '09:00', fin: '09:15', titre: "Ouverture de l'atelier", points: ["Mot de l'OIF", 'Mot du Secrétariat de la CCNUCC'], orgs: [O.oif, O.ccnucc], partie: 'matin', diffusee: false },
-    { n: 2, jour: 8, debut: '09:45', fin: '12:00', titre: 'Présentations des avancées par thématique', points: ['Atténuation', 'Adaptation', 'Pertes et préjudices', 'Mécanismes de coopération', 'Finance climat'], partie: 'matin', diffusee: false },
-    { n: 3, jour: 8, debut: '12:00', fin: '12:30', titre: 'Questions transversales', points: ['Cadre de la transparence', 'Transfert de technologies', 'Agriculture', 'Genre et climat'], partie: 'matin', diffusee: false },
-    {
-      n: 4, jour: 8, debut: '14:15', fin: '14:50',
-      titre: 'Présentation du Guide des négociations et du Programme de la Francophonie à la CdP31',
-      points: ['Présentation du Guide des négociations : Dr Issa Bado et M. Serges Djohy', 'Le Programme de la Francophonie à la CdP31 : Dr Issa Bado'],
-      intervenants: [
-        { nom: 'Dr Issa Bado', fonction: 'Guide des négociations, Programme de la Francophonie' },
-        { nom: 'M. Serges Djohy', fonction: 'Guide des négociations' },
-      ],
-      orgs: [O.oif], partie: 'apres-midi', diffusee: false,
-    },
-  ],
+  // Comme en production : l'atelier n'a que des moments, aucune activité à fiche.
+  activites: [],
   moments: [
+    { n: 3, jour: 8, debut: '09:00', fin: '09:15', libelle: "Ouverture de l'atelier", partie: 'matin', points: ["Mot de l'OIF", 'Mot du Secrétariat de la CCNUCC'] },
+    { n: 4, jour: 8, debut: '09:45', fin: '12:00', libelle: 'Présentations des avancées par thématique', partie: 'matin', points: ['Atténuation', 'Adaptation', 'Pertes et préjudices', 'Mécanismes de coopération', 'Finance climat'] },
+    { n: 5, jour: 8, debut: '12:00', fin: '12:30', libelle: 'Questions transversales', partie: 'matin', points: ['Cadre de la transparence', 'Transfert de technologies', 'Agriculture', 'Genre et climat'] },
     { n: 1, jour: 8, debut: '12:30', fin: '13:30', libelle: 'Déjeuner', partie: 'matin' },
+    { n: 6, jour: 8, debut: '14:15', fin: '14:50', libelle: 'Présentation du Guide des négociations et du Programme de la Francophonie à la CdP31', partie: 'apres-midi', points: ['Présentation du Guide des négociations : Dr Issa Bado et M. Serges Djohy', 'Le Programme de la Francophonie à la CdP31 : Dr Issa Bado'] },
     { n: 2, jour: 8, debut: '14:50', fin: '15:00', libelle: 'Clôture', partie: 'apres-midi' },
   ],
 }
