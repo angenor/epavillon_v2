@@ -184,6 +184,34 @@ pub async fn moments_du_fil<'e>(
     Ok(lignes)
 }
 
+/// Un moment d'un fil publié de l'édition, désigné par l'adresse du fil.
+pub struct MomentDeLedition {
+    pub track_slug: String,
+    pub starts_at: OffsetDateTime,
+    pub ends_at: Option<OffsetDateTime>,
+    pub label: Value,
+}
+
+/// Les moments de tous les fils publiés de l'édition, en une lecture.
+pub async fn moments_des_fils_publies<'e>(
+    executor: impl PgExecutor<'e>,
+    event_id: Uuid,
+) -> Result<Vec<MomentDeLedition>> {
+    let lignes = sqlx::query_as!(
+        MomentDeLedition,
+        r#"SELECT t.slug::text AS "track_slug!", m.starts_at, m.ends_at, m.label AS "label!: Value"
+             FROM event.programme_track_moments m
+             JOIN event.programme_tracks t ON t.id = m.track_id
+            WHERE t.event_id = $1 AND t.published_at IS NOT NULL
+            ORDER BY m.starts_at, m.created_at"#,
+        event_id
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes)
+}
+
 /// Les partenaires du fil, dans leur ordre, résolus pour l'affichage.
 pub async fn partenaires_du_fil<'e>(
     executor: impl PgExecutor<'e>,
@@ -209,11 +237,12 @@ pub async fn partenaires_du_fil<'e>(
 
 /// Les fils publiés de l'édition, chacun avec l'étendue de son déroulé publié
 /// (activités publiées et moments) et son lieu, pour relier les pages entre
-/// elles. `courant` marque la page lue.
+/// elles et regrouper leurs activités dans `/programmations`. `courant` marque
+/// la page lue. Une édition en brouillon ou annulée n'en a aucun, comme sa page.
 pub async fn fils_publies_de_ledition<'e>(
     executor: impl PgExecutor<'e>,
     event_id: Uuid,
-    courant: Uuid,
+    courant: Option<Uuid>,
 ) -> Result<Vec<PublicTrackSummary>> {
     let lignes = sqlx::query!(
         r#"WITH bornes AS (
@@ -237,8 +266,10 @@ pub async fn fils_publies_de_ledition<'e>(
                        ORDER BY p.created_at, p.id LIMIT 1)) AS "venue_name: Value",
                   (t.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS "is_off_site!"
              FROM event.programme_tracks t
+             JOIN event.events e ON e.id = t.event_id
              LEFT JOIN event.venues v ON v.id = t.venue_id
             WHERE t.event_id = $1 AND t.published_at IS NOT NULL
+              AND e.status NOT IN ('draft', 'cancelled')
             ORDER BY t.starts_on NULLS LAST, t.sort_order, t.code"#,
         event_id
     )
@@ -248,7 +279,7 @@ pub async fn fils_publies_de_ledition<'e>(
     Ok(lignes
         .into_iter()
         .map(|l| PublicTrackSummary {
-            is_current: l.id == courant,
+            is_current: Some(l.id) == courant,
             slug: l.slug,
             kind: l.kind,
             title: l.title,

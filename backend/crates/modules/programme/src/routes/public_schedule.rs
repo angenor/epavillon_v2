@@ -33,8 +33,38 @@ const LIMITE_MAX: i64 = 200;
 /// séance — c'est ainsi que le site les écrit.
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/schedule", web::get().to(programmation))
+        .route("/schedule/tracks", web::get().to(fils_de_la_programmation))
         .route("/events/{event_id}/sessions/{slug}", web::get().to(seance))
         .route("/events/{event_slug}/tracks/{track_slug}", web::get().to(page_du_fil));
+}
+
+#[derive(Debug, Deserialize)]
+pub struct EditionDuProgramme {
+    event_id: Uuid,
+}
+
+/// Les fils publiés d'une édition, pour `/programmations`.
+#[utoipa::path(
+    get,
+    description = "`PublicScheduleTrack[]`, **sans session** : les fils **publiés** de l'édition (journées spéciales, atelier préparatoire), avec slug, genre, titre, couleur, dates, lieu (celui du fil, à défaut le pavillon ; `is_off_site` quand il se tient ailleurs), heures de début et de fin **lues sur leur déroulé publié** (activités publiées et moments, nulles s'il est vide) et **moments sans activité** (`moments` : début, fin éventuelle, libellé, dans l'ordre de l'heure). `is_current` est toujours faux. Les activités ne sont pas recopiées : elles sont dans `/schedule`, chacune avec ses fils. `/programmations` en compose un cadre par journée et annonce l'atelier. Même garde que la page d'un fil : une édition en brouillon ou annulée, ou inconnue, rend une liste **vide**.\n\n`ETag` sur le corps ; **304** sur `If-None-Match`.",
+    path = "/schedule/tracks",
+    tag = "Programmation publique",
+    operation_id = "programmation_fils_publies",
+    params(("event_id" = Uuid, Query, description = "Édition dont on lit les fils")),
+    responses(
+        (status = 200, description = "PublicScheduleTrack[]", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
+    )
+)]
+pub(crate) async fn fils_de_la_programmation(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    demande: web::Query<EditionDuProgramme>,
+) -> Result<HttpResponse> {
+    let fils =
+        crate::service::track_page::fils_de_ledition(state.pool(), EventId(demande.event_id)).await?;
+
+    crate::routes::json_revalide(&requete, &fils, "public, no-cache")
 }
 
 /// La page publique d'un fil : journée spéciale ou atelier préparatoire.

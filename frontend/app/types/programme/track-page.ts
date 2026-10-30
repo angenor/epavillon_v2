@@ -173,6 +173,23 @@ export interface PublicTrackPage {
   other_tracks: PublicTrackSummary[]
 }
 
+/** Un moment sans activité, tel que le cadre d'une journée de `/programmations` le montre. */
+export interface PublicScheduleTrackMoment {
+  starts_at: IsoDateTime
+  /** Nulle pour un moment sans fin (la clôture). */
+  ends_at: IsoDateTime | null
+  label: I18nText
+}
+
+/**
+ * `GET /schedule/tracks?event_id=` : un fil publié de l'édition (`is_current`
+ * toujours faux) et ses moments, dans l'ordre de l'heure. Ses activités sont
+ * dans la programmation (`PublicScheduleRow.tracks`), pas recopiées ici.
+ */
+export interface PublicScheduleTrack extends PublicTrackSummary {
+  moments: PublicScheduleTrackMoment[]
+}
+
 /** `PUT /admin/planner/tracks/{trackId}/sessions/{sessionId}`. */
 export interface TrackSessionPlacementPayload {
   /** Partie de CE fil ; nulle : hors partie. */

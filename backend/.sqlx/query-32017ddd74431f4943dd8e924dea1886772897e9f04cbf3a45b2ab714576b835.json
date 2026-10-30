@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.slug::text AS \"track_slug!\", m.starts_at, m.ends_at, m.label AS \"label!: Value\"\n             FROM event.programme_track_moments m\n             JOIN event.programme_tracks t ON t.id = m.track_id\n            WHERE t.event_id = $1 AND t.published_at IS NOT NULL\n            ORDER BY m.starts_at, m.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "track_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "label!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "label"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "32017ddd74431f4943dd8e924dea1886772897e9f04cbf3a45b2ab714576b835"
+}

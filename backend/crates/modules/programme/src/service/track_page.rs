@@ -27,10 +27,37 @@ use crate::domain::ids::{EventId, SessionId};
 use crate::domain::track_page::{
     PublicTrackActivity, PublicTrackEdition, PublicTrackEntry, PublicTrackEntryBody,
     PublicTrackFeature, PublicTrackHeader, PublicTrackMoment, PublicTrackPage, PublicTrackPart,
-    PublicTrackVenue, TrackSessionPlacement, TrackSessionPlacementPayload,
+    PublicScheduleTrack, PublicScheduleTrackMoment, PublicTrackVenue, TrackSessionPlacement,
+    TrackSessionPlacementPayload,
 };
 use crate::repo::{cross, public_schedule, session_parts, track_page};
 use crate::state::ProgrammeState;
+
+/// Les fils publiés d'une édition et leurs moments, sans page lue : ce que
+/// `/programmations` regroupe en cadres (journée spéciale) ou en encadré
+/// (atelier). Deux lectures, quel que soit le nombre de fils.
+pub async fn fils_de_ledition(pool: &PgPool, event_id: EventId) -> Result<Vec<PublicScheduleTrack>> {
+    let fils = cross::fils_publies_de_ledition(pool, event_id.0, None).await?;
+    if fils.is_empty() {
+        return Ok(Vec::new());
+    }
+    let mut moments: HashMap<String, Vec<PublicScheduleTrackMoment>> = HashMap::new();
+    for m in cross::moments_des_fils_publies(pool, event_id.0).await? {
+        moments.entry(m.track_slug).or_default().push(PublicScheduleTrackMoment {
+            starts_at: m.starts_at,
+            ends_at: m.ends_at,
+            label: m.label,
+        });
+    }
+
+    Ok(fils
+        .into_iter()
+        .map(|summary| PublicScheduleTrack {
+            moments: moments.remove(&summary.slug).unwrap_or_default(),
+            summary,
+        })
+        .collect())
+}
 
 /// La page publique d'un fil publié, par les adresses de l'édition et du fil.
 pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<PublicTrackPage> {
@@ -130,7 +157,7 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
         .min()
         .filter(|debut| premiere_activite.is_some_and(|a| *debut < a));
 
-    let other_tracks = cross::fils_publies_de_ledition(pool, fil.event_id, fil.id).await?;
+    let other_tracks = cross::fils_publies_de_ledition(pool, fil.event_id, Some(fil.id)).await?;
 
     let feature = fil.feature_title.map(|title| PublicTrackFeature {
         kicker: fil.feature_kicker,

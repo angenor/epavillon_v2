@@ -151,6 +151,27 @@ pub struct PublicTrackSummary {
     pub is_current: bool,
 }
 
+/// Un moment sans activité, tel que `/programmations` l'affiche dans le cadre
+/// d'une journée : `PublicScheduleTrackMoment`.
+#[derive(Debug, Clone, Serialize)]
+pub struct PublicScheduleTrackMoment {
+    #[serde(with = "time::serde::rfc3339")]
+    pub starts_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub ends_at: Option<OffsetDateTime>,
+    pub label: Value,
+}
+
+/// Un fil publié de l'édition pour `/programmations` : `PublicScheduleTrack`,
+/// le résumé (jamais `is_current`) et ses moments dans l'ordre de l'heure.
+/// Les activités, elles, sont déjà dans la programmation.
+#[derive(Debug, Clone, Serialize)]
+pub struct PublicScheduleTrack {
+    #[serde(flatten)]
+    pub summary: PublicTrackSummary,
+    pub moments: Vec<PublicScheduleTrackMoment>,
+}
+
 /// Le fil lui-même : `PublicTrackHeader`.
 #[derive(Debug, Clone, Serialize)]
 pub struct PublicTrackHeader {

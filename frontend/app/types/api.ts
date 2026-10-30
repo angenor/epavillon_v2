@@ -6190,6 +6190,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedule/tracks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les fils publiés d'une édition, pour `/programmations`.
+         * @description `PublicScheduleTrack[]`, **sans session** : les fils **publiés** de l'édition (journées spéciales, atelier préparatoire), avec slug, genre, titre, couleur, dates, lieu (celui du fil, à défaut le pavillon ; `is_off_site` quand il se tient ailleurs), heures de début et de fin **lues sur leur déroulé publié** (activités publiées et moments, nulles s'il est vide) et **moments sans activité** (`moments` : début, fin éventuelle, libellé, dans l'ordre de l'heure). `is_current` est toujours faux. Les activités ne sont pas recopiées : elles sont dans `/schedule`, chacune avec ses fils. `/programmations` en compose un cadre par journée et annonce l'atelier. Même garde que la page d'un fil : une édition en brouillon ou annulée, ou inconnue, rend une liste **vide**.
+         *
+         *     `ETag` sur le corps ; **304** sur `If-None-Match`.
+         */
+        get: operations["programmation_fils_publies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sessions": {
         parameters: {
             query?: never;
@@ -23760,6 +23782,36 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description PublicScheduleRow[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    programmation_fils_publies: {
+        parameters: {
+            query: {
+                /** @description Édition dont on lit les fils */
+                event_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicScheduleTrack[] */
             200: {
                 headers: {
                     [name: string]: unknown;

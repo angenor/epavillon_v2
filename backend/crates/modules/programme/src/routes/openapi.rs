@@ -90,6 +90,7 @@ pub struct ApiErrorBody {
         crate::routes::public_schedule::programmation,
         crate::routes::public_schedule::seance,
         crate::routes::public_schedule::page_du_fil,
+        crate::routes::public_schedule::fils_de_la_programmation,
         crate::routes::planner::placer_dans_le_fil,
         crate::routes::registrations::formulaire,
         crate::routes::registrations::sinscrire,

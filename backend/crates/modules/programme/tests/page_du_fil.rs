@@ -6,7 +6,7 @@ mod commun;
 
 use commun::{Bac, FUSEAU_COP31, SLUG_COP31};
 use kernel::error::ErrorCode;
-use programme::domain::ids::SessionId;
+use programme::domain::ids::{EventId, SessionId};
 use programme::domain::track_page::{PublicTrackEntryBody, TrackSessionPlacementPayload};
 use programme::service::track_page;
 use uuid::Uuid;
@@ -208,6 +208,53 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
     assert!(atelier.is_off_site);
     assert_eq!(atelier.venue.map(|v| v.name["fr"].clone()), Some("Hôtel DoubleTree by Hilton".into()));
     assert!(atelier.agenda.is_empty());
+}
+
+#[tokio::test]
+async fn les_fils_publies_dune_edition_pour_la_programmation() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let finance = fil(&bac, terrain.edition, "journee-finance", true, None).await;
+    let atelier = fil(&bac, terrain.edition, "atelier", true, None).await;
+    sqlx::query!("UPDATE event.programme_tracks SET kind = 'side_programme', color_hex = NULL WHERE id = $1", atelier)
+        .execute(bac.pool())
+        .await
+        .unwrap();
+    fil(&bac, terrain.edition, "journee-cachee", false, None).await;
+    seance(&bac, terrain.edition, finance, "ouverture", "2027-11-13 09:00", "2027-11-13 09:15", true, terrain.organisation).await;
+    moment(&bac, finance, None, "Clôture", "2027-11-13 18:00", None).await;
+    moment(&bac, finance, None, "Accueil", "2027-11-13 08:00", Some("2027-11-13 08:45")).await;
+    moment(&bac, atelier, None, "Atelier", "2027-11-08 09:00", Some("2027-11-08 15:00")).await;
+
+    let fils = track_page::fils_de_ledition(bac.pool(), EventId(terrain.edition))
+        .await
+        .expect("fils");
+    let heure = |jour: &str, h: &str| commun::instant(&format!("2027-11-{jour}T{h}:00-03:00"));
+    let resume: Vec<(&str, &str, bool)> = fils
+        .iter()
+        .map(|t| (t.summary.slug.as_str(), t.summary.kind.as_str(), t.summary.is_current))
+        .collect();
+    assert_eq!(resume.len(), 2, "le fil non publié est tu : {resume:?}");
+    assert!(resume.contains(&("journee-finance", "special_day", false)));
+    assert!(resume.contains(&("atelier", "side_programme", false)));
+    let journee = fils.iter().find(|t| t.summary.slug == "journee-finance").unwrap();
+    assert_eq!(journee.summary.starts_at, Some(heure("13", "08:00")), "l'accueil ouvre la journée");
+    assert_eq!(journee.summary.ends_at, Some(heure("13", "18:00")));
+    let moments: Vec<&str> = journee.moments.iter().map(|m| m.label["fr"].as_str().unwrap()).collect();
+    assert_eq!(moments, ["Accueil", "Clôture"], "dans l'ordre de l'heure, ceux du fil seulement");
+    let atelier = fils.iter().find(|t| t.summary.slug == "atelier").unwrap();
+    assert_eq!(
+        (atelier.summary.starts_at, atelier.summary.ends_at),
+        (Some(heure("08", "09:00")), Some(heure("08", "15:00")))
+    );
+    assert_eq!(atelier.moments.len(), 1);
+
+    sqlx::query!("UPDATE event.events SET status = 'draft' WHERE id = $1", terrain.edition)
+        .execute(bac.pool())
+        .await
+        .unwrap();
+    let fils = track_page::fils_de_ledition(bac.pool(), EventId(terrain.edition)).await.unwrap();
+    assert!(fils.is_empty(), "édition en brouillon : aucun fil");
 }
 
 #[tokio::test]
