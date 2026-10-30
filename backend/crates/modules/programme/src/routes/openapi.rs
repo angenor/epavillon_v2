@@ -169,7 +169,9 @@ mod tests {
             .paths
             .paths
             .keys()
-            .filter(|c| !c.contains("/questions") && !c.contains("/tracks/") && *c != "/schedule/tracks")
+            .filter(|c| {
+                !c.contains("/questions") && !c.contains("/tracks/") && *c != "/schedule/tracks"
+            })
             .filter(|c| {
                 c.starts_with("/sessions")
                     || c.starts_with("/registrations")

@@ -83,22 +83,37 @@ async fn la_page_secrit_et_se_relit_entiere_partenaires_remplaces() {
     let enfants = seed::enfants(&bac, editions.cop31).await;
     let fil = TrackId::from(enfants.fil);
     let lieu = hotel(&bac, editions.cop31).await;
-    let oif = organisation(&bac, "Organisation internationale de la Francophonie", "oif").await;
+    let oif = organisation(
+        &bac,
+        "Organisation internationale de la Francophonie",
+        "oif",
+    )
+    .await;
     let quebec = organisation(&bac, "Gouvernement du Québec", "quebec").await;
 
     let mut page = page_vide();
     page.venue_id = Some(lieu);
     page.tagline = Some(json!({ "fr": "Hackathon, pitchs, jeu, scène" }));
     page.target_audiences = vec![json!({ "fr": "Négociateurs" }), json!({ "fr": "ONG" })];
-    page.support_note = Some(json!({ "fr": "Avec le soutien financier du gouvernement du Québec." }));
+    page.support_note =
+        Some(json!({ "fr": "Avec le soutien financier du gouvernement du Québec." }));
     page.feature_title = Some(json!({ "fr": "Guide des négociations de la CdP31" }));
     page.feature_link_label = Some(json!({ "fr": "Ouvrir dans Guide Négo" }));
     page.feature_link_url = Some("/guide-nego".to_owned());
     page.partners = vec![
-        TrackPartnerPayload { organization_id: oif, role_code: "organizer".to_owned() },
-        TrackPartnerPayload { organization_id: quebec, role_code: "financial_support".to_owned() },
+        TrackPartnerPayload {
+            organization_id: oif,
+            role_code: "organizer".to_owned(),
+        },
+        TrackPartnerPayload {
+            organization_id: quebec,
+            role_code: "financial_support".to_owned(),
+        },
         // Citée deux fois : sa première place compte.
-        TrackPartnerPayload { organization_id: oif, role_code: "partner".to_owned() },
+        TrackPartnerPayload {
+            organization_id: oif,
+            role_code: "partner".to_owned(),
+        },
     ];
 
     let reglages = track_page::enregistrer(&bac.state, &bac.ctx(), fil, page)
@@ -113,7 +128,10 @@ async fn la_page_secrit_et_se_relit_entiere_partenaires_remplaces() {
         .iter()
         .map(|p| (p.organization_id, p.role_code.as_str()))
         .collect();
-    assert_eq!(roles, vec![(oif, "organizer"), (quebec, "financial_support")]);
+    assert_eq!(
+        roles,
+        vec![(oif, "organizer"), (quebec, "financial_support")]
+    );
     assert_eq!(reglages.partners[1].role_label["fr"], "Soutien financier");
 
     let mut seconde = page_vide();
@@ -125,7 +143,10 @@ async fn la_page_secrit_et_se_relit_entiere_partenaires_remplaces() {
         .await
         .expect("seconde écriture");
 
-    assert_eq!(reglages.venue_id, None, "écriture totale : le lieu revient au pavillon");
+    assert_eq!(
+        reglages.venue_id, None,
+        "écriture totale : le lieu revient au pavillon"
+    );
     assert_eq!(reglages.partners.len(), 1, "la liste est remplacée");
     assert_eq!(reglages.partners[0].role_code, "partner");
 }
@@ -234,17 +255,26 @@ async fn une_partie_dun_autre_fil_est_introuvable_et_ne_se_designe_pas() {
             .parts[0]
             .id;
 
-    let refus =
-        track_page::modifier_partie(&bac.state, &bac.ctx(), atelier, partie_finance, partie("x", 1))
-            .await
-            .expect_err("partie d'un autre fil");
+    let refus = track_page::modifier_partie(
+        &bac.state,
+        &bac.ctx(),
+        atelier,
+        partie_finance,
+        partie("x", 1),
+    )
+    .await
+    .expect_err("partie d'un autre fil");
     assert_eq!(refus.code, ErrorCode::NotFound);
 
     let refus = track_page::creer_moment(
         &bac.state,
         &bac.ctx(),
         atelier,
-        moment(Some(partie_finance), "2027-11-08T12:00:00-03:00", "Déjeuner"),
+        moment(
+            Some(partie_finance),
+            "2027-11-08T12:00:00-03:00",
+            "Déjeuner",
+        ),
     )
     .await
     .expect_err("un moment ne désigne pas la partie d'un autre fil");
@@ -268,13 +298,17 @@ async fn hors_perimetre_le_fil_est_refuse_comme_inexistant() {
     let p = perimetres(&bac, &editions).await;
     let detache = commun::perimetre_de(&bac, p.detache).await;
 
-    let hors = edition_dans_le_perimetre(bac.pool(), &detache, Cible::Fil(TrackId::from(enfants.fil)))
-        .await
-        .expect_err("la COP31 n'est pas dans son périmètre");
-    let inconnu =
-        edition_dans_le_perimetre(bac.pool(), &detache, Cible::Fil(TrackId::from(Uuid::now_v7())))
+    let hors =
+        edition_dans_le_perimetre(bac.pool(), &detache, Cible::Fil(TrackId::from(enfants.fil)))
             .await
-            .expect_err("fil inconnu");
+            .expect_err("la COP31 n'est pas dans son périmètre");
+    let inconnu = edition_dans_le_perimetre(
+        bac.pool(),
+        &detache,
+        Cible::Fil(TrackId::from(Uuid::now_v7())),
+    )
+    .await
+    .expect_err("fil inconnu");
 
     assert_eq!(hors.code, ErrorCode::NotFound);
     assert_eq!(hors.code, inconnu.code);

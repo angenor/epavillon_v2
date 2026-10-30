@@ -71,8 +71,14 @@ async fn les_routes_de_la_page_dun_fil_sont_montees() {
         ("DELETE", format!("/api/admin/tracks/{fil}/parts/{partie}")),
         ("POST", format!("/api/admin/tracks/{fil}/moments")),
         ("PUT", format!("/api/admin/tracks/{fil}/moments/{moment}")),
-        ("DELETE", format!("/api/admin/tracks/{fil}/moments/{moment}")),
-        ("PUT", format!("/api/admin/planner/tracks/{fil}/sessions/{seance}")),
+        (
+            "DELETE",
+            format!("/api/admin/tracks/{fil}/moments/{moment}"),
+        ),
+        (
+            "PUT",
+            format!("/api/admin/planner/tracks/{fil}/sessions/{seance}"),
+        ),
     ] {
         let reponse = test::call_service(&app, requete(verbe).uri(&chemin).to_request()).await;
         assert_eq!(
@@ -89,7 +95,11 @@ async fn les_routes_de_la_page_dun_fil_sont_montees() {
             .to_request(),
     )
     .await;
-    assert_eq!(publiee.status(), StatusCode::OK, "page publique sans session");
+    assert_eq!(
+        publiee.status(),
+        StatusCode::OK,
+        "page publique sans session"
+    );
 
     let cachee = test::call_service(
         &app,

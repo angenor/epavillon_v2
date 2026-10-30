@@ -28,7 +28,10 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route("/{id}/parts/{partId}", web::delete().to(supprimer_partie))
         .route("/{id}/moments", web::post().to(creer_moment))
         .route("/{id}/moments/{momentId}", web::put().to(modifier_moment))
-        .route("/{id}/moments/{momentId}", web::delete().to(supprimer_moment));
+        .route(
+            "/{id}/moments/{momentId}",
+            web::delete().to(supprimer_moment),
+        );
 }
 
 async fn fil_garde(state: &EventState, perimetre: &Perimeter, id: Uuid) -> Result<TrackId> {

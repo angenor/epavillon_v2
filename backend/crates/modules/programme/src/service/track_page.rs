@@ -25,9 +25,9 @@ use uuid::Uuid;
 
 use crate::domain::ids::{EventId, SessionId};
 use crate::domain::track_page::{
-    PublicTrackActivity, PublicTrackEdition, PublicTrackEntry, PublicTrackEntryBody,
-    PublicTrackFeature, PublicTrackHeader, PublicTrackMoment, PublicTrackPage, PublicTrackPart,
-    PublicScheduleTrack, PublicScheduleTrackMoment, PublicTrackVenue, TrackSessionPlacement,
+    PublicScheduleTrack, PublicScheduleTrackMoment, PublicTrackActivity, PublicTrackEdition,
+    PublicTrackEntry, PublicTrackEntryBody, PublicTrackFeature, PublicTrackHeader,
+    PublicTrackMoment, PublicTrackPage, PublicTrackPart, PublicTrackVenue, TrackSessionPlacement,
     TrackSessionPlacementPayload,
 };
 use crate::repo::{cross, public_schedule, session_parts, track_page};
@@ -36,18 +36,24 @@ use crate::state::ProgrammeState;
 /// Les fils publiés d'une édition et leurs moments, sans page lue : ce que
 /// `/programmations` regroupe en cadres (journée spéciale) ou en encadré
 /// (atelier). Deux lectures, quel que soit le nombre de fils.
-pub async fn fils_de_ledition(pool: &PgPool, event_id: EventId) -> Result<Vec<PublicScheduleTrack>> {
+pub async fn fils_de_ledition(
+    pool: &PgPool,
+    event_id: EventId,
+) -> Result<Vec<PublicScheduleTrack>> {
     let fils = cross::fils_publies_de_ledition(pool, event_id.0, None).await?;
     if fils.is_empty() {
         return Ok(Vec::new());
     }
     let mut moments: HashMap<String, Vec<PublicScheduleTrackMoment>> = HashMap::new();
     for m in cross::moments_des_fils_publies(pool, event_id.0).await? {
-        moments.entry(m.track_slug).or_default().push(PublicScheduleTrackMoment {
-            starts_at: m.starts_at,
-            ends_at: m.ends_at,
-            label: m.label,
-        });
+        moments
+            .entry(m.track_slug)
+            .or_default()
+            .push(PublicScheduleTrackMoment {
+                starts_at: m.starts_at,
+                ends_at: m.ends_at,
+                label: m.label,
+            });
     }
 
     Ok(fils
@@ -146,8 +152,13 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
         })
         .collect();
 
-    let est_activite = |e: &&PublicTrackEntry| matches!(e.body, PublicTrackEntryBody::Activity { .. });
-    let premiere_activite = agenda.iter().filter(est_activite).map(|e| e.starts_at).min();
+    let est_activite =
+        |e: &&PublicTrackEntry| matches!(e.body, PublicTrackEntryBody::Activity { .. });
+    let premiere_activite = agenda
+        .iter()
+        .filter(est_activite)
+        .map(|e| e.starts_at)
+        .min();
     let starts_at = premiere_activite.or_else(|| agenda.iter().map(|e| e.starts_at).min());
     let ends_at = agenda.iter().map(fin).max();
     let opens_at = agenda

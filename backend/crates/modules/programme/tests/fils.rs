@@ -165,8 +165,7 @@ async fn un_rattachement_conserve_garde_son_rang_et_sa_partie() {
     let grille = seances::grille(&bac, terrain.edition).await;
     let premiere = seance(&bac, &terrain, "Ouverture", "ouverture").await;
     let id = seance(&bac, &terrain, "Panel", "panel").await;
-    let jeunesse =
-        seances::fil_publie(&bac, terrain.edition, "jeunesse", "Journée jeunesse").await;
+    let jeunesse = seances::fil_publie(&bac, terrain.edition, "jeunesse", "Journée jeunesse").await;
 
     seances::rattacher(&bac, terrain.edition, premiere, vec![grille.fil], None)
         .await
@@ -228,5 +227,8 @@ async fn un_rattachement_conserve_garde_son_rang_et_sa_partie() {
     .fetch_one(bac.pool())
     .await
     .unwrap();
-    assert!(premiere_place < 7, "la première activité arrivée garde la tête");
+    assert!(
+        premiere_place < 7,
+        "la première activité arrivée garde la tête"
+    );
 }

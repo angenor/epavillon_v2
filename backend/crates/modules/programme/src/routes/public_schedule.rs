@@ -35,7 +35,10 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/schedule", web::get().to(programmation))
         .route("/schedule/tracks", web::get().to(fils_de_la_programmation))
         .route("/events/{event_id}/sessions/{slug}", web::get().to(seance))
-        .route("/events/{event_slug}/tracks/{track_slug}", web::get().to(page_du_fil));
+        .route(
+            "/events/{event_slug}/tracks/{track_slug}",
+            web::get().to(page_du_fil),
+        );
 }
 
 #[derive(Debug, Deserialize)]
@@ -62,7 +65,8 @@ pub(crate) async fn fils_de_la_programmation(
     demande: web::Query<EditionDuProgramme>,
 ) -> Result<HttpResponse> {
     let fils =
-        crate::service::track_page::fils_de_ledition(state.pool(), EventId(demande.event_id)).await?;
+        crate::service::track_page::fils_de_ledition(state.pool(), EventId(demande.event_id))
+            .await?;
 
     crate::routes::json_revalide(&requete, &fils, "public, no-cache")
 }

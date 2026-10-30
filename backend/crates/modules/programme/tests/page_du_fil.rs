@@ -86,7 +86,14 @@ async fn partie(bac: &Bac, track: Uuid, nom: &str, rang: i16) -> Uuid {
     .expect("partie")
 }
 
-async fn moment(bac: &Bac, track: Uuid, part: Option<Uuid>, libelle: &str, debut: &str, fin: Option<&str>) {
+async fn moment(
+    bac: &Bac,
+    track: Uuid,
+    part: Option<Uuid>,
+    libelle: &str,
+    debut: &str,
+    fin: Option<&str>,
+) {
     sqlx::query!(
         "INSERT INTO event.programme_track_moments (track_id, part_id, label, starts_at, ends_at)
          VALUES ($1, $2, jsonb_build_object('fr', $3::text),
@@ -129,9 +136,39 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
 
     let p1 = partie(&bac, finance, "Partie 1", 1).await;
     let p2 = partie(&bac, finance, "Partie 2", 2).await;
-    let tard = seance(&bac, terrain.edition, finance, "cilss", "2027-11-13 10:15", "2027-11-13 11:15", true, terrain.organisation).await;
-    let tot = seance(&bac, terrain.edition, finance, "ouverture", "2027-11-13 09:00", "2027-11-13 09:15", true, terrain.organisation).await;
-    seance(&bac, terrain.edition, finance, "brouillon", "2027-11-13 11:30", "2027-11-13 12:30", false, terrain.organisation).await;
+    let tard = seance(
+        &bac,
+        terrain.edition,
+        finance,
+        "cilss",
+        "2027-11-13 10:15",
+        "2027-11-13 11:15",
+        true,
+        terrain.organisation,
+    )
+    .await;
+    let tot = seance(
+        &bac,
+        terrain.edition,
+        finance,
+        "ouverture",
+        "2027-11-13 09:00",
+        "2027-11-13 09:15",
+        true,
+        terrain.organisation,
+    )
+    .await;
+    seance(
+        &bac,
+        terrain.edition,
+        finance,
+        "brouillon",
+        "2027-11-13 11:30",
+        "2027-11-13 12:30",
+        false,
+        terrain.organisation,
+    )
+    .await;
     sqlx::query!(
         "UPDATE programme.session_tracks SET part_id = $1, is_highlight = true WHERE session_id = $2",
         p1,
@@ -140,11 +177,23 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
     .execute(bac.pool())
     .await
     .unwrap();
-    sqlx::query!("UPDATE programme.session_tracks SET part_id = $1 WHERE session_id = $2", p2, tard)
-        .execute(bac.pool())
-        .await
-        .unwrap();
-    moment(&bac, finance, Some(p1), "Accueil et installation", "2027-11-13 08:00", Some("2027-11-13 08:45")).await;
+    sqlx::query!(
+        "UPDATE programme.session_tracks SET part_id = $1 WHERE session_id = $2",
+        p2,
+        tard
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    moment(
+        &bac,
+        finance,
+        Some(p1),
+        "Accueil et installation",
+        "2027-11-13 08:00",
+        Some("2027-11-13 08:45"),
+    )
+    .await;
     moment(&bac, finance, Some(p2), "Clôture", "2027-11-13 18:00", None).await;
     let role = sqlx::query_scalar!(
         "SELECT id FROM reference.taxonomy_terms WHERE taxonomy_code = 'track_partner_role' AND code = 'partner'"
@@ -167,7 +216,11 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
         .expect("page publiée");
 
     let deroule: Vec<&str> = page.agenda.iter().map(genre).collect();
-    assert_eq!(deroule, ["moment", "activity", "activity", "moment"], "trié par heure, brouillon écarté");
+    assert_eq!(
+        deroule,
+        ["moment", "activity", "activity", "moment"],
+        "trié par heure, brouillon écarté"
+    );
     match &page.agenda[1].body {
         PublicTrackEntryBody::Activity { activity } => {
             assert_eq!(activity.session.id, tot);
@@ -179,19 +232,24 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
     }
     assert_eq!(page.agenda[1].part_id, Some(p1));
 
-    let heure = |h: &str| {
-        commun::instant(&format!("2027-11-13T{h}:00-03:00"))
-    };
+    let heure = |h: &str| commun::instant(&format!("2027-11-13T{h}:00-03:00"));
     assert_eq!(page.starts_at, Some(heure("09:00")), "première activité");
     assert_eq!(page.opens_at, Some(heure("08:00")), "accueil avant");
-    assert_eq!(page.ends_at, Some(heure("18:00")), "la clôture sans fin compte");
+    assert_eq!(
+        page.ends_at,
+        Some(heure("18:00")),
+        "la clôture sans fin compte"
+    );
     assert_eq!(page.parts.len(), 2);
     assert_eq!(page.parts[0].number, 1);
     assert_eq!(page.parts[0].starts_at, Some(heure("08:00")));
     assert_eq!(page.parts[0].ends_at, Some(heure("09:15")));
 
     assert!(!page.is_off_site);
-    assert_eq!(page.venue.as_ref().map(|v| v.kind.as_str()), Some("pavilion"));
+    assert_eq!(
+        page.venue.as_ref().map(|v| v.kind.as_str()),
+        Some("pavilion")
+    );
     assert_eq!(page.edition.timezone, FUSEAU_COP31);
     assert_eq!(page.partners.len(), 1);
 
@@ -204,9 +262,14 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
     assert!(autres.contains(&("journee-finance", true, false)));
     assert!(autres.contains(&("atelier", false, true)));
 
-    let atelier = track_page::page(bac.pool(), SLUG_COP31, "atelier").await.expect("atelier");
+    let atelier = track_page::page(bac.pool(), SLUG_COP31, "atelier")
+        .await
+        .expect("atelier");
     assert!(atelier.is_off_site);
-    assert_eq!(atelier.venue.map(|v| v.name["fr"].clone()), Some("Hôtel DoubleTree by Hilton".into()));
+    assert_eq!(
+        atelier.venue.map(|v| v.name["fr"].clone()),
+        Some("Hôtel DoubleTree by Hilton".into())
+    );
     assert!(atelier.agenda.is_empty());
 }
 
@@ -216,15 +279,44 @@ async fn les_fils_publies_dune_edition_pour_la_programmation() {
     let terrain = commun::terrain(&bac).await;
     let finance = fil(&bac, terrain.edition, "journee-finance", true, None).await;
     let atelier = fil(&bac, terrain.edition, "atelier", true, None).await;
-    sqlx::query!("UPDATE event.programme_tracks SET kind = 'side_programme', color_hex = NULL WHERE id = $1", atelier)
-        .execute(bac.pool())
-        .await
-        .unwrap();
+    sqlx::query!(
+        "UPDATE event.programme_tracks SET kind = 'side_programme', color_hex = NULL WHERE id = $1",
+        atelier
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
     fil(&bac, terrain.edition, "journee-cachee", false, None).await;
-    seance(&bac, terrain.edition, finance, "ouverture", "2027-11-13 09:00", "2027-11-13 09:15", true, terrain.organisation).await;
+    seance(
+        &bac,
+        terrain.edition,
+        finance,
+        "ouverture",
+        "2027-11-13 09:00",
+        "2027-11-13 09:15",
+        true,
+        terrain.organisation,
+    )
+    .await;
     moment(&bac, finance, None, "Clôture", "2027-11-13 18:00", None).await;
-    moment(&bac, finance, None, "Accueil", "2027-11-13 08:00", Some("2027-11-13 08:45")).await;
-    moment(&bac, atelier, None, "Atelier", "2027-11-08 09:00", Some("2027-11-08 15:00")).await;
+    moment(
+        &bac,
+        finance,
+        None,
+        "Accueil",
+        "2027-11-13 08:00",
+        Some("2027-11-13 08:45"),
+    )
+    .await;
+    moment(
+        &bac,
+        atelier,
+        None,
+        "Atelier",
+        "2027-11-08 09:00",
+        Some("2027-11-08 15:00"),
+    )
+    .await;
 
     let fils = track_page::fils_de_ledition(bac.pool(), EventId(terrain.edition))
         .await
@@ -232,16 +324,37 @@ async fn les_fils_publies_dune_edition_pour_la_programmation() {
     let heure = |jour: &str, h: &str| commun::instant(&format!("2027-11-{jour}T{h}:00-03:00"));
     let resume: Vec<(&str, &str, bool)> = fils
         .iter()
-        .map(|t| (t.summary.slug.as_str(), t.summary.kind.as_str(), t.summary.is_current))
+        .map(|t| {
+            (
+                t.summary.slug.as_str(),
+                t.summary.kind.as_str(),
+                t.summary.is_current,
+            )
+        })
         .collect();
     assert_eq!(resume.len(), 2, "le fil non publié est tu : {resume:?}");
     assert!(resume.contains(&("journee-finance", "special_day", false)));
     assert!(resume.contains(&("atelier", "side_programme", false)));
-    let journee = fils.iter().find(|t| t.summary.slug == "journee-finance").unwrap();
-    assert_eq!(journee.summary.starts_at, Some(heure("13", "08:00")), "l'accueil ouvre la journée");
+    let journee = fils
+        .iter()
+        .find(|t| t.summary.slug == "journee-finance")
+        .unwrap();
+    assert_eq!(
+        journee.summary.starts_at,
+        Some(heure("13", "08:00")),
+        "l'accueil ouvre la journée"
+    );
     assert_eq!(journee.summary.ends_at, Some(heure("13", "18:00")));
-    let moments: Vec<&str> = journee.moments.iter().map(|m| m.label["fr"].as_str().unwrap()).collect();
-    assert_eq!(moments, ["Accueil", "Clôture"], "dans l'ordre de l'heure, ceux du fil seulement");
+    let moments: Vec<&str> = journee
+        .moments
+        .iter()
+        .map(|m| m.label["fr"].as_str().unwrap())
+        .collect();
+    assert_eq!(
+        moments,
+        ["Accueil", "Clôture"],
+        "dans l'ordre de l'heure, ceux du fil seulement"
+    );
     let atelier = fils.iter().find(|t| t.summary.slug == "atelier").unwrap();
     assert_eq!(
         (atelier.summary.starts_at, atelier.summary.ends_at),
@@ -249,11 +362,16 @@ async fn les_fils_publies_dune_edition_pour_la_programmation() {
     );
     assert_eq!(atelier.moments.len(), 1);
 
-    sqlx::query!("UPDATE event.events SET status = 'draft' WHERE id = $1", terrain.edition)
-        .execute(bac.pool())
+    sqlx::query!(
+        "UPDATE event.events SET status = 'draft' WHERE id = $1",
+        terrain.edition
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    let fils = track_page::fils_de_ledition(bac.pool(), EventId(terrain.edition))
         .await
         .unwrap();
-    let fils = track_page::fils_de_ledition(bac.pool(), EventId(terrain.edition)).await.unwrap();
     assert!(fils.is_empty(), "édition en brouillon : aucun fil");
 }
 
@@ -269,14 +387,19 @@ async fn un_fil_non_publie_une_adresse_inconnue_une_edition_en_brouillon_rendent
         (SLUG_COP31, "inconnue"),
         ("edition-inconnue", "journee-finance"),
     ] {
-        let refus = track_page::page(bac.pool(), edition, slug).await.expect_err(slug);
+        let refus = track_page::page(bac.pool(), edition, slug)
+            .await
+            .expect_err(slug);
         assert_eq!(refus.code, ErrorCode::NotFound, "{edition}/{slug}");
     }
 
-    sqlx::query!("UPDATE event.events SET status = 'draft' WHERE id = $1", terrain.edition)
-        .execute(bac.pool())
-        .await
-        .unwrap();
+    sqlx::query!(
+        "UPDATE event.events SET status = 'draft' WHERE id = $1",
+        terrain.edition
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
     let refus = track_page::page(bac.pool(), SLUG_COP31, "journee-finance")
         .await
         .expect_err("édition en brouillon");
@@ -291,14 +414,28 @@ async fn placer_une_activite_dans_une_partie_de_son_fil_et_seulement_la() {
     let jeunesse = fil(&bac, terrain.edition, "journee-jeunesse", true, None).await;
     let partie_finance = partie(&bac, finance, "Partie 1", 1).await;
     let partie_jeunesse = partie(&bac, jeunesse, "S'inspirer", 1).await;
-    let s = seance(&bac, terrain.edition, finance, "panel", "2027-11-13 09:15", "2027-11-13 10:00", true, terrain.organisation).await;
+    let s = seance(
+        &bac,
+        terrain.edition,
+        finance,
+        "panel",
+        "2027-11-13 09:15",
+        "2027-11-13 10:00",
+        true,
+        terrain.organisation,
+    )
+    .await;
 
     let place = track_page::placer(
         &bac.state,
         &bac.ctx(),
         SessionId::from(s),
         finance,
-        TrackSessionPlacementPayload { part_id: Some(partie_finance), is_highlight: true, sort_order: 3 },
+        TrackSessionPlacementPayload {
+            part_id: Some(partie_finance),
+            is_highlight: true,
+            sort_order: 3,
+        },
     )
     .await
     .expect("placement");
@@ -310,7 +447,11 @@ async fn placer_une_activite_dans_une_partie_de_son_fil_et_seulement_la() {
         &bac.ctx(),
         SessionId::from(s),
         finance,
-        TrackSessionPlacementPayload { part_id: Some(partie_jeunesse), is_highlight: false, sort_order: 0 },
+        TrackSessionPlacementPayload {
+            part_id: Some(partie_jeunesse),
+            is_highlight: false,
+            sort_order: 0,
+        },
     )
     .await
     .expect_err("partie d'un autre fil");
@@ -321,7 +462,11 @@ async fn placer_une_activite_dans_une_partie_de_son_fil_et_seulement_la() {
         &bac.ctx(),
         SessionId::from(s),
         jeunesse,
-        TrackSessionPlacementPayload { part_id: None, is_highlight: false, sort_order: 0 },
+        TrackSessionPlacementPayload {
+            part_id: None,
+            is_highlight: false,
+            sort_order: 0,
+        },
     )
     .await
     .expect_err("séance non rattachée à ce fil");

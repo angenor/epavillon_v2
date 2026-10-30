@@ -73,7 +73,11 @@ pub async fn enregistrer(
 
     let mut tx = state.db().write(ctx).await?;
 
-    let codes: Vec<String> = payload.partners.iter().map(|p| p.role_code.clone()).collect();
+    let codes: Vec<String> = payload
+        .partners
+        .iter()
+        .map(|p| p.role_code.clone())
+        .collect();
     let inconnus = track_page::roles_inconnus(&mut tx, &codes).await?;
     if let Some(code) = inconnus.first() {
         return Err(ApiError::validation(
