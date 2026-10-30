@@ -17,12 +17,14 @@
  *   event/edition.ts           060_events.sql § 2, 3, 3 bis
  *   event/venue.ts             060_events.sql § 4, 4 bis
  *   event/call.ts              060_events.sql § 5, 6, 7
+ *   event/track-page.ts        060_events.sql § 3 bis, 4 ter : la page d'un fil (back-office)
  *   programme/proposal.ts      070_programme_proposals.sql
  *   programme/review.ts        070_programme_proposals.sql § 5
  *   programme/session.ts       075_programme_sessions.sql § 1, 2, 7
  *   programme/registration.ts  075_programme_sessions.sql § 3, 4, 5
  *   programme/day-plan.ts      070_programme_proposals.sql § 4 bis : le jour J d'une activité retenue
  *   programme/cover-design.ts  070_programme_proposals.sql § 4 ter : l'atelier de l'image de couverture
+ *   programme/track-page.ts    la page publique d'un fil, et le placement d'une activité dans ses parties
  *   content.ts                 115_content.sql — les contenus mis en avant
  *   engagement.ts              110_engagement.sql § 6 — les rappels seuls
  *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
@@ -65,6 +67,7 @@ export type * from './event/series'
 export type * from './event/edition'
 export type * from './event/venue'
 export type * from './event/call'
+export type * from './event/track-page'
 
 export type * from './programme/proposal'
 export type * from './programme/review'
@@ -72,6 +75,7 @@ export type * from './programme/session'
 export type * from './programme/registration'
 export type * from './programme/day-plan'
 export type * from './programme/cover-design'
+export type * from './programme/track-page'
 
 export type * from './content'
 export type * from './engagement'

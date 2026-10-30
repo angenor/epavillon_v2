@@ -22,6 +22,7 @@
  *                        COP30 et COP29 passées, cycle de webinaires PACO
  *   rooms.ts             les pavillons, leurs salles, leurs canaux de diffusion
  *   tracks.ts            les trois journées spéciales
+ *   track-pages.ts       pages publiques des fils de la CdP31 (atelier, finance, jeunesse)
  *   calls.ts             l'appel ouvert, les deux appels clos et le comité
  *   criteria.ts          les six critères pondérés, dont un éliminatoire
  *   proposals/           41 dossiers, découpés par statut, plus l'historique
@@ -139,6 +140,7 @@ export {
 export { eventSeries, events, eventDays } from './event'
 export { venues, rooms, broadcastChannels } from './rooms'
 export { programmeTracks } from './tracks'
+export { trackPages, trackPageSettings, trackPageOrganizations } from './track-pages'
 export { callsForProposals, callReviewers } from './calls'
 export { reviewCriteria, maxWeightedScore, maxWeightedScoreOf, seedDefaultCriteria } from './criteria'
 

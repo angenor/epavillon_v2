@@ -158,6 +158,8 @@ export interface SessionOrganization {
   acronym?: string | null
   country_code?: string | null
   country?: I18nText | null
+  /** Détail public : logo de l'organisation. */
+  logo?: AttachedImage | null
 }
 
 // ---------------------------------------------------------------------------

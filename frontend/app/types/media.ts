@@ -219,6 +219,19 @@ export interface AttachedImage {
 }
 
 /**
+ * Un document rattaché, servable et public : `media.attached_documents()` (050).
+ * Le libellé du lien (« Résumé (PDF) ») est `caption`.
+ */
+export interface AttachedDocument {
+  asset_id: AssetId
+  url: Url
+  mime_type: string
+  bytes: number
+  filename: string | null
+  caption: I18nText | null
+}
+
+/**
  * Retour de `GET /media/attachments` — `AttachedMedia`.
  *
  * C'est `AttachedImage` PLUS ce que l'écran qui GÈRE les médias d'une entité

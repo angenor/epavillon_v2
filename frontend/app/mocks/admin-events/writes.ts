@@ -625,6 +625,10 @@ export function saveVenue(payload: EditionVenuePayload): EditionTabResult {
       kind: payload.kind,
       address: null,
       map_url: null,
+      area: null,
+      access_note: null,
+      latitude: null,
+      longitude: null,
       created_at: new Date().toISOString(),
     }
 
@@ -633,6 +637,10 @@ export function saveVenue(payload: EditionVenuePayload): EditionTabResult {
     kind: payload.kind,
     address: payload.address,
     map_url: payload.map_url,
+    area: payload.area ?? null,
+    access_note: payload.access_note ?? null,
+    latitude: payload.latitude ?? null,
+    longitude: payload.longitude ?? null,
   })
   if (!existing) venueRows.push(venue)
 

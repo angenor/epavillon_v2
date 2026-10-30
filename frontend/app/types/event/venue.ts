@@ -34,6 +34,13 @@ export interface Venue {
   kind: VenueKind
   address: string | null
   map_url: Url | null
+  /** Secteur du site : « Zone bleue ». */
+  area: I18nText | null
+  /** Consigne d'accès : « En ville, hors de la zone bleue. » */
+  access_note: I18nText | null
+  /** Point relevé : les deux ou aucun. */
+  latitude: number | null
+  longitude: number | null
   created_at: IsoDateTime
 }
 

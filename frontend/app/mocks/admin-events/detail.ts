@@ -156,6 +156,10 @@ export function editionVenues(eventId: Uuid): EditionVenue[] {
       kind: v.kind,
       address: v.address,
       map_url: v.map_url,
+      area: v.area,
+      access_note: v.access_note,
+      latitude: v.latitude,
+      longitude: v.longitude,
       rooms: roomRows
         .filter((r) => r.venue_id === v.id)
         .sort((a, b) => a.sort_order - b.sort_order)

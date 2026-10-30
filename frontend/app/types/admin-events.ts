@@ -469,9 +469,14 @@ export interface EditionVenue {
   kind: VenueKind
   address: string | null
   map_url: Url | null
+  area: I18nText | null
+  access_note: I18nText | null
+  latitude: number | null
+  longitude: number | null
   rooms: EditionRoom[]
 }
 
+/** Écriture totale : un champ absent est écrit à nul. */
 export interface EditionVenuePayload {
   id: VenueId | null
   event_id: EventId
@@ -479,6 +484,10 @@ export interface EditionVenuePayload {
   kind: VenueKind
   address: string | null
   map_url: Url | null
+  area?: I18nText | null
+  access_note?: I18nText | null
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export interface EditionRoomPayload {

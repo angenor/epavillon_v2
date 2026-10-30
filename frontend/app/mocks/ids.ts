@@ -748,3 +748,24 @@ export const SHOWCASE_ASSET = (n: number): Uuid => uuid('7101', n)
 
 /** `media.attachments` des diapositives, numérotés à part des couvertures. */
 export const SHOWCASE_ATTACHMENT = (n: number): Uuid => uuid('7102', n)
+
+/**
+ * Pages publiques des fils de la CdP31 à Antalya (30/10, maquettes
+ * `docs/maquettes/journees-speciales/2-bandeau-et-billet/`). Jeu à part : une
+ * édition, trois fils, leurs lieux, parties, moments, séances et organisations.
+ */
+export const TRACK_PAGE = {
+  edition: uuid('7110', 1),
+  atelier: uuid('7111', 1),
+  finance: uuid('7111', 2),
+  jeunesse: uuid('7111', 3),
+  pavillon: uuid('7112', 1),
+  hotel: uuid('7112', 2),
+} as const
+
+export const TRACK_PAGE_PART = (n: number): Uuid => uuid('7113', n)
+export const TRACK_PAGE_MOMENT = (n: number): Uuid => uuid('7114', n)
+export const TRACK_PAGE_SESSION = (n: number): Uuid => uuid('7115', n)
+export const TRACK_PAGE_ORG = (n: number): Uuid => uuid('7116', n)
+export const TRACK_PAGE_SPEAKER = (n: number): Uuid => uuid('7117', n)
+export const TRACK_PAGE_ASSET = (n: number): Uuid => uuid('7118', n)
