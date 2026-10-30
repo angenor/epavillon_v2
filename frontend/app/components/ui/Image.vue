@@ -82,15 +82,35 @@ const { tr } = useI18nText()
  * Variantes triées par largeur croissante, pour un `srcset` exploitable.
  * Les clés sont `<variant_code>_<format>` ; on ne retient que les entrées dont
  * la largeur est connue, sans quoi le descripteur `w` serait faux.
+ *
+ * Seulement celles qui gardent la forme de l'original : `courriel` est recadrée
+ * en 6:1, et le navigateur qui la choisissait l'agrandissait dans un cadre 16/9
+ * (couverture floue et zoomée, 30/10). Sans `lg` (original pas plus large que
+ * 1600 px), l'original entre aussi, sinon l'image plafonnait à 1200.
  */
 const srcset = computed(() => {
-  const sources = props.image?.sources
-  if (!sources) return undefined
-  const entries = Object.values(sources)
-    .filter((source) => typeof source.width === 'number' && source.width > 0)
-    .sort((a, b) => (a.width ?? 0) - (b.width ?? 0))
+  const image = props.image
+  if (!image) return undefined
+  // Original sans dimensions connues : la vignette n'est jamais recadrée.
+  const thumb = Object.entries(image.sources ?? {}).find(([key]) => key.startsWith('thumb_'))?.[1]
+  const reference = image.width && image.height ? image : thumb
+  const ratio = reference?.width && reference.height ? reference.width / reference.height : null
+  const sameShape = (width: number | null, height: number | null): boolean =>
+    ratio === null || !width || !height || Math.abs(width / height - ratio) / ratio < 0.02
+  const entries = Object.values(image.sources ?? {}).filter(
+    (source) => typeof source.width === 'number' && source.width > 0 && sameShape(source.width, source.height),
+  )
   if (entries.length === 0) return undefined
-  return entries.map((source) => `${source.url} ${source.width}w`).join(', ')
+  // Seulement sans `lg` : un original de 6000 px pèserait plusieurs mégaoctets.
+  const originalWidth = image.width
+  const hasLarge = Object.keys(image.sources ?? {}).some((key) => key.startsWith('lg_'))
+  if (originalWidth && !hasLarge && entries.every((source) => (source.width ?? 0) < originalWidth)) {
+    entries.push({ url: image.url, width: originalWidth, height: image.height, bytes: null })
+  }
+  return entries
+    .sort((a, b) => (a.width ?? 0) - (b.width ?? 0))
+    .map((source) => `${source.url} ${source.width}w`)
+    .join(', ')
 })
 
 /** Le texte alternatif résolu. Toujours renseigné — voir l'en-tête. */
