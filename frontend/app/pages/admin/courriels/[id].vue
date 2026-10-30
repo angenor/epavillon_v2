@@ -6,7 +6,7 @@ import type { ShowcaseSessionOption } from '~/types/admin-showcase'
  * UN ENVOI, `/admin/courriels/<id>`.
  *
  * Parti : la fiche (contenu, critères, pièces jointes, état de chaque
- * destinataire), avec « Dupliquer » et « Arrêter ». Brouillon : il s'ouvre dans
+ * destinataire), avec « Dupliquer » et « Arrêter » ; en échec, « Relancer ». Brouillon : il s'ouvre dans
  * la fenêtre de rédaction (28/10), qui remplace les quatre étapes.
  */
 
@@ -103,6 +103,19 @@ async function duplicate(): Promise<void> {
   }
 }
 
+async function retrySending(): Promise<void> {
+  if (!mailing.value) return
+  busy.value = true
+  actionError.value = null
+  try {
+    mailing.value = await api.adminMailings.retry(mailing.value.id)
+  } catch (thrown) {
+    actionError.value = apiErrorMessage(thrown, t)
+  } finally {
+    busy.value = false
+  }
+}
+
 async function cancelSending(): Promise<void> {
   if (!mailing.value) return
   busy.value = true
@@ -167,6 +180,7 @@ async function cancelSending(): Promise<void> {
         :busy="busy"
         @duplicate="duplicate"
         @cancel="cancelOpen = true"
+        @retry="retrySending"
         @refresh="refresh()"
         @delete="deleteOpen = true"
       />

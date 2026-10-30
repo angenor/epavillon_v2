@@ -60,7 +60,7 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
     update: (mailingId: Uuid, payload: MailingPayload): Promise<Mailing> =>
       send(`/admin/mailings/${mailingId}`, payload, (m) => m.updateMailing(mailingId, payload), 'PUT'),
 
-    /** Brouillon, envoi terminé ou arrêté ; un envoi en cours est refusé (409). */
+    /** Brouillon, envoi terminé, arrêté ou en échec ; un envoi en cours est refusé (409). */
     remove: (mailingId: Uuid): Promise<{ deleted: boolean }> =>
       send(`/admin/mailings/${mailingId}`, {}, (m) => m.deleteMailing(mailingId), 'DELETE'),
 
@@ -81,6 +81,10 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
 
     cancel: (mailingId: Uuid): Promise<Mailing> =>
       send(`/admin/mailings/${mailingId}/cancel`, {}, (m) => m.cancelMailing(mailingId), 'POST'),
+
+    /** Un envoi en échec repart pour ses seuls destinataires encore en attente. */
+    retry: (mailingId: Uuid): Promise<Mailing> =>
+      send(`/admin/mailings/${mailingId}/retry`, {}, (m) => m.retryMailing(mailingId), 'POST'),
 
     duplicate: (mailingId: Uuid): Promise<Mailing> =>
       send(`/admin/mailings/${mailingId}/duplicate`, {}, (m) => m.duplicateMailing(mailingId), 'POST'),

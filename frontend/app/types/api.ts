@@ -608,7 +608,7 @@ export interface paths {
         post?: never;
         /**
          * Supprimer un envoi.
-         * @description `{ deleted }` : un brouillon, un envoi terminé ou arrêté disparaît, avec ses destinataires ; ses pièces jointes sont détachées (les fichiers restent, purgés plus tard s'ils ne servent plus). Un envoi en cours se refuse (409, `ENGAGEMENT_MAILING_IN_PROGRESS`) : on l'arrête d'abord.
+         * @description `{ deleted }` : un brouillon, un envoi terminé, arrêté ou en échec disparaît, avec ses destinataires ; ses pièces jointes sont détachées (les fichiers restent, purgés plus tard s'ils ne servent plus). Un envoi en cours se refuse (409, `ENGAGEMENT_MAILING_IN_PROGRESS`) : on l'arrête d'abord.
          */
         delete: operations["engagement_envois_supprimer"];
         options?: never;
@@ -647,7 +647,7 @@ export interface paths {
         put?: never;
         /**
          * Arrêter un envoi en cours.
-         * @description `Mailing` : ce qui est parti reste parti ; les destinataires encore en file passent à `cancelled`.
+         * @description `Mailing` : un envoi en cours ou en échec s'arrête ; ce qui est parti reste parti, les destinataires encore en file passent à `cancelled`.
          */
         post: operations["engagement_envois_arreter"];
         delete?: never;
@@ -690,6 +690,26 @@ export interface paths {
         get: operations["engagement_envois_apercu"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/mailings/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Relancer un envoi en échec.
+         * @description `Mailing` : un envoi `failed` (serveur de courriel injoignable, travail d'envoi mort) repart pour ses **seuls destinataires encore en file** ; ceux qui sont partis, en échec ou écartés ne reçoivent rien de plus. Le motif du dernier échec reste lisible (`failure_reason`, `failed_at`), `relaunch_count` compte les relances. Refusé (422) si l'envoi n'est pas en échec ou que plus personne n'attend.
+         */
+        post: operations["engagement_envois_relancer"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9356,6 +9376,56 @@ export interface operations {
             };
             /** @description Envoi inexistant ou hors droit */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_envois_relancer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description L'envoi */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Mailing */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Envoi inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

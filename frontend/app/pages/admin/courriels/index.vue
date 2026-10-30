@@ -68,7 +68,7 @@ const query = ref('')
 
 const allRows = computed<MailingSummary[]>(() => screen.value?.rows ?? [])
 const tabs = computed<TabItem[]>(() =>
-  (['all', 'draft', 'queued', 'sent', 'cancelled'] as const).map((value) => ({
+  (['all', 'draft', 'queued', 'failed', 'sent', 'cancelled'] as const).map((value) => ({
     value,
     label: t(`admin.mailing.list.filter.${value}`),
     count: value === 'all' ? allRows.value.length : allRows.value.filter((r) => r.status === value).length,
@@ -113,6 +113,10 @@ function create(): void {
 function open(row: MailingSummary): void {
   if (row.status === 'draft') composer.open(row.id)
   else navigateTo(localePath(`/admin/courriels/${row.id}`))
+}
+
+function waitingOf(row: MailingSummary): number {
+  return row.counts.queued + row.counts.sending
 }
 
 function dateOf(row: MailingSummary): string {
@@ -232,6 +236,12 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
               {{ t('admin.mailing.list.progress', { sent: row.counts.sent, total: row.counts.total }) }}
               <span v-if="row.counts.failed" class="text-danger">
                 · {{ t('admin.mailing.list.failed', { count: row.counts.failed }, row.counts.failed) }}
+              </span>
+              <span v-if="row.status === 'failed' && waitingOf(row)" class="text-text-secondary">
+                · {{ t('admin.mailing.list.waiting', { count: waitingOf(row) }, waitingOf(row)) }}
+              </span>
+              <span v-if="row.status === 'failed' && row.failure_reason" class="block text-xs text-danger">
+                {{ row.failure_reason }}
               </span>
             </span>
           </template>

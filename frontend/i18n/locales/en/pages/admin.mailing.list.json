@@ -14,7 +14,8 @@
     "draft": "Drafts",
     "queued": "Sending",
     "sent": "Sent",
-    "cancelled": "Stopped"
+    "cancelled": "Stopped",
+    "failed": "Failed"
   },
   "search": "Search by subject or author",
   "caption": "Emails of the edition",
@@ -28,6 +29,7 @@
   "notSent": "Not sent yet",
   "progress": "{sent} sent of {total}",
   "failed": "no failures | {count} failure | {count} failures",
+  "waiting": "none waiting | {count} waiting | {count} waiting",
   "noResults": "No email matches",
   "attachments": "no attachments | {count} attachment | {count} attachments",
   "delete": {
@@ -36,6 +38,7 @@
     "title": "Delete this email?",
     "draft": "The draft and its attachments are permanently deleted.",
     "sent": "The email leaves the history, with its recipients and the status of each message. Messages already sent are not recalled.",
+    "failed": "The email leaves the history, with its recipients and the status of each message. Those still waiting will receive nothing; messages already sent are not recalled.",
     "confirm": "Delete permanently"
   }
 }

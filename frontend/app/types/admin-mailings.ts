@@ -9,8 +9,8 @@
 import type { AttachedImage } from '~/types/media'
 import type { EventId, Uuid } from '~/types/shared'
 
-/** `engagement.mailing_status`. */
-export type MailingStatus = 'draft' | 'queued' | 'sent' | 'cancelled'
+/** `engagement.mailing_status` ; `failed` (31/10) : n'avance plus, à relancer. */
+export type MailingStatus = 'draft' | 'queued' | 'sent' | 'cancelled' | 'failed'
 
 /** `engagement.mailing_recipient_status`. */
 export type MailingRecipientStatus = 'queued' | 'sending' | 'sent' | 'failed' | 'suppressed' | 'cancelled'
@@ -75,6 +75,10 @@ export interface MailingSummary {
   queued_by_name: string | null
   queued_at: string | null
   completed_at: string | null
+  /** Le dernier échec, gardé après une relance ou un arrêt. */
+  failed_at: string | null
+  /** En français, à montrer tel quel. */
+  failure_reason: string | null
   created_at: string
   updated_at: string
   counts: MailingCounts
@@ -126,6 +130,12 @@ export interface Mailing {
   queued_at: string | null
   completed_at: string | null
   cancelled_at: string | null
+  /** Le dernier échec, gardé après une relance ou un arrêt. */
+  failed_at: string | null
+  /** En français, à montrer tel quel. */
+  failure_reason: string | null
+  relaunch_count: number
+  relaunched_at: string | null
   created_at: string
   updated_at: string
   counts: MailingCounts

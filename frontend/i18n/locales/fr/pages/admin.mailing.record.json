@@ -2,7 +2,15 @@
   "sentBy": "Envoyé par {name}, le {date}",
   "completedAt": "Terminé le {date}",
   "cancelledAt": "Arrêté le {date}",
+  "failedAt": "Échec le {date}",
   "inProgress": "Envoi en cours, par lots. Actualisez pour suivre l'avancement.",
+  "failure": {
+    "title": "L'envoi s'est arrêté",
+    "partial": "Partis : {sent} sur {total}. En attente d'une relance : {waiting}.",
+    "none": "Aucun message n'est parti. En attente d'une relance : {waiting}.",
+    "nothingLeft": "Plus aucun destinataire n'attend : il n'y a rien à relancer."
+  },
+  "relaunched": "Relancé le {date}, après un échec : {reason}",
   "counts": {
     "sent": "Partis",
     "queued": "En attente",
@@ -13,6 +21,8 @@
   "duplicate": "Dupliquer",
   "refresh": "Actualiser",
   "cancel": "Arrêter l'envoi",
+  "retry": "Relancer",
+  "retryHint": "Seuls les destinataires en attente recevront le message ; ceux qui l'ont déjà reçu ne le recevront pas une seconde fois.",
   "message": "Message",
   "eachRecipient": "chaque destinataire, un message chacun",
   "criteria": "Critères",

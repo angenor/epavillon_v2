@@ -3,7 +3,8 @@
     "draft": "Brouillon",
     "queued": "En cours",
     "sent": "Envoyé",
-    "cancelled": "Arrêté"
+    "cancelled": "Arrêté",
+    "failed": "Échec"
   },
   "recipientStatus": {
     "queued": "En file",

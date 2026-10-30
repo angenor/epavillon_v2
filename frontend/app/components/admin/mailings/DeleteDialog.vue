@@ -56,7 +56,7 @@ async function confirm(): Promise<void> {
   <UiModal
     v-model:open="open"
     :title="t('admin.mailing.list.delete.title')"
-    :description="props.target?.status === 'draft' ? t('admin.mailing.list.delete.draft') : t('admin.mailing.list.delete.sent')"
+    :description="t(`admin.mailing.list.delete.${props.target?.status === 'draft' ? 'draft' : props.target?.status === 'failed' ? 'failed' : 'sent'}`)"
   >
     <p v-if="props.target" class="font-semibold wrap-break-word">
       {{ props.target.subject || t('admin.mailing.common.noSubject') }}

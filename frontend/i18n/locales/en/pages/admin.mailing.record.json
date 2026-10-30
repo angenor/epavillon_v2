@@ -2,7 +2,15 @@
   "sentBy": "Sent by {name}, {date}",
   "completedAt": "Completed {date}",
   "cancelledAt": "Stopped {date}",
+  "failedAt": "Failed {date}",
   "inProgress": "Sending in progress, in batches. Refresh to follow progress.",
+  "failure": {
+    "title": "Sending stopped",
+    "partial": "Sent: {sent} of {total}. Waiting for a retry: {waiting}.",
+    "none": "No message was sent. Waiting for a retry: {waiting}.",
+    "nothingLeft": "No recipient is waiting any more: there is nothing to retry."
+  },
+  "relaunched": "Retried {date}, after a failure: {reason}",
   "counts": {
     "sent": "Sent",
     "queued": "Waiting",
@@ -13,6 +21,8 @@
   "duplicate": "Duplicate",
   "refresh": "Refresh",
   "cancel": "Stop sending",
+  "retry": "Retry",
+  "retryHint": "Only waiting recipients will receive the message; those who already received it will not receive it twice.",
   "message": "Message",
   "eachRecipient": "each recipient, one message each",
   "criteria": "Criteria",

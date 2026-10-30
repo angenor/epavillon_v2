@@ -3,7 +3,8 @@
     "draft": "Draft",
     "queued": "Sending",
     "sent": "Sent",
-    "cancelled": "Stopped"
+    "cancelled": "Stopped",
+    "failed": "Failed"
   },
   "recipientStatus": {
     "queued": "Queued",

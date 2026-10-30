@@ -14,7 +14,8 @@
     "draft": "Brouillons",
     "queued": "En cours",
     "sent": "Envoyés",
-    "cancelled": "Arrêtés"
+    "cancelled": "Arrêtés",
+    "failed": "En échec"
   },
   "search": "Chercher par objet ou par auteur",
   "caption": "Courriels de l'édition",
@@ -28,6 +29,7 @@
   "notSent": "Pas encore envoyé",
   "progress": "{sent} partis sur {total}",
   "failed": "aucun échec | {count} échec | {count} échecs",
+  "waiting": "aucun en attente | {count} en attente | {count} en attente",
   "noResults": "Aucun courriel ne correspond",
   "attachments": "aucune pièce jointe | {count} pièce jointe | {count} pièces jointes",
   "delete": {
@@ -36,6 +38,7 @@
     "title": "Supprimer ce courriel ?",
     "draft": "Le brouillon et ses pièces jointes sont supprimés définitivement.",
     "sent": "Le courriel quitte l'historique, avec ses destinataires et l'état de chaque message. Les messages déjà partis ne sont pas rappelés.",
+    "failed": "Le courriel quitte l'historique, avec ses destinataires et l'état de chaque message. Ceux qui attendaient ne recevront rien ; les messages déjà partis ne sont pas rappelés.",
     "confirm": "Supprimer définitivement"
   }
 }

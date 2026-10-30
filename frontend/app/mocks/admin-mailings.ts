@@ -61,7 +61,7 @@ function seed(): void {
     last_error: entry.is_suppressed ? 'adresse sur la liste de suppression' : null,
     sent_at: entry.is_suppressed ? null : '2026-10-20T09:12:00Z',
   }))
-  store.set(id, {
+  const sent: Mailing = {
     id,
     event_id: EVENT.cop31,
     status: 'sent',
@@ -84,6 +84,10 @@ function seed(): void {
     queued_at: '2026-10-20T09:10:00Z',
     completed_at: '2026-10-20T09:14:00Z',
     cancelled_at: null,
+    failed_at: null,
+    failure_reason: null,
+    relaunch_count: 0,
+    relaunched_at: null,
     created_at: '2026-10-20T08:40:00Z',
     updated_at: '2026-10-20T09:14:00Z',
     counts: countsOf(recipients),
@@ -91,6 +95,30 @@ function seed(): void {
     attachments: [],
     attachments_total_bytes: 0,
     attachments_max_bytes: ATTACHMENTS_MAX,
+  }
+  store.set(id, sent)
+
+  // Un envoi en échec, parti en partie : le serveur de courriel est tombé.
+  const failedId = mockUuid('7091', 2)
+  const stuck: MailingRecipient[] = recipients.map((r, index) => ({
+    ...r,
+    id: mockUuid('7094', index + 1),
+    status: r.status === 'sent' && index > 0 ? 'queued' : r.status,
+    sent_at: r.status === 'sent' && index === 0 ? '2026-10-29T16:02:00Z' : null,
+  }))
+  store.set(failedId, {
+    ...sent,
+    id: failedId,
+    status: 'failed',
+    subject: 'Rappel : votre activité de demain',
+    queued_at: '2026-10-29T16:00:00Z',
+    completed_at: null,
+    failed_at: '2026-10-29T16:03:10Z',
+    failure_reason: 'Le serveur de courriel est resté injoignable malgré 5 tentatives en une minute environ.',
+    created_at: '2026-10-29T15:40:00Z',
+    updated_at: '2026-10-29T16:03:10Z',
+    counts: countsOf(stuck),
+    recipients: stuck,
   })
 }
 
@@ -110,6 +138,8 @@ function summary(m: Mailing): MailingSummary {
     queued_by_name: m.queued_by_name,
     queued_at: m.queued_at,
     completed_at: m.completed_at,
+    failed_at: m.failed_at,
+    failure_reason: m.failure_reason,
     created_at: m.created_at,
     updated_at: m.updated_at,
     counts: m.counts,
@@ -217,6 +247,10 @@ export function createMailing(payload: CreateMailingPayload): Mailing {
       queued_at: null,
       completed_at: null,
       cancelled_at: null,
+      failed_at: null,
+      failure_reason: null,
+      relaunch_count: 0,
+      relaunched_at: null,
       created_at: now(),
       updated_at: now(),
       counts: NO_COUNTS,
@@ -286,6 +320,21 @@ export function dispatchMailing(id: Uuid): Mailing {
     queued_by_name: 'Awa Sow Fall',
     recipients,
     counts: countsOf(recipients),
+  }
+  store.set(id, next)
+  return next
+}
+
+/** Comme l'API : seuls les destinataires encore en attente repartent. */
+export function retryMailing(id: Uuid): Mailing {
+  const m = found(id)
+  if (m.status !== 'failed') throw new Error('Seul un envoi en échec peut être relancé.')
+  const next: Mailing = {
+    ...m,
+    status: 'queued',
+    relaunch_count: m.relaunch_count + 1,
+    relaunched_at: now(),
+    updated_at: now(),
   }
   store.set(id, next)
   return next

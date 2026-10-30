@@ -66,10 +66,11 @@ export function renderMailingTemplate(template: string, values: Record<string, s
   })
 }
 
-/** Couleur d'état d'un envoi : en cours = attention, parti = confirmé, arrêté = clos. */
-export function mailingStatusIntent(status: MailingStatus): 'neutral' | 'warning' | 'success' {
+/** Couleur d'état d'un envoi : en cours = attention, parti = confirmé, échec = rouge, arrêté = clos. */
+export function mailingStatusIntent(status: MailingStatus): 'neutral' | 'warning' | 'success' | 'danger' {
   if (status === 'queued') return 'warning'
   if (status === 'sent') return 'success'
+  if (status === 'failed') return 'danger'
   return 'neutral'
 }
 

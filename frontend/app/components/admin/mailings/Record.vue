@@ -16,7 +16,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ duplicate: []; cancel: []; refresh: []; delete: [] }>()
+const emit = defineEmits<{ duplicate: []; cancel: []; retry: []; refresh: []; delete: [] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -26,9 +26,21 @@ function at(value: string | null): string {
   return value ? t('admin.mailing.common.atZone', { date: dateTime(value, props.timezone), zone: t(zoneFormulaKey('zoneOf', props.zone), { zone: props.zone }) }) : ''
 }
 
+const isFailed = computed(() => props.mailing.status === 'failed')
+const waiting = computed(() => props.mailing.counts.queued + props.mailing.counts.sending)
+
+// Un envoi en échec dit ce qui est parti : en partie, ou rien du tout.
+const failureProgress = computed(() => {
+  const { sent, total } = props.mailing.counts
+  if (waiting.value === 0) return t('admin.mailing.record.failure.nothingLeft')
+  return sent > 0
+    ? t('admin.mailing.record.failure.partial', { sent, total, waiting: waiting.value })
+    : t('admin.mailing.record.failure.none', { waiting: waiting.value })
+})
+
 const counts = computed(() => [
   { key: 'sent', value: props.mailing.counts.sent },
-  { key: 'queued', value: props.mailing.counts.queued + props.mailing.counts.sending },
+  { key: 'queued', value: waiting.value },
   { key: 'failed', value: props.mailing.counts.failed },
   { key: 'suppressed', value: props.mailing.counts.suppressed },
   { key: 'cancelled', value: props.mailing.counts.cancelled },
@@ -74,12 +86,22 @@ function sessionLabel(id: string | null): string {
       <p v-if="props.mailing.cancelled_at" class="text-sm text-text-subtle">
         {{ t('admin.mailing.record.cancelledAt', { date: at(props.mailing.cancelled_at) }) }}
       </p>
+      <p v-if="isFailed && props.mailing.failed_at" class="text-sm text-text-subtle">
+        {{ t('admin.mailing.record.failedAt', { date: at(props.mailing.failed_at) }) }}
+      </p>
+      <p v-else-if="props.mailing.relaunched_at && props.mailing.failure_reason" class="text-sm text-text-subtle">
+        {{ t('admin.mailing.record.relaunched', { date: at(props.mailing.relaunched_at), reason: props.mailing.failure_reason }) }}
+      </p>
       <UiAlert
         v-if="props.mailing.status === 'queued'"
         intent="warning"
         compact
         :message="t('admin.mailing.record.inProgress')"
       />
+      <UiAlert v-else-if="isFailed" intent="danger" :title="t('admin.mailing.record.failure.title')">
+        <p>{{ props.mailing.failure_reason }}</p>
+        <p class="mt-1 font-semibold">{{ failureProgress }}</p>
+      </UiAlert>
 
       <dl class="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-5">
         <div v-for="c in counts" :key="c.key" class="bg-surface-raised px-4 py-3 last:col-span-2 sm:last:col-span-1">
@@ -89,7 +111,22 @@ function sessionLabel(id: string | null): string {
       </dl>
 
       <div class="flex flex-wrap gap-3">
-        <UiButton icon="copy" :loading="props.busy" @click="emit('duplicate')">
+        <UiButton
+          v-if="isFailed && waiting > 0"
+          icon="mail"
+          :loading="props.busy"
+          :aria-describedby="`retry-hint-${props.mailing.id}`"
+          @click="emit('retry')"
+        >
+          {{ t('admin.mailing.record.retry') }}
+        </UiButton>
+        <UiButton
+          icon="copy"
+          :variant="isFailed ? 'secondary' : 'primary'"
+          :loading="!isFailed && props.busy"
+          :disabled="isFailed && props.busy"
+          @click="emit('duplicate')"
+        >
           {{ t('admin.mailing.record.duplicate') }}
         </UiButton>
         <UiButton variant="secondary" icon="refresh" :disabled="props.busy" @click="emit('refresh')">
@@ -114,6 +151,9 @@ function sessionLabel(id: string | null): string {
           {{ t('admin.mailing.list.delete.action') }}
         </UiButton>
       </div>
+      <p v-if="isFailed && waiting > 0" :id="`retry-hint-${props.mailing.id}`" class="max-w-(--measure) text-sm text-text-subtle">
+        {{ t('admin.mailing.record.retryHint') }}
+      </p>
     </section>
 
     <section>
