@@ -428,6 +428,41 @@ CREATE TRIGGER tg_session_tracks_check_event
     BEFORE INSERT OR UPDATE ON programme.session_tracks
     FOR EACH ROW EXECUTE FUNCTION programme.tg_check_session_track_event();
 
+-- Signal du planificateur (temps réel, 31/10) : `event:<id>:planner`, la grille
+-- d'un collègue se relit quand une séance est placée, déplacée, rattachée à une
+-- journée, publiée, annulée ou née d'un dossier retenu. En base : les routes du
+-- planificateur, la composition d'une journée (module Événements) et la
+-- publication (travail différé) écrivent ces deux tables, aucun n'oublie. Un
+-- NOTIFY identique est fusionné par PostgreSQL dans une transaction : une
+-- publication de deux cents séances donne un signal.
+CREATE OR REPLACE FUNCTION programme.tg_planner_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_event uuid;
+BEGIN
+    IF TG_TABLE_NAME = 'sessions' THEN
+        v_event := CASE WHEN TG_OP = 'DELETE' THEN OLD.event_id ELSE NEW.event_id END;
+    ELSE
+        SELECT event_id INTO v_event FROM programme.sessions
+         WHERE id = CASE WHEN TG_OP = 'DELETE' THEN OLD.session_id ELSE NEW.session_id END;
+    END IF;
+    IF v_event IS NOT NULL THEN
+        PERFORM platform.signal('event:' || v_event || ':planner');
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_sessions_planner_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.sessions
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_planner_signal();
+
+CREATE TRIGGER tg_session_tracks_planner_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.session_tracks
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_planner_signal();
+
 -- -----------------------------------------------------------------------------
 -- 3. Formulaires d'inscription configurables
 -- -----------------------------------------------------------------------------

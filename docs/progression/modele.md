@@ -462,3 +462,11 @@ Côté code (crate `engagement`) : au dernier essai, le travail pose l'échec av
 **Côté Zoom** : l'application doit être abonnée à `meeting.started`, `meeting.ended`, `meeting.participant_joined`, `meeting.participant_left`. Sans les deux derniers, le poste l'écrit (« Nombre de présents indisponible »).
 
 **En production** : `ops/migrations/2026-10-31-direct-poste.sql`, rejouable, jouée deux fois en local, **avant** de démarrer l'API et le worker.
+## 31/10/2026, `070` et `075` : signaux d'écran du module Programme
+
+- **`programme.tg_proposals_signal()`**, déclencheur `tg_proposals_signal` (après insertion, ou mise à jour de `status` ou `deleted_at`) : `proposal:<id>:status`, `organization:<organisation>`, `event:<édition>:proposals`. En base plutôt que dans le service de transition : dépôt, décision, demande de correction, renvoi, action groupée écrivent tous la colonne.
+- **`programme.tg_planner_signal()`**, déclencheurs `tg_sessions_planner_signal` et `tg_session_tracks_planner_signal` (toute écriture) : `event:<édition>:planner`. Couvre les routes du planificateur, la composition d'une journée (module Événements), la publication (travail différé) et la naissance d'une séance ; un NOTIFY identique est fusionné dans une transaction.
+
+Les messages (écriture, lu, non lu, résolu, destinataires) signalent depuis le service (`programme::realtime::signaler_echange`), avec l'audience `committee` quand le déposant ne les voit pas.
+
+**En production** : `ops/migrations/2026-10-31-temps-reel-programme.sql`, rejouable, après `2026-10-31-temps-reel.sql`, avant l'API. Jouée en local.

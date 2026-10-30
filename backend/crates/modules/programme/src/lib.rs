@@ -24,11 +24,13 @@ use actix_web::web::ServiceConfig;
 
 pub mod consumers;
 pub mod domain;
+pub mod realtime;
 pub mod repo;
 pub mod routes;
 pub mod service;
 pub mod state;
 
+pub use realtime::topic_authorizers;
 pub use state::ProgrammeState;
 
 /// Routes propres au module. Le montage est décidé par l'API d'après

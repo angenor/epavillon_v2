@@ -433,6 +433,29 @@ CREATE TRIGGER tg_proposals_check_eligibility
     BEFORE INSERT OR UPDATE OF status ON programme.proposals
     FOR EACH ROW EXECUTE FUNCTION programme.tg_check_submission_eligibility();
 
+-- Signal d'écran (temps réel, 31/10) : l'état d'un dossier change sous les yeux
+-- de qui le regarde. En base plutôt que dans le service de transition : dépôt,
+-- décision, demande de correction, renvoi et action groupée écrivent tous la
+-- colonne, et aucun ne peut l'oublier. Trois sujets, la page relit sa route :
+--   proposal:<id>:status       la fiche, des deux côtés (l'état est visible du déposant) ;
+--   organization:<id>          l'espace de l'organisation (liste, pastilles) ;
+--   event:<id>:proposals       la liste du comité et le panneau des autres dossiers.
+CREATE OR REPLACE FUNCTION programme.tg_proposals_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    PERFORM platform.signal('proposal:' || NEW.id || ':status');
+    PERFORM platform.signal('organization:' || NEW.organization_id);
+    PERFORM platform.signal('event:' || NEW.event_id || ':proposals');
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_proposals_signal
+    AFTER INSERT OR UPDATE OF status, deleted_at ON programme.proposals
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_proposals_signal();
+
 -- -----------------------------------------------------------------------------
 -- 3 bis. CO-ORGANISATION
 --

@@ -308,8 +308,17 @@ pub async fn ajouter_destinataires(
         Annonce::Ajout,
     )
     .await?;
+    let organisation = organisation_du_dossier(state, dossier).await?;
+    crate::realtime::signaler_echange(&mut tx, dossier, edition, organisation, true).await?;
     tx.commit().await?;
     Ok(())
+}
+
+async fn organisation_du_dossier(state: &ProgrammeState, dossier: ProposalId) -> Result<Uuid> {
+    Ok(crate::repo::proposals::etat(state.pool(), dossier)
+        .await?
+        .ok_or_else(ApiError::not_found)?
+        .organization_id)
 }
 
 // -----------------------------------------------------------------------------
@@ -325,12 +334,12 @@ pub async fn marquer_lus(
     dossier: ProposalId,
     payload: MarkCommentsReadPayload,
 ) -> Result<()> {
-    let (_, acces) = perimeter::acces_au_dossier(state.pool(), lecteur, dossier).await?;
+    let (edition, acces) = perimeter::acces_au_dossier(state.pool(), lecteur, dossier).await?;
     if payload.comment_ids.is_empty() {
         return Ok(());
     }
     let mut tx = state.db().write(ctx).await?;
-    comments::marquer_lus(
+    let poses = comments::marquer_lus(
         &mut tx,
         dossier,
         lecteur,
@@ -338,6 +347,19 @@ pub async fn marquer_lus(
         cote_de(acces),
     )
     .await?;
+    // Accusés de l'auteur, pastilles des autres onglets. Rien de neuf, rien
+    // d'annoncé : une page qui relit au signal ne relance pas la boucle.
+    if poses > 0 {
+        let organisation = organisation_du_dossier(state, dossier).await?;
+        crate::realtime::signaler_echange(
+            &mut tx,
+            dossier,
+            edition,
+            organisation,
+            acces == Acces::BackOffice,
+        )
+        .await?;
+    }
     tx.commit().await?;
     Ok(())
 }
@@ -352,13 +374,22 @@ pub async fn marquer_non_lu(
     let ligne = comments::par_id(state.pool(), message)
         .await?
         .ok_or_else(ApiError::not_found)?;
-    let (_, acces) =
-        perimeter::acces_au_dossier(state.pool(), lecteur, ProposalId(ligne.proposal_id)).await?;
+    let dossier = ProposalId(ligne.proposal_id);
+    let (edition, acces) = perimeter::acces_au_dossier(state.pool(), lecteur, dossier).await?;
     if !comments::lisible(state.pool(), ligne.id, lecteur, cote_de(acces)).await? {
         return Err(ApiError::not_found());
     }
+    let organisation = organisation_du_dossier(state, dossier).await?;
     let mut tx = state.db().write(ctx).await?;
     comments::marquer_non_lu(&mut tx, ligne.id, lecteur).await?;
+    crate::realtime::signaler_echange(
+        &mut tx,
+        dossier,
+        edition,
+        organisation,
+        acces == Acces::BackOffice,
+    )
+    .await?;
     tx.commit().await?;
     Ok(())
 }

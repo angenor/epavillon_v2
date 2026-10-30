@@ -46,6 +46,7 @@ pub fn autorisations() -> TopicRegistry {
     TopicRegistry::new()
         .register(PersonTopics)
         .register(PublicEditionTopics)
+        .register_all(programme::topic_authorizers())
 }
 
 /// `?topics=a,b,c` : sujets valides, dédoublonnés, triés. Un sujet mal formé

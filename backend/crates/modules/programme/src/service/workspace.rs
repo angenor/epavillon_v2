@@ -366,7 +366,16 @@ async fn adhesion_ouverte(
     lecteur: Uuid,
     organisation: Uuid,
 ) -> Result<Option<LigneDAdhesion>> {
-    let adhesion = cross::adhesions_de_lorganisation(state.pool(), organisation)
+    adhesion_ouverte_dans(state.pool(), lecteur, organisation).await
+}
+
+/// La même garde, pour l'abonnement au sujet `organization:<id>`.
+pub(crate) async fn adhesion_ouverte_dans(
+    pool: &sqlx::PgPool,
+    lecteur: Uuid,
+    organisation: Uuid,
+) -> Result<Option<LigneDAdhesion>> {
+    let adhesion = cross::adhesions_de_lorganisation(pool, organisation)
         .await?
         .into_iter()
         .find(|a| a.person_id == lecteur);

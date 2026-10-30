@@ -271,6 +271,15 @@ pub async fn ecrire(
         .await?;
     }
 
+    crate::realtime::signaler_echange(
+        &mut tx,
+        dossier,
+        edition,
+        etat.organization_id,
+        visibilite != VISIBILITE_DEPOSANT,
+    )
+    .await?;
+
     tx.commit().await?;
 
     let mut vues = circle::composer(state, auteur, dossier, edition, cote, vec![message]).await?;
@@ -372,8 +381,8 @@ pub struct ResolveCommentPayload {
 /// retirer sa propre résolution ne changerait rien d'utile, mais un déposant
 /// qui pourrait retirer celle du comité effacerait un arbitrage.
 ///
-/// **Rien n'est émis** : l'état visible est le compteur de demandes ouvertes,
-/// relu à chaque affichage.
+/// **Aucun événement de domaine** : l'état visible est le compteur de demandes
+/// ouvertes, relu à chaque affichage ; seul le signal d'écran part.
 pub async fn resoudre(
     state: &ProgrammeState,
     ctx: &RequestContext,
@@ -393,7 +402,11 @@ pub async fn resoudre(
     }
 
     let dossier = ProposalId(ligne.proposal_id);
-    let (_, acces) = perimeter::acces_au_dossier(state.pool(), acteur, dossier).await?;
+    let (edition, acces) = perimeter::acces_au_dossier(state.pool(), acteur, dossier).await?;
+    let organisation = proposals::etat(state.pool(), dossier)
+        .await?
+        .ok_or_else(ApiError::not_found)?
+        .organization_id;
 
     if !resolu && acces == Acces::Organisation {
         return Err(ApiError::with_message(
@@ -419,6 +432,8 @@ pub async fn resoudre(
     )
     .fetch_one(&mut *tx)
     .await?;
+    // Une demande de correction est toujours partagée : les deux côtés suivent.
+    crate::realtime::signaler_echange(&mut tx, dossier, edition, organisation, false).await?;
     tx.commit().await?;
 
     Ok(Message {
