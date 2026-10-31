@@ -269,12 +269,15 @@ function reconcilePulse(l: Line): void {
   const topics = pulseTopics(l)
   if (!topics.length || !isVisible()) return
   const key = topics.join(',')
+  let wait = topics.some((t) => !isPublicTopic(t)) ? PULSE_FALLBACK_MS : PULSE_PUBLIC_MS
   if (key !== l.pulseKey) {
     l.pulseKey = key
     l.etag = null
+    // Un sujet nouveau pose sa version tout de suite : posée 30 s plus tard,
+    // un changement survenu entre-temps passerait pour l'état initial (vu à l'essai).
+    if (topics.some((t) => !l.versions.has(t))) wait = 0
   }
-  const every = topics.some((t) => !isPublicTopic(t)) ? PULSE_FALLBACK_MS : PULSE_PUBLIC_MS
-  l.pulseTimer = setTimeout(() => void pulse(l), every)
+  l.pulseTimer = setTimeout(() => void pulse(l), wait)
 }
 
 async function pulse(l: Line): Promise<void> {
