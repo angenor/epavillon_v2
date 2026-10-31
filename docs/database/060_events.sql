@@ -604,6 +604,68 @@ CREATE TRIGGER tg_programme_track_partners_check_role
     BEFORE INSERT OR UPDATE OF role_term_id ON event.programme_track_partners
     FOR EACH ROW EXECUTE FUNCTION event.tg_check_track_partner_role();
 
+-- Signal du programme public (temps réel, 31/10) : un fil publié, ou qui cesse
+-- de l'être, et sa page (parties, moments, partenaires) changent ce que
+-- montrent la programmation et la page du fil. `edition:<id>:public:schedule`,
+-- sujet public relu par le pouls ; même sujet que les séances
+-- (075_programme_sessions.sql, `tg_sessions_public_signal`).
+CREATE OR REPLACE FUNCTION event.signal_public_track(p_track_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_event uuid;
+BEGIN
+    SELECT event_id INTO v_event FROM event.programme_tracks
+     WHERE id = p_track_id AND published_at IS NOT NULL;
+    IF v_event IS NOT NULL THEN
+        PERFORM platform.signal('edition:' || v_event || ':public:schedule');
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION event.tg_programme_tracks_public_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF (TG_OP <> 'INSERT' AND OLD.published_at IS NOT NULL)
+       OR (TG_OP <> 'DELETE' AND NEW.published_at IS NOT NULL) THEN
+        PERFORM platform.signal('edition:'
+            || CASE WHEN TG_OP = 'DELETE' THEN OLD.event_id ELSE NEW.event_id END
+            || ':public:schedule');
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_programme_tracks_public_signal
+    AFTER INSERT OR UPDATE OR DELETE ON event.programme_tracks
+    FOR EACH ROW EXECUTE FUNCTION event.tg_programme_tracks_public_signal();
+
+CREATE OR REPLACE FUNCTION event.tg_programme_track_page_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    PERFORM event.signal_public_track(
+        CASE WHEN TG_OP = 'DELETE' THEN OLD.track_id ELSE NEW.track_id END);
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_programme_track_parts_public_signal
+    AFTER INSERT OR UPDATE OR DELETE ON event.programme_track_parts
+    FOR EACH ROW EXECUTE FUNCTION event.tg_programme_track_page_signal();
+
+CREATE TRIGGER tg_programme_track_moments_public_signal
+    AFTER INSERT OR UPDATE OR DELETE ON event.programme_track_moments
+    FOR EACH ROW EXECUTE FUNCTION event.tg_programme_track_page_signal();
+
+CREATE TRIGGER tg_programme_track_partners_public_signal
+    AFTER INSERT OR UPDATE OR DELETE ON event.programme_track_partners
+    FOR EACH ROW EXECUTE FUNCTION event.tg_programme_track_page_signal();
+
 -- -----------------------------------------------------------------------------
 -- 4 bis. Canaux de diffusion
 --

@@ -626,6 +626,82 @@ GROUP BY m.id;
 COMMENT ON VIEW live.meeting_room_counts IS
     'Par réunion, dans son occurrence en cours : personnes dans la salle (present_count) et passées par la salle (joined_count). Ne vaut que pour une réunion démarrée.';
 
+-- Signal du poste de direct (temps réel, 31/10) : `edition:<id>:desk`, sujet
+-- PRIVÉ (`live.meeting.manage` sur l'édition, `live::topic_authorizers()`).
+-- Entrée ou sortie de la salle, réunion créée ou en échec chez Zoom, inscription
+-- acceptée, refusée ou abandonnée : tout ce que montre `LiveDeskMeeting`. En
+-- base : le webhook, les travaux de synchronisation et les relances manuelles
+-- écrivent ces trois tables. L'édition de la réunion, à défaut celle de sa séance.
+CREATE OR REPLACE FUNCTION live.signal_desk(p_event_id uuid, p_session_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_event uuid := p_event_id;
+BEGIN
+    IF v_event IS NULL AND p_session_id IS NOT NULL THEN
+        SELECT event_id INTO v_event FROM programme.sessions WHERE id = p_session_id;
+    END IF;
+    IF v_event IS NOT NULL THEN
+        PERFORM platform.signal('edition:' || v_event || ':desk');
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION live.tg_desk_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_meeting uuid;
+    v_event   uuid;
+    v_session uuid;
+BEGIN
+    IF TG_TABLE_NAME = 'meetings' THEN
+        IF TG_OP = 'UPDATE'
+           AND (OLD.status, OLD.sync_status, OLD.last_sync_error, OLD.actual_start_at,
+                OLD.actual_end_at, OLD.external_uuid, OLD.session_id)
+               IS NOT DISTINCT FROM
+               (NEW.status, NEW.sync_status, NEW.last_sync_error, NEW.actual_start_at,
+                NEW.actual_end_at, NEW.external_uuid, NEW.session_id) THEN
+            RETURN NULL;
+        END IF;
+        IF TG_OP = 'DELETE' THEN
+            PERFORM live.signal_desk(OLD.event_id, OLD.session_id);
+        ELSE
+            PERFORM live.signal_desk(NEW.event_id, NEW.session_id);
+        END IF;
+        RETURN NULL;
+    END IF;
+
+    -- IF imbriqués : `sync_status` n'existe que sur les inscriptions, et
+    -- PL/pgSQL résout le champ dès qu'il évalue l'expression.
+    IF TG_TABLE_NAME = 'meeting_participants' AND TG_OP = 'UPDATE' THEN
+        IF OLD.sync_status = NEW.sync_status THEN
+            RETURN NULL;
+        END IF;
+    END IF;
+    v_meeting := CASE WHEN TG_OP = 'DELETE' THEN OLD.meeting_id ELSE NEW.meeting_id END;
+    SELECT event_id, session_id INTO v_event, v_session FROM live.meetings WHERE id = v_meeting;
+    IF FOUND THEN
+        PERFORM live.signal_desk(v_event, v_session);
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_meetings_desk_signal
+    AFTER INSERT OR UPDATE OR DELETE ON live.meetings
+    FOR EACH ROW EXECUTE FUNCTION live.tg_desk_signal();
+
+CREATE TRIGGER tg_meeting_participants_desk_signal
+    AFTER INSERT OR UPDATE OR DELETE ON live.meeting_participants
+    FOR EACH ROW EXECUTE FUNCTION live.tg_desk_signal();
+
+CREATE TRIGGER tg_meeting_presences_desk_signal
+    AFTER INSERT OR UPDATE ON live.meeting_presences
+    FOR EACH ROW EXECUTE FUNCTION live.tg_desk_signal();
+
 -- -----------------------------------------------------------------------------
 -- 4. D4 — Journal des webhooks entrants
 --
@@ -1038,6 +1114,110 @@ BEGIN
     RETURN v_row;
 END;
 $$;
+
+-- Signal des messages d'incident (temps réel, 31/10) :
+-- `edition:<id>:public:incidents`, sujet public relu par le pouls, pour chaque
+-- édition où le bandeau s'affiche. La cible se résout comme dans
+-- `active_incidents()` : édition, journée, séance, organisation porteuse d'une
+-- séance publiée, et pour un message global toutes les éditions (quelques
+-- dizaines). En base : publier, corriger, retirer passent par plusieurs
+-- fonctions et services, aucun n'oublie.
+--
+-- LA FENÊTRE D'AFFICHAGE N'ÉCRIT RIEN : un message programmé pour 14 h, ou qui
+-- expire à 15 h, apparaît ou disparaît sans écriture. Le déclencheur dépose donc
+-- un travail `live.incident_window` à chaque borne future ; le worker ne fait
+-- que rejouer le signal (`live.signal_incident()`). File `live_incidents`, à
+-- part de la file « live » qui n'est servie qu'avec Zoom configuré.
+CREATE OR REPLACE FUNCTION live.signal_incident_editions(
+    p_scope           live.incident_scope,
+    p_event_id        uuid,
+    p_event_day_id    uuid,
+    p_session_id      uuid,
+    p_organization_id uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_event uuid;
+BEGIN
+    FOR v_event IN
+        SELECT p_event_id WHERE p_scope = 'event'
+        UNION
+        SELECT d.event_id FROM event.event_days d
+         WHERE p_scope = 'event_day' AND d.id = p_event_day_id
+        UNION
+        SELECT s.event_id FROM programme.sessions s
+         WHERE p_scope = 'session' AND s.id = p_session_id
+        UNION
+        SELECT s.event_id FROM programme.sessions s
+         WHERE p_scope = 'organization' AND s.organization_id = p_organization_id
+           AND s.published_at IS NOT NULL
+        UNION
+        SELECT e.id FROM event.events e WHERE p_scope = 'global'
+    LOOP
+        IF v_event IS NOT NULL THEN
+            PERFORM platform.signal('edition:' || v_event || ':public:incidents');
+        END IF;
+    END LOOP;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION live.signal_incident(p_incident_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_row live.incidents;
+BEGIN
+    SELECT * INTO v_row FROM live.incidents
+     WHERE id = p_incident_id AND published_at IS NOT NULL;
+    IF FOUND THEN
+        PERFORM live.signal_incident_editions(v_row.scope, v_row.event_id,
+            v_row.event_day_id, v_row.session_id, v_row.organization_id);
+    END IF;
+END;
+$$;
+
+COMMENT ON FUNCTION live.signal_incident(uuid) IS
+    'Signale `edition:<id>:public:incidents` aux éditions où le message publié s''affiche. Rejouée par le travail live.incident_window aux bornes de la fenêtre d''affichage.';
+
+CREATE OR REPLACE FUNCTION live.tg_incidents_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_borne timestamptz;
+BEGIN
+    IF TG_OP <> 'INSERT' AND OLD.published_at IS NOT NULL THEN
+        PERFORM live.signal_incident_editions(OLD.scope, OLD.event_id,
+            OLD.event_day_id, OLD.session_id, OLD.organization_id);
+    END IF;
+    IF TG_OP = 'DELETE' OR NEW.published_at IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    PERFORM live.signal_incident_editions(NEW.scope, NEW.event_id,
+        NEW.event_day_id, NEW.session_id, NEW.organization_id);
+    IF NEW.unpublished_at IS NULL THEN
+        FOREACH v_borne IN ARRAY ARRAY[NEW.display_from, NEW.display_until] LOOP
+            IF v_borne IS NOT NULL AND v_borne > now() THEN
+                INSERT INTO platform.jobs (queue, task, payload, idempotency_key, run_at)
+                VALUES ('live_incidents', 'live.incident_window',
+                        jsonb_build_object('incident_id', NEW.id),
+                        NEW.id::text || ':' || extract(epoch FROM v_borne)::bigint,
+                        v_borne)
+                ON CONFLICT DO NOTHING;
+            END IF;
+        END LOOP;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_incidents_signal
+    AFTER INSERT OR UPDATE OR DELETE ON live.incidents
+    FOR EACH ROW EXECUTE FUNCTION live.tg_incidents_signal();
 
 -- Ce que le lecteur d'une session doit afficher à l'instant présent : les
 -- incidents de la session, de sa journée, de son événement, de l'organisation

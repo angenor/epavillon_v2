@@ -470,3 +470,15 @@ Côté code (crate `engagement`) : au dernier essai, le travail pose l'échec av
 Les messages (écriture, lu, non lu, résolu, destinataires) signalent depuis le service (`programme::realtime::signaler_echange`), avec l'audience `committee` quand le déposant ne les voit pas.
 
 **En production** : `ops/migrations/2026-10-31-temps-reel-programme.sql`, rejouable, après `2026-10-31-temps-reel.sql`, avant l'API. Jouée en local.
+
+## 31/10/2026, `060`, `075` et `080` : signaux des pages publiques et du poste de direct
+
+Tous posés par la base : chaque table a plusieurs écrivains (routes, travaux, réunion Zoom, publication), aucun n'oublie. Sujets publics servis par le pouls, sans session.
+
+- **`programme.tg_sessions_public_signal()`** (`075` § 2 bis, toute écriture sur `programme.sessions`) : seulement si la séance est publiée avant ou après, `edition:<id>:public:live` quand elle entre en direct ou en sort, sinon `edition:<id>:public:schedule` quand une colonne visible change (créneau, salle, titre, état, publication, inscriptions, diffusion). `tg_session_tracks_public_signal` : rattachement à un fil. Distincts de `tg_planner_signal` (sujet privé de la grille).
+- **`event.tg_programme_tracks_public_signal()`** et **`event.tg_programme_track_page_signal()`** (`060` § 4 ter) : un fil publié ou dépublié, ses parties, moments et partenaires, `edition:<id>:public:schedule`.
+- **`programme.tg_session_questions_signal()`**, **`tg_session_question_answers_signal()`** (`075` § 5) : question posée, soutenue (`upvotes` réécrit), masquée, répondue, `edition:<id>:public:questions`. Sujet d'édition et non de séance : la lecture des questions est publique, et un sujet par séance exigerait une autorisation en base pour chaque visiteur anonyme ; une seule activité est en direct à la fois.
+- **`live.tg_incidents_signal()`** (`080` § 6) : publié, corrigé, retiré, `edition:<id>:public:incidents` pour chaque édition où le bandeau s'affiche (`live.signal_incident_editions()`, même résolution que `active_incidents()`, toutes les éditions pour un message global). La fenêtre d'affichage n'écrit rien : le déclencheur dépose un travail `live.incident_window` (file `live_incidents`, servie même sans Zoom) à chaque borne future, qui rejoue `live.signal_incident()`.
+- **`live.tg_desk_signal()`** (`080` § 3 bis, sur `live.meetings`, `meeting_participants` et `meeting_presences`) : `edition:<id>:desk`, sujet privé (`live.meeting.manage` sur l'édition, `live::topic_authorizers()`). Entrée et sortie de salle, réunion créée ou en échec, inscription acceptée, refusée ou abandonnée.
+
+**En production** : `ops/migrations/2026-10-31-temps-reel-public.sql`, rejouable, après `2026-10-31-temps-reel.sql` et `2026-10-31-direct-poste.sql`, avant le nouveau worker. Jouée deux fois en local.

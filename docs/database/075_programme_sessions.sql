@@ -463,6 +463,94 @@ CREATE TRIGGER tg_session_tracks_planner_signal
     AFTER INSERT OR UPDATE OR DELETE ON programme.session_tracks
     FOR EACH ROW EXECUTE FUNCTION programme.tg_planner_signal();
 
+-- Signal du programme PUBLIC (temps réel, 31/10) : les pages ouvertes
+-- (programmation, accueil, activité, journée) relisent dans les 30 s, par le
+-- pouls, sans session. Distinct du signal du planificateur : seule une séance
+-- publiée, avant ou après l'écriture, et seule une colonne que le public voit,
+-- comptent ; une séance en préparation ne réveille aucun visiteur.
+--   `edition:<id>:public:live`     la séance entre en direct ou en sort (repère) ;
+--   `edition:<id>:public:schedule` tout autre changement visible : créneau,
+--                                  salle, titre, annulation, report, publication.
+-- Mêmes écrivains que le planificateur (routes, journée, publication, réunion
+-- Zoom par `programme.direct`, annulation d'un dossier, correction des textes),
+-- d'où la base plutôt que chaque service.
+CREATE OR REPLACE FUNCTION programme.signal_public_schedule(p_session_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_event uuid;
+BEGIN
+    SELECT event_id INTO v_event FROM programme.sessions
+     WHERE id = p_session_id AND published_at IS NOT NULL;
+    IF v_event IS NOT NULL THEN
+        PERFORM platform.signal('edition:' || v_event || ':public:schedule');
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION programme.tg_sessions_public_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_avant programme.sessions;
+    v_apres programme.sessions;
+    v_sujet text;
+BEGIN
+    IF TG_OP <> 'INSERT' THEN v_avant := OLD; END IF;
+    IF TG_OP <> 'DELETE' THEN v_apres := NEW; END IF;
+    IF v_avant.published_at IS NULL AND v_apres.published_at IS NULL THEN
+        RETURN NULL;
+    END IF;
+    v_sujet := 'edition:' || COALESCE(v_apres.event_id, v_avant.event_id) || ':public:';
+
+    IF COALESCE(v_avant.status = 'live', false) <> COALESCE(v_apres.status = 'live', false) THEN
+        PERFORM platform.signal(v_sujet || 'live');
+    ELSIF (v_avant.published_at, v_avant.status, v_avant.title, v_avant.slug, v_avant.summary,
+           v_avant.description, v_avant.format, v_avant.starts_at, v_avant.ends_at,
+           v_avant.timezone, v_avant.room_id, v_avant.location_note, v_avant.event_day_id,
+           v_avant.organization_id, v_avant.registration_required, v_avant.registration_opens_at,
+           v_avant.registration_closes_at, v_avant.capacity, v_avant.waitlist_enabled,
+           v_avant.is_streamed, v_avant.broadcast_channel_id, v_avant.is_recorded,
+           v_avant.allows_questions, v_avant.cancelled_reason)
+          IS DISTINCT FROM
+          (v_apres.published_at, v_apres.status, v_apres.title, v_apres.slug, v_apres.summary,
+           v_apres.description, v_apres.format, v_apres.starts_at, v_apres.ends_at,
+           v_apres.timezone, v_apres.room_id, v_apres.location_note, v_apres.event_day_id,
+           v_apres.organization_id, v_apres.registration_required, v_apres.registration_opens_at,
+           v_apres.registration_closes_at, v_apres.capacity, v_apres.waitlist_enabled,
+           v_apres.is_streamed, v_apres.broadcast_channel_id, v_apres.is_recorded,
+           v_apres.allows_questions, v_apres.cancelled_reason) THEN
+        PERFORM platform.signal(v_sujet || 'schedule');
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_sessions_public_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.sessions
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_sessions_public_signal();
+
+-- Rattachement à une journée, partie, mise en avant : la page du fil le montre.
+CREATE OR REPLACE FUNCTION programme.tg_session_tracks_public_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    PERFORM programme.signal_public_schedule(
+        CASE WHEN TG_OP = 'DELETE' THEN OLD.session_id ELSE NEW.session_id END);
+    IF TG_OP = 'UPDATE' AND OLD.session_id <> NEW.session_id THEN
+        PERFORM programme.signal_public_schedule(OLD.session_id);
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_session_tracks_public_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.session_tracks
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_session_tracks_public_signal();
+
 -- -----------------------------------------------------------------------------
 -- 3. Formulaires d'inscription configurables
 -- -----------------------------------------------------------------------------
@@ -758,6 +846,68 @@ CREATE TABLE programme.session_question_votes (
     created_at  timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (question_id, person_id)
 );
+
+-- Signal des questions (temps réel, 31/10) : `edition:<id>:public:questions`,
+-- sujet PUBLIC servi par le pouls comme la programmation. La lecture des
+-- questions est publique, et un sujet par séance exigerait une autorisation en
+-- base pour chaque visiteur anonyme ; l'édition suffit : une seule activité est
+-- en direct à la fois (règle 4), c'est elle qui reçoit les questions, et les
+-- autres pages relisent une route à empreinte (304). Une question posée,
+-- soutenue (le décompte `upvotes` est réécrit), masquée, répondue.
+CREATE OR REPLACE FUNCTION programme.signal_session_questions(p_session_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_event uuid;
+BEGIN
+    SELECT event_id INTO v_event FROM programme.sessions
+     WHERE id = p_session_id AND published_at IS NOT NULL;
+    IF v_event IS NOT NULL THEN
+        PERFORM platform.signal('edition:' || v_event || ':public:questions');
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION programme.tg_session_questions_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF TG_OP = 'UPDATE'
+       AND (OLD.body, OLD.upvotes, OLD.is_visible, OLD.answered_at, OLD.session_id)
+           IS NOT DISTINCT FROM (NEW.body, NEW.upvotes, NEW.is_visible, NEW.answered_at, NEW.session_id) THEN
+        RETURN NULL;
+    END IF;
+    PERFORM programme.signal_session_questions(
+        CASE WHEN TG_OP = 'DELETE' THEN OLD.session_id ELSE NEW.session_id END);
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_session_questions_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.session_questions
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_session_questions_signal();
+
+CREATE OR REPLACE FUNCTION programme.tg_session_question_answers_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_session uuid;
+BEGIN
+    SELECT session_id INTO v_session FROM programme.session_questions
+     WHERE id = CASE WHEN TG_OP = 'DELETE' THEN OLD.question_id ELSE NEW.question_id END;
+    IF v_session IS NOT NULL THEN
+        PERFORM programme.signal_session_questions(v_session);
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_session_question_answers_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.session_question_answers
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_session_question_answers_signal();
 
 -- -----------------------------------------------------------------------------
 -- 6. Vue calendrier
