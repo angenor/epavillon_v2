@@ -1,4 +1,5 @@
-//! Les trois écritures de la fiche : le sceau, un domaine, une dénomination.
+//! Les écritures de la fiche : le sceau, un domaine, une dénomination, et la
+//! fiche elle-même (31/10).
 //!
 //! **Chacune rend la fiche entière recomposée.** Vérifier un domaine change le
 //! score de confiance, qui change le rang de la fiche dans la liste ; poser le
@@ -15,8 +16,8 @@ use kernel::error::{ApiError, ErrorCode, Result};
 use kernel::events::{self, DomainEvent};
 
 use crate::domain::admin::{
-    DomainVerification, NameConfirmation, OrganizationRef, OrganizationVerification,
-    OrganizationWriteOutcome,
+    DomainVerification, NameConfirmation, OrganizationProfile, OrganizationRef,
+    OrganizationVerification, OrganizationWriteOutcome,
 };
 use crate::domain::ids::{OrganizationDomainId, OrganizationId, OrganizationNameId, PersonId};
 use crate::jobs;
@@ -191,6 +192,109 @@ pub async fn set_name_confirmation(
     tx.commit().await?;
 
     recomposer(state, perimetre, id).await
+}
+
+/// Corrige la fiche : nom, sigle, type, pays, site (31/10).
+///
+/// La fiche est partagée par tous ses dossiers et ses membres : la corriger ici
+/// la corrige partout. L'ancien nom et l'ancien sigle restent cherchables
+/// (`tg_organizations_sync_names`). Un nom déjà porté par une autre fiche du
+/// même pays est refusé en la nommant, comme un domaine déjà détenu.
+pub async fn set_profile(
+    state: &OrgState,
+    ctx: &RequestContext,
+    perimetre: &AdminScope,
+    id: OrganizationId,
+    demande: OrganizationProfile,
+) -> Result<OrganizationWriteOutcome> {
+    if !fiche::dans_le_perimetre(state.pool(), perimetre, id).await? {
+        return Ok(OrganizationWriteOutcome::NotFound);
+    }
+
+    let nom = demande.legal_name.trim();
+    if nom.chars().count() < 2 {
+        return Err(ApiError::validation("Le nom de l'organisation compte au moins deux caractères.", "legal_name"));
+    }
+    let sigle = demande.acronym.as_deref().map(str::trim).filter(|s| !s.is_empty());
+    let site = demande.website.as_deref().map(str::trim).filter(|s| !s.is_empty());
+
+    let mut tx = state.db().write(ctx).await?;
+
+    if !organizations::type_is_active(&mut tx, &demande.organization_type_code).await? {
+        return Err(ApiError::validation("Choisissez un type d'organisation dans la liste.", "organization_type_code"));
+    }
+
+    let changes = match organizations::update_profile(
+        &mut tx,
+        id,
+        nom,
+        sigle,
+        &demande.organization_type_code,
+        demande.country_id,
+        site,
+    )
+    .await
+    {
+        Ok(Some(changes)) => changes,
+        Ok(None) => return Ok(OrganizationWriteOutcome::NotFound),
+        Err(erreur) if contrainte(&erreur, "ux_organizations_name_country") => {
+            drop(tx);
+            return Ok(match homonyme(state, id, nom, demande.country_id).await? {
+                Some(conflict_with) => OrganizationWriteOutcome::NameTaken { conflict_with },
+                None => return Err(erreur),
+            });
+        }
+        Err(erreur) => return Err(erreur),
+    };
+
+    if !changes.is_empty() {
+        events::emit(
+            &mut tx,
+            DomainEvent {
+                aggregate_schema: evenements::AGGREGATE_SCHEMA,
+                aggregate_type: evenements::AGGREGATE_ORGANIZATION,
+                aggregate_id: id.as_uuid(),
+                event_type: evenements::ORGANIZATION_UPDATED,
+                payload: serde_json::to_value(evenements::OrganizationUpdated {
+                    organization_id: id.as_uuid(),
+                    changed_fields: changes,
+                })
+                .map_err(ApiError::internal)?,
+            },
+        )
+        .await?;
+        jobs::planifier_apres_ecriture(&mut tx, state.config(), id).await?;
+    }
+    tx.commit().await?;
+
+    recomposer(state, perimetre, id).await
+}
+
+/// La fiche vivante qui porte déjà ce nom dans ce pays.
+async fn homonyme(
+    state: &OrgState,
+    sauf: OrganizationId,
+    nom: &str,
+    pays: Option<uuid::Uuid>,
+) -> Result<Option<OrganizationRef>> {
+    let ligne = sqlx::query!(
+        "SELECT id, legal_name FROM org.organizations
+          WHERE legal_name_normalized = platform.normalize_label($1)
+            AND COALESCE(country_id, '00000000-0000-0000-0000-000000000000'::uuid)
+              = COALESCE($2, '00000000-0000-0000-0000-000000000000'::uuid)
+            AND status IN ('candidate', 'active') AND id <> $3
+          LIMIT 1",
+        nom,
+        pays,
+        sauf.as_uuid()
+    )
+    .fetch_optional(state.pool())
+    .await?;
+
+    Ok(ligne.map(|l| OrganizationRef {
+        organization_id: OrganizationId(l.id),
+        legal_name: l.legal_name,
+    }))
 }
 
 /// La fiche entière, relue après l'écriture.

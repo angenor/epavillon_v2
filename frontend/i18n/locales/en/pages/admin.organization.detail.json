@@ -28,7 +28,8 @@
   "actions": {
     "verify": "Grant the verification seal",
     "unverify": "Remove the seal",
-    "merge": "Merge with another record"
+    "merge": "Merge with another record",
+    "edit": "Edit record"
   },
   "duplicates": {
     "title": "Suspected duplicates",

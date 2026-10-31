@@ -15,7 +15,7 @@ use kernel::error::Result;
 
 use crate::domain::admin::{
     AdminMembershipDecision, DomainVerification, MembershipRoleChange, NameConfirmation,
-    OrganizationVerification,
+    OrganizationProfile, OrganizationVerification,
 };
 use crate::domain::duplicates::DuplicateDecision;
 use crate::domain::ids::{
@@ -47,6 +47,7 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route("/{id}", web::get().to(fiche))
         .route("/{id}/merge-preview", web::get().to(apercu_de_fusion))
         .route("/{id}/verification", web::put().to(verification))
+        .route("/{id}/profile", web::put().to(fiche_corrigee))
         .route("/{id}/domains/{domainId}", web::put().to(domaine))
         .route("/{id}/names/{nameId}", web::put().to(denomination))
         .route("/{id}/members/{membershipId}/decision", web::put().to(decision_d_adhesion))
@@ -182,6 +183,48 @@ pub(crate) async fn verification(
         &crate::routes::contexte_de(&requete, perimetre.person_id),
         &perimetre.scope,
         PersonId(perimetre.person_id),
+        OrganizationId(chemin.into_inner()),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(issue))
+}
+
+/// Corrige la fiche : nom, sigle, type, pays, site (31/10). **Permission de
+/// gestion**, bornée par le périmètre comme le sceau.
+#[utoipa::path(
+    put,
+    description = "`OrganizationWriteResult`. Corrige nom, sigle, type, pays et site. L'ancien nom et l'ancien sigle deviennent des anciens noms, toujours trouvés par la recherche ; l'adresse de la fiche ne change pas. `name_taken` **nomme la fiche** qui porte déjà ce nom dans ce pays. Le logo passe par le module média.",
+    path = "/admin/organizations/{id}/profile",
+    tag = "Back-office — organisations",
+    operation_id = "admin_organisation_fiche_corrigee",
+    params(("id" = uuid::Uuid, Path, description = "Organisation")),
+    request_body = Object,
+    responses(
+        (status = 200, description = "OrganizationWriteResult", body = Object),
+        (status = 403, description = "Permission de gestion absente, ou périmètre vide", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "VALIDATION_FAILED", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn fiche_corrigee(
+    state: web::Data<OrgState>,
+    perimetre: Perimeter,
+    chemin: web::Path<uuid::Uuid>,
+    corps: web::Json<OrganizationProfile>,
+    requete: actix_web::HttpRequest,
+) -> Result<HttpResponse> {
+    kernel::auth::require_permission_anywhere(
+        state.pool(),
+        perimetre.person_id,
+        ORGANIZATION_MANAGE,
+    )
+    .await?;
+
+    let issue = admin_write::set_profile(
+        &state,
+        &crate::routes::contexte_de(&requete, perimetre.person_id),
+        &perimetre.scope,
         OrganizationId(chemin.into_inner()),
         corps.into_inner(),
     )

@@ -129,6 +129,64 @@ pub async fn create(conn: &mut PgConnection, fiche: NewOrganization<'_>) -> Resu
     Organization::try_from(ligne)
 }
 
+/// Les champs que l'équipe corrige (31/10). Rend les colonnes changées, `None`
+/// si la fiche n'existe pas. `tg_organizations_sync_names` fait de l'ancien nom
+/// et de l'ancien sigle des anciens noms, toujours cherchables.
+pub async fn update_profile(
+    conn: &mut PgConnection,
+    id: OrganizationId,
+    legal_name: &str,
+    acronym: Option<&str>,
+    organization_type_code: &str,
+    country_id: Option<Uuid>,
+    website: Option<&str>,
+) -> Result<Option<Vec<String>>> {
+    let ligne = sqlx::query!(
+        r#"WITH avant AS (
+               SELECT legal_name, acronym, organization_type_code, country_id, website::text AS website
+                 FROM org.organizations WHERE id = $1 FOR UPDATE
+           ), apres AS (
+               UPDATE org.organizations
+                  SET legal_name = $2, acronym = $3, organization_type_code = $4,
+                      country_id = $5, website = $6::text::platform.url
+                WHERE id = $1
+            RETURNING id
+           )
+           SELECT array_remove(ARRAY[
+                      CASE WHEN a.legal_name IS DISTINCT FROM $2 THEN 'legal_name' END,
+                      CASE WHEN a.acronym IS DISTINCT FROM $3 THEN 'acronym' END,
+                      CASE WHEN a.organization_type_code IS DISTINCT FROM $4 THEN 'organization_type_code' END,
+                      CASE WHEN a.country_id IS DISTINCT FROM $5 THEN 'country_id' END,
+                      CASE WHEN a.website IS DISTINCT FROM $6 THEN 'website' END
+                  ], NULL) AS "changes!"
+             FROM avant a, apres"#,
+        id.as_uuid(),
+        legal_name,
+        acronym,
+        organization_type_code,
+        country_id,
+        website
+    )
+    .fetch_optional(conn)
+    .await?;
+
+    Ok(ligne.map(|l| l.changes))
+}
+
+/// Le type d'organisation existe-t-il, et sert-il encore ?
+pub async fn type_is_active(conn: &mut PgConnection, code: &str) -> Result<bool> {
+    let actif = sqlx::query_scalar!(
+        r#"SELECT EXISTS (
+               SELECT 1 FROM reference.taxonomy_terms
+                WHERE taxonomy_code = 'organization_type' AND code = $1 AND is_active
+           ) AS "actif!""#,
+        code
+    )
+    .fetch_one(conn)
+    .await?;
+    Ok(actif)
+}
+
 /// Pose le sceau, et **admet du même geste** une fiche `candidate`.
 ///
 /// Rend l'instant posé, ou `None` si la fiche n'existe pas. Le sceau déjà posé

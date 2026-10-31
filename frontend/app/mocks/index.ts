@@ -401,6 +401,7 @@ export {
   setDomainVerification,
   setNameConfirmation,
   setOrganizationMembershipRole,
+  setOrganizationProfile,
   setOrganizationVerification,
 } from './admin-organizations'
 

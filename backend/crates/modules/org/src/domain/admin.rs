@@ -322,9 +322,28 @@ pub enum OrganizationWriteOutcome {
     DomainTaken {
         conflict_with: OrganizationRef,
     },
+    /// Une autre fiche vivante porte déjà ce nom dans ce pays
+    /// (`ux_organizations_name_country`), et le refus la nomme.
+    NameTaken {
+        conflict_with: OrganizationRef,
+    },
     /// Le rôle retiré est celui du dernier référent actif, sans confirmation :
     /// l'écran le dit et redemande (FR-041).
     LastManager,
+}
+
+/// Ce que l'équipe corrige d'une fiche (31/10). Le logo passe par le module
+/// média, l'adresse de la fiche ne change pas : ses anciens liens tiennent.
+#[derive(Debug, Clone, Deserialize)]
+pub struct OrganizationProfile {
+    pub legal_name: String,
+    #[serde(default)]
+    pub acronym: Option<String>,
+    pub organization_type_code: String,
+    #[serde(default)]
+    pub country_id: Option<Uuid>,
+    #[serde(default)]
+    pub website: Option<String>,
 }
 
 /// La décision de l'équipe sur une **demande**, avec le rôle donné (31/10).

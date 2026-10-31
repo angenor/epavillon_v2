@@ -2377,6 +2377,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/organizations/{id}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Corrige la fiche : nom, sigle, type, pays, site (31/10). **Permission de
+         *     gestion**, bornée par le périmètre comme le sceau.
+         * @description `OrganizationWriteResult`. Corrige nom, sigle, type, pays et site. L'ancien nom et l'ancien sigle deviennent des anciens noms, toujours trouvés par la recherche ; l'adresse de la fiche ne change pas. `name_taken` **nomme la fiche** qui porte déjà ce nom dans ce pays. Le logo passe par le module média.
+         */
+        put: operations["admin_organisation_fiche_corrigee"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/organizations/{id}/verification": {
         parameters: {
             query?: never;
@@ -14699,6 +14720,51 @@ export interface operations {
                 };
             };
             /** @description ORG_NAME_IS_DERIVED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_organisation_fiche_corrigee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Organisation */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description OrganizationWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de gestion absente, ou périmètre vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
             422: {
                 headers: {
                     [name: string]: unknown;

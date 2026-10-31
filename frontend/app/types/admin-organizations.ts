@@ -715,6 +715,20 @@ export interface NameConfirmationPayload {
 }
 
 /**
+ * L'équipe corrige la fiche (31/10). L'ancien nom et l'ancien sigle deviennent
+ * des anciens noms, toujours trouvés par la recherche ; l'adresse de la fiche ne
+ * change pas. Le logo passe par le module média.
+ */
+export interface OrganizationProfilePayload {
+  organization_id: OrganizationId
+  legal_name: string
+  acronym: string | null
+  organization_type_code: TaxonomyTermCode
+  country_id: CountryId | null
+  website: Url | null
+}
+
+/**
  * L'équipe accepte ou refuse une DEMANDE de rattachement (31/10). Une
  * invitation attend la personne, l'API la refuse.
  */
@@ -750,3 +764,5 @@ export type OrganizationWriteResult =
   | { status: 'domain_taken'; conflict_with: OrganizationRef }
   /** Rôle retiré au dernier référent actif sans confirmation (FR-041). */
   | { status: 'last_manager' }
+  /** Une autre fiche vivante porte déjà ce nom dans ce pays — `ux_organizations_name_country`. */
+  | { status: 'name_taken'; conflict_with: OrganizationRef }

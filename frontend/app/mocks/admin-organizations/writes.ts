@@ -57,6 +57,7 @@ import type {
   MembershipRoleChangePayload,
   MergeResult,
   NameConfirmationPayload,
+  OrganizationProfilePayload,
   OrganizationVerificationPayload,
   OrganizationWriteResult,
 } from '~/types/admin-organizations'
@@ -442,5 +443,31 @@ export function setOrganizationMembershipRole(
   }
 
   patchMembership(membership.id, { role: payload.role })
+  return saved(payload.organization_id)
+}
+
+// ---------------------------------------------------------------------------
+// 7. La fiche corrigée par l'équipe (31/10)
+// ---------------------------------------------------------------------------
+
+/** Nom, sigle, type, pays, site. Les dénominations dérivées ne sont pas rejouées ici. */
+export function setOrganizationProfile(
+  payload: OrganizationProfilePayload,
+  actorId: string | null,
+): OrganizationWriteResult {
+  const current = effectiveOrganization(payload.organization_id)
+  if (!current) return { status: 'not_found' }
+
+  const { organization_id: _id, ...fields } = payload
+  patchOrganization(payload.organization_id, fields)
+  recordHistory(payload.organization_id, {
+    occurred_at: new Date().toISOString(),
+    actor_id: actorId,
+    actor_label: actorLabel(actorId),
+    action: 'update',
+    field: 'organizations.legal_name',
+    old_value: current.legal_name,
+    new_value: payload.legal_name,
+  })
   return saved(payload.organization_id)
 }

@@ -504,3 +504,10 @@ Zoom limite à 100 créations ou modifications de réunion par jour et par hôte
 - **`tg_memberships_audit`** sur `org.memberships` (`platform.tg_audit()`). L'équipe accepte désormais une demande et change un rôle depuis le back-office : qui a fait d'une personne le référent d'une organisation doit se relire. Avant, seuls le référent et la personne écrivaient ici, et `approved_by` suffisait.
 
 **En production** : `ops/migrations/2026-10-31-audit-adhesions.sql`, rejouable. Jouée en local.
+
+## 31/10/2026, `040_organizations.sql` : un nom remplacé devient un ancien nom
+
+- **`org.tg_sync_organization_names()`** : à un changement du nom légal ou du sigle, l'ancienne dénomination dérivée passe en `former` (nouvelle fonction **`org.retire_name()`**) au lieu de rester `legal` ou `acronym` à côté de la nouvelle. Elle reste trouvée par la recherche (règle n° 1). Une correction de casse ou d'accent (même forme normalisée) met à jour le libellé sans rien rétrograder (`ON CONFLICT … DO UPDATE SET name`). Raison : l'équipe corrige désormais la fiche depuis le back-office ; les choix de fusion, qui renomment la fiche absorbante, en profitent aussi.
+- **Reprise** : les fiches qui portaient déjà deux noms légaux (renommées par une fusion) voient celui qu'elles ne portent plus passer en `former`.
+
+**En production** : `ops/migrations/2026-10-31-fiche-organisation-modifiable.sql`, rejouable, avant l'API. Jouée deux fois en local.

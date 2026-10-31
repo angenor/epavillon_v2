@@ -20,6 +20,8 @@ pub const AGGREGATE_MEMBERSHIP: &str = "membership";
 pub const ORGANIZATION_CREATED: &str = "org.organization.created";
 pub const ORGANIZATION_VERIFIED: &str = "org.organization.verified";
 pub const ORGANIZATION_UNVERIFIED: &str = "org.organization.unverified";
+/// Fiche corrigée par l'équipe depuis le back-office (31/10).
+pub const ORGANIZATION_UPDATED: &str = "org.organization.updated";
 /// **Émis par la base** : `org.merge_organizations()` appelle elle-même
 /// `platform.emit_event()` avant de rendre la main, et marque elle-même la
 /// paire de la file des doublons.
@@ -124,4 +126,11 @@ pub struct MembershipRoleChanged {
     pub person_id: Uuid,
     pub previous_role: String,
     pub role: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OrganizationUpdated {
+    pub organization_id: Uuid,
+    /// Colonnes changées, dans les noms de `org.organizations`.
+    pub changed_fields: Vec<String>,
 }

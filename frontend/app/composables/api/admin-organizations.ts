@@ -58,6 +58,7 @@ import type {
   MembershipDecisionPayload,
   MembershipRoleChangePayload,
   NameConfirmationPayload,
+  OrganizationProfilePayload,
   OrganizationDetail,
   OrganizationListScreen,
   OrganizationVerificationPayload,
@@ -210,6 +211,18 @@ export function createAdminOrganizationsApi({ call, send }: ApiTransport) {
         `/admin/organizations/${payload.organization_id}/names/${payload.name_id}`,
         payload,
         (m) => m.setNameConfirmation(payload, actorId),
+        'PUT',
+      ),
+
+    /**
+     * CORRIGER LA FICHE : nom, sigle, type, pays, site. `name_taken` nomme la
+     * fiche qui porte déjà ce nom dans ce pays.
+     */
+    setProfile: (payload: OrganizationProfilePayload, actorId: Uuid | null): Promise<OrganizationWriteResult> =>
+      send(
+        `/admin/organizations/${payload.organization_id}/profile`,
+        payload,
+        (m) => m.setOrganizationProfile(payload, actorId),
         'PUT',
       ),
 

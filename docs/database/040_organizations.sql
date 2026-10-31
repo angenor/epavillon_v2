@@ -197,22 +197,66 @@ COMMENT ON TABLE org.organization_names IS
 
 -- Le nom légal et le sigle de la fiche alimentent automatiquement la table des
 -- dénominations : aucune synchronisation manuelle à maintenir.
+--
+-- UN NOM REMPLACÉ DEVIENT UN ANCIEN NOM (31/10). L'équipe corrige désormais la
+-- fiche depuis le back-office : l'ancien nom légal et l'ancien sigle restent
+-- trouvables par la recherche (règle n° 1, une fiche pour toutes ses
+-- dénominations), mais sous `former`, sans quoi la fiche afficherait deux noms
+-- légaux. Une simple correction de casse ou d'accent (même forme normalisée)
+-- met à jour le libellé sans rien rétrograder.
 CREATE OR REPLACE FUNCTION org.tg_sync_organization_names()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
+    IF TG_OP = 'UPDATE' THEN
+        PERFORM org.retire_name(NEW.id, OLD.legal_name, NEW.legal_name, 'legal');
+        IF OLD.acronym IS NOT NULL THEN
+            PERFORM org.retire_name(NEW.id, OLD.acronym, NEW.acronym, 'acronym');
+        END IF;
+    END IF;
+
     INSERT INTO org.organization_names (organization_id, name, kind, is_confirmed)
     VALUES (NEW.id, NEW.legal_name, 'legal', true)
-    ON CONFLICT (organization_id, name_normalized, kind) DO NOTHING;
+    ON CONFLICT (organization_id, name_normalized, kind) DO UPDATE SET name = EXCLUDED.name;
 
     IF NEW.acronym IS NOT NULL THEN
         INSERT INTO org.organization_names (organization_id, name, kind, is_confirmed)
         VALUES (NEW.id, NEW.acronym, 'acronym', true)
-        ON CONFLICT (organization_id, name_normalized, kind) DO NOTHING;
+        ON CONFLICT (organization_id, name_normalized, kind) DO UPDATE SET name = EXCLUDED.name;
     END IF;
 
     RETURN NULL;
+END;
+$$;
+
+-- Passe une dénomination dérivée (`legal` ou `acronym`) en `former` quand la
+-- fiche ne la porte plus. Déjà connue comme ancien nom : la ligne dérivée part.
+CREATE OR REPLACE FUNCTION org.retire_name(
+    p_organization_id uuid, p_old text, p_new text, p_kind org.name_kind)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF platform.normalize_label(p_old) IS NOT DISTINCT FROM platform.normalize_label(p_new) THEN
+        RETURN;
+    END IF;
+
+    UPDATE org.organization_names n
+       SET kind = 'former', is_confirmed = true
+     WHERE n.organization_id = p_organization_id
+       AND n.kind = p_kind
+       AND n.name_normalized = platform.normalize_label(p_old)
+       AND NOT EXISTS (
+           SELECT 1 FROM org.organization_names f
+            WHERE f.organization_id = p_organization_id
+              AND f.kind = 'former'
+              AND f.name_normalized = n.name_normalized);
+
+    DELETE FROM org.organization_names
+     WHERE organization_id = p_organization_id
+       AND kind = p_kind
+       AND name_normalized = platform.normalize_label(p_old);
 END;
 $$;
 

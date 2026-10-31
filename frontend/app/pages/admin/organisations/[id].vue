@@ -177,6 +177,7 @@ function selectTab(value: string): void {
 // ---------------------------------------------------------------------------
 
 const busy = ref(false)
+const profileOpen = ref(false)
 const notice = ref<string | null>(null)
 const writeError = ref<string | null>(null)
 
@@ -203,7 +204,7 @@ async function apply(action: () => Promise<OrganizationWriteResult>): Promise<vo
       writeError.value = t('admin.organization.detail.members.lastManagerRefused')
       return
     }
-    if (result.status === 'not_found') return
+    if (result.status !== 'saved') return
 
     detail.value = result.detail
     notice.value = t('admin.organization.detail.saved')
@@ -257,6 +258,12 @@ function toggleAutoJoin(domain: OrganizationDomainRow, autoJoin: boolean): void 
       auth.person?.id ?? null,
     ),
   )
+}
+
+function onProfileSaved(saved: OrganizationDetail): void {
+  detail.value = saved
+  writeError.value = null
+  notice.value = t('admin.organization.detail.saved')
 }
 
 function decideMember(row: OrganizationMemberRow, approved: boolean, role?: MembershipRole): void {
@@ -427,6 +434,9 @@ function pairLink(pairId: string, otherId: string): string {
                 )
               }}
             </UiButton>
+            <UiButton v-if="canManage && !detail.merged_into" variant="secondary" icon="edit" @click="profileOpen = true">
+              {{ t('admin.organization.detail.actions.edit') }}
+            </UiButton>
             <UiButton v-if="canMerge && !detail.merged_into" variant="secondary" :to="mergeLink">
               {{ t('admin.organization.detail.actions.merge') }}
             </UiButton>
@@ -572,6 +582,11 @@ function pairLink(pairId: string, otherId: string): string {
             :timezone="timezone"
           />
         </div>
+        <AdminOrganizationsProfileDrawer
+          v-model:open="profileOpen"
+          :organization-id="detail.organization_id"
+          @saved="onProfileSaved"
+        />
       </template>
     </template>
   </div>

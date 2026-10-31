@@ -27,5 +27,6 @@ export {
   setDomainVerification,
   setNameConfirmation,
   setOrganizationMembershipRole,
+  setOrganizationProfile,
   setOrganizationVerification,
 } from './writes'

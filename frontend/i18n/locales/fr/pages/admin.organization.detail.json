@@ -28,7 +28,8 @@
   "actions": {
     "verify": "Poser le sceau de vérification",
     "unverify": "Retirer le sceau",
-    "merge": "Fusionner avec une autre fiche"
+    "merge": "Fusionner avec une autre fiche",
+    "edit": "Modifier la fiche"
   },
   "duplicates": {
     "title": "Doublons présumés",

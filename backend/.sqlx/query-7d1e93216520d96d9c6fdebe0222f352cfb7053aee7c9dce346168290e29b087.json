@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM reference.taxonomy_terms\n                WHERE taxonomy_code = 'organization_type' AND code = $1 AND is_active\n           ) AS \"actif!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "actif!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7d1e93216520d96d9c6fdebe0222f352cfb7053aee7c9dce346168290e29b087"
+}
