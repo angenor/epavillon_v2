@@ -193,3 +193,9 @@ Maquette sur canevas (claude.ai, « Éditeur de couverture : directions »), ret
 - `UiInput` gagne `hideOptional` (déjà porté par `UiFormField`).
 
 Vérifié sur données d'exemple : 1440 × 900 (tout visible), 375 px (sans défilement horizontal), couleur libre appliquée, logos IFDD/OIF décochés, fenêtre de sortie. Tests : 6 intégrations `atelier_couverture` et 5 unitaires `cover_design`, 71 tests du site, typage, contrat d'API.
+
+## 31/10 : sa propre demande, et l'organisation sans référent
+
+- Sur sa propre demande, l'espace dit « En attente d'acceptation depuis le … » au lieu de « Demande reçue le … », qui se lisait comme une demande reçue par soi (`MembersPanel`, clé `status.awaiting`).
+- Sans référent actif, un encadré le dit et nomme qui accepte : l'équipe de l'ePavillon (clé `noManager`), qui le peut désormais depuis la fiche du back-office (voir [A11](a11-organisations-fusion.md)).
+- Non vu au navigateur : la connexion fictive de la demandeuse a échoué sur le site hors ligne. Typecheck vert.

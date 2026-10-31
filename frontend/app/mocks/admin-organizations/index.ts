@@ -22,8 +22,10 @@ export { duplicateQueue, mergePreview, pendingDuplicatesOf } from './duplicates'
 export { organizationDetail } from './detail'
 export {
   decideDuplicatePair,
+  decideOrganizationMembership,
   mergeOrganizations,
   setDomainVerification,
   setNameConfirmation,
+  setOrganizationMembershipRole,
   setOrganizationVerification,
 } from './writes'

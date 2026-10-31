@@ -96,6 +96,8 @@ codes! {
         "Cette adhésion est une invitation : elle attend la réponse de la personne, pas la vôtre.";
     OrgMembershipNotPending => "ORG_MEMBERSHIP_NOT_PENDING", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette adhésion n'attend plus de décision.";
+    OrgMembershipNotActive => "ORG_MEMBERSHIP_NOT_ACTIVE", StatusCode::UNPROCESSABLE_ENTITY,
+        "Seul un membre actif change de rôle. Une demande s'accepte d'abord.";
     OrgLastManager => "ORG_LAST_MANAGER", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette organisation n'aurait plus aucun référent. Désignez un remplaçant d'abord.";
     OrgMergeFieldNotArbitrable => "ORG_MERGE_FIELD_NOT_ARBITRABLE", StatusCode::UNPROCESSABLE_ENTITY,

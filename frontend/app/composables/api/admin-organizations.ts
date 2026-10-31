@@ -55,6 +55,8 @@ import type {
   MergePayload,
   MergePreview,
   MergeResult,
+  MembershipDecisionPayload,
+  MembershipRoleChangePayload,
   NameConfirmationPayload,
   OrganizationDetail,
   OrganizationListScreen,
@@ -208,6 +210,33 @@ export function createAdminOrganizationsApi({ call, send }: ApiTransport) {
         `/admin/organizations/${payload.organization_id}/names/${payload.name_id}`,
         payload,
         (m) => m.setNameConfirmation(payload, actorId),
+        'PUT',
+      ),
+
+    /** L'ÉQUIPE ACCEPTE OU REFUSE UNE DEMANDE, avec le rôle donné. Portée globale exigée. */
+    decideMembership: (
+      payload: MembershipDecisionPayload,
+      actorId: Uuid | null,
+    ): Promise<OrganizationWriteResult> =>
+      send(
+        `/admin/organizations/${payload.organization_id}/members/${payload.membership_id}/decision`,
+        payload,
+        (m) => m.decideOrganizationMembership(payload, actorId),
+        'PUT',
+      ),
+
+    /**
+     * LE RÔLE D'UN MEMBRE ACTIF. `last_manager` : c'était le dernier référent,
+     * l'écran redemande avec `confirm_last_manager`.
+     */
+    setMembershipRole: (
+      payload: MembershipRoleChangePayload,
+      actorId: Uuid | null,
+    ): Promise<OrganizationWriteResult> =>
+      send(
+        `/admin/organizations/${payload.organization_id}/members/${payload.membership_id}/role`,
+        payload,
+        (m) => m.setOrganizationMembershipRole(payload, actorId),
         'PUT',
       ),
   }

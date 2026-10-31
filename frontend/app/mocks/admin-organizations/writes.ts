@@ -53,6 +53,8 @@ import type {
   DuplicateDecisionResult,
   MergeField,
   MergePayload,
+  MembershipDecisionPayload,
+  MembershipRoleChangePayload,
   MergeResult,
   NameConfirmationPayload,
   OrganizationVerificationPayload,
@@ -64,8 +66,10 @@ import { MERGE_LOG } from '../ids'
 import { people } from '../people'
 import {
   effectiveDomains,
+  effectiveMemberships,
   effectiveOrganization,
   patchDomain,
+  patchMembership,
   patchName,
   patchOrganization,
   recordHistory,
@@ -386,5 +390,57 @@ export function setNameConfirmation(
     new_value: payload.is_confirmed,
   })
 
+  return saved(payload.organization_id)
+}
+
+// ---------------------------------------------------------------------------
+// 6. Les membres, par l'équipe (31/10)
+// ---------------------------------------------------------------------------
+
+/** Accepter ou refuser une DEMANDE. Une invitation attend la personne : refusée. */
+export function decideOrganizationMembership(
+  payload: MembershipDecisionPayload,
+  actorId: string | null,
+): OrganizationWriteResult {
+  const membership = effectiveMemberships().find(
+    (m) => m.id === payload.membership_id && m.organization_id === payload.organization_id,
+  )
+  if (!membership || membership.status !== 'pending' || membership.invited_at !== null) {
+    return { status: 'not_found' }
+  }
+
+  const now = new Date().toISOString()
+  patchMembership(
+    membership.id,
+    payload.approved
+      ? { status: 'active', role: payload.role ?? membership.role, approved_by: actorId, approved_at: now }
+      : { status: 'revoked', revoked_at: now },
+  )
+  return saved(payload.organization_id)
+}
+
+/** Le rôle d'un membre actif ; le dernier référent ne le perd que sur confirmation. */
+export function setOrganizationMembershipRole(
+  payload: MembershipRoleChangePayload,
+  _actorId: string | null,
+): OrganizationWriteResult {
+  const all = effectiveMemberships()
+  const membership = all.find(
+    (m) => m.id === payload.membership_id && m.organization_id === payload.organization_id,
+  )
+  if (!membership || membership.status !== 'active') return { status: 'not_found' }
+
+  const otherManagers = all.filter(
+    (m) =>
+      m.organization_id === payload.organization_id &&
+      m.id !== membership.id &&
+      m.status === 'active' &&
+      m.role === 'manager',
+  ).length
+  if (membership.role === 'manager' && payload.role !== 'manager' && otherManagers === 0 && !payload.confirm_last_manager) {
+    return { status: 'last_manager' }
+  }
+
+  patchMembership(membership.id, { role: payload.role })
   return saved(payload.organization_id)
 }

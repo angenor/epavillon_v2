@@ -106,6 +106,7 @@
     "status": {
       "invited": "Invitation sent on {date}",
       "requested": "Request received on {date}",
+      "awaiting": "Awaiting approval since {date}",
       "revoked": "Membership revoked",
       "you": "You"
     },
@@ -113,6 +114,10 @@
     "decline": "Decline",
     "remind": "Send a reminder",
     "managerOnly": "Only a contact can invite a member or approve a request.",
+    "noManager": {
+      "title": "This organization has no contact yet",
+      "message": "Membership requests are approved by the ePavillon team, which can also appoint a contact."
+    },
     "invite": {
       "title": "Invite someone",
       "description": "The invitation is sent by email. The person joins the organization once they accept it: there is nothing else for you to do.",

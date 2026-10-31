@@ -110,13 +110,14 @@
   },
   "members": {
     "title": "Membres",
-    "description": "Les adhésions de cette organisation, en attente comprises.",
+    "description": "Les adhésions de cette organisation, en attente comprises. L'équipe peut accepter une demande, désigner le référent et changer un rôle : chaque geste est enregistré avec son auteur.",
     "caption": "Membres de l'organisation",
     "columns": {
       "person": "Personne",
       "role": "Rôle",
       "status": "Statut",
-      "since": "Depuis"
+      "since": "Depuis",
+      "actions": "Actions"
     },
     "role": {
       "manager": "Référent",
@@ -128,11 +129,40 @@
       "active": "Active",
       "revoked": "Révoquée"
     },
-    "invited": "Invitée le {date} — attend la réponse de la personne",
-    "requested": "Demande du {date} — attend un référent",
+    "invited": "Invitée le {date} : attend la réponse de la personne",
+    "requested": "Demande du {date} : attend une décision",
     "primary": "Rattachement principal",
     "revokedOn": "Révoquée le {date}",
-    "empty": "Aucun membre."
+    "empty": "Aucun membre.",
+    "noManager": {
+      "title": "Cette organisation n'a aucun référent",
+      "message": "Personne ne peut accepter de demande depuis son espace. Acceptez une demande en choisissant « Référent », ou changez le rôle d'un membre."
+    },
+    "accept": "Accepter…",
+    "decline": "Refuser",
+    "changeRole": "Changer le rôle",
+    "awaitingPerson": "Attend la réponse de la personne. Rien à accepter ici.",
+    "lastManagerRefused": "C'est le dernier référent de l'organisation : confirmez dans la fenêtre pour lui retirer son rôle.",
+    "dialog": {
+      "acceptTitle": "Accepter la demande de {name}",
+      "acceptIntro": "{name} rejoindra l'organisation avec le rôle choisi. Un courriel l'en avertira.",
+      "roleTitle": "Changer le rôle de {name}",
+      "roleIntro": "Rôle actuel : {role}.",
+      "roleLabel": "Rôle dans l'organisation",
+      "hint": {
+        "manager": "Accepte les demandes, invite des membres, dépose et suit les dossiers.",
+        "member": "Dépose et suit les dossiers de l'organisation.",
+        "contributor": "Participe aux dossiers qu'on lui confie."
+      },
+      "lastManager": {
+        "title": "C'est le seul référent de l'organisation",
+        "message": "Sans référent, personne ne pourra accepter de demande depuis l'espace de l'organisation. Désignez d'abord un autre référent, ou confirmez en connaissance de cause."
+      },
+      "cancel": "Annuler",
+      "accept": "Accepter",
+      "save": "Enregistrer",
+      "forceSave": "Retirer quand même"
+    }
   },
   "activities": {
     "title": "Activités",

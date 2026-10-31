@@ -2,6 +2,7 @@
 
 pub mod admin_detail;
 pub mod admin_list;
+pub mod admin_members;
 pub mod admin_write;
 pub mod create;
 pub mod duplicates;

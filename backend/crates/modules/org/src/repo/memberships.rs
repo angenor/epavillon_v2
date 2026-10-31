@@ -288,6 +288,59 @@ pub async fn approve(
     ligne.map(Membership::try_from).transpose()
 }
 
+/// L'équipe accepte une **demande** et en fixe le rôle (31/10). `invited_at IS
+/// NULL` garde la porte : une invitation n'entre jamais par ici (écart n° 33).
+pub async fn approve_request_as(
+    conn: &mut PgConnection,
+    id: MembershipId,
+    approuve_par: PersonId,
+    role: MembershipRole,
+) -> Result<Option<Membership>> {
+    let ligne = sqlx::query_as!(
+        Ligne,
+        r#"UPDATE org.memberships
+              SET status = 'active', role = $3::text::org.membership_role,
+                  approved_by = $2, approved_at = now(), revoked_at = NULL
+            WHERE id = $1 AND status = 'pending' AND invited_at IS NULL
+        RETURNING id, organization_id, person_id, role::text AS "role!",
+                  status::text AS "statut!", is_primary, job_title,
+                  invited_by, invited_at, approved_by, approved_at, revoked_at,
+                  created_at, updated_at"#,
+        id.as_uuid(),
+        approuve_par.as_uuid(),
+        role.as_str()
+    )
+    .fetch_optional(conn)
+    .await?;
+
+    ligne.map(Membership::try_from).transpose()
+}
+
+/// Le rôle d'une adhésion **active**. `tg_memberships_sync_role` suit : le droit
+/// de gérer l'organisation part ou vient avec.
+pub async fn set_role(
+    conn: &mut PgConnection,
+    id: MembershipId,
+    role: MembershipRole,
+) -> Result<Option<Membership>> {
+    let ligne = sqlx::query_as!(
+        Ligne,
+        r#"UPDATE org.memberships
+              SET role = $2::text::org.membership_role
+            WHERE id = $1 AND status = 'active'
+        RETURNING id, organization_id, person_id, role::text AS "role!",
+                  status::text AS "statut!", is_primary, job_title,
+                  invited_by, invited_at, approved_by, approved_at, revoked_at,
+                  created_at, updated_at"#,
+        id.as_uuid(),
+        role.as_str()
+    )
+    .fetch_optional(conn)
+    .await?;
+
+    ligne.map(Membership::try_from).transpose()
+}
+
 /// Révoque une adhésion — **la ligne n'est jamais supprimée**.
 ///
 /// Supprimer effacerait l'histoire, et la personne pourrait redemander comme si

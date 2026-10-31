@@ -40,6 +40,8 @@ pub struct ApiErrorBody {
         crate::routes::admin::verification,
         crate::routes::admin::domaine,
         crate::routes::admin::denomination,
+        crate::routes::admin::decision_d_adhesion,
+        crate::routes::admin::role_d_adhesion,
         crate::routes::admin::file_des_doublons,
         crate::routes::admin::decision_de_doublon,
         crate::routes::admin::apercu_de_fusion,

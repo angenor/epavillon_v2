@@ -50,6 +50,17 @@ const viewerTimezone = computed(
 
 const active = computed(() => props.members.filter((entry) => entry.membership.status === 'active'))
 const pending = computed(() => props.members.filter((entry) => entry.membership.status === 'pending'))
+// Sans référent actif, personne ici ne peut accepter : c'est l'équipe de l'ePavillon qui tranche (31/10).
+const hasManager = computed(() => active.value.some((entry) => entry.membership.role === 'manager'))
+
+function pendingLabel(entry: WorkspaceMember): string {
+  if (entry.is_invitation) {
+    return t('organization.workspace.members.status.invited', { date: date(entry.membership.invited_at, viewerTimezone.value) })
+  }
+  // Sa propre demande : « reçue » se lirait comme une demande qu'on aurait soi-même reçue.
+  const key = entry.person.id === props.viewerId ? 'awaiting' : 'requested'
+  return t(`organization.workspace.members.status.${key}`, { date: date(entry.membership.created_at, viewerTimezone.value) })
+}
 
 const roleOptions = computed<SelectOption[]>(() =>
   (['member', 'contributor', 'manager'] satisfies Membership['role'][]).map((role) => ({
@@ -129,15 +140,7 @@ function nameOf(entry: WorkspaceMember): string {
           <!-- La DIRECTION de l'attente, écrite en toutes lettres. « En
                attente » seul laisserait deviner qui doit bouger. -->
           <span v-if="entry.membership.status === 'pending'" class="mt-0.5 block text-sm text-text-subtle">
-            {{
-              entry.is_invitation
-                ? t('organization.workspace.members.status.invited', {
-                    date: date(entry.membership.invited_at, viewerTimezone),
-                  })
-                : t('organization.workspace.members.status.requested', {
-                    date: date(entry.membership.created_at, viewerTimezone),
-                  })
-            }}
+            {{ pendingLabel(entry) }}
           </span>
         </span>
 
@@ -222,6 +225,12 @@ function nameOf(entry: WorkspaceMember): string {
       </form>
     </UiCard>
 
+    <UiAlert
+      v-else-if="!hasManager"
+      class="mt-4"
+      :title="t('organization.workspace.members.noManager.title')"
+      :message="t('organization.workspace.members.noManager.message')"
+    />
     <p v-else class="mt-4 text-sm text-text-subtle">
       {{ t('organization.workspace.members.managerOnly') }}
     </p>

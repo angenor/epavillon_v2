@@ -359,6 +359,14 @@ CREATE TRIGGER tg_memberships_updated_at
     BEFORE UPDATE ON org.memberships
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
 
+-- Audit (31/10) : depuis que l'équipe de l'ePavillon accepte une demande et
+-- change un rôle depuis le back-office, qui a fait d'une personne le référent
+-- d'une organisation doit se relire. Avant, seuls le référent et la personne
+-- écrivaient ici, et `approved_by` suffisait.
+CREATE TRIGGER tg_memberships_audit
+    AFTER INSERT OR UPDATE OR DELETE ON org.memberships
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
 -- Attribution automatique de la primauté : la première adhésion active d'une
 -- personne devient son rattachement principal. Les suivantes restent
 -- secondaires, sauf demande explicite. L'appelant n'a donc rien à calculer, et

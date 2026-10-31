@@ -715,6 +715,27 @@ export interface NameConfirmationPayload {
 }
 
 /**
+ * L'équipe accepte ou refuse une DEMANDE de rattachement (31/10). Une
+ * invitation attend la personne, l'API la refuse.
+ */
+export interface MembershipDecisionPayload {
+  organization_id: OrganizationId
+  membership_id: Uuid
+  approved: boolean
+  /** Absent : le rôle demandé est gardé. */
+  role?: MembershipRole
+}
+
+/** L'équipe change le rôle d'un membre actif (31/10). */
+export interface MembershipRoleChangePayload {
+  organization_id: OrganizationId
+  membership_id: Uuid
+  role: MembershipRole
+  /** Retirer son rôle au dernier référent actif n'est permis qu'avec elle. */
+  confirm_last_manager: boolean
+}
+
+/**
  * Ce que rend une écriture de la fiche : la fiche entière, recomposée.
  *
  * Même parti qu'en A10 : vérifier un domaine change le score de confiance, qui
@@ -727,3 +748,5 @@ export type OrganizationWriteResult =
   | { status: 'not_found' }
   /** Fiche qui détient déjà ce domaine vérifié — `ux_organization_domains_verified`. */
   | { status: 'domain_taken'; conflict_with: OrganizationRef }
+  /** Rôle retiré au dernier référent actif sans confirmation (FR-041). */
+  | { status: 'last_manager' }

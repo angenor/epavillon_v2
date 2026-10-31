@@ -49,6 +49,8 @@ const organizationPatches = new Map<string, Partial<Organization>>()
 const domainPatches = new Map<string, Partial<OrganizationDomain>>()
 /** Dénominations confirmées ou infirmées pendant la session. */
 const namePatches = new Map<string, Partial<OrganizationName>>()
+/** Adhésions acceptées, refusées ou changées de rôle par l'équipe (31/10). */
+const membershipPatches = new Map<string, Partial<Membership>>()
 /**
  * Arbitrages portés sur les paires de doublons.
  *
@@ -168,7 +170,7 @@ export function effectiveMemberships(): Membership[] {
     const key = `${organizationId}|${membership.person_id}`
     if (seen.has(key)) continue
     seen.add(key)
-    out.push({ ...membership, organization_id: organizationId })
+    out.push({ ...membership, ...membershipPatches.get(membership.id), organization_id: organizationId })
   }
   return out
 }
@@ -205,6 +207,10 @@ export function patchDomain(id: string, patch: Partial<OrganizationDomain>): voi
 
 export function patchName(id: string, patch: Partial<OrganizationName>): void {
   namePatches.set(id, { ...namePatches.get(id), ...patch })
+}
+
+export function patchMembership(id: string, patch: Partial<Membership>): void {
+  membershipPatches.set(id, { ...membershipPatches.get(id), ...patch })
 }
 
 export function recordPairDecision(

@@ -194,7 +194,7 @@ pub async fn set_name_confirmation(
 }
 
 /// La fiche entière, relue après l'écriture.
-async fn recomposer(
+pub(crate) async fn recomposer(
     state: &OrgState,
     perimetre: &AdminScope,
     id: OrganizationId,

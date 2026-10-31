@@ -396,9 +396,11 @@ export {
   pendingDuplicatesOf,
   organizationDetail,
   decideDuplicatePair,
+  decideOrganizationMembership,
   mergeOrganizations,
   setDomainVerification,
   setNameConfirmation,
+  setOrganizationMembershipRole,
   setOrganizationVerification,
 } from './admin-organizations'
 

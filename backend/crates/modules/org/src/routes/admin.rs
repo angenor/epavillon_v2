@@ -13,13 +13,20 @@ use actix_web::{web, HttpResponse};
 use kernel::auth::{Actor, Perimeter, Requires};
 use kernel::error::Result;
 
-use crate::domain::admin::{DomainVerification, NameConfirmation, OrganizationVerification};
+use crate::domain::admin::{
+    AdminMembershipDecision, DomainVerification, MembershipRoleChange, NameConfirmation,
+    OrganizationVerification,
+};
 use crate::domain::duplicates::DuplicateDecision;
-use crate::domain::ids::{OrganizationDomainId, OrganizationId, OrganizationNameId, PersonId};
+use crate::domain::ids::{
+    MembershipId, OrganizationDomainId, OrganizationId, OrganizationNameId, PersonId,
+};
 use crate::domain::merge::MergePayload;
-use crate::domain::permissions::{OrganizationMerge, ORGANIZATION_MANAGE, ORGANIZATION_READ};
+use crate::domain::permissions::{
+    OrganizationManage, OrganizationMerge, ORGANIZATION_MANAGE, ORGANIZATION_READ,
+};
 use crate::routes::public::RechercheQuery;
-use crate::service::{admin_detail, admin_list, admin_write, duplicates, merge, search};
+use crate::service::{admin_detail, admin_list, admin_members, admin_write, duplicates, merge, search};
 use crate::state::OrgState;
 
 /// Le scope `/admin/organizations` — **rempli, jamais créé ici**.
@@ -41,7 +48,9 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route("/{id}/merge-preview", web::get().to(apercu_de_fusion))
         .route("/{id}/verification", web::put().to(verification))
         .route("/{id}/domains/{domainId}", web::put().to(domaine))
-        .route("/{id}/names/{nameId}", web::put().to(denomination));
+        .route("/{id}/names/{nameId}", web::put().to(denomination))
+        .route("/{id}/members/{membershipId}/decision", web::put().to(decision_d_adhesion))
+        .route("/{id}/members/{membershipId}/role", web::put().to(role_d_adhesion));
 }
 
 /// La liste du back-office, **bornée par le périmètre**.
@@ -267,6 +276,90 @@ pub(crate) async fn denomination(
         &perimetre.scope,
         OrganizationId(organisation),
         OrganizationNameId(name_id),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(issue))
+}
+
+/// L'équipe accepte ou refuse une **demande**, avec le rôle donné (31/10).
+/// **Permission de gestion, portée GLOBALE** : qui parle au nom d'une
+/// organisation ne relève d'aucune édition.
+#[utoipa::path(
+    put,
+    description = "`OrganizationWriteResult`. Accepte (`approved`, `role` facultatif : le rôle demandé est gardé) ou refuse une **demande** de rattachement. Une invitation attend la personne : `ORG_MEMBERSHIP_IS_INVITATION`. **Permission de gestion en portée globale.**",
+    path = "/admin/organizations/{id}/members/{membershipId}/decision",
+    tag = "Back-office — organisations",
+    operation_id = "admin_organisation_decision_adhesion",
+    params(
+        ("id" = uuid::Uuid, Path, description = "Organisation"),
+        ("membershipId" = uuid::Uuid, Path, description = "Adhésion"),
+    ),
+    request_body = Object,
+    responses(
+        (status = 200, description = "OrganizationWriteResult", body = Object),
+        (status = 403, description = "Permission de gestion absente, ou détenue sur une portée qui n'est pas globale", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "ORG_MEMBERSHIP_IS_INVITATION ou ORG_MEMBERSHIP_NOT_PENDING", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn decision_d_adhesion(
+    state: web::Data<OrgState>,
+    acteur: Requires<OrganizationManage>,
+    perimetre: Perimeter,
+    chemin: web::Path<(uuid::Uuid, uuid::Uuid)>,
+    corps: web::Json<AdminMembershipDecision>,
+    requete: actix_web::HttpRequest,
+) -> Result<HttpResponse> {
+    let (organisation, adhesion) = chemin.into_inner();
+    let issue = admin_members::decide(
+        &state,
+        &crate::routes::contexte_de(&requete, acteur.person_id),
+        &perimetre.scope,
+        PersonId(acteur.person_id),
+        OrganizationId(organisation),
+        MembershipId(adhesion),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(issue))
+}
+
+/// L'équipe change le rôle d'un membre actif (31/10). **Permission de gestion,
+/// portée GLOBALE.**
+#[utoipa::path(
+    put,
+    description = "`OrganizationWriteResult`. Retirer son rôle au dernier référent actif rend `last_manager`, sauf `confirm_last_manager`. Une adhésion qui n'est pas active : `ORG_MEMBERSHIP_NOT_ACTIVE`. **Permission de gestion en portée globale.**",
+    path = "/admin/organizations/{id}/members/{membershipId}/role",
+    tag = "Back-office — organisations",
+    operation_id = "admin_organisation_role_adhesion",
+    params(
+        ("id" = uuid::Uuid, Path, description = "Organisation"),
+        ("membershipId" = uuid::Uuid, Path, description = "Adhésion"),
+    ),
+    request_body = Object,
+    responses(
+        (status = 200, description = "OrganizationWriteResult", body = Object),
+        (status = 403, description = "Permission de gestion absente, ou détenue sur une portée qui n'est pas globale", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "ORG_MEMBERSHIP_NOT_ACTIVE", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn role_d_adhesion(
+    state: web::Data<OrgState>,
+    acteur: Requires<OrganizationManage>,
+    perimetre: Perimeter,
+    chemin: web::Path<(uuid::Uuid, uuid::Uuid)>,
+    corps: web::Json<MembershipRoleChange>,
+    requete: actix_web::HttpRequest,
+) -> Result<HttpResponse> {
+    let (organisation, adhesion) = chemin.into_inner();
+    let issue = admin_members::set_role(
+        &state,
+        &crate::routes::contexte_de(&requete, acteur.person_id),
+        &perimetre.scope,
+        OrganizationId(organisation),
+        MembershipId(adhesion),
         corps.into_inner(),
     )
     .await?;

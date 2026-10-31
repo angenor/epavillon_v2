@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT actor_id FROM platform.audit_log\n          WHERE entity_table = 'memberships' AND entity_id = $1 AND action = 'update'\n          ORDER BY occurred_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "actor_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "platform.audit_log",
+            "name": "actor_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "e7cf7ed44329c408cd27be8f6d249bc63ab3388b3f304e3cff13fb4937a885fe"
+}

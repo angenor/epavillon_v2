@@ -33,6 +33,8 @@ pub const ORGANIZATION_MERGED: &str = "org.organization.merged";
 pub const MEMBERSHIP_REQUESTED: &str = "org.membership.requested";
 pub const MEMBERSHIP_APPROVED: &str = "org.membership.approved";
 pub const MEMBERSHIP_REVOKED: &str = "org.membership.revoked";
+/// Rôle changé par l'équipe depuis le back-office (31/10).
+pub const MEMBERSHIP_ROLE_CHANGED: &str = "org.membership.role_changed";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrganizationCreated {
@@ -113,4 +115,13 @@ pub struct MembershipRevoked {
     pub organization_id: Uuid,
     pub person_id: Uuid,
     pub cause: RevocationCause,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MembershipRoleChanged {
+    pub membership_id: Uuid,
+    pub organization_id: Uuid,
+    pub person_id: Uuid,
+    pub previous_role: String,
+    pub role: String,
 }

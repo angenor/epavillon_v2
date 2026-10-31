@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, invited_by, invited_at, approved_at)\n         VALUES ($1, $2, 'member', $3::text::org.membership_status, 'Chargée de programme', $4,\n                 CASE WHEN $4::uuid IS NULL THEN NULL ELSE now() END,\n                 CASE WHEN $3 = 'active' THEN now() END)\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "555cf2f7ba09930359195ee743fa7afa2cec4f523718ae8776211ac6c1a46c27"
+}

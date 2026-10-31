@@ -10,6 +10,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use super::ids::{OrganizationDomainId, OrganizationId, OrganizationNameId, PersonId};
+use super::membership::MembershipRole;
 
 /// Une ligne de la liste — la fiche de performance, plus ce qu'il faut pour la
 /// **lire**.
@@ -321,4 +322,25 @@ pub enum OrganizationWriteOutcome {
     DomainTaken {
         conflict_with: OrganizationRef,
     },
+    /// Le rôle retiré est celui du dernier référent actif, sans confirmation :
+    /// l'écran le dit et redemande (FR-041).
+    LastManager,
+}
+
+/// La décision de l'équipe sur une **demande**, avec le rôle donné (31/10).
+#[derive(Debug, Clone, Deserialize)]
+pub struct AdminMembershipDecision {
+    pub approved: bool,
+    /// Ignoré sur un refus. Absent : le rôle demandé est gardé.
+    #[serde(default)]
+    pub role: Option<MembershipRole>,
+}
+
+/// Le rôle d'un membre actif, changé par l'équipe (31/10).
+#[derive(Debug, Clone, Deserialize)]
+pub struct MembershipRoleChange {
+    pub role: MembershipRole,
+    /// Retirer son rôle au dernier référent actif n'est permis qu'avec elle.
+    #[serde(default)]
+    pub confirm_last_manager: bool,
 }

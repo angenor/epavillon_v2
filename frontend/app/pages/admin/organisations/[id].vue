@@ -2,10 +2,12 @@
 import type {
   OrganizationDetail,
   OrganizationDomainRow,
+  OrganizationMemberRow,
   OrganizationNameRow,
   OrganizationWriteResult,
 } from '~/types/admin-organizations'
 import type { EffectivePermission } from '~/types/identity'
+import type { MembershipRole } from '~/types/org'
 import type { TabItem } from '~/types/ui'
 
 /**
@@ -89,6 +91,8 @@ const canRead = computed(
 const canManage = computed(() => hasPermissionOnAnyScope(granted.value, 'org.organization.manage'))
 /** La fusion, elle, déplace des rattachements partout : portée GLOBALE exigée. */
 const canMerge = computed(() => hasPermission(granted.value, 'org.organization.merge'))
+/** Qui parle au nom d'une organisation ne relève d'aucune édition : portée GLOBALE aussi. */
+const canManageMembers = computed(() => hasPermission(granted.value, 'org.organization.manage'))
 
 const {
   data: detail,
@@ -195,6 +199,10 @@ async function apply(action: () => Promise<OrganizationWriteResult>): Promise<vo
       })
       return
     }
+    if (result.status === 'last_manager') {
+      writeError.value = t('admin.organization.detail.members.lastManagerRefused')
+      return
+    }
     if (result.status === 'not_found') return
 
     detail.value = result.detail
@@ -245,6 +253,29 @@ function toggleAutoJoin(domain: OrganizationDomainRow, autoJoin: boolean): void 
         domain_id: domain.id,
         verified: domain.verified_at !== null,
         auto_join: autoJoin,
+      },
+      auth.person?.id ?? null,
+    ),
+  )
+}
+
+function decideMember(row: OrganizationMemberRow, approved: boolean, role?: MembershipRole): void {
+  apply(() =>
+    api.adminOrganizations.decideMembership(
+      { organization_id: organizationId.value, membership_id: row.id, approved, role },
+      auth.person?.id ?? null,
+    ),
+  )
+}
+
+function setMemberRole(row: OrganizationMemberRow, role: MembershipRole, confirmLastManager: boolean): void {
+  apply(() =>
+    api.adminOrganizations.setMembershipRole(
+      {
+        organization_id: organizationId.value,
+        membership_id: row.id,
+        role,
+        confirm_last_manager: confirmLastManager,
       },
       auth.person?.id ?? null,
     ),
@@ -521,6 +552,10 @@ function pairLink(pairId: string, otherId: string): string {
             v-else-if="activeTab === 'members'"
             :members="detail.members"
             :timezone="timezone"
+            :can-manage="canManageMembers"
+            :busy="busy"
+            @decide="decideMember"
+            @set-role="setMemberRole"
           />
 
           <AdminOrganizationsDetailActivities

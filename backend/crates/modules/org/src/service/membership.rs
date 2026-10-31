@@ -445,7 +445,7 @@ async fn emettre_demande(
     Ok(())
 }
 
-async fn emettre_approbation(conn: &mut PgConnection, adhesion: &Membership) -> Result<()> {
+pub(crate) async fn emettre_approbation(conn: &mut PgConnection, adhesion: &Membership) -> Result<()> {
     events::emit(
         conn,
         DomainEvent {
@@ -466,7 +466,7 @@ async fn emettre_approbation(conn: &mut PgConnection, adhesion: &Membership) -> 
     Ok(())
 }
 
-async fn emettre_revocation(
+pub(crate) async fn emettre_revocation(
     conn: &mut PgConnection,
     adhesion: &Membership,
     cause: evenements::RevocationCause,

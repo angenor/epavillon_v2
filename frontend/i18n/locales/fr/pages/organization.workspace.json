@@ -106,6 +106,7 @@
     "status": {
       "invited": "Invitation envoyée le {date}",
       "requested": "Demande reçue le {date}",
+      "awaiting": "En attente d'acceptation depuis le {date}",
       "revoked": "Rattachement révoqué",
       "you": "Vous"
     },
@@ -113,6 +114,10 @@
     "decline": "Refuser",
     "remind": "Relancer l'invitation",
     "managerOnly": "Seul un référent peut inviter un membre ou accepter une demande.",
+    "noManager": {
+      "title": "Cette organisation n'a pas encore de référent",
+      "message": "Les demandes de rattachement sont acceptées par l'équipe de l'ePavillon, qui peut aussi désigner un référent."
+    },
     "invite": {
       "title": "Inviter une personne",
       "description": "L'invitation part par courriel. La personne rejoint l'organisation quand elle l'accepte : vous n'avez rien d'autre à faire.",

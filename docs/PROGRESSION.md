@@ -3,11 +3,11 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour : 31 octobre 2026
+- 31/10 : **membres d'une organisation** : l'équipe accepte une demande et désigne le référent depuis la fiche du back-office (portée globale, dernier référent sur confirmation, adhésions auditées, migration `audit-adhesions`) ; l'espace dit « En attente d'acceptation » et signale l'absence de référent. Voir [A11](progression/ecrans/a11-organisations-fusion.md).
 - 31/10 : **éditeur de l'image de couverture** (en production le 31/10) : outils, image au centre et ses trois formats, cases de ce qui figure dessus (logos IFDD/OIF séparés de celui de l'organisation), couleur libre, alerte du logo qui ouvre le choix du fichier, avertissement en quittant (migration `atelier-couleur-libre`). Voir [A5](progression/ecrans/a5-espace-organisation.md).
 - 31/10 : **Zoom** (en production le 31/10) : abonnement aux quatre notifications du direct ; quota de Zoom attendu au lieu d'abandonner, déplacement envoyé à Zoom après 5 min avec « Envoyer à Zoom maintenant » au panneau de la réunion, nouvel essai d'inscription qui cherche avant de réinscrire, contenu des notifications ignorées effacé.
 - 31/10 : **temps réel** (en production le 31/10) : `platform.signal` et flux SSE pour les connectés, pouls de 30 s pour le public ; échanges et état d'un dossier, planificateur, envois de courriels (notification de fin, état « Échec » et « Relancer »), direct, incidents, programme public, questions du public, poste de direct (présents Zoom, échecs d'inscription). Pictogramme d'un fil, colonne d'une journée spéciale teintée au calendrier. Voir [décision](progression/decisions/2026-10-31-temps-reel.md).
 - 30/10 : **espace organisation, quatre retours du soir** : pastilles éteintes une fois vues, manques qui clignotent, nature des échanges (migration `nature-des-echanges`), super-administrateur dans l'espace d'un dossier (migration `agir-pour-une-organisation`), QR en PNG, en production le 30/10 au soir ; image floue corrigée et en production (`srcset` sans la bande 6:1 des courriels)
-- 30/10 : **espace organisation, sept retours** : échanges en fenêtre flottante relue toutes les 15 s, pastilles des onglets (actions et messages non lus), menu « Mon espace » réduit à Profil et Mes activités, page Profil et `PUT /people/{id}`, « il manque » masqué sur un dossier clos, inscrits cachés au public. Voir [A5](progression/ecrans/a5-espace-organisation.md).
 
 ## État général
 | Domaine | État |
@@ -39,7 +39,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production · titre et présentation reportés sur la séance 03/10, en production le 16/10 · destinataires et lu / non lu des messages 28/10, en production · annulation d'un dossier retenu 28/10, en production | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
 | A9 | Planificateur de créneaux | ✅ 18/08 · stand par défaut 29/09, en production · dossiers acceptés seuls publiés 28/10, en production | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
 | A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 · fuseau cherchable et brouillon local 16/09 · appel : formats, revues et grille facultatifs 27/09 · en production | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
-| A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
+| A11 | Organisations et fusion | ✅ 18/08 · l'équipe accepte une demande et désigne le référent 31/10 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |
 | A13 | Messages d'incident | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a13-incidents.md) |
 | A13 bis | Envoi de courriels du back-office | ✅ 28/10, en production | [écarts et vérifications](progression/ecrans/a13-envoi-de-courriels.md) |

@@ -110,13 +110,14 @@
   },
   "members": {
     "title": "Members",
-    "description": "Affiliations of this organization, pending ones included.",
+    "description": "Affiliations of this organization, pending ones included. The team can approve a request, appoint the contact and change a role: each action is recorded with its author.",
     "caption": "Organization members",
     "columns": {
       "person": "Person",
       "role": "Role",
       "status": "Status",
-      "since": "Since"
+      "since": "Since",
+      "actions": "Actions"
     },
     "role": {
       "manager": "Manager",
@@ -128,11 +129,40 @@
       "active": "Active",
       "revoked": "Revoked"
     },
-    "invited": "Invited on {date} — awaiting the person's answer",
-    "requested": "Requested on {date} — awaiting a manager",
+    "invited": "Invited on {date}: awaiting the person's answer",
+    "requested": "Requested on {date}: awaiting a decision",
     "primary": "Primary affiliation",
     "revokedOn": "Revoked on {date}",
-    "empty": "No member."
+    "empty": "No member.",
+    "noManager": {
+      "title": "This organization has no contact",
+      "message": "Nobody can approve a request from its workspace. Approve a request as “Contact”, or change a member's role."
+    },
+    "accept": "Approve…",
+    "decline": "Decline",
+    "changeRole": "Change role",
+    "awaitingPerson": "Awaiting the person's answer. Nothing to approve here.",
+    "lastManagerRefused": "This is the organization's last contact: confirm in the dialog to remove their role.",
+    "dialog": {
+      "acceptTitle": "Approve {name}'s request",
+      "acceptIntro": "{name} will join the organization with the chosen role and will be notified by email.",
+      "roleTitle": "Change {name}'s role",
+      "roleIntro": "Current role: {role}.",
+      "roleLabel": "Role in the organization",
+      "hint": {
+        "manager": "Approves requests, invites members, submits and tracks proposals.",
+        "member": "Submits and tracks the organization's proposals.",
+        "contributor": "Takes part in the proposals assigned to them."
+      },
+      "lastManager": {
+        "title": "This is the organization's only contact",
+        "message": "Without a contact, nobody will be able to approve a request from the organization's workspace. Appoint another contact first, or confirm knowingly."
+      },
+      "cancel": "Cancel",
+      "accept": "Approve",
+      "save": "Save",
+      "forceSave": "Remove anyway"
+    }
   },
   "activities": {
     "title": "Activities",
