@@ -101,7 +101,8 @@
     "role": {
       "manager": "Référent",
       "member": "Membre",
-      "contributor": "Contributeur"
+      "contributor": "Contributeur",
+      "provisionalManager": "Référent provisoire"
     },
     "status": {
       "invited": "Invitation envoyée le {date}",
@@ -133,6 +134,10 @@
         "already_member": "{email} fait déjà partie de votre organisation.",
         "already_invited": "Une invitation est déjà en attente pour {email}. Vous pouvez la relancer."
       }
+    },
+    "pendingValidation": {
+      "title": "Votre fiche attend sa validation par l'équipe de l'ePavillon",
+      "message": "Vous pouvez déjà déposer vos dossiers. Inviter un membre et accepter une demande seront possibles une fois la fiche validée."
     }
   },
   "editions": {

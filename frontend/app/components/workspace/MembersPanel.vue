@@ -30,6 +30,9 @@ interface Props {
   viewerId: PersonId
   /** Le rôle du lecteur ouvre — ou non — l'invitation et la modération. */
   isManager: boolean
+  /** Fiche pas encore validée par l'équipe : le référent est provisoire, il
+   *  n'invite ni n'accepte personne (31/10). L'API le refuse aussi. */
+  pendingValidation?: boolean
   busy?: boolean
 }
 
@@ -52,6 +55,15 @@ const active = computed(() => props.members.filter((entry) => entry.membership.s
 const pending = computed(() => props.members.filter((entry) => entry.membership.status === 'pending'))
 // Sans référent actif, personne ici ne peut accepter : c'est l'équipe de l'ePavillon qui tranche (31/10).
 const hasManager = computed(() => active.value.some((entry) => entry.membership.role === 'manager'))
+const canModerate = computed(() => props.isManager && !props.pendingValidation)
+
+function roleLabel(role: Membership['role']): string {
+  return t(
+    role === 'manager' && props.pendingValidation
+      ? 'organization.workspace.members.role.provisionalManager'
+      : `organization.workspace.members.role.${role}`,
+  )
+}
 
 function pendingLabel(entry: WorkspaceMember): string {
   if (entry.is_invitation) {
@@ -62,8 +74,9 @@ function pendingLabel(entry: WorkspaceMember): string {
   return t(`organization.workspace.members.status.${key}`, { date: date(entry.membership.created_at, viewerTimezone.value) })
 }
 
+// Seule l'équipe nomme un référent (31/10) : une invitation n'en fait pas un.
 const roleOptions = computed<SelectOption[]>(() =>
-  (['member', 'contributor', 'manager'] satisfies Membership['role'][]).map((role) => ({
+  (['member', 'contributor'] satisfies Membership['role'][]).map((role) => ({
     value: role,
     label: t(`organization.workspace.members.role.${role}`),
   })),
@@ -146,12 +159,12 @@ function nameOf(entry: WorkspaceMember): string {
 
         <UiBadge
           :intent="entry.membership.role === 'manager' ? 'info' : 'neutral'"
-          :label="t(`organization.workspace.members.role.${entry.membership.role}`)"
+          :label="roleLabel(entry.membership.role)"
           size="sm"
         />
 
         <span v-if="entry.membership.status === 'pending'" class="flex flex-wrap gap-2">
-          <template v-if="props.isManager && !entry.is_invitation">
+          <template v-if="canModerate && !entry.is_invitation">
             <UiButton
               variant="secondary"
               size="sm"
@@ -171,7 +184,7 @@ function nameOf(entry: WorkspaceMember): string {
             </UiButton>
           </template>
           <UiButton
-            v-else-if="props.isManager"
+            v-else-if="canModerate && entry.is_invitation"
             variant="ghost"
             size="sm"
             icon="mail"
@@ -184,7 +197,13 @@ function nameOf(entry: WorkspaceMember): string {
     </ul>
 
     <!-- L'invitation. Réservée au référent, et le dire quand on ne l'est pas. -->
-    <UiCard v-if="props.isManager" class="mt-5" :title="t('organization.workspace.members.invite.title')">
+    <UiAlert
+      v-if="props.isManager && props.pendingValidation"
+      class="mt-5"
+      :title="t('organization.workspace.members.pendingValidation.title')"
+      :message="t('organization.workspace.members.pendingValidation.message')"
+    />
+    <UiCard v-else-if="props.isManager" class="mt-5" :title="t('organization.workspace.members.invite.title')">
       <p class="max-w-(--measure) text-sm text-text-muted">
         {{ t('organization.workspace.members.invite.description') }}
       </p>

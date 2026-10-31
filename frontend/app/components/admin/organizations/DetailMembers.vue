@@ -32,6 +32,8 @@ interface Props {
   timezone: TimeZoneName
   /** Gestion des organisations en portée globale. */
   canManage?: boolean
+  /** Fiche pas encore validée : son référent, le créateur, est provisoire. */
+  pendingValidation?: boolean
   busy?: boolean
 }
 
@@ -55,6 +57,14 @@ const columns = computed<TableColumn[]>(() => [
 const activeManagers = computed(
   () => props.members.filter((row) => row.status === 'active' && row.role === 'manager').length,
 )
+
+function roleLabel(role: MembershipRole): string {
+  return t(
+    role === 'manager' && props.pendingValidation
+      ? 'admin.organization.detail.members.provisionalManager'
+      : `admin.organization.detail.members.role.${role}`,
+  )
+}
 
 const isRequest = (row: OrganizationMemberRow) => row.status === 'pending' && row.invited_at === null
 
@@ -126,6 +136,12 @@ const STATUS_INTENT: Record<MembershipStatus, Intent> = {
     </p>
 
     <UiAlert
+      v-if="props.pendingValidation"
+      class="mt-4"
+      :title="t('admin.organization.detail.members.pendingValidation.title')"
+      :message="t('admin.organization.detail.members.pendingValidation.message')"
+    />
+    <UiAlert
       v-if="activeManagers === 0"
       class="mt-4"
       intent="warning"
@@ -150,7 +166,7 @@ const STATUS_INTENT: Record<MembershipStatus, Intent> = {
       </template>
 
       <template #cell-role="{ row }">
-        <UiBadge size="sm" :label="t('admin.organization.detail.members.role.' + row.role)" />
+        <UiBadge size="sm" :label="roleLabel(row.role)" />
         <p v-if="row.is_primary" class="mt-0.5 text-xs text-text-subtle">
           {{ t('admin.organization.detail.members.primary') }}
         </p>

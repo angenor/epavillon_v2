@@ -59,15 +59,15 @@ pub struct OrgApi;
 mod tests {
     use super::*;
 
-    /// **Les vingt et une routes du module sont décrites.**
+    /// **Les vingt-trois routes du module sont décrites.**
     ///
     /// Le compte est écrit pour qu'une route ajoutée sans son annotation fasse
-    /// échouer ce test plutôt que de passer inaperçue. Vingt chemins seulement :
+    /// échouer ce test plutôt que de passer inaperçue. Vingt-deux chemins seulement :
     /// `/organizations` en porte deux — la liste et la création.
     #[test]
     fn les_routes_du_module_sont_toutes_decrites() {
         let document = OrgApi::openapi();
-        assert_eq!(document.paths.paths.len(), 20, "chemins distincts");
+        assert_eq!(document.paths.paths.len(), 22, "chemins distincts");
 
         let rendu = document.to_json().expect("sérialisation du document");
         let chemins: serde_json::Value = serde_json::from_str(&rendu).expect("document JSON");
@@ -77,14 +77,14 @@ mod tests {
             .values()
             .map(|c| c.as_object().expect("un chemin").len())
             .sum();
-        assert_eq!(operations, 21, "opérations");
+        assert_eq!(operations, 23, "opérations");
     }
 
-    /// **Les onze codes du module sont au catalogue du noyau.** Ils sont
+    /// **Les quatorze codes du module sont au catalogue du noyau.** Ils sont
     /// engendrés dans la documentation depuis lui : un code ajouté apparaît au
     /// prochain démarrage, un code oublié n'existe pas.
     #[test]
-    fn les_onze_codes_du_module_sont_au_catalogue() {
+    fn les_quatorze_codes_du_module_sont_au_catalogue() {
         use kernel::error::ErrorCode;
 
         let du_module: Vec<&str> = ErrorCode::ALL
@@ -93,6 +93,6 @@ mod tests {
             .filter(|c| c.starts_with("ORG_"))
             .collect();
 
-        assert_eq!(du_module.len(), 11, "onze codes : {du_module:?}");
+        assert_eq!(du_module.len(), 14, "quatorze codes : {du_module:?}");
     }
 }

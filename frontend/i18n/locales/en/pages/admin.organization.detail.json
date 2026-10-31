@@ -162,6 +162,11 @@
       "accept": "Approve",
       "save": "Save",
       "forceSave": "Remove anyway"
+    },
+    "provisionalManager": "Provisional contact",
+    "pendingValidation": {
+      "title": "Organization awaiting validation: its contact is provisional",
+      "message": "The person who created the organization can submit proposals, but cannot invite or approve anyone. When validating it, confirm this contact or appoint another one below."
     }
   },
   "activities": {

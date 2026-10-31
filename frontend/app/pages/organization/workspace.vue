@@ -508,6 +508,7 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
         :organization-name="overview.organization.legal_name"
         :viewer-id="auth.person?.id ?? ''"
         :is-manager="isManager"
+        :pending-validation="overview.organization.status === 'candidate'"
         :busy="inviting"
         @invite="invite"
         @decide="decide"

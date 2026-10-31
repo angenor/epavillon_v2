@@ -162,6 +162,11 @@
       "accept": "Accepter",
       "save": "Enregistrer",
       "forceSave": "Retirer quand même"
+    },
+    "provisionalManager": "Référent provisoire",
+    "pendingValidation": {
+      "title": "Fiche en attente de validation : son référent est provisoire",
+      "message": "La personne qui a créé la fiche dépose ses dossiers, mais n'invite ni n'accepte personne. En validant la fiche, confirmez ce référent ou nommez-en un autre ci-dessous."
     }
   },
   "activities": {

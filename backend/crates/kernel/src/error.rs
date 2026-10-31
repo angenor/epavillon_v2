@@ -98,6 +98,10 @@ codes! {
         "Cette adhésion n'attend plus de décision.";
     OrgMembershipNotActive => "ORG_MEMBERSHIP_NOT_ACTIVE", StatusCode::UNPROCESSABLE_ENTITY,
         "Seul un membre actif change de rôle. Une demande s'accepte d'abord.";
+    OrgPendingValidation => "ORG_PENDING_VALIDATION", StatusCode::UNPROCESSABLE_ENTITY,
+        "La fiche de votre organisation attend sa validation par l'équipe de l'ePavillon. Les invitations et l'acceptation des demandes s'ouvriront ensuite.";
+    OrgManagerAppointedByTeam => "ORG_MANAGER_APPOINTED_BY_TEAM", StatusCode::UNPROCESSABLE_ENTITY,
+        "Seule l'équipe de l'ePavillon désigne un référent. Invitez la personne comme membre : l'équipe pourra ensuite la nommer.";
     OrgLastManager => "ORG_LAST_MANAGER", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette organisation n'aurait plus aucun référent. Désignez un remplaçant d'abord.";
     OrgMergeFieldNotArbitrable => "ORG_MERGE_FIELD_NOT_ARBITRABLE", StatusCode::UNPROCESSABLE_ENTITY,

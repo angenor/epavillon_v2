@@ -37,6 +37,12 @@ pub async fn invite(
     organisation: OrganizationId,
     demande: InviteMember,
 ) -> Result<InviteOutcome> {
+    // Seule l'équipe nomme un référent (31/10), depuis le back-office : une
+    // invitation entre comme membre ou contributeur.
+    if demande.role == crate::domain::membership::MembershipRole::Manager {
+        return Err(ApiError::new(ErrorCode::OrgManagerAppointedByTeam));
+    }
+
     let mut tx = state.db().write(ctx).await?;
 
     if !memberships::is_manager(&mut *tx, organisation, acteur).await? {
@@ -46,6 +52,7 @@ pub async fn invite(
     let Some(fiche) = organizations::by_id(&mut *tx, organisation).await? else {
         return Err(ApiError::not_found());
     };
+    referent_confirme(&fiche)?;
 
     let personne = trouver_ou_creer_personne(&mut tx, &demande.email).await?;
 
@@ -151,6 +158,10 @@ pub async fn decide(
     if !memberships::is_manager(&mut *tx, adhesion.organization_id, acteur).await? {
         return Err(ApiError::new(ErrorCode::OrgNotManager));
     }
+    let Some(fiche) = organizations::by_id(&mut *tx, adhesion.organization_id).await? else {
+        return Err(ApiError::not_found());
+    };
+    referent_confirme(&fiche)?;
 
     // **Le refus qui empêche de faire entrer quelqu'un qui n'a rien accepté**
     // (écart n° 33). Une invitation attend la personne, pas l'organisation.
@@ -442,6 +453,19 @@ async fn emettre_demande(
         },
     )
     .await?;
+    Ok(())
+}
+
+/// **Le référent d'une fiche `candidate` est provisoire** (31/10) : n'importe
+/// qui peut créer une fiche au nom d'une organisation qui n'est pas la sienne.
+/// Il dépose ses dossiers, mais n'invite ni n'accepte personne avant que
+/// l'équipe ait validé la fiche et confirmé ou remplacé ce référent. Ce qui a
+/// déjà été fait sur une fiche `candidate` reste : seuls les gestes suivants
+/// sont refusés.
+fn referent_confirme(fiche: &crate::domain::organization::Organization) -> Result<()> {
+    if fiche.status == crate::domain::organization::OrganizationStatus::Candidate {
+        return Err(ApiError::new(ErrorCode::OrgPendingValidation));
+    }
     Ok(())
 }
 

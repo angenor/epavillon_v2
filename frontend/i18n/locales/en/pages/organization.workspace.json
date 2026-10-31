@@ -101,7 +101,8 @@
     "role": {
       "manager": "Contact",
       "member": "Member",
-      "contributor": "Contributor"
+      "contributor": "Contributor",
+      "provisionalManager": "Provisional contact"
     },
     "status": {
       "invited": "Invitation sent on {date}",
@@ -133,6 +134,10 @@
         "already_member": "{email} is already part of your organization.",
         "already_invited": "An invitation is already pending for {email}. You can send a reminder."
       }
+    },
+    "pendingValidation": {
+      "title": "Your organization is awaiting validation by the ePavillon team",
+      "message": "You can already submit your proposals. Inviting members and approving requests will be possible once the organization is validated."
     }
   },
   "editions": {

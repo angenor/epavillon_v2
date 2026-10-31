@@ -553,6 +553,7 @@ function pairLink(pairId: string, otherId: string): string {
             :members="detail.members"
             :timezone="timezone"
             :can-manage="canManageMembers"
+            :pending-validation="detail.status === 'candidate'"
             :busy="busy"
             @decide="decideMember"
             @set-role="setMemberRole"
