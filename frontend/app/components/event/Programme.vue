@@ -46,7 +46,10 @@ const failed = ref(false)
 const data = computed<ProgrammeData>(() => loaded.get(selectedId.value) ?? { schedule: [], days: [], rooms: [], tracks: [] })
 
 async function load(eventId: string): Promise<void> {
-  if (loaded.has(eventId)) return
+  if (loaded.has(eventId)) {
+    if (eventId !== selectedId.value) void reload(eventId)
+    return
+  }
   loading.value = true
   failed.value = false
   try {
@@ -63,6 +66,27 @@ async function load(eventId: string): Promise<void> {
     loading.value = false
   }
 }
+
+/** Relecture au signal, sans squelette ni message : une panne garde le programme affiché. */
+async function reload(eventId: string): Promise<void> {
+  try {
+    const [schedule, days, rooms, tracks] = await Promise.all([
+      api.sessions.schedule(eventId),
+      api.events.days(eventId),
+      api.events.rooms(eventId),
+      api.sessions.scheduleTracks(eventId).catch(() => []),
+    ])
+    loaded.set(eventId, { schedule, days, rooms, tracks })
+  } catch {
+    // Le prochain signal, ou la prochaine visite, rattrape.
+  }
+}
+
+// Une édition gardée en mémoire mais quittée n'est plus suivie : elle se relit en y revenant.
+useRealtime(
+  () => publicEditionTopics([selectedId.value], PROGRAMME_CHANNELS),
+  () => reload(selectedId.value),
+)
 
 async function select(eventId: string): Promise<void> {
   if (eventId === selectedId.value) return
@@ -236,7 +260,6 @@ const hasPast = computed(() => {
 })
 
 // Même règle que l'accueil : la séance marquée en direct est déclarée une fois pour toute l'application.
-// Signal à écouter ici : `edition:<id>:public:live`, puis relire le programme.
 watch(() => data.value.schedule, declareFrom, { immediate: true })
 
 const liveSession = computed(() => data.value.schedule.find((session) => isLive(session.id)) ?? null)

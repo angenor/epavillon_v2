@@ -84,16 +84,16 @@ const programme = useTemplateRef<{ select: (eventId: string) => Promise<void> }>
  * Les messages actifs de l'édition ouverte. Chargés à part, et **sans casser la
  * page s'ils manquent** : le programme reste le sujet de l'écran.
  */
-const { data: incidents } = await useAsyncData(
+const { data: incidents, refresh: refreshIncidents } = await useAsyncData(
   () => `programme-incidents-${shown.value?.id ?? 'aucune'}`,
   async () => {
     const eventId = shown.value?.id
     if (!eventId) return []
     return api.incidents.forEvent(eventId).catch(() => [])
   },
-  // Signal à écouter ici : `edition:<id>:public:incidents`, puis relire.
   { default: () => [], lazy: true },
 )
+useRealtime(() => publicEditionTopics([shown.value?.id], ['incidents']), () => refreshIncidents())
 
 useHead(() => ({ title: t('programme.title') }))
 </script>

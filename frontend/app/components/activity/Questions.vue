@@ -6,6 +6,8 @@ import { estInchange } from '~/composables/api/etiquete'
 
 interface Props {
   sessionId: string
+  /** L'édition : les questions suivent son sujet public `edition:<id>:public:questions`. */
+  eventId: string
 }
 
 const props = defineProps<Props>()
@@ -39,6 +41,23 @@ async function load(): Promise<void> {
 }
 
 onMounted(load)
+
+/**
+ * Question posée, soutenue, masquée ou répondue, ici ou ailleurs : relue au
+ * signal (pouls, 30 s au plus). La route porte une empreinte, une relecture sans
+ * changement coûte un 304. Une panne garde la liste affichée, sans message.
+ */
+useRealtime(
+  () => publicEditionTopics([props.eventId], ['questions']),
+  async () => {
+    try {
+      const read = await api.pavillon.questions(props.sessionId)
+      if (!estInchange(read)) questions.value = read.valeur
+    } catch {
+      // Le prochain signal rattrape.
+    }
+  },
+)
 
 function replace(updated: PublicSessionQuestion): void {
   questions.value = questions.value

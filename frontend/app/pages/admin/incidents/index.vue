@@ -65,6 +65,29 @@ const {
   { watch: [() => adminScope.currentEventId], lazy: true },
 )
 
+/**
+ * Le poste suit la salle Zoom (`edition:<id>:desk`, accordé avec
+ * `live.meeting.manage`) et la liste suit les messages publiés par un collègue
+ * (`edition:<id>:public:incidents`) : relecture sans squelette ni message, une
+ * panne garde l'écran affiché. Les alertes d'échec vivent dans le layout
+ * (`AdminIncidentsDeskAlerts`).
+ */
+useRealtime(
+  () => {
+    const eventId = adminScope.currentEventId
+    return eventId ? [deskTopic(eventId), publicEditionTopic(eventId, 'incidents')] : []
+  },
+  async () => {
+    const eventId = adminScope.currentEventId
+    if (!eventId) return
+    try {
+      screen.value = await api.adminIncidents.list(eventId, adminScope.scope)
+    } catch {
+      // Le prochain signal rattrape.
+    }
+  },
+)
+
 const { data: granted } = await useAsyncData<EffectivePermission[]>(
   'admin-incidents-permissions',
   async () => (auth.person ? api.identity.permissions(auth.person.id) : []),

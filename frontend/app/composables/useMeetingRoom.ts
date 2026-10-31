@@ -76,6 +76,12 @@ export function useSessionMeeting(session: MaybeRefOrGetter<PublicScheduleRow | 
     if (document.visibilityState === 'visible' && Date.now() - lastLoad > 5_000) void load().then((changed) => changed && schedule(POLL_FAST_MS))
   }
 
+  // La réunion démarre ou finit avec la séance : le signal du direct la relit sans attendre la minute.
+  useRealtime(
+    () => publicEditionTopics([toValue(session)?.event_id], ['live']),
+    () => load().then((changed) => changed && schedule(POLL_FAST_MS)),
+  )
+
   onMounted(() => {
     mounted = true
     void load()

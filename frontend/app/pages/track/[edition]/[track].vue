@@ -40,7 +40,6 @@ if (import.meta.server && status.value === 'success' && !data.value) setResponse
 const page = computed(() => data.value ?? null)
 
 const { declareFrom } = useLiveSession()
-// Signal à écouter ici : `edition:<id>:public:live`, puis `refresh()`.
 watch(
   page,
   (value) => value && declareFrom(value.agenda.flatMap((entry) => (entry.kind === 'activity' ? [entry.activity.session] : []))),
@@ -48,12 +47,23 @@ watch(
 )
 const { mounted, timezone, phase, countdown, entryState, current } = useTrackDay(page)
 
-// Signal à écouter ici : `edition:<id>:public:incidents`, puis relire.
-const { data: incidents } = useLazyAsyncData(
+const { data: incidents, refresh: refreshIncidents } = useLazyAsyncData(
   () => `journee-incidents-${page.value?.track.id ?? 'aucune'}`,
   async () => (page.value ? api.incidents.forTrack(page.value.edition.id, page.value.track.id).catch(() => []) : []),
   { default: () => [], watch: [page] },
 )
+
+/** Au signal : la journée se relit sans squelette ni message ; une panne garde l'affichage. */
+async function reloadQuietly(): Promise<void> {
+  try {
+    data.value = await api.sessions.trackPage(editionSlug.value, trackSlug.value)
+  } catch {
+    // Le prochain signal rattrape.
+  }
+}
+const editionId = computed(() => page.value?.edition.id)
+useRealtime(() => publicEditionTopics([editionId.value], PROGRAMME_CHANNELS), () => reloadQuietly())
+useRealtime(() => publicEditionTopics([editionId.value], ['incidents']), () => refreshIncidents())
 
 const editionLabel = computed(() => (page.value ? (page.value.edition.acronym ?? tr(page.value.edition.title)) : ''))
 const title = computed(() => (page.value ? tr(page.value.track.title) : ''))

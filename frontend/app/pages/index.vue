@@ -59,6 +59,26 @@ const { data, status, error, refresh } = await useAsyncData('home-screen', () =>
 })
 
 /**
+ * Le direct et le programme public des éditions montrées (prochaines séances,
+ * édition en cours) : relus au signal, sans squelette ni message, une relecture
+ * manquée garde l'accueil affiché.
+ */
+const shownEditionIds = computed(() => [
+  ...(data.value?.upcomingSessions.map((session) => session.event_id) ?? []),
+  data.value?.currentEdition?.id,
+])
+useRealtime(
+  () => publicEditionTopics(shownEditionIds.value, PROGRAMME_CHANNELS),
+  async () => {
+    try {
+      data.value = await api.home.screen()
+    } catch {
+      // Le prochain signal rattrape.
+    }
+  },
+)
+
+/**
  * L'ÉTAT DU FILTRE VIT DANS L'URL, en français comme partout ailleurs
  * (`?periode=a-venir`). Il se partage, il survit au retour arrière, et il est
  * rendu par le serveur — un onglet choisi dans une `ref` ne fait rien de tout

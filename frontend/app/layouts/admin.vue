@@ -369,5 +369,6 @@ const sectionsVisibles = computed(() =>
     </div>
 
     <UiToastRegion top="calc(var(--admin-header-height) + var(--space-4))" />
+    <AdminIncidentsDeskAlerts />
   </div>
 </template>

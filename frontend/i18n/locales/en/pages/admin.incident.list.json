@@ -50,6 +50,11 @@
       "retryAt": "next attempt at {time}",
       "abandoned": "to be retried from the planner",
       "more": "and {count} more | and {count} more | and {count} more"
+    },
+    "alert": {
+      "open": "Open the live desk",
+      "meetingFailed": "Zoom meeting not created",
+      "registrationFailed": "Zoom refused a registration | Zoom refused a registration | Zoom refused {count} registrations"
     }
   },
   "forbidden": {

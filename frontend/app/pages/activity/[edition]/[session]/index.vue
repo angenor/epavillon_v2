@@ -37,17 +37,34 @@ const edition = computed(() => data.value?.edition ?? null)
 const detail = computed(() => data.value?.detail ?? null)
 const session = computed(() => detail.value?.session ?? null)
 const { declareFrom } = useLiveSession()
-// Signal à écouter ici : `session:<id>` (direct allumé ou éteint), puis `refresh()`.
 watch(session, (current) => current && declareFrom([current]), { immediate: true })
 const state = computed(() => (session.value ? stateOf(session.value) : 'upcoming'))
 const timezone = computed(() => session.value?.timezone ?? 'UTC')
 const { incidents } = useSessionIncidents(session)
 
-const { data: schedule } = useLazyAsyncData(
+const { data: schedule, refresh: refreshSchedule } = useLazyAsyncData(
   () => `activite-programme-${edition.value?.id ?? 'aucune'}`,
   async () => (edition.value ? api.sessions.schedule(edition.value.id).catch(() => []) : []),
   { default: () => [], watch: [edition] },
 )
+
+/**
+ * Direct allumé ou éteint, activité déplacée, annulée, retitrée : la fiche et la
+ * journée se relisent au signal du programme public. Sans squelette ni message :
+ * une relecture manquée garde ce qui est affiché.
+ */
+async function reloadQuietly(): Promise<void> {
+  const current = edition.value
+  if (!current) return
+  try {
+    const next = await api.pavillon.activite(current.id, sessionSlug.value)
+    data.value = next ? { edition: current, detail: next } : null
+  } catch {
+    // Le prochain signal rattrape.
+  }
+  void refreshSchedule()
+}
+useRealtime(() => publicEditionTopics([edition.value?.id], PROGRAMME_CHANNELS), () => reloadQuietly())
 
 const sameDay = computed(() => {
   const current = session.value
@@ -240,7 +257,7 @@ useSeoMeta({
               />
             </div>
             <ClientOnly>
-              <ActivityQuestions v-if="showQuestions" class="order-3" :session-id="session.id" />
+              <ActivityQuestions v-if="showQuestions" class="order-3" :session-id="session.id" :event-id="session.event_id" />
             </ClientOnly>
             <ActivitySameDay
               class="order-6"

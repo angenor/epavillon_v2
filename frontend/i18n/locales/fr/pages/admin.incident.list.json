@@ -50,6 +50,11 @@
       "retryAt": "nouvel essai à {time}",
       "abandoned": "à relancer depuis le planificateur",
       "more": "et {count} autre | et {count} autre | et {count} autres"
+    },
+    "alert": {
+      "open": "Ouvrir le poste de direct",
+      "meetingFailed": "Réunion Zoom non créée",
+      "registrationFailed": "Zoom a refusé une inscription | Zoom a refusé une inscription | Zoom a refusé {count} inscriptions"
     }
   },
   "forbidden": {

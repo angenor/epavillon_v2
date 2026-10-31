@@ -38,8 +38,8 @@ import type { TimeZoneName } from '~/types/shared'
  * de lire les bandeaux.
  *
  * ET LA SALLE ZOOM (31/10), pour qui gère les réunions : présents, inscriptions
- * refusées (`LiveDeskMeeting`). Signal à écouter ici : `edition:<id>:desk`,
- * puis relire l'écran.
+ * refusées (`LiveDeskMeeting`). La page relit le poste au signal
+ * `edition:<id>:desk` (temps réel).
  */
 
 interface Props {
