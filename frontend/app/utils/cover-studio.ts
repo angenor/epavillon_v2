@@ -80,8 +80,9 @@ export function drawCover(ctx: CanvasRenderingContext2D, scene: CoverScene, temp
   ctx.restore()
 }
 
-/** Les trois sorties de l'image : l'originale, son aperçu de partage, la bande des courriels. */
-export type CoverFormat = 'cover' | 'share' | 'mail'
+/** Les sorties de l'image montrées à l'organisation : l'originale et son aperçu de partage.
+ *  Les courriels prennent leurs visuels aux gabarits du back-office (31/10). */
+export type CoverFormat = 'cover' | 'share'
 
 /** Une couleur libre : `#rrggbb` en minuscules, la forme que la base accepte. */
 export const CUSTOM_ACCENT = /^#[0-9a-f]{6}$/

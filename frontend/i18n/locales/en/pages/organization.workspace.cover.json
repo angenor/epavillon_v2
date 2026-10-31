@@ -106,10 +106,7 @@
     "cover": "Cover",
     "coverSize": "1600 × 900",
     "share": "Sharing",
-    "shareSize": "1200 × 675",
-    "mail": "Email",
-    "mailSize": "1200 × 200",
-    "mailHint": "At the top of emails, the image is cut into a strip at its centre: only the middle remains."
+    "shareSize": "1200 × 675"
   },
   "texts": {
     "hint": "They come from the submission: the image and the activity page say the same thing.",

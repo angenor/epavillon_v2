@@ -376,11 +376,7 @@ if (import.meta.client) {
 }
 
 // L'image tient en entier sous la barre avec ce qui l'entoure (≈ 29rem) : sa largeur suit la hauteur de l'écran.
-const stageWidth = computed(() =>
-  format.value === 'mail'
-    ? '56rem'
-    : 'min(48rem, max(26rem, calc((100dvh - var(--nav-height) - var(--topbar-height) - 29rem) * 16 / 9)))',
-)
+const stageWidth = 'min(48rem, max(26rem, calc((100dvh - var(--nav-height) - var(--topbar-height) - 29rem) * 16 / 9)))'
 
 const statusKey = computed(() => (isDirty.value ? 'dirty' : savedOnce.value ? 'saved' : 'clean'))
 </script>
@@ -569,7 +565,7 @@ const statusKey = computed(() => (isDirty.value ? 'dirty' : savedOnce.value ? 's
               </div>
               <UiAlert v-if="logoError" intent="danger" :message="logoError" live />
 
-              <div class="overflow-hidden rounded-md shadow-lg" :class="format === 'mail' ? 'relative aspect-[6/1]' : ''">
+              <div class="overflow-hidden rounded-md shadow-lg">
                 <ClientOnly>
                   <CoverStudioCanvas
                     ref="preview"
@@ -577,7 +573,6 @@ const statusKey = computed(() => (isDirty.value ? 'dirty' : savedOnce.value ? 's
                     :template="template"
                     :options="options"
                     :label="t('organization.workspace.cover.previewLabel', { title: data.editable.draft.title })"
-                    :class="format === 'mail' ? 'absolute inset-x-0 top-1/2 -translate-y-1/2' : ''"
                   />
                   <template #fallback>
                     <div class="aspect-video bg-surface-sunken" />
@@ -588,7 +583,6 @@ const statusKey = computed(() => (isDirty.value ? 'dirty' : savedOnce.value ? 's
                   <p class="mt-0.5 line-clamp-2 text-sm font-semibold text-text">{{ data.editable.draft.title }}</p>
                 </div>
               </div>
-              <p v-if="format === 'mail'" class="text-sm text-text-secondary">{{ t('organization.workspace.cover.formats.mailHint') }}</p>
 
               <div
                 v-if="usesPhoto"

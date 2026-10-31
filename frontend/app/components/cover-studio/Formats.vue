@@ -3,10 +3,10 @@ import type { CoverDesignOptions } from '~/types/programme/cover-design'
 import type { CoverFormat, CoverScene } from '~/utils/cover-studio'
 
 /**
- * LES TROIS SORTIES DE L'IMAGE, toujours en vue sous l'aperçu. Le serveur les
- * tire de l'image enregistrée (`media/domain/variants.rs`) : `partage`, la même
- * image en 1200 px ; `courriel`, une bande 6:1 coupée au centre. L'aperçu
- * montre donc ce qu'elles seront vraiment.
+ * LES SORTIES DE L'IMAGE, toujours en vue sous l'aperçu. Le serveur tire
+ * `partage` de l'image enregistrée (`media/domain/variants.rs`), la même image
+ * en 1200 px. La bande des courriels n'est plus montrée : les courriels prennent
+ * leurs visuels aux gabarits du back-office (31/10).
  */
 
 interface Props {
@@ -24,7 +24,6 @@ const { t } = useI18n()
 const FORMATS: { key: CoverFormat; width: string }[] = [
   { key: 'cover', width: 'w-36' },
   { key: 'share', width: 'w-36' },
-  { key: 'mail', width: 'w-48' },
 ]
 </script>
 
@@ -41,14 +40,13 @@ const FORMATS: { key: CoverFormat; width: string }[] = [
     >
       <span
         class="relative block overflow-hidden rounded-md ring-offset-2 ring-offset-surface-sunken"
-        :class="[props.selected === format.key ? 'ring-2 ring-accent' : 'ring-1 ring-border', format.key === 'mail' ? 'aspect-[6/1]' : '']"
+        :class="props.selected === format.key ? 'ring-2 ring-accent' : 'ring-1 ring-border'"
       >
         <CoverStudioCanvas
           :scene="props.scene"
           :template="props.template"
           :options="props.options"
           :label="t(`organization.workspace.cover.formats.${format.key}`)"
-          :class="format.key === 'mail' ? 'absolute inset-x-0 top-1/2 -translate-y-1/2' : ''"
         />
       </span>
       <span class="flex items-baseline gap-1.5">

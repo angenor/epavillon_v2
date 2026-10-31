@@ -106,10 +106,7 @@
     "cover": "Couverture",
     "coverSize": "1600 × 900",
     "share": "Partage",
-    "shareSize": "1200 × 675",
-    "mail": "Courriel",
-    "mailSize": "1200 × 200",
-    "mailHint": "En tête des courriels, l'image est coupée en bande au centre : seul le milieu reste."
+    "shareSize": "1200 × 675"
   },
   "texts": {
     "hint": "Ils viennent du dossier : l'image et la page de l'activité disent la même chose.",
