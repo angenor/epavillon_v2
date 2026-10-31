@@ -22,6 +22,8 @@
 
 import type {
   CancellationImpact,
+  ChangeLeadOrganizationPayload,
+  ChangeSubmitterPayload,
   DecisionPayload,
   DecisionResult,
   PostCommentPayload,
@@ -33,6 +35,7 @@ import type {
 import type {
   AddCommentRecipientsPayload,
   CommentPerson,
+  Proposal,
   ProposalCommentView,
 } from '~/types/programme/proposal'
 import type { SaveDraftPayload, SaveDraftResult } from '~/types/proposal-form'
@@ -185,6 +188,17 @@ export function createProposalReviewApi({ call, callOrNull, send }: ApiTransport
     /** Ce qu'annuler ce dossier retenu retirerait du programme public, avant de confirmer. */
     cancellationImpact: (proposalId: Uuid): Promise<CancellationImpact> =>
       call(`/proposals/${proposalId}/cancellation-impact`, (m) => m.cancellationImpact(proposalId)),
+
+    /**
+     * RATTACHER LE DOSSIER À UNE AUTRE ORGANISATION PORTEUSE : il a été déposé
+     * au nom de la mauvaise fiche. Les co-organisatrices ne changent pas.
+     */
+    changeLeadOrganization: (proposalId: Uuid, payload: ChangeLeadOrganizationPayload): Promise<Proposal> =>
+      send(`/proposals/${proposalId}/lead-organization`, payload, (m) => m.changeLeadOrganization(proposalId, payload), 'PUT'),
+
+    /** Confier le dossier à un autre déposant. Son adhésion à l'organisation n'est pas posée. */
+    changeSubmitter: (proposalId: Uuid, payload: ChangeSubmitterPayload): Promise<Proposal> =>
+      send(`/proposals/${proposalId}/submitter`, payload, (m) => m.changeSubmitter(proposalId, payload), 'PUT'),
 
     decide: (personId: Uuid | null, payload: DecisionPayload): Promise<DecisionResult> => {
       const { proposal_id, ...body } = payload

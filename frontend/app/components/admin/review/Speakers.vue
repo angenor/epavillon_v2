@@ -30,6 +30,8 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { date } = useDateTime()
 
+const confirmed = computed(() => props.entries.filter((entry) => entry.speaker.confirmed_at).length)
+
 function speakerName(entry: ProposalSpeakerEntry): string {
   if (entry.person) return entry.person.display_name
   return [entry.speaker.first_name, entry.speaker.last_name].filter(Boolean).join(' ')
@@ -38,16 +40,21 @@ function speakerName(entry: ProposalSpeakerEntry): string {
 
 <template>
   <section aria-labelledby="review-speakers-title">
-    <h2 id="review-speakers-title" class="text-xl font-semibold">
+    <h2 id="review-speakers-title" class="flex flex-wrap items-baseline gap-x-3 border-b border-border pb-2 text-lg font-semibold">
       {{ t('admin.proposal.review.speakers.title') }}
+      <small v-if="props.entries.length" class="text-sm font-normal text-text-muted">
+        {{ t('admin.proposal.dashboard.speakers.subtitle', { count: props.entries.length, confirmed }) }}
+      </small>
     </h2>
 
     <p v-if="props.entries.length === 0" class="mt-3 text-sm text-text-muted">
       {{ t('admin.proposal.review.speakers.empty') }}
     </p>
 
-    <ul v-else class="mt-3 flex flex-col divide-y divide-border-subtle border-y border-border">
-      <li v-for="entry in props.entries" :key="entry.speaker.id" class="py-3">
+    <ul v-else class="mt-1 flex flex-col divide-y divide-border-subtle">
+      <li v-for="entry in props.entries" :key="entry.speaker.id" class="flex gap-4 py-3">
+        <AdminReviewPersonAvatar :name="speakerName(entry)" :photo="entry.photo" />
+        <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span class="font-medium text-text">
             {{ speakerName(entry) }}
@@ -108,6 +115,9 @@ function speakerName(entry: ProposalSpeakerEntry): string {
         <p v-if="entry.speaker.is_available_for_questions" class="mt-1 text-xs text-text-subtle">
           {{ t('admin.proposal.review.speakers.questions') }}
         </p>
+
+        <p v-if="entry.email" class="mt-1"><AdminReviewEmailAddress :email="entry.email" /></p>
+        </div>
       </li>
     </ul>
   </section>

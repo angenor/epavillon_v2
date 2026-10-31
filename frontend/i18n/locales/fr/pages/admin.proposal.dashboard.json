@@ -1,0 +1,147 @@
+{
+  "writeToSubmitter": "Écrire au déposant",
+  "writeToSubmitterHint": "Ouvre la rubrique Courriels sur un brouillon déjà adressé au déposant.",
+  "changeStatus": "Changer le statut",
+  "asideLabel": "Résumé du dossier",
+  "meta": {
+    "duration": "{minutes} min"
+  },
+  "slot": {
+    "label": "Programmation",
+    "preferred": "Souhaité par l'organisation",
+    "preferredNone": "Aucun jour demandé",
+    "preferredNoneHint": "L'organisation n'a pas indiqué de créneau.",
+    "requested": "Aucune séance demandée | Une séance demandée | {count} séances demandées",
+    "constraints": "« {text} »",
+    "retained": "Retenu par l'équipe",
+    "occurrence": "séance {n}",
+    "shift": {
+      "same": "Comme demandé",
+      "sameDay": "Même jour, autre heure",
+      "later": "Décalé de {count} jour | Décalé de {count} jour | Décalé de {count} jours",
+      "earlier": "Avancé de {count} jour | Avancé de {count} jour | Avancé de {count} jours",
+      "toPlace": "À placer"
+    },
+    "unplaced": "Pas encore de créneau",
+    "unplacedHint": "Le dossier est retenu, mais l'activité n'est placée ni à un jour ni dans une salle. Elle n'apparaît pas dans la programmation publique.",
+    "noSession": "Pas de séance",
+    "noSessionHint": "La séance naît quand le dossier est retenu : il n'y a encore rien à placer.",
+    "place": "Placer l'activité",
+    "takePreferred": "Reprendre le créneau souhaité",
+    "edit": "Modifier le créneau",
+    "openPlanner": "Voir dans la programmation",
+    "withPublication": "{status}, {publication}",
+    "published": "publié",
+    "unpublished": "non publié",
+    "sessionStatus": {
+      "planned": "Pressenti",
+      "scheduled": "Programmé",
+      "live": "En direct",
+      "completed": "Terminé",
+      "postponed": "Reporté",
+      "cancelled": "Annulé"
+    },
+    "registrations": "Aucun inscrit | {count} inscrit | {count} inscrits",
+    "waitlist": "{count} en attente",
+    "meeting": {
+      "synced": "Réunion Zoom à jour",
+      "pending": "Réunion Zoom : mise à jour en attente",
+      "failed": "Réunion Zoom : la mise à jour a échoué",
+      "notRequired": "Réunion saisie à la main",
+      "none": "Diffusée, sans réunion Zoom"
+    }
+  },
+  "panel": {
+    "title": "Créneau retenu",
+    "notFound": "Cette séance n'est pas dans la programmation de l'édition",
+    "notFoundHint": "Elle a peut-être été annulée. La programmation de l'édition dit où elle en est.",
+    "noRoom": "Choisissez une salle : sans salle, l'activité reste à placer.",
+    "pushZoom": "Prévenir Zoom tout de suite",
+    "pushZoomHint": "Sinon la réunion est mise à jour dans quelques minutes, ce qui laisse le temps d'un second ajustement.",
+    "writeAfter": "Écrire ensuite au déposant",
+    "writeAfterHint": "Ouvre la rubrique Courriels sur un brouillon adressé au déposant.",
+    "zoomPushed": "Zoom a été prévenu.",
+    "zoomFailed": "Zoom n'a pas pu être prévenu : {message}",
+    "conflicts": "Aucun chevauchement. | Un chevauchement est signalé : à arbitrer dans la programmation. | {count} chevauchements sont signalés : à arbitrer dans la programmation."
+  },
+  "contacts": {
+    "title": "Personnes à joindre",
+    "subtitle": "déposant et contact du dossier",
+    "submitter": "Déposant",
+    "contact": "Personne de contact",
+    "change": "Changer",
+    "none": "Aucune personne à joindre n'est connue pour ce dossier."
+  },
+  "email": {
+    "copy": "Copier l'adresse",
+    "copied": "Adresse copiée",
+    "none": "sans adresse"
+  },
+  "speakers": {
+    "subtitle": "{count}, dont {confirmed} confirmés"
+  },
+  "others": {
+    "title": "Autres dossiers de l'organisation",
+    "all": "Tous, sur la fiche de l'organisation",
+    "empty": "Aucun autre dossier de cette organisation dans votre périmètre.",
+    "columns": {
+      "proposal": "Dossier",
+      "status": "Statut",
+      "dates": "Dates",
+      "submitter": "Déposé par"
+    },
+    "stamp": "{date}, {time}",
+    "createdAt": "Créé le {date}",
+    "retainedAt": "Créneau retenu : {slot}",
+    "notPlaced": "pas encore placé",
+    "noSlot": "aucun"
+  },
+  "lead": {
+    "eyebrow": "Organisation porteuse",
+    "edit": "Modifier la fiche",
+    "open": "Ouvrir la fiche complète",
+    "change": "Changer l'organisation du dossier",
+    "pending": "en attente"
+  },
+  "figures": {
+    "title": "En chiffres",
+    "registrations": "inscrit | inscrit | inscrits",
+    "speakers": "intervenant | intervenant | intervenants",
+    "documents": "pièce | pièce | pièces"
+  },
+  "orgPanel": {
+    "title": "Changer l'organisation du dossier",
+    "intro": "Quand le dossier a été déposé au nom de la mauvaise organisation. Les co-organisatrices ne changent pas ; ses séances suivent.",
+    "current": "actuelle",
+    "search": "Chercher une organisation",
+    "searchHint": "Nom, sigle ou ancien nom : toutes les dénominations sont cherchées.",
+    "same": "C'est déjà l'organisation de ce dossier.",
+    "confirm": "Rattacher le dossier",
+    "done": "Le dossier est rattaché à sa nouvelle organisation.",
+    "membershipNote": "La déposante n'est pas rattachée à la nouvelle organisation : son adhésion se gère depuis la fiche de l'organisation."
+  },
+  "submitterPanel": {
+    "title": "Changer le déposant",
+    "intro": "La personne qui suit le dossier et en reçoit les avis. Elle doit avoir un compte ; le contact du dossier ne change pas.",
+    "current": "actuel",
+    "search": "Adresse de la personne",
+    "hint": "Les trois premiers caractères de l'adresse suffisent ; l'adresse complète retrouve aussi une personne absente de l'annuaire.",
+    "none": "Personne ne correspond. La personne doit déjà avoir un compte.",
+    "failed": "La recherche n'a pas abouti. Réessayez.",
+    "choose": "Choisir",
+    "other": "Choisir quelqu'un d'autre",
+    "confirm": "Confier le dossier",
+    "done": "Le dossier est confié à son nouveau déposant.",
+    "membershipNote": "Son adhésion à l'organisation porteuse n'est pas posée ici : elle se gère depuis la fiche de l'organisation."
+  },
+  "sections": {
+    "presentation": "Présentation",
+    "documents": "Pièces jointes",
+    "exchanges": "Commentaires et évaluations",
+    "exchangesHint": "Les échanges et l'évaluation s'ouvrent dans leurs fenêtres, en bas à droite ; l'historique, dans son onglet.",
+    "openComments": "Ouvrir les échanges",
+    "openScore": "Ouvrir l'évaluation",
+    "openHistory": "Voir l'historique",
+    "facts": "Fiche du dossier"
+  }
+}

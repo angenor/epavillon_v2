@@ -1,0 +1,147 @@
+{
+  "writeToSubmitter": "Write to the submitter",
+  "writeToSubmitterHint": "Opens the Emails section on a draft already addressed to the submitter.",
+  "changeStatus": "Change status",
+  "asideLabel": "Proposal summary",
+  "meta": {
+    "duration": "{minutes} min"
+  },
+  "slot": {
+    "label": "Scheduling",
+    "preferred": "Requested by the organisation",
+    "preferredNone": "No day requested",
+    "preferredNoneHint": "The organisation did not indicate a slot.",
+    "requested": "No session requested | One session requested | {count} sessions requested",
+    "constraints": "“{text}”",
+    "retained": "Retained by the team",
+    "occurrence": "session {n}",
+    "shift": {
+      "same": "As requested",
+      "sameDay": "Same day, other time",
+      "later": "Moved {count} day later | Moved {count} day later | Moved {count} days later",
+      "earlier": "Moved {count} day earlier | Moved {count} day earlier | Moved {count} days earlier",
+      "toPlace": "To place"
+    },
+    "unplaced": "No slot yet",
+    "unplacedHint": "The proposal is retained, but the activity has neither a day nor a room. It does not appear in the public programme.",
+    "noSession": "No session",
+    "noSessionHint": "The session is created when the proposal is retained: there is nothing to place yet.",
+    "place": "Place the activity",
+    "takePreferred": "Use the requested slot",
+    "edit": "Change the slot",
+    "openPlanner": "See in the programme",
+    "withPublication": "{status}, {publication}",
+    "published": "published",
+    "unpublished": "not published",
+    "sessionStatus": {
+      "planned": "Tentative",
+      "scheduled": "Scheduled",
+      "live": "Live",
+      "completed": "Completed",
+      "postponed": "Postponed",
+      "cancelled": "Cancelled"
+    },
+    "registrations": "No registrants | {count} registrant | {count} registrants",
+    "waitlist": "{count} on the waiting list",
+    "meeting": {
+      "synced": "Zoom meeting up to date",
+      "pending": "Zoom meeting: update pending",
+      "failed": "Zoom meeting: update failed",
+      "notRequired": "Meeting entered by hand",
+      "none": "Streamed, without a Zoom meeting"
+    }
+  },
+  "panel": {
+    "title": "Retained slot",
+    "notFound": "This session is not in the edition's programme",
+    "notFoundHint": "It may have been cancelled. The edition's programme shows where it stands.",
+    "noRoom": "Choose a room: without one, the activity stays to be placed.",
+    "pushZoom": "Notify Zoom right away",
+    "pushZoomHint": "Otherwise the meeting is updated within a few minutes, leaving time for a second adjustment.",
+    "writeAfter": "Then write to the submitter",
+    "writeAfterHint": "Opens the Emails section on a draft addressed to the submitter.",
+    "zoomPushed": "Zoom has been notified.",
+    "zoomFailed": "Zoom could not be notified: {message}",
+    "conflicts": "No overlap. | One overlap is flagged: to be settled in the programme. | {count} overlaps are flagged: to be settled in the programme."
+  },
+  "contacts": {
+    "title": "People to contact",
+    "subtitle": "submitter and contact person",
+    "submitter": "Submitter",
+    "contact": "Contact person",
+    "change": "Change",
+    "none": "No contact person is known for this proposal."
+  },
+  "email": {
+    "copy": "Copy the address",
+    "copied": "Address copied",
+    "none": "no address"
+  },
+  "speakers": {
+    "subtitle": "{count}, {confirmed} confirmed"
+  },
+  "others": {
+    "title": "Other proposals from the organisation",
+    "all": "All of them, on the organisation's page",
+    "empty": "No other proposal from this organisation within your scope.",
+    "columns": {
+      "proposal": "Proposal",
+      "status": "Status",
+      "dates": "Dates",
+      "submitter": "Submitted by"
+    },
+    "stamp": "{date}, {time}",
+    "createdAt": "Created on {date}",
+    "retainedAt": "Retained slot: {slot}",
+    "notPlaced": "not placed yet",
+    "noSlot": "none"
+  },
+  "lead": {
+    "eyebrow": "Lead organisation",
+    "edit": "Edit the organisation",
+    "open": "Open the full record",
+    "change": "Change the proposal's organisation",
+    "pending": "pending"
+  },
+  "figures": {
+    "title": "In figures",
+    "registrations": "registrant | registrant | registrants",
+    "speakers": "speaker | speaker | speakers",
+    "documents": "document | document | documents"
+  },
+  "orgPanel": {
+    "title": "Change the proposal's organisation",
+    "intro": "When the proposal was submitted on behalf of the wrong organisation. Co-organisers do not change; its sessions follow.",
+    "current": "current",
+    "search": "Search for an organisation",
+    "searchHint": "Name, acronym or former name: every name is searched.",
+    "same": "This is already the proposal's organisation.",
+    "confirm": "Move the proposal",
+    "done": "The proposal now belongs to its new organisation.",
+    "membershipNote": "The submitter is not added to the new organisation: memberships are managed from the organisation's page."
+  },
+  "submitterPanel": {
+    "title": "Change the submitter",
+    "intro": "The person who follows the proposal and receives its notices. They must have an account; the contact person does not change.",
+    "current": "current",
+    "search": "Person's email address",
+    "hint": "The first three characters of the address are enough; the full address also finds someone hidden from the directory.",
+    "none": "Nobody matches. The person must already have an account.",
+    "failed": "The search failed. Try again.",
+    "choose": "Choose",
+    "other": "Choose someone else",
+    "confirm": "Hand over the proposal",
+    "done": "The proposal now has its new submitter.",
+    "membershipNote": "Their membership of the lead organisation is not set here: it is managed from the organisation's page."
+  },
+  "sections": {
+    "presentation": "Presentation",
+    "documents": "Attachments",
+    "exchanges": "Comments and reviews",
+    "exchangesHint": "Exchanges and the review open in their windows, bottom right; the history, in its tab.",
+    "openComments": "Open the exchanges",
+    "openScore": "Open the review",
+    "openHistory": "See the history",
+    "facts": "Proposal details"
+  }
+}

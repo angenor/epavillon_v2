@@ -84,6 +84,7 @@ import {
   sessionReviewAssignments,
 } from './admin-proposals'
 import { proposalDashboard } from './views'
+import { proposalDeskDashboard, withReassignment } from './proposal-dashboard'
 
 const organizationById = new Map(organizations.map((o) => [o.id, o]))
 const personById = new Map(people.map((p) => [p.id, p]))
@@ -291,7 +292,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
 
   // Le statut peut avoir changé pendant la visite, depuis cet écran ou depuis la
   // liste : les deux écrans partagent le même tampon.
-  const proposal = { ...base, status: sessionProposalStatus(proposalId) ?? base.status }
+  const proposal = withReassignment({ ...base, status: sessionProposalStatus(proposalId) ?? base.status })
   const call = callsForProposals.find((entry) => entry.id === proposal.call_id) ?? null
   const grid = call
     ? reviewCriteria
@@ -321,6 +322,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
     can_decide: can('programme.proposal.decide'),
     can_assign: can('event.call.manage'),
     can_edit: can('programme.proposal.edit'),
+    can_schedule: can('programme.session.schedule'),
     is_assigned: myAssignment !== null && myAssignment.recused_at === null,
     is_recused: myAssignment?.recused_at != null,
   }
@@ -394,6 +396,8 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
     .map((speaker) => ({
       speaker,
       person: speaker.person_id ? (personById.get(speaker.person_id) ?? null) : null,
+      email: speaker.person_id ? (personById.get(speaker.person_id)?.primary_email ?? null) : null,
+      photo: null,
     }))
 
   const documentEntries: ProposalDocumentEntry[] = proposalDocuments
@@ -493,6 +497,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
     rank: dashboardRow?.event_rank ?? 0,
     first_visit: personId !== null && !alreadyRead,
     read_count: readCount,
+    dashboard: proposalDeskDashboard(proposal, speakerEntries.length, documentEntries.length, null),
   }
 }
 

@@ -2,7 +2,6 @@
 import type { CommitteeMemberProgress } from '~/types/admin-review'
 import type { Proposal, ProposalStatus } from '~/types/programme/proposal'
 import type { DecisionOption } from '~/utils/review-scoring'
-import type { Intent } from '~/types/ui'
 import type { TimeZoneName } from '~/types/shared'
 
 /**
@@ -38,25 +37,17 @@ interface Props {
   decisions: DecisionOption[]
   canDecide: boolean
   busy?: boolean
+  /** Le bloc de décision ; la fiche du dossier l'ouvre par « Changer le statut » (01/11). */
+  showDecision?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { busy: false, showDecision: true })
 const emit = defineEmits<{ decide: [option: DecisionOption] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { date } = useDateTime()
 
-const STATUS_INTENT: Record<ProposalStatus, Intent> = {
-  draft: 'neutral',
-  submitted: 'info',
-  under_review: 'info',
-  changes_requested: 'warning',
-  accepted: 'success',
-  rejected: 'danger',
-  withdrawn: 'neutral',
-  cancelled: 'danger',
-}
 
 const FIGURE = 'min-w-0 py-3 sm:border-s sm:border-border-subtle sm:px-6 sm:first:border-s-0 sm:first:ps-0'
 
@@ -119,7 +110,7 @@ function decisionVariant(status: ProposalStatus): 'primary' | 'secondary' | 'dan
 
     <div class="mt-4 flex flex-wrap items-center gap-2">
       <UiBadge
-        :intent="STATUS_INTENT[props.proposal.status]"
+        :intent="PROPOSAL_STATUS_INTENT[props.proposal.status]"
         :label="t(`admin.proposal.review.status.${props.proposal.status}`)"
       />
       <UiBadge
@@ -179,7 +170,11 @@ function decisionVariant(status: ProposalStatus): 'primary' | 'secondary' | 'dan
 
     <!-- LA DÉCISION, À PART. Fond creusé, libellé propre : on ne clique pas ici
          par inadvertance en sortant de la grille de notes. -->
-    <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-md border border-border bg-surface-sunken px-4 py-3">
+    <div
+      v-if="props.showDecision"
+      id="review-decision"
+      class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-md border border-border bg-surface-sunken px-4 py-3"
+    >
       <div class="min-w-0 flex-1 basis-64">
         <h2 class="text-sm font-semibold tracking-caps uppercase">
           {{ t('admin.proposal.review.decision.title') }}

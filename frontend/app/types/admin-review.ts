@@ -44,16 +44,23 @@ import type {
   ProposalTransition,
 } from './programme/proposal'
 import type { Review, ReviewAssignment, ReviewMode, ReviewRecommendation, ReviewScore } from './programme/review'
+import type { SessionStatus } from './programme/session'
 import type { ScheduleThemeBadge } from './views'
 import type {
   AssetId,
   CriterionId,
+  EventId,
+  I18nText,
   IsoDateTime,
   Numeric,
   OrganizationId,
   PersonId,
   ProposalId,
+  RoomId,
+  SessionId,
   TaxonomyTermCode,
+  TimeZoneName,
+  TrackId,
   Url,
   Uuid,
 } from './shared'
@@ -113,6 +120,10 @@ export interface ProposalOrganizationEntry {
 export interface ProposalSpeakerEntry {
   speaker: ProposalSpeaker
   person: Person | null
+  /** Adresse de la personne ; nulle pour un intervenant sans adresse (D16). */
+  email: string | null
+  /** Photo de la ligne, à défaut celle de la personne. */
+  photo: AttachedImage | null
 }
 
 /**
@@ -230,6 +241,8 @@ export interface ReviewDeskPermissions {
   can_assign: boolean
   /** `programme.proposal.edit` — corriger le contenu d'un dossier déposé. */
   can_edit: boolean
+  /** `programme.session.schedule` — placer et déplacer les séances du dossier. */
+  can_schedule: boolean
   /** Suis-je AFFECTÉ à ce dossier ? Décorrélé de la permission : un membre du
    *  comité peut lire un dossier qu'on ne lui a pas confié, sans le noter. */
   is_assigned: boolean
@@ -315,6 +328,99 @@ export interface ReviewDeskScreen {
   first_visit: boolean
   /** Membres du comité ayant ouvert le dossier — `proposal_reads`, collectif. */
   read_count: number
+  /** Le tableau de bord du back-office (01/11). */
+  dashboard: ProposalDashboard
+}
+
+// ---------------------------------------------------------------------------
+// Le tableau de bord du dossier (01/11)
+// ---------------------------------------------------------------------------
+
+/** Une personne à joindre : le back-office seul lit son adresse. */
+export interface ProposalContactPerson {
+  person_id: PersonId
+  display_name: string
+  job_title: string | null
+  organization_name: string | null
+  email: string
+  /** `media.attached_image('identity', 'people', id, 'avatar')`. */
+  photo: AttachedImage | null
+}
+
+/** Une journée spéciale à laquelle l'équipe a rattaché la séance. */
+export interface ProposalSessionTrack {
+  id: TrackId
+  title: I18nText
+  color_hex: string | null
+}
+
+/** La réunion de visioconférence d'une séance, réduite à son état (`live.meetings`). */
+export interface ProposalSessionMeeting {
+  provider: string
+  status: 'draft' | 'scheduled' | 'started' | 'ended' | 'cancelled' | 'failed'
+  sync_status: 'not_required' | 'pending' | 'in_progress' | 'synced' | 'failed' | 'abandoned'
+  last_synced_at: IsoDateTime | null
+}
+
+/** Une séance du dossier : le créneau RETENU, à distinguer du créneau souhaité. */
+export interface ProposalSessionSlot {
+  id: SessionId
+  sequence_number: number
+  starts_at: IsoDateTime
+  ends_at: IsoDateTime
+  timezone: TimeZoneName
+  status: SessionStatus
+  published_at: IsoDateTime | null
+  /** Nulle tant que la séance n'est pas placée. */
+  room_id: RoomId | null
+  room_name: I18nText | null
+  is_streamed: boolean
+  tracks: ProposalSessionTrack[]
+  /** Inscriptions confirmées (`registered`, `attended`, `no_show`). */
+  registration_count: number
+  waitlist_count: number
+  meeting: ProposalSessionMeeting | null
+}
+
+/** Un autre dossier de l'organisation porteuse, dans le périmètre du lecteur (règle 8). */
+export interface OrganizationOtherProposal {
+  id: ProposalId
+  reference_code: string
+  title: I18nText
+  status: ProposalStatus
+  created_at: IsoDateTime
+  event_id: EventId
+  event_title: I18nText
+  event_acronym: string | null
+  /** Fuseau de l'édition du dossier : ses dates s'y lisent. */
+  timezone: TimeZoneName
+  city: string | null
+  /** Début de la première séance placée et non annulée. */
+  retained_starts_at: IsoDateTime | null
+  submitter: ProposalContactPerson | null
+}
+
+export interface ProposalDashboard {
+  sessions: ProposalSessionSlot[]
+  submitter: ProposalContactPerson | null
+  /** Nulle sans contact, ou quand le contact est le déposant. */
+  contact: ProposalContactPerson | null
+  lead_organization_id: OrganizationId
+  lead_logo: AttachedImage | null
+  lead_type_label: I18nText | null
+  lead_country_name: I18nText | null
+  other_proposals: OrganizationOtherProposal[]
+  counts: { registrations: number; speakers: number; documents: number }
+}
+
+/** `PUT /proposals/{id}/lead-organization`. */
+export interface ChangeLeadOrganizationPayload {
+  organization_id: OrganizationId
+}
+
+/** `PUT /proposals/{id}/submitter`. */
+export interface ChangeSubmitterPayload {
+  person_id: PersonId
 }
 
 // ---------------------------------------------------------------------------

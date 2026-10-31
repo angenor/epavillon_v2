@@ -5870,6 +5870,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposals/{id}/lead-organization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Rattacher le dossier à une autre organisation porteuse.
+         * @description `ChangeLeadOrganizationPayload` → `Proposal`. Le dossier a été déposé au nom de la mauvaise organisation : l'équipe le rattache à la bonne. Périmètre de l'édition et `programme.proposal.edit` sur elle. **Les co-organisatrices ne changent pas** (sauf celle qui devient porteuse) ; les séances du dossier suivent. Tracé par l'audit du dossier ; aucun événement de domaine. Un brouillon est refusé.
+         */
+        put: operations["propositions_changer_de_porteuse"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposals/{id}/organizations": {
         parameters: {
             query?: never;
@@ -6044,6 +6064,26 @@ export interface paths {
          * @description `SaveDraftPayload` → `SubmitProposalResult`. **Les trois refus de recevabilité sortent en 200**, avec leur valeur : l'échéance pour un appel clos, le plafond pour un quota atteint. Ils sont classés **avant** l'écriture parce que le déclencheur ne les rend que dans une phrase française, et parce qu'un même code d'erreur PostgreSQL sert aux quatre causes possibles. Le déclencheur reste le dernier mot : une course est **reclassée**, jamais lue au texte. Le brouillon est enregistré **avant** toute décision — si l'appel a fermé entre le chargement et le clic, l'organisation ne perd pas en plus ce qu'elle venait de saisir. La réponse porte le nombre de revues attendues et la date d'annonce, **lus sur l'appel**.
          */
         post: operations["depot_deposer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/submitter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Confier le dossier à un autre déposant.
+         * @description `ChangeSubmitterPayload` → `Proposal`. Change la personne qui a déposé le dossier et qui en reçoit les avis. Périmètre de l'édition et `programme.proposal.edit` sur elle. La personne doit avoir un compte actif ; **son adhésion à l'organisation porteuse n'est pas posée ici** (elle relève du module des organisations). Le contact du dossier ne change pas. Tracé par l'audit du dossier. Un brouillon est refusé.
+         */
+        put: operations["propositions_changer_de_deposant"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -23293,6 +23333,69 @@ export interface operations {
             };
         };
     };
+    propositions_changer_de_porteuse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Proposal */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre vide, ou `programme.proposal.edit` absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Brouillon (PROPOSAL_NOT_EDITABLE), organisation inconnue ou qui ne peut plus porter (PROPOSAL_UNKNOWN_REFERENCE) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     propositions_organisations: {
         parameters: {
             query?: never;
@@ -23773,6 +23876,69 @@ export interface operations {
                 };
             };
             /** @description Dossier incomplet, ou bornes d'intervenants de l'appel */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_changer_de_deposant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Proposal */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre vide, ou `programme.proposal.edit` absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors périmètre**, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Brouillon (PROPOSAL_NOT_EDITABLE), personne inconnue ou inactive (PROPOSAL_UNKNOWN_REFERENCE) */
             422: {
                 headers: {
                     [name: string]: unknown;

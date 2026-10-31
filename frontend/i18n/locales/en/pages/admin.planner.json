@@ -115,6 +115,8 @@
     "noScore": "No score",
     "format": "Format",
     "preferred": "Slot requested at submission",
+    "preferredReminder": "Requested by the organisation: {slot}.",
+    "takePreferred": "Use this slot",
     "constraints": "Declared constraints",
     "openProposal": "Open the original proposal",
     "slot": "Slot",

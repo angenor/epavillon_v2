@@ -51,9 +51,17 @@ interface Props {
   error?: string | null
   /** Faux quand la personne n'a pas le droit d'arbitrer : panneau en lecture. */
   editable?: boolean
+  /** Rappel du créneau souhaité, avec « Reprendre ce créneau » (fiche du dossier, 01/11). */
+  offerPreferred?: boolean
+  /** À l'ouverture, le formulaire part du créneau souhaité plutôt que du créneau actuel. */
+  applyPreferred?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), { editable: true })
+const props = withDefaults(defineProps<Props>(), {
+  editable: true,
+  offerPreferred: false,
+  applyPreferred: false,
+})
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
@@ -100,9 +108,25 @@ watch(
     isStreamed.value = session.is_streamed
     channelId.value =
       session.broadcast_channel_id ?? props.channels.find((channel) => channel.is_default)?.id ?? ''
+    if (props.applyPreferred) takePreferred()
   },
   { immediate: true },
 )
+
+/** Le créneau souhaité au dépôt, dans le formulaire ; la salle reste à choisir. */
+function takePreferred(): void {
+  const session = props.session
+  if (!session?.preferred_start_at) return
+  startWallClock.value = wallClockInZone(session.preferred_start_at, props.timezone).replace(' ', 'T')
+  durationMinutes.value = plannedDuration(session)
+}
+
+const preferredLabel = computed(() => {
+  const start = props.session?.preferred_start_at
+  if (!start || !props.session) return ''
+  const end = endOfSlot(start, plannedDuration(props.session))
+  return `${formatDay(start, props.timezone)}, ${timeRange(start, end, props.timezone, props.zoneLabel)}`
+})
 
 // ---------------------------------------------------------------------------
 // Options
@@ -300,6 +324,16 @@ const isPlaced = computed(() => props.session?.room_id !== null && props.session
         </p>
       </section>
 
+      <div
+        v-if="props.offerPreferred && preferredLabel"
+        class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-info-border bg-info-surface px-4 py-3 text-sm"
+      >
+        <span class="min-w-0 flex-1">{{ t('admin.planner.dialog.preferredReminder', { slot: preferredLabel }) }}</span>
+        <UiButton variant="ghost" size="sm" :disabled="!props.editable || props.busy" @click="takePreferred">
+          {{ t('admin.planner.dialog.takePreferred') }}
+        </UiButton>
+      </div>
+
       <!-- LE CRÉNEAU. Jour, heure et durée dans le fuseau du PAVILLON : le champ
            porte le libellé du fuseau, sans quoi il laisserait croire à une heure
            locale. -->
@@ -458,6 +492,8 @@ const isPlaced = computed(() => props.session?.room_id !== null && props.session
         </UiButton>
         <p class="mt-1.5 text-xs text-text-muted">{{ t('admin.planner.dialog.reportOverrunHint') }}</p>
       </section>
+
+      <slot name="options" />
 
       <UiAlert v-if="props.error" intent="danger" live :message="props.error" />
     </div>

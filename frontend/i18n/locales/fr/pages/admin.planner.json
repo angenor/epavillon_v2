@@ -115,6 +115,8 @@
     "noScore": "Sans note",
     "format": "Format",
     "preferred": "Créneau souhaité au dépôt",
+    "preferredReminder": "Souhaité par l'organisation : {slot}.",
+    "takePreferred": "Reprendre ce créneau",
     "constraints": "Contraintes déclarées",
     "openProposal": "Ouvrir le dossier d'origine",
     "slot": "Créneau",

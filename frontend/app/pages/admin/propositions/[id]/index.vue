@@ -12,42 +12,35 @@ import type { TabItem } from '~/types/ui'
 import type { DecisionOption } from '~/utils/review-scoring'
 
 /**
- * FICHE D'ÉVALUATION D'UNE PROPOSITION — `/admin/propositions/:id`.
+ * LE DOSSIER, EN TABLEAU DE BORD — `/admin/propositions/:id` (01/11, maquette
+ * `docs/maquettes/dossier-admin/` validée par le commanditaire).
  *
- * C'EST ICI QU'UN MEMBRE DU COMITÉ DÉCIDE, ET TOUT S'Y FAIT SANS QUITTER LA
- * PAGE : lire le dossier, noter, écrire au comité ou au déposant, se déporter,
- * trancher. Chaque aller-retour vers un autre écran est une note perdue ou une
- * lecture recommencée — l'écran le plus dense de la plateforme est aussi celui
- * qu'on ne doit jamais avoir à quitter.
+ * TOUT S'Y FAIT SANS QUITTER LA PAGE : lire, joindre le déposant, placer
+ * l'activité, rattacher le dossier à la bonne organisation, noter, trancher.
  *
- * COMPOSITION (29/10, demande du commanditaire, comme en v1) :
- *  · à gauche, LES AUTRES DOSSIERS (`AdminReviewNavigator`) avec les filtres de
- *    la liste, repliable ; en tiroir sous 1024 px. Ouvert, il replie la barre
- *    du back-office le temps de la fiche, sans toucher à la préférence ;
- *  · au centre, le dossier : en-tête et décision, puis le texte, avec sa fiche
- *    signalétique et ses pièces en marge ;
- *  · en bas à droite, DEUX BOUTONS FLOTTANTS empilés : les échanges (avec le
- *    nombre de messages non lus) et l'évaluation. Une seule fenêtre ouverte à
- *    la fois, et elle le reste d'un dossier à l'autre.
+ * COMPOSITION :
+ *  · à gauche, LES AUTRES DOSSIERS (`AdminReviewNavigator`), repliable ; en
+ *    tiroir sous 1024 px ;
+ *  · en-tête : titre, état, une seule action principale (« Écrire au
+ *    déposant ») ; « Changer le statut » déplie la décision ;
+ *  · la bande de programmation : souhaité, écart, retenu. Le créneau retenu
+ *    vit sur la séance, jamais sur le dossier ;
+ *  · le corps : présentation, personnes à joindre, intervenants, autres
+ *    dossiers de l'organisation, pièces, échanges ; en marge, l'organisation
+ *    porteuse, les chiffres, la fiche du dossier ;
+ *  · en bas à droite, les deux fenêtres flottantes (échanges, évaluation),
+ *    inchangées : noter est facultatif (arbitré le 16/09).
  *
- * L'ÉVALUATION FLOTTE (arbitré le 16/09) : noter est facultatif, l'IFDD retient
- * parfois un dossier de partenaire sans l'évaluer.
+ * L'ÉVALUATION EN AVEUGLE est appliquée À LA SOURCE (`blind_review`) : tant que
+ * ma revue n'est pas déposée, les revues de mes pairs ne sont pas envoyées.
  *
- * L'ÉVALUATION EN AVEUGLE EST LA RÈGLE DE L'APPEL, pas un réglage d'écran.
- * `calls_for_proposals.blind_review` commande, et le voile est appliqué À LA
- * SOURCE : tant que ma revue n'est pas déposée, les revues de mes pairs ne sont
- * pas dans la réponse. L'écran en dit le nombre et la raison — un panneau vide
- * sans explication passe pour une panne.
+ * Chaque geste se teste par PERMISSION sur l'édition regardée :
+ * `programme.review.write` noter, `programme.proposal.decide` trancher,
+ * `programme.proposal.edit` corriger et rattacher, `programme.session.schedule`
+ * placer.
  *
- * LA NOTATION ET LA DÉCISION SONT DEUX GESTES DIFFÉRENTS, faits par deux
- * personnes différentes, et l'écran les sépare : la note dans la fenêtre
- * flottante, les actions de décision dans l'en-tête. Chacune se teste par
- * PERMISSION — `programme.review.write` pour noter, `programme.proposal.decide`
- * pour trancher —, toujours sur la portée de l'édition regardée.
- *
- * RÈGLE MÉTIER N° 8 — LE PÉRIMÈTRE D'ADMINISTRATION. Un dossier d'une édition
- * hors périmètre n'est pas affiché, même par URL forgée : `useApi()` refuse
- * l'édition, et la page rend « accès refusé » plutôt qu'une fiche vide.
+ * RÈGLE N° 8 : un dossier hors périmètre se refuse comme un inexistant ; ses
+ * autres dossiers d'une édition hors périmètre ne sont pas envoyés.
  *
  * QUATRE ÉTATS : chargement, erreur avec reprise, dossier introuvable, accès
  * refusé.
@@ -246,6 +239,17 @@ function selectTab(value: string): void {
   router.replace({ query: { ...route.query, vue: value === 'dossier' ? undefined : value } })
 }
 
+const figures = computed(() => {
+  const counts = screen.value?.dashboard.counts
+  return counts
+    ? [
+        { key: 'registrations', value: counts.registrations },
+        { key: 'speakers', value: counts.speakers },
+        { key: 'documents', value: counts.documents },
+      ]
+    : []
+})
+
 const tabs = computed<TabItem[]>(() => [
   { value: 'dossier', label: t('admin.proposal.review.tabs.dossier') },
   {
@@ -282,6 +286,79 @@ const canEditContent = computed(() => {
 })
 
 const editTo = computed(() => localePath(`/admin/propositions/${proposalId.value}/modifier`))
+
+/** La rubrique Courriels, sur un brouillon adressé au déposant. */
+const writeTo = computed(() => localePath({ path: '/admin/courriels/nouveau', query: { dossier: proposalId.value } }))
+
+const decisionShown = ref(false)
+watch(proposalId, () => (decisionShown.value = false))
+
+const plannerTo = computed(() => localePath('/admin/programmation'))
+
+const canSchedule = computed(() => Boolean(screen.value?.permissions.can_schedule))
+const canReassign = computed(() => {
+  const current = screen.value
+  return Boolean(current?.permissions.can_edit) && current?.proposal.status !== 'draft'
+})
+
+// ---------------------------------------------------------------------------
+// Le créneau, l'organisation porteuse, le déposant
+// ---------------------------------------------------------------------------
+
+const slotPanel = ref<{ sessionId: string; fromPreferred: boolean } | null>(null)
+const slotPanelOpen = computed({
+  get: () => slotPanel.value !== null,
+  set: (open: boolean) => {
+    if (!open) slotPanel.value = null
+  },
+})
+const slotHasMeeting = computed(() =>
+  Boolean(screen.value?.dashboard.sessions.find((slot) => slot.id === slotPanel.value?.sessionId)?.meeting),
+)
+
+async function slotSaved(summary: { message: string; conflicts: number }): Promise<void> {
+  notice.value = summary.conflicts
+    ? `${summary.message} ${t('admin.proposal.dashboard.panel.conflicts', summary.conflicts)}`
+    : summary.message
+  await refresh()
+}
+
+const leadPanelOpen = ref(false)
+const submitterPanelOpen = ref(false)
+const reassignBusy = ref(false)
+const reassignError = ref<string | null>(null)
+
+watch([leadPanelOpen, submitterPanelOpen], () => (reassignError.value = null))
+
+async function changeLead(organizationId: string): Promise<void> {
+  reassignBusy.value = true
+  reassignError.value = null
+  try {
+    await api.review.changeLeadOrganization(proposalId.value, { organization_id: organizationId })
+    leadPanelOpen.value = false
+    notice.value = t('admin.proposal.dashboard.orgPanel.done')
+    await Promise.all([refresh(), nav.refresh()])
+  } catch (thrown) {
+    reassignError.value = writeError(thrown)
+  } finally {
+    reassignBusy.value = false
+  }
+}
+
+async function changeSubmitter(personId: string): Promise<void> {
+  reassignBusy.value = true
+  reassignError.value = null
+  try {
+    await api.review.changeSubmitter(proposalId.value, { person_id: personId })
+    submitterPanelOpen.value = false
+    notice.value = t('admin.proposal.dashboard.submitterPanel.done')
+    await refresh()
+  } catch (thrown) {
+    reassignError.value = writeError(thrown)
+  } finally {
+    reassignBusy.value = false
+  }
+}
 
 /** Super-administrateur seulement : agir dans l'espace de l'organisation, à sa demande (30/10). */
 const canActForOrganization = computed(() => hasPermission(granted.value, 'programme.proposal.act_for_organization'))
@@ -566,16 +643,25 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             :decisions="decisions"
             :can-decide="screen.permissions.can_decide"
             :busy="busy"
+            :show-decision="decisionShown"
             @decide="openDecision"
           >
             <template #actions>
+              <UiButton icon="mail" :to="writeTo" :title="t('admin.proposal.dashboard.writeToSubmitterHint')">
+                {{ t('admin.proposal.dashboard.writeToSubmitter') }}
+              </UiButton>
               <UiButton
-                v-if="canEditContent"
+                v-if="screen.permissions.can_decide"
                 variant="secondary"
-                icon="edit"
-                :to="editTo"
-                :label="t('admin.proposal.edit.action')"
-              />
+                :aria-expanded="decisionShown"
+                aria-controls="review-decision"
+                @click="decisionShown = !decisionShown"
+              >
+                {{ t('admin.proposal.dashboard.changeStatus') }}
+              </UiButton>
+              <UiButton v-if="canEditContent" variant="secondary" icon="edit" :to="editTo">
+                {{ t('admin.proposal.edit.action') }}
+              </UiButton>
               <UiButton
                 v-if="canActForOrganization"
                 variant="secondary"
@@ -612,6 +698,18 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             @dismiss="notice = null"
           />
 
+          <AdminReviewSlotBand
+            class="mt-8"
+            :proposal="screen.proposal"
+            :sessions="screen.dashboard.sessions"
+            :timezone="timezone"
+            :zone-label="zoneLabel"
+            :can-schedule="canSchedule"
+            :planner-to="plannerTo"
+            @edit="(sessionId: string) => (slotPanel = { sessionId, fromPreferred: false })"
+            @place="(sessionId: string, fromPreferred: boolean) => (slotPanel = { sessionId, fromPreferred })"
+          />
+
           <UiTabs
             class="mt-10"
             :items="tabs"
@@ -620,15 +718,96 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             @update:model-value="selectTab"
           />
 
-          <!-- LE DOSSIER : le texte à gauche, sa fiche et ses pièces en marge.
-               Sous 56 rem de large, la fiche passe au-dessus du texte. -->
+          <!-- LE CORPS : colonne principale, et la marge du dossier. Sous 48 rem
+               de large, la marge passe sous le texte. -->
           <div
             v-if="activeTab === 'dossier'"
-            class="mt-8 grid gap-x-12 gap-y-10 @4xl:grid-cols-[minmax(0,1fr)_19rem]"
+            class="mt-8 grid grid-cols-1 gap-x-8 gap-y-10 @3xl:grid-cols-[minmax(0,1fr)_19rem]"
           >
-            <aside class="@4xl:col-start-2 @4xl:row-start-1">
-              <div class="flex flex-col gap-6 rounded-lg border border-border bg-surface-raised p-5 @4xl:sticky @4xl:top-[calc(var(--admin-header-height)+1rem)]">
+            <div class="flex min-w-0 flex-col gap-10">
+              <section aria-labelledby="review-project-title">
+                <h2 id="review-project-title" class="border-b border-border pb-2 text-lg font-semibold">
+                  {{ t('admin.proposal.dashboard.sections.presentation') }}
+                </h2>
+                <AdminReviewDossier class="mt-4" :proposal="screen.proposal" />
+              </section>
+
+              <AdminReviewContacts
+                :submitter="screen.dashboard.submitter"
+                :contact="screen.dashboard.contact"
+                :can-change-submitter="canReassign"
+                @change-submitter="submitterPanelOpen = true"
+              />
+
+              <AdminReviewSpeakers :entries="screen.speakers" :timezone="timezone" />
+
+              <AdminReviewOtherProposals
+                :entries="screen.dashboard.other_proposals"
+                :organization-id="screen.dashboard.lead_organization_id"
+              />
+
+              <section aria-labelledby="dashboard-documents-title">
+                <h2
+                  id="dashboard-documents-title"
+                  class="flex items-baseline gap-x-3 border-b border-border pb-2 text-lg font-semibold"
+                >
+                  {{ t('admin.proposal.dashboard.sections.documents') }}
+                  <small class="text-sm font-normal text-text-muted">{{ screen.documents.length }}</small>
+                </h2>
+                <AdminReviewDocuments class="mt-3" :entries="screen.documents" :timezone="timezone" />
+              </section>
+
+              <!-- ÉCHANGES ET ÉVALUATION : les fenêtres flottantes d'aujourd'hui,
+                   inchangées ; ce bloc les rend trouvables depuis le corps. -->
+              <section aria-labelledby="dashboard-exchanges-title">
+                <h2 id="dashboard-exchanges-title" class="border-b border-border pb-2 text-lg font-semibold">
+                  {{ t('admin.proposal.dashboard.sections.exchanges') }}
+                </h2>
+                <p class="mt-3 max-w-(--measure) text-sm text-text-secondary">
+                  {{ t('admin.proposal.dashboard.sections.exchangesHint') }}
+                </p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <UiButton variant="secondary" icon="chat" @click="setDesk('comments', true)">
+                    {{ t('admin.proposal.dashboard.sections.openComments') }}
+                  </UiButton>
+                  <UiButton variant="secondary" icon="star" @click="setDesk('score', true)">
+                    {{ t('admin.proposal.dashboard.sections.openScore') }}
+                  </UiButton>
+                  <UiButton variant="ghost" icon="clock" @click="selectTab('history')">
+                    {{ t('admin.proposal.dashboard.sections.openHistory') }}
+                  </UiButton>
+                </div>
+              </section>
+            </div>
+
+            <aside class="flex flex-col gap-4" :aria-label="t('admin.proposal.dashboard.asideLabel')">
+              <AdminReviewLeadOrganizationCard
+                :entries="screen.organizations"
+                :dashboard="screen.dashboard"
+                :can-change="canReassign"
+                @change="leadPanelOpen = true"
+              />
+
+              <section class="rounded-lg border border-border bg-surface-raised p-5">
+                <h2 class="text-base font-semibold">{{ t('admin.proposal.dashboard.figures.title') }}</h2>
+                <dl class="mt-3 grid grid-cols-2 gap-4">
+                  <div v-for="figure in figures" :key="figure.key" class="flex flex-col-reverse">
+                    <dt class="mt-1 text-sm text-text-muted">
+                      {{ t(`admin.proposal.dashboard.figures.${figure.key}`, figure.value) }}
+                    </dt>
+                    <dd class="text-2xl leading-none font-light tabular-nums">{{ figure.value }}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <!-- EMPLACEMENT DE LA CARTE « COURRIELS ENVOYÉS » : le composant
+                   AdminMailingsProposalMailings (rubrique Courriels), à brancher
+                   ici avec :proposal-id="screen.proposal.id". -->
+
+              <section class="rounded-lg border border-border bg-surface-raised p-5">
+                <h2 class="text-base font-semibold">{{ t('admin.proposal.dashboard.sections.facts') }}</h2>
                 <AdminReviewDossierFacts
+                  class="mt-3"
                   :proposal="screen.proposal"
                   :themes="screen.themes"
                   :timezone="timezone"
@@ -637,30 +816,42 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
                   :submitter-name="personName(screen.proposal.submitted_by)"
                   :contact-name="personName(screen.proposal.contact_person_id)"
                 />
-                <AdminReviewDocuments
-                  class="border-t border-border-subtle pt-4"
-                  :entries="screen.documents"
-                  :timezone="timezone"
-                />
-              </div>
-            </aside>
-
-            <div class="flex min-w-0 flex-col gap-16 @4xl:col-start-1 @4xl:row-start-1">
-              <section aria-labelledby="review-project-title">
-                <h2 id="review-project-title" class="mb-4 text-xl font-semibold">
-                  {{ t('admin.proposal.review.dossier.project') }}
-                </h2>
-                <AdminReviewDossier :proposal="screen.proposal" />
               </section>
-              <AdminReviewOrganizations :entries="screen.organizations" :timezone="timezone" />
-              <AdminReviewSpeakers :entries="screen.speakers" :timezone="timezone" />
-            </div>
+            </aside>
           </div>
 
           <!-- L'HISTORIQUE CHAMP PAR CHAMP est le même composant que l'espace
                organisation : `programme.proposal_history()` rend la même chose
                aux deux écrans. -->
           <WorkspaceHistoryList v-else class="mt-8" :entries="screen.history" :timezone="timezone" />
+
+          <AdminReviewSlotPanel
+            v-model:open="slotPanelOpen"
+            :event-id="screen.proposal.event_id"
+            :session-id="slotPanel?.sessionId ?? null"
+            :apply-preferred="slotPanel?.fromPreferred ?? false"
+            :has-meeting="slotHasMeeting"
+            :write-to="writeTo"
+            @saved="slotSaved"
+          />
+
+          <AdminReviewLeadOrganizationPanel
+            v-model:open="leadPanelOpen"
+            :current-id="screen.dashboard.lead_organization_id"
+            :current-name="leadOrganizationName"
+            :busy="reassignBusy"
+            :error="reassignError"
+            @submit="changeLead"
+          />
+
+          <AdminReviewSubmitterPanel
+            v-model:open="submitterPanelOpen"
+            :current-id="screen.proposal.submitted_by"
+            :current-name="screen.dashboard.submitter?.display_name ?? ''"
+            :busy="reassignBusy"
+            :error="reassignError"
+            @submit="changeSubmitter"
+          />
 
           <AdminReviewCommentsDesk
             :open="desk === 'comments'"

@@ -349,6 +349,7 @@ export {
   decideProposal,
   cancellationImpact,
 } from './proposal-review'
+export { changeLeadOrganization, changeSubmitter } from './proposal-dashboard'
 export {
   proposalCommentViews,
   commentAudience,
