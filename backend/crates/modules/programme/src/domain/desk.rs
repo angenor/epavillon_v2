@@ -19,8 +19,8 @@ use uuid::Uuid;
 use crate::repo::assignments::Affectation;
 use crate::repo::comments::Message;
 use crate::repo::cross::{
-    AnteriorAffiche, Critere, EntreeDHistorique, FicheAppel, FicheEdition, OrganisationAffichee,
-    PersonneAffichee as Personne,
+    AnteriorAffiche, AutreDossier, Critere, EntreeDHistorique, FicheAppel, FicheEdition,
+    OrganisationAffichee, PersonneAJoindre, PersonneAffichee as Personne, SeanceDuDossier,
 };
 use crate::repo::documents::PieceDuDossier;
 use crate::repo::organizations::LienDOrganisation;
@@ -87,6 +87,11 @@ pub struct OrganisationDuDossier {
 pub struct IntervenantDuDossier {
     pub speaker: IntervenantLu,
     pub person: Option<Personne>,
+    /// Adresse de la personne ; nulle pour un intervenant sans adresse (D16).
+    /// Le back-office seul la lit : la fiche est gardée par le périmètre.
+    pub email: Option<String>,
+    /// Photo de la ligne, à défaut celle de la personne.
+    pub photo: Option<serde_json::Value>,
 }
 
 /// La revue d'un pair, ses notes et son auteur — `PeerReview`.
@@ -134,6 +139,8 @@ pub struct DroitsSurLaFiche {
     pub can_assign: bool,
     /// `programme.proposal.edit` sur l'édition : corriger le contenu du dossier.
     pub can_edit: bool,
+    /// `programme.session.schedule` sur l'édition : placer et déplacer ses séances.
+    pub can_schedule: bool,
     /// **Décorrélé de `can_review`** : depuis le 16/09, noter n'exige plus
     /// d'affectation ; seul le déport l'interdit.
     pub is_assigned: bool,
@@ -187,6 +194,34 @@ pub struct FicheDEvaluation {
     /// offertes, et une requête de plus à l'affichage les lui donnerait au prix
     /// d'un aller-retour. Ignoré jusqu'au raccordement.
     pub available_transitions: Vec<crate::domain::transitions::AvailableTransition>,
+    /// Le tableau de bord du back-office (01/11) : créneau retenu, personnes à
+    /// joindre, autres dossiers de l'organisation, chiffres.
+    pub dashboard: TableauDuDossier,
+}
+
+/// Ce que le back-office voit d'un dossier au-delà de son évaluation.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct TableauDuDossier {
+    /// Les séances nées du dossier, par rang ; vide tant qu'il n'est pas retenu.
+    pub sessions: Vec<SeanceDuDossier>,
+    pub submitter: Option<PersonneAJoindre>,
+    /// Nulle quand le dossier n'a pas de contact, ou que c'est le déposant.
+    pub contact: Option<PersonneAJoindre>,
+    pub lead_organization_id: Uuid,
+    pub lead_logo: Option<serde_json::Value>,
+    pub lead_type_label: Option<serde_json::Value>,
+    pub lead_country_name: Option<serde_json::Value>,
+    /// Autres dossiers de la porteuse, **dans le périmètre** du lecteur (règle 8).
+    pub other_proposals: Vec<AutreDossier>,
+    pub counts: ChiffresDuDossier,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, ToSchema)]
+pub struct ChiffresDuDossier {
+    /// Inscriptions confirmées, toutes séances du dossier confondues.
+    pub registrations: i64,
+    pub speakers: i64,
+    pub documents: i64,
 }
 
 /// Un critère de la grille — `ReviewCriterion`. La grille appartient à

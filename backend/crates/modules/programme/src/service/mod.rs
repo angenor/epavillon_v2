@@ -17,6 +17,7 @@ pub mod planner;
 pub mod public_schedule;
 pub mod publication;
 pub mod questions;
+pub mod rattachement;
 pub mod registration;
 pub mod resubmit;
 pub mod review;

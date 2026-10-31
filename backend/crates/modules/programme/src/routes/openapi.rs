@@ -59,6 +59,8 @@ pub struct ApiErrorBody {
         crate::routes::admin_desk::decider,
         crate::routes::admin_desk::impact_de_lannulation,
         crate::routes::admin_desk::corriger,
+        crate::routes::admin_desk::changer_de_porteuse,
+        crate::routes::admin_desk::changer_de_deposant,
         crate::routes::workspace::espace,
         crate::routes::workspace::editions,
         crate::routes::workspace::fichier,

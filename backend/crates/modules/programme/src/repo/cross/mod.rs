@@ -13,7 +13,7 @@
 //! elles se relisent en un fichier, et **c'est ici qu'un ajout se discute**.
 //! C'est le patron de B3, repris sans être réinventé.
 //!
-//! # Les dix-huit lectures hors schéma autorisées
+//! # Les dix-neuf lectures hors schéma autorisées
 //!
 //! | # | Lecture | Question de **ce** module |
 //! |---|---|---|
@@ -35,6 +35,7 @@
 //! | 16 | `reference.countries.iso2`, `reference.taxonomy_terms.code` | les valeurs admises d'une réponse « pays » ou d'un champ adossé à une taxonomie |
 //! | 17 | `live.streams`, `live.build_embed_url()` — par `v_public_schedule` | « cette séance a-t-elle une rediffusion, où, et de quelle durée ? » (Guide Négo, étape 5) |
 //! | 18 | `event.programme_tracks` et ses parties, moments, partenaires, lieu ; `org`, `reference`, `media` pour les résoudre | « que montre la page publique de cette journée ? » (`cross/fils.rs`, 30/10) |
+//! | 19 | `identity.people` (adresse, photo), `event.rooms`, `event.programme_tracks`, `live.meetings`, `event.events` | « qui joindre pour ce dossier, où et quand se tient-il, Zoom est-il à jour, qu'a déposé d'autre son organisation ? » (`cross/tableau.rs`, 01/11) |
 //!
 //! Les cinq dernières sont arrivées avec B5 et vivent dans `cross/grille.rs`,
 //! **dans le même espace de noms** : le découpage est un fait de fichier — le
@@ -933,3 +934,11 @@ pub use comite::*;
 mod fils;
 
 pub use fils::*;
+
+// -----------------------------------------------------------------------------
+// Le tableau de bord d'un dossier (01/11) : personnes à joindre, séances,
+// réunion, autres dossiers de l'organisation. Lectures seules, lecture n° 19.
+// -----------------------------------------------------------------------------
+mod tableau;
+
+pub use tableau::*;

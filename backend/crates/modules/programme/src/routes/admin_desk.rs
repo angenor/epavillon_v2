@@ -26,8 +26,9 @@ use crate::domain::transitions::ProposalStatus;
 use crate::repo::proposals::Fiche;
 use crate::repo::transitions::LigneDeJournal;
 use crate::routes::contexte_de;
+use crate::service::rattachement::{ChangeLeadOrganizationPayload, ChangeSubmitterPayload};
 use crate::service::review::{RecusalPayload, SaveReviewPayload};
-use crate::service::{desk, draft_write, review, transition};
+use crate::service::{desk, draft_write, rattachement, review, transition};
 use crate::state::ProgrammeState;
 
 /// Les chemins portant un identifiant de dossier.
@@ -40,7 +41,12 @@ pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
             "/{id}/cancellation-impact",
             web::get().to(impact_de_lannulation),
         )
-        .route("/{id}/content", web::put().to(corriger));
+        .route("/{id}/content", web::put().to(corriger))
+        .route(
+            "/{id}/lead-organization",
+            web::put().to(changer_de_porteuse),
+        )
+        .route("/{id}/submitter", web::put().to(changer_de_deposant));
 }
 
 /// Toute la fiche, en une réponse.
@@ -287,4 +293,78 @@ pub(crate) async fn corriger(
     .await?;
 
     Ok(HttpResponse::Ok().json(ligne))
+}
+
+/// Rattacher le dossier à une autre organisation porteuse.
+#[utoipa::path(
+    put,
+    description = "`ChangeLeadOrganizationPayload` → `Proposal`. Le dossier a été déposé au nom de la mauvaise organisation : l'équipe le rattache à la bonne. Périmètre de l'édition et `programme.proposal.edit` sur elle. **Les co-organisatrices ne changent pas** (sauf celle qui devient porteuse) ; les séances du dossier suivent. Tracé par l'audit du dossier ; aucun événement de domaine. Un brouillon est refusé.",
+    path = "/proposals/{id}/lead-organization",
+    tag = "Back-office — propositions",
+    operation_id = "propositions_changer_de_porteuse",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    request_body = Object,
+    responses(
+        (status = 200, description = "Proposal", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Périmètre vide, ou `programme.proposal.edit` absente sur l'édition", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant **ou hors périmètre**, indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Brouillon (PROPOSAL_NOT_EDITABLE), organisation inconnue ou qui ne peut plus porter (PROPOSAL_UNKNOWN_REFERENCE)", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn changer_de_porteuse(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    perimetre: Perimeter,
+    chemin: web::Path<Uuid>,
+    corps: web::Json<ChangeLeadOrganizationPayload>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, perimetre.person_id);
+    let fiche = rattachement::changer_de_porteuse(
+        &state,
+        &ctx,
+        &perimetre,
+        ProposalId(chemin.into_inner()),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(fiche))
+}
+
+/// Confier le dossier à un autre déposant.
+#[utoipa::path(
+    put,
+    description = "`ChangeSubmitterPayload` → `Proposal`. Change la personne qui a déposé le dossier et qui en reçoit les avis. Périmètre de l'édition et `programme.proposal.edit` sur elle. La personne doit avoir un compte actif ; **son adhésion à l'organisation porteuse n'est pas posée ici** (elle relève du module des organisations). Le contact du dossier ne change pas. Tracé par l'audit du dossier. Un brouillon est refusé.",
+    path = "/proposals/{id}/submitter",
+    tag = "Back-office — propositions",
+    operation_id = "propositions_changer_de_deposant",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    request_body = Object,
+    responses(
+        (status = 200, description = "Proposal", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Périmètre vide, ou `programme.proposal.edit` absente sur l'édition", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant **ou hors périmètre**, indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Brouillon (PROPOSAL_NOT_EDITABLE), personne inconnue ou inactive (PROPOSAL_UNKNOWN_REFERENCE)", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn changer_de_deposant(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    perimetre: Perimeter,
+    chemin: web::Path<Uuid>,
+    corps: web::Json<ChangeSubmitterPayload>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, perimetre.person_id);
+    let fiche = rattachement::changer_de_deposant(
+        &state,
+        &ctx,
+        &perimetre,
+        ProposalId(chemin.into_inner()),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(fiche))
 }

@@ -46,11 +46,14 @@ use uuid::Uuid;
 
 use crate::domain::blind::{self, Lecteur};
 use crate::domain::desk::{
-    self, AvancementDuComite, CritereAffiche, DroitsSurLaFiche, FicheDEvaluation,
-    IntervenantDuDossier, MaRevue, OrganisationDuDossier, RevueDUnPair,
+    self, AvancementDuComite, ChiffresDuDossier, CritereAffiche, DroitsSurLaFiche,
+    FicheDEvaluation, IntervenantDuDossier, MaRevue, OrganisationDuDossier, RevueDUnPair,
+    TableauDuDossier,
 };
 use crate::domain::ids::ProposalId;
-use crate::domain::permissions::{CALL_MANAGE, PROPOSAL_DECIDE, PROPOSAL_EDIT, REVIEW_WRITE};
+use crate::domain::permissions::{
+    CALL_MANAGE, PROPOSAL_DECIDE, PROPOSAL_EDIT, REVIEW_WRITE, SESSION_SCHEDULE,
+};
 use crate::repo::{
     assignments, comments, cross, dashboard, documents, organizations, proposals, reads, reviews,
     scores, speakers, transitions,
@@ -184,7 +187,56 @@ pub async fn ouvrir(
     .await?;
     let available_transitions = transitions::offertes(&mut *tx, dossier, lecteur).await?;
 
+    // ---- Le tableau de bord : séances, personnes à joindre, autres dossiers --
+    let photos = speakers::photos_du_dossier(&mut *tx, dossier).await?;
+    let sessions = cross::seances_du_dossier(&mut *tx, dossier.as_uuid()).await?;
+    let habillage = cross::habillage_de_la_porteuse(&mut *tx, proposal.organization_id).await?;
+    let mut autres = cross::autres_dossiers(
+        &mut *tx,
+        proposal.organization_id,
+        dossier.as_uuid(),
+        &perimetre.scope,
+    )
+    .await?;
+    let ids_a_joindre = a_joindre(
+        proposal.submitted_by,
+        proposal.contact_person_id,
+        &intervenants,
+        &autres,
+    );
+    let a_joindre_lus = cross::personnes_a_joindre(&mut *tx, &ids_a_joindre).await?;
+
     tx.commit().await?;
+
+    let joignable: BTreeMap<Uuid, cross::PersonneAJoindre> = a_joindre_lus
+        .into_iter()
+        .map(|p| (p.person_id, p))
+        .collect();
+    for autre in &mut autres {
+        autre.submitter = joignable.get(&autre.submitted_by).cloned();
+    }
+    let photo_de: BTreeMap<Uuid, serde_json::Value> = photos
+        .into_iter()
+        .filter_map(|(id, photo)| photo.map(|p| (id, p)))
+        .collect();
+    let dashboard = TableauDuDossier {
+        counts: ChiffresDuDossier {
+            registrations: sessions.iter().map(|s| s.registration_count).sum(),
+            speakers: intervenants.len() as i64,
+            documents: documents.len() as i64,
+        },
+        sessions,
+        submitter: joignable.get(&proposal.submitted_by).cloned(),
+        contact: proposal
+            .contact_person_id
+            .filter(|id| *id != proposal.submitted_by)
+            .and_then(|id| joignable.get(&id).cloned()),
+        lead_organization_id: proposal.organization_id,
+        lead_logo: habillage.logo,
+        lead_type_label: habillage.type_label,
+        lead_country_name: habillage.country_name,
+        other_proposals: autres,
+    };
 
     let maintenant = OffsetDateTime::now_utc();
     let par_personne: BTreeMap<Uuid, cross::PersonneAffichee> =
@@ -214,6 +266,10 @@ pub async fn ouvrir(
                 person: speaker
                     .person_id
                     .and_then(|id| par_personne.get(&id).cloned()),
+                email: speaker
+                    .person_id
+                    .and_then(|id| joignable.get(&id).map(|p| p.email.clone())),
+                photo: photo_de.get(&speaker.id).cloned(),
                 speaker,
             })
             .collect(),
@@ -278,7 +334,24 @@ pub async fn ouvrir(
         first_visit: !deja_lu,
         read_count,
         available_transitions,
+        dashboard,
     })
+}
+
+/// Les personnes dont le back-office montre l'adresse, dédoublonnées.
+fn a_joindre(
+    deposant: Uuid,
+    contact: Option<Uuid>,
+    intervenants: &[speakers::IntervenantLu],
+    autres: &[cross::AutreDossier],
+) -> Vec<Uuid> {
+    let mut vus = HashSet::new();
+    std::iter::once(deposant)
+        .chain(contact)
+        .chain(intervenants.iter().filter_map(|i| i.person_id))
+        .chain(autres.iter().map(|a| a.submitted_by))
+        .filter(|id| vus.insert(*id))
+        .collect()
 }
 
 /// Les personnes à nommer, **dédoublonnées avant la requête**.
@@ -327,7 +400,8 @@ async fn droits(
         r#"SELECT identity.has_permission($1, $2, $4::text::identity.scope_type, $5) AS "noter!",
                   identity.has_permission($1, $3, $4::text::identity.scope_type, $5) AS "decider!",
                   identity.has_permission($1, $6, $4::text::identity.scope_type, $5) AS "affecter!",
-                  identity.has_permission($1, $7, $4::text::identity.scope_type, $5) AS "modifier!""#,
+                  identity.has_permission($1, $7, $4::text::identity.scope_type, $5) AS "modifier!",
+                  identity.has_permission($1, $8, $4::text::identity.scope_type, $5) AS "placer!""#,
         lecteur,
         REVIEW_WRITE,
         PROPOSAL_DECIDE,
@@ -335,6 +409,7 @@ async fn droits(
         portee.scope_id(),
         CALL_MANAGE,
         PROPOSAL_EDIT,
+        SESSION_SCHEDULE,
     )
     .fetch_one(conn)
     .await?;
@@ -344,6 +419,7 @@ async fn droits(
         can_decide: ligne.decider,
         can_assign: ligne.affecter,
         can_edit: ligne.modifier,
+        can_schedule: ligne.placer,
         is_assigned: affectation.is_some_and(|a| a.recused_at.is_none()),
         is_recused: affectation.is_some_and(|a| a.recused_at.is_some()),
     })
