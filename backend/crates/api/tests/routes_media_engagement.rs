@@ -281,6 +281,43 @@ async fn les_routes_du_module_engagement_sont_montees() {
     }
 }
 
+/// Les textes types et le courriel d'un dossier (01/11). `for-proposal` passe
+/// avant `{id}` : lue comme un identifiant, elle rendrait 405.
+#[actix_web::test]
+async fn les_textes_types_et_le_courriel_dun_dossier_sont_montes() {
+    let base = TestDb::new().await;
+    let config = kernel::testing::test_config(base.url());
+    let etat = api::state::AppState::new(base.db(), config)
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+
+    let texte = id();
+    let routes = vec![
+        ("POST", "/api/admin/mailings/for-proposal".to_owned()),
+        ("GET", format!("/api/admin/mailings?proposal_id={}", id())),
+        ("GET", format!("/api/admin/mail-texts?event_id={}", id())),
+        ("POST", "/api/admin/mail-texts".to_owned()),
+        ("GET", format!("/api/admin/mail-texts/{texte}")),
+        ("PUT", format!("/api/admin/mail-texts/{texte}")),
+        ("DELETE", format!("/api/admin/mail-texts/{texte}")),
+    ];
+    for (verbe, chemin) in routes {
+        let requete = match verbe {
+            "GET" => test::TestRequest::get(),
+            "PUT" => test::TestRequest::put(),
+            "POST" => test::TestRequest::post(),
+            _ => test::TestRequest::delete(),
+        };
+        let reponse = test::call_service(&app, requete.uri(&chemin).to_request()).await;
+        assert_eq!(
+            reponse.status(),
+            StatusCode::UNAUTHORIZED,
+            "{verbe} {chemin} devrait être montée et exiger une session"
+        );
+    }
+}
+
 /// Les deux modules sont **déployés** au semis : sans cela, leurs routes ne
 /// seraient jamais montées et tous les tests de ce fichier passeraient au vert
 /// pour la pire des raisons.
