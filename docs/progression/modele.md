@@ -511,3 +511,10 @@ Zoom limite à 100 créations ou modifications de réunion par jour et par hôte
 - **Reprise** : les fiches qui portaient déjà deux noms légaux (renommées par une fusion) voient celui qu'elles ne portent plus passer en `former`.
 
 **En production** : `ops/migrations/2026-10-31-fiche-organisation-modifiable.sql`, rejouable, avant l'API. Jouée deux fois en local.
+
+## 31/10/2026, `075_programme_sessions.sql` : les textes et les intervenants d'un dossier suivent sur l'activité
+
+- **Arbitrage du commanditaire** : ce que l'organisation corrige dans son dossier (ou depuis l'éditeur de l'image) passe aussitôt sur la page de l'activité. Fin de la règle « jamais par une correction de l'organisation » (FR-091 amendé le 03/10) pour le titre et la présentation ; les intervenants, qui ne suivaient jamais, suivent aussi. Le créneau, le format, la salle et l'adresse ne suivent toujours pas.
+- Commentaires mis à jour : `programme.sessions.title`, `.description`, en-tête de `programme.session_speakers`. Aucune colonne ne change : la recopie est faite par l'API (`session_parts::resynchroniser_les_intervenants`), qui garde la ligne et la présence notée (`attended`) d'un intervenant reconnu par personne et rôle, ou par nom et rôle sans personne (D16).
+
+**En production** : `ops/migrations/2026-10-31-textes-suivent-activite.sql` (commentaires seulement), rejouable.

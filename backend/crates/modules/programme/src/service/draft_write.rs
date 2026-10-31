@@ -87,7 +87,6 @@ pub async fn enregistrer(
     ecrire(
         state,
         ctx,
-        Auteur::Organisation,
         acteur,
         &payload,
         &regles,
@@ -151,7 +150,6 @@ pub async fn corriger_par_lequipe(
     ecrire(
         state,
         ctx,
-        Auteur::Equipe,
         acteur,
         &payload,
         &regles,
@@ -220,17 +218,10 @@ fn exiger_un_dossier_complet(brouillon: &ProposalDraft, regles: &ReglesDeLAppel)
     Ok(())
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Auteur {
-    Organisation,
-    Equipe,
-}
-
 #[allow(clippy::too_many_arguments)]
 async fn ecrire(
     state: &ProgrammeState,
     ctx: &RequestContext,
-    auteur: Auteur,
     acteur: Uuid,
     payload: &SaveDraftPayload,
     regles: &ReglesDeLAppel,
@@ -316,28 +307,21 @@ async fn ecrire(
     )
     .await?;
 
-    // 🔴 **SEULS LE TITRE ET LA PRÉSENTATION SONT PROPAGÉS VERS UNE SÉANCE
-    // PROGRAMMÉE, ET SEULEMENT QUAND L'ÉQUIPE CORRIGE.** `programme.sessions` porte aussi un format et un
-    // créneau, et il paraît naturel de « tenir la séance à jour » en entier.
+    // 🔴 **LE TITRE, LA PRÉSENTATION ET LES INTERVENANTS SUIVENT SUR LES
+    // SÉANCES, QUEL QUE SOIT L'AUTEUR** (arbitrage du commanditaire, 31/10).
+    // Jusque-là, seule l'équipe réécrivait les textes publics (FR-091 amendé le
+    // 03/10) et les intervenants ne suivaient jamais : l'organisation corrigeait
+    // son dossier, l'image de couverture changeait, la page de l'activité non.
     //
-    // Ce serait une faute. Une séance retenue a un créneau **arbitré** par
-    // l'IFDD, une salle attribuée, des inscrits prévenus et des rappels
-    // programmés. Recopier dessus le créneau *souhaité* d'un dossier corrigé
-    // déplacerait une séance à laquelle quarante personnes se sont inscrites,
-    // **sans que personne l'ait demandé** (FR-091). Le dossier est la demande,
-    // la séance est la décision : corriger la demande ne rejoue pas la
-    // décision.
-    //
-    // Les textes font exception (arbitrage du 03/10) : aucun écran ne corrige
-    // ceux d'une séance, et l'équipe qui rectifie le dossier rectifie l'affiche.
-    // L'organisation, elle, ne réécrit pas le texte public d'une activité
-    // retenue sans l'IFDD. L'adresse ne suit pas : elle a été communiquée.
+    // Le créneau, le format, la salle et l'adresse ne suivent toujours pas : une
+    // séance retenue a un créneau **arbitré** par l'IFDD et des inscrits
+    // prévenus. Le dossier est la demande, la séance est la décision ; seuls
+    // les textes et les personnes annoncées passent de l'une à l'autre.
     //
     // Ce service n'émet toujours aucun événement de modification : rien ne doit
     // pouvoir s'y abonner pour « synchroniser ».
-    if auteur == Auteur::Equipe {
-        crate::repo::sessions::reporter_les_textes(&mut tx, dossier.as_uuid()).await?;
-    }
+    crate::repo::sessions::reporter_les_textes(&mut tx, dossier.as_uuid()).await?;
+    crate::repo::session_parts::resynchroniser_les_intervenants(&mut tx, dossier.as_uuid()).await?;
 
     tx.commit().await?;
 

@@ -36,9 +36,15 @@ const draft = defineModel<ProposalDraft>({ required: true })
 interface Props {
   call: CallForProposals
   issues: DraftIssue[]
+  /** Variante étroite de l'éditeur de l'image (31/10) : ni en-tête, ni adresse, ni rappel de confirmation. */
+  compact?: boolean
 }
 
 const props = defineProps<Props>()
+defineSlots<{
+  /** La photo d'un intervenant, à la place de l'aperçu : l'éditeur de l'image y pose son champ. */
+  photo?: (scope: { speaker: DraftSpeaker; fullName: string }) => unknown
+}>()
 
 const { t } = useI18n()
 
@@ -107,7 +113,7 @@ function fullName(speaker: DraftSpeaker): string {
 
 <template>
   <div class="grid gap-5">
-    <header>
+    <header v-if="!props.compact">
       <h2 class="font-display text-xl text-text">
         {{ t('proposal.form.step-speakers.title') }}
       </h2>
@@ -117,7 +123,7 @@ function fullName(speaker: DraftSpeaker): string {
     </header>
 
     <!-- Les bornes de l'appel, annoncées AVANT la saisie. -->
-    <p class="flex items-start gap-2 rounded-md bg-surface-sunken px-3 py-2 text-sm text-text-secondary">
+    <p v-if="!props.compact" class="flex items-start gap-2 rounded-md bg-surface-sunken px-3 py-2 text-sm text-text-secondary">
       <UiIcon name="users" size="1.05rem" class="mt-0.5 shrink-0 text-text-muted" />
       {{
         t('proposal.form.step-speakers.bounds', {
@@ -134,19 +140,24 @@ function fullName(speaker: DraftSpeaker): string {
       <li
         v-for="(speaker, index) in draft.speakers"
         :key="speaker.key"
-        class="rounded-md border bg-surface-raised px-4 py-3"
-        :class="issuesOfSpeaker(speaker).some((i) => i.severity === 'error') ? 'border-danger-border' : 'border-border'"
+        class="rounded-md border bg-surface-raised"
+        :class="[
+          props.compact ? 'px-3 py-2.5' : 'px-4 py-3',
+          issuesOfSpeaker(speaker).some((i) => i.severity === 'error') ? 'border-danger-border' : 'border-border',
+        ]"
       >
         <div class="flex flex-wrap items-start justify-between gap-3">
           <!-- La photo est MONTRÉE dans la liste, pas seulement annoncée : c'est
                le seul endroit où l'on vérifie d'un coup d'œil qu'aucun portrait
                ne s'est glissé sur la mauvaise personne. -->
+          <slot name="photo" :speaker="speaker" :full-name="fullName(speaker)">
           <img
             v-if="speaker.photo?.preview_url"
             :src="speaker.photo.preview_url"
             :alt="t('proposal.form.step-speakers.photo.previewAlt', { speaker: fullName(speaker) })"
             class="size-12 shrink-0 rounded-md border border-border object-cover"
           >
+          </slot>
 
           <div class="min-w-0 flex-1">
             <p class="font-bold text-text">
@@ -156,7 +167,7 @@ function fullName(speaker: DraftSpeaker): string {
               </UiBadge>
               <!-- Profil de la plateforme : le déposant n'en modifie pas
                    l'identité, et il doit le savoir depuis la liste. -->
-              <UiBadge v-if="speaker.has_account" size="sm" intent="success" icon="shield-check" class="ml-1.5">
+              <UiBadge v-if="speaker.has_account && !props.compact" size="sm" intent="success" icon="shield-check" class="ml-1.5">
                 {{ t('proposal.form.step-speakers.accountBadge') }}
               </UiBadge>
             </p>
@@ -165,8 +176,10 @@ function fullName(speaker: DraftSpeaker): string {
               <span v-if="speaker.job_title && speaker.organization_name"> · </span>
               <span v-if="speaker.organization_name">{{ speaker.organization_name }}</span>
             </p>
-            <p v-if="speaker.email.trim()" class="font-mono text-sm text-text-subtle">{{ speaker.email }}</p>
-            <p v-else class="text-sm text-text-subtle">{{ t('proposal.form.step-speakers.noEmail') }}</p>
+            <template v-if="!props.compact">
+              <p v-if="speaker.email.trim()" class="font-mono text-sm text-text-subtle">{{ speaker.email }}</p>
+              <p v-else class="text-sm text-text-subtle">{{ t('proposal.form.step-speakers.noEmail') }}</p>
+            </template>
 
             <ul v-if="issuesOfSpeaker(speaker).length > 0" class="mt-2 grid gap-1">
               <li
@@ -185,7 +198,7 @@ function fullName(speaker: DraftSpeaker): string {
             </ul>
           </div>
 
-          <div class="flex shrink-0 items-center gap-1">
+          <div class="flex shrink-0 items-center gap-1" :class="props.compact ? 'basis-full justify-end' : ''">
             <UiButton
               variant="ghost"
               size="sm"
@@ -252,7 +265,7 @@ function fullName(speaker: DraftSpeaker): string {
     <!-- LA CONFIRMATION DE L'INTERVENANT SE FAIT PLUS TARD, par jeton envoyé par
          courriel (`one_time_tokens`, usage `speaker_confirmation`). On le dit :
          citer quelqu'un dans un dossier l'engage, et il l'apprendra s'il a une adresse. -->
-    <p class="flex items-start gap-2 text-sm text-text-muted">
+    <p v-if="!props.compact" class="flex items-start gap-2 text-sm text-text-muted">
       <UiIcon name="mail" size="1.05rem" class="mt-0.5 shrink-0" />
       {{ t('proposal.form.step-speakers.confirmationNotice') }}
     </p>

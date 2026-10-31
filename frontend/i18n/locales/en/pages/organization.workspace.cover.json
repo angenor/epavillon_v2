@@ -109,16 +109,22 @@
     "shareSize": "1200 × 675"
   },
   "texts": {
-    "hint": "They come from the submission: the image and the activity page say the same thing.",
-    "title": "Title",
+    "hint": "What you change here also applies to the proposal and to the activity page.",
+    "title": "Activity title",
     "date": "Date and time",
     "place": "Venue",
     "speakers": "Speakers",
-    "edit": "Edit in the submission"
+    "draft": "This proposal is still a draft: its title and speakers are edited in the submission form.",
+    "fixedByTeam": "Set by the team when scheduling.",
+    "orderHint": "The order of the list is the order on the image.",
+    "changePhoto": "Change",
+    "addPhoto": "Add",
+    "photoAfterSave": "Photo after saving",
+    "invalid": "Fix the flagged title or speakers before saving."
   },
   "leave": {
     "title": "Leave without saving?",
-    "description": "Your changes to the image (template, colour, displayed items) will be lost. The submission keeps the image saved last time.",
+    "description": "Your changes (image, title, speakers) will be lost. The proposal keeps what was last saved.",
     "stay": "Stay",
     "discard": "Leave without saving",
     "saveAndLeave": "Save and leave"

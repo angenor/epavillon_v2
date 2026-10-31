@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.display_name AS \"nom!\" FROM programme.session_speakers d\n             JOIN identity.people p ON p.id = d.person_id\n            WHERE d.session_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "nom!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "856f7ab03eb79c747710b3d02aa52c40f1b872e40ae1d80b089eb6df277239e7"
+}

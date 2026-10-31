@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.session_speakers d\n            SET job_title_snapshot = p.job_title_snapshot,\n                organization_snapshot = p.organization_snapshot,\n                bio = p.bio,\n                confirmed_at = p.confirmed_at,\n                sort_order = p.sort_order,\n                civility = p.civility\n           FROM programme.proposal_speakers p, programme.sessions s\n          WHERE d.session_id = s.id AND s.proposal_id = $1 AND s.status <> 'cancelled'\n            AND p.proposal_id = $1 AND p.role = d.role\n            AND (p.person_id = d.person_id\n                 OR (p.person_id IS NULL AND d.person_id IS NULL\n                     AND p.first_name = d.first_name AND p.last_name = d.last_name))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "999477459c85671d277f36ac2c143f8256e6b1fbb93d4b94ee1483f381f6c4b3"
+}

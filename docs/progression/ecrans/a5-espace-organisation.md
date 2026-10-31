@@ -199,3 +199,15 @@ Vérifié sur données d'exemple : 1440 × 900 (tout visible), 375 px (sans déf
 - Sur sa propre demande, l'espace dit « En attente d'acceptation depuis le … » au lieu de « Demande reçue le … », qui se lisait comme une demande reçue par soi (`MembersPanel`, clé `status.awaiting`).
 - Sans référent actif, un encadré le dit et nomme qui accepte : l'équipe de l'ePavillon (clé `noManager`), qui le peut désormais depuis la fiche du back-office (voir [A11](a11-organisations-fusion.md)).
 - Non vu au navigateur : la connexion fictive de la demandeuse a échoué sur le site hors ligne. Typecheck vert.
+
+## 31/10 : l'éditeur de l'image modifie le titre et les intervenants
+
+Demande du commanditaire, maquette validée (canevas de l'éditeur, artboard « Onglet Textes modifiable »).
+
+- **Onglet Textes** (`CoverStudioTexts`) : titre en champ, date et lieu en lecture (« Fixés par l'équipe à la programmation »), intervenants par la liste du dossier en variante compacte (`ProposalStepSpeakers compact`, nouvelle prop et emplacement `photo`) avec la même fenêtre d'intervenant ; photo sous chaque vignette (« Ajouter » ou « Changer », sur la ligne enregistrée ; « Photo après enregistrement » pour un intervenant ajouté ici). Le panneau s'élargit à 25rem pour cet outil.
+- **L'image suit chaque frappe** : la scène lit la copie de travail du dossier (`useProposalFileEditor`, qui contrôle désormais plusieurs rubriques à la fois : `edit('presentation', 'speakers')`).
+- **Un seul « Enregistrer »** : les textes d'abord (`PUT /proposals/{id}`, mêmes contrôles que le dossier ; un défaut ramène sur l'onglet Textes), puis l'image, dont le texte alternatif prend le nouveau titre. L'avertissement en quittant compte les textes.
+- **Même règle que la page du dossier** : brouillon renvoyé au formulaire de dépôt ; pendant l'évaluation, édition terminée ou dossier clos, l'onglet dit pourquoi et montre les textes en lecture.
+- **Activité** : voir `modele.md` (31/10) ; l'API recopie titre, présentation et intervenants sur les séances à chaque enregistrement, quel que soit l'auteur. Test `correction` mis à la nouvelle règle (le créneau ne bouge pas, titre, présentation et intervenants suivent) ; suite du module programme verte (44 ensembles).
+- **Outil « Photo de fond »** (ancien « Photo »), **format Courriel retiré** (les courriels prennent leurs visuels aux gabarits du back-office).
+- **Vérifié au navigateur** sur les données d'exemple (dossier COP31-00001 du ROAC, 1440 px) : vignettes et boutons de photo, saisie du titre (image et état « Modifications non enregistrées » suivent), enregistrement (titre du dossier changé, image enregistrée) ; 375 px sans défilement horizontal. Fenêtre d'intervenant et pose réelle d'une photo non essayées.

@@ -109,16 +109,22 @@
     "shareSize": "1200 × 675"
   },
   "texts": {
-    "hint": "Ils viennent du dossier : l'image et la page de l'activité disent la même chose.",
-    "title": "Titre",
+    "hint": "Ce que vous changez ici vaut aussi pour le dossier et pour la page de l'activité.",
+    "title": "Titre de l'activité",
     "date": "Date et heure",
     "place": "Lieu",
     "speakers": "Intervenants",
-    "edit": "Modifier dans le dossier"
+    "draft": "Ce dossier est encore un brouillon : son titre et ses intervenants se modifient dans le formulaire de dépôt.",
+    "fixedByTeam": "Fixés par l'équipe à la programmation.",
+    "orderHint": "L'ordre de la liste est celui de l'image.",
+    "changePhoto": "Changer",
+    "addPhoto": "Ajouter",
+    "photoAfterSave": "Photo après enregistrement",
+    "invalid": "Corrigez le titre ou les intervenants signalés avant d'enregistrer."
   },
   "leave": {
     "title": "Quitter sans enregistrer ?",
-    "description": "Vos changements de l'image (modèle, couleur, éléments affichés) seront perdus. Le dossier garde l'image enregistrée la dernière fois.",
+    "description": "Vos changements (image, titre, intervenants) seront perdus. Le dossier garde ce qui a été enregistré la dernière fois.",
     "stay": "Rester",
     "discard": "Quitter sans enregistrer",
     "saveAndLeave": "Enregistrer et quitter"

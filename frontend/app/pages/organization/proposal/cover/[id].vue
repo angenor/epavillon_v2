@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
 import type { ProposalFile } from '~/types/organization-workspace'
-import type { EditableProposal } from '~/types/proposal-form'
+import type { EditableProposal, ProposalDraft } from '~/types/proposal-form'
 import type { CoverDesignOptions, CoverStudioContext } from '~/types/programme/cover-design'
 import type { AssetId } from '~/types/shared'
 import type { AttachedImage } from '~/types/media'
@@ -12,11 +12,13 @@ import { findCoverTemplate } from '~/utils/cover-studio'
 /**
  * L'ÉDITEUR DE L'IMAGE DE COUVERTURE — `/mon-organisation/dossiers/:id/couverture`.
  *
- * Direction « table de montage » (31/10) : outils à gauche (modèles, photo,
- * textes), l'image au centre avec ses trois sorties dessous, ce qui figure
+ * Direction « table de montage » (31/10) : outils à gauche (modèles, photo de
+ * fond, textes), l'image au centre avec ses sorties dessous, ce qui figure
  * dessus et sa couleur à droite. Tout se voit d'un coup d'œil et l'image se
- * redessine à chaque geste. « Enregistrer » dépose exactement ce qui est montré
- * comme couverture du dossier ; quitter avec des changements le demande.
+ * redessine à chaque geste. Le titre et les intervenants se modifient ici et
+ * valent pour le dossier et la page de l'activité. « Enregistrer » écrit les
+ * textes puis dépose exactement l'image montrée ; quitter avec des changements
+ * le demande.
  * `?nouveau=1` repart des choix par défaut.
  */
 
@@ -83,7 +85,54 @@ const isAccent = (value: string): value is CoverAccent => value in COVER_ACCENTS
 
 const choices = () => JSON.stringify({ template: template.value, accent: accent.value, options: options.value })
 const savedChoices = ref<string | null>(null)
-const isDirty = computed(() => savedChoices.value !== null && savedChoices.value !== choices())
+const imageDirty = computed(() => savedChoices.value !== null && savedChoices.value !== choices())
+
+// ---------------------------------------------------------------------------
+// Les textes : le dossier, modifié ici (31/10)
+// ---------------------------------------------------------------------------
+
+const editor = useProposalFileEditor(proposalId, async () => {
+  await refresh()
+})
+
+const draftTo = computed(() => localePath({ path: localePath('/deposer-une-proposition'), query: { dossier: proposalId.value } }))
+
+/** Même règle que la page du dossier ; un brouillon passe par le formulaire de dépôt. */
+const textsBlockedReason = computed(() => {
+  const file = data.value?.file
+  if (!file) return 'file_closed' as const
+  if (file.tracking.proposal.status === 'draft') return 'draft' as const
+  return organizationEditBlockedReason(file.tracking.proposal, file.tracking.edition)
+})
+
+// Modifiable : on travaille d'emblée sur une copie, l'image suit chaque frappe.
+watch(
+  [() => editor.saved.value, textsBlockedReason],
+  ([saved, blocked]) => {
+    if (saved && !blocked && !editor.working.value) editor.edit('presentation', 'speakers')
+  },
+  { immediate: true },
+)
+
+const textsOf = (draft: ProposalDraft | null) =>
+  draft ? JSON.stringify({ title: draft.title, speakers: draft.speakers.map(({ photo_image: _photo, ...rest }) => rest) }) : null
+const textsDirty = computed(() => Boolean(editor.working.value) && textsOf(editor.working.value) !== textsOf(editor.saved.value))
+const isDirty = computed(() => imageDirty.value || textsDirty.value)
+
+/** La photo posée à l'instant : relue sur le dossier, recopiée sur la copie de travail sans perdre la saisie. */
+async function onSpeakerPhotoSet(): Promise<void> {
+  await editor.refresh()
+  const saved = editor.saved.value
+  const working = editor.working.value
+  if (!saved || !working) return
+  editor.working.value = {
+    ...working,
+    speakers: working.speakers.map((speaker) => {
+      const fresh = saved.speakers.find((entry) => entry.speaker_id && entry.speaker_id === speaker.speaker_id)
+      return fresh ? { ...speaker, photo_image: fresh.photo_image } : speaker
+    }),
+  }
+}
 const savedOnce = ref(false)
 
 // Les choix enregistrés reviennent une fois, à l'ouverture : une relecture après
@@ -168,13 +217,15 @@ async function attachSourcePhoto(assetId: AssetId | null): Promise<void> {
 const { data: mediaRules } = useAsyncData(
   'cover-studio-media-rules',
   async () => {
-    const [proposalRules, organizationRules] = await Promise.all([
+    const [proposalRules, organizationRules, speakerRules] = await Promise.all([
       api.media.roles('programme', 'proposals'),
       api.media.roles('org', 'organizations'),
+      api.media.roles('programme', 'proposal_speakers'),
     ])
     return {
       photo: proposalRules.find((rule) => rule.role === 'cover_source') ?? null,
       logo: organizationRules.find((rule) => rule.role === 'logo') ?? null,
+      avatar: speakerRules.find((rule) => rule.role === 'avatar') ?? null,
     }
   },
   { lazy: true, server: false },
@@ -243,10 +294,11 @@ const source = computed<CoverSceneSource | null>(() => {
   const current = data.value
   if (!current) return null
   const { file, editable, studio } = current
+  const texts = editor.working.value ?? editable.draft
   const edition = file.tracking.edition
   const session = [...file.tracking.sessions].sort((a, b) => a.session.starts_at.localeCompare(b.session.starts_at))[0]
   return {
-    title: editable.draft.title,
+    title: texts.title,
     eyebrow: t('organization.workspace.cover.eyebrow', { edition: edition.acronym ?? tr(edition.title) }),
     dateLine: session
       ? `${date(session.session.starts_at, edition.timezone)} · ${timeWithZone(session.session.starts_at, edition.timezone, edition.city ?? undefined)}`
@@ -256,7 +308,7 @@ const source = computed<CoverSceneSource | null>(() => {
     room: session?.room ? tr(session.room.name) : null,
     city: edition.city ?? null,
     organizationName: organizationName.value || null,
-    speakers: editable.draft.speakers.map((speaker) => ({
+    speakers: texts.speakers.map((speaker) => ({
       name: speakerName(speaker),
       imageUrl: speaker.photo_image?.url ?? null,
     })),
@@ -270,7 +322,7 @@ const accentToken = computed(() => (isAccent(accent.value) ? COVER_ACCENTS[accen
 const scene = useCoverScene(source, accentToken)
 
 const hints = computed(() => {
-  const speakers = data.value?.editable.draft.speakers.length ?? 0
+  const speakers = source.value?.speakers.length ?? 0
   return {
     show_date: source.value?.dateLine ?? '',
     show_speakers: speakers
@@ -300,7 +352,17 @@ async function save(): Promise<boolean> {
   saving.value = true
   saveError.value = null
   const saved = choices()
+  const title = editor.working.value?.title ?? current.editable.draft.title
   try {
+    // Les textes d'abord : l'image enregistrée doit dire ce que dit le dossier.
+    if (textsDirty.value) {
+      await editor.save()
+      if (editor.working.value) {
+        tool.value = 'texts'
+        saveError.value = editor.error.value ?? t('organization.workspace.cover.texts.invalid')
+        return false
+      }
+    }
     const blob = await preview.value.toJpeg(COVER_MAX_BYTES)
     if (!blob) {
       saveError.value = t('organization.workspace.cover.renderFailed')
@@ -310,7 +372,7 @@ async function save(): Promise<boolean> {
       file: blob,
       filename: `${current.file.tracking.proposal.reference_code}-couverture.jpg`,
       mimeType: 'image/jpeg',
-      altText: { fr: current.editable.draft.title },
+      altText: { fr: title },
       ownerSchema: 'programme',
       ownerTable: 'proposals',
       ownerId: proposalId.value,
@@ -417,7 +479,10 @@ const statusKey = computed(() => (isDirty.value ? 'dirty' : savedOnce.value ? 's
 
       <UiAlert v-if="saveError" class="mx-3 mt-3 sm:mx-4" intent="danger" :message="saveError" live />
 
-      <div class="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[4.5rem_19rem_minmax(0,1fr)_18rem]">
+      <div
+        class="flex min-h-0 flex-1 flex-col lg:grid"
+        :class="tool === 'texts' ? 'lg:grid-cols-[4.5rem_25rem_minmax(0,1fr)_18rem]' : 'lg:grid-cols-[4.5rem_19rem_minmax(0,1fr)_18rem]'"
+      >
         <!-- LES OUTILS -->
         <nav
           :aria-label="t('organization.workspace.cover.tools.label')"
@@ -491,29 +556,20 @@ const statusKey = computed(() => (isDirty.value ? 'dirty' : savedOnce.value ? 's
             </div>
           </template>
 
-          <template v-else>
-            <h2 class="text-lg font-bold">{{ t('organization.workspace.cover.tools.texts') }}</h2>
-            <p class="mt-1 mb-5 text-sm text-text-muted">{{ t('organization.workspace.cover.texts.hint') }}</p>
-            <dl class="flex flex-col gap-4">
-              <div>
-                <dt class="text-xs text-text-muted">{{ t('organization.workspace.cover.texts.title') }}</dt>
-                <dd class="mt-0.5 font-medium">{{ data.editable.draft.title }}</dd>
-              </div>
-              <div v-if="source?.dateLine">
-                <dt class="text-xs text-text-muted">{{ t('organization.workspace.cover.texts.date') }}</dt>
-                <dd class="mt-0.5 font-medium">{{ source.dateLine }}</dd>
-              </div>
-              <div v-if="source?.placeLine">
-                <dt class="text-xs text-text-muted">{{ t('organization.workspace.cover.texts.place') }}</dt>
-                <dd class="mt-0.5 font-medium">{{ source.placeLine }}</dd>
-              </div>
-              <div v-if="source?.speakers.length">
-                <dt class="text-xs text-text-muted">{{ t('organization.workspace.cover.texts.speakers') }}</dt>
-                <dd class="mt-0.5 font-medium">{{ source.speakers.map((speaker) => speaker.name).join(', ') }}</dd>
-              </div>
-            </dl>
-            <UiButton class="mt-5" variant="secondary" icon="edit" :to="fileTo">{{ t('organization.workspace.cover.texts.edit') }}</UiButton>
-          </template>
+          <CoverStudioTexts
+            v-else
+            v-model="editor.working.value"
+            :call="editor.data.value?.references.call ?? null"
+            :issues="editor.shownIssues.value"
+            :blocked-reason="textsBlockedReason"
+            :saved="editor.saved.value"
+            :date-line="source?.dateLine ?? null"
+            :place-line="source?.placeLine ?? null"
+            :photo-rule="mediaRules?.avatar ?? null"
+            :can-set-photo="!['rejected', 'withdrawn', 'cancelled'].includes(data.file.tracking.proposal.status)"
+            :draft-to="draftTo"
+            @photo-set="onSpeakerPhotoSet"
+          />
         </section>
 
         <!-- L'IMAGE ET SES SORTIES -->

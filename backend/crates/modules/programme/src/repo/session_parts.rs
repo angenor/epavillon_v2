@@ -56,6 +56,61 @@ pub async fn recopier_les_intervenants(
     Ok(poses)
 }
 
+/// Tenir les intervenants des séances d'un dossier à jour sur le dossier (31/10).
+///
+/// Arbitrage du commanditaire : ce que l'organisation corrige dans son dossier
+/// ou depuis l'éditeur de l'image passe aussitôt sur la page de l'activité. Un
+/// intervenant se reconnaît par personne et rôle, ou par nom et rôle sans
+/// personne (D16) : reconnu, il garde sa ligne et sa présence notée ; retiré du
+/// dossier, il quitte la séance ; nouveau, il y entre. Une séance annulée garde
+/// ce qu'elle avait.
+pub async fn resynchroniser_les_intervenants(conn: &mut PgConnection, proposal_id: Uuid) -> Result<()> {
+    sqlx::query!(
+        "DELETE FROM programme.session_speakers d
+          USING programme.sessions s
+          WHERE d.session_id = s.id AND s.proposal_id = $1 AND s.status <> 'cancelled'
+            AND NOT EXISTS (
+                SELECT 1 FROM programme.proposal_speakers p
+                 WHERE p.proposal_id = $1 AND p.role = d.role
+                   AND (p.person_id = d.person_id
+                        OR (p.person_id IS NULL AND d.person_id IS NULL
+                            AND p.first_name = d.first_name AND p.last_name = d.last_name)))",
+        proposal_id
+    )
+    .execute(&mut *conn)
+    .await?;
+
+    sqlx::query!(
+        "UPDATE programme.session_speakers d
+            SET job_title_snapshot = p.job_title_snapshot,
+                organization_snapshot = p.organization_snapshot,
+                bio = p.bio,
+                confirmed_at = p.confirmed_at,
+                sort_order = p.sort_order,
+                civility = p.civility
+           FROM programme.proposal_speakers p, programme.sessions s
+          WHERE d.session_id = s.id AND s.proposal_id = $1 AND s.status <> 'cancelled'
+            AND p.proposal_id = $1 AND p.role = d.role
+            AND (p.person_id = d.person_id
+                 OR (p.person_id IS NULL AND d.person_id IS NULL
+                     AND p.first_name = d.first_name AND p.last_name = d.last_name))",
+        proposal_id
+    )
+    .execute(&mut *conn)
+    .await?;
+
+    let seances = sqlx::query_scalar!(
+        "SELECT id FROM programme.sessions WHERE proposal_id = $1 AND status <> 'cancelled'",
+        proposal_id
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+    for seance in seances {
+        recopier_les_intervenants(conn, proposal_id, seance).await?;
+    }
+    Ok(())
+}
+
 /// Recopier les co-organisations — **tout sauf le porteur**.
 pub async fn recopier_les_coorganisations(
     conn: &mut PgConnection,

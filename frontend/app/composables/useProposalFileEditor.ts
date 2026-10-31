@@ -46,6 +46,8 @@ export function useProposalFileEditor(proposalId: Ref<string>, onSaved: () => Pr
   )
 
   const editing = ref<ProposalFileSection | null>(null)
+  /** Rubriques contrôlées ensemble : l'éditeur de l'image modifie le titre et les intervenants à la fois. */
+  const checked = ref<ProposalFileSection[]>([])
   const working = ref<ProposalDraft | null>(null)
   const saving = ref(false)
   const error = ref<string | null>(null)
@@ -54,25 +56,27 @@ export function useProposalFileEditor(proposalId: Ref<string>, onSaved: () => Pr
   const issues = computed(() => {
     const references = data.value?.references
     if (!working.value || !editing.value || !references?.call || !references.edition) return []
-    return validateProposalDraft(working.value, references.call, references.edition).filter(
-      (issue) => issue.step === editing.value,
+    return validateProposalDraft(working.value, references.call, references.edition).filter((issue) =>
+      checked.value.includes(issue.step as ProposalFileSection),
     )
   })
 
   /** Les défauts ne s'affichent qu'après une tentative : une rubrique qui s'ouvre en rouge réprimande avant la faute. */
   const shownIssues = computed(() => (tried.value ? issues.value : []))
 
-  function edit(section: ProposalFileSection): void {
+  function edit(section: ProposalFileSection, ...also: ProposalFileSection[]): void {
     if (!saved.value) return
     // Copie détachée : annuler ne doit rien laisser dans le dossier affiché.
     working.value = JSON.parse(JSON.stringify(saved.value)) as ProposalDraft
     editing.value = section
+    checked.value = [section, ...also]
     error.value = null
     tried.value = false
   }
 
   function cancel(): void {
     editing.value = null
+    checked.value = []
     working.value = null
     error.value = null
   }

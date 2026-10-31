@@ -1,4 +1,4 @@
-//! **Corriger un dossier déposé, et le renvoyer — sans toucher à la séance.**
+//! **Corriger un dossier déposé, et le renvoyer — sans déplacer la séance.**
 //!
 //! Quatre choses s'y prouvent :
 //!
@@ -10,10 +10,11 @@
 //! - **corriger ne change pas l'état** : un dossier en évaluation ne repart pas
 //!   au comité parce que l'équipe a rectifié une faute de frappe, et son
 //!   organisation ne le modifie plus tant que le comité le lit ;
-//! - **corriger un dossier retenu laisse sa séance strictement inchangée** —
-//!   créneau, salle, capacité. C'est le test qui coûterait le plus cher à ne
-//!   pas avoir : déplacer une séance à laquelle quarante personnes se sont
-//!   inscrites ne se rattrape pas.
+//! - **corriger un dossier retenu ne déplace pas sa séance** — créneau, salle,
+//!   capacité, format. C'est le test qui coûterait le plus cher à ne pas
+//!   avoir : déplacer une séance à laquelle quarante personnes se sont
+//!   inscrites ne se rattrape pas. Les textes et les intervenants, eux,
+//!   suivent (arbitrage du 31/10).
 
 mod commun;
 
@@ -433,9 +434,11 @@ async fn une_edition_terminee_ferme_la_modification() {
 /// Une séance retenue a un créneau **arbitré** par l'IFDD, une salle attribuée,
 /// des inscrits prévenus. Recopier dessus le créneau *souhaité* d'un dossier
 /// corrigé déplacerait une séance à laquelle des gens se sont inscrits, sans
-/// que personne l'ait demandé (FR-091).
+/// que personne l'ait demandé (FR-091). Le titre, la présentation et les
+/// intervenants suivent, eux, même quand c'est l'organisation qui corrige
+/// (arbitrage du 31/10) : la page de l'activité dit ce que dit l'image.
 #[tokio::test]
-async fn corriger_un_dossier_retenu_laisse_sa_seance_inchangee() {
+async fn corriger_un_dossier_retenu_ne_deplace_pas_sa_seance_mais_ses_textes_suivent() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
     let dossier = dossier_complet(&bac, &terrain, "Atelier adaptation").await;
@@ -496,11 +499,26 @@ async fn corriger_un_dossier_retenu_laisse_sa_seance_inchangee() {
         "le créneau n'a pas bougé"
     );
     assert_eq!(apres.ends_at, seance.ends_at);
-    assert_eq!(apres.title, seance.title, "le titre de la séance non plus");
-    assert_eq!(apres.description, seance.description, "ni sa présentation");
+    assert_eq!(apres.title["fr"], "Atelier adaptation — version corrigée", "le titre suit");
+    assert!(
+        apres.description.as_ref().is_some_and(|d| d.to_string().contains("réécrite par l'organisation")),
+        "la présentation suit : {:?}",
+        apres.description
+    );
     assert_eq!(apres.capacity, seance.capacity);
     assert_eq!(apres.format, seance.format);
     assert_eq!(apres.status, "planned");
+
+    let intervenants = sqlx::query_scalar!(
+        r#"SELECT p.display_name AS "nom!" FROM programme.session_speakers d
+             JOIN identity.people p ON p.id = d.person_id
+            WHERE d.session_id = $1"#,
+        seance.id
+    )
+    .fetch_all(bac.pool())
+    .await
+    .expect("intervenants de la séance");
+    assert_eq!(intervenants, vec!["Awa Sow".to_owned()], "les intervenants suivent : l'ancien part, la nouvelle entre");
 
     // Et le dossier, lui, a bien changé.
     let rouvert = draft_read::rouvrir(&bac.state, terrain.deposante, id)

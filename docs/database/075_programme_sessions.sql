@@ -165,9 +165,9 @@ CREATE TRIGGER tg_sessions_audit
 COMMENT ON COLUMN programme.sessions.sequence_number IS
     'Rang de l''occurrence dans une proposition multi-sessions (cycles de webinaires).';
 COMMENT ON COLUMN programme.sessions.title IS
-    'Titre public. Recopié du dossier à l''acceptation, puis à chaque correction du dossier par l''équipe — jamais par une correction de l''organisation (FR-091).';
+    'Titre public. Recopié du dossier à l''acceptation, puis à chaque enregistrement du dossier, par l''équipe comme par l''organisation (arbitrage du 31/10).';
 COMMENT ON COLUMN programme.sessions.description IS
-    'Présentation publique, en HTML restreint comme programme.proposals.detailed_presentation, dont elle est recopiée à l''acceptation puis à chaque correction du dossier par l''équipe.';
+    'Présentation publique, en HTML restreint comme programme.proposals.detailed_presentation, dont elle est recopiée à l''acceptation puis à chaque enregistrement du dossier (31/10).';
 
 -- Alignement automatique de l'exclusivité de salle, de la journée de
 -- rattachement et du canal de diffusion : ces trois valeurs sont déductibles,
@@ -279,8 +279,11 @@ CREATE TRIGGER tg_sessions_events
 -- -----------------------------------------------------------------------------
 -- 2. Intervenants de la session
 --
--- Recopiés depuis la proposition à la programmation, puis modifiables : les
--- intervenants annoncés dans le dossier ne sont pas toujours ceux du jour.
+-- Recopiés depuis la proposition à la programmation, puis tenus à jour à
+-- chaque enregistrement du dossier (31/10) : l'organisation corrige ses
+-- intervenants dans son dossier ou depuis l'éditeur de l'image, et la page de
+-- l'activité suit. Reconnu par personne et rôle (ou nom et rôle, D16), un
+-- intervenant garde sa ligne et sa présence notée (`attended`).
 -- -----------------------------------------------------------------------------
 CREATE TABLE programme.session_speakers (
     id                uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
