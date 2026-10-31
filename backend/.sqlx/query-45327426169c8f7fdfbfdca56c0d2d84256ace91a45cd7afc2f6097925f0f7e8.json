@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposals\n               (event_id, organization_id, submitted_by, title, slug, objectives,\n                detailed_presentation, format)\n           VALUES ($1, $2, $3, '{\"fr\":\"Dossier du PACO\"}'::jsonb,\n                   'dossier-du-paco'::platform.slug, '{\"fr\":\"Objectifs.\"}'::jsonb,\n                   '{\"fr\":\"<p>Présentation.</p>\"}'::jsonb, 'online')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "45327426169c8f7fdfbfdca56c0d2d84256ace91a45cd7afc2f6097925f0f7e8"
+}

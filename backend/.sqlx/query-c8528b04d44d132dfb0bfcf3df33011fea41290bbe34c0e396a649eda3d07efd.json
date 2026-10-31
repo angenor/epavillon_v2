@@ -1,0 +1,180 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.sequence_number, s.starts_at, s.ends_at,\n                  s.timezone::text AS \"timezone!\", s.status::text AS \"status!\",\n                  s.published_at, s.room_id, r.name AS \"room_name?\", s.is_streamed,\n                  (SELECT count(*) FROM programme.registrations g\n                    WHERE g.session_id = s.id\n                      AND g.status IN ('registered', 'attended', 'no_show')) AS \"registration_count!\",\n                  (SELECT count(*) FROM programme.registrations g\n                    WHERE g.session_id = s.id AND g.status = 'waitlisted') AS \"waitlist_count!\",\n                  COALESCE((SELECT jsonb_agg(jsonb_build_object(\n                                       'id', t.id, 'title', t.title, 'color_hex', t.color_hex)\n                                     ORDER BY st.sort_order, t.title ->> 'fr')\n                              FROM programme.session_tracks st\n                              JOIN event.programme_tracks t ON t.id = st.track_id\n                             WHERE st.session_id = s.id), '[]'::jsonb) AS \"tracks!\",\n                  m.provider::text AS \"meeting_provider?\", m.status::text AS \"meeting_status?\",\n                  m.sync_status::text AS \"meeting_sync_status?\",\n                  m.last_synced_at AS \"meeting_last_synced_at?\"\n             FROM programme.sessions s\n             LEFT JOIN event.rooms r ON r.id = s.room_id\n             LEFT JOIN LATERAL (\n                 SELECT provider, status, sync_status, last_synced_at\n                   FROM live.meetings\n                  WHERE session_id = s.id AND status <> 'cancelled'\n                  ORDER BY created_at DESC\n                  LIMIT 1\n             ) m ON true\n            WHERE s.proposal_id = $1\n            ORDER BY s.sequence_number",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "sequence_number",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "sequence_number"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "room_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "room_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "room_name?",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "is_streamed",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "is_streamed"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "registration_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "waitlist_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "tracks!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "meeting_provider?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "meeting_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "meeting_sync_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "meeting_last_synced_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "last_synced_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      true,
+      true,
+      true,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "c8528b04d44d132dfb0bfcf3df33011fea41290bbe34c0e396a649eda3d07efd"
+}

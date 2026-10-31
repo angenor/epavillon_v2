@@ -1,0 +1,148 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id, p.reference_code, p.title, p.status::text AS \"status!\",\n                  p.created_at, p.event_id, e.title AS event_title, e.acronym AS event_acronym,\n                  e.timezone::text AS \"timezone!\", e.city, p.submitted_by,\n                  (SELECT min(s.starts_at) FROM programme.sessions s\n                    WHERE s.proposal_id = p.id AND s.room_id IS NOT NULL\n                      AND s.status <> 'cancelled') AS retained_starts_at\n             FROM programme.proposals p\n             JOIN event.events e ON e.id = p.event_id\n            WHERE p.organization_id = $1 AND p.id <> $2 AND p.deleted_at IS NULL\n              AND ($3 OR p.event_id = ANY($4))\n            ORDER BY p.created_at DESC\n            LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "reference_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "event_title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "event_acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "submitted_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "submitted_by"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "retained_starts_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      true,
+      null,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "d59509f4f4dfde77c875325795f2d0e1d1bb5cbf6f663f43c7c83aef548974f9"
+}

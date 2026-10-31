@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions SET organization_id = $3\n          WHERE proposal_id = $1 AND organization_id IS NOT DISTINCT FROM $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cb4cdeb2fb016b10d725661c654ba1a206609fb0575463bc06e953907d4636c1"
+}

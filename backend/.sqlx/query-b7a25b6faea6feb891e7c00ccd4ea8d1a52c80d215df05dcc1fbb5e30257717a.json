@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT identity.has_permission($1, $2, $4::text::identity.scope_type, $5) AS \"noter!\",\n                  identity.has_permission($1, $3, $4::text::identity.scope_type, $5) AS \"decider!\",\n                  identity.has_permission($1, $6, $4::text::identity.scope_type, $5) AS \"affecter!\",\n                  identity.has_permission($1, $7, $4::text::identity.scope_type, $5) AS \"modifier!\"",
+  "query": "SELECT identity.has_permission($1, $2, $4::text::identity.scope_type, $5) AS \"noter!\",\n                  identity.has_permission($1, $3, $4::text::identity.scope_type, $5) AS \"decider!\",\n                  identity.has_permission($1, $6, $4::text::identity.scope_type, $5) AS \"affecter!\",\n                  identity.has_permission($1, $7, $4::text::identity.scope_type, $5) AS \"modifier!\",\n                  identity.has_permission($1, $8, $4::text::identity.scope_type, $5) AS \"placer!\"",
   "describe": {
     "columns": [
       {
@@ -26,6 +26,12 @@
         "name": "modifier!",
         "type_info": "Bool",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "placer!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -36,6 +42,7 @@
         "Text",
         "Uuid",
         "Text",
+        "Text",
         "Text"
       ]
     },
@@ -43,8 +50,9 @@
       null,
       null,
       null,
+      null,
       null
     ]
   },
-  "hash": "569072053ac43138108027ff1beb8829cfe2f2b0bb0db621e90569dd60d9f6e4"
+  "hash": "b7a25b6faea6feb891e7c00ccd4ea8d1a52c80d215df05dcc1fbb5e30257717a"
 }
