@@ -518,3 +518,14 @@ Zoom limite à 100 créations ou modifications de réunion par jour et par hôte
 - Commentaires mis à jour : `programme.sessions.title`, `.description`, en-tête de `programme.session_speakers`. Aucune colonne ne change : la recopie est faite par l'API (`session_parts::resynchroniser_les_intervenants`), qui garde la ligne et la présence notée (`attended`) d'un intervenant reconnu par personne et rôle, ou par nom et rôle sans personne (D16).
 
 **En production** : `ops/migrations/2026-10-31-textes-suivent-activite.sql` (commentaires seulement), rejouable.
+
+## 01/11/2026, `110_engagement.sql` : textes types et courriels d'un dossier
+
+Demande du commanditaire : « Écrire au déposant » depuis la fiche d'un dossier, par la rubrique Courriels, avec des textes prêts à l'emploi dont les valeurs du dossier se remplissent seules. Les gabarits règlent l'apparence, pas le texte : notion distincte.
+
+- **`engagement.mail_texts`** : nom (`ck_mail_texts_name`, 120), catégorie libre facultative (`ck_mail_texts_category`, 60), objet (`ck_mail_texts_subject`, 250), corps HTML assaini, `sort_order`, `event_id` facultatif (`xmod_fk_mail_texts_event`, nul : commun), auteur (`xmod_fk_mail_texts_author`), dates, `ix_mail_texts_event`, `tg_mail_texts_updated_at`, `tg_mail_texts_audit`. Donnée d'administration : pas d'i18n.
+- **`engagement.mailings.mail_text_id`** (`ON DELETE SET NULL`) : le texte type choisi, pour l'historique ; objet et corps restent recopiés dans l'envoi.
+- **`engagement.mailings.proposal_id`** (`xmod_fk_mailings_proposal` vers `programme.proposals`, `ON DELETE SET NULL`, `ix_mailings_proposal` partiel) : le courriel écrit depuis un dossier. Il ouvre `{{activite}}`, `{{date}}`, `{{heures}}` (fuseau compris), `{{salle}}`, lues sur le dossier et sa première séance non annulée ni reportée, figées par destinataire à l'envoi. Sans séance (ou sans salle pour `{{salle}}`), l'aperçu, l'essai et l'envoi refusent en le disant.
+- **Semence** : les neuf textes de la v1 (`activityEmailTemplates.js`), communs, dans une table vide seulement. « CdP31 » devient `{{edition}}` ; dates limites et lien du formulaire d'engagement deviennent des passages à compléter entre crochets ; les deux adresses personnelles en copie de la v1 ne sont pas reprises.
+
+**En production** : `ops/migrations/2026-11-01-textes-types.sql`, rejouable, jouée deux fois en local sur `epavillon` ; schéma complet rechargé dans une base jetable (neuf textes semés). À jouer **avant** de démarrer l'API et le worker.
