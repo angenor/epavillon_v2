@@ -428,7 +428,7 @@ const statusKey = computed(() => (isDirty.value ? 'dirty' : savedOnce.value ? 's
             :key="entry.key"
             type="button"
             :aria-pressed="tool === entry.key"
-            class="flex min-h-16 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs font-semibold transition-colors duration-(--duration-fast) lg:flex-none"
+            class="flex min-h-16 flex-1 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-1 text-center text-xs leading-tight font-semibold transition-colors duration-(--duration-fast) lg:flex-none"
             :class="tool === entry.key ? 'bg-accent-surface text-accent' : 'text-text-secondary hover:bg-surface-hover'"
             @click="tool = entry.key"
           >
