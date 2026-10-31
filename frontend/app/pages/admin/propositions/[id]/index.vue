@@ -324,6 +324,7 @@ async function slotSaved(summary: { message: string; conflicts: number }): Promi
 }
 
 const leadPanelOpen = ref(false)
+const profileOpen = ref(false)
 const submitterPanelOpen = ref(false)
 const reassignBusy = ref(false)
 const reassignError = ref<string | null>(null)
@@ -786,6 +787,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
                 :dashboard="screen.dashboard"
                 :can-change="canReassign"
                 @change="leadPanelOpen = true"
+                @edit="profileOpen = true"
               />
 
               <section class="rounded-lg border border-border bg-surface-raised p-5">
@@ -800,9 +802,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
                 </dl>
               </section>
 
-              <!-- EMPLACEMENT DE LA CARTE « COURRIELS ENVOYÉS » : le composant
-                   AdminMailingsProposalMailings (rubrique Courriels), à brancher
-                   ici avec :proposal-id="screen.proposal.id". -->
+              <AdminMailingsProposalMailings :proposal-id="screen.proposal.id" />
 
               <section class="rounded-lg border border-border bg-surface-raised p-5">
                 <h2 class="text-base font-semibold">{{ t('admin.proposal.dashboard.sections.facts') }}</h2>
@@ -842,6 +842,12 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             :busy="reassignBusy"
             :error="reassignError"
             @submit="changeLead"
+          />
+
+          <AdminOrganizationsProfileDrawer
+            v-model:open="profileOpen"
+            :organization-id="screen.dashboard.lead_organization_id"
+            @saved="refresh()"
           />
 
           <AdminReviewSubmitterPanel

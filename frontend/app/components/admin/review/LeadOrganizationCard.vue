@@ -3,8 +3,8 @@ import type { ProposalDashboard, ProposalOrganizationEntry } from '~/types/admin
 
 /**
  * L'ORGANISATION PORTEUSE, en carte latérale : sa fiche, son historique en une
- * ligne, ses co-organisatrices. La fiche se modifie sur sa propre page, partagée
- * par tous ses dossiers ; ici on ne change que le RATTACHEMENT du dossier.
+ * ligne, ses co-organisatrices. « Modifier la fiche » ouvre le panneau partagé
+ * avec la page de l'organisation ; « Changer » ne touche que le RATTACHEMENT.
  */
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ change: [] }>()
+const emit = defineEmits<{ change: []; edit: [] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -73,10 +73,10 @@ const LINK = 'flex min-h-(--target-min) items-center justify-between gap-2 borde
     </p>
 
     <div class="mt-3 flex flex-col border-t border-border-subtle">
-      <NuxtLink :to="sheetTo" :class="LINK">
+      <button type="button" :class="[LINK, 'cursor-pointer text-start text-accent']" @click="emit('edit')">
         {{ t('admin.proposal.dashboard.lead.edit') }}
         <UiIcon name="arrow-right" size="1rem" />
-      </NuxtLink>
+      </button>
       <NuxtLink :to="sheetTo" :class="LINK">
         {{ t('admin.proposal.dashboard.lead.open') }}
         <UiIcon name="external-link" size="1rem" />
