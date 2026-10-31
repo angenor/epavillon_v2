@@ -309,9 +309,23 @@ async function save(): Promise<void> {
 
       <UiAlert v-if="saveError" class="mt-6" intent="danger" :message="saveError" live />
 
-      <div class="mt-8 grid gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
-        <!-- LES CHOIX -->
-        <div class="flex flex-col gap-8 rounded-lg border border-border bg-surface-raised p-5">
+      <div
+        v-if="!hasLogo && options.show_logos"
+        role="alert"
+        class="mt-6 flex flex-col gap-2 rounded-lg border-2 border-danger bg-danger-surface p-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p class="text-sm text-text-secondary">
+          <strong class="text-danger">{{ t('organization.workspace.proposal.gaps.logo.title') }}</strong>
+          · {{ t('organization.workspace.cover.logoMissing') }}
+        </p>
+        <UiButton variant="danger" class="shrink-0" :to="`${fileTo}#logo`">
+          {{ t('organization.workspace.proposal.gaps.logo.action') }}
+        </UiButton>
+      </div>
+
+      <div class="mt-8 grid gap-8 lg:grid-cols-[26rem_minmax(0,1fr)] lg:items-start">
+        <!-- Les modèles défilent avec la page ; l'aperçu reste en vue à côté. -->
+        <div class="rounded-lg border border-border bg-surface-raised p-5">
           <fieldset>
             <legend class="font-semibold text-heading">{{ stepTitle('template') }}</legend>
             <div class="mt-3 grid grid-cols-2 gap-3">
@@ -336,42 +350,13 @@ async function save(): Promise<void> {
             </div>
             <p class="mt-2 text-sm text-text-muted">{{ t('organization.workspace.cover.catalogHint') }}</p>
           </fieldset>
-
-          <fieldset>
-            <legend class="font-semibold text-heading">{{ stepTitle('content') }}</legend>
-            <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.cover.contentHint') }}</p>
-            <div class="mt-3 flex flex-col gap-2">
-              <UiCheckbox
-                v-for="key in toggles"
-                :id="`cover-${key}`"
-                :key="key"
-                v-model="options[key]"
-                :label="t(`organization.workspace.cover.options.${key}`, { edition: data.file.tracking.edition.acronym ?? '' })"
-              />
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend class="font-semibold text-heading">{{ stepTitle('color') }}</legend>
-            <div class="mt-3 flex flex-wrap gap-3">
-              <button
-                v-for="[code, token] in accents"
-                :key="code"
-                type="button"
-                :aria-pressed="accent === code"
-                :aria-label="t(`organization.workspace.cover.accents.${code}`)"
-                class="size-11 cursor-pointer rounded-full border-4 border-surface-raised ring-2 transition-shadow duration-(--duration-fast)"
-                :class="accent === code ? 'ring-text' : 'ring-transparent hover:ring-border-strong'"
-                :style="{ background: `var(${token})` }"
-                @click="accent = code"
-              />
-            </div>
-          </fieldset>
         </div>
 
-        <!-- L'APERÇU -->
-        <div class="flex min-w-0 flex-col gap-5">
-          <div class="overflow-hidden rounded-lg border border-border shadow-sm">
+        <!-- Sur téléphone, l'aperçu passe en tête et les réglages sous les modèles. -->
+        <div
+          class="flex min-w-0 flex-col gap-5 *:shrink-0 max-lg:contents lg:sticky lg:top-[calc(var(--nav-height)+1rem)] lg:max-h-[calc(100dvh-var(--nav-height)-2rem)] lg:overflow-y-auto"
+        >
+          <div class="overflow-hidden rounded-lg border border-border shadow-sm max-lg:order-first">
             <ClientOnly>
               <CoverStudioCanvas
                 ref="preview"
@@ -415,42 +400,61 @@ async function save(): Promise<void> {
               </div>
             </div>
           </div>
-          <UiAlert v-if="photoError" intent="danger" :message="photoError" live />
+          <UiAlert v-if="photoError" class="max-lg:order-first" intent="danger" :message="photoError" live />
 
-          <div
-            v-if="!hasLogo && options.show_logos"
-            role="alert"
-            class="flex flex-col gap-2 rounded-lg border-2 border-danger bg-danger-surface p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <p class="text-sm text-text-secondary">
-              <strong class="text-danger">{{ t('organization.workspace.proposal.gaps.logo.title') }}</strong>
-              · {{ t('organization.workspace.cover.logoMissing') }}
-            </p>
-            <UiButton variant="danger" class="shrink-0" :to="`${fileTo}#logo`">
-              {{ t('organization.workspace.proposal.gaps.logo.action') }}
-            </UiButton>
-          </div>
-
-          <section aria-labelledby="share-preview-title" class="rounded-lg border border-border bg-surface-raised p-5">
-            <h2 id="share-preview-title" class="font-semibold text-heading">{{ t('organization.workspace.cover.share.title') }}</h2>
-            <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.cover.share.description') }}</p>
-            <div class="mt-4 max-w-sm overflow-hidden rounded-lg border border-border">
-              <ClientOnly>
-                <CoverStudioCanvas
-                  :scene="scene"
-                  :template="template"
-                  :options="options"
-                  :label="t('organization.workspace.cover.share.title')"
+          <div class="grid gap-6 rounded-lg border border-border bg-surface-raised p-5 max-lg:order-last xl:grid-cols-[minmax(0,1fr)_auto]">
+            <fieldset>
+              <legend class="font-semibold text-heading">{{ stepTitle('content') }}</legend>
+              <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.cover.contentHint') }}</p>
+              <div class="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                <UiCheckbox
+                  v-for="key in toggles"
+                  :id="`cover-${key}`"
+                  :key="key"
+                  v-model="options[key]"
+                  :label="t(`organization.workspace.cover.options.${key}`, { edition: data.file.tracking.edition.acronym ?? '' })"
                 />
-              </ClientOnly>
-              <div class="bg-surface-sunken px-3 py-2">
-                <p class="text-xs text-text-subtle uppercase">{{ t('organization.workspace.cover.share.site') }}</p>
-                <p class="mt-0.5 line-clamp-2 text-sm font-semibold text-text">{{ data.editable.draft.title }}</p>
               </div>
-            </div>
-          </section>
+            </fieldset>
+
+            <fieldset>
+              <legend class="font-semibold text-heading">{{ stepTitle('color') }}</legend>
+              <div class="mt-3 flex flex-wrap gap-3">
+                <button
+                  v-for="[code, token] in accents"
+                  :key="code"
+                  type="button"
+                  :aria-pressed="accent === code"
+                  :aria-label="t(`organization.workspace.cover.accents.${code}`)"
+                  class="size-11 cursor-pointer rounded-full border-4 border-surface-raised ring-2 transition-shadow duration-(--duration-fast)"
+                  :class="accent === code ? 'ring-text' : 'ring-transparent hover:ring-border-strong'"
+                  :style="{ background: `var(${token})` }"
+                  @click="accent = code"
+                />
+              </div>
+            </fieldset>
+          </div>
         </div>
       </div>
+
+      <section aria-labelledby="share-preview-title" class="mt-8 rounded-lg border border-border bg-surface-raised p-5">
+        <h2 id="share-preview-title" class="font-semibold text-heading">{{ t('organization.workspace.cover.share.title') }}</h2>
+        <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.cover.share.description') }}</p>
+        <div class="mt-4 max-w-sm overflow-hidden rounded-lg border border-border">
+          <ClientOnly>
+            <CoverStudioCanvas
+              :scene="scene"
+              :template="template"
+              :options="options"
+              :label="t('organization.workspace.cover.share.title')"
+            />
+          </ClientOnly>
+          <div class="bg-surface-sunken px-3 py-2">
+            <p class="text-xs text-text-subtle uppercase">{{ t('organization.workspace.cover.share.site') }}</p>
+            <p class="mt-0.5 line-clamp-2 text-sm font-semibold text-text">{{ data.editable.draft.title }}</p>
+          </div>
+        </div>
+      </section>
     </template>
   </div>
 </template>
