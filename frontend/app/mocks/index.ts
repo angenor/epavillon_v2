@@ -307,7 +307,10 @@ export {
   updateMailTemplate,
   deleteMailTemplate,
   mailTemplatePreview,
+  proposalMailingListScreen,
+  createProposalMailing,
 } from './admin-mailings'
+export { mailTexts, mailTextById, createMailText, updateMailText, deleteMailText } from './admin-mail-texts'
 export { publicSessionStreams } from './streams'
 export { publicSessionMeeting, meetingAccess, registrationJoined, adminSessionMeeting, syncSessionMeeting, pushSessionMeeting } from './meetings'
 

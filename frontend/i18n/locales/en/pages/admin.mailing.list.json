@@ -40,5 +40,6 @@
     "sent": "The email leaves the history, with its recipients and the status of each message. Messages already sent are not recalled.",
     "failed": "The email leaves the history, with its recipients and the status of each message. Those still waiting will receive nothing; messages already sent are not recalled.",
     "confirm": "Delete permanently"
-  }
+  },
+  "texts": "Standard texts"
 }

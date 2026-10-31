@@ -1,0 +1,24 @@
+{
+  "crumb": "Textes types",
+  "title": "Textes types",
+  "subtitle": "Un objet et un message prêts à l'emploi, proposés dans la fenêtre de rédaction sous les gabarits. Écrit depuis un dossier, le courriel remplit seul l'activité, la date, l'horaire et la salle. Ceux de l'édition, puis les communs à toutes.",
+  "new": "Nouveau texte",
+  "defaultName": "Nouveau texte",
+  "caption": "Textes types de l'édition",
+  "columns": {
+    "name": "Nom",
+    "category": "Catégorie",
+    "scope": "Rattachement",
+    "date": "Modifié ({zone})"
+  },
+  "scope": {
+    "edition": "Cette édition",
+    "all": "Toutes les éditions"
+  },
+  "noCategory": "Sans catégorie",
+  "readOnly": "Commun : se choisit, ne se modifie pas",
+  "empty": {
+    "title": "Aucun texte type",
+    "description": "Créez un texte pour ne plus réécrire les courriels qui reviennent : confirmation, créneau, liste d'attente."
+  }
+}

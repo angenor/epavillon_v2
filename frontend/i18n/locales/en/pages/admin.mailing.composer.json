@@ -29,7 +29,9 @@
     "subject": "The subject is empty.",
     "variables": "Unknown variable: {names}. Available variables are under “More options”.",
     "addresses": "Invalid address: {list}.",
-    "heavy": "Attachments exceed the allowed total size: remove one."
+    "heavy": "Attachments exceed the allowed total size: remove one.",
+    "proposalOnly": "{names} only work in an email written from a proposal's page: remove them, or write from the proposal.",
+    "placeholders": "Passages to fill in before sending: {list}"
   },
   "options": {
     "replyTo": "Reply to",
@@ -39,7 +41,7 @@
     "template": "Template",
     "defaults": "Default layouts",
     "custom": "Edition templates",
-    "customHint": "Based on the \u201c{layout}\u201d layout.",
+    "customHint": "Based on the “{layout}” layout.",
     "manage": "Manage templates",
     "expand": "Expand",
     "reduce": "Collapse",
@@ -91,5 +93,11 @@
       "name": "Edition, no image",
       "hint": "The edition logo on the left, its name, dates and venue on the right, no image."
     }
+  },
+  "proposal": {
+    "linked": "Written from proposal {reference}: {title}",
+    "variables": "Proposal variables",
+    "variablesHint": "Filled in from the proposal and its scheduled session; highlighted in the preview.",
+    "noValue": "no value"
   }
 }

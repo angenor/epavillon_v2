@@ -40,5 +40,6 @@
     "sent": "Le courriel quitte l'historique, avec ses destinataires et l'état de chaque message. Les messages déjà partis ne sont pas rappelés.",
     "failed": "Le courriel quitte l'historique, avec ses destinataires et l'état de chaque message. Ceux qui attendaient ne recevront rien ; les messages déjà partis ne sont pas rappelés.",
     "confirm": "Supprimer définitivement"
-  }
+  },
+  "texts": "Textes types"
 }

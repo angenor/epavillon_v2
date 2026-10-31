@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ComposerOptionsValue } from '~/types/admin-mailings'
+import type { ComposerOptionsValue, MailingProposal } from '~/types/admin-mailings'
 import type { Uuid } from '~/types/shared'
 import type { SelectOption } from '~/types/ui'
 
@@ -12,6 +12,8 @@ import type { SelectOption } from '~/types/ui'
 interface Props {
   modelValue: ComposerOptionsValue
   mailingId: Uuid | null
+  /** Le dossier du courriel : ses variables et leurs valeurs (01/11). */
+  proposal?: MailingProposal | null
   testing: boolean
   testMessage: string | null
 }
@@ -79,6 +81,19 @@ const tokenOf = variableToken
         />
       </div>
     </fieldset>
+
+    <section v-if="props.proposal">
+      <h4 class="text-sm font-semibold text-text">{{ t('admin.mailing.composer.proposal.variables') }}</h4>
+      <p class="mt-0.5 text-xs text-text-subtle">{{ t('admin.mailing.composer.proposal.variablesHint') }}</p>
+      <dl class="mt-2 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]">
+        <template v-for="name in MAILING_PROPOSAL_VARIABLES" :key="name">
+          <dt class="font-mono text-text-secondary">{{ tokenOf(name) }}</dt>
+          <dd class="min-w-0 wrap-break-word" :class="props.proposal.values[name] ? 'text-text' : 'text-text-subtle'">
+            {{ props.proposal.values[name] ?? t('admin.mailing.composer.proposal.noValue') }}
+          </dd>
+        </template>
+      </dl>
+    </section>
 
     <div class="flex flex-wrap items-center gap-3">
       <UiButton variant="secondary" icon="mail" :loading="props.testing" :disabled="!props.mailingId" @click="emit('test')">

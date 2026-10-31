@@ -1,0 +1,10 @@
+{
+  "title": "Standard texts",
+  "manage": "Manage texts",
+  "uncategorized": "Other",
+  "usesProposal": "Proposal values",
+  "error": "The standard texts could not be loaded.",
+  "confirm": "Replace the subject and message with “{name}”? What you wrote will be lost.",
+  "replace": "Replace",
+  "keep": "Keep my text"
+}

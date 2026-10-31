@@ -12,6 +12,7 @@
 
 import type {
   CreateMailingPayload,
+  CreateProposalMailingPayload,
   Mailing,
   MailingAddressSuggestion,
   MailingAudience,
@@ -22,6 +23,8 @@ import type {
   MailTemplate,
   MailTemplatePayload,
   MailTemplatePreview,
+  MailText,
+  MailTextPayload,
 } from '~/types/admin-mailings'
 import type { AdministeredEvents } from '~/types/identity'
 import type { EventId, Uuid } from '~/types/shared'
@@ -37,6 +40,19 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
     list: (eventId: EventId, scope: AdministeredEvents): Promise<MailingListScreen> => {
       assertEventInScope(eventId, scope)
       return call('/admin/mailings', (m) => m.mailingListScreen(eventId), { event_id: eventId })
+    },
+
+    /**
+     * Les courriels écrits depuis un dossier (01/11), sur son édition. `null` :
+     * dossier inexistant ou hors périmètre ; sans la permission, 403.
+     */
+    listForProposal: (proposalId: Uuid): Promise<MailingListScreen | null> =>
+      callOrNull('/admin/mailings', (m) => m.proposalMailingListScreen(proposalId), { proposal_id: proposalId }),
+
+    /** Le brouillon d'un dossier : au déposant, le contact en copie, objet = titre de l'activité. */
+    createForProposal: (proposalId: Uuid): Promise<Mailing> => {
+      const payload: CreateProposalMailingPayload = { proposal_id: proposalId }
+      return send('/admin/mailings/for-proposal', payload, (m) => m.createProposalMailing(payload), 'POST')
     },
 
     /** Un envoi. `null` : inexistant ou hors droit. */
@@ -117,6 +133,30 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
         callOrNull(`/admin/mail-templates/${templateId}/preview`, (m) => m.mailTemplatePreview(templateId), {
           event_id: eventId,
         }),
+    },
+
+    /**
+     * TEXTES TYPES (01/11). Ceux de l'édition et les communs ; choisis dans la
+     * fenêtre de rédaction, ils remplacent l'objet et le corps du brouillon.
+     */
+    texts: {
+      list: (eventId: EventId, scope: AdministeredEvents): Promise<MailText[]> => {
+        assertEventInScope(eventId, scope)
+        return call('/admin/mail-texts', (m) => m.mailTexts(eventId), { event_id: eventId })
+      },
+
+      /** `null` : inexistant ou hors droit. */
+      byId: (textId: Uuid): Promise<MailText | null> =>
+        callOrNull(`/admin/mail-texts/${textId}`, (m) => m.mailTextById(textId)),
+
+      create: (payload: MailTextPayload): Promise<MailText> =>
+        send('/admin/mail-texts', payload, (m) => m.createMailText(payload), 'POST'),
+
+      update: (textId: Uuid, payload: MailTextPayload): Promise<MailText> =>
+        send(`/admin/mail-texts/${textId}`, payload, (m) => m.updateMailText(textId, payload), 'PUT'),
+
+      remove: (textId: Uuid): Promise<{ deleted: boolean }> =>
+        send(`/admin/mail-texts/${textId}`, {}, (m) => m.deleteMailText(textId), 'DELETE'),
     },
   }
 }

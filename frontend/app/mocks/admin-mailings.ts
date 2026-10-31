@@ -8,6 +8,7 @@
 
 import type {
   CreateMailingPayload,
+  CreateProposalMailingPayload,
   Mailing,
   MailingAddressSuggestion,
   MailingAudience,
@@ -25,9 +26,11 @@ import type {
 } from '~/types/admin-mailings'
 import type { EventId, Uuid } from '~/types/shared'
 import { EVENT, mockUuid } from './ids'
+import { mailTextById } from './admin-mail-texts'
 
 const ATTACHMENTS_MAX = 10 * 1024 * 1024
 const VARIABLES = ['prenom', 'nom', 'organisation', 'email', 'edition']
+const PROPOSAL_VARIABLES = ['activite', 'date', 'heures', 'salle']
 const ME = 'a.sowfall@roac-afrique.org'
 
 const ENTRIES: MailingAudienceEntry[] = [
@@ -78,6 +81,8 @@ function seed(): void {
     cta_label: null,
     cta_url: null,
     mail_template_id: null,
+    mail_text_id: null,
+    proposal: null,
     duplicated_from: null,
     created_by_name: 'Awa Sow Fall',
     queued_by_name: 'Awa Sow Fall',
@@ -144,6 +149,10 @@ function summary(m: Mailing): MailingSummary {
     updated_at: m.updated_at,
     counts: m.counts,
     attachment_count: m.attachments.length,
+    proposal_id: m.proposal?.id ?? null,
+    mail_text_name: m.mail_text_id ? (mailTextById(m.mail_text_id)?.name ?? null) : null,
+    to: m.extra_addresses[0] ?? m.recipients[0]?.email ?? null,
+    cc_count: m.cc.length,
   }
 }
 
@@ -170,6 +179,7 @@ function apply(m: Mailing, p: MailingPayload): Mailing {
     reply_button: p.reply_button ?? m.reply_button,
     cta_label: p.cta_label === undefined ? m.cta_label : p.cta_label || null,
     cta_url: p.cta_url === undefined ? m.cta_url : p.cta_url || null,
+    mail_text_id: p.mail_text_id === undefined ? m.mail_text_id : p.mail_text_id || null,
     updated_at: now(),
   }
 }
@@ -186,13 +196,50 @@ function templateOf(m: Mailing, p: MailingPayload): Pick<Mailing, 'template' | '
   return { template: m.template, mail_template_id: m.mail_template_id }
 }
 
-export function mailingListScreen(eventId: EventId): MailingListScreen {
-  seed()
+function screenOf(rows: Mailing[]): MailingListScreen {
   return {
-    rows: [...store.values()].filter((m) => m.event_id === eventId).map(summary),
+    rows: rows.map(summary),
     team_cc: [],
     variables: VARIABLES,
+    proposal_variables: PROPOSAL_VARIABLES,
+    timezone: 'Europe/Istanbul',
+    city: 'Antalya',
   }
+}
+
+export function mailingListScreen(eventId: EventId): MailingListScreen {
+  seed()
+  return screenOf([...store.values()].filter((m) => m.event_id === eventId))
+}
+
+export function proposalMailingListScreen(proposalId: Uuid): MailingListScreen | null {
+  seed()
+  return screenOf([...store.values()].filter((m) => m.proposal?.id === proposalId))
+}
+
+/** Hors ligne, un dossier dont la séance n'a pas de salle : `{{salle}}` manque, et le dit. */
+export function createProposalMailing(payload: CreateProposalMailingPayload): Mailing {
+  const draft = createMailing({
+    event_id: EVENT.cop31,
+    subject: "Financer l'adaptation",
+    extra_addresses: ['k.diallo@example.org'],
+  })
+  const next: Mailing = {
+    ...draft,
+    proposal: {
+      id: payload.proposal_id,
+      reference_code: 'COP31-0042',
+      title: "Financer l'adaptation",
+      values: {
+        activite: "Financer l'adaptation",
+        date: 'lundi 16 novembre 2026',
+        heures: "10:00 à 11:30, heure d'Antalya",
+      },
+      missing: "La séance retenue n'a pas de salle : {{salle}} n'a pas de valeur. Attribuez une salle, ou retirez cette variable du courriel.",
+    },
+  }
+  store.set(next.id, next)
+  return next
 }
 
 export function mailingById(id: Uuid): Mailing | null {
@@ -241,6 +288,8 @@ export function createMailing(payload: CreateMailingPayload): Mailing {
       cta_label: null,
       cta_url: null,
       mail_template_id: null,
+      mail_text_id: null,
+      proposal: null,
       duplicated_from: null,
       created_by_name: 'Awa Sow Fall',
       queued_by_name: null,
@@ -366,6 +415,8 @@ export function duplicateMailing(id: Uuid): Mailing {
     reply_button: m.reply_button,
     cta_label: m.cta_label,
     cta_url: m.cta_url,
+    mail_text_id: m.mail_text_id,
+    proposal: m.proposal,
     duplicated_from: m.id,
   }
   store.set(next.id, next)
@@ -378,7 +429,10 @@ export function mailingPreview(id: Uuid, email?: string): MailingPreview | null 
   if (!m) return null
   const entry = ENTRIES.find((e) => !e.is_suppressed && (!email || e.email === email))
   const prenom = entry?.first_name ?? m.variable_fallbacks.prenom ?? ''
-  const html = m.body_html.replace(/\{\{\s*prenom\s*\}\}/g, prenom)
+  const values = m.proposal?.values ?? {}
+  const html = m.body_html
+    .replace(/\{\{\s*prenom\s*\}\}/g, prenom)
+    .replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (whole: string, name: string) => values[name] ?? whole)
   return { to: entry?.email ?? 'destinataire@exemple.org', has_account: Boolean(entry?.person_id), subject: m.subject, html }
 }
 

@@ -1,0 +1,10 @@
+{
+  "title": "Textes types",
+  "manage": "Gérer les textes",
+  "uncategorized": "Autres",
+  "usesProposal": "Valeurs du dossier",
+  "error": "Les textes types n'ont pas pu être chargés.",
+  "confirm": "Remplacer l'objet et le message par « {name} » ? Ce que vous avez écrit sera perdu.",
+  "replace": "Remplacer",
+  "keep": "Garder mon texte"
+}

@@ -99,3 +99,22 @@ export function variableToken(name: string): string {
 
 /** Les variables d'un envoi, dans l'ordre de l'écran ; miroir de `domain/mailing.rs`. */
 export const MAILING_VARIABLES = ['prenom', 'nom', 'organisation', 'email', 'edition']
+
+/** Les variables d'un courriel écrit depuis un dossier (01/11) ; miroir de `VARIABLES_DOSSIER`. */
+export const MAILING_PROPOSAL_VARIABLES = ['activite', 'date', 'heures', 'salle']
+
+/** Les variables citées dans un texte, sans doublon, dans l'ordre d'apparition. */
+export function citedVariables(text: string): string[] {
+  const found = [...text.matchAll(/\{\{\s*([a-z_][a-z0-9_]*)\s*\}\}/g)].map((match) => match[1] ?? '')
+  return [...new Set(found.filter(Boolean))]
+}
+
+/**
+ * Les passages à compléter d'un texte type, entre crochets (« [date limite] ») :
+ * un texte type ne porte jamais une date limite en dur, il la laisse à écrire,
+ * et la fenêtre de rédaction retient l'envoi tant qu'il en reste.
+ */
+export function placeholdersOf(text: string): string[] {
+  const found = [...text.matchAll(/\[([a-zà-ÿ][^[\]<>]{1,60})\]/g)].map((match) => `[${match[1] ?? ''}]`)
+  return [...new Set(found)]
+}

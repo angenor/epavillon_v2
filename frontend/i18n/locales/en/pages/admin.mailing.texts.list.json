@@ -1,0 +1,24 @@
+{
+  "crumb": "Standard texts",
+  "title": "Standard texts",
+  "subtitle": "A ready-made subject and message, offered in the compose window below the templates. Written from a proposal, the email fills in the activity, date, time and room by itself. This edition's first, then those shared by all.",
+  "new": "New text",
+  "defaultName": "New text",
+  "caption": "Standard texts of the edition",
+  "columns": {
+    "name": "Name",
+    "category": "Category",
+    "scope": "Applies to",
+    "date": "Modified ({zone})"
+  },
+  "scope": {
+    "edition": "This edition",
+    "all": "All editions"
+  },
+  "noCategory": "No category",
+  "readOnly": "Shared: can be chosen, not edited",
+  "empty": {
+    "title": "No standard texts",
+    "description": "Create a text so you no longer rewrite recurring emails: confirmation, time slot, waiting list."
+  }
+}

@@ -7,7 +7,7 @@
  */
 
 import type { AttachedImage } from '~/types/media'
-import type { EventId, Uuid } from '~/types/shared'
+import type { EventId, TimeZoneName, Uuid } from '~/types/shared'
 
 /** `engagement.mailing_status` ; `failed` (31/10) : n'avance plus, à relancer. */
 export type MailingStatus = 'draft' | 'queued' | 'sent' | 'cancelled' | 'failed'
@@ -83,12 +83,38 @@ export interface MailingSummary {
   updated_at: string
   counts: MailingCounts
   attachment_count: number
+  /** Le dossier du courriel (01/11) ; nul : un envoi groupé. */
+  proposal_id: Uuid | null
+  /** Le texte type choisi, s'il existe encore. */
+  mail_text_name: string | null
+  /** Le destinataire principal : la première adresse saisie, à défaut le premier figé. */
+  to: string | null
+  cc_count: number
 }
 
 export interface MailingListScreen {
   rows: MailingSummary[]
   team_cc: string[]
   variables: string[]
+  /** Les variables d'un courriel écrit depuis un dossier. */
+  proposal_variables: string[]
+  /** Le fuseau de l'édition, dans lequel les dates se lisent, et la ville qui le nomme. */
+  timezone: TimeZoneName
+  city: string | null
+}
+
+/**
+ * Le dossier d'un courriel écrit depuis sa fiche (01/11), et les valeurs de ses
+ * variables (`{{activite}}`, `{{date}}`, `{{heures}}`, `{{salle}}`).
+ */
+export interface MailingProposal {
+  id: Uuid
+  reference_code: string
+  title: string
+  /** Nom de variable vers valeur, pour celles qui en ont une. */
+  values: Record<string, string>
+  /** Pourquoi certaines n'en ont pas (pas de séance, pas de salle), en français. */
+  missing: string | null
 }
 
 export interface MailingRecipient {
@@ -124,6 +150,10 @@ export interface Mailing {
   cta_url: string | null
   /** Gabarit personnalisé ; `template` porte alors sa mise en page. */
   mail_template_id: Uuid | null
+  /** Le texte type choisi (01/11). */
+  mail_text_id: Uuid | null
+  /** Le dossier du courriel ; nul : un envoi groupé. */
+  proposal: MailingProposal | null
   duplicated_from: Uuid | null
   created_by_name: string | null
   queued_by_name: string | null
@@ -217,6 +247,8 @@ export interface MailingPayload {
   template?: MailingTemplate
   /** Un gabarit personnalisé ; chaîne vide : aucun. */
   mail_template_id?: string
+  /** Le texte type choisi ; chaîne vide : aucun. */
+  mail_text_id?: string
   variable_fallbacks?: Record<string, string>
   reply_button?: boolean
   /** Deux chaînes vides retirent le bouton d'action. */
@@ -226,6 +258,11 @@ export interface MailingPayload {
 
 export interface CreateMailingPayload extends MailingPayload {
   event_id: EventId
+}
+
+/** Le brouillon d'un dossier : au déposant, contact en copie, objet = titre de l'activité. */
+export interface CreateProposalMailingPayload {
+  proposal_id: Uuid
 }
 
 /** Une ligne de la liste des destinataires, avant l'envoi comme après. */
@@ -297,4 +334,37 @@ export interface MailTemplatePayload {
 export interface MailTemplatePreview {
   subject: string
   html: string
+}
+
+// ---------------------------------------------------------------------------
+// Textes types (01/11), `engagement.mail_texts`
+// ---------------------------------------------------------------------------
+
+/** Un texte type : objet et corps prêts à l'emploi, tel que `/admin/mail-texts` le rend. */
+export interface MailText {
+  id: Uuid
+  name: string
+  /** Regroupement libre dans la fenêtre de rédaction. */
+  category: string | null
+  subject: string
+  /** HTML assaini par l'API. */
+  body_html: string
+  sort_order: number
+  /** Nul : commun à toutes les éditions. */
+  event_id: EventId | null
+  created_by_name: string | null
+  created_at: string
+  updated_at: string
+  /** Faux : commun à toutes les éditions, sans la permission globale. */
+  can_edit: boolean
+}
+
+/** Écriture complète d'un texte type. */
+export interface MailTextPayload {
+  name: string
+  category: string | null
+  subject: string
+  body_html: string
+  sort_order: number
+  event_id: EventId | null
 }

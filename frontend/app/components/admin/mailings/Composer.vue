@@ -5,6 +5,7 @@ import type {
   MailingAudience,
   MailingCriterion,
   MailingPayload,
+  MailText,
 } from '~/types/admin-mailings'
 import type { ShowcaseSessionOption } from '~/types/admin-showcase'
 
@@ -23,6 +24,13 @@ import type { ShowcaseSessionOption } from '~/types/admin-showcase'
  * (`mailing_audience()`) : une ligne de synthèse sous les destinataires, et des
  * alertes en ligne. L'envoi part directement ; au-delà de 20 destinataires, une
  * seule confirmation, dans le bouton lui-même.
+ *
+ * TEXTES TYPES ET DOSSIER (01/11). Sous les gabarits, les textes types : en
+ * choisir un remplace l'objet et le message. Un courriel écrit depuis un dossier
+ * (« Écrire au déposant ») le dit en tête, et ses variables ({{activite}},
+ * {{date}}…) prennent les valeurs du dossier, surlignées dans l'aperçu. Une
+ * variable du dossier sans valeur, ou un passage à compléter (« [date limite] »)
+ * retiennent l'envoi.
  */
 
 const CONFIRM_ABOVE = 20
@@ -40,6 +48,8 @@ interface Form {
   bcc: string[]
   subject: string
   body: string
+  /** Le texte type choisi ; chaîne vide : aucun. */
+  textId: string
   options: ComposerOptionsValue
 }
 
@@ -71,6 +81,7 @@ function formOf(m: Mailing): Form {
     bcc: [...m.bcc],
     subject: m.subject,
     body: m.body_html,
+    textId: m.mail_text_id ?? '',
     options: {
       replyTo: m.reply_to ?? '',
       eventId: m.event_id,
@@ -98,6 +109,7 @@ function payloadOf(f: Form): MailingPayload {
     event_id: f.options.eventId,
     template: f.options.template,
     mail_template_id: f.options.customTemplateId,
+    mail_text_id: f.textId,
     variable_fallbacks: f.options.fallbacks,
     reply_button: f.options.replyButton,
     cta_label: f.options.ctaLabel,
@@ -225,6 +237,14 @@ function onTemplateChosen(): void {
   preselected.value = false
 }
 
+function applyText(text: MailText): void {
+  const f = form.value
+  if (!f) return
+  f.subject = text.subject
+  f.body = text.body_html
+  f.textId = text.id
+}
+
 async function reloadAttachments(): Promise<void> {
   if (!mailing.value) return
   const fresh = await api.adminMailings.byId(mailing.value.id)
@@ -266,13 +286,21 @@ async function togglePreview(): Promise<void> {
   scroller.scrollTo({ top, behavior: 'smooth' })
 }
 
-const unknownVariables = computed(() => {
-  if (!form.value) return []
-  const found = [...`${form.value.subject} ${form.value.body}`.matchAll(/\{\{\s*([a-z_][a-z0-9_]*)\s*\}\}/g)]
-    .map((match) => match[1] ?? '')
-    .filter((name) => name && !MAILING_VARIABLES.includes(name))
-  return [...new Set(found)]
+const cited = computed(() => (form.value ? citedVariables(`${form.value.subject} ${form.value.body}`) : []))
+const unknownVariables = computed(() =>
+  cited.value.filter((name) => !MAILING_VARIABLES.includes(name) && !MAILING_PROPOSAL_VARIABLES.includes(name)),
+)
+const proposal = computed(() => mailing.value?.proposal ?? null)
+const citedProposalVariables = computed(() => cited.value.filter((name) => MAILING_PROPOSAL_VARIABLES.includes(name)))
+// Hors dossier, ces variables n'ont aucune valeur ; dans un dossier, l'API dit
+// pourquoi celles qui manquent manquent (pas de séance, pas de salle).
+const proposalOnly = computed(() => (proposal.value ? [] : citedProposalVariables.value))
+const proposalMissing = computed(() => {
+  const p = proposal.value
+  if (!p || !citedProposalVariables.value.some((name) => !(name in p.values))) return null
+  return p.missing
 })
+const placeholders = computed(() => (form.value ? placeholdersOf(`${form.value.subject} ${richTextToPlain(form.value.body)}`) : []))
 const invalidAddresses = computed(() =>
   form.value ? [...form.value.addresses, ...form.value.cc, ...form.value.bcc].filter((a) => !isEmailAddress(a)) : [],
 )
@@ -287,6 +315,9 @@ const blocked = computed(
   () =>
     subjectEmpty.value ||
     unknownVariables.value.length > 0 ||
+    proposalOnly.value.length > 0 ||
+    proposalMissing.value !== null ||
+    placeholders.value.length > 0 ||
     invalidAddresses.value.length > 0 ||
     tooHeavy.value ||
     sendable.value === 0 ||
@@ -361,13 +392,11 @@ async function sendTest(): Promise<void> {
 }
 
 function isEmpty(f: Form): boolean {
-  return (
-    !f.subject.trim() &&
-    !richTextToPlain(f.body).trim() &&
-    f.addresses.length === 0 &&
-    f.groups.length === 0 &&
-    (mailing.value?.attachments.length ?? 0) === 0
-  )
+  const nothingWritten = !richTextToPlain(f.body).trim() && (mailing.value?.attachments.length ?? 0) === 0
+  // Le brouillon d'un dossier naît avec son destinataire et son objet : sans
+  // message, rien n'a été écrit.
+  if (mailing.value?.proposal) return nothingWritten
+  return nothingWritten && !f.subject.trim() && f.addresses.length === 0 && f.groups.length === 0
 }
 
 async function close(): Promise<void> {
@@ -432,6 +461,12 @@ watch(
           :preselected="preselected"
           @template-chosen="onTemplateChosen"
         />
+        <AdminMailingsTextStrip
+          :event-id="mailing.event_id"
+          :chosen-id="form.textId"
+          :body="form.body"
+          @apply="applyText"
+        />
         <div v-if="form.options.template === 'annonce'" class="grid gap-4 md:grid-cols-2">
           <UiInput v-model="form.options.ctaLabel" :label="t('admin.mailing.composer.options.ctaLabel')" block />
           <UiInput
@@ -450,6 +485,9 @@ watch(
       </div>
 
       <div class="min-w-0 space-y-1">
+        <p v-if="proposal" class="pb-1 text-sm text-text-secondary">
+          {{ t('admin.mailing.composer.proposal.linked', { reference: proposal.reference_code, title: proposal.title }) }}
+        </p>
         <AdminMailingsAddressField
           v-model:addresses="form.addresses"
           v-model:groups="form.groups"
@@ -499,6 +537,19 @@ watch(
             :message="t('admin.mailing.composer.alerts.variables', { names: unknownVariables.join(', ') })"
           />
           <UiAlert
+            v-if="proposalOnly.length"
+            intent="danger"
+            compact
+            :message="t('admin.mailing.composer.alerts.proposalOnly', { names: proposalOnly.map(variableToken).join(', ') })"
+          />
+          <UiAlert v-if="proposalMissing" intent="danger" compact :message="proposalMissing" />
+          <UiAlert
+            v-if="placeholders.length"
+            intent="warning"
+            compact
+            :message="t('admin.mailing.composer.alerts.placeholders', { list: placeholders.join(', ') })"
+          />
+          <UiAlert
             v-if="invalidAddresses.length"
             intent="danger"
             compact
@@ -534,6 +585,7 @@ watch(
             v-if="showOptions"
             v-model="form.options"
             :mailing-id="mailing.id"
+            :proposal="proposal"
             :testing="testing"
             :test-message="testMessage"
             @test="sendTest"

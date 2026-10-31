@@ -1,0 +1,35 @@
+{
+  "crumb": "Standard text",
+  "title": "Standard text",
+  "saving": "Saving…",
+  "saved": "Saved automatically.",
+  "readOnly": "Text shared by all editions: the global permission is needed to edit it.",
+  "delete": "Delete the text",
+  "back": "Back to standard texts",
+  "name": "Text name",
+  "category": "Category",
+  "categoryHint": "Groups the texts in the compose window.",
+  "sortOrder": "Order",
+  "sortOrderHint": "From smallest to largest.",
+  "subject": "Subject",
+  "body": "Message",
+  "scope": {
+    "label": "Applies to",
+    "hint": "A text shared by all editions requires the global permission.",
+    "edition": "This edition",
+    "all": "All editions"
+  },
+  "placeholders": "To fill in at each send: {list}. The compose window holds the email back while any remain.",
+  "variables": "Recipient variables",
+  "variablesHint": "Replaced for each recipient, in the subject and the message.",
+  "proposalVariables": "Proposal variables",
+  "proposalVariablesHint": "Filled in from the proposal and its scheduled session, only in an email written from a proposal: a group email that uses them is refused.",
+  "notFound": {
+    "title": "Text not found",
+    "description": "It was deleted, or it does not belong to an edition you administer."
+  },
+  "deleteConfirm": {
+    "title": "Delete this text?",
+    "description": "Emails that used it keep their subject and message."
+  }
+}

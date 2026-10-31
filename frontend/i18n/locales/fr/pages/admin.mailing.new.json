@@ -1,0 +1,13 @@
+{
+  "crumb": "Écrire au déposant",
+  "title": "Écrire au déposant",
+  "creating": "Préparation du courriel du dossier…",
+  "missing": {
+    "title": "Aucun dossier indiqué",
+    "description": "Ouvrez la fiche d'un dossier et choisissez « Écrire au déposant »."
+  },
+  "forbidden": {
+    "title": "Dossier introuvable",
+    "description": "Ce dossier n'existe pas, ou il appartient à une édition dont vous n'écrivez pas aux participants."
+  }
+}

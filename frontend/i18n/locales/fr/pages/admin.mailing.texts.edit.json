@@ -1,0 +1,35 @@
+{
+  "crumb": "Texte type",
+  "title": "Texte type",
+  "saving": "Enregistrement…",
+  "saved": "Enregistré automatiquement.",
+  "readOnly": "Texte commun à toutes les éditions : la permission globale est nécessaire pour le modifier.",
+  "delete": "Supprimer le texte",
+  "back": "Retour aux textes types",
+  "name": "Nom du texte",
+  "category": "Catégorie",
+  "categoryHint": "Regroupe les textes dans la fenêtre de rédaction.",
+  "sortOrder": "Rang",
+  "sortOrderHint": "Du plus petit au plus grand.",
+  "subject": "Objet",
+  "body": "Message",
+  "scope": {
+    "label": "Rattachement",
+    "hint": "Un texte commun à toutes les éditions demande la permission globale.",
+    "edition": "Cette édition",
+    "all": "Toutes les éditions"
+  },
+  "placeholders": "À compléter à chaque envoi : {list}. La fenêtre de rédaction retient l'envoi tant qu'il en reste.",
+  "variables": "Variables du destinataire",
+  "variablesHint": "Remplacées pour chaque destinataire, dans l'objet comme dans le message.",
+  "proposalVariables": "Variables du dossier",
+  "proposalVariablesHint": "Remplies d'après le dossier et sa séance retenue, dans un courriel écrit depuis un dossier seulement : un envoi groupé qui les cite est refusé.",
+  "notFound": {
+    "title": "Texte introuvable",
+    "description": "Il a été supprimé, ou il n'appartient pas à une édition que vous administrez."
+  },
+  "deleteConfirm": {
+    "title": "Supprimer ce texte ?",
+    "description": "Les courriels qui l'ont repris gardent leur objet et leur message."
+  }
+}

@@ -23,6 +23,7 @@ const api = useApi()
 const adminScope = useAdminScopeStore()
 const composer = useMailComposerStore()
 const route = useRoute()
+const router = useRouter()
 const localePath = useLocalePath()
 
 await adminScope.ensureLoaded()
@@ -48,7 +49,18 @@ watch(
   },
   { immediate: true },
 )
-watch(() => composer.version, () => void refresh())
+// Un brouillon resté vide disparaît à la fermeture de la fenêtre : on revient
+// d'où l'on venait (la fiche d'un dossier, l'historique) plutôt que sur « introuvable ».
+watch(
+  () => composer.version,
+  async () => {
+    const wasDraft = isDraft.value
+    await refresh()
+    if (!wasDraft || mailing.value) return
+    if (window.history.state?.back) router.back()
+    else await navigateTo(localePath('/admin/courriels'))
+  },
+)
 // L'avancement et l'état se relisent seuls ; la notification de fin vient du layout.
 useRealtime(() => [`mailing:${mailingId.value}`], () => refresh())
 

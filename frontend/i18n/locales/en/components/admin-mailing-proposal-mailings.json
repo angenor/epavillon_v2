@@ -1,0 +1,10 @@
+{
+  "title": "Proposal's emails",
+  "to": "To {to}",
+  "cc": "no copy | {count} in copy | {count} in copy",
+  "forbidden": "This proposal's emails can be read with the right to email the participants of its edition.",
+  "empty": {
+    "title": "No emails",
+    "description": "“Email the submitter” opens an email attached to this proposal; it will appear here."
+  }
+}

@@ -149,6 +149,9 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
           <UiButton variant="secondary" icon="grid" :to="localePath('/admin/courriels/gabarits')">
             {{ t('admin.mailing.list.templates') }}
           </UiButton>
+          <UiButton variant="secondary" icon="document" :to="localePath('/admin/courriels/textes')">
+            {{ t('admin.mailing.list.texts') }}
+          </UiButton>
           <UiButton icon="plus" @click="create">
             {{ t('admin.mailing.list.new') }}
           </UiButton>

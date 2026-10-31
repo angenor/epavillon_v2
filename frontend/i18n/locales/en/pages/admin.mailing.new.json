@@ -1,0 +1,13 @@
+{
+  "crumb": "Email the submitter",
+  "title": "Email the submitter",
+  "creating": "Preparing the proposal's email…",
+  "missing": {
+    "title": "No proposal given",
+    "description": "Open a proposal's page and choose “Email the submitter”."
+  },
+  "forbidden": {
+    "title": "Proposal not found",
+    "description": "This proposal does not exist, or it belongs to an edition whose participants you cannot email."
+  }
+}

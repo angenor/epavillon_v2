@@ -1,0 +1,10 @@
+{
+  "title": "Courriels du dossier",
+  "to": "À {to}",
+  "cc": "aucune copie | {count} en copie | {count} en copie",
+  "forbidden": "Les courriels de ce dossier se lisent avec le droit d'écrire aux participants de son édition.",
+  "empty": {
+    "title": "Aucun courriel",
+    "description": "« Écrire au déposant » ouvre un courriel rattaché à ce dossier ; il apparaîtra ici."
+  }
+}
