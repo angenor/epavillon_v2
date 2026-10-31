@@ -159,3 +159,27 @@ Non vérifié : rendu Outlook (VML compris) et Microsoft 365 ; la page des gabar
   au clavier (flèches, Entrée, Échap) ; une adresse inconnue reste permise. L'édition vient de la prop `eventId`, à
   défaut de l'édition courante du back-office : `Composer.vue` ne la passe pas encore (réorganisé en parallèle).
 - **Tests** : `engagement/tests/envois_suppression.rs` (six). Pas de parcours au navigateur.
+
+## 01/11 : textes types, écrire au déposant d'un dossier
+
+- **Textes types** (`engagement.mail_texts`, modèle : `modele.md`, 01/11) : objet et corps prêts à l'emploi, notion
+  distincte du gabarit (apparence). Neuf textes de la v1 semés, communs. Routes `/admin/mail-texts` (liste par édition,
+  création, détail, modification, suppression), gardées comme les gabarits (`engagement.mailing.send` sur l'édition,
+  globale pour un commun). Écrans `/admin/courriels/textes` et `/admin/courriels/textes/<id>` (enregistrement
+  automatique), bouton « Textes types » dans l'historique. Rédacteur : bande `AdminMailingsTextStrip` sous les gabarits,
+  même motif ; choisir remplace objet et message, confirmation en ligne si le message a été écrit ; `mail_text_id`
+  garde la trace.
+- **Courriel d'un dossier** : `POST /admin/mailings/for-proposal` crée le brouillon (au déposant, la personne à
+  contacter en copie si c'en est une autre, plus la copie de l'équipe ; objet = titre de l'activité ; `proposal_id`).
+  Page `/admin/courriels/nouveau?dossier=<id>` : crée au montage puis remplace l'adresse par `/admin/courriels/<id>`.
+  Un brouillon de dossier sans message est supprimé à la fermeture ; la fiche revient alors en arrière.
+- **Variables du dossier** `{{activite}}`, `{{date}}` (« lundi 9 novembre 2026 »), `{{heures}}` (« 10:00 à 11:30,
+  heure d'Antalya », ville de l'édition), `{{salle}}` : lues dans `repo/cross.rs` sur la première séance non annulée ni
+  reportée, figées par destinataire à l'envoi, surlignées dans l'aperçu (jamais dans le message). Sans séance, sans
+  salle ou hors dossier : aperçu, essai et envoi refusés en 422 avec la raison ; le rédacteur l'affiche et retient
+  l'envoi, comme pour un passage à compléter entre crochets.
+- **Historique d'un dossier** : `GET /admin/mailings?proposal_id=` (édition facultative, 404 si elle n'est pas celle du
+  dossier), lignes avec destinataire principal, nombre en copie, nom du texte type. Composant
+  `AdminMailingsProposalMailings` (prop `proposalId`), à brancher sur la fiche dossier.
+- **Tests** : `engagement/tests/envois_dossier.rs` (cinq), `textes_types.rs` (deux), montage des routes dans
+  `api/tests/routes_media_engagement.rs`. Pas de parcours au navigateur.
