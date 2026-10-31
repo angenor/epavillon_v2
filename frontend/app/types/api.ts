@@ -2633,6 +2633,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/sessions/{session_id}/meeting/push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `AdminSessionMeeting`, après « Envoyer à Zoom maintenant ». Un déplacement fait partir l'horaire chez Zoom cinq minutes plus tard (`sync_due_at`), pour qu'une activité déplacée plusieurs fois ne compte qu'une modification dans le quota de Zoom (cent par jour). Ce geste annule l'attente et met la synchronisation en file tout de suite ; il vaut aussi pendant l'attente d'un quota, au risque d'un nouveau refus. Ne touche ni aux inscrits ni au rattachement. Sans corps.
+         *
+         *     Exige `live.meeting.manage` sur l'édition. **404** sans réunion. `LIVE_ZOOM_UNAVAILABLE` (503) si Zoom n'est pas configuré.
+         */
+        post: operations["admin_seance_reunion_envoyer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/showcase": {
         parameters: {
             query?: never;
@@ -15421,6 +15442,65 @@ export interface operations {
             };
             /** @description Numéro de réunion mal formé */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description LIVE_ZOOM_UNAVAILABLE */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_seance_reunion_envoyer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminSessionMeeting */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre vide ou permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inconnue, hors périmètre, ou sans réunion */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

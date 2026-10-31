@@ -34,5 +34,9 @@ export function createMeetingsApi({ call, callOrNull, send }: Pick<ApiTransport,
     /** Crée la réunion chez Zoom, ou la resynchronise ; `external_id` rattache une réunion existante. */
     sync: (sessionId: Uuid, input: MeetingSyncInput): Promise<AdminSessionMeeting> =>
       send(`/admin/sessions/${sessionId}/meeting`, input, (m) => m.syncSessionMeeting(sessionId, input)),
+
+    /** Lève l'attente d'un déplacement (ou d'un quota) : la synchronisation part tout de suite. Inscrits non touchés. */
+    push: (sessionId: Uuid): Promise<AdminSessionMeeting> =>
+      send(`/admin/sessions/${sessionId}/meeting/push`, {}, (m) => m.pushSessionMeeting(sessionId)),
   }
 }

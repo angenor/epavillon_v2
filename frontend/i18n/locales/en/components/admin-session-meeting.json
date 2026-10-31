@@ -11,6 +11,11 @@
   "open": "Open the meeting in Zoom",
   "attach": "Attach an existing Zoom meeting",
   "attachHint": "Its number, as shown in Zoom. Left empty, the platform creates or updates its own meeting.",
+  "due": {
+    "reschedule": "Schedule change sent to Zoom at {time}.",
+    "quota": "Zoom is refusing for now (quota), next try at {time}.",
+    "push": "Send to Zoom now"
+  },
   "status": {
     "draft": "Draft",
     "scheduled": "Scheduled",

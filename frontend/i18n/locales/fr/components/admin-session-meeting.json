@@ -11,6 +11,11 @@
   "open": "Ouvrir la réunion dans Zoom",
   "attach": "Rattacher une réunion Zoom existante",
   "attachHint": "Son numéro, tel qu'affiché dans Zoom. Laissé vide, la plateforme crée ou met à jour sa propre réunion.",
+  "due": {
+    "reschedule": "Changement d'horaire envoyé à Zoom à {time}.",
+    "quota": "Zoom refuse pour l'instant (quota), nouvel essai à {time}.",
+    "push": "Envoyer à Zoom maintenant"
+  },
   "status": {
     "draft": "Brouillon",
     "scheduled": "Programmée",

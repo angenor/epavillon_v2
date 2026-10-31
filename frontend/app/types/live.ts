@@ -178,7 +178,7 @@ export interface MeetingSyncInput {
   external_id: string | null
 }
 
-/** `GET` et `POST /admin/sessions/{id}/meeting`. */
+/** `GET` et `POST /admin/sessions/{id}/meeting`, `POST /admin/sessions/{id}/meeting/push`. */
 export interface AdminSessionMeeting {
   id: Uuid
   session_id: SessionId
@@ -188,6 +188,13 @@ export interface AdminSessionMeeting {
   status: MeetingStatus
   sync_status: MeetingSyncStatus
   last_sync_error: string | null
+  /**
+   * Heure à laquelle la synchronisation partira chez Zoom (`sync_due_at`).
+   * En `pending` : un déplacement, envoyé cinq minutes après pour ne compter
+   * qu'une modification dans le quota de Zoom. En `failed` : Zoom a refusé
+   * (quota) et a dit quand revenir. Nulle dans les autres états.
+   */
+  sync_due_at: IsoDateTime | null
   join_url: Url | null
   participants_total: number
   participants_synced: number

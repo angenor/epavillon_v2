@@ -72,6 +72,7 @@ export function adminSessionMeeting(sessionId: string): AdminSessionMeeting | nu
     status: statut(s, Date.now()),
     sync_status: 'synced',
     last_sync_error: null,
+    sync_due_at: null,
     join_url: `https://zoom.us/j/${numero(sessionId)}`,
     participants_total: 42,
     participants_synced: 41,
@@ -90,11 +91,20 @@ export function syncSessionMeeting(sessionId: string, input: MeetingSyncInput): 
     status: base?.status ?? 'scheduled',
     sync_status: 'pending',
     last_sync_error: null,
+    sync_due_at: null,
     join_url: `https://zoom.us/j/${externalId}`,
     participants_total: base?.participants_total ?? 0,
     participants_synced: 0,
     participants_failed: 0,
   }
+  reunions.set(sessionId, reunion)
+  return reunion
+}
+
+/** « Envoyer à Zoom maintenant » : l'attente tombe, la synchronisation part en file. */
+export function pushSessionMeeting(sessionId: string): AdminSessionMeeting {
+  const base = adminSessionMeeting(sessionId) ?? syncSessionMeeting(sessionId, { external_id: null })
+  const reunion: AdminSessionMeeting = { ...base, sync_status: 'pending', sync_due_at: null, last_sync_error: null }
   reunions.set(sessionId, reunion)
   return reunion
 }

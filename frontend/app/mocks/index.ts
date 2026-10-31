@@ -309,7 +309,7 @@ export {
   mailTemplatePreview,
 } from './admin-mailings'
 export { publicSessionStreams } from './streams'
-export { publicSessionMeeting, meetingAccess, registrationJoined, adminSessionMeeting, syncSessionMeeting } from './meetings'
+export { publicSessionMeeting, meetingAccess, registrationJoined, adminSessionMeeting, syncSessionMeeting, pushSessionMeeting } from './meetings'
 
 export {
   proposalFunnel,

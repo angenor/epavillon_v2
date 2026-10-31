@@ -394,7 +394,13 @@ const isPlaced = computed(() => props.session?.room_id !== null && props.session
           }) }}
         </p>
 
-        <AdminPlannerMeetingPanel v-if="props.session.is_streamed" :session-id="props.session.id" :editable="props.editable" />
+        <AdminPlannerMeetingPanel
+          v-if="props.session.is_streamed"
+          :session-id="props.session.id"
+          :timezone="props.timezone"
+          :zone-label="props.zoneLabel"
+          :editable="props.editable"
+        />
       </section>
 
       <!-- GALERIE (D7). Elle s'enregistre seule, comme la réunion Zoom : ses

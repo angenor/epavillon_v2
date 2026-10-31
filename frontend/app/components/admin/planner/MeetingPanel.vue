@@ -1,23 +1,30 @@
 <script setup lang="ts">
 import type { AdminSessionMeeting, MeetingStatus, MeetingSyncStatus } from '~/types/live'
 import type { Intent } from '~/types/ui'
-import type { Uuid } from '~/types/shared'
+import type { TimeZoneName, Uuid } from '~/types/shared'
 
 /**
  * La réunion Zoom d'une séance diffusée : son état chez Zoom, celui des inscrits
  * qu'on y pousse, et le geste qui la crée ou la resynchronise. Un numéro saisi
  * rattache une réunion déjà créée dans Zoom au lieu d'en ouvrir une autre.
  * La portée d'administration est vérifiée par l'API, sur l'édition de la séance.
+ *
+ * Un déplacement part chez Zoom cinq minutes après (quota de cent modifications
+ * par jour) ; « Envoyer à Zoom maintenant » lève cette attente.
  */
 
 interface Props {
   sessionId: Uuid
+  /** Fuseau de l'édition : l'heure d'envoi à Zoom s'y affiche. */
+  timezone: TimeZoneName
+  zoneLabel?: string
   editable?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { editable: true })
 
 const { t } = useI18n()
+const { timeWithZone } = useDateTime()
 const api = useApi()
 
 const meeting = ref<AdminSessionMeeting | null>(null)
@@ -27,6 +34,17 @@ const forbidden = ref(false)
 const syncing = ref(false)
 const syncError = ref<string | null>(null)
 const externalId = ref('')
+const pushing = ref(false)
+const pushError = ref<string | null>(null)
+
+/** `failed` avec une heure prévue : Zoom a refusé (quota) et dit quand revenir. */
+const waitsForQuota = computed(() => !!meeting.value?.sync_due_at && meeting.value.sync_status === 'failed')
+const dueNotice = computed(() => {
+  const dueAt = meeting.value?.sync_due_at
+  if (!dueAt) return ''
+  const time = timeWithZone(dueAt, props.timezone, props.zoneLabel)
+  return t(waitsForQuota.value ? 'admin-session-meeting.due.quota' : 'admin-session-meeting.due.reschedule', { time })
+})
 
 const STATUS_INTENT: Record<MeetingStatus, Intent> = {
   draft: 'neutral',
@@ -73,11 +91,25 @@ async function sync(): Promise<void> {
   }
 }
 
+async function push(): Promise<void> {
+  pushing.value = true
+  pushError.value = null
+  try {
+    await api.meetings.push(props.sessionId)
+    await load()
+  } catch (failure) {
+    pushError.value = apiErrorMessage(failure, t)
+  } finally {
+    pushing.value = false
+  }
+}
+
 watch(
   () => props.sessionId,
   () => {
     externalId.value = ''
     syncError.value = null
+    pushError.value = null
     void load()
   },
   { immediate: true },
@@ -105,7 +137,8 @@ watch(
     <template v-else>
       <div class="flex flex-wrap gap-2">
         <UiBadge size="sm" solid :intent="STATUS_INTENT[meeting.status]" :label="t(`admin-session-meeting.status.${meeting.status}`)" />
-        <UiBadge size="sm" :intent="SYNC_INTENT[meeting.sync_status]" :label="t(`admin-session-meeting.sync.${meeting.sync_status}`)" />
+        <UiBadge v-if="waitsForQuota" size="sm" intent="warning" :label="t('admin-session-meeting.sync.pending')" />
+        <UiBadge v-else size="sm" :intent="SYNC_INTENT[meeting.sync_status]" :label="t(`admin-session-meeting.sync.${meeting.sync_status}`)" />
       </div>
       <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
         <div>
@@ -122,7 +155,21 @@ watch(
           </dd>
         </div>
       </dl>
-      <UiAlert v-if="meeting.last_sync_error" intent="danger" compact :message="meeting.last_sync_error" />
+      <div v-if="meeting.sync_due_at" class="space-y-2">
+        <UiAlert :intent="waitsForQuota ? 'warning' : 'info'" compact :message="dueNotice" />
+        <UiButton
+          v-if="props.editable"
+          variant="secondary"
+          icon="arrow-up-right"
+          :loading="pushing"
+          :disabled="syncing"
+          @click="push"
+        >
+          {{ t('admin-session-meeting.due.push') }}
+        </UiButton>
+        <UiAlert v-if="pushError" intent="danger" live compact :message="pushError" />
+      </div>
+      <UiAlert v-if="meeting.last_sync_error && !waitsForQuota" intent="danger" compact :message="meeting.last_sync_error" />
       <UiButton v-if="meeting.join_url" variant="link" icon="external-link" :href="meeting.join_url">
         {{ t('admin-session-meeting.open') }}
       </UiButton>
@@ -137,7 +184,7 @@ watch(
         autocomplete="off"
         :disabled="syncing"
       />
-      <UiButton variant="secondary" icon="refresh" :loading="syncing" @click="sync">
+      <UiButton variant="secondary" icon="refresh" :loading="syncing" :disabled="pushing" @click="sync">
         {{ t('admin-session-meeting.sync.action') }}
       </UiButton>
       <UiAlert v-if="syncError" intent="danger" live compact :message="syncError" />
