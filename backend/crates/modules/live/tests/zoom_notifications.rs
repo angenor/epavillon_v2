@@ -249,3 +249,71 @@ async fn une_reunion_relancee_par_lhote_rouvre_la_salle() {
         "le premier démarrage reste"
     );
 }
+
+#[tokio::test]
+async fn la_notification_dune_reunion_inconnue_perd_son_contenu() {
+    let bac = Bac::monter().await;
+    let etat = etat_avec_zoom(&bac);
+    let maintenant = OffsetDateTime::now_utc();
+    let ts = maintenant.unix_timestamp().to_string();
+
+    // Une réunion du compte IFDD étrangère à l'ePavillon.
+    let corps = json!({
+        "event": "meeting.participant_joined",
+        "event_ts": maintenant.unix_timestamp() * 1000,
+        "payload": { "object": {
+            "id": "99999999999",
+            "participant": { "user_name": "Moussa Traoré", "email": "moussa@exemple.org",
+                             "join_time": "2026-11-10T14:02:00Z" }
+        } }
+    })
+    .to_string();
+    recevoir(
+        &etat,
+        &EnTetes {
+            signature: Some(&signer(&corps, &ts)),
+            horodatage: Some(&ts),
+        },
+        corps.as_bytes(),
+        maintenant,
+    )
+    .await
+    .unwrap();
+    let id = sqlx::query_scalar::<_, uuid::Uuid>("SELECT id FROM live.provider_webhook_events")
+        .fetch_one(bac.pool())
+        .await
+        .unwrap();
+
+    let mut tx = bac
+        .db()
+        .write(&RequestContext::background("test"))
+        .await
+        .unwrap();
+    live::jobs::webhook::traiter(&mut tx, id).await.unwrap();
+    tx.commit().await.unwrap();
+
+    let (statut, payload, type_, numero, empreinte, traitee) = sqlx::query_as::<
+        _,
+        (
+            String,
+            serde_json::Value,
+            String,
+            Option<String>,
+            bool,
+            bool,
+        ),
+    >(
+        "SELECT status::text, payload, event_type, external_id,
+                payload_hash IS NOT NULL, processed_at IS NOT NULL
+           FROM live.provider_webhook_events WHERE id = $1",
+    )
+    .bind(id)
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(statut, "ignored");
+    assert_eq!(payload, json!({}), "ni nom ni adresse ne restent");
+    assert_eq!(type_, "meeting.participant_joined");
+    assert_eq!(numero.as_deref(), Some("99999999999"));
+    assert!(empreinte && traitee, "la trace reste analysable");
+}

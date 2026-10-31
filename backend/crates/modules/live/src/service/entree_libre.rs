@@ -53,7 +53,8 @@ pub async fn place(
         "last_name": personne.last_name,
     });
 
-    let (participant_id, deja_inscrit) =
+    // Une ligne déjà là a déjà tenté l'inscription : chercher avant de POSTer.
+    let (participant_id, deja_inscrit, nouvel_essai) =
         match meetings::participant_libre(&mut tx, reunion.id, person_id, &personne.email).await? {
             Some(p) if p.pret => {
                 let place = meetings::place_du_participant(&mut tx, p.id).await?;
@@ -72,7 +73,7 @@ pub async fn place(
                 {
                     return Err(pas_prete());
                 }
-                (p.id, p.external_registrant_id.is_some())
+                (p.id, p.external_registrant_id.is_some(), true)
             }
             None => {
                 let id = meetings::inserer_participant_libre(
@@ -85,7 +86,7 @@ pub async fn place(
                 )
                 .await?
                 .ok_or_else(pas_prete)?;
-                (id, false)
+                (id, false, false)
             }
         };
     tx.commit().await?;
@@ -98,8 +99,14 @@ pub async fn place(
     let nom: String = personne.last_name.chars().take(64).collect();
     let resultat = tokio::time::timeout(
         DELAI_ZOOM,
-        zoom.client
-            .inscrire_et_approuver(&numero, &personne.email, &prenom, &nom, deja_inscrit),
+        zoom.client.inscrire_et_approuver(
+            &numero,
+            &personne.email,
+            &prenom,
+            &nom,
+            deja_inscrit,
+            nouvel_essai,
+        ),
     )
     .await;
 

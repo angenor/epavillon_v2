@@ -262,6 +262,30 @@ pub async fn reconstruire(
     Ok(tableau)
 }
 
+/// « Envoyer à Zoom maintenant » : l'attente d'un déplacement (ou d'un quota)
+/// tombe et la synchronisation part en file tout de suite. Ni les inscrits ni
+/// le rattachement ne sont touchés, à la différence de `reconstruire`.
+pub async fn envoyer_maintenant(
+    state: &LiveState,
+    ctx: &RequestContext,
+    perimetre: &Perimeter,
+    session_id: Uuid,
+) -> Result<AdminSessionMeeting> {
+    autoriser(state, perimetre, session_id).await?;
+    state.zoom()?;
+
+    let mut tx = state.db().write(ctx).await?;
+    let reunion = meetings::reunion_active(&mut tx, session_id)
+        .await?
+        .ok_or_else(ApiError::not_found)?;
+    meetings::relancer_reunion(&mut tx, reunion.id).await?;
+    let tableau = meetings::tableau(&mut tx, session_id)
+        .await?
+        .ok_or_else(|| ApiError::internal("réunion introuvable après l'envoi"))?;
+    tx.commit().await?;
+    Ok(tableau)
+}
+
 /// Un numéro de réunion Zoom saisi à la main : espaces et tirets tolérés.
 fn normaliser_numero(brut: &str) -> Option<String> {
     let chiffres: String = brut

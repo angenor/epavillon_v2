@@ -268,6 +268,11 @@ impl ZoomClient {
 
     /// Inscrit, puis réapprouve quand Zoom range l'inscrit parmi les refusés ou
     /// en attente (réinscription après annulation, approbation manuelle passée).
+    ///
+    /// `chercher_dabord` : un nouvel essai cherche l'inscrit avant de le POSTer.
+    /// Zoom n'accepte que trois demandes d'inscription par jour pour une même
+    /// adresse dans une même réunion, et un essai dont la réponse s'est perdue
+    /// a pu inscrire ; la recherche ne compte pas dans cette limite.
     pub async fn inscrire_et_approuver(
         &self,
         numero: &str,
@@ -275,8 +280,19 @@ impl ZoomClient {
         prenom: &str,
         nom: &str,
         deja_inscrit: bool,
+        chercher_dabord: bool,
     ) -> ZoomResult<Inscrit> {
-        let inscrit = self.inscrire(numero, email, prenom, nom).await?;
+        let trouve = if chercher_dabord {
+            self.trouver_inscrit(numero, email)
+                .await?
+                .filter(|i| i.join_url.is_some())
+        } else {
+            None
+        };
+        let inscrit = match trouve {
+            Some(i) => i,
+            None => self.inscrire(numero, email, prenom, nom).await?,
+        };
         if deja_inscrit || matches!(inscrit.statut, Some("pending" | "denied")) {
             if let Err(e) = self
                 .changer_statut_inscrit(numero, "approve", &inscrit.registrant_id, email)

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings SET sync_due_at = NULL\n              WHERE id = $1 AND sync_due_at IS NOT NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c2f84316fbe7e6788d6eb6f92b70e785991bfb60c1a2f844b5b8762615568d4e"
+}

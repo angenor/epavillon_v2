@@ -84,6 +84,10 @@ pub struct AdminSessionMeeting {
     pub status: String,
     pub sync_status: String,
     pub last_sync_error: Option<String>,
+    /// Heure à laquelle la synchronisation partira chez Zoom, en `pending`
+    /// (déplacement regroupé) ou `failed` (attente d'un quota) ; nulle sinon.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub sync_due_at: Option<OffsetDateTime>,
     pub join_url: Option<String>,
     pub participants_total: i64,
     pub participants_synced: i64,

@@ -26,6 +26,10 @@ pub fn chemins_admin(cfg: &mut web::ServiceConfig) {
     .route(
         "/admin/sessions/{session_id}/meeting",
         web::post().to(reconstruire),
+    )
+    .route(
+        "/admin/sessions/{session_id}/meeting/push",
+        web::post().to(envoyer_maintenant),
     );
 }
 
@@ -141,6 +145,38 @@ pub(crate) async fn reconstruire(
         &perimetre,
         chemin.into_inner(),
         &entree,
+    )
+    .await?;
+    Ok(HttpResponse::Ok().json(tableau))
+}
+
+#[utoipa::path(
+    post,
+    description = "`AdminSessionMeeting`, après « Envoyer à Zoom maintenant ». Un déplacement fait partir l'horaire chez Zoom cinq minutes plus tard (`sync_due_at`), pour qu'une activité déplacée plusieurs fois ne compte qu'une modification dans le quota de Zoom (cent par jour). Ce geste annule l'attente et met la synchronisation en file tout de suite ; il vaut aussi pendant l'attente d'un quota, au risque d'un nouveau refus. Ne touche ni aux inscrits ni au rattachement. Sans corps.\n\nExige `live.meeting.manage` sur l'édition. **404** sans réunion. `LIVE_ZOOM_UNAVAILABLE` (503) si Zoom n'est pas configuré.",
+    path = "/admin/sessions/{session_id}/meeting/push",
+    tag = "Back-office : réunions Zoom",
+    operation_id = "admin_seance_reunion_envoyer",
+    params(("session_id" = Uuid, Path, description = "Séance")),
+    responses(
+        (status = 200, description = "AdminSessionMeeting", body = Object),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Périmètre vide ou permission absente", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Séance inconnue, hors périmètre, ou sans réunion", body = crate::routes::openapi::ApiErrorBody),
+        (status = 503, description = "LIVE_ZOOM_UNAVAILABLE", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn envoyer_maintenant(
+    state: web::Data<LiveState>,
+    requete: HttpRequest,
+    perimetre: Perimeter,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let tableau = meeting::envoyer_maintenant(
+        &state,
+        &crate::routes::contexte_de(&requete, perimetre.person_id),
+        &perimetre,
+        chemin.into_inner(),
     )
     .await?;
     Ok(HttpResponse::Ok().json(tableau))

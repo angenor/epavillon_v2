@@ -191,6 +191,9 @@ CREATE TABLE live.meetings (
                                     REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at          timestamptz NOT NULL DEFAULT now(),
     updated_at          timestamptz NOT NULL DEFAULT now(),
+    -- Heure à laquelle la synchronisation part chez Zoom (31/10) ; NULL : tout
+    -- de suite. Voir le COMMENT ON COLUMN.
+    sync_due_at         timestamptz,
 
     -- Une réunion autonome doit au moins porter un intitulé lisible.
     CONSTRAINT ck_meetings_context
@@ -229,15 +232,28 @@ CREATE TRIGGER tg_meetings_audit
 
 -- Création chez le fournisseur, mise en file par la base (17/10, Zoom). Une
 -- réunion passée en `pending` (création, rattachement d'une réunion existante,
--- relance depuis le back-office) dépose un travail `live.sync_meeting` dans la
--- même transaction : aucun chemin d'écriture ne peut l'oublier.
+-- relance depuis le back-office, déplacement de la séance) dépose un travail
+-- `live.sync_meeting` dans la même transaction : aucun chemin d'écriture ne peut
+-- l'oublier.
 --
--- La clé d'idempotence est HORODATÉE, comme dans requeue_failed_participants() :
--- platform.jobs garde la clé des travaux réussis, et une clé égale à
--- l'identifiant de la réunion interdirait toute relance après une première
--- création. Deux passages en `pending` dans la même microseconde n'en font qu'un.
--- Le travail se protège lui-même du doublon : il réserve la ligne
--- (`pending`/`failed` vers `in_progress`) avant d'appeler le fournisseur.
+-- Sans heure prévue, la clé d'idempotence est HORODATÉE, comme dans
+-- requeue_failed_participants() : platform.jobs garde la clé des travaux
+-- réussis, et une clé égale à l'identifiant de la réunion interdirait toute
+-- relance après une première création. Deux passages en `pending` dans la même
+-- microseconde n'en font qu'un. Le travail se protège lui-même du doublon : il
+-- réserve la ligne (`pending`/`failed` vers `in_progress`) avant d'appeler le
+-- fournisseur.
+--
+-- Avec une heure prévue dans le futur (`sync_due_at`, 31/10), le travail part à
+-- cette heure et sa clé est cette heure : une série de déplacements dans la
+-- fenêtre de cinq minutes, qui garde la même heure, ne dépose qu'un travail.
+-- `failed` ne dépose rien, sauf avec une heure prévue : c'est l'attente d'un
+-- refus de quota (Retry-After), qui ne consomme pas les essais du travail ;
+-- un `failed` ordinaire est déjà réessayé par platform.fail_job().
+--
+-- Le déclencheur porte sur `sync_status` : il se déclenche dès que la colonne
+-- est dans le SET, même à valeur égale. Les écritures qui veulent garder une
+-- attente en cours y remettent donc la même valeur, et la clé fait le reste.
 --
 -- Dix essais et non cinq : le délai croissant de platform.fail_job() couvre
 -- ainsi une demi-heure de panne du fournisseur, cinq essais n'en couvraient
@@ -246,13 +262,24 @@ CREATE OR REPLACE FUNCTION live.tg_enqueue_meeting_sync()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_prevue boolean := COALESCE(NEW.sync_due_at > now(), false);
 BEGIN
-    INSERT INTO platform.jobs (queue, task, payload, idempotency_key, max_attempts)
+    IF NEW.sync_status = 'failed' AND NOT v_prevue THEN
+        RETURN NULL;
+    END IF;
+
+    INSERT INTO platform.jobs (queue, task, payload, idempotency_key, run_at, max_attempts)
     VALUES (
         'live',
         'live.sync_meeting',
         jsonb_build_object('meeting_id', NEW.id),
-        NEW.id::text || ':' || to_char(clock_timestamp(), 'YYYYMMDDHH24MISSUS'),
+        CASE WHEN v_prevue
+             THEN NEW.id::text || ':prevue:'
+                  || to_char(NEW.sync_due_at AT TIME ZONE 'UTC', 'YYYYMMDDHH24MISSUS')
+             ELSE NEW.id::text || ':' || to_char(clock_timestamp(), 'YYYYMMDDHH24MISSUS')
+        END,
+        CASE WHEN v_prevue THEN NEW.sync_due_at ELSE now() END,
         10
     )
     ON CONFLICT DO NOTHING;
@@ -264,7 +291,7 @@ $$;
 CREATE TRIGGER tg_meetings_enqueue_sync
     AFTER INSERT OR UPDATE OF sync_status ON live.meetings
     FOR EACH ROW
-    WHEN (NEW.sync_status = 'pending')
+    WHEN (NEW.sync_status IN ('pending', 'failed'))
     EXECUTE FUNCTION live.tg_enqueue_meeting_sync();
 
 COMMENT ON TABLE live.meetings IS
@@ -277,6 +304,8 @@ COMMENT ON COLUMN live.meetings.passcode_encrypted IS
     'Code d''accès, CHIFFRÉ (D3). Le code n''est transmis qu''aux inscrits, avec leur lien personnel.';
 COMMENT ON COLUMN live.meetings.join_url IS
     'Lien de participation générique : donnée publique, diffusable. À distinguer strictement des colonnes chiffrées.';
+COMMENT ON COLUMN live.meetings.sync_due_at IS
+    'Heure à laquelle la synchronisation part chez Zoom ; NULL : tout de suite. Zoom limite à 100 créations ou modifications de réunion par jour et par hôte (remise à zéro à 00:00 UTC). Un déplacement d''une réunion déjà créée la pose à cinq minutes, sans la repousser si elle est déjà dans le futur : déplacer plusieurs fois de suite ne compte qu''une modification. Un refus de quota avec Retry-After la pose à l''heure dite (ligne en failed), sans consommer d''essai. Remise à NULL par une synchronisation réussie, un échec ordinaire, la relance et le bouton « Envoyer à Zoom maintenant » du back-office.';
 
 -- Contrat d'exposition : ce que l'API a le droit de renvoyer au navigateur.
 CREATE VIEW live.meetings_public AS
@@ -724,7 +753,9 @@ CREATE TABLE live.provider_webhook_events (
     signature_verified  boolean     NOT NULL DEFAULT false,
 
     -- Rattachement résolu au moment du traitement. `external_id` est conservé
-    -- même si la réunion est inconnue : un webhook orphelin reste analysable.
+    -- même si la réunion est inconnue : un webhook orphelin reste analysable
+    -- par son type, son numéro de réunion, son heure, son statut et son
+    -- empreinte, mais pas par son contenu (`payload`, voir son COMMENT).
     meeting_id          uuid        REFERENCES live.meetings(id) ON DELETE SET NULL,
     external_id         text,
 
@@ -763,6 +794,8 @@ COMMENT ON TABLE live.provider_webhook_events IS
     'Journal idempotent et rejouable des webhooks de visioconférence (D4). Toute notification est écrite avant d''être traitée.';
 COMMENT ON COLUMN live.provider_webhook_events.signature_verified IS
     'Résultat de la vérification de signature (en-tête x-zm-signature pour Zoom). Un webhook non vérifié est journalisé sans son contenu (type et horodatage seulement) et jamais appliqué.';
+COMMENT ON COLUMN live.provider_webhook_events.payload IS
+    'Charge utile reçue, telle quelle. Vidée (''{}'') quand la notification est close en ignored (31/10) : l''abonnement Zoom couvre tout le compte de l''IFDD, et une réunion étrangère à l''ePavillon n''a pas à laisser ici les noms et adresses de ses participants. Le type, external_id, l''heure de réception, le statut et payload_hash restent.';
 
 -- Rejeu d'un webhook : duplique la ligne en état `received` et laisse le worker
 -- la reprendre. L'originale conserve sa trace d'échec.

@@ -67,6 +67,9 @@ pub async fn reserver(conn: &mut PgConnection, id: Uuid) -> Result<Option<Webhoo
     Ok(ligne)
 }
 
+/// Close en `ignored`, la notification perd son contenu dans la même écriture :
+/// l'abonnement couvre tout le compte Zoom de l'IFDD, et une réunion étrangère
+/// à l'ePavillon n'a pas à laisser ici les noms et adresses de ses participants.
 pub async fn clore(
     conn: &mut PgConnection,
     id: Uuid,
@@ -78,7 +81,8 @@ pub async fn clore(
         "UPDATE live.provider_webhook_events
             SET status = $2::text::live.webhook_status, meeting_id = COALESCE($3, meeting_id),
                 last_error = $4,
-                processed_at = CASE WHEN $2 IN ('processed', 'ignored') THEN now() END
+                processed_at = CASE WHEN $2 IN ('processed', 'ignored') THEN now() END,
+                payload = CASE WHEN $2 = 'ignored' THEN '{}'::jsonb ELSE payload END
           WHERE id = $1",
         id,
         statut,

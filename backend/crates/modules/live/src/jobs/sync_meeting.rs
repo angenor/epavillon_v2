@@ -8,6 +8,12 @@
 //! référence de sa ligne dans son ordre du jour : un essai dont la réponse
 //! s'est perdue (délai dépassé, worker tué) cherche d'abord chez Zoom la
 //! réunion qu'il a peut-être déjà créée.
+//!
+//! Quota de Zoom (100 créations ou modifications par jour et par hôte) : un
+//! refus qui dit quand revenir (`Retry-After`) pose `sync_due_at`, et le
+//! déclencheur dépose un nouveau travail à cette heure ; celui-ci réussit sans
+//! consommer d'essai. Une ligne dont l'heure prévue n'est pas venue n'est pas
+//! réservée : le travail prévu à cette heure s'en chargera.
 
 use async_trait::async_trait;
 use kernel::db::Db;
@@ -19,6 +25,7 @@ use time::format_description::well_known::Rfc3339;
 use time::{OffsetDateTime, UtcOffset};
 use uuid::Uuid;
 
+use super::delai_avant;
 use crate::repo::meetings::{self, FILE, SYNC_MEETING};
 use crate::zoom::{Zoom, ZoomError};
 
@@ -146,6 +153,7 @@ impl JobHandler for SyncMeeting {
                 WHERE id = $1
                   AND (sync_status IN ('pending', 'failed')
                        OR (sync_status = 'in_progress' AND updated_at < now() - interval '10 minutes'))
+                  AND (sync_due_at IS NULL OR sync_due_at <= now())
             RETURNING external_id, topic, agenda, scheduled_start_at, duration_minutes,
                       timezone::text AS "timezone!",
                       (provider_payload ? 'creation_envoyee') AS "creation_envoyee!""#,
@@ -161,14 +169,33 @@ impl JobHandler for SyncMeeting {
         };
 
         match self.appeler_zoom(job, meeting_id, &r).await {
-            Ok(reunion) => self.enregistrer(job, meeting_id, &reunion).await,
+            Ok(reunion) => self.enregistrer(job, meeting_id, &r, &reunion).await,
+            Err(e) if e.reessayer_dans().is_some() => {
+                let delai = delai_avant(&e, 1, meeting_id);
+                let quand = OffsetDateTime::now_utc() + time::Duration::seconds(delai);
+                let mut tx = self.db.write(&job.context()).await?;
+                sqlx::query!(
+                    "UPDATE live.meetings
+                        SET sync_status = 'failed', last_sync_error = $2, sync_due_at = $3
+                      WHERE id = $1",
+                    meeting_id,
+                    e.to_string(),
+                    quand
+                )
+                .execute(&mut *tx)
+                .await?;
+                tx.commit().await?;
+                tracing::info!(reunion = %meeting_id, %quand, "quota Zoom : réunion replanifiée");
+                Ok(())
+            }
             Err(e) => {
                 let dernier = job.attempts >= job.max_attempts || !e.est_passagere();
                 let statut = if dernier { "abandoned" } else { "failed" };
                 let mut tx = self.db.write(&job.context()).await?;
                 sqlx::query!(
                     "UPDATE live.meetings
-                        SET sync_status = $2::text::live.sync_status, last_sync_error = $3
+                        SET sync_status = $2::text::live.sync_status, last_sync_error = $3,
+                            sync_due_at = NULL
                       WHERE id = $1",
                     meeting_id,
                     statut,
@@ -299,7 +326,16 @@ impl SyncMeeting {
         client.lire_reunion(numero).await
     }
 
-    async fn enregistrer(&self, job: &ClaimedJob, meeting_id: Uuid, reunion: &Value) -> Result<()> {
+    /// Une séance déplacée pendant l'appel n'est pas tenue pour synchronisée :
+    /// la ligne repart en `pending`, avec l'heure prévue que le déplacement a
+    /// posée, et le nouvel horaire suivra.
+    async fn enregistrer(
+        &self,
+        job: &ClaimedJob,
+        meeting_id: Uuid,
+        envoye: &AReserver,
+        reunion: &Value,
+    ) -> Result<()> {
         let numero = match &reunion["id"] {
             Value::Number(n) => n.to_string(),
             Value::String(s) => s.clone(),
@@ -332,7 +368,15 @@ impl SyncMeeting {
                     passcode_encrypted = $8, start_url_encrypted = $9,
                     host_email = $10::text::platform.email,
                     status = CASE WHEN status = 'draft' THEN 'scheduled' ELSE status END,
-                    sync_status = 'synced', last_synced_at = now(), last_sync_error = NULL
+                    sync_status = CASE
+                        WHEN scheduled_start_at IS NOT DISTINCT FROM $11
+                         AND duration_minutes IS NOT DISTINCT FROM $12
+                        THEN 'synced'::live.sync_status ELSE 'pending'::live.sync_status END,
+                    sync_due_at = CASE
+                        WHEN scheduled_start_at IS NOT DISTINCT FROM $11
+                         AND duration_minutes IS NOT DISTINCT FROM $12
+                        THEN NULL ELSE sync_due_at END,
+                    last_synced_at = now(), last_sync_error = NULL
               WHERE id = $1",
             meeting_id,
             numero,
@@ -344,6 +388,8 @@ impl SyncMeeting {
             passcode,
             lien_hote,
             reunion["host_email"].as_str().filter(|e| e.contains('@')),
+            envoye.scheduled_start_at,
+            envoye.duration_minutes,
         )
         .execute(&mut *tx)
         .await?;

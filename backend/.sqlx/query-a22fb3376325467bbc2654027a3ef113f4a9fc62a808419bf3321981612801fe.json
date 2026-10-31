@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings\n                SET external_id = $2, external_uuid = $3, provider_account = $4,\n                    provider_payload = $5, join_url = $6::text::platform.url,\n                    registration_url = $7::text::platform.url,\n                    passcode_encrypted = $8, start_url_encrypted = $9,\n                    host_email = $10::text::platform.email,\n                    status = CASE WHEN status = 'draft' THEN 'scheduled' ELSE status END,\n                    sync_status = CASE\n                        WHEN scheduled_start_at IS NOT DISTINCT FROM $11\n                         AND duration_minutes IS NOT DISTINCT FROM $12\n                        THEN 'synced'::live.sync_status ELSE 'pending'::live.sync_status END,\n                    sync_due_at = CASE\n                        WHEN scheduled_start_at IS NOT DISTINCT FROM $11\n                         AND duration_minutes IS NOT DISTINCT FROM $12\n                        THEN NULL ELSE sync_due_at END,\n                    last_synced_at = now(), last_sync_error = NULL\n              WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Bytea",
+        "Bytea",
+        "Text",
+        "Timestamptz",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a22fb3376325467bbc2654027a3ef113f4a9fc62a808419bf3321981612801fe"
+}

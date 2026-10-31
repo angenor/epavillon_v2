@@ -15,8 +15,9 @@ use std::sync::Arc;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use super::delai_avant;
 use crate::repo::meetings::{self, CANCEL_PARTICIPANT, FILE, SYNC_PARTICIPANT};
-use crate::zoom::{Zoom, ZoomError};
+use crate::zoom::Zoom;
 
 pub const PAS_ENCORE_CREEE: &str = "réunion pas encore créée";
 
@@ -64,7 +65,14 @@ impl JobHandler for SyncParticipant {
         let resultat = self
             .zoom
             .client
-            .inscrire_et_approuver(&a.numero, &a.email, &prenom, &nom, a.deja_inscrit.is_some())
+            .inscrire_et_approuver(
+                &a.numero,
+                &a.email,
+                &prenom,
+                &nom,
+                a.deja_inscrit.is_some(),
+                a.essais > 1,
+            )
             .await;
 
         let mut tx = self.db.write(&job.context()).await?;
@@ -135,17 +143,6 @@ impl JobHandler for SyncParticipant {
             }
         }
     }
-}
-
-/// `Retry-After`, sinon trente secondes doublées à chaque essai (une heure au
-/// plus), plus jusqu'à une minute propre à chaque inscrit : trois cents
-/// inscrits refusés ensemble ne reviennent pas ensemble.
-fn delai_avant(e: &ZoomError, essais: i16, participant_id: Uuid) -> i64 {
-    let base = match e.reessayer_dans() {
-        Some(s) => s as i64,
-        None => (30i64 << (essais.clamp(1, 8) - 1)).min(3600),
-    };
-    base + i64::from(participant_id.as_bytes()[15] % 60)
 }
 
 impl SyncParticipant {

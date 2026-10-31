@@ -131,19 +131,32 @@ pub async fn external_id_pris(
     Ok(pris)
 }
 
-/// Repasse la réunion en `pending` : le déclencheur dépose un nouveau travail.
-/// Jamais pendant qu'un travail tient la ligne : il la rendrait `pending` sous
-/// ses pieds, et un second travail créerait une seconde réunion. Un travail
-/// mort depuis dix minutes ne la tient plus.
+/// Repasse la réunion en `pending`, sans attente : le déclencheur dépose un
+/// travail immédiat. Jamais pendant qu'un travail tient la ligne : il la
+/// rendrait `pending` sous ses pieds, et un second travail créerait une seconde
+/// réunion. Un travail mort depuis dix minutes ne la tient plus. Sous un
+/// travail qui la tient, seule l'attente tombe : si la séance a bougé pendant
+/// l'appel, la ligne repart aussitôt (`SyncMeeting::enregistrer`).
 pub async fn relancer_reunion(conn: &mut PgConnection, meeting_id: Uuid) -> Result<()> {
-    sqlx::query!(
-        "UPDATE live.meetings SET sync_status = 'pending', last_sync_error = NULL
+    let relancee = sqlx::query!(
+        "UPDATE live.meetings
+            SET sync_status = 'pending', last_sync_error = NULL, sync_due_at = NULL
           WHERE id = $1
             AND (sync_status <> 'in_progress' OR updated_at < now() - interval '10 minutes')",
         meeting_id
     )
-    .execute(conn)
-    .await?;
+    .execute(&mut *conn)
+    .await?
+    .rows_affected();
+    if relancee == 0 {
+        sqlx::query!(
+            "UPDATE live.meetings SET sync_due_at = NULL
+              WHERE id = $1 AND sync_due_at IS NOT NULL",
+            meeting_id
+        )
+        .execute(conn)
+        .await?;
+    }
     Ok(())
 }
 
@@ -327,6 +340,8 @@ pub async fn tableau(
         r#"SELECT m.id, m.session_id AS "session_id!", m.provider::text AS "provider!",
                   m.external_id, m.status::text AS "status!",
                   m.sync_status::text AS "sync_status!", m.last_sync_error,
+                  CASE WHEN m.sync_status IN ('pending', 'failed') THEN m.sync_due_at END
+                      AS sync_due_at,
                   m.join_url::text AS join_url,
                   count(p.id) FILTER (WHERE p.cancelled_at IS NULL) AS "participants_total!",
                   count(p.id) FILTER (WHERE p.cancelled_at IS NULL AND p.sync_status = 'synced')
@@ -438,28 +453,47 @@ pub async fn annuler_reunion(conn: &mut PgConnection, session_id: Uuid) -> Resul
     Ok(())
 }
 
-/// Séance déplacée : la réunion prend le nouvel horaire, et la relance le
-/// reporte chez Zoom.
+/// Séance déplacée : la réunion prend le nouvel horaire, qui part chez Zoom
+/// cinq minutes plus tard. Zoom compte cent modifications par jour et par hôte :
+/// une activité déplacée plusieurs fois de suite n'en coûte qu'une, l'heure
+/// prévue ne reculant pas tant qu'elle est à venir. Une réunion pas encore
+/// créée chez Zoom part tout de suite.
+///
+/// Le statut ne change pas sous un travail qui tient la ligne (voir
+/// `relancer_reunion`), ni pendant l'attente d'un quota : le travail prévu
+/// relira la ligne. Il reste dans le SET pour que le déclencheur s'y appuie,
+/// et la clé de l'heure prévue évite le doublon.
 pub async fn recaler_reunion(
     conn: &mut PgConnection,
     session_id: Uuid,
     debut: OffsetDateTime,
     minutes: i32,
 ) -> Result<()> {
-    let id = sqlx::query_scalar!(
-        "UPDATE live.meetings
-            SET scheduled_start_at = $2, duration_minutes = $3
-          WHERE session_id = $1 AND status NOT IN ('cancelled', 'failed')
-        RETURNING id",
+    sqlx::query!(
+        "WITH avant AS (
+             SELECT id,
+                    (sync_status = 'in_progress' AND updated_at >= now() - interval '10 minutes')
+                    OR (sync_status = 'failed' AND sync_due_at > now()) AS garde
+               FROM live.meetings
+              WHERE session_id = $1 AND status NOT IN ('cancelled', 'failed')
+                FOR UPDATE
+         )
+         UPDATE live.meetings m
+            SET scheduled_start_at = $2, duration_minutes = $3,
+                sync_due_at = CASE
+                    WHEN m.sync_due_at > now() THEN m.sync_due_at
+                    WHEN m.external_id IS NOT NULL THEN now() + interval '5 minutes'
+                END,
+                sync_status = CASE WHEN avant.garde THEN m.sync_status ELSE 'pending' END,
+                last_sync_error = CASE WHEN avant.garde THEN m.last_sync_error END
+           FROM avant
+          WHERE m.id = avant.id",
         session_id,
         debut,
         minutes
     )
-    .fetch_optional(&mut *conn)
+    .execute(conn)
     .await?;
-    if let Some(id) = id {
-        relancer_reunion(conn, id).await?;
-    }
     Ok(())
 }
 
