@@ -9,6 +9,26 @@ use uuid::Uuid;
 /// Les variables offertes, dans l'ordre où l'écran les propose.
 pub const VARIABLES: [&str; 5] = ["prenom", "nom", "organisation", "email", "edition"];
 
+/// Les variables d'un courriel écrit depuis un dossier (01/11), lues sur le
+/// dossier et sa séance retenue (`domain/dossier.rs`). Sans valeur de secours :
+/// une valeur absente fait refuser l'envoi.
+pub const VARIABLES_DOSSIER: [&str; 4] = ["activite", "date", "heures", "salle"];
+
+/// Une variable que le rédacteur connaît, du destinataire ou du dossier.
+pub fn variable_connue(nom: &str) -> bool {
+    VARIABLES.contains(&nom) || VARIABLES_DOSSIER.contains(&nom)
+}
+
+/// Les variables connues, en jetons `{{nom}}`, pour les messages de refus.
+pub fn jetons_connus() -> String {
+    VARIABLES
+        .iter()
+        .chain(VARIABLES_DOSSIER.iter())
+        .map(|v| format!("{{{{{v}}}}}"))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 /// Les quatre familles de destinataires, telles que `mailing_audience()` les lit.
 pub const KINDS: [&str; 4] = ["submitters", "speakers", "registrants", "roles"];
 
@@ -47,6 +67,9 @@ pub struct MailingPayload {
     pub template: Option<String>,
     /// Un gabarit personnalisé de l'édition ou commun ; chaîne vide : aucun.
     pub mail_template_id: Option<String>,
+    /// Le texte type choisi (01/11), de l'édition ou commun ; chaîne vide :
+    /// aucun. Trace seulement : l'objet et le corps s'écrivent à côté.
+    pub mail_text_id: Option<String>,
     /// Valeur de secours par variable ; une chaîne vide retire le secours.
     pub variable_fallbacks: Option<HashMap<String, String>>,
     pub reply_button: Option<bool>,
@@ -61,6 +84,12 @@ pub struct CreateMailingPayload {
     pub event_id: Uuid,
     #[serde(flatten)]
     pub draft: MailingPayload,
+}
+
+/// Le brouillon d'un dossier (`CreateProposalMailingPayload`, 01/11).
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct CreateProposalMailingPayload {
+    pub proposal_id: Uuid,
 }
 
 /// Les compteurs d'un envoi, par état de destinataire (`MailingCounts`).
@@ -99,6 +128,14 @@ pub struct MailingSummary {
     pub updated_at: OffsetDateTime,
     pub counts: MailingCounts,
     pub attachment_count: i64,
+    /// Le dossier du courriel (01/11) ; nul : un envoi groupé.
+    pub proposal_id: Option<Uuid>,
+    /// Le nom du texte type choisi, s'il existe encore.
+    pub mail_text_name: Option<String>,
+    /// Le destinataire principal : la première adresse saisie, à défaut le
+    /// premier destinataire figé.
+    pub to: Option<String>,
+    pub cc_count: i64,
 }
 
 /// L'écran de l'historique (`MailingListScreen`) : les envois, et les réglages
@@ -108,6 +145,12 @@ pub struct MailingListScreen {
     pub rows: Vec<MailingSummary>,
     pub team_cc: Vec<String>,
     pub variables: Vec<String>,
+    /// Les variables d'un courriel écrit depuis un dossier (01/11).
+    pub proposal_variables: Vec<String>,
+    /// Le fuseau de l'édition, dans lequel les dates de l'écran se lisent, et
+    /// la ville qui le nomme.
+    pub timezone: String,
+    pub city: Option<String>,
 }
 
 /// Un envoi complet (`Mailing`).
@@ -130,6 +173,11 @@ pub struct Mailing {
     pub cta_label: Option<String>,
     pub cta_url: Option<String>,
     pub mail_template_id: Option<Uuid>,
+    /// Le texte type choisi (01/11).
+    pub mail_text_id: Option<Uuid>,
+    /// Le dossier du courriel et les valeurs de ses variables ; nul : un envoi
+    /// groupé.
+    pub proposal: Option<crate::domain::dossier::MailingProposal>,
     pub duplicated_from: Option<Uuid>,
     pub created_by_name: Option<String>,
     pub queued_by_name: Option<String>,
@@ -304,10 +352,20 @@ pub fn echapper_html(valeur: &str) -> String {
 
 /// Les valeurs des variables d'un destinataire, toutes présentes : une valeur
 /// inconnue est vide plutôt qu'absente, l'écran ayant prévenu avant l'envoi.
+/// Les variables du dossier, elles, ne sont présentes qu'avec une valeur : le
+/// rendu refuse un courriel qui en cite une absente.
 pub fn valeurs(
     variables: &serde_json::Value,
     secours: &serde_json::Value,
 ) -> HashMap<String, String> {
+    let du_dossier = VARIABLES_DOSSIER.iter().filter_map(|nom| {
+        variables
+            .get(*nom)
+            .and_then(serde_json::Value::as_str)
+            .map(str::trim)
+            .filter(|v| !v.is_empty())
+            .map(|v| ((*nom).to_owned(), v.to_owned()))
+    });
     VARIABLES
         .iter()
         .map(|nom| {
@@ -328,6 +386,7 @@ pub fn valeurs(
             };
             ((*nom).to_owned(), valeur.to_owned())
         })
+        .chain(du_dossier)
         .collect()
 }
 
@@ -430,5 +489,16 @@ mod tests {
         assert_eq!(v["nom"], "");
         let sans_compte = valeurs(&serde_json::json!({ "prenom": "" }), &secours);
         assert_eq!(sans_compte["prenom"], "Madame, Monsieur");
+    }
+
+    #[test]
+    fn une_variable_du_dossier_nest_presente_quavec_une_valeur() {
+        let v = valeurs(
+            &serde_json::json!({ "activite": "Atelier", "salle": "" }),
+            &serde_json::json!({}),
+        );
+        assert_eq!(v["activite"], "Atelier");
+        assert!(!v.contains_key("salle"));
+        assert!(!v.contains_key("date"));
     }
 }

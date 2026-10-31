@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.mail_texts\n               (name, category, subject, body_html, sort_order, event_id, created_by)\n           VALUES ($1, $2, $3, $4, $5, $6, $7)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int2",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4cb8b0bcbb5acd34a7c7dda748d0154f62b38397ed3f639edfcfed2a9f9b4b79"
+}

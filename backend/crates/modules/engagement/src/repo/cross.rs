@@ -22,6 +22,7 @@
 //! | `identity.people` | la langue préférée et l'adresse du destinataire ; nom et adresse des personnes proposées en saisissant un destinataire |
 //! | `platform.modules` | à quel module appartient un type de notification |
 //! | `media.attached_image()` | la bannière et le logo de l'édition d'un courriel (29/10) |
+//! | `programme.proposals`, `programme.sessions`, `event.rooms` | le dossier d'un courriel écrit depuis sa fiche : titre, déposant et contact, séance retenue et sa salle (01/11) |
 //!
 //! Rien d'autre.
 
@@ -441,6 +442,91 @@ pub struct VisuelsEdition {
     pub fin: time::Date,
     pub banniere: Option<serde_json::Value>,
     pub logo: Option<serde_json::Value>,
+}
+
+/// Le dossier d'un courriel écrit depuis sa fiche (01/11).
+pub struct DossierPourCourriel {
+    pub id: Uuid,
+    pub event_id: Uuid,
+    pub reference_code: String,
+    pub titre: String,
+    /// L'adresse du déposant, et celle de la personne à contacter (nulle si
+    /// c'est la même personne, ou s'il n'y en a pas).
+    pub deposant: String,
+    pub contact: Option<String>,
+    pub seance: Option<crate::domain::dossier::SeanceRetenue>,
+}
+
+/// Un dossier non supprimé, et sa séance retenue : la première de ses séances
+/// qui n'est ni annulée ni reportée (un dossier en compte une, rarement
+/// plusieurs), heures lues dans son fuseau. Le texte du dossier est lu en
+/// français : un courriel du back-office part dans une langue.
+pub async fn dossier_pour_courriel(
+    pool: &PgPool,
+    proposal_id: Uuid,
+) -> Result<Option<DossierPourCourriel>> {
+    let ligne = sqlx::query!(
+        r#"SELECT p.id, p.event_id, p.reference_code,
+                  platform.t(p.title, 'fr') AS "titre!",
+                  dep.primary_email::text AS "deposant!",
+                  CASE WHEN p.contact_person_id IS DISTINCT FROM p.submitted_by
+                       THEN con.primary_email::text END AS contact,
+                  e.city,
+                  s.debut AS "debut?", s.fin AS "fin?", s.timezone AS "timezone?", s.salle
+             FROM programme.proposals p
+             JOIN event.events e ON e.id = p.event_id
+             JOIN identity.people dep ON dep.id = p.submitted_by
+             LEFT JOIN identity.people con ON con.id = p.contact_person_id
+             LEFT JOIN LATERAL (
+                 SELECT (x.starts_at AT TIME ZONE x.timezone) AS debut,
+                        (x.ends_at AT TIME ZONE x.timezone) AS fin,
+                        x.timezone::text AS timezone,
+                        (SELECT platform.t(r.name, 'fr') FROM event.rooms r WHERE r.id = x.room_id) AS salle
+                   FROM programme.sessions x
+                  WHERE x.proposal_id = p.id AND x.status NOT IN ('cancelled', 'postponed')
+                  ORDER BY x.sequence_number, x.starts_at
+                  LIMIT 1
+             ) s ON true
+            WHERE p.id = $1 AND p.deleted_at IS NULL"#,
+        proposal_id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(ligne.map(|l| {
+        let seance = match (l.debut, l.fin, l.timezone) {
+            (Some(debut), Some(fin), Some(timezone)) => {
+                Some(crate::domain::dossier::SeanceRetenue {
+                    debut,
+                    fin,
+                    timezone,
+                    ville: l.city.clone(),
+                    salle: l.salle,
+                })
+            }
+            _ => None,
+        };
+        DossierPourCourriel {
+            id: l.id,
+            event_id: l.event_id,
+            reference_code: l.reference_code,
+            titre: l.titre,
+            deposant: l.deposant,
+            contact: l.contact,
+            seance,
+        }
+    }))
+}
+
+/// Le fuseau d'une édition et la ville qui le nomme.
+pub async fn fuseau_edition(pool: &PgPool, event_id: Uuid) -> Result<(String, Option<String>)> {
+    let ligne = sqlx::query!(
+        r#"SELECT e.timezone::text AS "timezone!", e.city FROM event.events e WHERE e.id = $1"#,
+        event_id
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(ligne.map_or_else(|| ("UTC".to_owned(), None), |l| (l.timezone, l.city)))
 }
 
 pub async fn visuels_edition(pool: &PgPool, event_id: Uuid) -> Result<Option<VisuelsEdition>> {

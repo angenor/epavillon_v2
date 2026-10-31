@@ -34,14 +34,15 @@ use uuid::Uuid;
 
 use crate::domain::gabarits::GABARITS;
 use crate::domain::mailing::{
-    normaliser_adresses, CreateMailingPayload, Mailing, MailingAddressSuggestion, MailingAudience,
-    MailingCriterion, MailingListScreen, MailingPayload, MailingPreview, MailingTestResult, KINDS,
-    VARIABLES,
+    jetons_connus, normaliser_adresses, variable_connue, CreateMailingPayload, Mailing,
+    MailingAddressSuggestion, MailingAudience, MailingCriterion, MailingListScreen, MailingPayload,
+    MailingPreview, MailingTestResult, KINDS, VARIABLES, VARIABLES_DOSSIER,
 };
 use crate::domain::{render, sanitize};
 use crate::jobs::send_mailing::{QUEUE, SEND_MAILING, SEND_MAILING_TEST};
 use crate::realtime::{self, Auteur};
 use crate::repo::{cross, mailings};
+use crate::service::{mail_texts, mailing_dossier};
 use crate::state::EngagementState;
 
 /// Testée par permission, jamais par rôle, et toujours sur l'édition.
@@ -57,7 +58,11 @@ const ADRESSES_MAX: usize = 500;
 // -----------------------------------------------------------------------------
 
 /// Les deux contrôles sur une édition nommée par l'écran.
-async fn garder_edition(state: &EngagementState, acteur: Uuid, event_id: Uuid) -> Result<()> {
+pub(crate) async fn garder_edition(
+    state: &EngagementState,
+    acteur: Uuid,
+    event_id: Uuid,
+) -> Result<()> {
     if !cross::edition_existe(state.pool(), event_id).await? {
         return Err(ApiError::not_found());
     }
@@ -123,12 +128,25 @@ pub async fn ecran(
     event_id: Uuid,
 ) -> Result<MailingListScreen> {
     garder_edition(state, acteur, event_id).await?;
+    ecran_garde(state, event_id, None).await
+}
+
+/// L'écran, une fois l'édition gardée ; `proposal_id` le réduit à un dossier.
+pub(crate) async fn ecran_garde(
+    state: &EngagementState,
+    event_id: Uuid,
+    proposal_id: Option<Uuid>,
+) -> Result<MailingListScreen> {
     verifier_les_envois_en_cours(state, event_id).await?;
     let team_cc = mailings::equipe_en_copie(state.pool()).await?;
+    let (timezone, city) = cross::fuseau_edition(state.pool(), event_id).await?;
     Ok(MailingListScreen {
-        rows: mailings::lister(state.pool(), event_id).await?,
+        rows: mailings::lister(state.pool(), event_id, proposal_id).await?,
         team_cc,
         variables: VARIABLES.iter().map(|v| (*v).to_owned()).collect(),
+        proposal_variables: VARIABLES_DOSSIER.iter().map(|v| (*v).to_owned()).collect(),
+        timezone,
+        city,
     })
 }
 
@@ -172,6 +190,8 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
         cta_label: e.habillage.cta_label,
         cta_url: e.habillage.cta_url,
         mail_template_id: e.habillage.mail_template_id,
+        mail_text_id: e.mail_text_id,
+        proposal: mailing_dossier::dossier_de(state.pool(), e.proposal_id).await?,
         duplicated_from: e.duplicated_from,
         created_by_name: e.created_by_name,
         queued_by_name: e.queued_by_name,
@@ -265,8 +285,10 @@ pub async fn apercu(
         .iter()
         .filter(|e| !e.is_suppressed)
         .find(|e| email.is_none_or(|m| e.email.eq_ignore_ascii_case(m)));
+    // Une variable du dossier sans valeur se dit ici, avant l'envoi.
+    let dossier = mailing_dossier::exiger_valeurs(state.pool(), &envoi).await?;
     let edition = mailings::titre_edition(state.pool(), envoi.event_id).await?;
-    let (adresse, variables) = match choisie {
+    let (adresse, mut variables) = match choisie {
         Some(e) => (
             e.email.clone(),
             serde_json::json!({
@@ -279,6 +301,9 @@ pub async fn apercu(
             serde_json::json!({ "email": "destinataire@exemple.org", "edition": edition }),
         ),
     };
+    if let (Some(v), serde_json::Value::Object(d)) = (variables.as_object_mut(), &dossier) {
+        v.extend(d.clone());
+    }
     let valeurs = crate::domain::mailing::valeurs(&variables, &envoi.habillage.variable_fallbacks);
     let apparence = crate::jobs::send_mailing::apparence_de_lenvoi(
         state.db(),
@@ -286,12 +311,14 @@ pub async fn apercu(
         &state.config().app_public_url,
     )
     .await?;
-    let message = crate::jobs::send_mailing::composer(
+    // Les passages repris du dossier se voient dans l'aperçu, et là seulement.
+    let message = crate::jobs::send_mailing::composer_surligne(
         "apercu".to_owned(),
         &adresse,
         &envoi,
         &valeurs,
         &apparence,
+        &VARIABLES_DOSSIER,
     )?;
     Ok(MailingPreview {
         to: adresse,
@@ -315,6 +342,7 @@ struct Brouillon {
     bcc: Vec<String>,
     reply_to: Option<String>,
     habillage: mailings::Habillage,
+    mail_text_id: Option<Uuid>,
 }
 
 impl Brouillon {
@@ -328,6 +356,7 @@ impl Brouillon {
             bcc: &self.bcc,
             reply_to: self.reply_to.as_deref(),
             habillage: &self.habillage,
+            mail_text_id: self.mail_text_id,
         }
     }
 }
@@ -488,7 +517,32 @@ fn preparer(base: Brouillon, p: &MailingPayload) -> Result<Brouillon> {
         bcc,
         reply_to,
         habillage,
+        mail_text_id: base.mail_text_id,
     })
+}
+
+/// Le texte type nommé, vérifié sur l'édition de l'envoi ; gardé d'avant, il
+/// tombe si l'envoi change d'édition et qu'il n'y sert pas.
+async fn resoudre_le_texte(
+    state: &EngagementState,
+    brouillon: &mut Brouillon,
+    p: &MailingPayload,
+    edition: Uuid,
+) -> Result<()> {
+    match p.mail_text_id.as_deref() {
+        Some(brut) => {
+            brouillon.mail_text_id =
+                mail_texts::verifier_pour_edition(state, brut, edition).await?;
+        }
+        None => {
+            if let Some(id) = brouillon.mail_text_id {
+                if !mail_texts::sert_ledition(state, id, edition).await? {
+                    brouillon.mail_text_id = None;
+                }
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Le gabarit personnalisé d'un brouillon : nommé, il doit exister et servir
@@ -541,6 +595,7 @@ fn brouillon_de(e: &mailings::LigneEnvoi) -> Result<Brouillon> {
         bcc: e.bcc.clone(),
         reply_to: e.reply_to.clone(),
         habillage: e.habillage.clone(),
+        mail_text_id: e.mail_text_id,
     })
 }
 
@@ -554,11 +609,35 @@ pub async fn creer(
     payload: &CreateMailingPayload,
 ) -> Result<Mailing> {
     garder_edition(state, acteur, payload.event_id).await?;
+    creer_garde(
+        state,
+        ctx,
+        acteur,
+        payload.event_id,
+        &payload.draft,
+        &[],
+        None,
+    )
+    .await
+}
 
+/// La création, une fois l'édition gardée. `cc_en_plus` s'ajoute à la copie
+/// de l'équipe proposée par défaut ; `proposal_id` rattache le brouillon à un
+/// dossier de cette édition.
+pub(crate) async fn creer_garde(
+    state: &EngagementState,
+    ctx: &RequestContext,
+    acteur: Uuid,
+    event_id: Uuid,
+    draft: &MailingPayload,
+    cc_en_plus: &[String],
+    proposal_id: Option<Uuid>,
+) -> Result<Mailing> {
     let mut cc_par_defaut = mailings::equipe_en_copie(state.pool()).await?;
     if let Some((adresse, ..)) = mailings::adresse_de(state.pool(), acteur).await? {
         cc_par_defaut.push(adresse);
     }
+    cc_par_defaut.extend(cc_en_plus.iter().cloned());
     let base = Brouillon {
         subject: String::new(),
         body_html: String::new(),
@@ -568,17 +647,20 @@ pub async fn creer(
         bcc: Vec::new(),
         reply_to: None,
         habillage: habillage_par_defaut(),
+        mail_text_id: None,
     };
-    let mut brouillon = preparer(base, &payload.draft)?;
-    resoudre_le_gabarit(state, &mut brouillon, &payload.draft, payload.event_id).await?;
+    let mut brouillon = preparer(base, draft)?;
+    resoudre_le_gabarit(state, &mut brouillon, draft, event_id).await?;
+    resoudre_le_texte(state, &mut brouillon, draft, event_id).await?;
 
     let mut tx = state.db().write(ctx).await?;
     let id = mailings::creer(
         &mut tx,
-        payload.event_id,
+        event_id,
         acteur,
         &brouillon.valeurs(),
         None,
+        proposal_id,
     )
     .await?;
     tx.commit().await?;
@@ -597,15 +679,23 @@ pub async fn modifier(
         return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
     }
     let mut brouillon = preparer(brouillon_de(&envoi)?, payload)?;
-    // Changer d'édition : le droit se vérifie aussi sur la nouvelle.
+    // Changer d'édition : le droit se vérifie aussi sur la nouvelle. Un
+    // courriel de dossier reste dans l'édition du dossier.
     let edition = match payload.event_id {
         Some(nouvelle) if nouvelle != envoi.event_id => {
+            if envoi.proposal_id.is_some() {
+                return Err(ApiError::validation(
+                    "Ce courriel est écrit depuis un dossier : il reste dans l'édition du dossier.",
+                    "event_id",
+                ));
+            }
             garder_edition(state, acteur, nouvelle).await?;
             nouvelle
         }
         _ => envoi.event_id,
     };
     resoudre_le_gabarit(state, &mut brouillon, payload, edition).await?;
+    resoudre_le_texte(state, &mut brouillon, payload, edition).await?;
 
     let mut tx = state.db().write(ctx).await?;
     if !mailings::modifier(&mut tx, id, edition, &brouillon.valeurs()).await? {
@@ -704,6 +794,7 @@ pub async fn dupliquer(
         acteur,
         &brouillon.valeurs(),
         Some(id),
+        envoi.proposal_id,
     )
     .await?;
     tx.commit().await?;
@@ -723,11 +814,11 @@ fn exiger_un_contenu(e: &mailings::LigneEnvoi) -> Result<()> {
     }
     let mut citees = render::variables_citees(&e.subject);
     citees.extend(render::variables_citees(&e.body_html));
-    if let Some(inconnue) = citees.iter().find(|v| !VARIABLES.contains(&v.as_str())) {
+    if let Some(inconnue) = citees.iter().find(|v| !variable_connue(v)) {
         return Err(ApiError::validation(
             format!(
                 "Variable inconnue : {{{{{inconnue}}}}}. Possibles : {}.",
-                VARIABLES.map(|v| format!("{{{{{v}}}}}")).join(", ")
+                jetons_connus()
             ),
             "body_html",
         ));
@@ -765,6 +856,7 @@ pub async fn essai(
 ) -> Result<MailingTestResult> {
     let envoi = garder_envoi(state, acteur, id).await?;
     exiger_un_contenu(&envoi)?;
+    mailing_dossier::exiger_valeurs(state.pool(), &envoi).await?;
     exiger_des_pieces_pretes(state, id).await?;
     let Some((adresse, ..)) = mailings::adresse_de(state.pool(), acteur).await? else {
         return Err(ApiError::not_found());
@@ -798,10 +890,11 @@ pub async fn envoyer(
         return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
     }
     exiger_un_contenu(&envoi)?;
+    let dossier = mailing_dossier::exiger_valeurs(state.pool(), &envoi).await?;
     exiger_des_pieces_pretes(state, id).await?;
 
     let mut tx = state.db().write(ctx).await?;
-    let Some(partiront) = mailings::figer(&mut tx, id, acteur).await? else {
+    let Some(partiront) = mailings::figer(&mut tx, id, acteur, &dossier).await? else {
         return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
     };
     if partiront == 0 {

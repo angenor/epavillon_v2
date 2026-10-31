@@ -19,7 +19,11 @@ use crate::state::EngagementState;
 const PERMISSION: &str = "engagement.mailing.send";
 
 /// Peut-on écrire un gabarit de cette édition (ou commun, `None`) ?
-async fn peut_ecrire(state: &EngagementState, acteur: Uuid, edition: Option<Uuid>) -> Result<bool> {
+pub(crate) async fn peut_ecrire(
+    state: &EngagementState,
+    acteur: Uuid,
+    edition: Option<Uuid>,
+) -> Result<bool> {
     Ok(match edition {
         Some(e) => {
             administered_events(state.pool(), acteur).await?.allows(e)
@@ -30,14 +34,22 @@ async fn peut_ecrire(state: &EngagementState, acteur: Uuid, edition: Option<Uuid
 }
 
 /// Peut-on le lire (le choisir) ?
-async fn peut_lire(state: &EngagementState, acteur: Uuid, edition: Option<Uuid>) -> Result<bool> {
+pub(crate) async fn peut_lire(
+    state: &EngagementState,
+    acteur: Uuid,
+    edition: Option<Uuid>,
+) -> Result<bool> {
     match edition {
         Some(_) => peut_ecrire(state, acteur, edition).await,
         None => has_permission_anywhere(state.pool(), acteur, PERMISSION).await,
     }
 }
 
-async fn garder_edition(state: &EngagementState, acteur: Uuid, event_id: Uuid) -> Result<()> {
+pub(crate) async fn garder_edition(
+    state: &EngagementState,
+    acteur: Uuid,
+    event_id: Uuid,
+) -> Result<()> {
     if !cross::edition_existe(state.pool(), event_id).await? {
         return Err(ApiError::not_found());
     }
@@ -176,7 +188,7 @@ fn valeurs<'a>(v: &'a Valide, p: &'a MailTemplatePayload) -> mail_templates::Val
 
 /// Exige le droit d'écrire sur cette édition : 404 hors périmètre, 403 sans la
 /// permission (ou sans la permission globale pour un gabarit commun).
-async fn exiger_lecriture(
+pub(crate) async fn exiger_lecriture(
     state: &EngagementState,
     acteur: Uuid,
     edition: Option<Uuid>,

@@ -8,6 +8,7 @@
 pub mod cross;
 pub mod delivery;
 pub mod mail_templates;
+pub mod mail_texts;
 pub mod mailings;
 pub mod notifications;
 pub mod preferences;

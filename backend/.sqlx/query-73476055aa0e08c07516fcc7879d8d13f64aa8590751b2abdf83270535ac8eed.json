@@ -1,0 +1,131 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id, t.name, t.category, t.subject, t.body_html, t.sort_order, t.event_id,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = t.created_by) AS created_by_name,\n                  t.created_at, t.updated_at\n             FROM engagement.mail_texts t\n            WHERE t.event_id IS NULL OR t.event_id = $1\n            ORDER BY lower(t.category) NULLS LAST, t.sort_order, lower(t.name)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "category",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "category"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "subject",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "body_html",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "body_html"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mail_texts",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "73476055aa0e08c07516fcc7879d8d13f64aa8590751b2abdf83270535ac8eed"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH lieu AS (\n               INSERT INTO event.venues (event_id, name)\n               VALUES ($1, '{\"fr\":\"Pavillon de la Francophonie\"}'::jsonb) RETURNING id\n           ), salle AS (\n               INSERT INTO event.rooms (venue_id, name, code)\n               SELECT id, '{\"fr\":\"Salle Niger\",\"en\":\"Niger room\"}'::jsonb, 'niger' FROM lieu\n               RETURNING id\n           )\n           UPDATE programme.sessions SET room_id = (SELECT id FROM salle) WHERE id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3a0b19c0cee3ccac3ddd41cb8d06aa9016641d3e116120e7cf6ce517e1203fc4"
+}

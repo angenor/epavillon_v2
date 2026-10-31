@@ -40,6 +40,10 @@ pub struct LigneEnvoi {
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
     pub habillage: Habillage,
+    /// Le dossier du courriel (01/11) ; nul : un envoi groupé.
+    pub proposal_id: Option<Uuid>,
+    /// Le texte type choisi (01/11).
+    pub mail_text_id: Option<Uuid>,
 }
 
 /// Le dernier échec d'un envoi et ses relances (31/10).
@@ -74,6 +78,7 @@ pub struct ValeursBrouillon<'a> {
     pub bcc: &'a [String],
     pub reply_to: Option<&'a str>,
     pub habillage: &'a Habillage,
+    pub mail_text_id: Option<Uuid>,
 }
 
 fn criteres(valeur: serde_json::Value) -> Vec<MailingCriterion> {
@@ -91,7 +96,7 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
                   m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at,
                   m.failed_at, m.failure_reason, m.relaunch_count, m.relaunched_at,
                   m.template, m.variable_fallbacks, m.reply_button, m.cta_label,
-                  m.cta_url::text AS cta_url, m.mail_template_id
+                  m.cta_url::text AS cta_url, m.mail_template_id, m.proposal_id, m.mail_text_id
              FROM engagement.mailings m
             WHERE m.id = $1"#,
         id
@@ -132,10 +137,17 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
             cta_url: l.cta_url,
             mail_template_id: l.mail_template_id,
         },
+        proposal_id: l.proposal_id,
+        mail_text_id: l.mail_text_id,
     }))
 }
 
-pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>> {
+/// Les envois d'une édition, ou ceux d'un de ses dossiers.
+pub async fn lister(
+    pool: &PgPool,
+    event_id: Uuid,
+    proposal_id: Option<Uuid>,
+) -> Result<Vec<MailingSummary>> {
     let lignes = sqlx::query!(
         r#"SELECT m.id, m.event_id, m.status::text AS "status!", m.subject,
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,
@@ -148,7 +160,13 @@ pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>
                   COALESCE(c.cancelled, 0) AS "cancelled!",
                   (SELECT count(*) FROM media.attachments x
                     WHERE x.owner_schema = 'engagement' AND x.owner_table = 'mailings'
-                      AND x.owner_id = m.id AND x.role = 'attachment') AS "attachment_count!"
+                      AND x.owner_id = m.id AND x.role = 'attachment') AS "attachment_count!",
+                  m.proposal_id,
+                  (SELECT t.name FROM engagement.mail_texts t WHERE t.id = m.mail_text_id) AS mail_text_name,
+                  COALESCE(m.extra_addresses[1]::text,
+                           (SELECT r.email::text FROM engagement.mailing_recipients r
+                             WHERE r.mailing_id = m.id ORDER BY r.id LIMIT 1)) AS "to",
+                  cardinality(m.cc)::int8 AS "cc_count!"
              FROM engagement.mailings m
              LEFT JOIN LATERAL (
                  SELECT count(*) AS total,
@@ -161,9 +179,10 @@ pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>
                    FROM engagement.mailing_recipients r
                   WHERE r.mailing_id = m.id
              ) c ON true
-            WHERE m.event_id = $1
+            WHERE m.event_id = $1 AND ($2::uuid IS NULL OR m.proposal_id = $2)
             ORDER BY COALESCE(m.queued_at, m.updated_at) DESC"#,
-        event_id
+        event_id,
+        proposal_id
     )
     .fetch_all(pool)
     .await?;
@@ -193,6 +212,10 @@ pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>
                 cancelled: l.cancelled,
             },
             attachment_count: l.attachment_count,
+            proposal_id: l.proposal_id,
+            mail_text_name: l.mail_text_name,
+            to: l.to,
+            cc_count: l.cc_count,
         })
         .collect())
 }
@@ -253,15 +276,16 @@ pub async fn creer(
     acteur: Uuid,
     v: &ValeursBrouillon<'_>,
     duplique_de: Option<Uuid>,
+    proposal_id: Option<Uuid>,
 ) -> Result<Uuid> {
     let id = sqlx::query_scalar!(
         r#"INSERT INTO engagement.mailings
                (event_id, subject, body_html, audience, extra_addresses, cc, bcc, reply_to,
                 duplicated_from, created_by, template, variable_fallbacks, reply_button,
-                cta_label, cta_url, mail_template_id)
+                cta_label, cta_url, mail_template_id, mail_text_id, proposal_id)
            VALUES ($1, $2, $3, $4, $5::text[]::platform.email[], $6::text[]::platform.email[],
                    $7::text[]::platform.email[], $8::text::platform.email, $9, $10,
-                   $11, $12, $13, $14, $15::text::platform.url, $16)
+                   $11, $12, $13, $14, $15::text::platform.url, $16, $17, $18)
            RETURNING id"#,
         event_id,
         v.subject,
@@ -278,7 +302,9 @@ pub async fn creer(
         v.habillage.reply_button,
         v.habillage.cta_label,
         v.habillage.cta_url,
-        v.habillage.mail_template_id
+        v.habillage.mail_template_id,
+        v.mail_text_id,
+        proposal_id
     )
     .fetch_one(conn)
     .await?;
@@ -299,7 +325,8 @@ pub async fn modifier(
                   cc = $6::text[]::platform.email[], bcc = $7::text[]::platform.email[],
                   reply_to = $8::text::platform.email, event_id = $9,
                   template = $10, variable_fallbacks = $11, reply_button = $12,
-                  cta_label = $13, cta_url = $14::text::platform.url, mail_template_id = $15
+                  cta_label = $13, cta_url = $14::text::platform.url, mail_template_id = $15,
+                  mail_text_id = $16
             WHERE id = $1 AND status = 'draft'"#,
         id,
         v.subject,
@@ -315,7 +342,8 @@ pub async fn modifier(
         v.habillage.reply_button,
         v.habillage.cta_label,
         v.habillage.cta_url,
-        v.habillage.mail_template_id
+        v.habillage.mail_template_id,
+        v.mail_text_id
     )
     .execute(conn)
     .await?
@@ -370,8 +398,15 @@ pub async fn audience(
 
 /// Fige les destinataires et passe l'envoi en file, dans la transaction de
 /// l'appelant. Rend le nombre d'adresses qui partiront, ou `None` si l'envoi
-/// n'était plus un brouillon (deux clics, deux onglets).
-pub async fn figer(conn: &mut PgConnection, id: Uuid, acteur: Uuid) -> Result<Option<i64>> {
+/// n'était plus un brouillon (deux clics, deux onglets). `dossier` : les
+/// valeurs des variables du dossier (objet vide hors dossier), figées sur
+/// chaque destinataire avec les siennes.
+pub async fn figer(
+    conn: &mut PgConnection,
+    id: Uuid,
+    acteur: Uuid,
+    dossier: &serde_json::Value,
+) -> Result<Option<i64>> {
     let passe = sqlx::query!(
         "UPDATE engagement.mailings
             SET status = 'queued', queued_at = now(), queued_by = $2
@@ -395,7 +430,7 @@ pub async fn figer(conn: &mut PgConnection, id: Uuid, acteur: Uuid) -> Result<Op
                       'nom', COALESCE(a.last_name, ''),
                       'organisation', COALESCE(a.organization, ''),
                       'email', a.email,
-                      'edition', platform.t(e.title, 'fr')),
+                      'edition', platform.t(e.title, 'fr')) || $2::jsonb,
                   a.sources,
                   CASE WHEN a.is_suppressed THEN 'suppressed'::engagement.mailing_recipient_status
                        ELSE 'queued'::engagement.mailing_recipient_status END,
@@ -404,7 +439,8 @@ pub async fn figer(conn: &mut PgConnection, id: Uuid, acteur: Uuid) -> Result<Op
              JOIN event.events e ON e.id = m.event_id
              CROSS JOIN LATERAL engagement.mailing_audience(m.event_id, m.audience, m.extra_addresses) a
             WHERE m.id = $1"#,
-        id
+        id,
+        dossier
     )
     .execute(&mut *conn)
     .await?;

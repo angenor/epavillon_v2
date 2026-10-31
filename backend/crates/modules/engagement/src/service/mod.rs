@@ -11,6 +11,8 @@
 pub mod compose;
 pub mod deliverability;
 pub mod mail_templates;
+pub mod mail_texts;
+pub mod mailing_dossier;
 pub mod mailings;
 pub mod notifications;
 pub mod rules;

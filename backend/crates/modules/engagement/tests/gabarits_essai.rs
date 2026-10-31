@@ -80,6 +80,8 @@ fn envoi(sujet: &str) -> LigneEnvoi {
             cta_url: None,
             mail_template_id: None,
         },
+        proposal_id: None,
+        mail_text_id: None,
     }
 }
 

@@ -1,0 +1,113 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id, p.event_id, p.reference_code,\n                  platform.t(p.title, 'fr') AS \"titre!\",\n                  dep.primary_email::text AS \"deposant!\",\n                  CASE WHEN p.contact_person_id IS DISTINCT FROM p.submitted_by\n                       THEN con.primary_email::text END AS contact,\n                  e.city,\n                  s.debut AS \"debut?\", s.fin AS \"fin?\", s.timezone AS \"timezone?\", s.salle\n             FROM programme.proposals p\n             JOIN event.events e ON e.id = p.event_id\n             JOIN identity.people dep ON dep.id = p.submitted_by\n             LEFT JOIN identity.people con ON con.id = p.contact_person_id\n             LEFT JOIN LATERAL (\n                 SELECT (x.starts_at AT TIME ZONE x.timezone) AS debut,\n                        (x.ends_at AT TIME ZONE x.timezone) AS fin,\n                        x.timezone::text AS timezone,\n                        (SELECT platform.t(r.name, 'fr') FROM event.rooms r WHERE r.id = x.room_id) AS salle\n                   FROM programme.sessions x\n                  WHERE x.proposal_id = p.id AND x.status NOT IN ('cancelled', 'postponed')\n                  ORDER BY x.sequence_number, x.starts_at\n                  LIMIT 1\n             ) s ON true\n            WHERE p.id = $1 AND p.deleted_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "reference_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "deposant!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "contact",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "debut?",
+        "type_info": "Timestamp",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "fin?",
+        "type_info": "Timestamp",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "timezone?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "salle",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "d5549df64a1d29a02245b5723b4506add7ed33df68d18ce5b56ea5d681195524"
+}

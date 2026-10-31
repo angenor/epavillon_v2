@@ -2,13 +2,13 @@
 
 use actix_web::{web, HttpRequest, HttpResponse};
 use kernel::auth::Actor;
-use kernel::error::Result;
+use kernel::error::{ApiError, Result};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::mailing::{CreateMailingPayload, MailingPayload};
+use crate::domain::mailing::{CreateMailingPayload, CreateProposalMailingPayload, MailingPayload};
 use crate::routes::contexte_de;
-use crate::service::mailings;
+use crate::service::{mailing_dossier, mailings};
 use crate::state::EngagementState;
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
@@ -19,6 +19,7 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
             "/admin/mailings/address-suggestions",
             web::get().to(suggestions),
         )
+        .route("/admin/mailings/for-proposal", web::post().to(pour_dossier))
         .route("/admin/mailings/{id}", web::get().to(detail))
         .route("/admin/mailings/{id}", web::put().to(modifier))
         .route("/admin/mailings/{id}", web::delete().to(supprimer))
@@ -32,8 +33,9 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct EditionQuery {
-    pub event_id: Uuid,
+pub struct ListeQuery {
+    pub event_id: Option<Uuid>,
+    pub proposal_id: Option<Uuid>,
 }
 
 #[derive(Debug, Serialize)]
@@ -41,28 +43,70 @@ struct Suppression {
     deleted: bool,
 }
 
-/// L'historique d'une édition.
+/// L'historique d'une édition, ou celui d'un dossier.
 #[utoipa::path(
     get,
-    description = "`MailingListScreen` : les envois de l'édition, du plus récent au plus ancien, avec leurs compteurs par état de destinataire, la copie de l'équipe proposée par défaut et les variables offertes.\n\nGardé par `engagement.mailing.send` **sur l'édition**, et borné au périmètre d'administration : hors périmètre, l'édition n'existe pas (404) ; dans le périmètre sans la permission, 403.",
+    description = "`MailingListScreen` : les envois de l'édition, du plus récent au plus ancien, avec leurs compteurs par état de destinataire, le destinataire principal, le nombre d'adresses en copie, le texte type choisi, la copie de l'équipe proposée par défaut, les variables offertes et le fuseau de l'édition. `proposal_id` (01/11) réduit la liste aux courriels écrits depuis ce dossier, sur son édition ; `event_id` est alors facultatif. L'un des deux est exigé.\n\nGardé par `engagement.mailing.send` **sur l'édition** (celle du dossier), et borné au périmètre d'administration : hors périmètre, l'édition ou le dossier n'existent pas (404) ; dans le périmètre sans la permission, 403.",
     path = "/admin/mailings",
     tag = "Back-office : envois de courriels",
     operation_id = "engagement_envois_lister",
-    params(("event_id" = Uuid, Query, description = "L'édition")),
+    params(
+        ("event_id" = Option<Uuid>, Query, description = "L'édition"),
+        ("proposal_id" = Option<Uuid>, Query, description = "Le dossier : ses courriels seulement"),
+    ),
     responses(
         (status = 200, description = "MailingListScreen", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
         (status = 403, description = "Permission absente sur l'édition", body = crate::routes::openapi::ApiErrorBody),
-        (status = 404, description = "Édition inexistante ou hors périmètre", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Édition ou dossier inexistants, ou hors périmètre", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "VALIDATION_FAILED", body = crate::routes::openapi::ApiErrorBody),
     ),
     security(("session" = []))
 )]
 pub(crate) async fn lister(
     state: web::Data<EngagementState>,
     Actor(acteur): Actor,
-    edition: web::Query<EditionQuery>,
+    requete: web::Query<ListeQuery>,
 ) -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().json(mailings::ecran(&state, acteur, edition.event_id).await?))
+    let ecran = match (requete.proposal_id, requete.event_id) {
+        (Some(dossier), edition) => {
+            mailing_dossier::ecran(&state, acteur, dossier, edition).await?
+        }
+        (None, Some(edition)) => mailings::ecran(&state, acteur, edition).await?,
+        (None, None) => {
+            return Err(ApiError::validation(
+                "Précisez l'édition ou le dossier.",
+                "event_id",
+            ))
+        }
+    };
+    Ok(HttpResponse::Ok().json(ecran))
+}
+
+/// Le brouillon d'un dossier (01/11).
+#[utoipa::path(
+    post,
+    description = "`CreateProposalMailingPayload` → `Mailing` : un brouillon rattaché au dossier, dans son édition. Destinataire : l'adresse du déposant ; copie : celle de l'équipe proposée par défaut, la personne qui écrit, et la personne à contacter du dossier si c'en est une autre ; objet : le titre de l'activité. Le rattachement ouvre les variables `{{activite}}`, `{{date}}`, `{{heures}}` et `{{salle}}`, lues sur le dossier et sa séance retenue (`Mailing.proposal`).\n\nGardé par `engagement.mailing.send` **sur l'édition du dossier**, et borné au périmètre d'administration : dossier inexistant, supprimé ou hors périmètre, 404 ; dans le périmètre sans la permission, 403.",
+    path = "/admin/mailings/for-proposal",
+    tag = "Back-office : envois de courriels",
+    operation_id = "engagement_envois_creer_pour_dossier",
+    request_body = CreateProposalMailingPayload,
+    responses(
+        (status = 200, description = "Mailing", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Permission absente sur l'édition", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant ou hors périmètre", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn pour_dossier(
+    state: web::Data<EngagementState>,
+    Actor(acteur): Actor,
+    requete: HttpRequest,
+    payload: web::Json<CreateProposalMailingPayload>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, acteur);
+    Ok(HttpResponse::Ok().json(mailing_dossier::creer(&state, &ctx, acteur, &payload).await?))
 }
 
 /// Créer un brouillon.

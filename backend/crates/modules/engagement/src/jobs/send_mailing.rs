@@ -201,9 +201,35 @@ pub fn composer(
     valeurs: &HashMap<String, String>,
     apparence: &Apparence,
 ) -> Result<OutgoingMail> {
+    composer_surligne(message_id, to, envoi, valeurs, apparence, &[])
+}
+
+/// Fond des valeurs surlignées dans l'aperçu : un cyan très clair, la couleur
+/// d'information de la charte, lisible sous tout gabarit.
+const SURLIGNAGE: &str = "background-color:#e0f3fb;border-radius:2px;padding:0 2px";
+
+/// [`composer`], les valeurs des variables `surlignees` posées sur un fond dans
+/// le corps : l'aperçu montre ainsi ce qui vient du dossier. Jamais pour un
+/// message qui part.
+pub fn composer_surligne(
+    message_id: String,
+    to: &str,
+    envoi: &mailings::LigneEnvoi,
+    valeurs: &HashMap<String, String>,
+    apparence: &Apparence,
+    surlignees: &[&str],
+) -> Result<OutgoingMail> {
     let echappees: HashMap<String, String> = valeurs
         .iter()
-        .map(|(k, v)| (k.clone(), echapper_html(v)))
+        .map(|(k, v)| {
+            let sure = echapper_html(v);
+            let valeur = if surlignees.contains(&k.as_str()) {
+                format!("<span style=\"{SURLIGNAGE}\">{sure}</span>")
+            } else {
+                sure
+            };
+            (k.clone(), valeur)
+        })
         .collect();
     let sujet =
         render::rendre(&envoi.subject, valeurs).map_err(|e| ApiError::internal(e.to_string()))?;
@@ -479,16 +505,19 @@ impl JobHandler for SendMailingTest {
             return Ok(());
         };
         let edition = mailings::titre_edition(self.db.pool(), envoi.event_id).await?;
-        let valeurs = mailing::valeurs(
-            &serde_json::json!({
-                "prenom": prenom,
-                "nom": nom,
-                "organisation": organisation.unwrap_or_default(),
-                "email": adresse,
-                "edition": edition,
-            }),
-            &envoi.habillage.variable_fallbacks,
-        );
+        let mut variables = serde_json::json!({
+            "prenom": prenom,
+            "nom": nom,
+            "organisation": organisation.unwrap_or_default(),
+            "email": adresse,
+            "edition": edition,
+        });
+        let dossier =
+            crate::service::mailing_dossier::exiger_valeurs(self.db.pool(), &envoi).await?;
+        if let (Some(v), serde_json::Value::Object(d)) = (variables.as_object_mut(), dossier) {
+            v.extend(d);
+        }
+        let valeurs = mailing::valeurs(&variables, &envoi.habillage.variable_fallbacks);
 
         let apparence = apparence_de_lenvoi(&self.db, &envoi, &self.site).await?;
         let mut message = composer(job.id.to_string(), &adresse, &envoi, &valeurs, &apparence)?;
@@ -540,6 +569,8 @@ mod tests {
                 cta_url: None,
                 mail_template_id: None,
             },
+            proposal_id: None,
+            mail_text_id: None,
         }
     }
 
@@ -563,6 +594,39 @@ mod tests {
         assert!(html.contains("Bonjour A&lt;b&gt; O&#39;Neil"), "{html}");
         assert!(html.contains("mailto:equipe@ifdd.org"), "{html}");
         assert!(m.text.starts_with("Bonjour A<b> O'Neil"), "{}", m.text);
+    }
+
+    #[test]
+    fn lapercu_surligne_les_valeurs_du_dossier_et_lenvoi_non() {
+        let e = envoi("{{activite}}", "<p>{{activite}}, {{prenom}}</p>");
+        let valeurs = mailing::valeurs(
+            &serde_json::json!({ "prenom": "Awa", "activite": "A&B" }),
+            &e.habillage.variable_fallbacks,
+        );
+        let vu = composer_surligne(
+            "x".into(),
+            "a@example.org",
+            &e,
+            &valeurs,
+            &sobre(),
+            &["activite"],
+        )
+        .unwrap();
+        let html = vu.html.unwrap();
+        assert!(
+            html.contains(&format!("<span style=\"{SURLIGNAGE}\">A&amp;B</span>, Awa")),
+            "{html}"
+        );
+        assert_eq!(vu.subject, "A&B");
+        let parti = composer("x".into(), "a@example.org", &e, &valeurs, &sobre()).unwrap();
+        assert!(!parti.html.unwrap().contains(SURLIGNAGE));
+    }
+
+    #[test]
+    fn une_variable_du_dossier_absente_fait_echouer_le_rendu() {
+        let e = envoi("Objet", "<p>Le {{date}}</p>");
+        let valeurs = mailing::valeurs(&serde_json::json!({}), &e.habillage.variable_fallbacks);
+        assert!(composer("x".into(), "a@example.org", &e, &valeurs, &sobre()).is_err());
     }
 
     #[test]

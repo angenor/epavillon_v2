@@ -540,6 +540,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/mail-texts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les textes types d'une édition.
+         * @description `MailText[]` : les textes types utilisables pour l'édition, les siens et les communs à toutes, rangés par catégorie, rang puis nom. `can_edit` faux : un texte commun sans la permission globale, qui se choisit sans se modifier.
+         *
+         *     Gardé par `engagement.mailing.send` **sur l'édition** et le périmètre d'administration.
+         */
+        get: operations["engagement_textes_types_lister"];
+        put?: never;
+        /**
+         * Créer un texte type.
+         * @description `MailTextPayload` → `MailText`. `event_id` nul : commun à toutes les éditions, ce qui demande la permission globale. Le corps est **assaini** (liste blanche des courriels) ; les variables ne sont vérifiées qu'à l'envoi.
+         */
+        post: operations["engagement_textes_types_creer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/mail-texts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Un texte type.
+         * @description `MailText`.
+         */
+        get: operations["engagement_textes_types_detail"];
+        /**
+         * Modifier un texte type.
+         * @description `MailTextPayload` → `MailText` : écriture complète. Les envois qui l'ont repris gardent leur objet et leur corps.
+         */
+        put: operations["engagement_textes_types_modifier"];
+        post?: never;
+        /**
+         * Supprimer un texte type.
+         * @description `{ deleted: true }`. Les envois qui l'avaient repris gardent leur objet et leur corps.
+         */
+        delete: operations["engagement_textes_types_supprimer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/mailings": {
         parameters: {
             query?: never;
@@ -548,10 +602,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * L'historique d'une édition.
-         * @description `MailingListScreen` : les envois de l'édition, du plus récent au plus ancien, avec leurs compteurs par état de destinataire, la copie de l'équipe proposée par défaut et les variables offertes.
+         * L'historique d'une édition, ou celui d'un dossier.
+         * @description `MailingListScreen` : les envois de l'édition, du plus récent au plus ancien, avec leurs compteurs par état de destinataire, le destinataire principal, le nombre d'adresses en copie, le texte type choisi, la copie de l'équipe proposée par défaut, les variables offertes et le fuseau de l'édition. `proposal_id` (01/11) réduit la liste aux courriels écrits depuis ce dossier, sur son édition ; `event_id` est alors facultatif. L'un des deux est exigé.
          *
-         *     Gardé par `engagement.mailing.send` **sur l'édition**, et borné au périmètre d'administration : hors périmètre, l'édition n'existe pas (404) ; dans le périmètre sans la permission, 403.
+         *     Gardé par `engagement.mailing.send` **sur l'édition** (celle du dossier), et borné au périmètre d'administration : hors périmètre, l'édition ou le dossier n'existent pas (404) ; dans le périmètre sans la permission, 403.
          */
         get: operations["engagement_envois_lister"];
         put?: never;
@@ -582,6 +636,28 @@ export interface paths {
         get: operations["engagement_envois_suggestions"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/mailings/for-proposal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Le brouillon d'un dossier (01/11).
+         * @description `CreateProposalMailingPayload` → `Mailing` : un brouillon rattaché au dossier, dans son édition. Destinataire : l'adresse du déposant ; copie : celle de l'équipe proposée par défaut, la personne qui écrit, et la personne à contacter du dossier si c'en est une autre ; objet : le titre de l'activité. Le rattachement ouvre les variables `{{activite}}`, `{{date}}`, `{{heures}}` et `{{salle}}`, lues sur le dossier et sa séance retenue (`Mailing.proposal`).
+         *
+         *     Gardé par `engagement.mailing.send` **sur l'édition du dossier**, et borné au périmètre d'administration : dossier inexistant, supprimé ou hors périmètre, 404 ; dans le périmètre sans la permission, 403.
+         */
+        post: operations["engagement_envois_creer_pour_dossier"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7055,6 +7131,11 @@ export interface components {
             /** Format: uuid */
             event_id: string;
         };
+        /** @description Le brouillon d'un dossier (`CreateProposalMailingPayload`, 01/11). */
+        CreateProposalMailingPayload: {
+            /** Format: uuid */
+            proposal_id: string;
+        };
         HealthIndicator: {
             code: string;
             label: string;
@@ -7134,6 +7215,20 @@ export interface components {
             event_id?: string | null;
             preselect_for_submitters: boolean;
         };
+        /** @description L'écriture d'un texte type (`MailTextPayload`), complète à chaque fois. */
+        MailTextPayload: {
+            name: string;
+            category?: string | null;
+            subject: string;
+            body_html: string;
+            /** Format: int32 */
+            sort_order?: number;
+            /**
+             * Format: uuid
+             * @description Nul : commun à toutes les éditions.
+             */
+            event_id?: string | null;
+        };
         /**
          * @description Un critère de destinataires (`MailingCriterion`). Les filtres vides valent
          *     « le défaut du critère », écrit dans `engagement.mailing_audience()`.
@@ -7172,6 +7267,11 @@ export interface components {
             template?: string | null;
             /** @description Un gabarit personnalisé de l'édition ou commun ; chaîne vide : aucun. */
             mail_template_id?: string | null;
+            /**
+             * @description Le texte type choisi (01/11), de l'édition ou commun ; chaîne vide :
+             *     aucun. Trace seulement : l'objet et le corps s'écrivent à côté.
+             */
+            mail_text_id?: string | null;
             /** @description Valeur de secours par variable ; une chaîne vide retire le secours. */
             variable_fallbacks?: {
                 [key: string]: string;
@@ -9080,11 +9180,277 @@ export interface operations {
             };
         };
     };
-    engagement_envois_lister: {
+    engagement_textes_types_lister: {
         parameters: {
             query: {
                 /** @description L'édition */
                 event_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MailText[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_textes_types_creer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MailTextPayload"];
+            };
+        };
+        responses: {
+            /** @description MailText */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_textes_types_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Le texte type */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MailText */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Texte inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_textes_types_modifier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Le texte type */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MailTextPayload"];
+            };
+        };
+        responses: {
+            /** @description MailText */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Texte inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_textes_types_supprimer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Le texte type */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Supprimé */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Texte inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_envois_lister: {
+        parameters: {
+            query?: {
+                /** @description L'édition */
+                event_id?: string;
+                /** @description Le dossier : ses courriels seulement */
+                proposal_id?: string;
             };
             header?: never;
             path?: never;
@@ -9119,8 +9485,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description Édition inexistante ou hors périmètre */
+            /** @description Édition ou dossier inexistants, ou hors périmètre */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9232,6 +9607,57 @@ export interface operations {
                 };
             };
             /** @description Édition inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_envois_creer_pour_dossier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProposalMailingPayload"];
+            };
+        };
+        responses: {
+            /** @description Mailing */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant ou hors périmètre */
             404: {
                 headers: {
                     [name: string]: unknown;
