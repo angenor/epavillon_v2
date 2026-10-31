@@ -21,13 +21,13 @@ interface Props {
   applyPreferred: boolean
   /** La séance a une réunion : la case « Prévenir Zoom tout de suite » a un sens. */
   hasMeeting: boolean
-  writeTo: string
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
   saved: [summary: { message: string; conflicts: number }]
+  write: []
 }>()
 
 const { t } = useI18n()
@@ -100,7 +100,7 @@ async function afterWrite(id: SessionId, nextConflicts: ScheduleConflict[], mess
   }
   emit('saved', { message: note, conflicts: mine(nextConflicts, id) })
   emit('update:open', false)
-  if (writeAfter.value) await navigateTo(props.writeTo)
+  if (writeAfter.value) emit('write')
 }
 
 async function submit(changes: {

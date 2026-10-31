@@ -288,7 +288,21 @@ const canEditContent = computed(() => {
 const editTo = computed(() => localePath(`/admin/propositions/${proposalId.value}/modifier`))
 
 /** La rubrique Courriels, sur un brouillon adressé au déposant. */
-const writeTo = computed(() => localePath({ path: '/admin/courriels/nouveau', query: { dossier: proposalId.value } }))
+const mailComposer = useMailComposerStore()
+const writing = ref(false)
+// Le brouillon s'ouvre dans la fenêtre de rédaction, par-dessus le dossier.
+async function writeToSubmitter(): Promise<void> {
+  if (writing.value) return
+  writing.value = true
+  try {
+    const draft = await api.adminMailings.createForProposal(proposalId.value)
+    mailComposer.open(draft.id)
+  } catch (thrown) {
+    toast.error(apiErrorMessage(thrown, t))
+  } finally {
+    writing.value = false
+  }
+}
 
 const decisionShown = ref(false)
 watch(proposalId, () => (decisionShown.value = false))
@@ -648,7 +662,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             @decide="openDecision"
           >
             <template #actions>
-              <UiButton icon="mail" :to="writeTo" :title="t('admin.proposal.dashboard.writeToSubmitterHint')">
+              <UiButton icon="mail" :loading="writing" :title="t('admin.proposal.dashboard.writeToSubmitterHint')" @click="writeToSubmitter">
                 {{ t('admin.proposal.dashboard.writeToSubmitter') }}
               </UiButton>
               <UiButton
@@ -831,8 +845,8 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             :session-id="slotPanel?.sessionId ?? null"
             :apply-preferred="slotPanel?.fromPreferred ?? false"
             :has-meeting="slotHasMeeting"
-            :write-to="writeTo"
             @saved="slotSaved"
+            @write="writeToSubmitter"
           />
 
           <AdminReviewLeadOrganizationPanel

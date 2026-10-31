@@ -1,6 +1,6 @@
 {
   "writeToSubmitter": "Écrire au déposant",
-  "writeToSubmitterHint": "Ouvre la rubrique Courriels sur un brouillon déjà adressé au déposant.",
+  "writeToSubmitterHint": "Ouvre un brouillon déjà adressé au déposant, sans quitter le dossier.",
   "changeStatus": "Changer le statut",
   "asideLabel": "Résumé du dossier",
   "meta": {
@@ -59,7 +59,7 @@
     "pushZoom": "Prévenir Zoom tout de suite",
     "pushZoomHint": "Sinon la réunion est mise à jour dans quelques minutes, ce qui laisse le temps d'un second ajustement.",
     "writeAfter": "Écrire ensuite au déposant",
-    "writeAfterHint": "Ouvre la rubrique Courriels sur un brouillon adressé au déposant.",
+    "writeAfterHint": "Ouvre un brouillon adressé au déposant, sans quitter le dossier.",
     "zoomPushed": "Zoom a été prévenu.",
     "zoomFailed": "Zoom n'a pas pu être prévenu : {message}",
     "conflicts": "Aucun chevauchement. | Un chevauchement est signalé : à arbitrer dans la programmation. | {count} chevauchements sont signalés : à arbitrer dans la programmation."

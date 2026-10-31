@@ -1,6 +1,6 @@
 {
   "writeToSubmitter": "Write to the submitter",
-  "writeToSubmitterHint": "Opens the Emails section on a draft already addressed to the submitter.",
+  "writeToSubmitterHint": "Opens a draft already addressed to the submitter, without leaving the dossier.",
   "changeStatus": "Change status",
   "asideLabel": "Proposal summary",
   "meta": {
@@ -59,7 +59,7 @@
     "pushZoom": "Notify Zoom right away",
     "pushZoomHint": "Otherwise the meeting is updated within a few minutes, leaving time for a second adjustment.",
     "writeAfter": "Then write to the submitter",
-    "writeAfterHint": "Opens the Emails section on a draft addressed to the submitter.",
+    "writeAfterHint": "Opens a draft addressed to the submitter, without leaving the dossier.",
     "zoomPushed": "Zoom has been notified.",
     "zoomFailed": "Zoom could not be notified: {message}",
     "conflicts": "No overlap. | One overlap is flagged: to be settled in the programme. | {count} overlaps are flagged: to be settled in the programme."
