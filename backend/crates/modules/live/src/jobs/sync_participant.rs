@@ -129,7 +129,7 @@ impl JobHandler for SyncParticipant {
                 .execute(&mut *tx)
                 .await?;
                 tx.commit().await?;
-                // Signal à émettre ici (et à l'échec passager ci-dessus) : `edition:<event_id>:desk`.
+                // `edition:<id>:desk` (ici et à l'échec passager) : `tg_meeting_participants_desk_signal`.
                 tracing::warn!(participant = %participant_id, erreur = %e, "inscrit abandonné");
                 Ok(())
             }

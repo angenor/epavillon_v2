@@ -47,12 +47,14 @@ use std::sync::Arc;
 pub mod consumers;
 pub mod domain;
 pub mod jobs;
+pub mod realtime;
 pub mod repo;
 pub mod routes;
 pub mod service;
 pub mod state;
 pub mod zoom;
 
+pub use realtime::topic_authorizers;
 pub use state::LiveState;
 
 /// Le back-office des messages d'incident.
@@ -96,17 +98,20 @@ pub fn zoom_webhook_configure(config: &Config) -> bool {
         .is_some_and(|z| z.webhook_secret_token.is_some())
 }
 
-/// Les sept travaux de la file « live ». Aucun sans Zoom : les travaux
-/// déposés attendent alors en file, sans échouer, qu'il soit configuré.
+/// Les sept travaux de la file « live », aucun sans Zoom : les travaux
+/// déposés attendent alors en file, sans échouer, qu'il soit configuré. Plus
+/// celui de la fenêtre des messages d'incident, toujours servi, dans sa file.
 pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
+    let mut travaux: Vec<Arc<dyn JobHandler>> =
+        vec![Arc::new(jobs::fenetre::IncidentWindow::new(db.clone()))];
     let Some(zoom) = state::zoom_depuis(config) else {
-        return Vec::new();
+        return travaux;
     };
-    vec![
+    travaux.extend([
         Arc::new(jobs::sync_meeting::SyncMeeting::new(
             db.clone(),
             zoom.clone(),
-        )),
+        )) as Arc<dyn JobHandler>,
         Arc::new(jobs::sync_participant::SyncParticipant::new(
             db.clone(),
             zoom.clone(),
@@ -119,7 +124,8 @@ pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
         Arc::new(jobs::filet::RequeueParticipants::new(db.clone())),
         Arc::new(jobs::annonce::AnnounceMeetingStart::new(db.clone())),
         Arc::new(jobs::webhook::ProcessWebhook::new(db)),
-    ]
+    ]);
+    travaux
 }
 
 /// Le consommateur des inscriptions. Aucun sans Zoom : une réunion créée sans

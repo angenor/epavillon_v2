@@ -134,7 +134,7 @@ pub(crate) async fn programmation(
 /// Le détail d'une séance publiée.
 #[utoipa::path(
     get,
-    description = "`PublicSessionDetail` : `{ session, description, allows_questions, is_recorded, cancelled_reason, speakers, organizations, gallery }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, le motif de son annulation (texte multilingue, nul si elle ne l'est pas), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar`, **ni identifiant de personne, ni adresse, ni confirmation, ni présence**), ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`) et sa galerie (`AttachedImage[]`, photos **prêtes et publiques** seulement, dans l'ordre réglé par l'équipe ; tableau vide sans photo). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.",
+    description = "`PublicSessionDetail` : `{ session, description, allows_questions, is_recorded, cancelled_reason, speakers, organizations, gallery }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, le motif de son annulation (texte multilingue, nul si elle ne l'est pas), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar`, **ni identifiant de personne, ni adresse, ni confirmation, ni présence**), ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`) et sa galerie (`AttachedImage[]`, photos **prêtes et publiques** seulement, dans l'ordre réglé par l'équipe ; tableau vide sans photo). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.\n\n`ETag` sur le corps ; **304** sur `If-None-Match` : la page ouverte la relit au signal du programme public.",
     path = "/events/{event_id}/sessions/{slug}",
     tag = "Programmation publique",
     operation_id = "programmation_seance_publique",
@@ -144,15 +144,17 @@ pub(crate) async fn programmation(
     ),
     responses(
         (status = 200, description = "Séance publiée, intervenants et organisations", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
         (status = 404, description = "Adresse inconnue **ou séance non publiée** — indiscernables", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn seance(
+    requete: HttpRequest,
     state: web::Data<ProgrammeState>,
     chemin: web::Path<(Uuid, String)>,
 ) -> Result<HttpResponse> {
     let (event_id, slug) = chemin.into_inner();
     let seance = public_schedule::seance(state.pool(), EventId(event_id), &slug).await?;
 
-    Ok(HttpResponse::Ok().json(seance))
+    crate::routes::json_revalide(&requete, &seance, "public, no-cache")
 }

@@ -103,8 +103,9 @@ async fn main() {
             &config,
             courrier_negociation,
         ))
-        // Les six travaux Zoom, et c'est ce geste qui fait écouter la file
+        // Les travaux Zoom, et c'est ce geste qui fait écouter la file
         // « live ». Sans configuration Zoom, aucun : les travaux attendent.
+        // La fenêtre des messages d'incident (file `live_incidents`) toujours.
         .register_all(live::job_handlers(db.clone(), &config));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait

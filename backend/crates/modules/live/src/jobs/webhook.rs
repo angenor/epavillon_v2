@@ -95,7 +95,7 @@ pub async fn traiter(conn: &mut PgConnection, id: Uuid) -> Result<()> {
                 let quand = instant(&participant["join_time"]);
                 webhooks::noter_un_mouvement(conn, meeting_id, occurrence, &cle, true, quand)
                     .await?;
-                // Signal à émettre ici : `edition:<event_id>:desk` (présents du poste de direct).
+                // `edition:<id>:desk` : signalé par `tg_meeting_presences_desk_signal`.
             }
             let inscription = webhooks::participant_entre(
                 conn,
@@ -118,7 +118,7 @@ pub async fn traiter(conn: &mut PgConnection, id: Uuid) -> Result<()> {
                 let quand = instant(&participant["leave_time"]);
                 webhooks::noter_un_mouvement(conn, meeting_id, occurrence, &cle, false, quand)
                     .await?;
-                // Signal à émettre ici : `edition:<event_id>:desk` (présents du poste de direct).
+                // `edition:<id>:desk` : signalé par `tg_meeting_presences_desk_signal`.
             }
             webhooks::participant_sorti(
                 conn,

@@ -5,7 +5,9 @@
 //! `live`. Fin : `live` vers `completed`. Une séance annulée, reportée ou non
 //! programmée ne bouge jamais ; une répétition n'arrive jamais ici, la base ne
 //! l'annonce qu'à début − 15 min. Le déclencheur des séances émet ensuite
-//! `programme.session.live` ou `.completed`, comme pour tout changement d'état.
+//! `programme.session.live` ou `.completed`, comme pour tout changement d'état,
+//! et `tg_sessions_public_signal` le signal `edition:<id>:public:live` des
+//! pages publiques ouvertes.
 
 use async_trait::async_trait;
 use contracts::live::{MEETING_ENDED, MEETING_STARTED};
@@ -39,7 +41,7 @@ impl EventConsumer for DirectConsumer {
         } else {
             (&["live"], "completed")
         };
-        let edition = sqlx::query_scalar!(
+        sqlx::query_scalar!(
             "UPDATE programme.sessions
                 SET status = $3::text::programme.session_status
               WHERE id = $1 AND status::text = ANY ($2)
@@ -50,9 +52,6 @@ impl EventConsumer for DirectConsumer {
         )
         .fetch_optional(conn)
         .await?;
-        if let Some(_event_id) = edition {
-            // Signal à émettre ici : `edition:<event_id>:public:live` et `session:<session_id>`.
-        }
         Ok(())
     }
 }

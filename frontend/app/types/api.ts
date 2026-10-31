@@ -3460,6 +3460,8 @@ export interface paths {
         /**
          * Le détail d'une séance publiée.
          * @description `PublicSessionDetail` : `{ session, description, allows_questions, is_recorded, cancelled_reason, speakers, organizations, gallery }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, le motif de son annulation (texte multilingue, nul si elle ne l'est pas), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar`, **ni identifiant de personne, ni adresse, ni confirmation, ni présence**), ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`) et sa galerie (`AttachedImage[]`, photos **prêtes et publiques** seulement, dans l'ordre réglé par l'équipe ; tableau vide sans photo). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
+         *
+         *     `ETag` sur le corps ; **304** sur `If-None-Match` : la page ouverte la relit au signal du programme public.
          */
         get: operations["programmation_seance_publique"];
         put?: never;
@@ -17438,6 +17440,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Adresse inconnue **ou séance non publiée** — indiscernables */
             404: {
