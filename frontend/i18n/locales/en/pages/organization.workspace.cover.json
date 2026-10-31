@@ -1,15 +1,8 @@
 {
-  "title": "Cover image studio",
-  "back": "Back to the submission",
-  "save": "Save as cover image",
+  "title": "Cover image",
+  "save": "Save the cover",
   "eyebrow": "Francophonie Pavilion · {edition}",
-  "steps": {
-    "template": "Choose a template",
-    "content": "What appears on the image",
-    "color": "Colour"
-  },
   "catalogHint": "Templates are prepared by IFDD and follow the Francophonie brand guidelines.",
-  "contentHint": "Everything comes from your submission: edit it there, the image follows.",
   "templates": {
     "texte-photo": "Text and photo",
     "typographique": "Typographic",
@@ -29,10 +22,11 @@
     "hublot": "Porthole"
   },
   "options": {
-    "show_date": "Date, time and room",
-    "show_speakers": "Speakers’ faces",
-    "show_logos": "Logos (IFDD, OIF, your organisation)",
-    "show_event_icon": "Event icon ({edition})"
+    "show_date": "Date, time and venue",
+    "show_speakers": "Speakers",
+    "show_event_icon": "Event icon",
+    "show_partner_logos": "IFDD and OIF logos",
+    "show_org_logo": "Your organisation’s logo"
   },
   "accents": {
     "bleu": "Night blue",
@@ -44,8 +38,6 @@
   "previewLabel": "Cover image preview: {title}",
   "logoMissing": "its place stays empty on the image.",
   "share": {
-    "title": "When the link is shared",
-    "description": "WhatsApp, LinkedIn, Facebook, email: the preview uses this image.",
     "site": "epavillonclimatique.francophonie.org"
   },
   "renderFailed": "The image could not be made. Try again; if it happens again, use another browser.",
@@ -54,8 +46,84 @@
     "own": "Background: your image.",
     "missing": "No background image yet: the chosen colour fills in.",
     "change": "Change the image",
-    "useOwn": "Use my photo again",
-    "useEvent": "Back to the event image",
-    "field": "Background photo"
+    "field": "Background photo",
+    "title": "Background photo",
+    "hint": "The edition photo, or your own.",
+    "unused": "This template uses no photo: choose one “with a photo” for it to appear.",
+    "eventChoice": "Edition photo",
+    "eventChoiceDetail": "{edition}, chosen by IFDD",
+    "ownChoice": "Your photo",
+    "addOwn": "Upload your photo",
+    "replaceOwn": "Replace your photo"
+  },
+  "backTo": "Submission {reference}",
+  "savedToast": "Cover image saved",
+  "status": {
+    "dirty": "Unsaved changes",
+    "saved": "Saved",
+    "clean": "No changes"
+  },
+  "tools": {
+    "label": "Image tools",
+    "templates": "Templates",
+    "photo": "Photo",
+    "texts": "Texts"
+  },
+  "templatesHint": "Click: the image changes at once. Your texts and photo follow.",
+  "groups": {
+    "withPhoto": "With a photo",
+    "withoutPhoto": "Without a photo"
+  },
+  "previousTemplate": "Previous template",
+  "nextTemplate": "Next template",
+  "previewRegion": "The image and its formats",
+  "onImage": "On the image",
+  "color": "Colour",
+  "customColor": "Custom, {hex}",
+  "addColor": "Choose another colour",
+  "hints": {
+    "speakers": "No speakers | {count} face and name | {count} faces and names",
+    "noSpeakers": "No speakers in the submission",
+    "partners": "Pavilion organisers",
+    "orgLogoSet": "Uploaded",
+    "orgLogoMissing": "Not uploaded yet"
+  },
+  "picker": {
+    "title": "Custom colour",
+    "hex": "Colour code",
+    "hue": "Hue",
+    "saturation": "Saturation",
+    "lightness": "Lightness",
+    "suggestions": "Suggestions",
+    "sample": "White text",
+    "readable": "White text stays readable on this colour.",
+    "unreadable": "Too light: the white text on the image will be hard to read.",
+    "cancel": "Cancel",
+    "apply": "Apply"
+  },
+  "formats": {
+    "label": "The image formats",
+    "cover": "Cover",
+    "coverSize": "1600 × 900",
+    "share": "Sharing",
+    "shareSize": "1200 × 675",
+    "mail": "Email",
+    "mailSize": "1200 × 200",
+    "mailHint": "At the top of emails, the image is cut into a strip at its centre: only the middle remains."
+  },
+  "texts": {
+    "hint": "They come from the submission: the image and the activity page say the same thing.",
+    "title": "Title",
+    "date": "Date and time",
+    "place": "Venue",
+    "speakers": "Speakers",
+    "edit": "Edit in the submission"
+  },
+  "leave": {
+    "title": "Leave without saving?",
+    "description": "Your changes to the image (template, colour, displayed items) will be lost. The submission keeps the image saved last time.",
+    "stay": "Stay",
+    "discard": "Leave without saving",
+    "saveAndLeave": "Save and leave"
   }
 }

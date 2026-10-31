@@ -291,7 +291,11 @@ const currentYear = new Date().getFullYear()
       </template>
     </UiNavBar>
 
-    <main id="contenu-principal" class="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 sm:py-10">
+    <main
+      id="contenu-principal"
+      class="w-full flex-1"
+      :class="route.meta.fullBleed ? 'flex flex-col' : 'mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10'"
+    >
       <slot />
     </main>
 

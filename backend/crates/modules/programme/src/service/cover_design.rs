@@ -75,9 +75,9 @@ pub async fn enregistrer(
         ));
     }
     let accent = payload.accent.trim();
-    if !cover_design::code_valide(accent) {
+    if !cover_design::accent_valide(accent) {
         return Err(ApiError::validation(
-            "Choisissez une couleur dans la liste.",
+            "Choisissez une couleur dans la liste, ou un code comme #1b2a6b.",
             "accent",
         ));
     }

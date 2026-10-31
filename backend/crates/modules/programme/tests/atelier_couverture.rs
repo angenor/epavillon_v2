@@ -131,14 +131,14 @@ async fn la_lecture_est_vide_puis_rend_les_choix_et_les_images() {
         &bac.ctx(),
         terrain.deposante,
         dossier,
-        choix("bandeau", "jaune", CoverDesignOptions::default()),
+        choix("bandeau", "#1b2a6b", CoverDesignOptions::default()),
     )
     .await
     .expect("modification");
     let design = relu.design.expect("choix");
     assert_eq!(
         (design.template_code.as_str(), design.accent.as_str()),
-        ("bandeau", "jaune")
+        ("bandeau", "#1b2a6b")
     );
     assert_eq!(design.options, CoverDesignOptions::default());
     let lignes = sqlx::query_scalar!(
@@ -172,9 +172,11 @@ async fn des_options_partielles_sont_tolerees_et_ecrites_completes() {
     assert_eq!(
         lu.design.expect("choix").options,
         CoverDesignOptions {
-            show_logos: true,
+            show_partner_logos: true,
+            show_org_logo: true,
             ..CoverDesignOptions::default()
-        }
+        },
+        "l'ancienne case des logos vaut pour les deux"
     );
 
     // Un corps aux options incomplètes : les absentes valent faux.
@@ -200,7 +202,8 @@ async fn des_options_partielles_sont_tolerees_et_ecrites_completes() {
         json!({
             "show_date": false,
             "show_speakers": false,
-            "show_logos": false,
+            "show_partner_logos": false,
+            "show_org_logo": false,
             "show_event_banner": false,
             "show_event_icon": true
         })
@@ -228,9 +231,15 @@ async fn un_code_mal_forme_est_refuse() {
         ),
         (
             "bandeau",
+            "#1B2A6B",
+            "accent",
+            "Choisissez une couleur dans la liste, ou un code comme #1b2a6b.",
+        ),
+        (
+            "bandeau",
             "bleu nuit",
             "accent",
-            "Choisissez une couleur dans la liste.",
+            "Choisissez une couleur dans la liste, ou un code comme #1b2a6b.",
         ),
     ] {
         let refus = cover_design::enregistrer(

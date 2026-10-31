@@ -30,6 +30,8 @@ interface Props extends FieldProps {
   icon?: string
   /** Compte les caractères saisis face à `maxlength`. */
   showCounter?: boolean
+  /** Champ hors soumission (un réglage, une recherche) : pas de mention « facultatif ». */
+  hideOptional?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { type: 'text', size: 'md' })
@@ -70,6 +72,7 @@ const classes = computed(() =>
     :disabled="props.disabled"
     :readonly="props.readonly"
     :hide-label="props.hideLabel"
+    :hide-optional="props.hideOptional"
     :counter="counter"
     :counter-exceeded="Boolean(props.maxlength && length > props.maxlength)"
   >

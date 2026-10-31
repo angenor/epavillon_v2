@@ -1,15 +1,8 @@
 {
-  "title": "Atelier de l'image de couverture",
-  "back": "Revenir au dossier",
-  "save": "Enregistrer comme image de couverture",
+  "title": "Image de couverture",
+  "save": "Enregistrer la couverture",
   "eyebrow": "Pavillon de la Francophonie · {edition}",
-  "steps": {
-    "template": "Choisissez un modèle",
-    "content": "Ce qui figure sur l'image",
-    "color": "La couleur"
-  },
   "catalogHint": "Les modèles sont préparés par l'IFDD et suivent la charte de la Francophonie.",
-  "contentHint": "Tout vient de votre dossier : modifiez-le là-bas, l'image suit.",
   "templates": {
     "texte-photo": "Texte et photo",
     "typographique": "Typographique",
@@ -29,10 +22,11 @@
     "hublot": "Hublot"
   },
   "options": {
-    "show_date": "Date, heure et salle",
-    "show_speakers": "Visages des intervenants",
-    "show_logos": "Logos (IFDD, OIF, votre organisation)",
-    "show_event_icon": "Icône de l'événement ({edition})"
+    "show_date": "Date, heure et lieu",
+    "show_speakers": "Intervenants",
+    "show_event_icon": "Icône de l'événement",
+    "show_partner_logos": "Logos IFDD et OIF",
+    "show_org_logo": "Logo de votre organisation"
   },
   "accents": {
     "bleu": "Bleu nuit",
@@ -44,8 +38,6 @@
   "previewLabel": "Aperçu de l’image de couverture : {title}",
   "logoMissing": "sa place reste vide sur l'image.",
   "share": {
-    "title": "Quand on partage le lien",
-    "description": "WhatsApp, LinkedIn, Facebook, courriel : l'aperçu reprend cette image.",
     "site": "epavillonclimatique.francophonie.org"
   },
   "renderFailed": "L'image n'a pas pu être fabriquée. Réessayez ; si cela recommence, changez de navigateur.",
@@ -54,8 +46,84 @@
     "own": "Image de fond : votre image.",
     "missing": "Pas encore d'image de fond : la couleur choisie la remplace.",
     "change": "Changer l'image",
-    "useOwn": "Reprendre ma photo",
-    "useEvent": "Revenir à l'image de l'événement",
-    "field": "Photo de fond"
+    "field": "Photo de fond",
+    "title": "Photo de fond",
+    "hint": "La photo de l'édition, ou la vôtre.",
+    "unused": "Ce modèle n'utilise pas de photo : choisissez-en un « avec photo » pour qu'elle apparaisse.",
+    "eventChoice": "Photo de l'édition",
+    "eventChoiceDetail": "{edition}, choisie par l'IFDD",
+    "ownChoice": "Votre photo",
+    "addOwn": "Déposer votre photo",
+    "replaceOwn": "Remplacer votre photo"
+  },
+  "backTo": "Dossier {reference}",
+  "savedToast": "Image de couverture enregistrée",
+  "status": {
+    "dirty": "Modifications non enregistrées",
+    "saved": "Enregistrée",
+    "clean": "Aucune modification"
+  },
+  "tools": {
+    "label": "Outils de l'image",
+    "templates": "Modèles",
+    "photo": "Photo",
+    "texts": "Textes"
+  },
+  "templatesHint": "Cliquez : l'image change aussitôt. Vos textes et votre photo suivent.",
+  "groups": {
+    "withPhoto": "Avec photo",
+    "withoutPhoto": "Sans photo"
+  },
+  "previousTemplate": "Modèle précédent",
+  "nextTemplate": "Modèle suivant",
+  "previewRegion": "L'image et ses formats",
+  "onImage": "Sur l'image",
+  "color": "Couleur",
+  "customColor": "Personnalisée, {hex}",
+  "addColor": "Choisir une autre couleur",
+  "hints": {
+    "speakers": "Aucun intervenant | {count} visage et son nom | {count} visages et leurs noms",
+    "noSpeakers": "Aucun intervenant dans le dossier",
+    "partners": "Organisateurs du Pavillon",
+    "orgLogoSet": "Déposé",
+    "orgLogoMissing": "Pas encore déposé"
+  },
+  "picker": {
+    "title": "Couleur personnalisée",
+    "hex": "Code de la couleur",
+    "hue": "Teinte",
+    "saturation": "Intensité",
+    "lightness": "Clarté",
+    "suggestions": "Suggestions",
+    "sample": "Texte blanc",
+    "readable": "Le texte blanc reste lisible sur cette couleur.",
+    "unreadable": "Trop claire : le texte blanc de l'image deviendra difficile à lire.",
+    "cancel": "Annuler",
+    "apply": "Appliquer"
+  },
+  "formats": {
+    "label": "Les formats de l'image",
+    "cover": "Couverture",
+    "coverSize": "1600 × 900",
+    "share": "Partage",
+    "shareSize": "1200 × 675",
+    "mail": "Courriel",
+    "mailSize": "1200 × 200",
+    "mailHint": "En tête des courriels, l'image est coupée en bande au centre : seul le milieu reste."
+  },
+  "texts": {
+    "hint": "Ils viennent du dossier : l'image et la page de l'activité disent la même chose.",
+    "title": "Titre",
+    "date": "Date et heure",
+    "place": "Lieu",
+    "speakers": "Intervenants",
+    "edit": "Modifier dans le dossier"
+  },
+  "leave": {
+    "title": "Quitter sans enregistrer ?",
+    "description": "Vos changements de l'image (modèle, couleur, éléments affichés) seront perdus. Le dossier garde l'image enregistrée la dernière fois.",
+    "stay": "Rester",
+    "discard": "Quitter sans enregistrer",
+    "saveAndLeave": "Enregistrer et quitter"
   }
 }

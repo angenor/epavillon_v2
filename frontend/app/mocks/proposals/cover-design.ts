@@ -59,8 +59,8 @@ export function saveProposalCoverDesign(proposalId: Uuid, payload: SaveCoverDesi
     refuse(422, 'VALIDATION_FAILED', "Choisissez un modèle d'image dans la liste.", 'template_code')
   }
   const accent = payload.accent.trim()
-  if (!CODE.test(accent)) {
-    refuse(422, 'VALIDATION_FAILED', 'Choisissez une couleur dans la liste.', 'accent')
+  if (!CODE.test(accent) && !/^#[0-9a-f]{6}$/.test(accent)) {
+    refuse(422, 'VALIDATION_FAILED', 'Choisissez une couleur dans la liste, ou un code comme #1b2a6b.', 'accent')
   }
 
   designs.set(proposalId, {
@@ -69,7 +69,8 @@ export function saveProposalCoverDesign(proposalId: Uuid, payload: SaveCoverDesi
     options: {
       show_date: payload.options.show_date === true,
       show_speakers: payload.options.show_speakers === true,
-      show_logos: payload.options.show_logos === true,
+      show_partner_logos: payload.options.show_partner_logos === true,
+      show_org_logo: payload.options.show_org_logo === true,
       show_event_banner: payload.options.show_event_banner === true,
       show_event_icon: payload.options.show_event_icon === true,
     },

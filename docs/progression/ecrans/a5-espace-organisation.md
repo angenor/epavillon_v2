@@ -177,3 +177,19 @@ Vérifié au navigateur sur les données d'exemple, à 1400 et 375 px : pastille
 - **Image floue** (hors espace, toutes les images) : `UiImage` mêlait au `srcset` la déclinaison `courriel` (6:1) ; écartée, original ajouté sans `lg`. En production le 30/10.
 
 Vérifié au navigateur sur les données d'exemple : pastilles éteintes, clignotement, deux fils avec nature, bouton admin puis bandeau en super-administrateur (compte de démonstration ajouté le temps de l'essai, retiré).
+
+## 31/10 : l'éditeur de l'image de couverture (direction « table de montage »)
+
+Maquette sur canevas (claude.ai, « Éditeur de couverture : directions »), retouchée cinq fois avec le commanditaire avant construction.
+
+- **Disposition** : barre d'en-tête (retour au dossier, titre, état « Aucune modification / Modifications non enregistrées / Enregistrée », « Enregistrer la couverture ») ; rail d'outils Modèles, Photo, Textes ; panneau de l'outil ; scène au centre (flèches modèle précédent/suivant, alerte du logo au-dessus de l'image, « Changer l'image » dessous, chacune dans son cadre) ; bande des trois formats fixée en bas ; colonne « Sur l'image » et « Couleur » à droite. Téléphone : image, formats, onglets d'outils, panneau, réglages.
+- **Pleine largeur** : `route.meta.fullBleed` (nouveau, `types/navigation.ts`) retire au layout public sa largeur bornée et ses marges ; l'éditeur prend la hauteur sous la barre, l'image se dimensionne sur la hauteur de l'écran (tout tient à 1440 × 900).
+- **Cases** au lieu des cases du panneau : date et lieu, intervenants, logos IFDD et OIF, logo de l'organisation (séparés, modèle `070`), icône de l'événement. `drawCover` retire de la scène les logos décochés et ne dessine le bandeau que s'il porte un logo : les seize modèles n'ont pas changé.
+- **Couleur libre** : pastille « + », fenêtre `CoverStudioColorPicker` (teinte, intensité, clarté, code, douze suggestions foncées, avertissement si le texte blanc devient illisible, contraste WCAG < 4,5). Garde la dernière couleur libre en sixième pastille.
+- **Logo** : « Ajouter le logo » de l'alerte ouvre directement le choix du fichier (`MediaImageField`, rôle `logo` de l'organisation, référent seulement, sinon la phrase « demandez-le-lui »). Le logo vaut pour tous les dossiers : il ne compte pas dans les modifications de l'image.
+- **Formats** : couverture 1600 × 900, partage (la même image, avec le nom du site et le titre comme un aperçu de lien), courriel 1200 × 200 coupé au centre comme le fait le serveur (`media/domain/variants.rs`), avec une phrase qui le dit.
+- **Quitter** : `onBeforeRouteLeave` ouvre « Quitter sans enregistrer ? » (Quitter sans enregistrer, Rester, Enregistrer et quitter) ; fermer l'onglet déclenche l'avertissement du navigateur. « Enregistrer » reste désormais dans l'éditeur (message bref) au lieu de revenir au dossier.
+- **Choix de jetons** : la maquette ignorait la charte (indigo, Geist) ; la construction garde les jetons du site (accent cyan, police du site, thème sombre).
+- `UiInput` gagne `hideOptional` (déjà porté par `UiFormField`).
+
+Vérifié sur données d'exemple : 1440 × 900 (tout visible), 375 px (sans défilement horizontal), couleur libre appliquée, logos IFDD/OIF décochés, fenêtre de sortie. Tests : 6 intégrations `atelier_couverture` et 5 unitaires `cover_design`, 71 tests du site, typage, contrat d'API.

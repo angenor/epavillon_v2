@@ -12,28 +12,42 @@ use utoipa::ToSchema;
 pub struct CoverDesignOptions {
     pub show_date: bool,
     pub show_speakers: bool,
-    pub show_logos: bool,
+    /// Logos de l'IFDD et de l'OIF.
+    pub show_partner_logos: bool,
+    /// Logo de l'organisation porteuse : elle peut ne montrer que le sien (31/10).
+    pub show_org_logo: bool,
     pub show_event_banner: bool,
     pub show_event_icon: bool,
 }
 
-const CLES: [&str; 5] = [
+const CLES: [&str; 6] = [
     "show_date",
     "show_speakers",
-    "show_logos",
+    "show_partner_logos",
+    "show_org_logo",
     "show_event_banner",
     "show_event_icon",
 ];
+
+/// Avant le 31/10, une seule case portait tous les logos.
+const CLE_D_AVANT: &str = "show_logos";
 
 impl CoverDesignOptions {
     /// Une clé absente, ou qui n'est pas un booléen, vaut faux : une ligne
     /// écrite avant l'ajout d'une option se relit sans reprise.
     pub fn depuis_json(valeur: &Value) -> Self {
-        let lire = |cle: &str| valeur.get(cle).and_then(Value::as_bool).unwrap_or(false);
+        let booleen = |cle: &str| valeur.get(cle).and_then(Value::as_bool);
+        let lire = |cle: &str| booleen(cle).unwrap_or(false);
+        let logos = |cle: &str| {
+            booleen(cle)
+                .or_else(|| booleen(CLE_D_AVANT))
+                .unwrap_or(false)
+        };
         Self {
             show_date: lire("show_date"),
             show_speakers: lire("show_speakers"),
-            show_logos: lire("show_logos"),
+            show_partner_logos: logos("show_partner_logos"),
+            show_org_logo: logos("show_org_logo"),
             show_event_banner: lire("show_event_banner"),
             show_event_icon: lire("show_event_icon"),
         }
@@ -44,7 +58,8 @@ impl CoverDesignOptions {
         let valeurs = [
             self.show_date,
             self.show_speakers,
-            self.show_logos,
+            self.show_partner_logos,
+            self.show_org_logo,
             self.show_event_banner,
             self.show_event_icon,
         ];
@@ -99,6 +114,18 @@ pub fn code_valide(code: &str) -> bool {
             .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
 }
 
+/// Une couleur : un code de la charte, ou une couleur libre `#rrggbb` en
+/// minuscules (31/10), comme l'exige `ck_proposal_cover_designs_accent`.
+pub fn accent_valide(accent: &str) -> bool {
+    code_valide(accent)
+        || accent.strip_prefix('#').is_some_and(|hex| {
+            hex.len() == 6
+                && hex
+                    .bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -131,7 +158,7 @@ mod tests {
     fn une_option_absente_ou_mal_typee_vaut_faux() {
         let lues = CoverDesignOptions::depuis_json(&json!({
             "show_date": true,
-            "show_logos": "oui",
+            "show_partner_logos": "oui",
             "inconnue": true
         }));
         assert_eq!(
@@ -159,10 +186,29 @@ mod tests {
             json!({
                 "show_date": false,
                 "show_speakers": true,
-                "show_logos": false,
+                "show_partner_logos": false,
+                "show_org_logo": false,
                 "show_event_banner": false,
                 "show_event_icon": false
             })
         );
+    }
+
+    #[test]
+    fn lancienne_case_des_logos_vaut_pour_les_deux() {
+        let lues =
+            CoverDesignOptions::depuis_json(&json!({ "show_logos": true, "show_org_logo": false }));
+        assert!(lues.show_partner_logos);
+        assert!(!lues.show_org_logo, "la nouvelle clé l'emporte");
+    }
+
+    #[test]
+    fn une_couleur_libre_est_un_code_hexadecimal_en_minuscules() {
+        for bonne in ["bleu", "#1b2a6b", "#000000"] {
+            assert!(accent_valide(bonne), "{bonne}");
+        }
+        for mauvaise in ["#1B2A6B", "#12345", "#1234567", "1b2a6b", "#12345g", "#"] {
+            assert!(!accent_valide(mauvaise), "{mauvaise}");
+        }
     }
 }

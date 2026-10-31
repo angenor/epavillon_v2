@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { findCoverTemplate, fitText, withAlpha, wrapLines } from '../../app/utils/cover-studio.ts'
+import { CUSTOM_ACCENT, findCoverTemplate, fitText, hexToHsl, hslToHex, whiteContrast, withAlpha, wrapLines } from '../../app/utils/cover-studio.ts'
 
 /** Un mesureur sans navigateur : chaque caractère vaut un dixième de la taille de police. */
 function measurer() {
@@ -47,4 +47,20 @@ test('le voile dose l’opacité d’un jeton opaque', () => {
 test('un code de modèle inconnu retombe sur le premier modèle du catalogue', () => {
   assert.equal(findCoverTemplate('disparu').code, 'photo-pleine')
   assert.equal(findCoverTemplate('visages').code, 'visages')
+})
+
+test('une couleur libre fait l’aller-retour teinte, intensité, clarté sans dériver', () => {
+  for (const hex of ['#1b2a6b', '#a3172e', '#4e6b1f', '#000000']) {
+    const { hue, saturation, lightness } = hexToHsl(hex)
+    const back = hslToHex(hue, saturation, lightness)
+    const gap = [1, 3, 5].map((i) => Math.abs(Number.parseInt(back.slice(i, i + 2), 16) - Number.parseInt(hex.slice(i, i + 2), 16)))
+    assert.ok(Math.max(...gap) <= 3, `${hex} → ${back}`)
+    assert.match(back, CUSTOM_ACCENT)
+  }
+})
+
+test('le texte blanc est jugé lisible sur une couleur foncée, pas sur une claire', () => {
+  assert.ok(whiteContrast('#1b2a6b') >= 4.5)
+  assert.ok(whiteContrast('#f5d76e') < 4.5)
+  assert.equal(Math.round(whiteContrast('#000000')), 21)
 })

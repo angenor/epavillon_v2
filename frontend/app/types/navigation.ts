@@ -62,6 +62,11 @@ declare module '#app' {
      * l'organisation à sa demande (30/10). L'API refuse tout autre non-membre.
      */
     actingForOrganization?: boolean
+    /**
+     * Le layout public laisse la page occuper toute la largeur et la hauteur
+     * sous la barre, sans marges : un éditeur, pas une page de lecture (31/10).
+     */
+    fullBleed?: boolean
   }
 }
 

@@ -88,9 +88,22 @@ export type CoverAccent = keyof typeof COVER_ACCENTS
 export const DEFAULT_COVER_OPTIONS: CoverDesignOptions = {
   show_date: true,
   show_speakers: true,
-  show_logos: true,
+  show_partner_logos: true,
+  show_org_logo: true,
   show_event_banner: true,
   show_event_icon: true,
+}
+
+/**
+ * Ce que lit un modèle : les deux cases de logos s'y résument en un bandeau
+ * (`show_logos`), et la scène ne porte que les logos cochés (`drawCover`).
+ */
+export interface CoverDrawOptions {
+  show_date: boolean
+  show_speakers: boolean
+  show_logos: boolean
+  show_event_banner: boolean
+  show_event_icon: boolean
 }
 
 /** Mesure seule : permet de tester le découpage du texte sans navigateur. */
@@ -259,11 +272,11 @@ export function drawIcon(ctx: CanvasRenderingContext2D, scene: CoverScene): void
 }
 
 /** Le bas de la zone utile : au-dessus du bandeau de logos quand il est montré. */
-export function bottomOf(options: CoverDesignOptions): number {
+export function bottomOf(options: CoverDrawOptions): number {
   return options.show_logos ? COVER_HEIGHT - LOGO_BAR : COVER_HEIGHT
 }
 
-export function drawChrome(ctx: CanvasRenderingContext2D, scene: CoverScene, options: CoverDesignOptions): void {
+export function drawChrome(ctx: CanvasRenderingContext2D, scene: CoverScene, options: CoverDrawOptions): void {
   if (options.show_logos) drawLogoBar(ctx, scene)
   if (options.show_event_icon) drawIcon(ctx, scene)
 }
@@ -295,7 +308,7 @@ export function drawFade(
 export function drawTextBlock(
   ctx: CanvasRenderingContext2D,
   scene: CoverScene,
-  options: CoverDesignOptions,
+  options: CoverDrawOptions,
   box: { x: number; y: number; width: number; maxTitleLines: number; titleMax: number },
   colors: { title: string; text: string; eyebrow: string },
 ): number {
@@ -334,7 +347,7 @@ export interface CoverTemplate {
   code: string
   /** La photo de départ compte-t-elle dans ce modèle ? Sinon l'atelier ne la propose pas. */
   usesPhoto: boolean
-  draw(ctx: CanvasRenderingContext2D, scene: CoverScene, options: CoverDesignOptions): void
+  draw(ctx: CanvasRenderingContext2D, scene: CoverScene, options: CoverDrawOptions): void
 }
 
 

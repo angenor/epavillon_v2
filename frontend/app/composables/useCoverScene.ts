@@ -47,13 +47,28 @@ function loadImage(url: string | null): Promise<HTMLImageElement | null> {
   return loading
 }
 
-/** Les couleurs de l'image, lues dans les jetons : le canvas ne connaît pas les variables CSS. */
-function resolveColors(accentToken: string): CoverColors {
+/** Une couleur libre éclaircie vers le blanc, comme la teinte 100 d'une couleur de la charte. */
+function lighten(hex: string, amount: number): string {
+  const mix = (index: number) => {
+    const value = Number.parseInt(hex.slice(index, index + 2), 16)
+    return Math.round(value + (255 - value) * amount)
+      .toString(16)
+      .padStart(2, '0')
+  }
+  return `#${mix(1)}${mix(3)}${mix(5)}`
+}
+
+/**
+ * Les couleurs de l'image, lues dans les jetons : le canvas ne connaît pas les
+ * variables CSS. `accent` est un jeton de la charte ou une couleur libre `#rrggbb`.
+ */
+function resolveColors(accent: string): CoverColors {
   const style = getComputedStyle(document.documentElement)
   const read = (name: string) => style.getPropertyValue(name).trim()
+  const custom = accent.startsWith('#')
   return {
-    accent: read(accentToken),
-    accentLight: read(accentToken.replace(/-\d+$/, '-100')),
+    accent: custom ? accent : read(accent),
+    accentLight: custom ? lighten(accent, 0.85) : read(accent.replace(/-\d+$/, '-100')),
     onAccent: read('--ifdd-gris-0'),
     paper: read('--ifdd-gris-0'),
     tint: read('--ifdd-gris-50'),

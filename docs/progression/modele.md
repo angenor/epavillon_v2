@@ -491,3 +491,10 @@ Zoom limite à 100 créations ou modifications de réunion par jour et par hôte
 - **`live.provider_webhook_events.payload`** : vidé (`'{}'`) quand la notification est close en `ignored` (`repo/webhooks.rs::clore`, même écriture). L'abonnement Zoom couvre tout le compte de l'IFDD : une réunion étrangère à l'ePavillon ne laisse plus noms ni adresses. Type, `external_id`, heure de réception, statut et `payload_hash` restent. `COMMENT ON COLUMN` ajouté, commentaire de `external_id` précisé ; aucune contrainte (le service est seul à clore).
 
 **En production** : `ops/migrations/2026-10-31-zoom-quota-recalage.sql`, rejouable (colonne, commentaires, fonction et déclencheur recréés, contenu des `ignored` déjà présents vidé), jouée deux fois en local, **avant** de démarrer l'API et le worker qui lisent `sync_due_at`.
+
+## 31/10/2026, `070_programme_proposals.sql` : couleur libre et logos séparés sur l'image de couverture
+
+- **`ck_proposal_cover_designs_accent`** accepte aussi `#rrggbb` en minuscules : l'éditeur propose une couleur personnalisée en plus des cinq de la charte.
+- **`options`** : `show_logos` devient `show_partner_logos` (IFDD et OIF) et `show_org_logo` (l'organisation peut ne montrer que le sien). Aucune reprise : l'API lit l'ancienne clé pour les deux quand elles manquent, et réécrit l'objet complet au prochain enregistrement.
+
+**En production** : `ops/migrations/2026-10-31-atelier-couleur-libre.sql`, rejouable, avant l'API (l'ancienne contrainte refuserait une couleur libre). Jouée deux fois en local.

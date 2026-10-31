@@ -12,7 +12,10 @@ import type { AttachedImage } from '../media'
 export interface CoverDesignOptions {
   show_date: boolean
   show_speakers: boolean
-  show_logos: boolean
+  /** Logos de l'IFDD et de l'OIF. */
+  show_partner_logos: boolean
+  /** Logo de l'organisation porteuse, réglé à part : elle peut ne montrer que le sien. */
+  show_org_logo: boolean
   /** Le nom est d'origine : vrai, la photo de fond est l'image de l'édition ; faux, celle de l'organisation (`cover_source`). */
   show_event_banner: boolean
   show_event_icon: boolean
@@ -21,7 +24,7 @@ export interface CoverDesignOptions {
 export interface CoverDesign {
   /** Code d'un modèle défini dans le site (`utils/cover-studio`). */
   template_code: string
-  /** Code d'une couleur de la charte, défini dans le site. */
+  /** Code d'une couleur de la charte, défini dans le site, ou couleur libre `#rrggbb` en minuscules. */
   accent: string
   options: CoverDesignOptions
   updated_at: IsoDateTime

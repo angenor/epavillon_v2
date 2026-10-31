@@ -746,10 +746,15 @@ CREATE TABLE programme.proposal_cover_designs (
     proposal_id   uuid        PRIMARY KEY REFERENCES programme.proposals(id) ON DELETE CASCADE,
     -- Code d'un modèle défini dans le site (`frontend/app/utils/cover-studio`).
     template_code text        NOT NULL,
-    -- Code d'une couleur de la charte, défini dans le site au même endroit.
+    -- Code d'une couleur de la charte, défini dans le site au même endroit,
+    -- ou couleur libre `#rrggbb` en minuscules (31/10) : l'éditeur la propose
+    -- en plus des cinq de la charte.
     accent        text        NOT NULL,
-    -- Ce qui figure sur l'image : `show_date`, `show_speakers`, `show_logos`,
-    -- `show_event_banner`, `show_event_icon`, booléens. `show_event_banner`
+    -- Ce qui figure sur l'image : `show_date`, `show_speakers`,
+    -- `show_partner_logos` (IFDD et OIF), `show_org_logo` (l'organisation peut
+    -- ne montrer que le sien, 31/10 ; avant, une seule clé `show_logos`, encore
+    -- lue pour les deux quand elles manquent), `show_event_banner`,
+    -- `show_event_icon`, booléens. `show_event_banner`
     -- choisit la photo de fond (29/10) : vrai, l'image de l'édition ; faux,
     -- la photo `cover_source` du dossier. Une clé absente vaut
     -- faux à la lecture : l'API écrit l'objet complet, une option ajoutée plus
@@ -759,7 +764,7 @@ CREATE TABLE programme.proposal_cover_designs (
     updated_by    uuid        CONSTRAINT xmod_fk_proposal_cover_designs_updater
                               REFERENCES identity.people(id) ON DELETE SET NULL,
     CONSTRAINT ck_proposal_cover_designs_template CHECK (template_code ~ '^[a-z][a-z0-9-]{1,40}$'),
-    CONSTRAINT ck_proposal_cover_designs_accent   CHECK (accent ~ '^[a-z][a-z0-9-]{1,40}$'),
+    CONSTRAINT ck_proposal_cover_designs_accent   CHECK (accent ~ '^([a-z][a-z0-9-]{1,40}|#[0-9a-f]{6})$'),
     CONSTRAINT ck_proposal_cover_designs_options  CHECK (jsonb_typeof(options) = 'object')
 );
 
