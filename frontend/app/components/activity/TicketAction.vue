@@ -30,20 +30,16 @@ const label = (action: TicketCallToAction) => t(props.compact ? `activity.ticket
   >
     {{ label(props.action) }}
   </UiButton>
-  <!-- Ni `UiButton` ni sa variante `danger` : l'ancre reste sur la page, et le rouge du direct n'est pas celui d'une suppression. -->
-  <a
-    v-else-if="props.action === 'watch'"
-    href="#direct"
-    class="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-md bg-live px-6 font-condensed text-[1.05rem] font-semibold tracking-[0.05em] whitespace-nowrap text-live-contrast uppercase transition-[background-color,transform] hover:-translate-y-px hover:bg-live/90 motion-reduce:hover:translate-y-0"
-  >
-    <UiIcon name="broadcast" size="1.125rem" />
+  <UiButton v-else-if="props.action === 'watch'" variant="live" size="lg" icon="broadcast" class="min-h-12!" href="#direct">
     {{ label('watch') }}
-  </a>
+  </UiButton>
   <!-- Lien simple vers la salle, pas le routeur : la salle se charge d'un coup, et Zoom ne démarre qu'une fois par document. -->
+  <!-- Pas `UiButton` : il ouvrirait la salle dans un nouvel onglet ; même habit que sa variante « live ». -->
   <a
     v-else-if="props.action === 'join'"
     :href="props.joinTo ?? '#direct'"
-    class="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-md bg-live px-6 font-condensed text-[1.05rem] font-semibold tracking-[0.05em] whitespace-nowrap text-live-contrast uppercase transition-[background-color,transform] hover:-translate-y-px hover:bg-live/90 motion-reduce:hover:translate-y-0"
+    data-ui-button
+    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-live px-6 font-bold whitespace-nowrap text-live-contrast no-underline hover:bg-[color-mix(in_srgb,var(--color-live)_85%,var(--color-text))]"
   >
     <UiIcon name="video" size="1.125rem" />
     {{ label('join') }}
