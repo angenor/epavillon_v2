@@ -267,7 +267,7 @@ h1, h2, h3, .heading {
 
 @media (max-width: 860px) {
   .row { grid-template-columns: 76px minmax(0, 1fr); gap: 6px 14px; }
-  .row-thumb { display: none; }
+  .row-thumb, .row-thumb.initials { display: none; }
   .row-side { grid-column: 2; flex-direction: row; align-items: center; justify-content: flex-start; }
   .row-time b { font-size: 1.95rem; }
   .row-title { font-size: 1.25rem; }

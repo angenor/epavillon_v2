@@ -32,16 +32,15 @@
     .main { margin-top: 0; }
   }
 
-  /* La journée en 3 temps : posée sur le bandeau, comme en production. */
-  .parts-card { padding: 24px; border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-xl); }
-  .parts-card h2 { font-size: 1.7rem; margin-bottom: 16px; }
-  .parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-  .part { display: block; padding: 0 0 16px; border-radius: var(--radius); background: var(--day-tint); text-decoration: none; overflow: hidden; }
-  .part-head { display: flex; align-items: baseline; gap: 10px; padding: 8px 14px 6px; background: var(--day-solid); color: var(--day-on); font-family: var(--font-heading); text-transform: uppercase; }
-  .part-head b { font-size: 1.9rem; font-weight: 700; line-height: 0.9; }
-  .part-head span { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em; }
-  .part h3 { margin: 12px 14px 0; font-size: 1.2rem; font-weight: 600; text-transform: none; line-height: 1.15; }
-  .part:hover h3 { color: var(--color-accent); text-decoration: underline; }
+  /* La journée en 3 temps : le bloc de la production, tel quel, posé sur le bandeau. */
+  .parts-card { padding: 24px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-xl); }
+  .parts-card h2 { font-family: var(--font-body); font-size: 1.25rem; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--color-heading); }
+  .parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 20px 0 0; padding: 0; list-style: none; }
+  .part { display: block; height: 100%; min-height: var(--target); padding: 16px; border-top: 3px solid var(--day-solid); border-radius: 0 0 6px 6px; background: var(--day-tint); color: var(--color-text); text-decoration: none; }
+  .part:hover { background: var(--color-surface-hover); }
+  .part small { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--day-ink); }
+  .part span { display: block; margin-top: 4px; font-size: 0.875rem; color: var(--color-text-muted); }
+  .part b { display: block; margin-top: 8px; line-height: 1.35; }
   @media (max-width: 760px) { .parts { grid-template-columns: minmax(0, 1fr); } .parts-card { padding: 18px; } }
 
   /* Le billet. Collé à l'écran ; s'il dépasse, seule la liste des partenaires
@@ -184,20 +183,11 @@
   <div class="main">
     <section class="parts-card" aria-labelledby="temps">
       <h2 id="temps">La journée en 3 temps</h2>
-      <div class="parts">
-        <a class="part" href="#p1">
-          <div class="part-head"><b>1</b><span>08:00 à 10:00</span></div>
-          <h3>Opportunités de financement et synergies d'action</h3>
-        </a>
-        <a class="part" href="#p2">
-          <div class="part-head"><b>2</b><span>10:15 à 15:15</span></div>
-          <h3>Initiatives nationales, études de cas et témoignages</h3>
-        </a>
-        <a class="part" href="#p3">
-          <div class="part-head"><b>3</b><span>15:30 à 18:00</span></div>
-          <h3>Partage entre pairs et partenaires, réseautage</h3>
-        </a>
-      </div>
+      <ol class="parts">
+        <li><a class="part" href="#p1"><small>Partie 1</small><span>08:00 à 10:00</span><b>Opportunités de financement et synergies d'action</b></a></li>
+        <li><a class="part" href="#p2"><small>Partie 2</small><span>10:15 à 15:15</span><b>Initiatives nationales, études de cas et témoignages</b></a></li>
+        <li><a class="part" href="#p3"><small>Partie 3</small><span>15:30 à 18:00</span><b>Partage entre pairs et partenaires, réseautage</b></a></li>
+      </ol>
     </section>
 
     <section class="block">
