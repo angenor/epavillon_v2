@@ -130,3 +130,8 @@
 .row-thumb.fade img + img, .wk-media.fade img + img { animation-delay: -5s; }
 @keyframes relai { 0%, 45% { opacity: 1; } 50%, 95% { opacity: 0; } 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .row-thumb.fade img, .wk-media.fade img { animation: none; } .row-thumb.fade img + img, .wk-media.fade img + img { opacity: 0; } }
+
+/* Vignette d'une séance commune : un trait fin avance pendant chaque couverture (5 s), puis repart. */
+.row-thumb.fade::after, .wk-media.fade::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--day-solid, var(--color-accent-solid)); transform-origin: left; animation: avance-vignette 5s linear infinite; z-index: 1; }
+@keyframes avance-vignette { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .row-thumb.fade::after, .wk-media.fade::after { display: none; } }

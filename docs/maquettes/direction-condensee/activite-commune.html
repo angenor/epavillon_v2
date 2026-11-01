@@ -147,6 +147,12 @@
   .media.slides figcaption { position: absolute; left: 14px; bottom: 14px; display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border-radius: var(--radius); background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass)); color: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em; }
   .media.slides figcaption i { display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--radius-sm); background: #fff; color: var(--ifdd-bleu-900); font-style: normal; font-size: 0.65rem; }
   .media.slides figcaption b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--day-solid); color: var(--day-on); font-size: 0.85rem; }
+  /* Barre d'avancement : elle se remplit pendant l'affichage, pour dire qu'une autre couverture arrive. */
+  .slide-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgb(255 255 255 / 0.25); z-index: 1; }
+  .slide-progress i { display: block; height: 100%; width: 0; background: var(--day-solid); }
+  .slide-progress i.run { animation: avance 6s linear forwards; }
+  .slide-progress.paused i { animation-play-state: paused; }
+  @keyframes avance { to { width: 100%; } }
   .slide-ctrl { position: absolute; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass)); }
   .slide-ctrl button { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; cursor: pointer; color: #fff; }
   .slide-ctrl .dot::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: rgb(255 255 255 / 0.5); }
@@ -288,6 +294,7 @@
     <div class="media slides" data-st="register registered full free" aria-roledescription="carrousel" aria-label="Couvertures des deux activités">
       <figure class="is-on"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""><figcaption><b>1</b><i>AIRF</i>Régions</figcaption></figure>
       <figure><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""><figcaption><b>2</b><i>AIMF</i>Villes</figcaption></figure>
+      <div class="slide-progress" aria-hidden="true"><i></i></div>
       <div class="slide-ctrl">
         <button type="button" class="dot" aria-label="Couverture 1" aria-current="true"></button>
         <button type="button" class="dot" aria-label="Couverture 2"></button>
@@ -412,17 +419,21 @@
     .observe(document.querySelector(state === 'live' ? '.ticket-live' : '#cta'))
 </script>
 <script>
+  {
   // Les couvertures défilent seules (6 s), en fondu ; arrêt si « moins d'animations » ou sur pause.
   const box = document.querySelector('.media.slides')
   const figs = [...box.querySelectorAll('figure')], dots = [...box.querySelectorAll('.dot')]
   let i = 0, timer = null
-  const show = n => { i = n; figs.forEach((f, k) => f.classList.toggle('is-on', k === n)); dots.forEach((d, k) => d.toggleAttribute('aria-current', k === n)) }
-  const play = () => { timer = setInterval(() => show((i + 1) % figs.length), 6000) }
+  const progress = box.querySelector('.slide-progress i')
+  const restart = () => { progress.classList.remove('run'); void progress.offsetWidth; if (timer) progress.classList.add('run') }
+  const show = n => { i = n; restart(); figs.forEach((f, k) => f.classList.toggle('is-on', k === n)); dots.forEach((d, k) => d.toggleAttribute('aria-current', k === n)) }
+  const play = () => { timer = setInterval(() => show((i + 1) % figs.length), 6000); box.querySelector('.slide-progress').classList.remove('paused'); restart() }
   dots.forEach((d, k) => d.addEventListener('click', () => show(k)))
   const pause = box.querySelector('.pause')
   const mark = on => { pause.querySelector('use').setAttribute('href', on ? '#i-pause' : '#i-play'); pause.setAttribute('aria-label', on ? 'Mettre en pause' : 'Reprendre le défilement') }
-  pause.addEventListener('click', () => { if (timer) { clearInterval(timer); timer = null; mark(false) } else { play(); mark(true) } })
+  pause.addEventListener('click', () => { if (timer) { clearInterval(timer); timer = null; mark(false); box.querySelector('.slide-progress').classList.add('paused') } else { play(); mark(true) } })
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) play(); else mark(false)
+  }
 </script>
 </body>
 </html>
