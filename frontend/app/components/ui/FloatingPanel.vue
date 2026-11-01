@@ -19,6 +19,12 @@ interface Props {
   launcherIcon?: string
   /** Texte court affiché à la place de l'icône : une note, un compte. */
   launcherValue?: string | null
+  /**
+   * Mot affiché À CÔTÉ de l'icône (« Aide ») : le bouton devient une pastille
+   * allongée, pour qui ne devinerait pas à quoi sert une icône seule. La
+   * fenêtre s'ouvre alors au-dessus du bouton, et non à sa gauche.
+   */
+  launcherText?: string | null
   /** Pastille chiffrée sur le bouton (messages non lus) ; zéro la masque. */
   launcherBadge?: number
   /** Rang du bouton dans la colonne, en partant du bas. */
@@ -37,6 +43,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   launcherIcon: 'plus',
   launcherValue: null,
+  launcherText: null,
   launcherBadge: 0,
   stack: 0,
   width: '26rem',
@@ -81,10 +88,13 @@ const windowStyle = computed(() => ({
     <button
       ref="launcher"
       type="button"
-      class="fixed end-4 bottom-[calc(1rem+var(--floating-stack)*4.25rem)] z-30 flex size-14 cursor-pointer items-center justify-center rounded-full text-lg font-semibold tabular-nums shadow-lg transition-colors sm:end-6 sm:bottom-[calc(1.5rem+var(--floating-stack)*4.25rem)]"
-      :class="props.open
-        ? 'border-2 border-accent bg-surface-overlay text-accent'
-        : 'bg-accent-solid text-accent-contrast hover:bg-accent-solid-hover'"
+      class="fixed end-4 bottom-[calc(1rem+var(--floating-stack)*4.25rem)] z-30 flex h-14 cursor-pointer items-center justify-center gap-2 rounded-full text-lg font-semibold tabular-nums shadow-lg transition-colors sm:end-6 sm:bottom-[calc(1.5rem+var(--floating-stack)*4.25rem)]"
+      :class="[
+        props.open
+          ? 'border-2 border-accent bg-surface-overlay text-accent'
+          : 'bg-accent-solid text-accent-contrast hover:bg-accent-solid-hover',
+        props.launcherText ? 'ps-4 pe-5' : 'w-14',
+      ]"
       :style="{ '--floating-stack': props.stack }"
       :aria-label="props.launcherLabel"
       :title="props.launcherLabel"
@@ -94,6 +104,7 @@ const windowStyle = computed(() => ({
     >
       <span v-if="props.launcherValue">{{ props.launcherValue }}</span>
       <UiIcon v-else :name="props.launcherIcon" size="1.5rem" />
+      <span v-if="props.launcherText" class="text-base font-bold">{{ props.launcherText }}</span>
       <UiCounter
         v-if="props.launcherBadge > 0"
         class="absolute -end-1 -top-1 ring-2 ring-surface"
@@ -115,11 +126,14 @@ const windowStyle = computed(() => ({
         role="dialog"
         aria-modal="false"
         :aria-labelledby="titleId"
-        class="fixed z-40 flex flex-col border border-border bg-surface-overlay text-text shadow-lg sm:inset-x-auto sm:end-24 sm:bottom-6 sm:h-(--floating-height) sm:max-h-[calc(100dvh-3rem)] sm:w-(--floating-width) sm:rounded-lg"
-        :class="props.fullscreenOnMobile
-          ? 'inset-0 max-sm:h-dvh sm:top-auto'
-          : 'inset-x-0 bottom-0 max-h-[85dvh] rounded-t-lg'"
-        :style="windowStyle"
+        class="fixed z-40 flex flex-col border border-border bg-surface-overlay text-text shadow-lg sm:inset-x-auto sm:h-(--floating-height) sm:w-(--floating-width) sm:rounded-lg"
+        :class="[
+          props.fullscreenOnMobile ? 'inset-0 max-sm:h-dvh sm:top-auto' : 'inset-x-0 bottom-0 max-h-[85dvh] rounded-t-lg',
+          props.launcherText
+            ? 'sm:end-6 sm:bottom-[calc(5.5rem+var(--floating-stack)*4.25rem)] sm:max-h-[calc(100dvh-7rem-var(--floating-stack)*4.25rem)]'
+            : 'sm:end-24 sm:bottom-6 sm:max-h-[calc(100dvh-3rem)]',
+        ]"
+        :style="[windowStyle, { '--floating-stack': props.stack }]"
         @keydown.esc.stop="setOpen(false)"
       >
         <header class="flex items-center justify-between gap-2 border-b border-border-subtle py-2 ps-5 pe-2">

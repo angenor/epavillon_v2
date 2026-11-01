@@ -52,68 +52,6 @@
       "under_review": "Le comité évalue votre dossier : il redeviendra modifiable s'il vous demande des corrections."
     }
   },
-  "exchanges": {
-    "empty": {
-      "title": "Aucun échange pour l'instant",
-      "description": "Écrivez ici à l'équipe de l'IFDD. Elle vous répondra dans cette fenêtre, et vous recevrez un courriel."
-    },
-    "changeRequest": "Demande de correction",
-    "openRequests": "Une demande de correction reste ouverte | Une demande de correction reste ouverte | {count} demandes de correction restent ouvertes",
-    "resolved": "Résolu le {date}",
-    "markResolved": "Marquer comme résolu",
-    "unmarkResolved": "Rouvrir ce point",
-    "reply": "Répondre",
-    "send": "Envoyer",
-    "cancel": "Annuler",
-    "edited": "Modifié",
-    "you": "Vous",
-    "launcher": "Échanges avec l'équipe",
-    "launcherUnread": "Échanges avec l'équipe, aucun message non lu | Échanges avec l'équipe, un message non lu | Échanges avec l'équipe, {count} messages non lus",
-    "windowTitle": "Échanges · {reference}",
-    "team": "L'équipe IFDD",
-    "newMessages": "Nouveaux messages",
-    "replyingTo": "Réponse à {name}",
-    "messageLabel": "Votre message",
-    "messagePlaceholder": "Écrivez à l'équipe…",
-    "sendHint": "Entrée pour envoyer, Maj + Entrée pour aller à la ligne.",
-    "topicLabel": "Nature de l'échange",
-    "topicPlaceholder": "Nature de l'échange…",
-    "topicOtherLabel": "Précisez la nature de l'échange",
-    "topicOtherPlaceholder": "Précisez (80 caractères au plus)",
-    "arrived": {
-      "title": "Nouveau message de l'équipe",
-      "message": "Dossier {reference} : ouvrez les échanges pour le lire."
-    },
-    "filterLabel": "Filtrer les sujets",
-    "filter": {
-      "open": "Ouverts · {count}",
-      "resolved": "Résolus · {count}"
-    },
-    "newSubject": "Nouveau sujet",
-    "newSubjectHint": "Un sujet par question : l'équipe y répond, et vous le retrouvez d'un coup d'œil.",
-    "subjectLabel": "Titre du sujet",
-    "subjectPlaceholder": "Remplacer une intervenante, lien de connexion…",
-    "openSubject": "Ouvrir le sujet",
-    "backToSubjects": "Tous les sujets",
-    "state": {
-      "waiting": "En attente de l'équipe",
-      "answered": "Réponse reçue",
-      "resolved": "Résolu"
-    },
-    "markSubjectResolved": "Marquer comme résolu",
-    "reopenSubject": "Rouvrir",
-    "resolvedNotice": "Sujet résolu. Écrire ici le rouvre.",
-    "unreadInSubject": "Un message non lu | {count} messages non lus",
-    "emptyOpen": {
-      "title": "Aucun sujet ouvert",
-      "description": "Une question pour l'équipe ? Ouvrez un sujet."
-    },
-    "emptyResolved": {
-      "title": "Aucun sujet résolu"
-    },
-    "replyLabel": "Votre réponse",
-    "replyPlaceholder": "Votre réponse"
-  },
   "sessions": {
     "title": "Quand et où",
     "description": "Le créneau et la salle sont fixés par l'IFDD.",

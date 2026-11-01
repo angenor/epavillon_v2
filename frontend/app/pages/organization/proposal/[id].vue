@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { CommentsDeskMessage } from '~/components/workspace/CommentsDesk.vue'
 import type { ProposalFile } from '~/types/organization-workspace'
-import type { ProposalCommentView, ProposalOrganization, ProposalStatus } from '~/types/programme/proposal'
+import type { ProposalOrganization, ProposalStatus } from '~/types/programme/proposal'
 import type { Organization } from '~/types/org'
 import type { AttachableRoleRule } from '~/types/media'
 import type { Intent, SelectOption, TabItem } from '~/types/ui'
@@ -487,118 +486,22 @@ function sectionProps(section: ProposalFileSection) {
 }
 
 // ---------------------------------------------------------------------------
-// Les échanges, en fenêtre flottante : relus dès que l'équipe écrit (temps
-// réel), pour que le fil et la pastille du bouton restent justes.
+// Les échanges vivent dans l'assistance de chaque écran (02/11) : la page lui
+// dit quel dossier elle montre, et suit l'état qu'une correction résolue change.
 // ---------------------------------------------------------------------------
 
-const deskOpen = ref(route.query.vue === 'exchanges' || route.hash === '#echanges')
+const assistance = useAssistance()
+assistance.attach({ proposalId: () => proposalId.value })
+onMounted(() => {
+  if (route.query.vue === 'exchanges' || route.hash === '#echanges') assistance.open.value = true
+})
+watch(assistance.revision, () => refresh())
 
-const {
-  data: comments,
-  status: commentsStatus,
-  error: commentsError,
-  refresh: refreshComments,
-} = useAsyncData<ProposalCommentView[]>(
-  () => `workspace-proposal-comments-${proposalId.value}`,
-  () => {
-    const person = auth.person
-    return person ? api.proposals.comments(proposalId.value, person.id) : Promise.resolve([])
-  },
-  { watch: [proposalId, () => auth.person?.id], lazy: true, server: false, default: () => [] },
-)
-
-const toast = useToast()
-
-/** Relit le fil ; fenêtre fermée, un message de l'équipe se signale en bref. */
-async function rereadComments(): Promise<void> {
-  const loaded = commentsStatus.value === 'success'
-  const known = new Set(comments.value.map((comment) => comment.id))
-  await refreshComments()
-  if (!loaded || deskOpen.value || document.visibilityState !== 'visible' || !file.value) return
-  if (commentArrivals(known, comments.value, auth.person?.id).length === 0) return
-  toast.info(t('organization.workspace.proposal.exchanges.arrived.title'), {
-    message: t('organization.workspace.proposal.exchanges.arrived.message', {
-      reference: file.value.tracking.proposal.reference_code,
-    }),
-  })
-}
-
-// L'équipe qui agit pour l'organisation lit les échanges au back-office : seul l'état se suit ici.
+// L'état du dossier change sous les yeux : la saisie en cours vit à part (`editor`).
 useRealtime(
-  () => [
-    `proposal:${proposalId.value}:status`,
-    ...(file.value?.acting_for_organization ? [] : [`proposal:${proposalId.value}`]),
-  ],
-  async (topics) => {
-    await Promise.all([
-      topics.includes(`proposal:${proposalId.value}`) ? rereadComments() : null,
-      // L'état du dossier change sous les yeux : la saisie en cours vit à part (`editor`).
-      topics.includes(`proposal:${proposalId.value}:status`) ? refresh() : null,
-    ])
-  },
+  () => [`proposal:${proposalId.value}:status`],
+  () => refresh(),
 )
-
-const busy = ref(false)
-const sendError = ref<string | null>(null)
-
-async function sendMessage(message: CommentsDeskMessage): Promise<Uuid | null> {
-  const person = auth.person
-  if (!person || !file.value) return null
-  busy.value = true
-  sendError.value = null
-  try {
-    const sent = await api.workspace.reply(person.id, {
-      proposal_id: file.value.tracking.proposal.id,
-      parent_id: message.parentId,
-      body: message.body,
-      topic: message.topic,
-      topic_other: message.topicOther,
-      subject: message.subject,
-    })
-    await refreshComments()
-    return sent.id
-  } catch (thrown) {
-    sendError.value = apiErrorMessage(thrown, (key) => t(key))
-    return null
-  } finally {
-    busy.value = false
-  }
-}
-
-/** Lecture silencieuse : un échec laisse le message à reprendre à sa prochaine vue. */
-async function markCommentsRead(ids: Uuid[]): Promise<void> {
-  const person = auth.person
-  if (!person || !file.value) return
-  await api.proposals.markCommentsRead(person.id, file.value.tracking.proposal.id, ids)
-  for (const comment of comments.value) if (ids.includes(comment.id)) comment.is_read = true
-}
-
-async function closeSubject(rootId: Uuid, closed: boolean): Promise<void> {
-  const person = auth.person
-  if (!person) return
-  busy.value = true
-  sendError.value = null
-  try {
-    await api.proposals.closeSubject(person.id, rootId, closed)
-    await refreshComments()
-  } catch (thrown) {
-    sendError.value = apiErrorMessage(thrown, (key) => t(key))
-  } finally {
-    busy.value = false
-  }
-}
-
-async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
-  const person = auth.person
-  if (!person) return
-  busy.value = true
-  try {
-    await api.workspace.resolve(person.id, { comment_id: commentId, resolved })
-    await Promise.all([refreshComments(), refresh()])
-  } finally {
-    busy.value = false
-  }
-}
 </script>
 
 <template>
@@ -1020,24 +923,6 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
         <WorkspaceHistoryList v-else :entries="file.history" :timezone="timezone" />
       </UiTabs>
 
-      <!-- L'équipe qui agit pour l'organisation lit ses échanges dans la fiche du back-office. -->
-      <WorkspaceCommentsDesk
-        v-if="!file.acting_for_organization"
-        v-model:open="deskOpen"
-        :reference-code="file.tracking.proposal.reference_code"
-        :comments="comments"
-        :participants="file.participants"
-        :viewer-id="auth.person?.id ?? ''"
-        :loading="commentsStatus === 'pending'"
-        :failed="Boolean(commentsError) && comments.length === 0"
-        :busy="busy"
-        :error="sendError"
-        :submit="sendMessage"
-        :mark-read="markCommentsRead"
-        @resolve="resolve"
-        @close-subject="closeSubject"
-        @retry="refreshComments()"
-      />
     </template>
   </div>
 </template>

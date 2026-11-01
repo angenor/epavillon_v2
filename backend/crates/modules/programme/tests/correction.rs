@@ -499,9 +499,15 @@ async fn corriger_un_dossier_retenu_ne_deplace_pas_sa_seance_mais_ses_textes_sui
         "le créneau n'a pas bougé"
     );
     assert_eq!(apres.ends_at, seance.ends_at);
-    assert_eq!(apres.title["fr"], "Atelier adaptation — version corrigée", "le titre suit");
+    assert_eq!(
+        apres.title["fr"], "Atelier adaptation — version corrigée",
+        "le titre suit"
+    );
     assert!(
-        apres.description.as_ref().is_some_and(|d| d.to_string().contains("réécrite par l'organisation")),
+        apres
+            .description
+            .as_ref()
+            .is_some_and(|d| d.to_string().contains("réécrite par l'organisation")),
         "la présentation suit : {:?}",
         apres.description
     );
@@ -518,7 +524,11 @@ async fn corriger_un_dossier_retenu_ne_deplace_pas_sa_seance_mais_ses_textes_sui
     .fetch_all(bac.pool())
     .await
     .expect("intervenants de la séance");
-    assert_eq!(intervenants, vec!["Awa Sow".to_owned()], "les intervenants suivent : l'ancien part, la nouvelle entre");
+    assert_eq!(
+        intervenants,
+        vec!["Awa Sow".to_owned()],
+        "les intervenants suivent : l'ancien part, la nouvelle entre"
+    );
 
     // Et le dossier, lui, a bien changé.
     let rouvert = draft_read::rouvrir(&bac.state, terrain.deposante, id)

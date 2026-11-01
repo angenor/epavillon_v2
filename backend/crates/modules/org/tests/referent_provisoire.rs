@@ -76,7 +76,10 @@ async fn le_referent_provisoire_n_accepte_pas_de_demande_et_l_existant_reste() {
         &bac.ctx().with_actor(chef),
         PersonId(chef),
         MembershipId(demande),
-        DecideMembership { membership_id: None, approved: true },
+        DecideMembership {
+            membership_id: None,
+            approved: true,
+        },
     )
     .await
     .expect_err("fiche en attente de validation");

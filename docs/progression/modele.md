@@ -546,3 +546,16 @@ Demande du commanditaire : « Écrire au déposant » depuis la fiche d'un dossi
 - Partenaires et photo d'un fil ne touchent pas le modèle : `GET /schedule/tracks` les lit dans `event.programme_track_partners` et par `media.attached_image(…, 'cover')`, déjà là.
 
 **En production** : `ops/migrations/2026-11-01-temps-fort-programme.sql`, rejouable (la définition de `080` rejouée), avant l'API. Jouée deux fois sur une copie locale.
+
+## 01/11/2026, `070_programme_proposals.sql` et `030_identity.sql` : l'assistance sans dossier
+
+Demande du commanditaire : une organisation pose une question sur la plateforme ou fait une suggestion, sans dossier en cause.
+
+- **`programme.proposal_comments.proposal_id`** devient nullable : nul, un sujet d'assistance sur la plateforme. Même table plutôt qu'une seconde : fil, lecture par message, sujet résolu et réouverture restent un seul mécanisme. **`ck_proposal_comments_platform`** : sans dossier, toujours `submitter`, jamais une demande de correction. **`ix_proposal_comments_platform`**.
+- **`tg_proposal_comments_check_parent`** : une réponse vit sur le même dossier que son parent (ou sans dossier comme lui), en base désormais.
+- **`tg_check_proposal_comment_topic`** : la nature d'un sujet sans dossier relève de **`platform_support_topic`** (question, problème technique, compte ou organisation, suggestion), semée.
+- **`programme.support_visible_comments(personne, équipe, globale, éditions)`** : ce que l'assistance montre à chacun, lu par la liste, son compteur et la lecture (messages partagés des dossiers suivis ou du périmètre ; sujets sans dossier de leur auteur, ou de l'équipe en portée globale).
+- **Permission `programme.support.answer`**, accordée à `admin` (et à `super_admin` par son déclencheur).
+
+**En production** : `ops/migrations/2026-11-02-assistance.sql`, rejouable, avant l'API. Jouée deux fois en local ; schéma complet rechargé par les tests (base jetable).
+

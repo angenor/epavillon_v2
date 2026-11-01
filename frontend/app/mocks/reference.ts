@@ -693,6 +693,15 @@ export const taxonomyTerms = [
       ['other', { fr: 'Autre', en: 'Other' }, 1000],
     ] as const
   ).map(([code, label, order]) => term(`comment-topic-${code}`, 'proposal_comment_topic', code, label, order)),
+  // Nature d'une demande d'assistance sans dossier (02/11), même semis
+  ...(
+    [
+      ['question', { fr: 'Question', en: 'Question' }, 10],
+      ['technical_issue', { fr: 'Problème technique', en: 'Technical issue' }, 20],
+      ['account', { fr: 'Mon compte ou mon organisation', en: 'My account or organisation' }, 30],
+      ['suggestion', { fr: 'Suggestion', en: 'Suggestion' }, 40],
+    ] as const
+  ).map(([code, label, order]) => term(`support-topic-${code}`, 'platform_support_topic', code, label, order)),
 ] satisfies TaxonomyTerm[]
 
 // ---------------------------------------------------------------------------

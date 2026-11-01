@@ -26,7 +26,9 @@ use crate::domain::permissions::{
     OrganizationManage, OrganizationMerge, ORGANIZATION_MANAGE, ORGANIZATION_READ,
 };
 use crate::routes::public::RechercheQuery;
-use crate::service::{admin_detail, admin_list, admin_members, admin_write, duplicates, merge, search};
+use crate::service::{
+    admin_detail, admin_list, admin_members, admin_write, duplicates, merge, search,
+};
 use crate::state::OrgState;
 
 /// Le scope `/admin/organizations` — **rempli, jamais créé ici**.
@@ -50,8 +52,14 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route("/{id}/profile", web::put().to(fiche_corrigee))
         .route("/{id}/domains/{domainId}", web::put().to(domaine))
         .route("/{id}/names/{nameId}", web::put().to(denomination))
-        .route("/{id}/members/{membershipId}/decision", web::put().to(decision_d_adhesion))
-        .route("/{id}/members/{membershipId}/role", web::put().to(role_d_adhesion));
+        .route(
+            "/{id}/members/{membershipId}/decision",
+            web::put().to(decision_d_adhesion),
+        )
+        .route(
+            "/{id}/members/{membershipId}/role",
+            web::put().to(role_d_adhesion),
+        );
 }
 
 /// La liste du back-office, **bornée par le périmètre**.

@@ -213,15 +213,29 @@ pub async fn set_profile(
 
     let nom = demande.legal_name.trim();
     if nom.chars().count() < 2 {
-        return Err(ApiError::validation("Le nom de l'organisation compte au moins deux caractères.", "legal_name"));
+        return Err(ApiError::validation(
+            "Le nom de l'organisation compte au moins deux caractères.",
+            "legal_name",
+        ));
     }
-    let sigle = demande.acronym.as_deref().map(str::trim).filter(|s| !s.is_empty());
-    let site = demande.website.as_deref().map(str::trim).filter(|s| !s.is_empty());
+    let sigle = demande
+        .acronym
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
+    let site = demande
+        .website
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
 
     let mut tx = state.db().write(ctx).await?;
 
     if !organizations::type_is_active(&mut tx, &demande.organization_type_code).await? {
-        return Err(ApiError::validation("Choisissez un type d'organisation dans la liste.", "organization_type_code"));
+        return Err(ApiError::validation(
+            "Choisissez un type d'organisation dans la liste.",
+            "organization_type_code",
+        ));
     }
 
     let changes = match organizations::update_profile(

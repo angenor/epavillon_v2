@@ -1,0 +1,93 @@
+{
+  "organization": {
+    "title": "Assistance technique ePavillon",
+    "intro": "L'équipe de l'IFDD vous répond ici, sur vos dossiers comme sur la plateforme.",
+    "launcher": "Aide"
+  },
+  "team": {
+    "title": "Assistance aux utilisateurs",
+    "intro": "Questions et suggestions des organisations, sur toute la plateforme."
+  },
+  "launcherUnread": "{title}, aucun message non lu | {title}, un message non lu | {title}, {count} messages non lus",
+  "arrived": {
+    "title": "Nouveau message de l'assistance",
+    "message": "Ouvrez l'assistance pour le lire."
+  },
+  "you": "Vous",
+  "teamAuthor": "Équipe ePavillon",
+  "filterLabel": "Filtrer les sujets",
+  "tab": {
+    "open": "Ouverts · {count}",
+    "resolved": "Résolus · {count}",
+    "waiting": "À traiter · {count}",
+    "answered": "Répondus · {count}"
+  },
+  "kindLabel": "À propos de",
+  "kind": {
+    "all": "Tout",
+    "file": "Dossiers",
+    "platform": "Plateforme",
+    "idea": "Suggestions"
+  },
+  "state": {
+    "organization": {
+      "waiting": "En attente de l'équipe",
+      "answered": "Réponse reçue",
+      "resolved": "Résolu"
+    },
+    "team": {
+      "waiting": "À traiter",
+      "answered": "Réponse envoyée",
+      "resolved": "Résolu"
+    }
+  },
+  "about": {
+    "label": "À propos de",
+    "file": "Un de mes dossiers",
+    "fileHint": "Intervenants, pièces, créneau, couverture.",
+    "platform": "La plateforme",
+    "platformHint": "Une question ou un problème sur le site, votre compte, votre organisation.",
+    "idea": "Une suggestion",
+    "ideaHint": "Pour nous aider à rendre le site plus simple.",
+    "ideaNotice": "Ce qui vous a gêné, ce qui vous a manqué, ce qui serait plus simple : chaque suggestion est lue par l'équipe.",
+    "fileBadge": "Dossier {reference}",
+    "platformBadge": "Plateforme",
+    "ideaBadge": "Suggestion"
+  },
+  "empty": {
+    "organization": "Aucun sujet ouvert. Une question pour l'équipe ? Ouvrez un sujet.",
+    "team": "Rien à traiter.",
+    "resolved": "Aucun sujet résolu."
+  },
+  "unreadInSubject": "Un message non lu | {count} messages non lus",
+  "newSubject": "Nouveau sujet",
+  "backToSubjects": "Tous les sujets",
+  "proposalLabel": "Dossier",
+  "proposalPlaceholder": "Choisissez le dossier…",
+  "topicLabel": "Nature",
+  "topicPlaceholder": "Nature de la demande…",
+  "topicOtherLabel": "Précisez la nature",
+  "subjectLabel": "Titre du sujet",
+  "subjectPlaceholder": {
+    "file": "Remplacer une intervenante, lien de connexion…",
+    "platform": "Je ne reçois pas le code de connexion…",
+    "idea": "Enregistrer un brouillon de message…"
+  },
+  "messageLabel": "Votre message",
+  "openSubject": "Ouvrir le sujet",
+  "sendIdea": "Envoyer la suggestion",
+  "openFile": "Ouvrir le dossier {reference}",
+  "markSubjectResolved": "Marquer comme résolu",
+  "reopenSubject": "Rouvrir",
+  "edited": "Modifié",
+  "changeRequest": "Demande de correction",
+  "requestResolved": "Corrigé le {date}",
+  "markRequest": "Marquer comme corrigé",
+  "unmarkRequest": "Rouvrir ce point",
+  "resolvedNotice": "Sujet résolu. Écrire ici le rouvre.",
+  "replyLabel": "Votre réponse",
+  "replyPlaceholder": "Votre réponse",
+  "replyPlaceholderTeam": "Répondre à l'organisation",
+  "send": "Envoyer",
+  "sendHint": "Entrée pour envoyer, Maj + Entrée pour aller à la ligne."
+}

@@ -469,7 +469,10 @@ fn referent_confirme(fiche: &crate::domain::organization::Organization) -> Resul
     Ok(())
 }
 
-pub(crate) async fn emettre_approbation(conn: &mut PgConnection, adhesion: &Membership) -> Result<()> {
+pub(crate) async fn emettre_approbation(
+    conn: &mut PgConnection,
+    adhesion: &Membership,
+) -> Result<()> {
     events::emit(
         conn,
         DomainEvent {

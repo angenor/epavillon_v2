@@ -1,0 +1,93 @@
+{
+  "organization": {
+    "title": "ePavillon technical support",
+    "intro": "The IFDD team answers you here, about your proposals and about the platform.",
+    "launcher": "Help"
+  },
+  "team": {
+    "title": "User support",
+    "intro": "Questions and suggestions from organisations, across the whole platform."
+  },
+  "launcherUnread": "{title}, no unread message | {title}, one unread message | {title}, {count} unread messages",
+  "arrived": {
+    "title": "New support message",
+    "message": "Open support to read it."
+  },
+  "you": "You",
+  "teamAuthor": "ePavillon team",
+  "filterLabel": "Filter subjects",
+  "tab": {
+    "open": "Open · {count}",
+    "resolved": "Resolved · {count}",
+    "waiting": "To handle · {count}",
+    "answered": "Answered · {count}"
+  },
+  "kindLabel": "About",
+  "kind": {
+    "all": "All",
+    "file": "Proposals",
+    "platform": "Platform",
+    "idea": "Suggestions"
+  },
+  "state": {
+    "organization": {
+      "waiting": "Waiting for the team",
+      "answered": "Answer received",
+      "resolved": "Resolved"
+    },
+    "team": {
+      "waiting": "To handle",
+      "answered": "Answer sent",
+      "resolved": "Resolved"
+    }
+  },
+  "about": {
+    "label": "About",
+    "file": "One of my proposals",
+    "fileHint": "Speakers, documents, slot, cover.",
+    "platform": "The platform",
+    "platformHint": "A question or a problem with the site, your account, your organisation.",
+    "idea": "A suggestion",
+    "ideaHint": "To help us make the site simpler.",
+    "ideaNotice": "What got in your way, what was missing, what would be simpler: the team reads every suggestion.",
+    "fileBadge": "Proposal {reference}",
+    "platformBadge": "Platform",
+    "ideaBadge": "Suggestion"
+  },
+  "empty": {
+    "organization": "No open subject. A question for the team? Open a subject.",
+    "team": "Nothing to handle.",
+    "resolved": "No resolved subject."
+  },
+  "unreadInSubject": "One unread message | {count} unread messages",
+  "newSubject": "New subject",
+  "backToSubjects": "All subjects",
+  "proposalLabel": "Proposal",
+  "proposalPlaceholder": "Choose the proposal…",
+  "topicLabel": "Topic",
+  "topicPlaceholder": "Topic of the request…",
+  "topicOtherLabel": "Specify the topic",
+  "subjectLabel": "Subject title",
+  "subjectPlaceholder": {
+    "file": "Replace a speaker, connection link…",
+    "platform": "I don't receive the sign-in code…",
+    "idea": "Save a message draft…"
+  },
+  "messageLabel": "Your message",
+  "openSubject": "Open the subject",
+  "sendIdea": "Send the suggestion",
+  "openFile": "Open proposal {reference}",
+  "markSubjectResolved": "Mark as resolved",
+  "reopenSubject": "Reopen",
+  "edited": "Edited",
+  "changeRequest": "Change request",
+  "requestResolved": "Corrected on {date}",
+  "markRequest": "Mark as corrected",
+  "unmarkRequest": "Reopen this point",
+  "resolvedNotice": "Subject resolved. Writing here reopens it.",
+  "replyLabel": "Your answer",
+  "replyPlaceholder": "Your answer",
+  "replyPlaceholderTeam": "Reply to the organisation",
+  "send": "Send",
+  "sendHint": "Enter to send, Shift + Enter for a new line."
+}

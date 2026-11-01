@@ -623,6 +623,9 @@ INSERT INTO identity.permissions (code, label, module_code) VALUES
     -- sa demande (30/10). Testée en portée globale ; seul super_admin la reçoit
     -- (tg_permissions_grant_super_admin). Chaque écriture reste à son nom.
     ('programme.proposal.act_for_organization', '{"fr":"Agir dans l''espace d''une organisation","en":"Act in an organisation''s space"}', 'programme'),
+    -- Répondre à l'assistance (01/11) : les sujets des organisations, sur leurs
+    -- dossiers du périmètre et, en portée globale, sur la plateforme.
+    ('programme.support.answer',    '{"fr":"Répondre à l''assistance","en":"Answer support requests"}', 'programme'),
     ('programme.session.schedule',  '{"fr":"Planifier les sessions","en":"Schedule sessions"}', 'programme'),
     ('programme.registration.manage','{"fr":"Gérer les inscriptions","en":"Manage registrations"}', 'programme'),
     ('live.meeting.manage',         '{"fr":"Gérer les réunions et diffusions","en":"Manage meetings and streams"}', 'live'),
@@ -670,6 +673,7 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     -- adhésion à l'organisation porteuse, et jamais sur un brouillon en cours de
     -- saisie. La modification est tracée dans l'audit sous le nom de l'agent.
     ('admin', 'programme.proposal.edit'),
+    ('admin', 'programme.support.answer'),
     ('admin', 'programme.session.schedule'), ('admin', 'programme.registration.manage'),
     ('admin', 'live.meeting.manage'), ('admin', 'live.incident.publish'),
     ('admin', 'publication.article.moderate'), ('admin', 'publication.quota.manage'),

@@ -13,7 +13,7 @@
 //! elles se relisent en un fichier, et **c'est ici qu'un ajout se discute**.
 //! C'est le patron de B3, repris sans être réinventé.
 //!
-//! # Les vingt et une lectures hors schéma autorisées
+//! # Les vingt-deux lectures hors schéma autorisées
 //!
 //! | # | Lecture | Question de **ce** module |
 //! |---|---|---|
@@ -38,6 +38,7 @@
 //! | 19 | `identity.people` (adresse, photo), `event.rooms`, `event.programme_tracks`, `live.meetings`, `event.events` | « qui joindre pour ce dossier, où et quand se tient-il, Zoom est-il à jour, qu'a déposé d'autre son organisation ? » (`cross/tableau.rs`, 01/11) |
 //! | 20 | `platform.audit_log`, `event.events` | « qu'est-ce qui a changé ces quinze derniers jours dans le programme publié de cette édition ? » (`cross/changements.rs`, 01/11) |
 //! | 21 | `event`, `org`, `media`, `identity.people`, `live.meetings`, `live.meeting_room_counts`, `live.incidents`, `reference.taxonomy_terms`, `platform.jobs` | « que se passe-t-il aujourd'hui, Zoom est-il prêt, qu'a-t-on publié, les inscrits sont-ils prévenus ? » (`cross/regie.rs`, 02/11) |
+//! | 22 | `org.memberships`, `org.organizations`, `identity.people` (`display_name`), `reference.taxonomy_terms` | « qui peut demander de l'aide, sur quels dossiers, et de qui vient ce message ? » (`cross/assistance.rs`, 02/11) |
 //!
 //! Les cinq dernières sont arrivées avec B5 et vivent dans `cross/grille.rs`,
 //! **dans le même espace de noms** : le découpage est un fait de fichier — le
@@ -959,3 +960,9 @@ pub use changements::*;
 // courriels d'une annulation. Lectures seules, lecture n° 21.
 // -----------------------------------------------------------------------------
 pub mod regie;
+
+// -----------------------------------------------------------------------------
+// L'assistance (02/11) : qui y a droit, sur quels dossiers, et la liste de ses
+// sujets avec le nom de leurs auteurs. Lectures seules, lecture n° 22.
+// -----------------------------------------------------------------------------
+pub mod assistance;

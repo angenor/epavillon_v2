@@ -24,6 +24,9 @@ pub const PROPOSAL_EDIT: &str = "programme.proposal.edit";
 /// Agir dans l'espace d'un dossier comme son organisation, à sa demande (30/10).
 /// Portée globale seulement : super_admin.
 pub const PROPOSAL_ACT_FOR_ORGANIZATION: &str = "programme.proposal.act_for_organization";
+/// Répondre à l'assistance (01/11) : les sujets des dossiers du périmètre et,
+/// en portée globale, ceux qui ne concernent aucun dossier.
+pub const SUPPORT_ANSWER: &str = "programme.support.answer";
 
 /// **Permission d'un autre module, et cela ne crée aucune arête.**
 ///

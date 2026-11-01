@@ -21,7 +21,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::domain::ids::{EventId, ProposalId};
-use crate::domain::permissions::SESSION_SCHEDULE;
+use crate::domain::permissions::{SESSION_SCHEDULE, SUPPORT_ANSWER};
 use crate::repo::cross;
 use crate::service::perimeter::{self, Acces};
 use crate::service::workspace;
@@ -35,7 +35,36 @@ pub fn topic_authorizers() -> Vec<Arc<dyn TopicAuthorizer>> {
         Arc::new(SujetsDuDossier),
         Arc::new(SujetsDeLOrganisation),
         Arc::new(SujetsDeLEdition),
+        Arc::new(SujetsDeLAssistance),
     ]
+}
+
+/// `assistance:team` : quiconque répond à l'assistance, quelle qu'en soit la
+/// portée. Le signal ne porte rien ; la liste relue reste filtrée par place.
+struct SujetsDeLAssistance;
+
+#[async_trait]
+impl TopicAuthorizer for SujetsDeLAssistance {
+    fn handles(&self, topic: &Topic) -> bool {
+        topic.as_str() == SUJET_EQUIPE_D_ASSISTANCE
+    }
+
+    async fn authorize(
+        &self,
+        pool: &PgPool,
+        viewer: &Viewer,
+        _topic: &Topic,
+    ) -> Result<TopicAccess> {
+        let Some(personne) = viewer.person_id else {
+            return Ok(TopicAccess::Denied);
+        };
+        let equipe = kernel::auth::has_permission_anywhere(pool, personne, SUPPORT_ANSWER).await?;
+        Ok(if equipe {
+            TopicAccess::Granted(Audience::All)
+        } else {
+            TopicAccess::Denied
+        })
+    }
 }
 
 /// Un refus de la garde (404, 403) refuse le sujet ; une panne reste une panne.
@@ -172,6 +201,21 @@ pub async fn signaler_echange(
             Some(json!({ "kind": "comments" })),
         )
         .await?;
+        realtime::signal(&mut *conn, SUJET_EQUIPE_D_ASSISTANCE, None).await?;
     }
     Ok(())
+}
+
+/// L'équipe d'assistance suit tous ses sujets d'un seul abonnement.
+pub const SUJET_EQUIPE_D_ASSISTANCE: &str = "assistance:team";
+
+/// Un sujet sans dossier a changé : l'équipe, et la personne qui l'a ouvert.
+pub async fn signaler_assistance(conn: &mut PgConnection, auteur_du_sujet: Uuid) -> Result<()> {
+    realtime::signal(&mut *conn, SUJET_EQUIPE_D_ASSISTANCE, None).await?;
+    realtime::signal(
+        &mut *conn,
+        &format!("person:{auteur_du_sujet}"),
+        Some(json!({ "kind": "assistance" })),
+    )
+    .await
 }

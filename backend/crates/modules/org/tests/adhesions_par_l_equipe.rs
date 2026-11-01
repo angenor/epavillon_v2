@@ -35,7 +35,13 @@ async fn sans_referent(bac: &Bac, organisation: Uuid) {
     .expect("retrait du référent du semis");
 }
 
-async fn adhesion(bac: &Bac, organisation: Uuid, qui: Uuid, sql_statut: &str, invitee_par: Option<Uuid>) -> MembershipId {
+async fn adhesion(
+    bac: &Bac,
+    organisation: Uuid,
+    qui: Uuid,
+    sql_statut: &str,
+    invitee_par: Option<Uuid>,
+) -> MembershipId {
     let id = sqlx::query_scalar!(
         "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, invited_by, invited_at, approved_at)
          VALUES ($1, $2, 'member', $3::text::org.membership_status, 'Chargée de programme', $4,
@@ -76,18 +82,26 @@ async fn l_equipe_accepte_une_demande_et_en_fait_le_referent() {
         PersonId(admin),
         OrganizationId(organisation),
         demande,
-        AdminMembershipDecision { approved: true, role: Some(MembershipRole::Manager) },
+        AdminMembershipDecision {
+            approved: true,
+            role: Some(MembershipRole::Manager),
+        },
     )
     .await
     .expect("acceptation");
-    assert!(matches!(issue, OrganizationWriteOutcome::Saved { .. }), "{issue:?}");
+    assert!(
+        matches!(issue, OrganizationWriteOutcome::Saved { .. }),
+        "{issue:?}"
+    );
 
     let apres = relue(&bac, demande).await;
     assert_eq!(apres.status, MembershipStatus::Active);
     assert_eq!(apres.role, MembershipRole::Manager);
     assert_eq!(apres.approved_by, Some(PersonId(admin)));
 
-    assert!(evenements_emis(&bac, demande.as_uuid()).await.contains(&"org.membership.approved".to_owned()));
+    assert!(evenements_emis(&bac, demande.as_uuid())
+        .await
+        .contains(&"org.membership.approved".to_owned()));
 
     let auteur = sqlx::query_scalar!(
         "SELECT actor_id FROM platform.audit_log
@@ -117,12 +131,18 @@ async fn une_invitation_ne_s_accepte_pas_a_la_place_de_la_personne() {
         PersonId(admin),
         OrganizationId(organisation),
         invitation,
-        AdminMembershipDecision { approved: true, role: None },
+        AdminMembershipDecision {
+            approved: true,
+            role: None,
+        },
     )
     .await
     .expect_err("une invitation attend la personne");
     assert_eq!(refus.code, ErrorCode::OrgMembershipIsInvitation);
-    assert_eq!(relue(&bac, invitation).await.status, MembershipStatus::Pending);
+    assert_eq!(
+        relue(&bac, invitation).await.status,
+        MembershipStatus::Pending
+    );
 }
 
 #[tokio::test]
@@ -142,20 +162,34 @@ async fn le_dernier_referent_ne_perd_son_role_que_sur_confirmation() {
             &perimetre,
             OrganizationId(organisation),
             membre,
-            MembershipRoleChange { role, confirm_last_manager },
+            MembershipRoleChange {
+                role,
+                confirm_last_manager,
+            },
         )
     };
 
-    let issue = changer(MembershipRole::Manager, false).await.expect("désignation");
+    let issue = changer(MembershipRole::Manager, false)
+        .await
+        .expect("désignation");
     assert!(matches!(issue, OrganizationWriteOutcome::Saved { .. }));
     assert_eq!(relue(&bac, membre).await.role, MembershipRole::Manager);
-    assert!(evenements_emis(&bac, membre.as_uuid()).await.contains(&"org.membership.role_changed".to_owned()));
+    assert!(evenements_emis(&bac, membre.as_uuid())
+        .await
+        .contains(&"org.membership.role_changed".to_owned()));
 
-    let issue = changer(MembershipRole::Member, false).await.expect("refus rendu");
-    assert!(matches!(issue, OrganizationWriteOutcome::LastManager), "{issue:?}");
+    let issue = changer(MembershipRole::Member, false)
+        .await
+        .expect("refus rendu");
+    assert!(
+        matches!(issue, OrganizationWriteOutcome::LastManager),
+        "{issue:?}"
+    );
     assert_eq!(relue(&bac, membre).await.role, MembershipRole::Manager);
 
-    let issue = changer(MembershipRole::Member, true).await.expect("retrait confirmé");
+    let issue = changer(MembershipRole::Member, true)
+        .await
+        .expect("retrait confirmé");
     assert!(matches!(issue, OrganizationWriteOutcome::Saved { .. }));
     assert_eq!(relue(&bac, membre).await.role, MembershipRole::Member);
 }
@@ -174,7 +208,10 @@ async fn une_demande_ne_change_pas_de_role_et_une_url_forgee_ne_touche_rien() {
         &perimetre,
         OrganizationId(organisation),
         demande,
-        MembershipRoleChange { role: MembershipRole::Manager, confirm_last_manager: false },
+        MembershipRoleChange {
+            role: MembershipRole::Manager,
+            confirm_last_manager: false,
+        },
     )
     .await
     .expect_err("une demande s'accepte d'abord");
@@ -187,7 +224,10 @@ async fn une_demande_ne_change_pas_de_role_et_une_url_forgee_ne_touche_rien() {
         PersonId(admin),
         OrganizationId(Uuid::now_v7()),
         demande,
-        AdminMembershipDecision { approved: true, role: None },
+        AdminMembershipDecision {
+            approved: true,
+            role: None,
+        },
     )
     .await
     .expect("lecture");

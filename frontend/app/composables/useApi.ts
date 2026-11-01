@@ -92,6 +92,7 @@ import { createAuthApi } from './api/auth'
 import { createMeetingsApi } from './api/meetings'
 import { createRealtimeApi } from './api/realtime'
 import { createProgrammeChangesApi } from './api/programme-changes'
+import { createAssistanceApi } from './api/assistance'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
 // erreurs de la couche d'accès : le client HTTP doit pouvoir la lever sur un
@@ -328,6 +329,7 @@ export function useApi() {
     guideNegoSavoir: createGuideNegoSavoirApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     home: createHomeApi(deps),
     programmeChanges: createProgrammeChangesApi(deps),
+    assistance: createAssistanceApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),
 
     // -----------------------------------------------------------------------

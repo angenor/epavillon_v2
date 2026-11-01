@@ -1,5 +1,6 @@
 //! Les règles du module. Un fichier par geste.
 
+pub mod assistance;
 pub mod backfill;
 pub mod birth;
 pub mod comment_circle;

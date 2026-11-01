@@ -346,6 +346,8 @@ const currentYear = new Date().getFullYear()
     </footer>
 
     <!-- L'espace organisation reçoit ses notifications brèves ici. -->
+    <!-- L'aide de chaque écran : l'équipe, et les organisations qui suivent un dossier déposé. -->
+    <ClientOnly><AssistanceDesk /></ClientOnly>
     <UiToastRegion />
   </div>
 </template>

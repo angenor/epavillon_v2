@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_comment_reads (comment_id, person_id)\n         SELECT c.id, $1\n           FROM programme.support_visible_comments($1, $2, $3, $4) v\n           JOIN programme.proposal_comments c ON c.id = v.comment_id\n          WHERE c.id = ANY($5) AND c.author_id <> $1\n         ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Bool",
+        "UuidArray",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "23df669a57bdfe17afe14038b5f8dee1e93fbb23dc13f5e32904422aaccc9041"
+}

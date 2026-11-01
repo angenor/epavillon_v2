@@ -105,6 +105,11 @@ pub struct ApiErrorBody {
         crate::routes::regie::demarrer,
         crate::routes::regie::terminer,
         crate::routes::regie::defaire,
+        crate::routes::assistance::etat,
+        crate::routes::assistance::sujets,
+        crate::routes::assistance::ouvrir,
+        crate::routes::assistance::repondre,
+        crate::routes::assistance::marquer_lus,
         crate::routes::registrations::formulaire,
         crate::routes::registrations::sinscrire,
         crate::routes::registrations::liste_nominative,
@@ -124,6 +129,7 @@ pub struct ApiErrorBody {
         (name = "Back-office — évaluation", description = "Notation, déport, messages. Noter exige une AFFECTATION non déportée ; lire n'en exige pas — la permission et l'affectation sont décorrélées."),
         (name = "Planificateur de séances", description = "L'écran d'arbitrage et ses trois écritures. **Aucune ne peut être refusée pour chevauchement** : le modèle ne pose aucune contrainte d'exclusion sur les créneaux, l'équipe travaille par déplacements successifs, et le seul garde-fou dur est la publication du programme. Gardé par `programme.session.schedule` sur l'édition DE LA SÉANCE, résolue en base."),
         (name = "Inscriptions", description = "Le formulaire applicable, l'inscription et ses six issues, l'annulation avec sa promotion. Trois régimes d'autorisation distincts : le formulaire décide si l'on peut s'inscrire sans compte, la liste nominative exige `programme.registration.manage` — que le rôle de programmation ne détient pas —, et l'annulation est ouverte à l'inscrit lui-même."),
+        (name = "Assistance", description = "La fenêtre d'aide de chaque écran : côté organisation, les sujets de ses dossiers et ses questions sur la plateforme ; côté équipe (`programme.support.answer`), tout ce qui attend une réponse dans son périmètre. Ce que chacun lit est décidé en base (`programme.support_visible_comments`)."),
         (name = "Programmation publique", description = "Ce que le public lit, **sans session**. Seules les séances publiées y figurent ; une édition dont le programme n'est pas paru rend une liste vide, jamais une erreur."),
     )
 )]
@@ -165,8 +171,8 @@ mod tests {
             .sum();
 
         assert_eq!(
-            operations, 89,
-            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10, les cinq du jour J et les deux de l'atelier de couverture du 29/10, la page d'un fil et le placement dans ses parties du 30/10, les fils de la programmation (`/schedule/tracks`), le changement de porteuse et de déposant du 31/10, clore et rouvrir un sujet du 01/11, réunir et séparer une séance commune du 01/11, ce qui a changé dans le programme du 01/11, les six de la régie du jour du 02/11"
+            operations, 94,
+            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10, les cinq du jour J et les deux de l'atelier de couverture du 29/10, la page d'un fil et le placement dans ses parties du 30/10, les fils de la programmation (`/schedule/tracks`), le changement de porteuse et de déposant du 31/10, clore et rouvrir un sujet du 01/11, réunir et séparer une séance commune du 01/11, ce qui a changé dans le programme du 01/11, les six de la régie du jour du 02/11, les cinq de l'assistance du 02/11"
         );
     }
 

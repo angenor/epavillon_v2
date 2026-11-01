@@ -69,8 +69,11 @@ const reads = new Map<string, string>(
 const sessionComments: ProposalComment[] = []
 let commentSeq = 900
 
-function allComments(): ProposalComment[] {
-  return [...proposalComments, ...sessionComments]
+/** Sujets d'assistance sur la plateforme, sans dossier : `mocks/assistance.ts` les sème et les écrit. */
+export const platformComments: ProposalComment[] = []
+
+export function allComments(): ProposalComment[] {
+  return [...proposalComments, ...sessionComments, ...platformComments]
 }
 
 // ---------------------------------------------------------------------------
@@ -218,7 +221,7 @@ export function commentAudience(proposalId: Uuid): CommentPerson[] {
 
 /** Habille un message écrit ailleurs (réponse de l'organisation, A5). */
 export function asCommentView(comment: ProposalComment, viewerId: PersonId): ProposalCommentView {
-  const proposal = proposalOf(comment.proposal_id)
+  const proposal = comment.proposal_id ? proposalOf(comment.proposal_id) : undefined
   const committee = proposal ? committeeOf(proposal) : new Set<PersonId>()
   return viewOf(comment, viewerId, committee, [...allComments(), comment])
 }

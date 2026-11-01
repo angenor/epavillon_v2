@@ -112,7 +112,7 @@ async fn nature_du_fil(
         }
         return Ok((None, None));
     };
-    let terme = comments::terme_de_nature(state.pool(), code)
+    let terme = comments::terme_de_nature(state.pool(), comments::NATURES_DE_DOSSIER, code)
         .await?
         .ok_or_else(|| ApiError::validation("Cette nature d'échange n'existe pas.", "topic"))?;
     if code != NATURE_AUTRE {
@@ -237,7 +237,7 @@ pub async fn ecrire(
     let mut tx = state.db().write(ctx).await?;
     let message = comments::ecrire(
         &mut tx,
-        dossier,
+        Some(dossier),
         auteur,
         &NouveauMessage {
             parent_id: payload.parent_id,
@@ -368,7 +368,7 @@ async fn exiger_le_meme_dossier(
         .await?
         .ok_or_else(ApiError::not_found)?;
 
-    if message.proposal_id == dossier.as_uuid() {
+    if message.proposal_id == Some(dossier.as_uuid()) {
         Ok(())
     } else {
         Err(ApiError::not_found())
@@ -436,7 +436,8 @@ pub async fn resoudre(
         ));
     }
 
-    let dossier = ProposalId(ligne.proposal_id);
+    // Un sujet sans dossier n'est jamais une demande de correction (base).
+    let dossier = ProposalId(ligne.proposal_id.ok_or_else(ApiError::not_found)?);
     let (edition, acces) = perimeter::acces_au_dossier(state.pool(), acteur, dossier).await?;
     let organisation = proposals::etat(state.pool(), dossier)
         .await?
@@ -501,7 +502,9 @@ pub async fn clore_sujet(
         ));
     }
 
-    let dossier = ProposalId(racine.proposal_id);
+    let Some(dossier) = racine.proposal_id.map(ProposalId) else {
+        return crate::service::assistance::clore(state, ctx, acteur, &racine, clos).await;
+    };
     let (edition, acces) = perimeter::acces_au_dossier(state.pool(), acteur, dossier).await?;
     let cote = match acces {
         Acces::BackOffice => Cote::Comite,
@@ -516,26 +519,11 @@ pub async fn clore_sujet(
         .organization_id;
 
     let mut tx = state.db().write(ctx).await?;
-    let ligne = sqlx::query!(
-        r#"UPDATE programme.proposal_comments
-              SET closed_at = CASE WHEN $2 THEN now() END,
-                  closed_by = CASE WHEN $2 THEN $3::uuid END
-            WHERE id = $1 AND deleted_at IS NULL
-        RETURNING id, proposal_id, parent_id, author_id,
-                  visibility::text AS "visibility!", body, is_change_request,
-                  resolved_at, resolved_by, edited_at, created_at,
-                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
-                  topic_other, subject, closed_at, closed_by"#,
-        racine.id,
-        clos,
-        acteur
-    )
-    .fetch_one(&mut *tx)
-    .await?;
+    let ligne = comments::clore(&mut tx, racine.id, clos, acteur).await?;
     let reserve_au_comite = ligne.visibility != VISIBILITE_DEPOSANT;
     crate::realtime::signaler_echange(&mut tx, dossier, edition, organisation, reserve_au_comite)
         .await?;
     tx.commit().await?;
 
-    Ok(crate::repo::comments::message_depuis!(ligne))
+    Ok(ligne)
 }

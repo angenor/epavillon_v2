@@ -52,68 +52,6 @@
       "under_review": "The committee is reviewing your submission: it becomes editable again if they ask you for changes."
     }
   },
-  "exchanges": {
-    "empty": {
-      "title": "No messages yet",
-      "description": "Write to the IFDD team here. They will answer in this window, and you will receive an email."
-    },
-    "changeRequest": "Change request",
-    "openRequests": "One change request is still open | One change request is still open | {count} change requests are still open",
-    "resolved": "Resolved on {date}",
-    "markResolved": "Mark as resolved",
-    "unmarkResolved": "Reopen this point",
-    "reply": "Reply",
-    "send": "Send",
-    "cancel": "Cancel",
-    "edited": "Edited",
-    "you": "You",
-    "launcher": "Messages with the team",
-    "launcherUnread": "Messages with the team, no unread message | Messages with the team, one unread message | Messages with the team, {count} unread messages",
-    "windowTitle": "Messages · {reference}",
-    "team": "The IFDD team",
-    "newMessages": "New messages",
-    "replyingTo": "Reply to {name}",
-    "messageLabel": "Your message",
-    "messagePlaceholder": "Write to the team…",
-    "sendHint": "Enter to send, Shift + Enter for a new line.",
-    "topicLabel": "Exchange topic",
-    "topicPlaceholder": "Exchange topic…",
-    "topicOtherLabel": "Specify the topic",
-    "topicOtherPlaceholder": "Specify (80 characters max)",
-    "arrived": {
-      "title": "New message from the team",
-      "message": "Submission {reference}: open the exchanges to read it."
-    },
-    "filterLabel": "Filter subjects",
-    "filter": {
-      "open": "Open · {count}",
-      "resolved": "Resolved · {count}"
-    },
-    "newSubject": "New subject",
-    "newSubjectHint": "One subject per question: the team answers it, and you find it at a glance.",
-    "subjectLabel": "Subject title",
-    "subjectPlaceholder": "Replace a speaker, connection link…",
-    "openSubject": "Open the subject",
-    "backToSubjects": "All subjects",
-    "state": {
-      "waiting": "Waiting for the team",
-      "answered": "Answer received",
-      "resolved": "Resolved"
-    },
-    "markSubjectResolved": "Mark as resolved",
-    "reopenSubject": "Reopen",
-    "resolvedNotice": "Subject resolved. Writing here reopens it.",
-    "unreadInSubject": "One unread message | {count} unread messages",
-    "emptyOpen": {
-      "title": "No open subject",
-      "description": "A question for the team? Open a subject."
-    },
-    "emptyResolved": {
-      "title": "No resolved subject"
-    },
-    "replyLabel": "Your reply",
-    "replyPlaceholder": "Your reply"
-  },
   "sessions": {
     "title": "When and where",
     "description": "The slot and the room are set by IFDD.",

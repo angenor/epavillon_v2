@@ -16,7 +16,9 @@ use kernel::context::RequestContext;
 use kernel::error::{ApiError, ErrorCode, Result};
 use kernel::events::{self, DomainEvent};
 
-use crate::domain::admin::{AdminMembershipDecision, MembershipRoleChange, OrganizationWriteOutcome};
+use crate::domain::admin::{
+    AdminMembershipDecision, MembershipRoleChange, OrganizationWriteOutcome,
+};
 use crate::domain::ids::{MembershipId, OrganizationId, PersonId};
 use crate::domain::membership::{Membership, MembershipRole, MembershipStatus};
 use crate::jobs;

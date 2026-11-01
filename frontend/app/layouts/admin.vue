@@ -370,6 +370,8 @@ const sectionsVisibles = computed(() =>
       </ClientOnly>
     </div>
 
+    <!-- L'aide de chaque écran : l'équipe, et les organisations qui suivent un dossier déposé. -->
+    <ClientOnly><AssistanceDesk /></ClientOnly>
     <UiToastRegion top="calc(var(--admin-header-height) + var(--space-4))" />
     <AdminIncidentsDeskAlerts />
   </div>

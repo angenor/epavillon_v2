@@ -260,7 +260,7 @@ pub async fn ajouter_destinataires(
     let message = comments::par_id(state.pool(), racine)
         .await?
         .ok_or_else(ApiError::not_found)?;
-    let dossier = ProposalId(message.proposal_id);
+    let dossier = ProposalId(message.proposal_id.ok_or_else(ApiError::not_found)?);
     let (edition, acces) = perimeter::acces_au_dossier(state.pool(), acteur, dossier).await?;
     if acces != Acces::BackOffice
         || !comments::lisible(state.pool(), message.id, acteur, Cote::Comite).await?
@@ -374,7 +374,9 @@ pub async fn marquer_non_lu(
     let ligne = comments::par_id(state.pool(), message)
         .await?
         .ok_or_else(ApiError::not_found)?;
-    let dossier = ProposalId(ligne.proposal_id);
+    let Some(dossier) = ligne.proposal_id.map(ProposalId) else {
+        return crate::service::assistance::marquer_non_lu(state, ctx, lecteur, &ligne).await;
+    };
     let (edition, acces) = perimeter::acces_au_dossier(state.pool(), lecteur, dossier).await?;
     if !comments::lisible(state.pool(), ligne.id, lecteur, cote_de(acces)).await? {
         return Err(ApiError::not_found());

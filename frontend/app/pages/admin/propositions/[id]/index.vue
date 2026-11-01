@@ -65,6 +65,8 @@ const adminScope = useAdminScopeStore()
 const localePath = useLocalePath()
 
 const proposalId = computed(() => String(route.params.id ?? ''))
+// L'assistance se pose au-dessus des fenêtres de la fiche (échanges du dossier, évaluation).
+useAssistance().attach({ proposalId: () => proposalId.value, stack: 2 })
 
 await adminScope.ensureLoaded()
 

@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM programme.support_visible_comments($1, $2, $3, $4) v\n                           WHERE v.comment_id = $5) AS \"lisible!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lisible!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Bool",
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b82a6b8b0732a98b4aae07ecf4397934bf9d3d3240f7f93f73136c92108e19b6"
+}

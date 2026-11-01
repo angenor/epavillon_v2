@@ -33,7 +33,8 @@ use crate::domain::ids::ProposalId;
 #[derive(Debug, Clone, serde::Serialize, ToSchema)]
 pub struct Message {
     pub id: Uuid,
-    pub proposal_id: Uuid,
+    /// Nul : sujet d'assistance sur la plateforme, hors de tout dossier (01/11).
+    pub proposal_id: Option<Uuid>,
     pub parent_id: Option<Uuid>,
     pub author_id: Uuid,
     pub visibility: String,
@@ -144,7 +145,7 @@ pub struct NouveauMessage<'a> {
 /// body)) > 0` —, et le service traduit plutôt que de redoubler la règle.
 pub async fn ecrire(
     conn: &mut PgConnection,
-    dossier: ProposalId,
+    dossier: Option<ProposalId>,
     auteur: Uuid,
     nouveau: &NouveauMessage<'_>,
 ) -> Result<Message> {
@@ -158,7 +159,7 @@ pub async fn ecrire(
                   resolved_at, resolved_by, edited_at, created_at,
                   (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
                   topic_other, subject, closed_at, closed_by"#,
-        dossier.as_uuid(),
+        dossier.map(|d| d.as_uuid()),
         nouveau.parent_id,
         auteur,
         nouveau.visibility,
@@ -174,14 +175,47 @@ pub async fn ecrire(
     Ok(message_depuis!(ligne))
 }
 
+/// Natures d'un échange sur un dossier, et d'un sujet d'assistance sans dossier.
+pub const NATURES_DE_DOSSIER: &str = "proposal_comment_topic";
+pub const NATURES_D_ASSISTANCE: &str = "platform_support_topic";
+
+/// Marquer un sujet résolu (`clos`), ou le rouvrir.
+pub async fn clore(
+    conn: &mut PgConnection,
+    racine: Uuid,
+    clos: bool,
+    acteur: Uuid,
+) -> Result<Message> {
+    let ligne = sqlx::query!(
+        r#"UPDATE programme.proposal_comments
+              SET closed_at = CASE WHEN $2 THEN now() END,
+                  closed_by = CASE WHEN $2 THEN $3::uuid END
+            WHERE id = $1 AND deleted_at IS NULL
+        RETURNING id, proposal_id, parent_id, author_id,
+                  visibility::text AS "visibility!", body, is_change_request,
+                  resolved_at, resolved_by, edited_at, created_at,
+                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
+                  topic_other, subject, closed_at, closed_by"#,
+        racine,
+        clos,
+        acteur
+    )
+    .fetch_one(conn)
+    .await?;
+
+    Ok(message_depuis!(ligne))
+}
+
 /// Le terme d'une nature d'échange par son code, s'il existe et reste actif.
 pub async fn terme_de_nature<'e>(
     executor: impl PgExecutor<'e>,
+    taxonomie: &str,
     code: &str,
 ) -> Result<Option<Uuid>> {
     Ok(sqlx::query_scalar!(
         r#"SELECT id FROM reference.taxonomy_terms
-            WHERE taxonomy_code = 'proposal_comment_topic' AND code = $1 AND is_active"#,
+            WHERE taxonomy_code = $1 AND code = $2 AND is_active"#,
+        taxonomie,
         code
     )
     .fetch_optional(executor)
@@ -404,7 +438,7 @@ pub async fn non_lus_par_dossier<'e>(
     edition: crate::domain::ids::EventId,
 ) -> Result<Vec<UnreadCommentCount>> {
     let lignes = sqlx::query!(
-        r#"SELECT c.proposal_id, count(*) AS "n!"
+        r#"SELECT c.proposal_id AS "proposal_id!", count(*) AS "n!"
              FROM programme.proposal_comments c
              JOIN programme.proposals d ON d.id = c.proposal_id
             WHERE d.event_id = $2 AND d.deleted_at IS NULL

@@ -3484,6 +3484,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assistance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `AssistanceStatus` : de quel côté la personne connectée se tient (`team` si elle détient `programme.support.answer`, `organization` si elle suit un dossier déposé, en évaluation, à corriger ou retenu, `null` sinon) et combien de messages de l'assistance elle n'a pas lus. Appelée sur chaque écran : décide si le bouton d'aide s'affiche. */
+        get: operations["assistance_etat"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistance/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `MarkAssistanceReadPayload` → 204. Marque lus des messages de l'assistance, sur un dossier ou non ; ceux que la personne ne lit pas, ou qu'elle a écrits, sont ignorés. */
+        post: operations["assistance_marquer_lus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistance/subjects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `AssistanceFeed` : tous les messages de l'assistance que la personne lit, du plus ancien au plus récent, avec leur état de lecture. Côté équipe : les messages partagés des dossiers de son périmètre et, en portée globale, les sujets sans dossier. Côté organisation : les messages partagés de ses dossiers, ses propres sujets sans dossier, et ses dossiers ouverts à l'assistance (`proposals`). Côté organisation, un message de l'équipe ne porte pas de nom (`author_name` nul). */
+        get: operations["assistance_sujets"];
+        put?: never;
+        /** @description `OpenSupportSubjectPayload` → `ProposalComment`. Ouvre un sujet qui ne concerne aucun dossier : question, problème, compte, suggestion (`platform_support_topic`). Réservé à l'organisation ; un sujet sur un dossier s'ouvre par `POST /proposals/{id}/comments`. */
+        post: operations["assistance_ouvrir"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assistance/subjects/{id}/replies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `ReplySupportSubjectPayload` → `ProposalComment`. Répond dans un sujet sans dossier, côté organisation (son auteur) ou côté équipe (portée globale). Rouvre un sujet résolu. */
+        post: operations["assistance_repondre"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -18508,6 +18577,191 @@ export interface operations {
             };
             /** @description Lieu inexistant **ou hors périmètre** — indiscernables */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    assistance_etat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AssistanceStatus */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    assistance_marquer_lus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Lus */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Pas d'assistance pour cette personne */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    assistance_sujets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AssistanceFeed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Ni équipe d'assistance, ni dossier déposé */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    assistance_ouvrir: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description ProposalComment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Pas de dossier déposé, ou équipe d'assistance */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Nature inconnue, titre hors de 2 à 120 caractères, message vide */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    assistance_repondre: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Message qui ouvre le sujet */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description ProposalComment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sujet inexistant, sur un dossier, ou hors de lecture */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Message vide */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

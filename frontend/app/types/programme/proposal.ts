@@ -245,7 +245,8 @@ export type CommentVisibility = 'committee' | 'submitter' | 'private'
  */
 export interface ProposalComment {
   id: Uuid
-  proposal_id: ProposalId
+  /** Nul : sujet d'assistance sur la plateforme, hors de tout dossier (02/11). */
+  proposal_id: ProposalId | null
   parent_id: Uuid | null
   author_id: PersonId
   visibility: CommentVisibility

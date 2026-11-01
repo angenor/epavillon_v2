@@ -28,7 +28,12 @@ async fn fiche(bac: &Bac, id: Uuid) -> (String, Option<String>, String, Option<U
     .fetch_one(bac.pool())
     .await
     .expect("la fiche");
-    (l.legal_name, l.acronym, l.organization_type_code, l.country_id)
+    (
+        l.legal_name,
+        l.acronym,
+        l.organization_type_code,
+        l.country_id,
+    )
 }
 
 async fn denominations(bac: &Bac, id: Uuid) -> Vec<(String, String)> {
@@ -66,18 +71,28 @@ async fn renommer_garde_l_ancien_nom_et_l_ancien_sigle_cherchables() {
     )
     .await
     .expect("correction");
-    assert!(matches!(issue, OrganizationWriteOutcome::Saved { .. }), "{issue:?}");
+    assert!(
+        matches!(issue, OrganizationWriteOutcome::Saved { .. }),
+        "{issue:?}"
+    );
 
     let (nom, sigle, _, _) = fiche(&bac, osed.complete).await;
     assert_eq!(nom, "Observatoire sahélien de l'environnement durable");
     assert_eq!(sigle.as_deref(), Some("OSEDD"));
 
     let noms = denominations(&bac, osed.complete).await;
-    assert!(noms.contains(&("former".to_owned(), ancien_nom.clone())), "{noms:?}");
+    assert!(
+        noms.contains(&("former".to_owned(), ancien_nom.clone())),
+        "{noms:?}"
+    );
     if let Some(s) = ancien_sigle {
         assert!(noms.contains(&("former".to_owned(), s)), "{noms:?}");
     }
-    assert_eq!(noms.iter().filter(|(k, _)| k == "legal").count(), 1, "un seul nom légal : {noms:?}");
+    assert_eq!(
+        noms.iter().filter(|(k, _)| k == "legal").count(),
+        1,
+        "un seul nom légal : {noms:?}"
+    );
 
     let trouvee = sqlx::query_scalar!(
         r#"SELECT count(*) AS "n!" FROM org.find_similar_organizations($1, NULL, NULL, NULL, 10) WHERE organization_id = $2"#,
@@ -89,7 +104,9 @@ async fn renommer_garde_l_ancien_nom_et_l_ancien_sigle_cherchables() {
     .expect("recherche");
     assert_eq!(trouvee, 1, "l'ancien nom ramène la fiche");
 
-    assert!(evenements_emis(&bac, osed.complete).await.contains(&"org.organization.updated".to_owned()));
+    assert!(evenements_emis(&bac, osed.complete)
+        .await
+        .contains(&"org.organization.updated".to_owned()));
 }
 
 #[tokio::test]
@@ -121,7 +138,11 @@ async fn un_homonyme_du_meme_pays_est_nomme_et_un_type_inconnu_refuse() {
         }
         autre => panic!("homonyme attendu : {autre:?}"),
     }
-    assert_eq!(fiche(&bac, osed.jumelle).await.3, pays_jumelle, "rien n'a changé");
+    assert_eq!(
+        fiche(&bac, osed.jumelle).await.3,
+        pays_jumelle,
+        "rien n'a changé"
+    );
 
     let refus = admin_write::set_profile(
         &bac.state,
