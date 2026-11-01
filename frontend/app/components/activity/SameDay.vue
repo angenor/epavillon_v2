@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
 import type { TimeZoneName } from '~/types/shared'
+import type { AttachedImage } from '~/types/media'
 
 /**
  * Les autres activités du même jour, en lignes comme la liste de programmation :
@@ -17,9 +18,11 @@ interface Props {
   /** La journée spéciale, sinon la liste du jour entier. */
   dayTo?: string
   specialDay?: { title: string; to: string } | null
+  /** La photo de l'édition : la vignette des activités sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -118,12 +121,19 @@ const ruleStyle = { '--rule-solid': 'var(--color-day-solid)', '--rule-on': 'var(
               :class="{ grayscale: row.faded }"
               sizes="160px"
             />
-            <span
+            <ActivityCoverFallback
               v-else
-              class="absolute inset-0 flex items-center justify-center font-condensed text-2xl font-bold tracking-[0.04em] text-(--color-day)"
+              :image="props.editionImage"
+              :label="(row.acronym ?? initialsOf(row.organization ?? row.title)).slice(0, 6)"
+              text-class="text-2xl"
+              :faded="row.faded"
+              :image-class="['transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100']"
+              sizes="160px"
             >
-              {{ (row.acronym ?? initialsOf(row.organization ?? row.title)).slice(0, 6) }}
-            </span>
+              <span class="absolute inset-0 flex items-center justify-center font-condensed text-2xl font-bold tracking-[0.04em] text-(--color-day)">
+                {{ (row.acronym ?? initialsOf(row.organization ?? row.title)).slice(0, 6) }}
+              </span>
+            </ActivityCoverFallback>
           </span>
 
           <div class="min-w-0">

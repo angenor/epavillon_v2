@@ -56,6 +56,8 @@ interface Props {
   compact?: boolean
   /** L'en cours et le direct se posent sur un fond (jaune, rouge pâle). */
   stateSurface?: boolean
+  /** La photo de l'édition : la vignette d'une activité sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -64,6 +66,7 @@ const props = withDefaults(defineProps<Props>(), {
   highlight: false,
   compact: false,
   stateSurface: false,
+  editionImage: null,
 })
 
 const { t } = useI18n()
@@ -168,7 +171,7 @@ const layout = computed(() =>
       <span v-if="props.entry.until" class="mt-1.5 block font-text text-[0.82rem] text-text-muted">{{ props.entry.until }}</span>
     </p>
 
-    <!-- Sans couverture, une tuile au sigle ; masquée avec la vignette sur téléphone. -->
+    <!-- Sans couverture, la photo de l'édition voilée au sigle ; masquée avec la vignette sur téléphone. -->
     <div v-if="props.media" class="relative hidden aspect-video overflow-hidden" :class="layout.thumb">
       <UiSlideshow
         v-if="isJoint && slides.length"
@@ -186,14 +189,22 @@ const layout = computed(() =>
         :class="[layout.image, { grayscale: props.compact && props.entry.faded }]"
         :sizes="layout.sizes"
       />
-      <span
+      <ActivityCoverFallback
         v-else
-        class="absolute inset-0 flex items-center justify-center font-condensed text-[1.6rem] font-bold tracking-[0.04em]"
-        :class="layout.placeholder"
-        aria-hidden="true"
+        :image="props.editionImage"
+        :label="props.entry.placeholder ?? props.entry.acronym"
+        :sizes="layout.sizes"
+        :faded="props.compact && props.entry.faded"
+        :image-class="['transition motion-safe:group-hover:scale-105', layout.image]"
       >
-        {{ props.entry.placeholder ?? props.entry.acronym }}
-      </span>
+        <span
+          class="absolute inset-0 flex items-center justify-center font-condensed text-[1.6rem] font-bold tracking-[0.04em]"
+          :class="layout.placeholder"
+          aria-hidden="true"
+        >
+          {{ props.entry.placeholder ?? props.entry.acronym }}
+        </span>
+      </ActivityCoverFallback>
     </div>
 
     <div class="min-w-0" :class="layout.body">

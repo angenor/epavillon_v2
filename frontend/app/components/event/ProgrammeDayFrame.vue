@@ -3,6 +3,7 @@ import type { DayFrame } from '~/utils/programme-tracks'
 import type { ProgrammeRowData } from './ProgrammeRow.vue'
 import type { TimeZoneName } from '~/types/shared'
 import type { PublicScheduleRow } from '~/types/views'
+import type { AttachedImage } from '~/types/media'
 
 /**
  * Le cadre d'une journée spéciale publiée dans `/programmations` (direction
@@ -17,9 +18,11 @@ interface Props {
   /** La page de la journée. */
   to: string
   timezone: TimeZoneName
+  /** La photo de l'édition : la vignette des activités sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -90,7 +93,7 @@ const kicker = computed(() => {
           class="border-b border-border-subtle"
           :class="item.kind === 'activity' ? 'last:border-b-0' : 'border-dashed'"
         >
-          <EventProgrammeRow v-if="item.kind === 'activity'" :entry="item.row" tone="day" :highlight="isHighlight(item.session)" />
+          <EventProgrammeRow v-if="item.kind === 'activity'" :entry="item.row" tone="day" :highlight="isHighlight(item.session)" :edition-image="props.editionImage" />
           <template v-else>
             <p
               v-for="moment in item.moments"

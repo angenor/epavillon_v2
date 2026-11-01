@@ -209,6 +209,7 @@ useHead(() => ({
               :session="liveSession"
               :edition-slug="data.edition.slug"
               :timezone="data.edition.timezone"
+              :edition-image="editionPhoto(data.images)"
               compact
             />
 

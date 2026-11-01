@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { JointProposalDetail } from '~/types/views'
+import type { AttachedImage } from '~/types/media'
 
 /**
  * Séance commune : une carte par dossier réuni dans le créneau, dans l'ordre.
@@ -12,9 +13,11 @@ interface Props {
   proposals: JointProposalDetail[]
   /** Terminée ou annulée : les couvertures passent en gris, comme l'image de la séance. */
   faded?: boolean
+  /** La photo de l'édition : l'image d'un dossier sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -74,13 +77,21 @@ const ruleStyle = { '--rule-solid': 'var(--color-day-solid)', '--rule-on': 'var(
             :class="{ grayscale: props.faded }"
             sizes="(min-width: 1024px) 26rem, (min-width: 768px) 45vw, 100vw"
           />
-          <span
+          <ActivityCoverFallback
             v-else
-            class="absolute inset-0 flex items-center justify-center px-4 font-condensed text-[2.4rem] font-bold tracking-[0.04em] text-(--color-day)"
-            aria-hidden="true"
+            :image="props.editionImage"
+            :label="(card.acronym ?? initialsOf(card.name)).slice(0, 8)"
+            text-class="text-[2.4rem]"
+            :faded="props.faded"
+            sizes="(min-width: 1024px) 26rem, (min-width: 768px) 45vw, 100vw"
           >
-            {{ (card.acronym ?? initialsOf(card.name)).slice(0, 8) }}
-          </span>
+            <span
+              class="absolute inset-0 flex items-center justify-center px-4 font-condensed text-[2.4rem] font-bold tracking-[0.04em] text-(--color-day)"
+              aria-hidden="true"
+            >
+              {{ (card.acronym ?? initialsOf(card.name)).slice(0, 8) }}
+            </span>
+          </ActivityCoverFallback>
         </div>
 
         <div class="flex flex-1 flex-col gap-3 px-5 pt-4.5 pb-5">

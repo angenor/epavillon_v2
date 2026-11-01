@@ -24,7 +24,7 @@ const { t, n } = useI18n()
 const { tr } = useI18nText()
 const { dateRange, dateTime, zoneLabel } = useDateTime()
 
-const picture = computed(() => props.edition.cover ?? props.edition.banner ?? null)
+const picture = computed(() => editionPhoto(props.edition))
 
 const label = (edition: PublicEditionRow) =>
   edition.acronym ?? edition.edition_label ?? tr(edition.title)

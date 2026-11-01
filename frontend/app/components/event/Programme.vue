@@ -107,6 +107,8 @@ const search = ref('')
 const day = ref<IsoDate | null>(typeof route.query.jour === 'string' ? route.query.jour : null)
 
 const timezone = computed(() => selectedEdition.value.timezone)
+/** La vignette des activités sans couverture : la photo du bandeau. */
+const editionImage = computed(() => editionPhoto(selectedEdition.value))
 const zoneNote = computed(() => {
   const edition = selectedEdition.value
   return t('programme.toolbar.timezone', {
@@ -351,6 +353,7 @@ const views = computed(() => [
         :visited-id="visitedId"
         :edition-slug="selectedEdition.slug"
         :edition-past="selectedEdition.temporal_state === 'past'"
+        :edition-image="editionImage"
       />
 
       <div v-else>
@@ -381,6 +384,7 @@ const views = computed(() => [
           :edition-slug="selectedEdition.slug"
           :timezone="timezone"
           :city="selectedEdition.city"
+          :edition-image="editionImage"
         />
         <EventProgrammeDayList
           ref="list"
@@ -398,6 +402,7 @@ const views = computed(() => [
           :edition-slug="selectedEdition.slug"
           :edition-past="selectedEdition.temporal_state === 'past'"
           :sticky-offset="stickyOffset"
+          :edition-image="editionImage"
           @reading="day = $event"
           @reset="search = ''"
         />

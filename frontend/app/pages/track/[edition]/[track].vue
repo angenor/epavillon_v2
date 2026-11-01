@@ -40,6 +40,10 @@ if (import.meta.server && status.value === 'success' && !data.value) setResponse
 
 const page = computed(() => data.value ?? null)
 
+// La page du fil ne porte pas la photo de l'édition, repli des activités sans couverture : la liste des éditions, si.
+const { data: editions } = useLazyAsyncData('journee-editions', () => api.events.publicList().catch(() => []), { default: () => [] })
+const editionImage = computed(() => editionPhoto(editions.value.find((edition) => edition.slug === editionSlug.value)))
+
 const { declareFrom } = useLiveSession()
 watch(
   page,
@@ -218,7 +222,7 @@ useSeoMeta({
           </div>
 
           <div class="flex min-w-0 flex-col gap-14 lg:col-start-1 lg:row-start-1">
-            <TrackOverview :page="page" :live="live" />
+            <TrackOverview :page="page" :live="live" :edition-image="editionImage" />
 
             <TrackFeature v-if="page.feature" :feature="page.feature" :documents="page.documents" />
 
@@ -239,7 +243,7 @@ useSeoMeta({
             <section v-if="page.agenda.length" id="deroule" class="scroll-mt-28" aria-labelledby="journee-deroule-titre">
               <h2 id="journee-deroule-titre" :class="sectionTitle">{{ t(`track.agenda.title.${subject}`) }}</h2>
               <p class="mt-2.5 max-w-[66ch] text-[0.95rem] text-text-secondary">{{ zoneNote }}</p>
-              <TrackAgenda :page="page" :entry-state="entryState" />
+              <TrackAgenda :page="page" :entry-state="entryState" :edition-image="editionImage" />
             </section>
             <UiEmptyState
               v-else

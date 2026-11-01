@@ -2,6 +2,7 @@
 import type { PublicTrackEntry, PublicTrackPage } from '~/types/programme/track-page'
 import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
 import type { ProgrammeRowData } from '~/components/event/ProgrammeRow.vue'
+import type { AttachedImage } from '~/types/media'
 
 /**
  * Le déroulé d'un fil (journée spéciale, atelier) : une partie = une étiquette
@@ -17,9 +18,11 @@ import type { ProgrammeRowData } from '~/components/event/ProgrammeRow.vue'
 interface Props {
   page: PublicTrackPage
   entryState: (entry: PublicTrackEntry) => SessionDisplayState
+  /** La photo de l'édition : la vignette des activités sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -164,7 +167,7 @@ const itemClass = (item: { anchor: string | undefined; data: ProgrammeRowData })
         class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
         :class="itemClass(item)"
       >
-        <EventProgrammeRow :entry="item.data" :media="media" :highlight="item.highlight" tone="day" compact state-surface />
+        <EventProgrammeRow :entry="item.data" :media="media" :highlight="item.highlight" :edition-image="props.editionImage" tone="day" compact state-surface />
       </li>
     </ol>
 
@@ -198,7 +201,7 @@ const itemClass = (item: { anchor: string | undefined; data: ProgrammeRowData })
           class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
           :class="itemClass(item)"
         >
-          <EventProgrammeRow :entry="item.data" :media="media" :highlight="item.highlight" tone="day" compact state-surface />
+          <EventProgrammeRow :entry="item.data" :media="media" :highlight="item.highlight" :edition-image="props.editionImage" tone="day" compact state-surface />
         </li>
       </ol>
     </section>

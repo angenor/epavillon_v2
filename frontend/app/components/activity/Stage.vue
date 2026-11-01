@@ -8,7 +8,8 @@ import type { JointPart } from '~/composables/useJointSession'
 /**
  * Le média de l'activité, toujours rendu : la salle Zoom (posée sur la couverture
  * tant qu'on n'y est pas entré) quand aucun flux n'est diffusé, le direct avec ses langues pendant
- * la diffusion, l'enregistrement après, la couverture sinon (à défaut, le sigle).
+ * la diffusion, l'enregistrement après, la couverture sinon (à défaut, la photo
+ * de l'édition voilée au sigle).
  * Une séance a un flux par langue d'interprétation. Enregistrée mais sans
  * rediffusion encore, elle l'annonce : les vidéos de la CdP 30 reviendront
  * après la CdP 31 (chaîne YouTube perdue, 28/10).
@@ -27,9 +28,11 @@ interface Props {
   isRecorded?: boolean
   /** Séance commune : hors direct, les couvertures des dossiers en diaporama ; vide pour une séance ordinaire. */
   parts?: JointPart[]
+  /** La photo de l'édition, grande : l'image d'une activité ou d'un dossier sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 
 const { t, locale } = useI18n()
 
@@ -70,6 +73,7 @@ const isLive = computed(
 const replayUrl = computed(() => (props.state === 'past' ? (props.session.replay_url ?? null) : null))
 const replaySoon = computed(() => props.state === 'past' && props.isRecorded === true && !replayUrl.value)
 const faded = computed(() => props.state === 'past' || props.state === 'cancelled')
+const stageText = 'text-[clamp(2.6rem,6vw,4.6rem)]'
 
 const replayMinutes = computed(() =>
   props.session.replay_duration_seconds ? Math.round(props.session.replay_duration_seconds / 60) : null,
@@ -216,12 +220,21 @@ const replayMinutes = computed(() =>
       sizes="(min-width: 1024px) 50rem, 100vw"
     >
       <template #fallback="{ slide }">
-        <span
-          class="absolute inset-0 flex items-center justify-center overflow-hidden px-6 text-[clamp(3.5rem,14vw,9rem)] leading-none font-bold whitespace-nowrap text-text-on-inverse/15 select-none"
-          aria-hidden="true"
+        <ActivityCoverFallback
+          :image="props.editionImage"
+          :label="slide.part.acronym ?? initialsOf(slide.part.name)"
+          :text-class="stageText"
+          :faded="faded"
+          loading="eager"
+          sizes="(min-width: 1024px) 50rem, 100vw"
         >
-          {{ slide.part.acronym ?? initialsOf(slide.part.name) }}
-        </span>
+          <span
+            class="absolute inset-0 flex items-center justify-center overflow-hidden px-6 text-[clamp(3.5rem,14vw,9rem)] leading-none font-bold whitespace-nowrap text-text-on-inverse/15 select-none"
+            aria-hidden="true"
+          >
+            {{ slide.part.acronym ?? initialsOf(slide.part.name) }}
+          </span>
+        </ActivityCoverFallback>
       </template>
       <template #caption="{ slide }">
         <span
@@ -246,12 +259,22 @@ const replayMinutes = computed(() =>
       :class="faded ? 'grayscale' : ''"
       sizes="(min-width: 1024px) 50rem, 100vw"
     />
-    <span
-      v-else-if="props.acronym"
-      class="absolute inset-0 flex items-center justify-center overflow-hidden px-6 text-[clamp(3.5rem,14vw,9rem)] leading-none font-bold whitespace-nowrap text-text-on-inverse/15 select-none"
-      aria-hidden="true"
+    <ActivityCoverFallback
+      v-else
+      :image="props.editionImage"
+      :label="props.acronym"
+      :text-class="stageText"
+      :faded="faded"
+      loading="eager"
+      sizes="(min-width: 1024px) 50rem, 100vw"
     >
-      {{ props.acronym }}
-    </span>
+      <span
+        v-if="props.acronym"
+        class="absolute inset-0 flex items-center justify-center overflow-hidden px-6 text-[clamp(3.5rem,14vw,9rem)] leading-none font-bold whitespace-nowrap text-text-on-inverse/15 select-none"
+        aria-hidden="true"
+      >
+        {{ props.acronym }}
+      </span>
+    </ActivityCoverFallback>
   </div>
 </template>

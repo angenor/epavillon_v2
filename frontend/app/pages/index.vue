@@ -193,6 +193,7 @@ useHead(() => ({
         :session="liveSession"
         :edition-slug="liveEdition.slug"
         :timezone="liveSession.timezone"
+        :edition-image="editionPhoto(liveEdition)"
       />
 
       <HomeHighlights v-if="data.currentEdition" :edition="data.currentEdition" :now="data.generated_at" />

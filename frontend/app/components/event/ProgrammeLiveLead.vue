@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
 import type { TimeZoneName } from '~/types/shared'
+import type { AttachedImage } from '~/types/media'
 
 /**
  * L'activité en direct, à la une au-dessus de la liste : un bandeau bas (image
@@ -16,9 +17,11 @@ interface Props {
   /** Ville de l'édition : « heure de Belém », plutôt que le nom technique du fuseau. */
   city?: string | null
   compact?: boolean
+  /** La photo de l'édition : l'image d'une activité sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = withDefaults(defineProps<Props>(), { city: null, compact: false })
+const props = withDefaults(defineProps<Props>(), { city: null, compact: false, editionImage: null })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -47,13 +50,21 @@ const organization = computed(() => props.session.organization_acronym ?? props.
         loading="eager"
         sizes="(min-width: 860px) 340px, 100vw"
       />
-      <span
+      <ActivityCoverFallback
         v-else
-        class="absolute inset-0 flex items-center justify-center font-condensed text-5xl font-bold text-text-on-inverse/20"
-        aria-hidden="true"
+        :image="props.editionImage"
+        :label="props.session.organization_acronym"
+        text-class="text-[2.6rem]"
+        loading="eager"
+        sizes="(min-width: 860px) 340px, 100vw"
       >
-        {{ props.session.organization_acronym }}
-      </span>
+        <span
+          class="absolute inset-0 flex items-center justify-center font-condensed text-5xl font-bold text-text-on-inverse/20"
+          aria-hidden="true"
+        >
+          {{ props.session.organization_acronym }}
+        </span>
+      </ActivityCoverFallback>
       <UiStatusBadge state="live" :label="t('programme.list.live')" class="absolute top-3 left-3" />
     </div>
 
@@ -102,9 +113,18 @@ const organization = computed(() => props.session.organization_acronym ?? props.
         loading="eager"
         sizes="(min-width: 768px) 300px, 100vw"
       />
-      <span v-else class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-text-on-inverse/20" aria-hidden="true">
-        {{ props.session.organization_acronym }}
-      </span>
+      <ActivityCoverFallback
+        v-else
+        :image="props.editionImage"
+        :label="props.session.organization_acronym"
+        text-class="text-[2.2rem]"
+        loading="eager"
+        sizes="(min-width: 768px) 300px, 100vw"
+      >
+        <span class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-text-on-inverse/20" aria-hidden="true">
+          {{ props.session.organization_acronym }}
+        </span>
+      </ActivityCoverFallback>
       <UiStatusBadge state="live" :label="t('programme.list.live')" class="absolute top-3 left-3" />
     </div>
 

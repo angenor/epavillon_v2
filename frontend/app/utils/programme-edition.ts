@@ -1,4 +1,5 @@
 import type { EditionTemporalState, PublicEditionRow } from '~/types/views'
+import type { AttachedImage } from '~/types/media'
 
 const RANK: Record<EditionTemporalState, number> = { ongoing: 0, upcoming: 1, past: 2 }
 
@@ -16,4 +17,12 @@ export function defaultProgrammeEdition(
       ? a.starts_at.localeCompare(b.starts_at)
       : b.starts_at.localeCompare(a.starts_at)
   })[0]
+}
+
+/**
+ * La photo d'une édition, 16:9 d'abord : celle de son bandeau, et la couverture
+ * par défaut de ses activités sans image (`ActivityCoverFallback`).
+ */
+export function editionPhoto(edition: Pick<PublicEditionRow, 'cover' | 'banner'> | null | undefined): AttachedImage | null {
+  return edition ? (edition.cover ?? edition.banner ?? null) : null
 }

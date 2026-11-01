@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
+import type { AttachedImage } from '~/types/media'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { PublicScheduleTrack } from '~/types/programme/track-page'
@@ -33,9 +34,11 @@ interface Props {
   editionSlug: string
   /** Édition passée : ses activités gardent leurs couleurs, sinon plus rien ne donne envie de cliquer. */
   editionPast: boolean
+  /** La photo de l'édition : la vignette des activités sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -377,7 +380,17 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
                   :class="{ grayscale: item.faded }"
                   sizes="(min-width: 960px) 216px, 104px"
                 />
-                <span v-else aria-hidden="true">{{ item.initials }}</span>
+                <ActivityCoverFallback
+                  v-else
+                  :image="props.editionImage"
+                  :label="item.initials"
+                  text-class="text-[1.6rem]"
+                  :faded="item.faded"
+                  :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]']"
+                  sizes="(min-width: 960px) 216px, 104px"
+                >
+                  <span aria-hidden="true">{{ item.initials }}</span>
+                </ActivityCoverFallback>
               </div>
               <div class="wk-body">
                 <p class="wk-time">

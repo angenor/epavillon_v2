@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
+import type { AttachedImage } from '~/types/media'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 import type { ProgrammeRowData } from './ProgrammeRow.vue'
 import type { PublicScheduleTrack } from '~/types/programme/track-page'
@@ -36,9 +37,11 @@ interface Props {
   hidePast: boolean
   /** Édition passée : ses activités gardent leurs couleurs, sinon plus rien ne donne envie de cliquer. */
   editionPast: boolean
+  /** La photo de l'édition : la vignette des activités sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 const emit = defineEmits<{ reading: [date: IsoDate]; reset: [] }>()
 
 const { t, locale } = useI18n()
@@ -251,6 +254,7 @@ onBeforeUnmount(() => {
           :frame="entry.frame"
           :to="entry.to"
           :timezone="props.timezone"
+          :edition-image="props.editionImage"
         />
 
         <div v-if="section.rows.length">
@@ -262,7 +266,7 @@ onBeforeUnmount(() => {
           </p>
           <ol>
             <li v-for="entry in section.rows" :key="entry.id" class="border-b border-border-subtle last:border-b-0">
-              <EventProgrammeRow :entry="entry" />
+              <EventProgrammeRow :entry="entry" :edition-image="props.editionImage" />
             </li>
           </ol>
         </div>

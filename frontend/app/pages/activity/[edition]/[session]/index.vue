@@ -49,6 +49,8 @@ const jointProposals = computed(() => detail.value?.proposals ?? [])
 const parts = computed(() => jointParts(jointProposals.value.length ? jointProposals.value : session.value?.proposals))
 /** La séance commune n'a en général pas d'image propre : le direct et la rediffusion se posent sur celle du premier dossier. */
 const stageCover = computed(() => session.value?.cover ?? parts.value.find((part) => part.cover)?.cover ?? null)
+/** Une activité ou un dossier sans couverture prend la photo de l'édition, voilée au sigle. */
+const editionImage = computed(() => editionPhoto(edition.value))
 
 const { data: schedule, refresh: refreshSchedule } = useLazyAsyncData(
   () => `activite-programme-${edition.value?.id ?? 'aucune'}`,
@@ -268,6 +270,7 @@ useSeoMeta({
               :room-to="roomTo"
               :zone-label="edition.city ?? undefined"
               :is-recorded="detail.is_recorded"
+              :edition-image="editionImage"
             />
 
             <section v-if="summary || hasDescription" aria-labelledby="a-propos-titre">
@@ -278,7 +281,7 @@ useSeoMeta({
               <UiRichContent class="mt-3.5 max-w-[68ch]! text-[1.05rem] leading-[1.75]" :html="description" />
             </section>
 
-            <ActivityJointParts v-if="jointProposals.length > 1" :proposals="jointProposals" :faded="state === 'past' || state === 'cancelled'" />
+            <ActivityJointParts v-if="jointProposals.length > 1" :proposals="jointProposals" :faded="state === 'past' || state === 'cancelled'" :edition-image="editionImage" />
 
             <template v-else>
               <ActivityPeople :speakers="detail.speakers" />
@@ -300,6 +303,7 @@ useSeoMeta({
               :day-label="dayLabel"
               :day-to="specialDay?.to ?? programmeListTo"
               :special-day="specialDay"
+              :edition-image="editionImage"
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicTrackPage } from '~/types/programme/track-page'
 import type { PublicScheduleRow } from '~/types/views'
+import type { AttachedImage } from '~/types/media'
 
 /**
  * La carte levée en tête de la colonne : le direct le jour J (la tête de liste
@@ -11,9 +12,11 @@ import type { PublicScheduleRow } from '~/types/views'
 interface Props {
   page: PublicTrackPage
   live: PublicScheduleRow | null
+  /** La photo de l'édition : l'image du direct sans couverture. */
+  editionImage?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { editionImage: null })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -48,7 +51,7 @@ const paragraphs = computed(() =>
 <template>
   <section class="rounded-lg bg-surface-raised p-6 shadow-lg" aria-labelledby="journee-apercu-titre">
     <div v-if="props.live" id="direct" class="mb-6 border-b border-separator pb-6">
-      <EventProgrammeLiveLead :session="props.live" :edition-slug="props.page.edition.slug" :timezone="timezone" compact />
+      <EventProgrammeLiveLead :session="props.live" :edition-slug="props.page.edition.slug" :timezone="timezone" :edition-image="props.editionImage" compact />
     </div>
 
     <template v-if="tiles.length > 1">
