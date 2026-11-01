@@ -1,8 +1,10 @@
 <script setup lang="ts">
 /**
  * Le billet : la carte levée qui remonte sur le bandeau d'une page de la
- * programmation, avec son filet de tête. `barClass` en change la couleur
- * (accent pour une activité, couleur de la journée pour une journée spéciale).
+ * programmation. Sa tête est un filet (`barClass` en change la couleur) ou,
+ * par le créneau `band`, une bande pleine (la date en aplat, direction
+ * condensée). Le corps peut rétrécir : une page qui colle le billet borne sa
+ * hauteur et laisse défiler ce qui dépasse.
  */
 
 interface Props {
@@ -14,9 +16,11 @@ const props = withDefaults(defineProps<Props>(), { barClass: 'bg-accent' })
 </script>
 
 <template>
-  <aside class="overflow-hidden rounded-lg bg-surface-raised text-text shadow-lg" :aria-label="props.label">
-    <div class="h-1" :class="props.barClass" aria-hidden="true" />
-    <div class="flex flex-col p-6">
+  <aside class="flex flex-col overflow-hidden rounded-lg bg-surface-raised text-text shadow-lg" :aria-label="props.label">
+    <slot name="band">
+      <div class="h-1 shrink-0" :class="props.barClass" aria-hidden="true" />
+    </slot>
+    <div class="flex min-h-0 flex-col p-6">
       <slot />
     </div>
     <slot name="outside" />
