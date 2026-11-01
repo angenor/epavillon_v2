@@ -1,5 +1,5 @@
 /**
- * Nouvelle version en ligne : la page ouverte interroge `version.json` toutes les
+ * Nouvelle version en ligne : la page ouverte interroge `_version` toutes les
  * cinq minutes et à chaque retour sur l'onglet. Construction différente : un
  * bandeau propose de recharger (`stale`) ; construction antérieure à l'instant
  * imposé par la mise en ligne : rechargement d'office après un décompte
@@ -25,7 +25,7 @@ export function useAppVersion() {
   async function check(): Promise<void> {
     if (forced.value) return
     try {
-      const url = `${config.app.baseURL.replace(/\/$/, '')}/version.json`
+      const url = `${config.app.baseURL.replace(/\/$/, '')}/_version`
       const info = await $fetch<VersionInfo>(url, { cache: 'no-store', retry: 0 })
       if (!info.build || info.build === config.public.buildTime) return
       stale.value = true

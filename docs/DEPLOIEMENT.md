@@ -1396,7 +1396,7 @@ reste va à Nuxt ; les logos de la v2, en sous-dossiers `png/` et `svg/`, ne son
 
 ## 19. Prévenir les pages ouvertes d'une nouvelle version (01/11)
 
-Chaque page ouverte interroge `/version.json` (intercepteur `frontend/server/middleware/version.ts`) toutes les cinq minutes et à chaque retour sur l'onglet. Si la construction servie diffère de la sienne, elle affiche « Le ePavillon a été mis à jour » avec **Recharger** et **Plus tard** ; après « Plus tard », le changement de page suivant se fait par un vrai chargement, donc dans la nouvelle version (`plugins/app-version.client.ts`).
+Chaque page ouverte interroge `/_version` (pas `/version.json`, que la configuration Apache envoie à PACO, § 18) (intercepteur `frontend/server/middleware/version.ts`) toutes les cinq minutes et à chaque retour sur l'onglet. Si la construction servie diffère de la sienne, elle affiche « Le ePavillon a été mis à jour » avec **Recharger** et **Plus tard** ; après « Plus tard », le changement de page suivant se fait par un vrai chargement, donc dans la nouvelle version (`plugins/app-version.client.ts`).
 
 - `./deploy.sh update` : le cas ordinaire, rien à faire.
 - `./deploy.sh update --imposer` : correction urgente ou de sécurité. Le script écrit `NUXT_FORCE_RELOAD_BEFORE=<instant>` dans `.env.prod` **avant** la construction ; toute page construite plus tôt se recharge d'office après un décompte de 10 s, sans bouton de refus. Les pages de la nouvelle construction, plus récentes, ne sont pas concernées : pas de boucle. La valeur reste dans `.env.prod` sans effet sur les mises en ligne suivantes.
