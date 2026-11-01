@@ -48,8 +48,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 <template>
   <section aria-labelledby="galerie-titre">
-    <h2 id="galerie-titre" class="border-b border-text pb-3 font-sans text-[26px] font-light text-text">
-      <b class="font-bold">{{ t('activity.gallery.title') }}</b>
+    <h2 id="galerie-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
+      {{ t('activity.gallery.title') }}
     </h2>
 
     <ul class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">

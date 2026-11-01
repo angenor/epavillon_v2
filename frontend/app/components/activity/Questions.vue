@@ -101,8 +101,8 @@ const loginTo = computed(() => ({ path: localePath('auth-login'), query: { redir
 </script>
 
 <template>
-  <section class="rounded-lg bg-surface-raised p-6 font-sans" aria-labelledby="questions-titre">
-    <h2 id="questions-titre" class="font-sans text-xl leading-tight font-bold text-text">
+  <section class="rounded-lg border border-border-subtle bg-surface-raised p-5.5" aria-labelledby="questions-titre">
+    <h2 id="questions-titre" class="heading-condensed text-[1.6rem] text-heading">
       {{ t('activity.questions.title') }}
     </h2>
 

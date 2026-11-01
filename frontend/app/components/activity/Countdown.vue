@@ -60,11 +60,11 @@ const spoken = computed(() => {
 
 <template>
   <div role="timer" :aria-label="spoken">
-    <p class="text-xs text-text-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }" aria-hidden="true">
+    <p class="font-condensed text-base leading-tight font-bold tracking-[0.05em] text-text-secondary uppercase" aria-hidden="true">
       {{ t('activity.ticket.startsIn') }}
     </p>
     <div
-      class="mt-3 grid grid-cols-[repeat(var(--cells),minmax(0,1fr))]"
+      class="mt-2 grid grid-cols-[repeat(var(--cells),minmax(0,1fr))]"
       :style="{ '--cells': String(cells.length) }"
       aria-hidden="true"
     >
@@ -73,12 +73,12 @@ const spoken = computed(() => {
         :key="cell.unit"
         class="flex flex-col items-center border-l border-border-subtle first:border-l-0"
       >
-        <span class="relative block h-11 w-full overflow-hidden text-center text-[40px] leading-[44px] font-light tabular-nums" :class="cell.unit === 's' ? 'text-accent' : 'text-text'">
+        <span class="relative block h-10 w-full overflow-hidden text-center font-condensed text-[2.3rem] leading-10 font-bold text-(--color-day) tabular-nums">
           <Transition name="countdown-tick">
             <span :key="cell.value" class="block">{{ cell.value }}</span>
           </Transition>
         </span>
-        <span class="mt-1.5 text-[11px] text-text-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">{{ cell.label }}</span>
+        <span class="mt-1 text-[0.7rem] font-semibold tracking-[0.06em] text-text-muted uppercase">{{ cell.label }}</span>
       </span>
     </div>
   </div>

@@ -2,9 +2,10 @@
 import type { PublicSessionStream } from '~/types/live'
 
 /**
- * LA PAGE D'UNE ACTIVITÉ — celle qu'ouvre un clic dans la semaine ou la liste
+ * LA PAGE D'UNE ACTIVITÉ, celle qu'ouvre un clic dans la semaine ou la liste
  * du jour. Bandeau de l'édition, titre en grand, image et billet en léger débord
- * (arbitré le 05/10) ; pendant le direct, l'image cède la place au lecteur.
+ * (arbitré le 05/10), dans la direction condensée (01/11) ; pendant le direct,
+ * l'image cède la place au lecteur.
  *
  * L'adresse porte l'édition et l'activité par leurs slugs : une séance n'a de
  * slug unique que dans son édition. Une activité inconnue et une activité non
@@ -122,8 +123,8 @@ const homeTime = computed(() => {
   if (now.value === null || !session.value) return null
   const visitor = Intl.DateTimeFormat().resolvedOptions().timeZone
   if (!visitor || visitor === session.value.timezone) return null
-  const range = `${time(session.value.starts_at, visitor)} → ${time(session.value.ends_at, visitor)}`
-  const sameInstant = range === `${time(session.value.starts_at, session.value.timezone)} → ${time(session.value.ends_at, session.value.timezone)}`
+  const range = t('activity.ticket.hours', { start: time(session.value.starts_at, visitor), end: time(session.value.ends_at, visitor) })
+  const sameInstant = range === t('activity.ticket.hours', { start: time(session.value.starts_at, session.value.timezone), end: time(session.value.ends_at, session.value.timezone) })
   return sameInstant ? null : { range, zone: t('activity.hero.yourZone', { zone: timeZoneCityLabel(visitor) }) }
 })
 
@@ -150,6 +151,18 @@ const trail = computed(() =>
 const programmeListTo = computed(() =>
   localePath({ name: 'programme', query: edition.value ? { edition: edition.value.slug, vue: 'liste', jour: session.value ? dayKeyInZone(session.value.starts_at, timezone.value) : undefined } : {} }),
 )
+// La première journée spéciale donne sa couleur à la page (bande de date, accents) ; sans elle, le bleu nuit.
+const specialDay = computed(() => {
+  const track = session.value?.tracks.find((entry) => entry.kind === 'special_day')
+  if (!track || !edition.value) return null
+  return {
+    title: tr(track.title),
+    color: track.color,
+    to: localePath({ name: 'track-edition-track', params: { edition: edition.value.slug, track: track.slug } }),
+  }
+})
+const dayStyle = computed(() => trackDayStyle(specialDay.value?.color ?? null))
+
 const showQuestions = computed(
   () => Boolean(detail.value?.allows_questions) && state.value !== 'cancelled' && state.value !== 'past',
 )
@@ -179,7 +192,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div data-direction="condensee" class="full-bleed -mt-8 -mb-8 min-h-[75vh] bg-surface font-sans text-text sm:-mt-10 sm:-mb-10">
+  <div data-direction="condensee" :style="dayStyle" class="full-bleed -mt-8 -mb-8 min-h-[75vh] bg-surface font-sans text-text sm:-mt-10 sm:-mb-10">
     <UiLoadingState v-if="status === 'pending' && !data" :label="t('activity.loading')">
       <ActivitySkeleton />
     </UiLoadingState>
@@ -211,12 +224,32 @@ useSeoMeta({
         :cancelled-reason="detail.cancelled_reason ? tr(detail.cancelled_reason) : null"
       />
 
-      <!-- Sur mobile, les deux colonnes s'effacent (`contents`) pour que le billet suive l'image. -->
-      <div class="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6">
-        <div class="relative -mt-12 flex flex-col gap-10 lg:-mt-[72px] lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-x-8">
-          <div class="contents min-w-0 lg:flex lg:flex-col lg:gap-14 lg:pr-8">
+      <!--
+        Billet d'abord sur téléphone, collé à droite sur grand écran. Les marges
+        négatives n'existent qu'à partir de `lg` : sur une colonne, une marge
+        négative raccourcit la ligne de grille et la suite remonte sous le billet.
+      -->
+      <div class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
+        <div class="grid grid-cols-1 gap-7 pt-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 lg:pt-0">
+          <div class="relative z-1 min-w-0 lg:sticky lg:top-[calc(var(--nav-height)+1rem)] lg:col-start-2 lg:row-start-1 lg:-mt-18">
+            <ActivityTicket
+              class="lg:max-h-[calc(100dvh-var(--nav-height)-2rem)]"
+              :session="session"
+              :edition="edition"
+              :state="state"
+              :languages="languages"
+              :now="now"
+              :home-time="homeTime"
+              :meeting="meeting"
+              :zoom-open="zoomShown"
+              :room-to="roomTo"
+              :special-day="specialDay"
+              @started="refresh()"
+            />
+          </div>
+
+          <div class="relative z-1 flex min-w-0 flex-col gap-13 lg:col-start-1 lg:row-start-1 lg:-mt-18">
             <ActivityStage
-              class="order-1 lg:-mr-8"
               :session="session"
               :state="state"
               :streams="streams"
@@ -228,45 +261,32 @@ useSeoMeta({
               :is-recorded="detail.is_recorded"
             />
 
-            <section v-if="summary || hasDescription" class="order-4" aria-labelledby="a-propos-titre">
-              <h2 id="a-propos-titre" class="border-b border-text pb-3 font-sans text-[26px] font-light text-text">
-                <b class="font-bold">{{ t('activity.about') }}</b>
+            <section v-if="summary || hasDescription" aria-labelledby="a-propos-titre">
+              <h2 id="a-propos-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
+                {{ t('activity.about') }}
               </h2>
-              <p v-if="summary" class="mt-5 text-xl leading-normal font-light">{{ summary }}</p>
-              <UiRichContent class="mt-4 max-w-none! text-[17px] leading-relaxed" :html="description" />
+              <p v-if="summary" class="mt-4.5 max-w-[68ch] text-lg leading-relaxed text-text">{{ summary }}</p>
+              <UiRichContent class="mt-3.5 max-w-[68ch]! text-[1.05rem] leading-[1.75]" :html="description" />
             </section>
 
-            <ActivityPeople class="order-5" :speakers="detail.speakers" />
+            <ActivityPeople :speakers="detail.speakers" />
 
-            <ActivityGallery v-if="detail.gallery?.length" class="order-5" :photos="detail.gallery" />
-          </div>
+            <ActivityOrganizations :organizations="detail.organizations" />
 
-          <div class="contents lg:flex lg:flex-col lg:gap-10">
-            <div class="order-2">
-              <ActivityTicket
-                :session="session"
-                :edition="edition"
-                :state="state"
-                :languages="languages"
-                :now="now"
-                :home-time="homeTime"
-                :meeting="meeting"
-                :zoom-open="zoomShown"
-                :room-to="roomTo"
-                @started="refresh()"
-              />
-            </div>
             <ClientOnly>
-              <ActivityQuestions v-if="showQuestions" class="order-3" :session-id="session.id" :event-id="session.event_id" />
+              <ActivityQuestions v-if="showQuestions" :session-id="session.id" :event-id="session.event_id" />
             </ClientOnly>
+
+            <ActivityGallery v-if="detail.gallery?.length" :photos="detail.gallery" />
+
             <ActivitySameDay
-              class="order-6"
               :sessions="sameDay"
               :current-id="session.id"
               :edition-slug="edition.slug"
               :timezone="timezone"
               :day-label="dayLabel"
-              :day-to="programmeListTo"
+              :day-to="specialDay?.to ?? programmeListTo"
+              :special-day="specialDay"
             />
           </div>
         </div>
