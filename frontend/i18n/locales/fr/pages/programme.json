@@ -41,14 +41,16 @@
       "activities": "activité | activité | activités",
       "organizations": "organisation | organisation | organisations",
       "countries": "pays | pays | pays",
-      "updated": "Mis à jour le"
+      "updated": "Mis à jour le",
+      "seeChanges": "Voir ce qui a changé"
     },
     "others": "Autres programmations"
   },
   "toolbar": {
     "list": "Liste",
     "week": "Calendrier",
-    "timezone": "Toutes les heures : {zone} ({offset})"
+    "timezone": "Toutes les heures : {zone} ({offset})",
+    "sinceVisit": "aucun changement depuis votre dernière visite | {count} changement depuis votre dernière visite | {count} changements depuis votre dernière visite"
   },
   "board": {
     "title": "Le programme"
@@ -132,5 +134,29 @@
       "6": "six"
     },
     "part": "{title}, {organization}"
+  },
+  "changes": {
+    "title": "Ce qui a changé",
+    "description": "Les quinze derniers jours, le plus récent en haut. Toutes les heures : {zone} ({offset}).",
+    "sinceNote": "Les changements survenus depuis votre dernière visite sont signalés.",
+    "kind": {
+      "time": "Horaire",
+      "date": "Date",
+      "title": "Titre",
+      "cancelled": "Annulée",
+      "postponed": "Reportée",
+      "added": "Nouvelle"
+    },
+    "since": "Depuis votre visite",
+    "slot": "{day}, {start} à {end}",
+    "before": "Avant :",
+    "after": "Après :",
+    "cancelledNote": "Prévue le {slot}. Retirée du programme.",
+    "postponedNote": "Était le {slot}. Nouveau créneau à venir.",
+    "addedNote": "Prévue le {slot}.",
+    "footer": "Seuls les changements d'horaire, de titre, les annulations, les reports et les nouvelles activités sont listés.",
+    "empty": "Aucun changement ces quinze derniers jours",
+    "loading": "Chargement des changements",
+    "error": "Changements indisponibles"
   }
 }

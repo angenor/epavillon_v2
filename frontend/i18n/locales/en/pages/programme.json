@@ -41,14 +41,16 @@
       "activities": "activity | activity | activities",
       "organizations": "organisation | organisation | organisations",
       "countries": "country | country | countries",
-      "updated": "Updated on"
+      "updated": "Updated on",
+      "seeChanges": "See what changed"
     },
     "others": "Other programmes"
   },
   "toolbar": {
     "list": "List",
     "week": "Calendar",
-    "timezone": "All times: {zone} ({offset})"
+    "timezone": "All times: {zone} ({offset})",
+    "sinceVisit": "no changes since your last visit | {count} change since your last visit | {count} changes since your last visit"
   },
   "board": {
     "title": "The programme"
@@ -132,5 +134,29 @@
       "6": "six"
     },
     "part": "{title}, {organization}"
+  },
+  "changes": {
+    "title": "What changed",
+    "description": "The last fifteen days, most recent first. All times: {zone} ({offset}).",
+    "sinceNote": "Changes made since your last visit are marked.",
+    "kind": {
+      "time": "Time",
+      "date": "Date",
+      "title": "Title",
+      "cancelled": "Cancelled",
+      "postponed": "Postponed",
+      "added": "New"
+    },
+    "since": "Since your visit",
+    "slot": "{day}, {start} to {end}",
+    "before": "Before:",
+    "after": "After:",
+    "cancelledNote": "Scheduled for {slot}. Removed from the programme.",
+    "postponedNote": "Was on {slot}. New time to be announced.",
+    "addedNote": "Scheduled for {slot}.",
+    "footer": "Only changes of time and title, cancellations, postponements and new activities are listed.",
+    "empty": "No changes in the last fifteen days",
+    "loading": "Loading changes",
+    "error": "Changes unavailable"
   }
 }

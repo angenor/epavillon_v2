@@ -1,0 +1,115 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH journal AS (\n               -- Par séance : l'index du journal est clé par entité, pas par édition.\n               SELECT a.occurred_at, a.old_data AS o, a.new_data AS n,\n                      s.id, s.slug::text AS slug, s.title, s.timezone::text AS tz\n                 FROM event.events e\n                 JOIN programme.sessions s ON s.event_id = e.id AND s.published_at IS NOT NULL\n                 JOIN platform.audit_log a\n                   ON a.entity_schema = 'programme' AND a.entity_table = 'sessions'\n                  AND a.entity_id = s.id AND a.action IN ('insert', 'update')\n                WHERE e.id = $1\n                  AND e.status NOT IN ('draft', 'cancelled')\n                  AND e.programme_published_at IS NOT NULL\n           ),\n           premiere AS (\n               SELECT min(j.occurred_at) AS instant FROM journal j\n                WHERE j.n ->> 'published_at' IS NOT NULL AND j.o ->> 'published_at' IS NULL\n           ),\n           changements AS (\n               SELECT j.*, k.kind\n                 FROM journal j\n                CROSS JOIN premiere p\n                CROSS JOIN LATERAL (\n                    SELECT j.o ->> 'published_at' IS NOT NULL\n                       AND j.n ->> 'published_at' IS NOT NULL AS publiee\n                ) v\n                CROSS JOIN LATERAL (VALUES\n                    ('added', j.n ->> 'published_at' IS NOT NULL\n                              AND j.o ->> 'published_at' IS NULL\n                              AND j.occurred_at IS DISTINCT FROM p.instant),\n                    ('rescheduled', v.publiee\n                              AND (j.o -> 'starts_at' IS DISTINCT FROM j.n -> 'starts_at'\n                                   OR j.o -> 'ends_at' IS DISTINCT FROM j.n -> 'ends_at')),\n                    ('retitled', v.publiee AND j.o -> 'title' IS DISTINCT FROM j.n -> 'title'),\n                    ('cancelled', v.publiee AND j.o ->> 'status' <> 'cancelled'\n                              AND j.n ->> 'status' = 'cancelled'),\n                    ('postponed', v.publiee AND j.o ->> 'status' <> 'postponed'\n                              AND j.n ->> 'status' = 'postponed')\n                ) AS k(kind, retenu)\n                WHERE k.retenu AND j.occurred_at >= now() - interval '15 days'\n           )\n           SELECT c.occurred_at AS \"occurred_at!\", c.kind AS \"kind!\",\n                  c.id AS \"session_id!\", c.slug AS \"slug!\", c.title AS \"title!: Value\",\n                  (c.n ->> 'starts_at')::timestamptz AS \"starts_at!\",\n                  (c.n ->> 'ends_at')::timestamptz AS \"ends_at!\",\n                  CASE WHEN c.kind <> 'added' THEN (c.o ->> 'starts_at')::timestamptz END\n                      AS previous_starts_at,\n                  CASE WHEN c.kind <> 'added' THEN (c.o ->> 'ends_at')::timestamptz END\n                      AS previous_ends_at,\n                  CASE WHEN c.kind = 'retitled' THEN c.o -> 'title' END\n                      AS \"previous_title: Value\",\n                  CASE WHEN c.kind = 'retitled' THEN c.n -> 'title' END AS \"new_title: Value\",\n                  (c.kind = 'rescheduled'\n                   AND ((c.o ->> 'starts_at')::timestamptz AT TIME ZONE c.tz)::date\n                       <> ((c.n ->> 'starts_at')::timestamptz AT TIME ZONE c.tz)::date)\n                      AS \"day_changed!\"\n             FROM changements c\n            ORDER BY c.occurred_at DESC, c.kind\n            LIMIT 300",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "occurred_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "platform.audit_log",
+            "name": "occurred_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "session_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "title!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "starts_at!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "ends_at!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "previous_starts_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "previous_ends_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "previous_title: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "new_title: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "day_changed!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "42712061bc8673d7c243343dafa0079a5a10bdb2938d6798bc62bb3cc5d9207f"
+}

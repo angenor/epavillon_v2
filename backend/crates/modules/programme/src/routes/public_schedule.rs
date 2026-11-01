@@ -28,7 +28,7 @@ pub struct EditionDemandee {
 const LIMITE_PAR_DEFAUT: i64 = 50;
 const LIMITE_MAX: i64 = 200;
 
-/// Les deux chemins publics. **Ils ne vivent pas sous `/sessions`** : le premier
+/// Les chemins publics. **Ils ne vivent pas sous `/sessions`** : le premier
 /// est `/schedule`, le second passe par l'édition et l'adresse d'URL de la
 /// séance — c'est ainsi que le site les écrit.
 pub fn configurer(cfg: &mut web::ServiceConfig) {
@@ -38,6 +38,10 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route(
             "/events/{event_slug}/tracks/{track_slug}",
             web::get().to(page_du_fil),
+        )
+        .route(
+            "/events/{event_id}/programme-changes",
+            web::get().to(changements_du_programme),
         );
 }
 
@@ -157,4 +161,28 @@ pub(crate) async fn seance(
     let seance = public_schedule::seance(state.pool(), EventId(event_id), &slug).await?;
 
     crate::routes::json_revalide(&requete, &seance, "public, no-cache")
+}
+
+/// Ce qui a changé dans le programme publié : la fenêtre de `/programmations`.
+#[utoipa::path(
+    get,
+    description = "`ProgrammeChange[]`, **sans session** : les changements des **quinze derniers jours** que le public a pu voir, lus dans le journal d'audit, le plus récent d'abord (300 au plus). Une ligne par changement : `occurred_at`, `kind` (`rescheduled` horaire ou date, `retitled`, `cancelled`, `postponed`, `added`), la séance (`session_id`, `slug`, titre courant), le créneau après (`starts_at`, `ends_at`) et avant (`previous_starts_at`, `previous_ends_at`, nuls pour `added`), l'ancien et le nouveau titre d'un `retitled`, `day_changed` quand un `rescheduled` change de jour dans le fuseau de la séance. **Seulement les séances publiées**, et ce qui leur est arrivé pendant qu'elles l'étaient ; la première publication du programme n'y figure pas. Aucun auteur. Une édition inconnue, en brouillon, annulée ou au programme non paru rend une liste **vide**.\n\n`ETag` sur le corps ; **304** sur `If-None-Match`.",
+    path = "/events/{event_id}/programme-changes",
+    tag = "Programmation publique",
+    operation_id = "programmation_changements",
+    params(("event_id" = Uuid, Path, description = "Édition")),
+    responses(
+        (status = 200, description = "ProgrammeChange[]", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
+    )
+)]
+pub(crate) async fn changements_du_programme(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let changements =
+        public_schedule::changements(state.pool(), EventId(chemin.into_inner())).await?;
+
+    crate::routes::json_revalide(&requete, &changements, "public, no-cache")
 }

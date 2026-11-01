@@ -95,6 +95,18 @@ const { data: incidents, refresh: refreshIncidents } = await useAsyncData(
 )
 useRealtime(() => publicEditionTopics([shown.value?.id], ['incidents']), () => refreshIncidents())
 
+// Le bandeau et la barre d'outils ouvrent la même fenêtre : elle vit ici, au-dessus des deux.
+const {
+  open: changesOpen,
+  changes,
+  status: changesStatus,
+  error: changesError,
+  hasSince,
+  isNew,
+  newCount,
+  retry: retryChanges,
+} = useProgrammeChanges(() => shown.value?.id ?? null)
+
 useHead(() => ({ title: t('programme.title') }))
 </script>
 
@@ -107,6 +119,7 @@ useHead(() => ({ title: t('programme.title') }))
       :edition="shown"
       :editions="data.editions"
       @select="programme?.select($event)"
+      @changes="changesOpen = true"
     />
 
     <EventProgrammeHeroSkeleton v-else-if="status === 'pending'" />
@@ -146,7 +159,24 @@ useHead(() => ({ title: t('programme.title') }))
       :edition="data.edition"
       :initial="data.programme"
       :editions="data.editions"
+      :changes-since-visit="newCount"
       @update:edition="current = $event"
+      @changes="changesOpen = true"
+    />
+
+    <EventProgrammeChanges
+      v-if="shown"
+      v-model:open="changesOpen"
+      :changes="changes"
+      :status="changesStatus"
+      :error="changesError"
+      :has-since="hasSince"
+      :is-new="isNew"
+      :timezone="shown.timezone"
+      :city="shown.city"
+      :edition-slug="shown.slug"
+      :edition-start="shown.starts_at"
+      @retry="retryChanges"
     />
   </div>
 </template>

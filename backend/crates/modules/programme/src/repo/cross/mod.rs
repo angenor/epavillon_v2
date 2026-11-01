@@ -13,7 +13,7 @@
 //! elles se relisent en un fichier, et **c'est ici qu'un ajout se discute**.
 //! C'est le patron de B3, repris sans être réinventé.
 //!
-//! # Les dix-neuf lectures hors schéma autorisées
+//! # Les vingt lectures hors schéma autorisées
 //!
 //! | # | Lecture | Question de **ce** module |
 //! |---|---|---|
@@ -36,6 +36,7 @@
 //! | 17 | `live.streams`, `live.build_embed_url()` — par `v_public_schedule` | « cette séance a-t-elle une rediffusion, où, et de quelle durée ? » (Guide Négo, étape 5) |
 //! | 18 | `event.programme_tracks` et ses parties, moments, partenaires, lieu ; `org`, `reference`, `media` pour les résoudre | « que montre la page publique de cette journée ? » (`cross/fils.rs`, 30/10) |
 //! | 19 | `identity.people` (adresse, photo), `event.rooms`, `event.programme_tracks`, `live.meetings`, `event.events` | « qui joindre pour ce dossier, où et quand se tient-il, Zoom est-il à jour, qu'a déposé d'autre son organisation ? » (`cross/tableau.rs`, 01/11) |
+//! | 20 | `platform.audit_log`, `event.events` | « qu'est-ce qui a changé ces quinze derniers jours dans le programme publié de cette édition ? » (`cross/changements.rs`, 01/11) |
 //!
 //! Les cinq dernières sont arrivées avec B5 et vivent dans `cross/grille.rs`,
 //! **dans le même espace de noms** : le découpage est un fait de fichier — le
@@ -942,3 +943,11 @@ pub use fils::*;
 mod tableau;
 
 pub use tableau::*;
+
+// -----------------------------------------------------------------------------
+// Ce qui a changé dans le programme publié (01/11) : horaires, titres,
+// annulations, reports, ajouts, lus dans le journal d'audit. Lecture n° 20.
+// -----------------------------------------------------------------------------
+mod changements;
+
+pub use changements::*;

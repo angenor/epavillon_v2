@@ -18,7 +18,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ select: [eventId: string] }>()
+const emit = defineEmits<{ select: [eventId: string]; changes: [] }>()
 
 const { t, n } = useI18n()
 const { tr } = useI18nText()
@@ -110,31 +110,38 @@ const choices = computed(() =>
           </span>
         </p>
 
-        <dl
-          v-if="isPublished"
-          class="mt-5.5 flex flex-wrap items-end gap-x-8 gap-y-3"
-          :aria-label="t('programme.hero.stats.label')"
-        >
-          <div v-for="figure in figures" :key="figure.key" class="flex flex-col-reverse">
-            <dt class="text-[0.82rem] font-semibold tracking-[0.05em] text-text-on-inverse-muted uppercase">
-              {{ t(`programme.hero.stats.${figure.key}`, figure.value) }}
-            </dt>
-            <dd class="font-condensed text-[2.4rem] leading-none font-bold text-text-on-inverse tabular-nums">
-              {{ n(figure.value) }}
-            </dd>
-          </div>
+        <div v-if="isPublished" class="mt-5.5 flex flex-wrap items-end gap-x-8 gap-y-3">
+          <dl class="flex flex-wrap items-end gap-x-8 gap-y-3" :aria-label="t('programme.hero.stats.label')">
+            <div v-for="figure in figures" :key="figure.key" class="flex flex-col-reverse">
+              <dt class="text-[0.82rem] font-semibold tracking-[0.05em] text-text-on-inverse-muted uppercase">
+                {{ t(`programme.hero.stats.${figure.key}`, figure.value) }}
+              </dt>
+              <dd class="font-condensed text-[2.4rem] leading-none font-bold text-text-on-inverse tabular-nums">
+                {{ n(figure.value) }}
+              </dd>
+            </div>
+          </dl>
 
-          <div
+          <!-- « Mis à jour le » ouvre la liste des derniers changements. -->
+          <button
             v-if="updatedAt"
-            class="basis-full text-[0.82rem] text-text-on-inverse-muted sm:basis-auto sm:border-l sm:border-border-on-inverse sm:pl-6"
+            type="button"
+            aria-haspopup="dialog"
+            class="group flex min-h-11 basis-full cursor-pointer flex-col items-start gap-1 text-left text-[0.82rem] text-text-on-inverse-muted sm:basis-auto sm:border-l sm:border-border-on-inverse sm:pl-6"
+            @click="emit('changes')"
           >
-            <dt class="inline">{{ t('programme.hero.stats.updated') }}</dt>
-            <dd class="inline">
-              {{ ' ' }}{{ updatedAt }}
+            <span>
+              {{ t('programme.hero.stats.updated') }} {{ updatedAt }}
               <span class="block">{{ zone }}</span>
-            </dd>
-          </div>
-        </dl>
+            </span>
+            <span
+              class="inline-flex items-center gap-1.5 font-condensed text-[0.95rem] font-semibold tracking-[0.05em] text-accent-on-inverse uppercase underline underline-offset-4 group-hover:text-text-on-inverse"
+            >
+              {{ t('programme.hero.stats.seeChanges') }}
+              <UiIcon name="arrow-right" size="1em" />
+            </span>
+          </button>
+        </div>
 
         <nav v-if="choices.length > 1" class="mt-6" :aria-label="t('programme.hero.others')">
           <p class="text-xs uppercase text-text-on-inverse-muted" :style="{ letterSpacing: 'var(--tracking-caps)' }">

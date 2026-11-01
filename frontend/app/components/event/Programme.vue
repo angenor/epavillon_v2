@@ -21,10 +21,12 @@ interface Props {
   edition: PublicEditionRow
   initial: ProgrammeData
   editions: PublicEditionRow[]
+  /** Changements postérieurs à la dernière visite ; zéro à la première. */
+  changesSinceVisit?: number
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<{ 'update:edition': [edition: PublicEditionRow] }>()
+const props = withDefaults(defineProps<Props>(), { changesSinceVisit: 0 })
+const emit = defineEmits<{ 'update:edition': [edition: PublicEditionRow]; changes: [] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -292,7 +294,18 @@ const views = computed(() => [
             </UiButton>
           </div>
         </template>
-        <p class="basis-full text-sm text-text-muted min-[860px]:ml-auto min-[860px]:basis-auto">{{ zoneNote }}</p>
+        <div class="flex basis-full flex-col items-start min-[860px]:ml-auto min-[860px]:basis-auto min-[860px]:items-end">
+          <p class="text-sm text-text-muted">{{ zoneNote }}</p>
+          <button
+            v-if="props.changesSinceVisit > 0"
+            type="button"
+            aria-haspopup="dialog"
+            class="inline-flex min-h-11 cursor-pointer items-center gap-1.5 text-[0.85rem] font-bold text-live underline underline-offset-3 before:size-1.75 before:rounded-full before:bg-current hover:decoration-2 lg:min-h-10"
+            @click="emit('changes')"
+          >
+            {{ t('programme.toolbar.sinceVisit', props.changesSinceVisit) }}
+          </button>
+        </div>
       </header>
 
       <UiErrorState

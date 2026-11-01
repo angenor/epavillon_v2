@@ -25,6 +25,7 @@
  *   programme/day-plan.ts      070_programme_proposals.sql § 4 bis : le jour J d'une activité retenue
  *   programme/cover-design.ts  070_programme_proposals.sql § 4 ter : l'atelier de l'image de couverture
  *   programme/track-page.ts    la page publique d'un fil, et le placement d'une activité dans ses parties
+ *   programme/changes.ts       010_platform.sql § 2 sur 075 § 1 : ce qui a changé dans un programme publié
  *   content.ts                 115_content.sql — les contenus mis en avant
  *   engagement.ts              110_engagement.sql § 6 — les rappels seuls
  *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
@@ -77,6 +78,7 @@ export type * from './programme/registration'
 export type * from './programme/day-plan'
 export type * from './programme/cover-design'
 export type * from './programme/track-page'
+export type * from './programme/changes'
 
 export type * from './content'
 export type * from './engagement'

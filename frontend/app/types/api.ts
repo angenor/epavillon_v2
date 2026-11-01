@@ -3651,6 +3651,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/{event_id}/programme-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ce qui a changé dans le programme publié : la fenêtre de `/programmations`.
+         * @description `ProgrammeChange[]`, **sans session** : les changements des **quinze derniers jours** que le public a pu voir, lus dans le journal d'audit, le plus récent d'abord (300 au plus). Une ligne par changement : `occurred_at`, `kind` (`rescheduled` horaire ou date, `retitled`, `cancelled`, `postponed`, `added`), la séance (`session_id`, `slug`, titre courant), le créneau après (`starts_at`, `ends_at`) et avant (`previous_starts_at`, `previous_ends_at`, nuls pour `added`), l'ancien et le nouveau titre d'un `retitled`, `day_changed` quand un `rescheduled` change de jour dans le fuseau de la séance. **Seulement les séances publiées**, et ce qui leur est arrivé pendant qu'elles l'étaient ; la première publication du programme n'y figure pas. Aucun auteur. Une édition inconnue, en brouillon, annulée ou au programme non paru rend une liste **vide**.
+         *
+         *     `ETag` sur le corps ; **304** sur `If-None-Match`.
+         */
+        get: operations["programmation_changements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{event_id}/sessions/{slug}": {
         parameters: {
             query?: never;
@@ -18370,6 +18392,36 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    programmation_changements: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Édition */
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ProgrammeChange[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

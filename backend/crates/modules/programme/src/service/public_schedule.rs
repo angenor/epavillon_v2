@@ -53,6 +53,15 @@ pub async fn programmation(
     public_schedule::programmation(pool, event_id, limite).await
 }
 
+/// Ce qui a changé ces quinze derniers jours dans le programme publié d'une
+/// édition. Vide pour une édition inconnue ou au programme non paru.
+pub async fn changements(
+    pool: &PgPool,
+    event_id: EventId,
+) -> Result<Vec<crate::repo::cross::ChangementDuProgramme>> {
+    crate::repo::cross::changements_du_programme(pool, event_id.0).await
+}
+
 /// Le détail d'une séance **publiée**, par son adresse d'URL.
 ///
 /// **Une adresse inconnue et une séance non publiée rendent le même refus** :
