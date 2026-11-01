@@ -24,7 +24,7 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 | **Suivi d'un dossier (espace organisation)** | `070_programme_proposals.sql` | `proposal_transitions`, `proposal_comments`, `proposal_reads` · `proposal_history()` |
 | **Liste des propositions (back-office)** | `070_programme_proposals.sql` | `v_proposal_dashboard` (vue prête à l'emploi) · `proposal_transitions_allowed` (les actions offertes) · `unread_proposals_for()` (dossiers jamais ouverts par une personne) |
 | **Fiche d'évaluation** | `070_programme_proposals.sql` + `060_events.sql` | `reviews`, `review_scores`, `review_assignments`, `event.review_criteria` · `refresh_proposal_score()` |
-| **Planificateur de créneaux** | `075_programme_sessions.sql` | `programme.sessions`, `session_speakers`, `session_organizations`, `session_tracks` · `detect_conflicts()`, `publication_readiness()`, `session_schedule_history()` |
+| **Planificateur de créneaux** | `075_programme_sessions.sql` | `programme.sessions`, `session_speakers`, `session_organizations`, `session_tracks`, `session_proposals` (séances communes) · `detect_conflicts()`, `publication_readiness()`, `session_schedule_history()` |
 | **Programmation publique** | `075_programme_sessions.sql` | `v_public_schedule` (vue prête à l'emploi, état temporel calculé) |
 | **Inscriptions** | `075_programme_sessions.sql` | `registration_forms`, `registration_form_fields`, `registrations` · `record_join()`, `promote_from_waitlist()` |
 | **Questions du public** | `075_programme_sessions.sql` | `session_questions`, `session_question_answers`, `session_question_votes` |

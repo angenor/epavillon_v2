@@ -1,4 +1,4 @@
-//! Réunir et séparer — les séances communes du planificateur (01/11).
+//! Réunir et séparer : les séances communes du planificateur (01/11).
 //!
 //! Faute de créneaux pour tous, l'équipe réunit deux dossiers retenus ou plus
 //! dans un créneau, sous un titre commun. Le public voit une séance : une

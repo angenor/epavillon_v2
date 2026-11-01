@@ -46,10 +46,11 @@ const ruleStyle = { '--rule-solid': 'var(--color-day-solid)', '--rule-on': 'var(
 
 <template>
   <section v-if="cards.length" aria-labelledby="dossiers-titre">
-    <h2 id="dossiers-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
+    <!-- Titre pour les lecteurs d'écran seulement : la maquette enchaîne les cartes sous le diaporama. -->
+    <h2 id="dossiers-titre" class="sr-only">
       {{ t('activity.joint.title') }}
     </h2>
-    <div class="mt-4.5 grid grid-cols-1 gap-5 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
       <article
         v-for="card in cards"
         :key="card.id"
