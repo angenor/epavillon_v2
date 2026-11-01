@@ -153,6 +153,17 @@
     .dialog-foot .acts { width: 100%; }
     .dialog-foot .acts .btn { flex: 1; justify-content: center; }
   }
+  .guest { margin: 0 0 6px; }
+  .guest-intro { margin: 0 0 12px; font-size: 0.9rem; color: var(--color-text-secondary); }
+  .guest-intro a { font-weight: 600; color: var(--color-accent); }
+  .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+  .field { display: grid; gap: 4px; }
+  .field.wide { grid-column: 1 / -1; }
+  .field label { font-weight: 600; font-size: 0.88rem; color: var(--color-text); }
+  .field input, .field select { min-height: 44px; padding: 0 12px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); font: inherit; font-size: 0.95rem; color: var(--color-text); }
+  .field small { font-size: 0.78rem; color: var(--color-text-muted); }
+  .pick-title { margin: 18px 0 0; font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink); }
+  @media (max-width: 560px) { .fields { grid-template-columns: minmax(0, 1fr); } }
   .state-switch { position: fixed; left: 16px; bottom: 16px; z-index: 50; display: flex; flex-wrap: wrap; gap: 4px; max-width: calc(100vw - 140px); padding: 4px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-md); }
   .state-switch a { padding: 6px 8px; border-radius: var(--radius-sm); font-family: var(--font-heading); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; text-decoration: none; color: var(--color-text-secondary); }
   .state-switch a[aria-current] { background: var(--ifdd-bleu-900); color: #fff; }
@@ -217,7 +228,8 @@
         <div class="ticket-join" data-st="registered">
           <div class="done-line"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Inscrit à la journée</div>
           <p>Vous suivez 6 activités sur 8 ; un rappel vous parvient avant chacune. Le lien du direct, le même toute la journée, s'affiche ici le jour venu et vous arrive par courriel.</p>
-          <button class="linkish" type="button" data-open>Modifier mes activités</button>
+          <button class="linkish" type="button" data-open data-who="account">Modifier mes activités</button>
+          <p data-who="guest" style="margin:0 !important;font-size:0.85rem;color:var(--color-text-secondary) !important">Sans compte : pour changer vos activités, suivez le lien du courriel de confirmation.</p>
         </div>
         <div class="ticket-live" data-st="live">
           <span class="tag tag-live">En direct depuis 08:00</span>
@@ -438,6 +450,17 @@
     </div>
     <div class="dialog-body">
       <p class="intro"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Un seul lien pour toute la journée : ouverture, activités, pauses et clôture. Décochez ce qui ne vous intéresse pas ; vous recevrez un rappel avant chaque activité gardée.</span></p>
+      <div class="guest" data-who="guest">
+        <p class="guest-intro">Vous pouvez vous inscrire sans compte. Vous en avez un ? <a href="#">Connectez-vous.</a></p>
+        <div class="fields">
+          <div class="field"><label for="g-nom">Nom</label><input id="g-nom" autocomplete="family-name"></div>
+          <div class="field"><label for="g-prenom">Prénom</label><input id="g-prenom" autocomplete="given-name"></div>
+          <div class="field wide"><label for="g-mail">Adresse électronique</label><input id="g-mail" type="email" autocomplete="email"><small>Elle sert à vous confirmer l'inscription, à vous envoyer le lien du direct et les rappels des activités gardées.</small></div>
+          <div class="field"><label for="g-pays">Pays</label><select id="g-pays"><option>Côte d'Ivoire</option></select><small>Deviné d'après votre fuseau horaire.</small></div>
+          <div class="field"><label for="g-org">Organisation</label><input id="g-org" autocomplete="organization"></div>
+        </div>
+        <p class="pick-title">Vos activités</p>
+      </div>
       <div class="pick-tools"><span id="d-count">8 activités sur 8</span><button type="button" id="d-toggle">Tout décocher</button></div>
       <p class="pick-part">Partie 1, 08:00 à 10:00</p>
       <div class="pick is-moment"><span></span><time>08:00</time><div><b>Accueil et installation</b><em>Compris dans le direct</em></div></div>
@@ -455,7 +478,7 @@
       <div class="pick is-moment"><span></span><time>18:00</time><div><b>Clôture</b><em>Compris dans le direct</em></div></div>
     </div>
     <div class="dialog-foot">
-      <p>Inscription au nom de <b>Angenor Test</b></p>
+      <p data-who="account">Inscription au nom de <b>Angenor Test</b></p><p data-who="guest">Un courriel confirme l'inscription ; son lien permet de changer vos activités.</p>
       <div class="acts"><button class="btn btn-outline" type="button" data-close>Annuler</button><button class="btn btn-primary" type="button" data-close>Confirmer l'inscription</button></div>
     </div>
   </div>
@@ -463,12 +486,16 @@
 <nav class="state-switch" aria-label="État de la maquette">
   <a href="?etat=inscription">Avant</a>
   <a href="?etat=fenetre">Fenêtre</a>
+  <a href="?etat=fenetre-invite">Fenêtre sans compte</a>
   <a href="?etat=inscrit">Inscrit</a>
+  <a href="?etat=inscrit-invite">Inscrit sans compte</a>
   <a href="?etat=direct">Le jour même</a>
 </nav>
 <script>
 {
-  const states = { inscription: 'register', fenetre: 'register', inscrit: 'registered', direct: 'live' }
+  const states = { inscription: 'register', fenetre: 'register', 'fenetre-invite': 'register', inscrit: 'registered', 'inscrit-invite': 'registered', direct: 'live' }
+  const who = /invite$/.test(new URLSearchParams(location.search).get('etat') || '') ? 'guest' : 'account'
+  document.querySelectorAll('[data-who]').forEach(el => { el.hidden = el.dataset.who !== who })
   const key = new URLSearchParams(location.search).get('etat') || 'inscription'
   const state = states[key] || 'register'
   document.querySelectorAll('[data-st]').forEach(el => { el.hidden = !el.dataset.st.split(' ').includes(state) })
@@ -486,7 +513,7 @@
   backdrop.querySelectorAll('[data-close], .dialog-close').forEach(b => b.addEventListener('click', close))
   backdrop.addEventListener('click', e => { if (e.target === backdrop) close() })
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close() })
-  if (key === 'fenetre') open()
+  if (key === 'fenetre' || key === 'fenetre-invite') open()
 }
 </script>
 </body>
