@@ -28,7 +28,9 @@
   .cal-col { min-width: 0; padding: 0 6px; }
   /* Un trait vertical marque le début de chaque semaine. */
   .cal-col.week-start { border-left: 3px solid var(--color-text); padding-left: 9px; }
-  .cal-head .cal-col { padding-top: 10px; }
+  /* L'en-tête descend jusqu'au trait, même quand un voisin (« Aujourd'hui ») est plus haut. */
+  .cal-head .cal-col { display: flex; flex-direction: column; padding-top: 10px; }
+  .cal-head .wk-head { flex: 1; align-content: flex-start; }
   .cal-head .cal-col.is-special, .cal-head .cal-col.is-rest { background: linear-gradient(var(--page), var(--page)); }
 
   .wk-special { display: flex; align-self: stretch; border-radius: var(--radius) var(--radius) 0 0; font-size: 1rem; padding: 6px 10px 5px; text-decoration: none; white-space: nowrap; overflow: hidden; }
@@ -45,6 +47,16 @@
   .wk-head p { margin: 0; font-size: 0.76rem; color: var(--color-text-muted); }
   .cal-col.is-rest .wk-head { background: repeating-linear-gradient(135deg, var(--color-border) 0 2px, transparent 2px 10px); }
 
+  /* Collée en haut, la rangée se réduit à une ligne : étiquette fine, numéro et jour. */
+  .wk-special, .wk-head, .wk-head b, .wk-head h2, .cal-head .cal-col { transition: font-size 180ms ease, padding 180ms ease; }
+  .cal-sticky.is-stuck .cal-head .cal-col { padding-top: 4px; }
+  .cal-sticky.is-stuck .wk-special { font-size: 0.78rem; padding: 3px 8px 2px; }
+  .cal-sticky.is-stuck .wk-head { flex-wrap: nowrap; padding: 3px 8px 5px; }
+  .cal-sticky.is-stuck .wk-head b { font-size: 1.45rem; }
+  .cal-sticky.is-stuck .wk-head h2 { font-size: 0.95rem; }
+  .cal-sticky.is-stuck .wk-head p, .cal-sticky.is-stuck .wk-head .tag { display: none; }
+  @media (prefers-reduced-motion: reduce) { .wk-special, .wk-head, .wk-head b, .wk-head h2, .cal-head .cal-col { transition: none; } }
+
   .cal-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; display: grid; place-items: center; width: var(--target); height: var(--target); border: 1px solid var(--color-border-strong); border-radius: 50%; background: var(--card); color: var(--ink); box-shadow: var(--shadow-md); cursor: pointer; font-size: 1.3rem; }
   .cal-arrow:hover { background: var(--color-surface-hover); }
   .cal-arrow[disabled] { display: none; }
@@ -59,7 +71,7 @@
 
   /* Le jour de repos : hachuré sur toute la hauteur, et dit. */
   .cal-body .cal-col.is-rest { background: repeating-linear-gradient(135deg, var(--color-border) 0 2px, transparent 2px 10px); }
-  .rest-note { position: sticky; top: calc(var(--sticky-top) + 120px); margin: 24px 0 0; padding: 12px 10px; border-radius: var(--radius); background: var(--page); border: 1px solid var(--color-border); text-align: center; font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); }
+  .rest-note { position: sticky; top: calc(var(--sticky-top) + 72px); margin: 24px 0 0; padding: 12px 10px; border-radius: var(--radius); background: var(--page); border: 1px solid var(--color-border); text-align: center; font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); }
   .rest-note span { display: block; margin-top: 6px; font-family: var(--font-body); font-weight: 400; font-size: 0.76rem; text-transform: none; letter-spacing: 0; color: var(--color-text-muted); }
 
   .wk-card { border-radius: var(--radius); overflow: hidden; background: var(--card); border: 1px solid var(--color-border-subtle); box-shadow: var(--shadow-sm); transition: box-shadow 300ms ease, transform 300ms ease; }
@@ -561,6 +573,13 @@
   }))
   const current = document.querySelector('.daystrip a[aria-current]')
   if (current) current.parentElement.scrollLeft = current.offsetLeft - 80
+  // Repère placé juste avant la rangée : il ne bouge pas quand elle rétrécit, donc pas d'aller-retour.
+  const sticky = document.querySelector('.cal-sticky')
+  const sentinel = document.createElement('div')
+  sticky.before(sentinel)
+  const stuck = () => sticky.classList.toggle('is-stuck', sentinel.getBoundingClientRect().top < parseFloat(getComputedStyle(sticky).top) - 1)
+  addEventListener('scroll', stuck, { passive: true })
+  stuck()
   sync()
 </script>
 </body>
