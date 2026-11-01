@@ -3,33 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Programmation : depuis votre visite</title>
+<title>Programmation : ce qui a changé</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="programme.css">
 <style>
-  /* Depuis votre dernière visite : un résumé en tête, une étiquette sur chaque activité concernée. */
-  .since { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px 20px; margin-top: 24px; padding: 16px 18px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); border-left: 5px solid var(--ifdd-cyan); box-shadow: var(--shadow-sm); }
-  .since > .icon { font-size: 1.6rem; color: var(--color-accent); }
-  .since h2 { font-size: 1.25rem; }
-  .since p { margin: 4px 0 0; font-size: 0.92rem; color: var(--color-text-secondary); }
-  .since .counts { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 8px; }
-  .since .counts span { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; }
-  .since .counts b { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: var(--ink); }
-  .since-acts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-  @media (max-width: 860px) { .since { grid-template-columns: auto minmax(0, 1fr); } .since-acts { grid-column: 1 / -1; justify-content: flex-start; } }
+  /* « Mis à jour le … » s'ouvre sur la liste des derniers changements. */
+  .updated { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 0 0 0 24px; border: 0; border-left: 1px solid rgb(255 255 255 / 0.25); background: none; color: rgb(255 255 255 / 0.75); font: inherit; font-size: 0.82rem; text-align: left; cursor: pointer; min-height: var(--target); }
+  .updated em { display: inline-flex; align-items: center; gap: 6px; font-style: normal; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ifdd-cyan-300); text-decoration: underline; text-underline-offset: 4px; }
+  .updated:hover em { color: #fff; }
+
+  .veil { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgb(35 31 32 / 0.55); backdrop-filter: blur(2px); }
+  .changes { display: flex; flex-direction: column; width: min(640px, 100%); max-height: calc(100dvh - 32px); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-xl); }
+  .changes-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px 14px; border-bottom: 1px solid var(--color-border-subtle); }
+  .changes-head h2 { font-size: 1.7rem; }
+  .changes-head p { margin: 4px 0 0; font-size: 0.85rem; color: var(--color-text-muted); }
+  .close { display: grid; place-items: center; flex: none; width: var(--target); height: var(--target); border: 0; border-radius: var(--radius); background: none; cursor: pointer; color: var(--color-text-secondary); font-size: 1.4rem; }
+  .close:hover { background: var(--color-surface-hover); }
+  .changes-body { overflow-y: auto; padding: 6px 22px 18px; }
+  .when { margin: 16px 0 6px; font-family: var(--font-heading); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
+  .change { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--color-border-subtle); }
+  .change .kind { align-self: start; justify-self: start; }
+  .change h3 { grid-column: 2; font-size: 1.1rem; font-weight: 600; text-transform: none; line-height: 1.2; }
+  .change h3 a { text-decoration: none; }
+  .change h3 a:hover { color: var(--color-accent); text-decoration: underline; }
+  .change .diff { grid-column: 2; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 0.92rem; }
+  .change del { color: var(--color-text-muted); text-decoration-thickness: 1.5px; }
+  .change ins { text-decoration: none; font-weight: 700; color: var(--color-text); }
+  .change .diff .icon { color: var(--color-text-muted); }
+  .change .note { grid-column: 2; font-size: 0.85rem; color: var(--color-text-secondary); }
   .tag-new { background: var(--ifdd-cyan); color: var(--ifdd-bleu-900); }
   .tag-changed { background: var(--ifdd-jaune); color: var(--ifdd-noir); }
-  .tag-new::before, .tag-changed::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .row.is-new, .row.is-changed { position: relative; }
-  .row.is-new::after, .row.is-changed::after { content: ""; position: absolute; left: -20px; top: 18px; width: 8px; height: 8px; border-radius: 50%; background: var(--ifdd-cyan); }
-  .row.is-changed::after { background: var(--ifdd-jaune); }
-  .change-note { display: block; margin-top: 6px; font-size: 0.8rem; color: var(--color-text-secondary); }
-  .change-note b { color: var(--color-warning); }
-  .day-head .tag-new, .day-head .tag-changed { margin-top: 10px; }
-  @media (max-width: 860px) { .row.is-new::after, .row.is-changed::after { left: -10px; } }
+  .tag-cancelled { background: var(--color-live-surface); color: var(--color-live); border: 1px solid var(--color-live-border); }
+  .changes-foot { padding: 12px 22px; border-top: 1px solid var(--color-border-subtle); font-size: 0.8rem; color: var(--color-text-muted); }
+  @media (max-width: 560px) { .change { grid-template-columns: minmax(0, 1fr); } .change h3, .change .diff, .change .note { grid-column: 1; } }
 </style>
 </head>
 <body>
@@ -59,7 +68,7 @@
       <div><b>48</b>activités</div>
       <div><b>62</b>organisations</div>
       <div><b>31</b>pays</div>
-      <small>Mis à jour le 13 novembre à 08:12<br>heure d'Antalya</small>
+      <button class="updated" type="button" aria-haspopup="dialog"><span>Mis à jour le 13 novembre à 08:12<br>heure d'Antalya</span><em>Voir ce qui a changé <svg class="icon"><use href="#i-arrow"/></svg></em></button>
     </div>
   </div>
 </section>
@@ -100,23 +109,6 @@
 </nav>
 
 <main class="wrap" style="padding-bottom:80px">
-
-  <aside class="since" aria-labelledby="depuis">
-    <svg class="icon"><use href="#i-clock"/></svg>
-    <div>
-      <h2 id="depuis">Depuis votre dernière visite</h2>
-      <p>Le jeudi 12 novembre à 18:40, heure d'Antalya.</p>
-      <div class="counts">
-        <span><span class="tag tag-new">Nouveau</span><b>3</b> activités</span>
-        <span><span class="tag tag-changed">Modifié</span><b>2</b> activités</span>
-        <span><span class="tag tag-postponed">Reportée</span><b>1</b> activité</span>
-      </div>
-    </div>
-    <div class="since-acts">
-      <button class="btn btn-primary btn-sm" type="button">Voir seulement les changements (6)</button>
-      <button class="btn btn-ghost btn-sm" type="button">Tout marquer comme vu</button>
-    </div>
-  </aside>
 
   <article class="lead" aria-label="En direct">
     <div class="lead-media">
@@ -234,7 +226,7 @@
               </div>
               <div class="row-side"><span class="tag tag-live">En direct</span><a class="btn btn-live btn-sm" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre</a></div>
             </li>
-            <li class="row is-new is-highlight">
+            <li class="row is-highlight">
               <div class="row-time"><b>11:30</b><span>à 12:30, 1 h</span></div>
               <div class="row-thumb fade"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
               <div>
@@ -246,17 +238,16 @@
                   <li><b>2</b><span>Villes francophones et adaptation : financer les plans locaux, AIMF</span></li>
                 </ol>
               </div>
-              <div class="row-side"><span class="tag tag-new">Nouveau</span><span class="tag tag-soon">À venir</span></div>
+              <div class="row-side"><span class="tag tag-soon">À venir</span></div>
             </li>
-            <li class="row is-changed">
+            <li class="row">
               <div class="row-time"><b>14:15</b><span>à 15:15, 1 h</span></div>
               <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
               <div>
                 <h3 class="row-title"><a href="#">Du récif à la résilience : financer la protection des côtes mauriciennes</a></h3>
                 <p class="row-org"><span class="logo" aria-hidden="true">BM</span><span><b>Business Maurice</b> Maurice</span></p>
-                <span class="change-note"><b>Horaire modifié</b> depuis votre visite</span>
               </div>
-              <div class="row-side"><span class="tag tag-changed">Modifié</span><span class="tag tag-soon">À venir</span></div>
+              <div class="row-side"><span class="tag tag-soon">À venir</span></div>
             </li>
           </ul>
           <div class="moment"><b>18:00</b><span>Clôture de la journée</span></div>
@@ -265,13 +256,12 @@
 
       <p class="others-label">Le même jour, hors de la journée spéciale</p>
       <ul class="rows">
-        <li class="row is-changed">
+        <li class="row">
           <div class="row-time"><b>18:30</b><span>à 19:30, 1 h</span></div>
           <div class="row-thumb initials">AIMF</div>
           <div>
             <h3 class="row-title"><a href="#">Dialogue des bailleurs et des collectivités sur la finance locale</a></h3>
             <p class="row-org"><span class="logo" aria-hidden="true">AIMF</span><span><b>AIMF</b> Association internationale des maires francophones, France</span></p>
-            <span class="change-note"><b>Reportée</b> depuis votre visite, nouveau créneau à venir</span>
           </div>
           <div class="row-side"><span class="tag tag-postponed">Reportée</span></div>
         </li>
@@ -298,14 +288,14 @@
           </div>
           <div class="moment"><b>08:00</b><span>Arrivée des jeunes, ouverture officielle à 09:00</span></div>
           <ul class="rows">
-            <li class="row is-new">
+            <li class="row">
               <div class="row-time"><b>09:20</b><span>à 10:10, 50 min</span></div>
               <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt=""></div>
               <div>
                 <h3 class="row-title"><a href="#">Les 10 minutes qui inspirent : pitchs des organisations de jeunes</a></h3>
                 <p class="row-org"><span class="logo" aria-hidden="true">GOL</span><span><b>Green OpenLab</b> avec JVE Centrafrique, Youth Voices Cameroun et trois autres</span></p>
               </div>
-              <div class="row-side"><span class="tag tag-new">Nouveau</span><span class="tag tag-soon">À venir</span></div>
+              <div class="row-side"><span class="tag tag-soon">À venir</span></div>
             </li>
             <li class="row is-highlight">
               <div class="row-time"><b>10:20</b><span>à 11:20, 1 h</span></div>
@@ -328,6 +318,56 @@
   <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
 </footer>
 
+
+<div class="veil" role="dialog" aria-modal="true" aria-labelledby="changements">
+  <section class="changes">
+    <header class="changes-head">
+      <div>
+        <h2 id="changements">Ce qui a changé</h2>
+        <p>Les quinze derniers jours, le plus récent en haut. Heures d'Antalya (UTC+3).</p>
+      </div>
+      <button class="close" type="button" aria-label="Fermer">×</button>
+    </header>
+    <div class="changes-body">
+      <p class="when">Vendredi 13 novembre</p>
+      <article class="change">
+        <span class="tag tag-changed kind">Horaire</span>
+        <h3><a href="#">Du récif à la résilience : financer la protection des côtes mauriciennes</a></h3>
+        <p class="diff"><del>ven. 13, 13:00 à 14:00</del><svg class="icon"><use href="#i-arrow"/></svg><ins>ven. 13, 14:15 à 15:15</ins></p>
+      </article>
+      <article class="change">
+        <span class="tag tag-cancelled kind">Annulée</span>
+        <h3>Femmes et transition énergétique en Afrique centrale</h3>
+        <p class="note">Prévue le mercredi 18, 15:00 à 16:00. Retirée du programme.</p>
+      </article>
+
+      <p class="when">Jeudi 12 novembre</p>
+      <article class="change">
+        <span class="tag tag-changed kind">Titre</span>
+        <h3><a href="activite-commune.html">Financer l'action climatique locale : régions et villes francophones</a></h3>
+        <p class="diff"><del>Enjeux de financements pour les régions et les municipalités</del><svg class="icon"><use href="#i-arrow"/></svg><ins>Financer l'action climatique locale : régions et villes francophones</ins></p>
+      </article>
+      <article class="change">
+        <span class="tag tag-postponed kind">Reportée</span>
+        <h3><a href="#">Dialogue des bailleurs et des collectivités sur la finance locale</a></h3>
+        <p class="note">Était le vendredi 13, 18:30 à 19:30. Nouveau créneau à venir.</p>
+      </article>
+      <article class="change">
+        <span class="tag tag-new kind">Nouvelle</span>
+        <h3><a href="#">Les 10 minutes qui inspirent : pitchs des organisations de jeunes</a></h3>
+        <p class="note">Samedi 14, 09:20 à 10:10, journée action jeunesse.</p>
+      </article>
+
+      <p class="when">Mardi 10 novembre</p>
+      <article class="change">
+        <span class="tag tag-changed kind">Date</span>
+        <h3><a href="#">Transition énergétique juste : partenariats francophones</a></h3>
+        <p class="diff"><del>mer. 11, 15:00 à 16:00</del><svg class="icon"><use href="#i-arrow"/></svg><ins>jeu. 19, 10:00 à 11:00</ins></p>
+      </article>
+    </div>
+    <p class="changes-foot">Seuls les changements d'horaire, de titre, les annulations, les reports et les nouvelles activités sont listés.</p>
+  </section>
+</div>
 <script src="icones.js"></script>
 <script>
   // Comme en production : la bande s'ouvre sur le jour courant.
