@@ -64,7 +64,13 @@ const {
     const person = auth.person
     return person ? api.workspace.proposalFile(proposalId.value, person.id) : Promise.resolve(null)
   },
-  { watch: [proposalId, () => auth.person?.id], lazy: true },
+  {
+    watch: [proposalId, () => auth.person?.id],
+    lazy: true,
+    // Relu à chaque arrivée sur la page : en revenant de l'éditeur de l'image, le
+    // dossier gardé en mémoire montrait l'ancienne couverture (01/11).
+    getCachedData: (key, nuxtApp) => (nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined),
+  },
 )
 
 useHead(() => ({
@@ -214,11 +220,33 @@ async function attachCover(assetId: AssetId | null): Promise<void> {
       owner_id: file.value.tracking.proposal.id,
       assignments: [{ role: 'cover', asset_id: assetId }],
     })
-    await refresh()
+    await Promise.all([refresh(), rereadPreparingCover()])
   } catch (thrown) {
     coverError.value = apiErrorMessage(thrown, (key) => t(key))
   }
 }
+
+// Une couverture qui vient d'être déposée n'est servie qu'une fois ses formats
+// préparés, quelques secondes plus tard : on montre l'original en attendant,
+// on le dit, et la page bascule seule sur la version finale (01/11).
+const { data: preparingCover, refresh: rereadPreparingCover } = useAsyncData(
+  () => `proposal-file-cover-preparing-${proposalId.value}`,
+  async () => {
+    const [latest] = await api.media.attached({ schema: 'programme', table: 'proposals', id: proposalId.value }, 'cover')
+    return latest && ['uploaded', 'scanning', 'processing'].includes(latest.status) ? latest : null
+  },
+  { lazy: true, server: false, watch: [proposalId], getCachedData: () => undefined },
+)
+const preparingPreviewFailed = ref(false)
+let preparingTimer: ReturnType<typeof setTimeout> | null = null
+watch(preparingCover, (pending, previous) => {
+  if (preparingTimer) clearTimeout(preparingTimer)
+  if (pending) preparingTimer = setTimeout(() => rereadPreparingCover(), 3000)
+  else if (previous) refresh()
+})
+onBeforeUnmount(() => {
+  if (preparingTimer) clearTimeout(preparingTimer)
+})
 
 /** L'atelier a-t-il déjà servi ? « Modifier » le rouvre là où on l'a laissé. */
 const { data: coverStudio } = useAsyncData(
@@ -667,8 +695,23 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
               aria-labelledby="couverture-title"
               class="scroll-mt-24 overflow-hidden rounded-lg border border-border bg-surface-raised"
             >
+              <div v-if="preparingCover && !preparingPreviewFailed" class="relative">
+                <img
+                  :src="preparingCover.url"
+                  :alt="tr(file.tracking.proposal.title)"
+                  class="aspect-video w-full object-cover"
+                  @error="preparingPreviewFailed = true"
+                />
+                <p
+                  role="status"
+                  class="absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-md bg-surface-raised px-3 py-2 text-sm font-medium text-text shadow-sm"
+                >
+                  <UiSpinner size="1rem" />
+                  {{ t('organization.workspace.proposal.cover.preparing') }}
+                </p>
+              </div>
               <UiImage
-                v-if="file.tracking.cover"
+                v-else-if="file.tracking.cover"
                 :image="file.tracking.cover"
                 ratio="16 / 9"
                 sizes="(min-width: 1024px) 800px, 100vw"

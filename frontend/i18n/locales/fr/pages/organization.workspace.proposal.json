@@ -218,7 +218,8 @@
     "description": "Elle illustre votre activité sur la plateforme et sert d'aperçu quand on partage le lien.",
     "change": "Changer l'image",
     "edit": "Modifier",
-    "create": "Créer ou choisir un modèle"
+    "create": "Créer ou choisir un modèle",
+    "preparing": "Votre nouvelle image est en préparation : elle s'affichera partout dans quelques secondes."
   },
   "sections": {
     "presentation": "Présentation",
