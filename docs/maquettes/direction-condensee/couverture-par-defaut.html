@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Couverture par défaut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  .page { padding: 40px 0 80px; }
+  .note { max-width: 72ch; margin: 0 0 32px; color: var(--color-text-secondary); line-height: 1.55; }
+  h2.sec { margin: 0 0 6px; font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; color: var(--ink); text-transform: uppercase; }
+  .sub { margin: 0 0 16px; color: var(--color-text-muted); font-size: 0.9rem; }
+  .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; margin-bottom: 48px; }
+  .pair > div > small { display: block; margin-bottom: 8px; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
+  @media (max-width: 800px) { .pair { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Tuile de repli : la photo de l'édition (petite version), un voile bleu nuit, le sigle de l'organisation en blanc. */
+  .fallback { position: relative; display: grid; place-items: center; overflow: hidden; background: var(--color-surface-inverse); }
+  .fallback img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .fallback::after { content: ""; position: absolute; inset: 0; background: rgb(29 26 91 / 0.62); }
+  .fallback span { position: relative; z-index: 1; padding: 0 10px; font-family: var(--font-heading); font-weight: 700; letter-spacing: 0.03em; color: #fff; text-shadow: 0 1px 8px rgb(0 0 0 / 0.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .old { display: grid; place-items: center; background: var(--color-surface-sunken); font-family: var(--font-heading); font-weight: 700; color: var(--color-text-muted); }
+
+  /* Ligne de la liste */
+  .row { display: grid; grid-template-columns: 76px 168px minmax(0, 1fr); gap: 18px; align-items: center; padding: 16px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); }
+  .row b.t { font-family: var(--font-heading); font-weight: 700; font-size: 1.7rem; line-height: 1; color: var(--ink); }
+  .row .thumb { aspect-ratio: 16 / 9; border-radius: var(--radius); font-size: 1.5rem; }
+  .row h3 { margin: 0 0 6px; font-family: var(--font-heading); font-weight: 600; font-size: 1.2rem; line-height: 1.15; color: var(--ink); }
+  .row p { margin: 0; font-size: 0.85rem; color: var(--color-text-secondary); }
+  @media (max-width: 520px) { .row { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Carte du calendrier */
+  .card { width: 230px; overflow: hidden; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); box-shadow: var(--shadow-sm); }
+  .card .thumb { aspect-ratio: 16 / 9; font-size: 1.8rem; }
+  .card .body { padding: 10px 12px 12px; }
+  .card b.t { font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; color: var(--ink); }
+  .card h3 { margin: 6px 0 0; font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; line-height: 1.15; color: var(--ink); }
+
+  /* Scène de la page d'une activité : la grande version de la photo. */
+  .stage { aspect-ratio: 16 / 9; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); font-size: clamp(2.6rem, 6vw, 4.6rem); }
+  .stage.old { background: var(--color-surface-inverse); color: rgb(255 255 255 / 0.15); white-space: nowrap; overflow: hidden; }
+  .row h3, .card h3 { text-transform: none; }
+</style>
+</head>
+<body>
+<main class="page wrap">
+  <p class="note">Une activité sans image de couverture prend la photo de son édition, sous un voile bleu nuit, avec le sigle de l'organisation par-dessus. Dans les listes, la petite version de la photo ; sur la page de l'activité, la grande. Une activité qui a sa couverture ne change pas.</p>
+
+  <h2 class="sec">Liste du programme</h2>
+  <p class="sub">Ligne d'une activité, sur grand écran.</p>
+  <div class="pair">
+    <div><small>Aujourd'hui</small>
+      <div class="row"><b class="t">10:15</b><div class="thumb old">CILSS</div><div><h3>Du financement climatique à l'action régionale</h3><p>CILSS</p></div></div>
+    </div>
+    <div><small>Proposé</small>
+      <div class="row"><b class="t">10:15</b><div class="thumb fallback"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""><span>CILSS</span></div><div><h3>Du financement climatique à l'action régionale</h3><p>CILSS</p></div></div>
+    </div>
+  </div>
+
+  <h2 class="sec">Calendrier</h2>
+  <p class="sub">Carte d'une colonne de jour.</p>
+  <div class="pair">
+    <div><small>Aujourd'hui</small>
+      <div class="card"><div class="thumb old">AIMF</div><div class="body"><b class="t">09:30</b><h3>Adaptation côtière : les villes du golfe de Guinée</h3></div></div>
+    </div>
+    <div><small>Proposé</small>
+      <div class="card"><div class="thumb fallback"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""><span>AIMF</span></div><div class="body"><b class="t">09:30</b><h3>Adaptation côtière : les villes du golfe de Guinée</h3></div></div>
+    </div>
+  </div>
+
+  <h2 class="sec">Page de l'activité</h2>
+  <p class="sub">La grande image sous le bandeau, à la place de la couverture absente.</p>
+  <div class="pair">
+    <div><small>Aujourd'hui</small>
+      <div class="stage old">ENERGIES 2050</div>
+    </div>
+    <div><small>Proposé</small>
+      <div class="stage fallback"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""><span>ENERGIES 2050</span></div>
+    </div>
+  </div>
+</main>
+<script src="icones.js"></script>
+</body>
+</html>
