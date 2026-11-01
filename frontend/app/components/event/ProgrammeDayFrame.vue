@@ -4,19 +4,15 @@ import type { ProgrammeRowData } from './ProgrammeRow.vue'
 import type { TimeZoneName } from '~/types/shared'
 
 /**
- * Le cadre d'une journée spéciale publiée dans `/programmations` (direction F,
- * 30/10) : un bandeau à sa couleur, puis ses lignes, celles de la liste, et
- * ses moments réunis en lignes discrètes.
- *
- * Tout le cadre mène à la page de la journée : le lien du bandeau s'étend au
- * cadre entier (`after:inset-0`), chaque activité pose son propre lien
- * au-dessus (vers son ancre dans le déroulé). Aucun lien imbriqué ; les
- * lignes de moments, sans lien, laissent passer le clic au bandeau.
+ * Le cadre d'une journée spéciale publiée dans `/programmations` (direction
+ * condensée, 01/11) : son nom en étiquette posée sur un filet à sa couleur,
+ * puis un fond teinté qui porte le lien vers sa page, ses moments en lignes
+ * pointillées et ses activités, les lignes de la liste.
  */
 
 interface Props {
   frame: DayFrame<ProgrammeRowData>
-  /** La page de la journée, en haut. */
+  /** La page de la journée. */
   to: string
   timezone: TimeZoneName
 }
@@ -27,7 +23,12 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
 
-const style = computed(() => trackDayStyle(props.frame.track.color_hex))
+const style = computed(() => ({
+  ...trackDayStyle(props.frame.track.color_hex),
+  '--rule-solid': 'var(--color-day-solid)',
+  '--rule-on': 'var(--color-day-on-solid)',
+}))
+const icon = computed(() => trackIcon(props.frame.track.icon_code))
 const title = computed(() => tr(props.frame.track.title))
 const kicker = computed(() => {
   const { start, end } = props.frame
@@ -37,48 +38,47 @@ const kicker = computed(() => {
 </script>
 
 <template>
-  <div
-    role="group"
-    :aria-label="title"
-    class="group/frame relative overflow-hidden lg:-ml-3 rounded-[10px] border-2 border-(--color-day-line) bg-(--color-day-surface) transition-colors hover:bg-(--color-day-surface-hover)"
-    :style="style"
-  >
-    <NuxtLink
-      :to="props.to"
-      class="flex flex-wrap items-center justify-between gap-x-6 gap-y-1.5 bg-(--color-day-solid) px-4 py-3 text-(--color-day-on-solid) no-underline after:absolute after:inset-0 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-(--color-day-on-solid) sm:px-5"
-    >
-      <span class="flex min-w-0 items-center gap-3.5">
-        <TrackIconBadge :code="props.frame.track.icon_code" :color="props.frame.track.color_hex" />
-        <span class="min-w-0">
-          <span class="block text-xs font-bold uppercase opacity-85 tabular-nums" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-            {{ kicker }}
-          </span>
-          <span class="mt-0.5 block text-lg leading-snug font-bold text-balance">{{ title }}</span>
-        </span>
+  <div role="group" :aria-label="title" :style="style">
+    <div class="rule-line">
+      <span class="rule-label">
+        <UiIcon v-if="icon" :name="icon" size="1.05em" />
+        {{ title }}
       </span>
-      <span class="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold group-hover/frame:underline">
-        {{ t('programme.tracks.open') }}
-        <UiIcon name="arrow-right" size="18px" class="transition-transform duration-200 motion-safe:group-hover/frame:translate-x-1" />
-      </span>
-    </NuxtLink>
+      <span class="pb-1.5 text-sm text-text-secondary tabular-nums">{{ kicker }}</span>
+    </div>
 
-    <ol>
-      <li
-        v-for="item in props.frame.items"
-        :key="item.kind === 'activity' ? item.row.id : item.key"
-        :class="item.kind === 'activity' ? 'relative z-[1]' : ''"
-      >
-        <EventProgrammeRow v-if="item.kind === 'activity'" :entry="item.row" :striped="item.index % 2 === 1" tone="day" />
-        <p v-else class="flex min-h-11 flex-wrap items-center gap-x-2 gap-y-0.5 px-3 py-2 text-sm text-text-muted">
-          <template v-for="(moment, index) in item.moments" :key="moment.starts_at">
-            <span v-if="index" aria-hidden="true">·</span>
-            <span>
-              <span class="font-bold text-text-secondary tabular-nums">{{ time(moment.starts_at, props.timezone) }}</span>
-              {{ tr(moment.label) }}
-            </span>
+    <div class="rounded-b-xl rounded-tr-xl bg-(--color-day-surface) px-3.5 pt-1 pb-2 sm:px-6 sm:pb-3">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-4 pb-2">
+        <!-- Contour à la couleur de la journée : l'accent du site jurerait sur sa teinte. -->
+        <UiButton
+          :to="props.to"
+          variant="secondary"
+          class="border-(--color-day-line)! text-(--color-day)! hover:bg-(--color-day-solid)! hover:text-(--color-day-on-solid)! sm:ml-auto"
+        >
+          {{ t('programme.tracks.open') }}
+        </UiButton>
+      </div>
+
+      <ol>
+        <li
+          v-for="item in props.frame.items"
+          :key="item.kind === 'activity' ? item.row.id : item.key"
+          class="border-b border-border-subtle"
+          :class="item.kind === 'activity' ? 'last:border-b-0' : 'border-dashed'"
+        >
+          <EventProgrammeRow v-if="item.kind === 'activity'" :entry="item.row" tone="day" />
+          <template v-else>
+            <p
+              v-for="moment in item.moments"
+              :key="moment.starts_at"
+              class="grid grid-cols-[76px_minmax(0,1fr)] items-baseline gap-x-3.5 py-3 text-[0.92rem] text-text-secondary min-[860px]:grid-cols-[112px_minmax(0,1fr)] min-[860px]:gap-x-5.5"
+            >
+              <b class="font-condensed text-[1.3rem] font-bold tabular-nums">{{ time(moment.starts_at, props.timezone) }}</b>
+              <span>{{ tr(moment.label) }}</span>
+            </p>
           </template>
-        </p>
-      </li>
-    </ol>
+        </li>
+      </ol>
+    </div>
   </div>
 </template>

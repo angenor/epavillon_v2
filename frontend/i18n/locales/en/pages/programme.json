@@ -3,9 +3,7 @@
   "description": "Published activities, edition by edition, by week or day by day.",
   "loading": "Loading the programme",
   "views": {
-    "label": "Display",
-    "week": "Calendar view",
-    "list": "List view"
+    "label": "Display"
   },
   "filters": {
     "search": "Search for an activity",
@@ -47,16 +45,21 @@
     },
     "others": "Other programmes"
   },
+  "toolbar": {
+    "list": "List",
+    "week": "Calendar",
+    "timezone": "All times: {zone} ({offset})"
+  },
   "board": {
-    "title": "The programme",
-    "subtitle": "{edition} · {dates} · all times: {zone} ({offset})"
+    "title": "The programme"
   },
   "days": {
     "count": "no activity | {count} activity | {count} activities",
     "jump": "Go to day",
     "showPast": "Show past days",
     "hidePast": "Hide past days",
-    "monthYear": "{month} · {count}"
+    "monthCount": "{month}, {count}",
+    "today": "Today"
   },
   "week": {
     "live": "Live",
@@ -71,6 +74,8 @@
   },
   "list": {
     "until": "→ {end} · {duration}",
+    "untilShort": "to {end}, {duration}",
+    "join": "Join",
     "minutes": "{minutes} min",
     "hours": "{hours} h",
     "hoursMinutes": "{hours} h {minutes}",
@@ -82,20 +87,28 @@
   "lead": {
     "label": "Featured: live now",
     "watch": "Watch live",
-    "open": "View activity"
+    "open": "View activity",
+    "kicker": "Now at the pavilion",
+    "until": "to {end}, {zone}",
+    "join": "Join the live stream"
   },
   "tracks": {
     "kicker": "Special day",
-    "kickerHours": "Special day · {start} to {end}",
+    "kickerHours": "Special day, {start} to {end}",
+    "others": "Same day, outside the special day",
     "open": "The day's programme",
     "eve": "the day before",
     "before": "before the opening",
     "side": {
       "kicker": "Preparatory workshop",
-      "kickerVenue": "Preparatory workshop · {venue}",
       "hours": "{start} to {end}",
       "audience": "mainly for negotiators",
-      "open": "See the workshop"
+      "open": "See the workshop",
+      "state": {
+        "upcoming": "Upcoming",
+        "ongoing": "Ongoing",
+        "past": "Ended"
+      }
     }
   }
 }

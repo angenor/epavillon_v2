@@ -2,12 +2,13 @@
 import type { PublicEditionRow } from '~/types/views'
 
 /**
- * BANDEAU DE `/programmations` — distinct de celui de la page d'édition (16/09).
+ * BANDEAU DE `/programmations`, distinct de celui de la page d'édition (16/09).
  *
  * Il ne présente pas la conférence : il dit quel programme on lit, ce qu'il
  * pèse et de quand il date, et permet d'en ouvrir un autre. D'où une hauteur
  * bornée par ce contenu, et la même composition que la section d'appel de
- * l'accueil — aplat institutionnel, couverture fondue à droite.
+ * l'accueil : aplat institutionnel, couverture fondue à droite. Titre et
+ * chiffres en direction condensée (01/11).
  */
 
 interface Props {
@@ -80,8 +81,8 @@ const choices = computed(() =>
       <div class="fade-inverse-start absolute inset-y-0 left-0 hidden w-3/5 lg:block" />
     </div>
 
-    <div class="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10">
-      <div class="max-w-2xl">
+    <div class="mx-auto w-full max-w-[1280px] px-4 pt-10 pb-9 sm:px-6">
+      <div class="max-w-3xl">
         <p class="flex flex-wrap items-center gap-3 text-sm">
           <span
             class="font-bold uppercase text-text-on-inverse-muted"
@@ -96,39 +97,41 @@ const choices = computed(() =>
           />
         </p>
 
-        <h1 class="mt-3 font-display text-2xl leading-tight text-balance text-text-on-inverse sm:text-4xl">
+        <h1 class="heading-condensed mt-3.5 max-w-[34ch] text-[clamp(2.1rem,3.6vw,3.1rem)] leading-none! text-balance text-text-on-inverse">
           {{ title }}
         </h1>
 
-        <p class="mt-2 text-sm text-text-on-inverse-muted">
-          <span class="tabular-nums">{{ period }}</span>
-          <template v-if="place"> · {{ place }}</template>
+        <p class="mt-3.5 flex flex-wrap gap-x-6.5 gap-y-2.5 text-[0.95rem] text-text-on-inverse-muted">
+          <span class="inline-flex items-center gap-2 tabular-nums">
+            <UiIcon name="calendar" size="1em" class="text-accent-on-inverse" />{{ period }}
+          </span>
+          <span v-if="place" class="inline-flex items-center gap-2">
+            <UiIcon name="map-pin" size="1em" class="text-accent-on-inverse" />{{ place }}
+          </span>
         </p>
 
         <dl
           v-if="isPublished"
-          class="mt-6 flex flex-wrap gap-x-8 gap-y-4"
+          class="mt-5.5 flex flex-wrap items-end gap-x-8 gap-y-3"
           :aria-label="t('programme.hero.stats.label')"
         >
           <div v-for="figure in figures" :key="figure.key" class="flex flex-col-reverse">
-            <dt class="text-xs uppercase text-text-on-inverse-muted" :style="{ letterSpacing: 'var(--tracking-caps)' }">
+            <dt class="text-[0.82rem] font-semibold tracking-[0.05em] text-text-on-inverse-muted uppercase">
               {{ t(`programme.hero.stats.${figure.key}`, figure.value) }}
             </dt>
-            <dd class="font-display text-3xl leading-none tabular-nums text-text-on-inverse">
+            <dd class="font-condensed text-[2.4rem] leading-none font-bold text-text-on-inverse tabular-nums">
               {{ n(figure.value) }}
             </dd>
           </div>
 
           <div
             v-if="updatedAt"
-            class="basis-full border-t border-border-on-inverse pt-4 sm:basis-auto sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8"
+            class="basis-full text-[0.82rem] text-text-on-inverse-muted sm:basis-auto sm:border-l sm:border-border-on-inverse sm:pl-6"
           >
-            <dt class="text-xs uppercase text-text-on-inverse-muted" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-              {{ t('programme.hero.stats.updated') }}
-            </dt>
-            <dd class="mt-1 text-sm text-text-on-inverse">
-              <span class="font-bold">{{ updatedAt }}</span>
-              <span class="block text-xs text-text-on-inverse-muted">{{ zone }}</span>
+            <dt class="inline">{{ t('programme.hero.stats.updated') }}</dt>
+            <dd class="inline">
+              {{ ' ' }}{{ updatedAt }}
+              <span class="block">{{ zone }}</span>
             </dd>
           </div>
         </dl>
