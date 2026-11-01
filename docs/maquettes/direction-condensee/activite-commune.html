@@ -140,6 +140,17 @@
   .carriers { display: flex; flex-wrap: wrap; gap: 14px 28px; margin-top: 22px; }
   .carriers .carrier { margin-top: 0; }
   .carriers .amp { align-self: center; font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; color: var(--ifdd-cyan-300); }
+  .media.slides { position: relative; }
+  .media.slides figure { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 900ms ease; }
+  .media.slides figure.is-on { opacity: 1; }
+  .media.slides figure img { width: 100%; height: 100%; object-fit: cover; }
+  .media.slides figcaption { position: absolute; left: 14px; bottom: 14px; display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border-radius: var(--radius); background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass)); color: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .media.slides figcaption i { display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--radius-sm); background: #fff; color: var(--ifdd-bleu-900); font-style: normal; font-size: 0.65rem; }
+  .media.slides figcaption b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--day-solid); color: var(--day-on); font-size: 0.85rem; }
+  .slide-ctrl { position: absolute; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass)); }
+  .slide-ctrl button { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; cursor: pointer; color: #fff; }
+  .slide-ctrl .dot::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: rgb(255 255 255 / 0.5); }
+  .slide-ctrl .dot[aria-current]::before { background: #fff; width: 22px; border-radius: 5px; }
   .media.split { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--card); }
   .media.split figure { position: relative; margin: 0; overflow: hidden; }
   .media.split figure img { width: 100%; height: 100%; object-fit: cover; }
@@ -274,9 +285,16 @@
   </aside>
 
   <div class="main">
-    <div class="media split">
-      <figure data-st="register registered full free"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""><figcaption><b>1</b><i>AIRF</i>Régions</figcaption></figure>
-      <figure data-st="register registered full free"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""><figcaption><b>2</b><i>AIMF</i>Villes</figcaption></figure>
+    <div class="media slides" data-st="register registered full free" aria-roledescription="carrousel" aria-label="Couvertures des deux activités">
+      <figure class="is-on"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""><figcaption><b>1</b><i>AIRF</i>Régions</figcaption></figure>
+      <figure><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""><figcaption><b>2</b><i>AIMF</i>Villes</figcaption></figure>
+      <div class="slide-ctrl">
+        <button type="button" class="dot" aria-label="Couverture 1" aria-current="true"></button>
+        <button type="button" class="dot" aria-label="Couverture 2"></button>
+        <button type="button" class="pause" aria-label="Mettre en pause"><svg class="icon"><use href="#i-pause"/></svg></button>
+      </div>
+    </div>
+    <div class="media" data-st="live">
       <div class="player" data-st="live">
         <span class="cam"><svg class="icon"><use href="#i-play"/></svg></span>
         <h2>Réunion Zoom en cours</h2>
@@ -286,13 +304,9 @@
     </div>
 
     <section class="block">
-      <div class="joint-intro">
-        <svg class="icon"><use href="#i-users"/></svg>
-        <p><b>Une séance, deux activités</b>L'IFDD a réuni dans ce créneau deux propositions proches. Chaque organisation présente la sienne, avec ses intervenants, l'une après l'autre.</p>
-      </div>
-      <div class="parts">
+      <div class="parts" style="margin-top:0">
         <article class="part">
-          <div class="rule"><span class="rule-label"><b style="font-size:1.4rem">1</b>AIRF</span><span class="rule-meta">11:30 à 12:00</span></div>
+          <div class="rule"><span class="rule-label"><b style="font-size:1.4rem">1</b>AIRF</span></div>
           <div class="part-cover"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""></div>
           <div class="part-body">
             <div class="part-org"><i>AIRF</i><div><b>Association internationale des régions francophones</b><small>Porteuse</small></div></div>
@@ -305,7 +319,7 @@
           </div>
         </article>
         <article class="part">
-          <div class="rule"><span class="rule-label"><b style="font-size:1.4rem">2</b>AIMF</span><span class="rule-meta">12:00 à 12:30</span></div>
+          <div class="rule"><span class="rule-label"><b style="font-size:1.4rem">2</b>AIMF</span></div>
           <div class="part-cover"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
           <div class="part-body">
             <div class="part-org"><i>AIMF</i><div><b>Association internationale des maires francophones</b><small>Porteuse</small></div></div>
@@ -396,6 +410,19 @@
   const hasAction = ['register', 'full', 'live'].includes(state)
   new IntersectionObserver(([entry]) => bar.classList.toggle('is-shown', hasAction && !entry.isIntersecting))
     .observe(document.querySelector(state === 'live' ? '.ticket-live' : '#cta'))
+</script>
+<script>
+  // Les couvertures défilent seules (6 s), en fondu ; arrêt si « moins d'animations » ou sur pause.
+  const box = document.querySelector('.media.slides')
+  const figs = [...box.querySelectorAll('figure')], dots = [...box.querySelectorAll('.dot')]
+  let i = 0, timer = null
+  const show = n => { i = n; figs.forEach((f, k) => f.classList.toggle('is-on', k === n)); dots.forEach((d, k) => d.toggleAttribute('aria-current', k === n)) }
+  const play = () => { timer = setInterval(() => show((i + 1) % figs.length), 6000) }
+  dots.forEach((d, k) => d.addEventListener('click', () => show(k)))
+  const pause = box.querySelector('.pause')
+  const mark = on => { pause.querySelector('use').setAttribute('href', on ? '#i-pause' : '#i-play'); pause.setAttribute('aria-label', on ? 'Mettre en pause' : 'Reprendre le défilement') }
+  pause.addEventListener('click', () => { if (timer) { clearInterval(timer); timer = null; mark(false) } else { play(); mark(true) } })
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) play(); else mark(false)
 </script>
 </body>
 </html>
