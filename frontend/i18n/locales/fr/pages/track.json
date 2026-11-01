@@ -85,9 +85,7 @@
       "title": "Déroulé à venir",
       "description": "Les activités de cette journée seront annoncées ici."
     },
-    "untilDuration": "à {end}, {duration}",
-    "with": "avec {list}",
-    "join": "Rejoindre"
+    "with": "avec {list}"
   },
   "highlight": {
     "mark": "Temps fort",

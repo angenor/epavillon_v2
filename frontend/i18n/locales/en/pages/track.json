@@ -85,9 +85,7 @@
       "title": "Running order to come",
       "description": "The activities of this day will be announced here."
     },
-    "untilDuration": "to {end}, {duration}",
-    "with": "with {list}",
-    "join": "Join"
+    "with": "with {list}"
   },
   "highlight": {
     "mark": "Highlight",

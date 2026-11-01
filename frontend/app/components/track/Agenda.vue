@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { PublicTrackEntry, PublicTrackPage } from '~/types/programme/track-page'
 import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
-import type { TrackAgendaRowData } from '~/components/track/AgendaRow.vue'
+import type { ProgrammeRowData } from '~/components/event/ProgrammeRow.vue'
 
 /**
  * Le déroulé d'un fil (journée spéciale, atelier) : une partie = une étiquette
  * posée sur un filet à la couleur de la journée (« 1 Partie 1 », ses heures),
- * son intitulé, puis ses lignes (`TrackAgendaRow`). Activités et moments sans
- * activité y sont mêlés, dans l'ordre de l'heure ; ce qui n'appartient à
- * aucune partie vient en tête.
+ * son intitulé, puis ses lignes (`EventProgrammeRow` en `compact`). Activités
+ * et moments sans activité y sont mêlés, dans l'ordre de l'heure ; ce qui
+ * n'appartient à aucune partie vient en tête.
  *
  * Chaque activité porte une ancre (`trackActivityAnchor`) : `/programmations`
  * y mène, et l'activité visée s'encadre quelques secondes à l'arrivée.
@@ -42,54 +42,60 @@ function lines(text: string): string[] {
   return text.split('\n').map((line) => line.trim()).filter(Boolean)
 }
 
-function row(entry: PublicTrackEntry, index: number): { key: string; anchor: string | undefined; moment: boolean; data: TrackAgendaRowData } {
+function row(entry: PublicTrackEntry, index: number): { key: string; anchor: string | undefined; highlight: boolean; data: ProgrammeRowData } {
   const current = props.entryState(entry)
   const stateLabel = current === 'live' ? t('programme.list.live') : t(`session-card.state.${current}`)
+  const faded = current === 'past' || current === 'cancelled'
   if (entry.kind === 'moment') {
     return {
       key: `m-${index}`,
       anchor: undefined,
-      moment: true,
+      highlight: false,
       data: {
+        id: entry.moment.id,
         to: null,
         start: time(entry.starts_at, timezone.value),
         until: entry.ends_at ? t('track.agenda.until', { end: time(entry.ends_at, timezone.value) }) : '',
-        title: tr(entry.moment.label),
-        lead: null,
-        others: '',
+        title: { lead: tr(entry.moment.label), rest: '' },
+        acronym: null,
+        organization: null,
+        country: '',
         cover: null,
-        placeholder: '',
-        current,
-        stateLabel,
-        liveTo: null,
         points: lines(entry.moment.description ? tr(entry.moment.description) : ''),
-        highlight: false,
+        current,
+        faded,
+        stateLabel,
       },
     }
   }
   const { session, organizations, is_highlight: highlight } = entry.activity
   const [lead, ...others] = organizations
   const to = link(props.page.edition.slug, session)
-  const leadName = lead?.name ?? session.organization_name ?? ''
   const leadAcronym = lead ? (lead.acronym ?? null) : session.organization_acronym
+  const leadName = (lead?.name ?? session.organization_name ?? '') || leadAcronym || ''
   return {
     key: `a-${session.id}`,
     anchor: trackActivityAnchor(session.slug),
-    moment: false,
+    highlight,
     data: {
+      id: session.id,
       to,
       start: time(session.starts_at, timezone.value),
-      until: t('track.agenda.untilDuration', { end: time(session.ends_at, timezone.value), duration: duration(session) }),
-      title: tr(session.title),
-      lead: leadName || leadAcronym ? { name: leadName || leadAcronym || '', acronym: leadAcronym, logo: lead?.logo ?? session.organization_logo ?? null } : null,
+      until: t('programme.list.untilShort', { end: time(session.ends_at, timezone.value), duration: duration(session) }),
+      title: { lead: tr(session.title), rest: '' },
+      acronym: leadAcronym,
+      // Le nom suit le sigle, sauf s'il le répète.
+      organization: leadName && leadName !== leadAcronym ? leadName : null,
+      country: '',
       others: others.length ? t('track.agenda.with', { list: list.value.format(others.map(label).filter(Boolean)) }) : '',
       cover: session.cover,
       placeholder: leadAcronym ?? initialsOf(leadName),
-      current,
-      stateLabel,
-      liveTo: current === 'live' ? `${to}#direct` : null,
+      logo: lead?.logo ?? session.organization_logo ?? null,
       points: lines(session.summary ? tr(session.summary) : ''),
-      highlight,
+      joinTo: current === 'live' ? `${to}#direct` : null,
+      current,
+      faded,
+      stateLabel,
     },
   }
 }
@@ -135,8 +141,8 @@ onMounted(() => reach(route.hash))
 watch(() => route.hash, reach)
 onBeforeUnmount(() => clearTimeout(flashTimer))
 
-const itemClass = (item: { anchor: string | undefined; moment: boolean; data: TrackAgendaRowData }) => [
-  item.moment ? 'border-b border-dashed border-border-subtle' : 'border-b border-border-subtle last:border-b-0',
+const itemClass = (item: { anchor: string | undefined; data: ProgrammeRowData }) => [
+  item.data.to === null ? 'border-b border-dashed border-border-subtle' : 'border-b border-border-subtle last:border-b-0',
   item.data.current === 'live' ? 'border-transparent' : '',
   flashed.value && flashed.value === item.anchor ? 'rounded-md outline-accent' : 'outline-transparent',
 ]
@@ -152,7 +158,7 @@ const itemClass = (item: { anchor: string | undefined; moment: boolean; data: Tr
         class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
         :class="itemClass(item)"
       >
-        <TrackAgendaRow :entry="item.data" :media="media" />
+        <EventProgrammeRow :entry="item.data" :media="media" :highlight="item.highlight" tone="day" compact state-surface />
       </li>
     </ol>
 
@@ -186,7 +192,7 @@ const itemClass = (item: { anchor: string | undefined; moment: boolean; data: Tr
           class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
           :class="itemClass(item)"
         >
-          <TrackAgendaRow :entry="item.data" :media="media" />
+          <EventProgrammeRow :entry="item.data" :media="media" :highlight="item.highlight" tone="day" compact state-surface />
         </li>
       </ol>
     </section>
