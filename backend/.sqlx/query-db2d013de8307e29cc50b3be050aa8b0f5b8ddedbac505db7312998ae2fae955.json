@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_tracks\n             (session_id, track_id, sort_order, is_highlight, added_by, part_id)\n         SELECT $1, st.track_id, st.sort_order, st.is_highlight, st.added_by, st.part_id\n           FROM programme.session_tracks st\n           JOIN programme.sessions s ON s.id = st.session_id\n          WHERE s.proposal_id = $2 AND s.status <> 'cancelled'\n         ON CONFLICT (session_id, track_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "db2d013de8307e29cc50b3be050aa8b0f5b8ddedbac505db7312998ae2fae955"
+}

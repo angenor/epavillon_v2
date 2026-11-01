@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM reference.entity_terms\n          WHERE entity_schema = 'programme' AND entity_table = 'sessions' AND entity_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "749f116fa4920a95abeae433be75ae4b36f812f2e6d81386ddc831c2e0dbe7bc"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT s.id, s.event_id, s.proposal_id, s.event_day_id,\n                  s.title, s.slug::text AS \"slug!\", s.summary,\n                  s.status::text AS \"status!\", s.format::text AS \"format!\",\n                  s.starts_at, s.ends_at, s.timezone::text AS \"timezone!\",\n                  -- Les quatre jointures sont EXTERNES : sans salle, sans\n                  -- organisation, sans pays ou sans dossier, la colonne est\n                  -- nulle. SQLx ne le déduit pas d'un LEFT JOIN — il lit la\n                  -- nullité de la colonne d'origine —, d'où le `?`.\n                  s.room_id, r.name AS \"room_name?\",\n                  s.enforce_room_exclusivity, s.location_note,\n                  s.organization_id, o.legal_name AS \"organization_name?\",\n                  o.acronym AS \"organization_acronym?\",\n                  c.iso2 AS \"organization_country_code?\",\n                  p.reference_code AS \"reference_code?\",\n                  p.status::text AS \"proposal_status?\",\n                  p.average_score::float8 AS \"average_score?\",\n                  p.duration_minutes::int4 AS \"requested_duration_minutes?\",\n                  p.preferred_start_at,\n                  p.scheduling_constraints,\n                  s.is_streamed, s.broadcast_channel_id, s.published_at,\n                  COALESCE((SELECT array_agg(st.track_id ORDER BY st.sort_order)\n                              FROM programme.session_tracks st\n                             WHERE st.session_id = s.id), '{}') AS \"track_ids!\",\n                  reference.term_badges('programme', 'sessions', s.id, 'activity_theme')\n                      AS \"themes!\",\n                  (SELECT count(*) FROM programme.session_speakers sp\n                    WHERE sp.session_id = s.id) AS \"speaker_count!\"\n             FROM programme.sessions s\n             LEFT JOIN event.rooms r         ON r.id = s.room_id\n             LEFT JOIN org.organizations o   ON o.id = s.organization_id\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN programme.proposals p ON p.id = s.proposal_id\n            WHERE s.event_id = $1\n            ORDER BY s.starts_at, s.id",
+  "query": "SELECT s.id, s.event_id, s.proposal_id, s.event_day_id,\n                  s.title, s.slug::text AS \"slug!\", s.summary,\n                  s.status::text AS \"status!\", s.format::text AS \"format!\",\n                  s.starts_at, s.ends_at, s.timezone::text AS \"timezone!\",\n                  -- Les quatre jointures sont EXTERNES : sans salle, sans\n                  -- organisation, sans pays ou sans dossier, la colonne est\n                  -- nulle. SQLx ne le déduit pas d'un LEFT JOIN — il lit la\n                  -- nullité de la colonne d'origine —, d'où le `?`.\n                  s.room_id, r.name AS \"room_name?\",\n                  s.enforce_room_exclusivity, s.location_note,\n                  s.organization_id, o.legal_name AS \"organization_name?\",\n                  o.acronym AS \"organization_acronym?\",\n                  c.iso2 AS \"organization_country_code?\",\n                  p.reference_code AS \"reference_code?\",\n                  p.status::text AS \"proposal_status?\",\n                  p.average_score::float8 AS \"average_score?\",\n                  p.duration_minutes::int4 AS \"requested_duration_minutes?\",\n                  p.preferred_start_at,\n                  p.scheduling_constraints,\n                  s.is_streamed, s.broadcast_channel_id, s.published_at,\n                  COALESCE((SELECT array_agg(st.track_id ORDER BY st.sort_order)\n                              FROM programme.session_tracks st\n                             WHERE st.session_id = s.id), '{}') AS \"track_ids!\",\n                  reference.term_badges('programme', 'sessions', s.id, 'activity_theme')\n                      AS \"themes!\",\n                  (SELECT count(*) FROM programme.session_speakers sp\n                    WHERE sp.session_id = s.id) AS \"speaker_count!\",\n                  COALESCE((\n                      SELECT jsonb_agg(jsonb_build_object(\n                                 'proposal_id', jp.proposal_id,\n                                 'sort_order', jp.sort_order,\n                                 'title', jp.title,\n                                 'reference_code', pp.reference_code,\n                                 'organization_name', po.legal_name,\n                                 'organization_acronym', po.acronym)\n                             ORDER BY jp.sort_order, jp.added_at)\n                        FROM programme.session_proposals jp\n                        JOIN programme.proposals pp ON pp.id = jp.proposal_id\n                        JOIN org.organizations po ON po.id = pp.organization_id\n                       WHERE jp.session_id = s.id\n                  ), '[]'::jsonb) AS \"joint_proposals!\"\n             FROM programme.sessions s\n             LEFT JOIN event.rooms r         ON r.id = s.room_id\n             LEFT JOIN org.organizations o   ON o.id = s.organization_id\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN programme.proposals p ON p.id = s.proposal_id\n            WHERE s.event_id = $1\n            ORDER BY s.starts_at, s.id",
   "describe": {
     "columns": [
       {
@@ -304,6 +304,12 @@
         "name": "speaker_count!",
         "type_info": "Int8",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 32,
+        "name": "joint_proposals!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -343,8 +349,9 @@
       true,
       null,
       null,
+      null,
       null
     ]
   },
-  "hash": "3a85190771169612537f304187f12219ebc49a2f4642d73dd95a76c93a1ef7ed"
+  "hash": "2e7f66c38bef931f3287dbac88f267ae7617574417f73dfd5d7d89d0b6b19c85"
 }

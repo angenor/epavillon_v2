@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, title, ends_at\n           FROM programme.sessions\n          WHERE proposal_id = $1\n            AND ends_at < now()\n            AND status <> 'cancelled'\n            AND report_submitted_at IS NULL\n          ORDER BY ends_at",
+  "query": "SELECT id, title, ends_at\n           FROM programme.sessions s\n          WHERE (s.proposal_id = $1\n                 OR EXISTS (SELECT 1 FROM programme.session_proposals sp\n                             WHERE sp.session_id = s.id AND sp.proposal_id = $1))\n            AND ends_at < now()\n            AND status <> 'cancelled'\n            AND report_submitted_at IS NULL\n          ORDER BY ends_at",
   "describe": {
     "columns": [
       {
@@ -48,5 +48,5 @@
       false
     ]
   },
-  "hash": "b0a3dc1ad20cdefa9b9be658dfde952a870c1dfee4a30118eceb3fe6fe596033"
+  "hash": "8c7b05ba812d1e1046d0a612abf8032f55b81f472f46edbf15603a88c1c3c151"
 }

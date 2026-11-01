@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.session_proposals sp\n            SET title = p.title, description = p.detailed_presentation\n           FROM programme.proposals p\n          WHERE p.id = $1\n            AND sp.proposal_id = p.id\n            AND (sp.title IS DISTINCT FROM p.title\n                 OR sp.description IS DISTINCT FROM p.detailed_presentation)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d18237909c35ce52c77cb01374104a70405ad09a05d6496bcb0e71a6c99befd2"
+}

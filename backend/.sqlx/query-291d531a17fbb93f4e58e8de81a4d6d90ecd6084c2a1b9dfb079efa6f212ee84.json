@@ -1,0 +1,85 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.status::text AS \"status!\", s.room_id, s.starts_at, s.ends_at,\n                  s.event_day_id,\n                  (SELECT count(*) FROM programme.registrations r\n                    WHERE r.session_id = s.id AND r.status <> 'cancelled') AS \"inscrits!\",\n                  COALESCE((SELECT array_agg(sp.proposal_id ORDER BY sp.sort_order, sp.added_at)\n                              FROM programme.session_proposals sp\n                             WHERE sp.session_id = s.id), '{}') AS \"dossiers!\"\n             FROM programme.sessions s\n            WHERE s.id = $1\n            FOR UPDATE OF s",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "room_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "room_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "event_day_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_day_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "inscrits!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "dossiers!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      false,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "291d531a17fbb93f4e58e8de81a4d6d90ecd6084c2a1b9dfb079efa6f212ee84"
+}

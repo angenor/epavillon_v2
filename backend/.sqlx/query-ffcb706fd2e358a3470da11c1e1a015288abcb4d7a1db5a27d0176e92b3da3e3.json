@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id FROM programme.sessions s\n          WHERE s.status <> 'cancelled'\n            AND (s.proposal_id = $1 OR EXISTS (\n                SELECT 1 FROM programme.session_proposals sp\n                 WHERE sp.session_id = s.id AND sp.proposal_id = $1))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ffcb706fd2e358a3470da11c1e1a015288abcb4d7a1db5a27d0176e92b3da3e3"
+}

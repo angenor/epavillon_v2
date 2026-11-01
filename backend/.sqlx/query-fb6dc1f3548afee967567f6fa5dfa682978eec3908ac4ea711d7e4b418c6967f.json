@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM programme.session_speakers d\n          USING programme.sessions s\n          WHERE d.session_id = s.id AND (s.proposal_id = $1 OR d.proposal_id = $1)\n            AND s.status <> 'cancelled'\n            AND NOT EXISTS (\n                SELECT 1 FROM programme.proposal_speakers p\n                 WHERE p.proposal_id = $1 AND p.role = d.role\n                   AND (p.person_id = d.person_id\n                        OR (p.person_id IS NULL AND d.person_id IS NULL\n                            AND p.first_name = d.first_name AND p.last_name = d.last_name)))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fb6dc1f3548afee967567f6fa5dfa682978eec3908ac4ea711d7e4b418c6967f"
+}

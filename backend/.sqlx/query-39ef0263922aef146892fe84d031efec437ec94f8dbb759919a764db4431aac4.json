@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.proposals\n              SET detailed_presentation = '{\"fr\":\"<p>Présentation revue.</p>\"}'::jsonb\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "39ef0263922aef146892fe84d031efec437ec94f8dbb759919a764db4431aac4"
+}
