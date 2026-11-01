@@ -4,8 +4,9 @@ import type { PublicSessionSpeaker } from '~/types/programme/session'
 /**
  * LA PAGE D'UNE JOURNÉE SPÉCIALE, ou de l'atelier préparatoire (un fil
  * `side_programme`) : la grande sœur de la page d'une activité (direction
- * « bandeau et billet », 30/10). Même bandeau, même billet qui remonte de 72 px,
- * même liste éditoriale que `/programmations`.
+ * « bandeau et billet », 30/10, passée en direction condensée le 01/11). Même
+ * bandeau, même billet qui remonte de 72 px sur grand écran, collé et borné à
+ * la hauteur de l'écran.
  *
  * L'adresse porte l'édition et le fil par leurs slugs. Un fil non publié et une
  * adresse inconnue donnent la même réponse, comme l'API.
@@ -45,7 +46,7 @@ watch(
   (value) => value && declareFrom(value.agenda.flatMap((entry) => (entry.kind === 'activity' ? [entry.activity.session] : []))),
   { immediate: true },
 )
-const { mounted, timezone, phase, countdown, entryState, current } = useTrackDay(page)
+const { now, mounted, timezone, phase, countdown, entryState, current } = useTrackDay(page)
 
 const { data: incidents, refresh: refreshIncidents } = useLazyAsyncData(
   () => `journee-incidents-${page.value?.track.id ?? 'aucune'}`,
@@ -122,10 +123,11 @@ const organizations = computed(() => {
       id: organization.organization_id,
       name: organization.name ?? organization.acronym ?? '',
       acronym: organization.acronym ?? null,
-      logo: organization.logo ? (organization.logo.sources.thumb?.url ?? organization.logo.url) : null,
+      logo: organization.logo ?? null,
     }))
 })
 
+const sectionTitle = 'heading-condensed text-[clamp(1.9rem,3.6vw,2.5rem)] text-heading'
 const subject = computed(() => (page.value?.track.kind === 'special_day' ? 'day' : 'other'))
 const hasTiles = computed(() => (page.value?.parts.filter((part) => part.starts_at).length ?? 0) > 1)
 const paragraphs = computed(() =>
@@ -198,10 +200,12 @@ useSeoMeta({
       <div v-if="incidents.length" class="mx-auto max-w-[1280px] px-4 pt-6 pb-4 sm:px-6">
         <EventIncidentBanners :incidents="incidents" :timezone="timezone" :zone-label="page.edition.city ?? undefined" />
       </div>
-      <TrackHero :page="page" :phase="phase" :back-to="programmeTo" :eve="eve" />
+      <TrackHero :page="page" :phase="phase" :back-to="programmeTo" :eve="eve" :live="live !== null" />
 
-      <div class="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6">
-        <div class="relative -mt-[72px] grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-12">
+      <div class="mx-auto max-w-[1280px] px-4 pb-22 sm:px-6">
+        <!-- Le billet et la carte des temps ne remontent sur le bandeau que sur grand écran : sur
+             téléphone, une marge négative raccourcit la ligne de grille et la suite passe dessous. -->
+        <div class="relative grid gap-8 pt-6 lg:-mt-18 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-12 lg:pt-0">
           <div class="lg:sticky lg:top-[calc(var(--nav-height)+1rem)] lg:col-start-2 lg:row-start-1">
             <TrackTicket
               :page="page"
@@ -213,18 +217,18 @@ useSeoMeta({
             />
           </div>
 
-          <div class="flex min-w-0 flex-col gap-16 lg:col-start-1 lg:row-start-1">
+          <div class="flex min-w-0 flex-col gap-14 lg:col-start-1 lg:row-start-1">
             <TrackOverview :page="page" :live="live" />
 
             <TrackFeature v-if="page.feature" :feature="page.feature" :documents="page.documents" />
 
             <section v-if="hasTiles && paragraphs.length" aria-labelledby="journee-presentation-titre">
-              <h2 id="journee-presentation-titre" class="font-sans text-2xl font-bold text-heading">{{ t(`track.about.${subject}`) }}</h2>
+              <h2 id="journee-presentation-titre" :class="sectionTitle">{{ t(`track.about.${subject}`) }}</h2>
               <p
                 v-for="(paragraph, index) in paragraphs"
                 :key="index"
-                class="max-w-(--measure)"
-                :class="index ? 'mt-4' : 'mt-3 text-lg text-text-secondary'"
+                class="max-w-[66ch] text-[1.05rem] leading-[1.75]"
+                :class="index ? 'mt-3.5' : 'mt-4.5'"
               >
                 {{ paragraph }}
               </p>
@@ -233,8 +237,8 @@ useSeoMeta({
             <TrackHighlight v-if="highlight" :activity="highlight" :edition-slug="page.edition.slug" :timezone="timezone" />
 
             <section v-if="page.agenda.length" id="deroule" class="scroll-mt-28" aria-labelledby="journee-deroule-titre">
-              <h2 id="journee-deroule-titre" class="font-sans text-2xl font-bold text-heading">{{ t(`track.agenda.title.${subject}`) }}</h2>
-              <p class="mt-3 max-w-(--measure) text-lg text-text-secondary">{{ zoneNote }}</p>
+              <h2 id="journee-deroule-titre" :class="sectionTitle">{{ t(`track.agenda.title.${subject}`) }}</h2>
+              <p class="mt-2.5 max-w-[66ch] text-[0.95rem] text-text-secondary">{{ zoneNote }}</p>
               <TrackAgenda :page="page" :entry-state="entryState" />
             </section>
             <UiEmptyState
@@ -247,22 +251,30 @@ useSeoMeta({
             <ActivityPeople v-if="speakers.length" :speakers="speakers" />
 
             <section v-if="organizations.length" aria-labelledby="journee-organisations-titre">
-              <h2 id="journee-organisations-titre" class="font-sans text-2xl font-bold text-heading">{{ t('track.organizations.title') }}</h2>
-              <p class="mt-3 max-w-(--measure) text-lg text-text-secondary">{{ t(`track.organizations.lead.${subject}`) }}</p>
+              <h2 id="journee-organisations-titre" :class="sectionTitle">{{ t('track.organizations.title') }}</h2>
+              <p class="mt-2.5 max-w-[66ch] text-[0.95rem] text-text-secondary">{{ t(`track.organizations.lead.${subject}`) }}</p>
               <ul class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <li v-for="organization in organizations" :key="organization.id">
-                  <OrganizationLogoTile :name="organization.name" :acronym="organization.acronym" :logo="organization.logo" />
+                <li
+                  v-for="organization in organizations"
+                  :key="organization.id"
+                  class="flex h-full min-h-26 flex-col items-center justify-center gap-1.5 rounded-lg border border-border-subtle bg-surface-raised p-3.5 text-center"
+                >
+                  <OrganizationLogoMark v-if="organization.logo" :name="organization.name" :acronym="organization.acronym" :logo="organization.logo" />
+                  <b v-else class="font-condensed text-2xl leading-none font-bold tracking-[0.03em] text-heading" aria-hidden="true">
+                    {{ organization.acronym ?? initialsOf(organization.name) }}
+                  </b>
+                  <small class="line-clamp-3 text-[0.76rem] leading-snug text-text-secondary">{{ organization.name }}</small>
                 </li>
               </ul>
             </section>
 
             <section v-if="page.target_audiences.length" id="public" aria-labelledby="journee-public-titre">
-              <h2 id="journee-public-titre" class="font-sans text-2xl font-bold text-heading">{{ t('track.audiences') }}</h2>
+              <h2 id="journee-public-titre" :class="sectionTitle">{{ t('track.audiences') }}</h2>
               <ul class="mt-4 flex flex-wrap gap-2">
                 <li
                   v-for="(audience, index) in page.target_audiences"
                   :key="index"
-                  class="inline-flex min-h-8 items-center rounded-full border border-border bg-surface-raised px-3 text-sm"
+                  class="inline-flex min-h-8 items-center rounded-full border border-(--color-day-line) bg-(--color-day-surface) px-3 text-sm"
                 >
                   {{ tr(audience) }}
                 </li>
@@ -271,7 +283,13 @@ useSeoMeta({
 
             <TrackFeature v-if="!page.feature" :feature="null" :documents="page.documents" />
 
-            <TrackOthers :tracks="page.other_tracks" :edition-slug="page.edition.slug" :edition-label="editionLabel" :timezone="timezone" />
+            <TrackOthers
+              :tracks="page.other_tracks"
+              :edition-slug="page.edition.slug"
+              :edition-label="editionLabel"
+              :timezone="timezone"
+              :now="now"
+            />
           </div>
         </div>
       </div>
