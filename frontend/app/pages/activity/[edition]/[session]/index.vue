@@ -179,7 +179,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="full-bleed -mt-8 -mb-8 min-h-[75vh] bg-surface font-sans text-text sm:-mt-10 sm:-mb-10">
+  <div data-direction="condensee" class="full-bleed -mt-8 -mb-8 min-h-[75vh] bg-surface font-sans text-text sm:-mt-10 sm:-mb-10">
     <UiLoadingState v-if="status === 'pending' && !data" :label="t('activity.loading')">
       <ActivitySkeleton />
     </UiLoadingState>

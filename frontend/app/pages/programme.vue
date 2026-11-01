@@ -99,7 +99,7 @@ useHead(() => ({ title: t('programme.title') }))
 </script>
 
 <template>
-  <div class="flex flex-col gap-8">
+  <div data-direction="condensee" class="flex flex-col gap-8">
     <!-- Le bandeau déborde la gouttière et remonte sous le menu : il doit
          rester le premier enfant de la page. -->
     <EventProgrammeHero

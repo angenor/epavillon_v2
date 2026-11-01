@@ -226,6 +226,7 @@ const iconSize = computed(() => (props.size === 'lg' ? '1.15em' : '1.05em'))
     :target="external ? '_blank' : undefined"
     :rel="external ? 'noopener noreferrer' : undefined"
     :class="classes"
+    data-ui-button
     :disabled="tag === 'button' ? isInert : undefined"
     :aria-disabled="tag !== 'button' && isInert ? 'true' : undefined"
     :tabindex="tag !== 'button' && isInert ? -1 : undefined"

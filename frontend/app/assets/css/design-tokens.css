@@ -424,6 +424,10 @@
   /* Réservées à l'affiche, embarquées sous licence OFL (assets/fonts/affiche/). */
   --font-poster: "Archivo", var(--ifdd-police-2);
   --font-poster-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+  /* Direction « condensée » des pages de la programmation (01/11), embarquées
+     sous licence OFL (assets/fonts/condensee/) : voir condensee.css. */
+  --font-condensed: "Barlow Condensed", "Arial Narrow", var(--ifdd-police-1);
+  --font-text: "Inter", var(--ifdd-police-1);
 
   /* -- Rayons. Coins légèrement arrondis, jamais plus de 8 px sur les blocs. -- */
   --radius-sm: 4px;
