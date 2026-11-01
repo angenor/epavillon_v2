@@ -10,10 +10,8 @@
 <link rel="stylesheet" href="style.css">
 <style>
   /* Deux états dans la même maquette : à venir (par défaut) et en direct (?etat=direct). */
-  .live-only { display: none !important; }
-  body.is-live .live-only { display: revert !important; }
-  body.is-live .player.live-only { display: flex !important; }
-  body.is-live .soon-only { display: none !important; }
+  /* Plusieurs états dans la même maquette (?etat=…) : chaque élément dit dans quels états il paraît. */
+  [hidden] { display: none !important; }
 
   /* Bandeau de la production : photo de l'édition voilée, étiquettes, grand titre, lieu, date, porteur. */
   .hero-act { padding: 20px 0 112px; }
@@ -38,6 +36,7 @@
     .hero-act { padding-bottom: 36px; }
     .layout { padding-top: 24px; }
     .aside, .main { margin-top: 0; }
+    .aside { position: static; }
   }
 
   /* L'image de l'activité ; en direct, le lecteur prend sa place. */
@@ -48,7 +47,7 @@
   .player .cam .icon { stroke-width: 1.8; }
   .player h2 { color: #fff; font-size: 1.6rem; }
   .player p { margin: 0; max-width: 46ch; font-size: 0.92rem; color: rgb(255 255 255 / 0.8); }
-  @media (max-width: 640px) { body.is-live .media { aspect-ratio: auto; } .player { padding: 28px 20px; } }
+  @media (max-width: 640px) { body.s-live .media { aspect-ratio: auto; } .player { padding: 28px 20px; } }
 
   /* Le billet, comme sur la journée. */
   .ticket { display: flex; flex-direction: column; max-height: calc(100dvh - 104px); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-xl); }
@@ -109,7 +108,33 @@
   .row-org .logo img { width: 100%; height: 100%; object-fit: contain; }
   @media (max-width: 860px) { .same-day .row { grid-template-columns: 76px minmax(0, 1fr); } }
 
-  .state-switch { position: fixed; left: 16px; bottom: 16px; z-index: 50; }
+  .seats { margin-top: 16px; }
+  .seats-top { display: flex; justify-content: space-between; gap: 12px; font-size: 0.82rem; color: var(--color-text-secondary); }
+  .seats-top b { font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+  .seats-bar { height: 6px; margin-top: 6px; border-radius: 3px; background: var(--color-surface-sunken); overflow: hidden; }
+  .seats-bar i { display: block; height: 100%; border-radius: 3px; background: var(--day-solid); }
+  .seats.is-full .seats-bar i { background: var(--color-warning); }
+  .cta { display: grid; gap: 8px; margin-top: 16px; }
+  .cta .btn { width: 100%; }
+  .cta .note { margin: 0 !important; font-size: 0.8rem !important; color: var(--color-text-muted) !important; }
+  .done { padding: 12px; border-radius: var(--radius); background: var(--color-success-surface); border: 1px solid var(--color-success-border); }
+  .done p { margin: 8px 0 4px !important; color: var(--color-text) !important; }
+  .done .btn { width: auto; padding: 0 4px; color: var(--color-danger, var(--color-live)); }
+  .tag-ok { background: var(--color-success); color: #fff; }
+
+  /* Téléphone : quand le billet sort de l'écran, l'action principale reste en bas (comme en production). */
+  .cta-bar { display: none; }
+  @media (max-width: 1000px) {
+    .cta-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--color-border); box-shadow: 0 -4px 12px rgb(29 26 91 / 0.08); transform: translateY(110%); transition: transform 200ms ease; }
+    .cta-bar.is-shown { transform: none; }
+    .cta-bar b { font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .cta-bar small { display: block; font-size: 0.75rem; color: var(--color-text-muted); }
+    .state-switch, .theme-switch { bottom: 84px !important; }
+  }
+
+  .state-switch { position: fixed; left: 16px; bottom: 16px; z-index: 50; display: flex; flex-wrap: wrap; gap: 4px; max-width: calc(100vw - 140px); padding: 4px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-md); }
+  .state-switch a { padding: 6px 8px; border-radius: var(--radius-sm); font-family: var(--font-heading); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; text-decoration: none; color: var(--color-text-secondary); }
+  .state-switch a[aria-current] { background: var(--ifdd-bleu-900); color: #fff; }
 </style>
 </head>
 <body class="day-finance">
@@ -134,8 +159,8 @@
       <span>Programmations / CdP31 / vendredi 13 novembre</span>
     </nav>
     <div class="tags">
-      <span class="tag tag-soon soon-only">À venir</span>
-      <span class="tag tag-live live-only">En direct</span>
+      <span class="tag tag-soon" data-st="register registered full free">À venir</span>
+      <span class="tag tag-live" data-st="live">En direct</span>
       <span class="tag tag-glass"><svg class="icon"><use href="#i-door"/></svg>Sur place</span>
       <a class="tag tag-day" href="journee.html"><svg class="icon"><use href="#i-coins"/></svg>Journée finance durable</a>
     </div>
@@ -163,16 +188,39 @@
         <p>Heure d'Antalya (UTC+3)</p>
         <p>Chez vous, à Abidjan (UTC+0) : 08:30 à 09:30</p>
 
-        <div class="countdown soon-only">
+        <div class="countdown" data-st="register registered full free">
           <h3>Commence dans</h3>
           <div><b>00</b><small>jours</small></div>
           <div><b>01</b><small>heure</small></div>
           <div><b>14</b><small>min</small></div>
           <div><b>52</b><small>sec</small></div>
         </div>
-        <p class="entry soon-only">Entrée libre, sans inscription, dans la limite des places.</p>
+        <div class="seats" data-st="register registered">
+          <div class="seats-top"><span><b>212</b> / 300 inscrits</span><span>88 places restantes</span></div>
+          <div class="seats-bar"><i style="width:71%"></i></div>
+        </div>
+        <div class="seats is-full" data-st="full">
+          <div class="seats-top"><span><b>300</b> / 300 inscrits</span><span>Complet, 14 en liste d'attente</span></div>
+          <div class="seats-bar"><i style="width:100%"></i></div>
+        </div>
 
-        <div class="ticket-live live-only">
+        <div class="cta" id="cta">
+          <a class="btn btn-primary" href="#" data-st="register"><svg class="icon"><use href="#i-calendar-plus"/></svg>S'inscrire</a>
+          <p class="note" data-st="register">Gratuit. Le lien de connexion vous est envoyé par courriel la veille.</p>
+
+          <div class="done" data-st="registered">
+            <span class="tag tag-ok">Inscription confirmée</span>
+            <p>Le lien de connexion vous sera envoyé par courriel la veille.</p>
+            <button class="btn btn-ghost btn-sm" type="button">Annuler mon inscription</button>
+          </div>
+
+          <a class="btn btn-outline" href="#" data-st="full"><svg class="icon"><use href="#i-users"/></svg>Rejoindre la liste d'attente</a>
+          <p class="note" data-st="full">Vous êtes prévenu par courriel dès qu'une place se libère.</p>
+
+          <p class="entry" data-st="free">Entrée libre, sans inscription, dans la limite des places.</p>
+        </div>
+
+        <div class="ticket-live" data-st="live">
           <span class="tag tag-live">En direct depuis 11:30</span>
           <p>Le direct se suit sur Zoom, en plein écran.</p>
           <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre le direct</a>
@@ -188,8 +236,8 @@
 
   <div class="main">
     <div class="media">
-      <img class="soon-only" src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt="">
-      <div class="player live-only">
+      <img data-st="register registered full free" src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt="">
+      <div class="player" data-st="live">
         <span class="cam"><svg class="icon"><use href="#i-play"/></svg></span>
         <h2>Réunion Zoom en cours</h2>
         <p>Jusqu'à 300 personnes ; au-delà, une liste d'attente vous fait entrer dès qu'une place se libère.</p>
@@ -273,14 +321,32 @@
   <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
 </footer>
 
-<a class="btn btn-sm btn-white state-switch" id="state" href="?etat=direct">Voir en direct</a>
+<div class="cta-bar" id="cta-bar">
+  <div><b>11:30 à 12:30</b><small>vendredi 13 novembre, heure d'Antalya</small></div>
+  <a class="btn btn-primary btn-sm" href="#" data-st="register">S'inscrire</a>
+  <a class="btn btn-outline btn-sm" href="#" data-st="full">Liste d'attente</a>
+  <a class="btn btn-live btn-sm" href="#" data-st="live"><svg class="icon"><use href="#i-play"/></svg>Rejoindre</a>
+</div>
+<nav class="state-switch" aria-label="État de la maquette">
+  <a href="?etat=inscription">S'inscrire</a>
+  <a href="?etat=inscrit">Inscrit</a>
+  <a href="?etat=complet">Complet</a>
+  <a href="?etat=libre">Libre</a>
+  <a href="?etat=direct">En direct</a>
+</nav>
 <script src="icones.js"></script>
 <script>
-  const live = new URLSearchParams(location.search).get('etat') === 'direct'
-  document.body.classList.toggle('is-live', live)
-  const link = document.getElementById('state')
-  link.href = live ? '?' : '?etat=direct'
-  link.textContent = live ? 'Voir à venir' : 'Voir en direct'
+  const states = { inscription: 'register', inscrit: 'registered', complet: 'full', libre: 'free', direct: 'live' }
+  const key = new URLSearchParams(location.search).get('etat') || 'inscription'
+  const state = states[key] || 'register'
+  document.body.classList.add('s-' + state)
+  document.querySelectorAll('[data-st]').forEach(el => { el.hidden = !el.dataset.st.split(' ').includes(state) })
+  document.querySelectorAll('.state-switch a').forEach(a => { if (a.getAttribute('href') === '?etat=' + key) a.setAttribute('aria-current', 'page') })
+
+  const bar = document.getElementById('cta-bar')
+  const hasAction = ['register', 'full', 'live'].includes(state)
+  new IntersectionObserver(([entry]) => bar.classList.toggle('is-shown', hasAction && !entry.isIntersecting))
+    .observe(document.querySelector(state === 'live' ? '.ticket-live' : '#cta'))
 </script>
 </body>
 </html>
