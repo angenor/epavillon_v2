@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT session_id FROM programme.session_proposals sp\n           JOIN programme.sessions s ON s.id = sp.session_id\n          WHERE s.event_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_proposals",
+            "name": "session_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "de89ca59f77a3ebf79b5337f83f76830ba15269e3c06bd7428ce4c6ddf5c4799"
+}

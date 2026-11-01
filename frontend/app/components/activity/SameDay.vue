@@ -25,13 +25,18 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
 const { state, link, duration } = useProgrammeSession()
+const { partsOf, slidesOf, namesOf } = useJointSession()
 
 const rows = computed(() =>
   props.sessions.map((session) => {
     const current = state(session)
     const here = session.id === props.currentId
+    const parts = partsOf(session)
     return {
       id: session.id,
+      parts,
+      slides: parts.length ? slidesOf(parts, session.cover, session.id) : [],
+      jointNames: namesOf(parts),
       to: link(props.editionSlug, session),
       start: time(session.starts_at, props.timezone),
       until: t('activity.sameDay.until', { end: time(session.ends_at, props.timezone), duration: duration(session) }),
@@ -97,8 +102,15 @@ const ruleStyle = { '--rule-solid': 'var(--color-day-solid)', '--rule-on': 'var(
           </p>
 
           <span class="relative hidden aspect-video overflow-hidden rounded-md bg-(--color-day-surface) md:block" aria-hidden="true">
+            <UiSlideshow
+              v-if="row.slides.length"
+              :slides="row.slides"
+              :interval="5000"
+              :image-class="['transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100', { grayscale: row.faded }]"
+              sizes="160px"
+            />
             <UiImage
-              v-if="row.cover"
+              v-else-if="row.cover"
               :image="row.cover"
               ratio="auto"
               frame-class="size-full"
@@ -126,7 +138,25 @@ const ruleStyle = { '--rule-solid': 'var(--color-day-solid)', '--rule-on': 'var(
                 {{ row.title }}
               </NuxtLink>
             </h3>
-            <p v-if="row.organization || row.here" class="mt-2 flex items-center gap-2.5 text-sm text-text-secondary">
+            <p v-if="row.parts.length" class="mt-2 flex items-center gap-2.5 text-sm text-text-secondary">
+              <span class="flex shrink-0">
+                <OrganizationLogoMark
+                  v-for="(part, index) in row.parts"
+                  :key="part.id"
+                  size="sm"
+                  :name="part.name"
+                  :acronym="part.acronym"
+                  :logo="part.logo"
+                  :class="{ '-ml-3 ring-2 ring-surface': index > 0 }"
+                />
+              </span>
+              <span class="flex min-w-0 flex-wrap gap-x-1.5">
+                <b class="font-bold text-text">{{ row.jointNames }}</b>
+                <span>{{ t('programme.joint.with') }}</span>
+                <span v-if="row.here">{{ t('activity.sameDay.here') }}</span>
+              </span>
+            </p>
+            <p v-else-if="row.organization || row.here" class="mt-2 flex items-center gap-2.5 text-sm text-text-secondary">
               <OrganizationLogoMark v-if="row.organization" size="sm" :name="row.organization" :acronym="row.acronym" :logo="row.logo" />
               <span class="flex min-w-0 flex-wrap gap-x-1.5">
                 <b v-if="row.organization" class="font-bold text-text">{{ row.acronym ?? row.organization }}</b>

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM programme.session_speakers\n                    WHERE session_id = $1 AND proposal_id IS NOT NULL) AS \"intervenants!\",\n                  (SELECT count(*) FROM programme.session_organizations\n                    WHERE session_id = $1 AND role = 'lead' AND proposal_id IS NOT NULL) AS \"porteurs!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "intervenants!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "porteurs!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "d0d3435460d64b6f804103af40d8f3cd71cd7a575c50b79f487fe6c2b1ff7eae"
+}

@@ -1,0 +1,11 @@
+{
+  "carouselRole": "slideshow",
+  "slideRole": "image",
+  "position": "{index} of {total}",
+  "goTo": "Show image {index} of {total}",
+  "play": "Resume automatic rotation",
+  "pause": "Pause automatic rotation",
+  "playing": "automatic rotation on",
+  "paused": "automatic rotation paused",
+  "reducedMotion": "Rotation is stopped because your system asks for reduced motion."
+}

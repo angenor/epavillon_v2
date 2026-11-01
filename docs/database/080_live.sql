@@ -1567,8 +1567,8 @@ COMMENT ON COLUMN live.streams.recording_asset_id IS
 -- encore : elle se REDÉFINIT ICI EN ENTIER, colonnes de 075 identiques et dans
 -- le même ordre (leurs commentaires y restent), avec deux colonnes en queue.
 -- Toute modification de la vue se reporte dans les deux fichiers — sauf les
--- colonnes venues APRÈS la rediffusion (logo et type de l'organisation, 30/09) :
--- elles n'existent qu'ici, car les poser dans 075 les placerait avant
+-- colonnes venues APRÈS la rediffusion (logo et type de l'organisation, 30/09 ;
+-- dossiers d'une séance commune, 01/11) : elles n'existent qu'ici, car les poser dans 075 les placerait avant
 -- `replay_url` et l'ordre des colonnes différerait de celui de la production.
 --
 -- UNE SEULE REDIFFUSION PAR SÉANCE (LATERAL … LIMIT 1) : une ligne de la vue est
@@ -1638,11 +1638,42 @@ SELECT
     (SELECT count(*) FROM programme.registrations rg
       WHERE rg.session_id = s.id AND rg.status = 'waitlisted') AS waitlisted_count,
     s.listing_changed_at,
-    p.language_codes,
+    COALESCE(p.language_codes, (
+        SELECT array_agg(DISTINCT l ORDER BY l)
+        FROM programme.session_proposals sp
+        JOIN programme.proposals pp ON pp.id = sp.proposal_id
+        CROSS JOIN unnest(pp.language_codes) AS l
+        WHERE sp.session_id = s.id
+    )) AS language_codes,
     rp.url              AS replay_url,
     rp.duration_seconds AS replay_duration_seconds,
     media.attached_image('org', 'organizations', o.id, 'logo') AS organization_logo,
-    o.organization_type_code
+    o.organization_type_code,
+    -- Séance commune (01/11) : les dossiers réunis dans l'ordre d'affichage,
+    -- chacun avec son titre d'origine, sa couverture et son organisation
+    -- porteuse ; [] pour une séance ordinaire. Les colonnes organization_*
+    -- portent alors le premier dossier (organization_id de la séance).
+    COALESCE((
+        SELECT jsonb_agg(jsonb_build_object(
+                   'proposal_id', sp.proposal_id,
+                   'sort_order', sp.sort_order,
+                   'title', sp.title,
+                   'cover', media.attached_image('programme', 'proposals', sp.proposal_id, 'cover'),
+                   'organization', jsonb_build_object(
+                       'id', po.id,
+                       'name', po.legal_name,
+                       'acronym', po.acronym,
+                       'country_code', pc.iso2,
+                       'country', pc.name,
+                       'type_code', po.organization_type_code,
+                       'logo', media.attached_image('org', 'organizations', po.id, 'logo')))
+               ORDER BY sp.sort_order, sp.added_at)
+        FROM programme.session_proposals sp
+        JOIN programme.proposals pp   ON pp.id = sp.proposal_id
+        JOIN org.organizations po     ON po.id = pp.organization_id
+        LEFT JOIN reference.countries pc ON pc.id = po.country_id
+        WHERE sp.session_id = s.id
+    ), '[]'::jsonb) AS proposals
 FROM programme.sessions s
 LEFT JOIN event.rooms r          ON r.id = s.room_id
 LEFT JOIN org.organizations o    ON o.id = s.organization_id
@@ -1678,3 +1709,5 @@ COMMENT ON COLUMN programme.v_public_schedule.organization_logo IS
     'Logo de l''organisation porteuse, rendu par media.attached_image() comme la couverture ; nul sans organisation ou sans logo servable.';
 COMMENT ON COLUMN programme.v_public_schedule.organization_type_code IS
     'Type de l''organisation porteuse (code de la taxonomie organization_type) : public_national_institution fait afficher le drapeau de son pays. Nul sans organisation.';
+COMMENT ON COLUMN programme.v_public_schedule.proposals IS
+    'Séance commune : dossiers réunis (titre d''origine, couverture, organisation porteuse avec logo et pays), dans l''ordre d''affichage ; [] pour une séance ordinaire.';

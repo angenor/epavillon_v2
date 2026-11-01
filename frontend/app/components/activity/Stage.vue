@@ -3,6 +3,7 @@ import type { PublicScheduleRow } from '~/types/views'
 import type { PublicSessionMeeting, PublicSessionStream } from '~/types/live'
 import type { AttachedImage } from '~/types/media'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
+import type { JointPart } from '~/composables/useJointSession'
 
 /**
  * Le média de l'activité, toujours rendu : la salle Zoom (posée sur la couverture
@@ -24,11 +25,19 @@ interface Props {
   roomTo?: string
   zoneLabel?: string
   isRecorded?: boolean
+  /** Séance commune : hors direct, les couvertures des dossiers en diaporama ; vide pour une séance ordinaire. */
+  parts?: JointPart[]
 }
 
 const props = defineProps<Props>()
 
 const { t, locale } = useI18n()
+
+/** Chaque dossier a sa diapositive, même sans couverture : on y lit encore son numéro et son porteur. */
+const jointSlides = computed(() => {
+  const parts = props.parts ?? []
+  return parts.length > 1 ? parts.map((part) => ({ key: part.id, image: part.cover, part })) : []
+})
 
 const chosen = ref<string | null>(null)
 
@@ -197,8 +206,38 @@ const replayMinutes = computed(() =>
   </section>
 
   <div v-else class="relative aspect-video min-w-0 overflow-hidden rounded-lg bg-surface-inverse shadow-lg">
+    <UiSlideshow
+      v-if="jointSlides.length"
+      :slides="jointSlides"
+      controls
+      eager
+      :label="t('activity.joint.covers')"
+      :image-class="faded ? 'grayscale' : ''"
+      sizes="(min-width: 1024px) 50rem, 100vw"
+    >
+      <template #fallback="{ slide }">
+        <span
+          class="absolute inset-0 flex items-center justify-center overflow-hidden px-6 text-[clamp(3.5rem,14vw,9rem)] leading-none font-bold whitespace-nowrap text-text-on-inverse/15 select-none"
+          aria-hidden="true"
+        >
+          {{ slide.part.acronym ?? initialsOf(slide.part.name) }}
+        </span>
+      </template>
+      <template #caption="{ slide }">
+        <span
+          class="flex min-w-0 items-center gap-2 rounded-md border border-glass-border bg-glass py-1.5 ps-1.5 pe-2.5 font-condensed text-[0.95rem] font-bold tracking-[0.04em] text-text-on-inverse uppercase shadow-glass backdrop-blur-glass"
+        >
+          <span class="grid size-5.5 shrink-0 place-items-center rounded-full bg-(--color-day-mark) text-[0.85rem] text-(--color-day-on-mark)">
+            {{ slide.part.number }}
+          </span>
+          <OrganizationLogoMark :name="slide.part.name" :acronym="slide.part.acronym" :logo="slide.part.logo" size="sm" />
+          <span v-if="slide.part.logo" class="truncate">{{ slide.part.label }}</span>
+          <span class="sr-only">{{ slide.part.title }}</span>
+        </span>
+      </template>
+    </UiSlideshow>
     <UiImage
-      v-if="props.cover"
+      v-else-if="props.cover"
       :image="props.cover"
       ratio="auto"
       loading="eager"

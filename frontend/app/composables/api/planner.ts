@@ -27,6 +27,7 @@
  */
 
 import type {
+  JointSessionPayload,
   PlannerMutationResult,
   PlannerScreen,
   PublishProgrammeResult,
@@ -103,6 +104,19 @@ export function createPlannerApi({ call, send, assertEventInScope }: PlannerApiC
      */
     setBroadcast: (payload: SessionBroadcastPayload): Promise<PlannerMutationResult> =>
       send(`/sessions/${payload.session_id}/broadcast`, payload, (m) => m.setSessionBroadcast(payload), 'PUT'),
+
+    /**
+     * RÉUNIR des dossiers retenus dans une séance commune, au créneau de la
+     * séance du premier. Plusieurs séances changent à la fois : la réponse est
+     * tout l'écran, pas une séance. Refusé quand une séance retirée a des
+     * inscrits (rien n'est perdu).
+     */
+    join: (payload: JointSessionPayload): Promise<PlannerScreen> =>
+      send('/admin/planner/joint-sessions', payload, (m) => m.joinSessions(payload.event_id)),
+
+    /** SÉPARER une séance commune : chaque dossier retrouve sa séance. */
+    split: (eventId: Uuid, sessionId: Uuid): Promise<PlannerScreen> =>
+      send(`/admin/planner/joint-sessions/${sessionId}`, {}, (m) => m.splitJointSession(eventId), 'DELETE'),
 
     /**
      * CE QUI RESTE À RÉGLER AVANT DE PUBLIER — lecture seule.

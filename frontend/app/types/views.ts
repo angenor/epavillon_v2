@@ -157,6 +157,43 @@ export interface PublicScheduleRow {
   organization_logo?: AttachedImage | null
   /** Taxonomie `organization_type` : `public_national_institution` fait afficher le drapeau. */
   organization_type_code?: TaxonomyTermCode | null
+  /** Séance commune : dossiers réunis dans l'ordre d'affichage ; [] (ou absent dans les jeux d'exemple) pour une séance ordinaire. */
+  proposals?: JointProposal[]
+}
+
+/**
+ * Séance commune : l'IFDD réunit dans un créneau, sous un titre commun, des
+ * dossiers acceptés d'organisations différentes. Le public voit une séance ;
+ * chaque dossier garde sa couverture, son porteur et son titre d'origine. Les
+ * colonnes `organization_*` de la ligne portent alors le premier dossier.
+ */
+export interface JointProposalOrganization {
+  id: OrganizationId
+  name: string
+  acronym: string | null
+  country_code: string | null
+  country: I18nText | null
+  type_code: TaxonomyTermCode | null
+  logo: AttachedImage | null
+}
+
+export interface JointProposal {
+  proposal_id: ProposalId
+  sort_order: number
+  /** Titre d'origine du dossier. */
+  title: I18nText
+  /** Couverture du dossier ; nulle sans image. */
+  cover: AttachedImage | null
+  /** Organisation porteuse du dossier. */
+  organization: JointProposalOrganization
+}
+
+/** Un dossier d'une séance commune, dans le détail public. */
+export interface JointProposalDetail extends JointProposal {
+  description: I18nText | null
+  /** Co-organisateurs, partenaires et soutiens du dossier, porteur exclu. */
+  organizations: SessionOrganization[]
+  speakers: PublicSessionSpeaker[]
 }
 
 /** `GET /events/{id}/sessions/{slug}` — le détail public d'une séance publiée. */
@@ -172,6 +209,8 @@ export interface PublicSessionDetail {
   organizations: SessionOrganization[]
   /** Galerie (D7) : photos prêtes et publiques, dans l'ordre réglé. Vide sans photo. */
   gallery: AttachedImage[]
+  /** Séance commune : un élément par dossier, dans l'ordre ; [] pour une séance ordinaire. */
+  proposals?: JointProposalDetail[]
 }
 
 // ---------------------------------------------------------------------------

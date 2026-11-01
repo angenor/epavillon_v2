@@ -44,8 +44,13 @@ const { tr } = useI18nText()
 const { timeRange, date } = useDateTime()
 
 const title = computed(() => tr(props.session.title))
+// Une séance commune nomme toutes ses organisations, pas seulement la première.
 const organization = computed(() =>
-  props.session.organization_acronym?.trim() || props.session.organization_name || '',
+  props.session.joint_proposals.length
+    ? props.session.joint_proposals
+        .map((part) => part.organization_acronym?.trim() || part.organization_name)
+        .join(' · ')
+    : props.session.organization_acronym?.trim() || props.session.organization_name || '',
 )
 
 const duration = computed(() => plannedDuration(props.session))
@@ -130,6 +135,7 @@ function onDragStart(dragEvent: DragEvent): void {
     </div>
 
     <p v-if="organization" class="mt-1 truncate text-xs text-text-muted">
+      <UiBadge v-if="props.session.joint_proposals.length" size="sm" intent="info" :label="t('admin.planner.joint.badge')" />
       {{ organization }}
       <span v-if="props.session.organization_country_code">
         · {{ props.session.organization_country_code }}

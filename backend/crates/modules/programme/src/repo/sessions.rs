@@ -184,6 +184,10 @@ pub async fn creer(
                  ) AS instant
              ) AS debut
             WHERE p.id = $1
+              -- Réuni dans une séance commune, le dossier n'a plus de séance
+              -- propre : une acceptation rejouée ne doit pas lui en refaire une.
+              AND NOT EXISTS (SELECT 1 FROM programme.session_proposals sp
+                               WHERE sp.proposal_id = p.id)
            ON CONFLICT (proposal_id, sequence_number) DO NOTHING
         RETURNING id"#,
         proposal_id,
@@ -202,7 +206,8 @@ pub async fn creer(
 /// Reporter sur les séances d'un dossier son titre et sa présentation.
 ///
 /// Rien d'autre : le créneau, le format et l'adresse restent ceux qui ont été
-/// arbitrés ou communiqués (FR-091, amendé le 03/10).
+/// arbitrés ou communiqués (FR-091, amendé le 03/10). Réuni dans une séance
+/// commune, le dossier met à jour sa ligne de réunion, jamais le titre commun.
 pub async fn reporter_les_textes(conn: &mut PgConnection, proposal_id: Uuid) -> Result<u64> {
     let reportees = sqlx::query!(
         "UPDATE programme.sessions s
@@ -214,11 +219,27 @@ pub async fn reporter_les_textes(conn: &mut PgConnection, proposal_id: Uuid) -> 
                  OR s.description IS DISTINCT FROM p.detailed_presentation)",
         proposal_id
     )
-    .execute(conn)
+    .execute(&mut *conn)
     .await?
     .rows_affected();
 
-    Ok(reportees)
+    // Dans une séance commune, le titre d'origine et la présentation du dossier
+    // vivent sur sa ligne de réunion ; le titre commun, lui, est celui de l'IFDD.
+    let reunies = sqlx::query!(
+        "UPDATE programme.session_proposals sp
+            SET title = p.title, description = p.detailed_presentation
+           FROM programme.proposals p
+          WHERE p.id = $1
+            AND sp.proposal_id = p.id
+            AND (sp.title IS DISTINCT FROM p.title
+                 OR sp.description IS DISTINCT FROM p.detailed_presentation)",
+        proposal_id
+    )
+    .execute(&mut *conn)
+    .await?
+    .rows_affected();
+
+    Ok(reportees + reunies)
 }
 
 /// Ce qu'un dossier retenu apporte à ses séances.
@@ -526,6 +547,8 @@ pub async fn seances_suivies<'e>(
              FROM programme.sessions s
              LEFT JOIN event.rooms r ON r.id = s.room_id
             WHERE s.proposal_id = $1
+               OR EXISTS (SELECT 1 FROM programme.session_proposals sp
+                           WHERE sp.session_id = s.id AND sp.proposal_id = $1)
             ORDER BY s.sequence_number, s.starts_at"#,
         proposal_id
     )
@@ -561,8 +584,10 @@ pub async fn comptes_rendus_manquants<'e>(
 ) -> Result<Vec<(Uuid, serde_json::Value, time::OffsetDateTime)>> {
     let lignes = sqlx::query!(
         "SELECT id, title, ends_at
-           FROM programme.sessions
-          WHERE proposal_id = $1
+           FROM programme.sessions s
+          WHERE (s.proposal_id = $1
+                 OR EXISTS (SELECT 1 FROM programme.session_proposals sp
+                             WHERE sp.session_id = s.id AND sp.proposal_id = $1))
             AND ends_at < now()
             AND status <> 'cancelled'
             AND report_submitted_at IS NULL

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id FROM programme.sessions WHERE proposal_id = $1 AND status <> 'cancelled'",
+  "query": "SELECT id FROM programme.sessions\n          WHERE proposal_id = $1 AND status <> 'cancelled'\n          ORDER BY sequence_number, starts_at\n          LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -24,5 +24,5 @@
       false
     ]
   },
-  "hash": "5b9fd08e8b999f1481dacbcf0a7535b66d051f4e8d2fbba5bd9eb918a214924c"
+  "hash": "c771bb4727a3897640783eba73e26f81df718318ee2414c27e6c9263a2fe6e7b"
 }

@@ -370,6 +370,8 @@ export {
   setSessionTracks,
   setSessionBroadcast,
   publishProgramme,
+  joinSessions,
+  splitJointSession,
 } from './admin-planner'
 
 export {

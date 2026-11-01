@@ -1,0 +1,11 @@
+{
+  "carouselRole": "diaporama",
+  "slideRole": "image",
+  "position": "{index} sur {total}",
+  "goTo": "Afficher l'image {index} sur {total}",
+  "play": "Reprendre le défilement automatique",
+  "pause": "Mettre le défilement automatique en pause",
+  "playing": "défilement automatique en cours",
+  "paused": "défilement automatique en pause",
+  "reducedMotion": "Le défilement est arrêté parce que votre système demande moins d'animations."
+}

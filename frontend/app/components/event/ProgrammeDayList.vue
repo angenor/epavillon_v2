@@ -45,6 +45,7 @@ const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
 const { state, link, duration, titleParts } = useProgrammeSession()
+const { partsOf } = useJointSession()
 const localePath = useLocalePath()
 
 const at = (day: IsoDate) => new Date(`${day}T12:00:00Z`)
@@ -77,6 +78,7 @@ function row(session: PublicScheduleRow, track: PublicScheduleTrack | null = nul
     current,
     faded,
     stateLabel: current === 'live' ? t('programme.list.live') : t(`session-card.state.${current}`),
+    parts: partsOf(session),
   }
 }
 

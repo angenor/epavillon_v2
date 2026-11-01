@@ -58,7 +58,21 @@ pub async fn seances_de_ledition<'e>(
                   reference.term_badges('programme', 'sessions', s.id, 'activity_theme')
                       AS "themes!",
                   (SELECT count(*) FROM programme.session_speakers sp
-                    WHERE sp.session_id = s.id) AS "speaker_count!"
+                    WHERE sp.session_id = s.id) AS "speaker_count!",
+                  COALESCE((
+                      SELECT jsonb_agg(jsonb_build_object(
+                                 'proposal_id', jp.proposal_id,
+                                 'sort_order', jp.sort_order,
+                                 'title', jp.title,
+                                 'reference_code', pp.reference_code,
+                                 'organization_name', po.legal_name,
+                                 'organization_acronym', po.acronym)
+                             ORDER BY jp.sort_order, jp.added_at)
+                        FROM programme.session_proposals jp
+                        JOIN programme.proposals pp ON pp.id = jp.proposal_id
+                        JOIN org.organizations po ON po.id = pp.organization_id
+                       WHERE jp.session_id = s.id
+                  ), '[]'::jsonb) AS "joint_proposals!"
              FROM programme.sessions s
              LEFT JOIN event.rooms r         ON r.id = s.room_id
              LEFT JOIN org.organizations o   ON o.id = s.organization_id
@@ -106,6 +120,7 @@ pub async fn seances_de_ledition<'e>(
             themes: l.themes,
             speaker_count: l.speaker_count,
             published_at: l.published_at,
+            joint_proposals: l.joint_proposals,
         })
         .collect())
 }

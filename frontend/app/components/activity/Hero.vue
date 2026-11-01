@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
+import type { JointPart } from '~/composables/useJointSession'
 
 interface Props {
   session: PublicScheduleRow
@@ -9,9 +10,14 @@ interface Props {
   backTo: string
   trail: string
   cancelledReason?: string | null
+  /** Séance commune : un « Porté par » par dossier ; vide pour une séance ordinaire. */
+  parts?: JointPart[]
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { cancelledReason: null, parts: () => [] })
+
+const isJoint = computed(() => props.parts.length > 1)
+const thumbOf = (asset: JointPart['logo']) => (asset ? (asset.sources.thumb?.url ?? asset.url) : null)
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -80,6 +86,10 @@ const nationalCountry = computed(() =>
         <UiIcon name="globe" size="0.9375rem" :stroke-width="2" />
         {{ t(`session-card.format.${props.session.format}`) }}
       </UiBannerPill>
+      <UiBannerPill v-if="isJoint">
+        <UiIcon name="users" size="0.9375rem" :stroke-width="2" />
+        {{ t('activity.joint.tag') }}
+      </UiBannerPill>
       <NuxtLink
         v-for="track in specialDays"
         :key="track.slug"
@@ -115,7 +125,35 @@ const nationalCountry = computed(() =>
       </li>
     </ul>
 
-    <div v-if="props.session.organization_name" class="mt-5.5 flex items-center gap-3.5">
+    <ul v-if="isJoint" class="mt-5.5 flex flex-wrap items-center gap-x-7 gap-y-3.5">
+      <li v-for="(part, index) in props.parts" :key="part.id" class="flex min-w-0 items-center gap-x-7">
+        <span v-if="index > 0" class="font-condensed text-[1.6rem] font-bold text-accent-on-inverse" aria-hidden="true">
+          {{ t('activity.joint.and') }}
+        </span>
+        <span class="flex min-w-0 items-center gap-3.5">
+          <span
+            class="flex h-16 min-w-16 shrink-0 items-center justify-center rounded-lg bg-surface-inverse-selected p-1.5 shadow-glass"
+          >
+            <img v-if="thumbOf(part.logo)" :src="thumbOf(part.logo) ?? undefined" alt="" class="max-h-13 max-w-36 object-contain sm:max-w-44">
+            <span v-else class="px-2 font-condensed text-lg font-bold tracking-[0.02em] text-text-on-inverse-selected" aria-hidden="true">
+              {{ part.acronym ?? initialsOf(part.name) }}
+            </span>
+          </span>
+          <span class="min-w-0">
+            <span class="block font-condensed text-[0.95rem] font-semibold tracking-[0.05em] text-text-on-inverse-muted uppercase">
+              {{ t('activity.hero.ledBy') }}
+            </span>
+            <b class="block text-[1.02rem] font-bold">{{ part.name }}</b>
+            <span v-if="part.nationalCountry" class="mt-1 inline-flex items-center gap-1.5 text-sm text-text-on-inverse-muted">
+              <UiCountryFlag v-if="part.countryCode" :code="part.countryCode" :label="part.nationalCountry" aria-hidden="true" />
+              {{ part.nationalCountry }}
+            </span>
+          </span>
+        </span>
+      </li>
+    </ul>
+
+    <div v-else-if="props.session.organization_name" class="mt-5.5 flex items-center gap-3.5">
       <span
         class="flex h-16 max-w-[45%] min-w-16 shrink-0 items-center justify-center rounded-lg bg-surface-inverse-selected p-1.5 shadow-glass"
       >

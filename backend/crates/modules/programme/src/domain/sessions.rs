@@ -118,6 +118,9 @@ pub struct PlannerSession {
     pub speaker_count: i64,
     #[serde(with = "time::serde::rfc3339::option")]
     pub published_at: Option<OffsetDateTime>,
+    /// Séance commune : les dossiers réunis (`PlannerJointProposal[]`), dans
+    /// l'ordre d'affichage ; vide pour une séance ordinaire.
+    pub joint_proposals: serde_json::Value,
 }
 
 /// Salle offerte au placement — `PlannerRoom`.
@@ -328,4 +331,6 @@ pub struct PublicScheduleRow {
     pub organization_logo: Option<serde_json::Value>,
     /// `public_national_institution` fait afficher le drapeau du pays.
     pub organization_type_code: Option<String>,
+    /// Séance commune : les dossiers réunis (`JointProposal[]`) ; `[]` sinon.
+    pub proposals: serde_json::Value,
 }

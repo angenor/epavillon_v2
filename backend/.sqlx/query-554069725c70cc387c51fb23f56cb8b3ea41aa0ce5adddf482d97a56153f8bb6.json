@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_organizations\n             (session_id, organization_id, role, sort_order, proposal_id)\n         SELECT $2, o.organization_id, o.role, o.sort_order,\n                CASE WHEN EXISTS (SELECT 1 FROM programme.session_proposals sp\n                                   WHERE sp.session_id = $2 AND sp.proposal_id = $1)\n                     THEN $1::uuid END\n           FROM programme.proposal_organizations o\n          WHERE o.proposal_id = $1 AND o.role <> 'lead'\n         ON CONFLICT (session_id, organization_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "554069725c70cc387c51fb23f56cb8b3ea41aa0ce5adddf482d97a56153f8bb6"
+}

@@ -3,6 +3,12 @@
   "trail": "Programmes / {edition} / {day}",
   "loading": "Loading the activity",
   "about": "About",
+  "joint": {
+    "tag": "Joint session",
+    "and": "&",
+    "covers": "Covers of the session's activities",
+    "title": "In this session"
+  },
   "error": {
     "title": "Activity unavailable",
     "description": "This activity could not be loaded."

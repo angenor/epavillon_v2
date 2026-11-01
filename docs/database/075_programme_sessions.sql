@@ -303,6 +303,9 @@ CREATE TABLE programme.session_speakers (
     civility          text        CHECK (civility IN ('mme', 'm', 'dr', 'pr', 'other')),
     first_name        text,
     last_name         text,
+    -- Dossier dont l'intervenant vient, dans une séance commune (§ 2 quater) ;
+    -- NULL dans une séance ordinaire, où il n'y a qu'un dossier.
+    proposal_id       uuid        REFERENCES programme.proposals(id) ON DELETE CASCADE,
     CONSTRAINT ux_session_speakers UNIQUE (session_id, person_id, role),
     CONSTRAINT ck_session_speakers_identity CHECK (
         (person_id IS NOT NULL AND civility IS NULL AND first_name IS NULL AND last_name IS NULL)
@@ -326,11 +329,18 @@ CREATE TABLE programme.session_organizations (
     role            programme.organization_role NOT NULL DEFAULT 'co_organizer',
     sort_order      smallint    NOT NULL DEFAULT 0,
     added_at        timestamptz NOT NULL DEFAULT now(),
+    -- Dossier dont l'organisation vient, dans une séance commune (§ 2 quater) ;
+    -- NULL dans une séance ordinaire. Une organisation présente dans deux
+    -- dossiers d'une même séance commune n'y figure qu'une fois (clé primaire),
+    -- sous le premier dossier réuni.
+    proposal_id     uuid        REFERENCES programme.proposals(id) ON DELETE CASCADE,
     PRIMARY KEY (session_id, organization_id)
 );
 
+-- Un porteur par dossier : un seul dans une séance ordinaire (dossier NULL,
+-- d'où NULLS NOT DISTINCT), un par dossier réuni dans une séance commune.
 CREATE UNIQUE INDEX ux_session_organizations_lead
-    ON programme.session_organizations (session_id)
+    ON programme.session_organizations (session_id, proposal_id) NULLS NOT DISTINCT
     WHERE role = 'lead';
 
 CREATE INDEX ix_session_organizations_org
@@ -339,7 +349,9 @@ CREATE INDEX ix_session_organizations_org
 COMMENT ON TABLE programme.session_organizations IS
     'Organisations d''une session publiée, porteur principal compris. Alimente l''affichage public et le décompte par organisation.';
 
--- Synchronisation du porteur principal, comme sur les propositions.
+-- Synchronisation du porteur principal, comme sur les propositions. Dans une
+-- séance commune, les porteurs des dossiers réunis (rangés sous leur dossier)
+-- ne sont pas ceux de la séance : seul le porteur sans dossier est remplacé.
 CREATE OR REPLACE FUNCTION programme.tg_sync_session_lead_organization()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -353,7 +365,8 @@ BEGIN
     END IF;
 
     DELETE FROM programme.session_organizations
-    WHERE session_id = NEW.id AND role = 'lead' AND organization_id <> NEW.organization_id;
+    WHERE session_id = NEW.id AND role = 'lead' AND proposal_id IS NULL
+      AND organization_id <> NEW.organization_id;
 
     INSERT INTO programme.session_organizations (session_id, organization_id, role, sort_order)
     VALUES (NEW.id, NEW.organization_id, 'lead', 0)
@@ -366,6 +379,89 @@ $$;
 CREATE TRIGGER tg_sessions_sync_lead_organization
     AFTER INSERT OR UPDATE OF organization_id ON programme.sessions
     FOR EACH ROW EXECUTE FUNCTION programme.tg_sync_session_lead_organization();
+
+-- -----------------------------------------------------------------------------
+-- 2 quater. Séances communes (01/11/2026)
+--
+-- Faute de créneaux pour tous, l'IFDD réunit parfois deux dossiers retenus ou
+-- plus, d'organisations différentes et aux thèmes proches, dans UN créneau et
+-- sous un titre commun qu'elle choisit. Le public voit une séance : une
+-- inscription, une réunion visio, un direct. Chaque dossier y garde sa
+-- présentation, sa couverture, ses organisations et ses intervenants, dans un
+-- ordre d'affichage. Pas d'horaire de passage : les organisations s'entendent
+-- entre elles, seuls le début et la fin de la séance comptent.
+--
+-- La séance commune est une ligne ordinaire de programme.sessions, sans dossier
+-- (`proposal_id` NULL, le cas « l'IFDD programme directement »), dont le titre
+-- est le titre commun et dont l'organisation est celle du premier dossier.
+-- Créneau, inscriptions, diffusion et conflits restent donc ceux d'une séance,
+-- sans rien dupliquer. Cette table dit quels dossiers elle réunit.
+--
+-- Pourquoi pas plusieurs `proposal_id` sur la séance : un dossier n'a qu'une
+-- séance commune à la fois, mais une séance en réunit un nombre variable ; et
+-- ce que chaque dossier apporte (titre d'origine, présentation) doit se
+-- recopier et se tenir à jour comme les textes d'une séance ordinaire, ce
+-- qu'un tableau d'identifiants ne porte pas.
+--
+-- Intervenants et organisations recopiés des dossiers vivent dans
+-- session_speakers et session_organizations, rangés par leur `proposal_id`.
+-- -----------------------------------------------------------------------------
+CREATE TABLE programme.session_proposals (
+    id          uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    session_id  uuid        NOT NULL REFERENCES programme.sessions(id) ON DELETE CASCADE,
+    proposal_id uuid        NOT NULL REFERENCES programme.proposals(id) ON DELETE RESTRICT,
+    -- Ordre d'affichage des dossiers dans la séance (1, 2…).
+    sort_order  smallint    NOT NULL DEFAULT 1 CHECK (sort_order > 0),
+    -- Titre d'origine et présentation du dossier, recopiés à la réunion puis à
+    -- chaque correction, comme ceux d'une séance ordinaire (« les textes
+    -- suivent l'activité »).
+    title       platform.i18n_text NOT NULL,
+    description platform.i18n_text,
+    added_by    uuid        CONSTRAINT xmod_fk_session_proposals_actor
+                            REFERENCES identity.people(id) ON DELETE SET NULL,
+    added_at    timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ux_session_proposals UNIQUE (session_id, proposal_id),
+    -- Un dossier n'est réuni que dans une séance commune à la fois.
+    CONSTRAINT ux_session_proposals_proposal UNIQUE (proposal_id)
+);
+
+CREATE INDEX ix_session_proposals_session ON programme.session_proposals (session_id, sort_order);
+
+CREATE TRIGGER tg_session_proposals_audit
+    AFTER INSERT OR UPDATE OR DELETE ON programme.session_proposals
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON TABLE programme.session_proposals IS
+    'Dossiers réunis dans une séance commune : un créneau, un titre commun choisi par l''IFDD, chaque dossier gardant sa présentation, sa couverture, ses organisations et ses intervenants.';
+COMMENT ON COLUMN programme.session_proposals.sort_order IS
+    'Ordre d''affichage du dossier dans la séance commune ; aucun horaire de passage.';
+
+-- Une séance commune n'a pas de dossier propre, et ne réunit que des dossiers
+-- de son édition : sans ce contrôle, une URL forgée glisserait un dossier de
+-- la COP30 dans une séance de la COP31.
+CREATE OR REPLACE FUNCTION programme.tg_check_session_proposal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM programme.sessions s
+        JOIN programme.proposals p ON p.id = NEW.proposal_id
+        WHERE s.id = NEW.session_id
+          AND s.proposal_id IS NULL
+          AND s.event_id = p.event_id
+    ) THEN
+        RAISE EXCEPTION 'Réunion impossible : la séance commune a déjà un dossier propre, ou le dossier relève d''une autre édition.'
+            USING ERRCODE = 'integrity_constraint_violation';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_session_proposals_check
+    BEFORE INSERT OR UPDATE OF session_id, proposal_id ON programme.session_proposals
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_check_session_proposal();
 
 -- -----------------------------------------------------------------------------
 -- 2 bis. Rattachement aux journées spéciales
@@ -1022,8 +1118,15 @@ SELECT
     s.listing_changed_at,
     -- LA SEULE COLONNE TIRÉE DU DOSSIER DE PROPOSITION. La langue d'une activité
     -- est annoncée au public ; rien d'autre du dossier (coordonnées, pièces,
-    -- évaluation) ne l'est. Nulle quand l'IFDD programme sans dossier.
-    p.language_codes
+    -- évaluation) ne l'est. Séance commune : les langues de ses dossiers. Nulle
+    -- quand l'IFDD programme sans dossier.
+    COALESCE(p.language_codes, (
+        SELECT array_agg(DISTINCT l ORDER BY l)
+        FROM programme.session_proposals sp
+        JOIN programme.proposals pp ON pp.id = sp.proposal_id
+        CROSS JOIN unnest(pp.language_codes) AS l
+        WHERE sp.session_id = s.id
+    )) AS language_codes
 FROM programme.sessions s
 LEFT JOIN event.rooms r          ON r.id = s.room_id
 LEFT JOIN org.organizations o    ON o.id = s.organization_id
@@ -1035,7 +1138,8 @@ WHERE s.published_at IS NOT NULL;
 -- programmation publique ») : elle y gagne, en fin de liste, `replay_url` et
 -- `replay_duration_seconds`, lus dans live.streams — qui n'existe pas encore ici,
 -- puis `organization_logo` et `organization_type_code` (30/09), qui n'existent
--- que là. Toute autre modification de la vue se reporte dans les deux fichiers.
+-- que là, comme `proposals` (séances communes, 01/11). Toute autre
+-- modification de la vue se reporte dans les deux fichiers.
 
 COMMENT ON VIEW programme.v_public_schedule IS
     'Programmation publique prête à l''affichage (vue grille et vue calendrier), état temporel calculé en base.';
@@ -1345,12 +1449,14 @@ STABLE
 AS $$
     SELECT min(s.starts_at) - interval '10 days'
       FROM programme.sessions s
-     WHERE s.proposal_id = p_proposal_id
+     WHERE (s.proposal_id = p_proposal_id
+            OR EXISTS (SELECT 1 FROM programme.session_proposals sp
+                        WHERE sp.session_id = s.id AND sp.proposal_id = p_proposal_id))
        AND s.status <> 'cancelled';
 $$;
 
 COMMENT ON FUNCTION programme.proposal_needs_deadline IS
-    'Dix jours avant la première séance non annulée du dossier ; NULL sans séance. Indicative.';
+    'Dix jours avant la première séance non annulée du dossier, séance commune comprise ; NULL sans séance. Indicative.';
 
 -- -----------------------------------------------------------------------------
 -- 8. Déclaration des références vers les organisations (pour la fusion)

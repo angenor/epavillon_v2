@@ -14,8 +14,9 @@
 
 import type { I18nText, IsoDateTime } from '~/types/shared'
 import type { AttachedImage } from '~/types/media'
-import type { PublicScheduleRow } from '~/types/views'
+import type { JointProposal, JointProposalDetail, JointProposalOrganization, PublicScheduleRow } from '~/types/views'
 import type { PublicSessionSpeaker, SessionOrganization } from '~/types/programme/session'
+import type { SpeakerRole } from '~/types/programme/proposal'
 import type {
   PublicScheduleTrack,
   PublicTrackEntry,
@@ -32,6 +33,7 @@ import {
   TRACK_PAGE_MOMENT,
   TRACK_PAGE_ORG,
   TRACK_PAGE_PART,
+  TRACK_PAGE_PROPOSAL,
   TRACK_PAGE_SESSION,
   TRACK_PAGE_SPEAKER,
 } from './ids'
@@ -112,6 +114,7 @@ const O = {
   dakiFarm: org(22, 'Daki Farm NRCI'),
   cegepGaspesie: org(23, 'Cégep de la Gaspésie et des Îles'),
   genreClimatSn: org(24, 'Sénégal : Genre et Climat'),
+  aimf: org(25, 'Association internationale des maires francophones', 'AIMF'),
 }
 
 const roles: Record<string, I18nText> = {
@@ -131,6 +134,34 @@ const partenaire = (o: Org, role_code: keyof typeof roles): PublicTrackPartner =
 
 // --- Activités ---------------------------------------------------------------
 
+/** Un dossier d'une séance commune : porteur en tête de `orgs`, puis ses co-organisateurs. */
+interface Dossier {
+  n: number
+  titre: string
+  description: string
+  orgs: Org[]
+  couverture: AttachedImage | null
+  intervenants: Array<{ nom: string; fonction: string; role: SpeakerRole }>
+}
+
+const organisationCommune = (o: Org): JointProposalOrganization => ({
+  id: o.id,
+  name: o.name,
+  acronym: o.acronym,
+  country_code: null,
+  country: null,
+  type_code: null,
+  logo: null,
+})
+
+const dossierPublic = (d: Dossier, i: number): JointProposal => ({
+  proposal_id: TRACK_PAGE_PROPOSAL(d.n),
+  sort_order: i,
+  title: fr(d.titre),
+  cover: d.couverture,
+  organization: organisationCommune(d.orgs[0]!),
+})
+
 interface Activite {
   n: number
   jour: number
@@ -140,6 +171,8 @@ interface Activite {
   points?: string[]
   orgs?: Org[]
   intervenants?: Array<{ nom: string; fonction: string }>
+  /** Séance commune : les dossiers réunis dans le créneau, dans l'ordre ; `orgs` porte alors leurs porteurs. */
+  dossiers?: Dossier[]
   partie: string | null
   tempsFort?: boolean
   diffusee?: boolean
@@ -177,6 +210,7 @@ const ligne = (x: Activite, track: { slug: string; title: I18nText; color: strin
     registered_count: 0,
     theme_codes: [],
     themes: [],
+    ...(x.dossiers ? { proposals: x.dossiers.map(dossierPublic) } : {}),
   }
 }
 
@@ -207,6 +241,39 @@ const intervenants = (x: Activite): PublicSessionSpeaker[] =>
     created_at: '2026-10-20T10:00:00Z',
     display_name: p.nom,
     avatar: null,
+  }))
+
+/** Le détail public d'une séance commune : un élément par dossier, avec ses intervenants et ses co-organisateurs. */
+const dossiersDetail = (x: Activite): JointProposalDetail[] =>
+  (x.dossiers ?? []).map((d, i) => ({
+    ...dossierPublic(d, i),
+    description: fr(`<p>${d.description}</p>`),
+    organizations: d.orgs.slice(1).map((o, j) => ({
+      session_id: TRACK_PAGE_SESSION(x.n),
+      organization_id: o.id,
+      role: 'co_organizer',
+      sort_order: j,
+      added_at: '2026-10-20T10:00:00Z',
+      name: o.name,
+      acronym: o.acronym,
+      country_code: null,
+      country: null,
+      logo: null,
+      proposal_id: TRACK_PAGE_PROPOSAL(d.n),
+    })),
+    speakers: d.intervenants.map((p, j) => ({
+      id: TRACK_PAGE_SPEAKER(100 + d.n * 10 + j),
+      session_id: TRACK_PAGE_SESSION(x.n),
+      role: p.role,
+      job_title_snapshot: p.fonction,
+      organization_snapshot: null,
+      bio: null,
+      sort_order: j,
+      created_at: '2026-10-20T10:00:00Z',
+      display_name: p.nom,
+      avatar: null,
+      proposal_id: TRACK_PAGE_PROPOSAL(d.n),
+    })),
   }))
 
 interface Moment { n: number; jour: number; debut: string; fin: string | null; libelle: string; partie: string | null; points?: string[] }
@@ -256,6 +323,9 @@ const photo = (n: number, alt: string): AttachedImage => ({
   credit: 'IFDD',
   sources: {},
 })
+
+/** Une couverture de dossier servie par le site lui-même (`public/mocks/covers/`) : elle s'affiche hors ligne. */
+const couverture = (n: number, fichier: string, alt: string): AttachedImage => ({ ...photo(n, alt), url: `/mocks/covers/${fichier}.jpg` })
 
 const atelier: Source = {
   id: TRACK_PAGE.atelier,
@@ -359,7 +429,33 @@ const finance: Source = {
       orgs: [O.oif, O.ocde, O.fondsAdaptation, O.fondsVert, O.cif], partie: 'p1',
     },
     { n: 13, jour: 13, debut: '10:15', fin: '11:15', titre: "Du financement climatique à l'action régionale : les solutions du P2RS pour la résilience du Sahel, la restauration des terres et la sécurité alimentaire", orgs: [O.cilss], partie: 'p2' },
-    { n: 14, jour: 13, debut: '11:30', fin: '12:30', titre: 'Enjeux de financements pour les régions et les municipalités', orgs: [O.airf, O.sakete], partie: 'p2' },
+    {
+      n: 14, jour: 13, debut: '11:30', fin: '12:30', titre: "Financer l'action climatique locale : régions et villes francophones", orgs: [O.airf, O.aimf], partie: 'p2',
+      dossiers: [
+        {
+          n: 1,
+          titre: 'Enjeux de financements pour les régions et les municipalités',
+          description: "Régions et communes francophones portent une part croissante de l'action climatique, mais accèdent rarement aux grands fonds. Élus et techniciens disent ce qui bloque, et ce qui a permis de débloquer.",
+          orgs: [O.airf, O.sakete],
+          couverture: couverture(41, 'adaptation-cotiere', 'Une digue sur le littoral, en Afrique de l\'Ouest'),
+          intervenants: [
+            { nom: 'Aminata Diallo', fonction: 'Secrétaire générale, AIRF', role: 'moderator' },
+            { nom: 'Jean Houngbo', fonction: 'Maire de Sakété, Bénin', role: 'panelist' },
+          ],
+        },
+        {
+          n: 2,
+          titre: 'Villes francophones et adaptation : financer les plans locaux',
+          description: "Dakar, Abidjan et Port-Louis présentent les montages qui ont permis de financer leurs plans d'adaptation, et les guichets qui restent fermés aux villes.",
+          orgs: [O.aimf],
+          couverture: couverture(42, 'mangroves', 'Une mangrove restaurée'),
+          intervenants: [
+            { nom: 'Moussa Koné', fonction: 'Directeur de la planification, Sikasso', role: 'panelist' },
+            { nom: 'Claire Lefebvre', fonction: 'Chargée de programme, AIMF', role: 'panelist' },
+          ],
+        },
+      ],
+    },
     { n: 15, jour: 13, debut: '13:00', fin: '14:00', titre: 'Autorité nationale de budgétisation climat : institutionnaliser, coordonner et budgétiser la mise en œuvre de la CDN', orgs: [O.menteSenegal], partie: 'p2' },
     { n: 16, jour: 13, debut: '14:15', fin: '15:15', titre: 'Du récif à la résilience : financer et mettre en œuvre la réhabilitation côtière dans les petits États insulaires', orgs: [O.businessMaurice], partie: 'p2' },
     { n: 17, jour: 13, debut: '15:30', fin: '16:30', titre: 'Rencontre avec les experts : mobiliser les investissements pour une transition résiliente et inclusive', orgs: [O.ndcp], partie: 'p3' },
@@ -587,7 +683,7 @@ export const trackPageSettings: Record<string, TrackPageSettings> = Object.fromE
   }),
 )
 
-/** Les vingt-quatre organisations du jeu, pour un sélecteur de partenaire. */
+/** Les organisations du jeu, pour un sélecteur de partenaire. */
 export const trackPageOrganizations = Object.values(O)
 
 // --- La programmation de l'édition ------------------------------------------
@@ -614,3 +710,10 @@ export const trackPagesScheduleTracks: PublicScheduleTrack[] = SOURCES.map((s) =
     .map((m) => ({ starts_at: a(m.jour, m.debut), ends_at: m.fin ? a(m.jour, m.fin) : null, label: fr(m.libelle) }))
     .sort((g, d) => g.starts_at.localeCompare(d.starts_at)),
 }))
+
+/** Les séances communes de la CdP31 d'Antalya : leurs dossiers, pour le détail public d'une activité. */
+export const trackPagesJointDetails: ReadonlyMap<string, JointProposalDetail[]> = new Map(
+  [...SOURCES.flatMap((s) => s.activites), ...HORS_FIL]
+    .filter((x) => x.dossiers?.length)
+    .map((x) => [TRACK_PAGE_SESSION(x.n), dossiersDetail(x)]),
+)

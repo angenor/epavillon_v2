@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sp.description ->> 'fr' AS \"description?\",\n                  s.title ->> 'fr' AS \"titre_commun?\"\n             FROM programme.session_proposals sp\n             JOIN programme.sessions s ON s.id = sp.session_id\n            WHERE sp.proposal_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "description?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "titre_commun?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "513fa513d7c66b3daca8ed2da609cd32a1190f022c57ad893adc8f82472015a7"
+}

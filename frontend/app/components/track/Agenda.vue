@@ -25,13 +25,18 @@ const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
 const { link, duration } = useProgrammeSession()
+const { partsOf } = useJointSession()
 const route = useRoute()
 
 const timezone = computed(() => props.page.edition.timezone)
 
 /** L'atelier, sans images ni diffusion, se passe de la colonne des vignettes. */
 const media = computed(() =>
-  props.page.agenda.some((entry) => entry.kind === 'activity' && (entry.activity.session.cover || entry.activity.session.is_streamed)),
+  props.page.agenda.some(
+    (entry) =>
+      entry.kind === 'activity' &&
+      (entry.activity.session.cover || entry.activity.session.is_streamed || entry.activity.session.proposals?.some((proposal) => proposal.cover)),
+  ),
 )
 
 const label = (entry: { acronym?: string | null; name?: string }) => entry.acronym ?? entry.name ?? ''
@@ -96,6 +101,7 @@ function row(entry: PublicTrackEntry, index: number): { key: string; anchor: str
       current,
       faded,
       stateLabel,
+      parts: partsOf(session),
     },
   }
 }

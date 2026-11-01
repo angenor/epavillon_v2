@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AttachedImage } from '~/types/media'
 import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
+import type { JointPart } from '~/composables/useJointSession'
 
 /**
  * Une ligne d'activité, direction condensée : grande heure, vignette, titre,
@@ -9,6 +10,9 @@ import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
  *
  * Sans `to`, c'est un moment sans activité (accueil, déjeuner, clôture) :
  * ligne basse, sans lien ni vignette.
+ *
+ * Séance commune (`parts`) : les couvertures des dossiers se relaient dans la
+ * vignette, les logos se chevauchent, les titres d'origine suivent, numérotés.
  */
 
 export interface ProgrammeRowData {
@@ -36,6 +40,8 @@ export interface ProgrammeRowData {
   current: SessionDisplayState
   faded: boolean
   stateLabel: string
+  /** Séance commune : ses dossiers, dans l'ordre ; vide ou absent pour une séance ordinaire. */
+  parts?: JointPart[]
 }
 
 interface Props {
@@ -61,6 +67,11 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { t } = useI18n()
+const { namesOf, countLabel, slidesOf } = useJointSession()
+
+const parts = computed(() => props.entry.parts ?? [])
+const isJoint = computed(() => parts.value.length > 1)
+const slides = computed(() => slidesOf(parts.value, props.entry.cover, props.entry.id))
 
 const isMoment = computed(() => props.entry.to === null)
 const title = computed(() => props.entry.title.lead + props.entry.title.rest)
@@ -159,8 +170,15 @@ const layout = computed(() =>
 
     <!-- Sans couverture, une tuile au sigle ; masquée avec la vignette sur téléphone. -->
     <div v-if="props.media" class="relative hidden aspect-video overflow-hidden" :class="layout.thumb">
+      <UiSlideshow
+        v-if="isJoint && slides.length"
+        :slides="slides"
+        :interval="5000"
+        :image-class="['transition motion-safe:group-hover:scale-105', layout.image, { grayscale: props.compact && props.entry.faded }]"
+        :sizes="layout.sizes"
+      />
       <UiImage
-        v-if="props.entry.cover"
+        v-else-if="props.entry.cover"
         :image="props.entry.cover"
         ratio="auto"
         frame-class="size-full"
@@ -191,8 +209,40 @@ const layout = computed(() =>
           {{ title }}
         </NuxtLink>
       </h4>
+      <template v-if="isJoint">
+        <p class="mt-2 flex items-center gap-2.5 text-[0.9rem] text-text-secondary" :class="{ 'leading-snug': props.compact }">
+          <span class="flex shrink-0">
+            <OrganizationLogoMark
+              v-for="(part, index) in parts"
+              :key="part.id"
+              :name="part.name"
+              :acronym="part.acronym"
+              :logo="part.logo"
+              :size="props.compact ? 'sm' : 'md'"
+              :class="{ '-ml-3 ring-2 ring-surface': index > 0 }"
+            />
+          </span>
+          <span class="min-w-0">
+            <b class="font-bold tracking-[0.02em] text-text">{{ namesOf(parts) }}</b> {{ t('programme.joint.with') }}
+          </span>
+        </p>
+        <p class="mt-2 inline-flex items-center gap-1.5 text-[0.72rem] font-bold tracking-[0.06em] text-[var(--color-day,var(--color-accent))] uppercase">
+          <UiIcon name="users" size="1.05em" :stroke-width="2" />{{ countLabel(parts.length) }}
+        </p>
+        <ol class="mt-1 text-[0.85rem] text-text-secondary">
+          <li v-for="part in parts" :key="part.id" class="flex gap-2 py-0.5">
+            <b
+              class="mt-0.5 grid size-4.5 flex-none place-items-center rounded-full bg-[var(--color-day-solid,var(--color-text))] text-[0.7rem] text-[var(--color-day-on-solid,var(--color-surface))]"
+              aria-hidden="true"
+            >
+              {{ part.number }}
+            </b>
+            <span class="min-w-0">{{ t('programme.joint.part', { title: part.title, organization: part.label }) }}</span>
+          </li>
+        </ol>
+      </template>
       <p
-        v-if="props.entry.organization || props.entry.acronym"
+        v-else-if="props.entry.organization || props.entry.acronym"
         class="mt-2 flex items-start gap-2.5 text-[0.9rem] text-text-secondary"
         :class="{ 'leading-snug': props.compact }"
       >

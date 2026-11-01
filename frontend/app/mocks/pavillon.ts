@@ -22,6 +22,7 @@ import { ApiRequestError } from '~/utils/api-error'
 import { REGISTRATION_FORM } from './ids'
 import { allSessions } from './sessions'
 import { publicSchedule } from './views'
+import { trackPagesJointDetails, trackPagesSchedule } from './track-pages'
 
 const FUSEAU = 'America/Belem'
 const MOI = '01990000-0000-7000-8000-0000000d0000'
@@ -197,8 +198,39 @@ export function programme(eventId: string): AvecEmpreinte<PublicScheduleRow[]> {
 export function activite(eventId: string, slug: string): PublicSessionDetail | null {
   const session =
     programme(eventId).valeur.find((l) => l.slug === slug) ??
-    publicSchedule().find((l) => l.event_id === eventId && l.slug === slug)
+    publicSchedule().find((l) => l.event_id === eventId && l.slug === slug) ??
+    trackPagesSchedule.find((l) => l.event_id === eventId && l.slug === slug)
   if (!session) return null
+  // Séance commune : les listes plates portent les intervenants et organisations de tous ses dossiers.
+  const dossiers = trackPagesJointDetails.get(session.id)
+  if (dossiers) {
+    return {
+      session,
+      description: null,
+      allows_questions: true,
+      is_recorded: true,
+      cancelled_reason: null,
+      speakers: dossiers.flatMap((d) => d.speakers),
+      organizations: dossiers.flatMap((d, i) => [
+        {
+          session_id: session.id,
+          organization_id: d.organization.id,
+          role: i === 0 ? 'lead' : 'co_organizer',
+          sort_order: i,
+          added_at: session.starts_at,
+          name: d.organization.name,
+          acronym: d.organization.acronym,
+          country_code: d.organization.country_code,
+          country: d.organization.country,
+          logo: d.organization.logo,
+          proposal_id: d.proposal_id,
+        },
+        ...d.organizations,
+      ]),
+      gallery: [],
+      proposals: dossiers,
+    }
+  }
   return {
     session,
     description: { fr: "Un échange entre négociatrices, chercheurs et partenaires sur les priorités francophones de la COP.", en: 'An exchange between negotiators, researchers and partners on francophone priorities at the COP.' },

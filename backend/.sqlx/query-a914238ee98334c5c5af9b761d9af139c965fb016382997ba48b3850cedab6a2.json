@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH retirees AS (\n               DELETE FROM programme.sessions s\n                WHERE s.proposal_id = $1 AND s.status <> 'cancelled'\n            RETURNING s.id\n           ), liens AS (\n               DELETE FROM reference.entity_terms et\n                USING retirees r\n                WHERE et.entity_schema = 'programme'\n                  AND et.entity_table = 'sessions'\n                  AND et.entity_id = r.id\n           )\n           SELECT count(*) AS \"n!\" FROM retirees",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a914238ee98334c5c5af9b761d9af139c965fb016382997ba48b3850cedab6a2"
+}

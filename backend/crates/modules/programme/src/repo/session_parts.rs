@@ -25,7 +25,8 @@ use crate::domain::ids::SessionId;
 ///
 /// Un intervenant sans personne (D16) échappe au `ON CONFLICT` : deux `NULL` ne
 /// se heurtent pas. Le `NOT EXISTS` le tient à une ligne par nom et rôle, faute
-/// de quoi une seconde recopie le doublerait.
+/// de quoi une seconde recopie le doublerait. Dans une séance commune, la ligne
+/// est rangée sous son dossier.
 pub async fn recopier_les_intervenants(
     conn: &mut PgConnection,
     proposal_id: Uuid,
@@ -35,10 +36,13 @@ pub async fn recopier_les_intervenants(
         "INSERT INTO programme.session_speakers
              (session_id, person_id, role, job_title_snapshot,
               organization_snapshot, bio, confirmed_at, sort_order,
-              civility, first_name, last_name)
+              civility, first_name, last_name, proposal_id)
          SELECT $2, s.person_id, s.role, s.job_title_snapshot,
                 s.organization_snapshot, s.bio, s.confirmed_at, s.sort_order,
-                s.civility, s.first_name, s.last_name
+                s.civility, s.first_name, s.last_name,
+                CASE WHEN EXISTS (SELECT 1 FROM programme.session_proposals sp
+                                   WHERE sp.session_id = $2 AND sp.proposal_id = $1)
+                     THEN $1::uuid END
            FROM programme.proposal_speakers s
           WHERE s.proposal_id = $1
             AND (s.person_id IS NOT NULL OR NOT EXISTS (
@@ -63,12 +67,17 @@ pub async fn recopier_les_intervenants(
 /// intervenant se reconnaît par personne et rôle, ou par nom et rôle sans
 /// personne (D16) : reconnu, il garde sa ligne et sa présence notée ; retiré du
 /// dossier, il quitte la séance ; nouveau, il y entre. Une séance annulée garde
-/// ce qu'elle avait.
-pub async fn resynchroniser_les_intervenants(conn: &mut PgConnection, proposal_id: Uuid) -> Result<()> {
+/// ce qu'elle avait. Une séance commune suit chacun de ses dossiers, ligne par
+/// ligne rangée sous lui.
+pub async fn resynchroniser_les_intervenants(
+    conn: &mut PgConnection,
+    proposal_id: Uuid,
+) -> Result<()> {
     sqlx::query!(
         "DELETE FROM programme.session_speakers d
           USING programme.sessions s
-          WHERE d.session_id = s.id AND s.proposal_id = $1 AND s.status <> 'cancelled'
+          WHERE d.session_id = s.id AND (s.proposal_id = $1 OR d.proposal_id = $1)
+            AND s.status <> 'cancelled'
             AND NOT EXISTS (
                 SELECT 1 FROM programme.proposal_speakers p
                  WHERE p.proposal_id = $1 AND p.role = d.role
@@ -89,7 +98,8 @@ pub async fn resynchroniser_les_intervenants(conn: &mut PgConnection, proposal_i
                 sort_order = p.sort_order,
                 civility = p.civility
            FROM programme.proposal_speakers p, programme.sessions s
-          WHERE d.session_id = s.id AND s.proposal_id = $1 AND s.status <> 'cancelled'
+          WHERE d.session_id = s.id AND (s.proposal_id = $1 OR d.proposal_id = $1)
+            AND s.status <> 'cancelled'
             AND p.proposal_id = $1 AND p.role = d.role
             AND (p.person_id = d.person_id
                  OR (p.person_id IS NULL AND d.person_id IS NULL
@@ -100,7 +110,11 @@ pub async fn resynchroniser_les_intervenants(conn: &mut PgConnection, proposal_i
     .await?;
 
     let seances = sqlx::query_scalar!(
-        "SELECT id FROM programme.sessions WHERE proposal_id = $1 AND status <> 'cancelled'",
+        "SELECT s.id FROM programme.sessions s
+          WHERE s.status <> 'cancelled'
+            AND (s.proposal_id = $1 OR EXISTS (
+                SELECT 1 FROM programme.session_proposals sp
+                 WHERE sp.session_id = s.id AND sp.proposal_id = $1))",
         proposal_id
     )
     .fetch_all(&mut *conn)
@@ -119,8 +133,11 @@ pub async fn recopier_les_coorganisations(
 ) -> Result<u64> {
     let poses = sqlx::query!(
         "INSERT INTO programme.session_organizations
-             (session_id, organization_id, role, sort_order)
-         SELECT $2, o.organization_id, o.role, o.sort_order
+             (session_id, organization_id, role, sort_order, proposal_id)
+         SELECT $2, o.organization_id, o.role, o.sort_order,
+                CASE WHEN EXISTS (SELECT 1 FROM programme.session_proposals sp
+                                   WHERE sp.session_id = $2 AND sp.proposal_id = $1)
+                     THEN $1::uuid END
            FROM programme.proposal_organizations o
           WHERE o.proposal_id = $1 AND o.role <> 'lead'
          ON CONFLICT (session_id, organization_id) DO NOTHING",
@@ -200,6 +217,7 @@ pub async fn intervenants_publics_de<'e>(
         r#"SELECT jsonb_build_object(
                       'id', s.id,
                       'session_id', s.session_id,
+                      'proposal_id', s.proposal_id,
                       'role', s.role,
                       'job_title_snapshot', s.job_title_snapshot,
                       'organization_snapshot', s.organization_snapshot,
@@ -211,7 +229,8 @@ pub async fn intervenants_publics_de<'e>(
                       'avatar', COALESCE(
                                     (SELECT media.attached_image('programme', 'proposal_speakers', d.id, 'avatar')
                                        FROM programme.sessions se
-                                       JOIN programme.proposal_speakers d ON d.proposal_id = se.proposal_id
+                                       JOIN programme.proposal_speakers d
+                                         ON d.proposal_id = COALESCE(s.proposal_id, se.proposal_id)
                                       WHERE se.id = s.session_id AND d.role = s.role
                                         AND (d.person_id = s.person_id
                                              OR (d.person_id IS NULL AND s.person_id IS NULL
@@ -249,6 +268,7 @@ pub async fn organisations_publiques_de<'e>(
         r#"SELECT jsonb_build_object(
                       'session_id', so.session_id,
                       'organization_id', so.organization_id,
+                      'proposal_id', so.proposal_id,
                       'role', so.role,
                       'sort_order', so.sort_order,
                       'added_at', so.added_at,
