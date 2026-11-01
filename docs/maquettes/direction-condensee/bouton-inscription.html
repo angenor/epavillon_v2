@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bouton d'inscription</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  .page { padding: 40px 0 80px; }
+  .note { max-width: 72ch; margin: 0 0 28px; color: var(--color-text-secondary); line-height: 1.55; }
+  h2.sec { margin: 0 0 6px; font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; text-transform: uppercase; color: var(--ink); }
+  .sub { margin: 0 0 18px; color: var(--color-text-muted); font-size: 0.9rem; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-bottom: 48px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .grid > div > small { display: block; margin-bottom: 8px; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
+  .grid > div > p { margin: 10px 0 0; font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.45; }
+
+  /* Billet de droite, comme sur la page d'une activité. */
+  .ticket { overflow: hidden; border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-xl); }
+  .ticket-date { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: var(--ifdd-bleu-900); color: #fff; }
+  .ticket-date b { font-family: var(--font-heading); font-size: 3.2rem; font-weight: 700; line-height: 0.8; }
+  .ticket-date span { font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.04em; }
+  .ticket-body { padding: 16px 20px 20px; }
+  .ticket-hours { font-family: var(--font-heading); font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--ink); }
+  .ticket-body p { margin: 6px 0 16px; font-size: 0.85rem; color: var(--color-text-secondary); }
+
+  /* Le bouton : jaune de l'IFDD, texte vert très foncé. */
+  .cta { position: relative; isolation: isolate; overflow: hidden; display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: center; gap: 10px; padding: 0 20px; border: 0; border-radius: var(--radius); background: var(--cta-bg, var(--ifdd-jaune-400)); color: var(--ifdd-vert-900); font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; box-shadow: 0 1px 0 var(--ifdd-jaune-700), var(--shadow-md); transition: transform 150ms ease, background 150ms ease; }
+  .cta:hover { background: var(--cta-hover, var(--ifdd-jaune-300)); transform: translateY(-1px); }
+  .cta:focus-visible { outline: 3px solid var(--ifdd-vert-700); outline-offset: 3px; }
+  .cta svg { flex: none; width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .cta.dark { --cta-bg: var(--ifdd-jaune-500); --cta-hover: var(--ifdd-jaune-400); }
+
+  /* A. Un reflet traverse le bouton toutes les quatre secondes. */
+  .cta.a::after { content: ""; position: absolute; inset: 0 auto 0 -60%; z-index: -1; width: 45%; background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.65), transparent); transform: skewX(-18deg); animation: sheen 4s ease-in-out infinite; }
+  @keyframes sheen { 0%, 62% { left: -60%; } 100% { left: 120%; } }
+
+  /* B. La flèche avance et revient, comme pour inviter à cliquer. */
+  .cta.b svg.go { animation: nudge 1.8s ease-in-out infinite; }
+  @keyframes nudge { 0%, 55%, 100% { transform: translateX(0); } 70% { transform: translateX(6px); } 85% { transform: translateX(0); } }
+
+  /* C. Un anneau net s'élargit puis s'efface, toutes les trois secondes (pas de halo flou). */
+  .cta-wrap { position: relative; }
+  .cta-wrap.c::before { content: ""; position: absolute; inset: 0; border: 2px solid var(--ifdd-jaune-500); border-radius: var(--radius); animation: ring 3s ease-out infinite; pointer-events: none; }
+  @keyframes ring { 0%, 40% { inset: 0; opacity: 0.9; } 100% { inset: -10px; opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta.a::after, .cta.b svg.go, .cta-wrap.c::before { animation: none; }
+    .cta.a::after { display: none; }
+  }
+
+  /* Sur téléphone : la barre du bas reprend le même bouton. */
+  .phone { width: 375px; max-width: 100%; border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; background: var(--page); }
+  .phone .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: var(--card); border-top: 1px solid var(--color-border); }
+  .phone .bar b { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--ink); }
+  .phone .bar small { display: block; font-size: 0.75rem; color: var(--color-text-muted); }
+  .phone .bar .cta { width: auto; min-height: 44px; font-size: 1.05rem; padding: 0 16px; }
+  .phone .fill { height: 120px; }
+</style>
+</head>
+<body>
+<main class="page wrap">
+  <p class="note">Le bouton d'inscription des activités, des journées spéciales et de l'atelier préparatoire : jaune de l'IFDD, texte vert très foncé, et un mouvement discret pour attirer l'œil. Trois mouvements au choix ; ils s'arrêtent pour qui a demandé « moins d'animations » à son appareil.</p>
+
+  <h2 class="sec">Trois mouvements</h2>
+  <p class="sub">Jaune de la charte. Survolez : le bouton s'éclaircit et monte d'un pixel.</p>
+  <div class="grid">
+    <div><small>A. Reflet</small>
+      <div class="ticket"><div class="ticket-date"><b>13</b><span>Vendredi<br>novembre 2026</span></div><div class="ticket-body"><div class="ticket-hours">11:30 à 12:30</div><p>Heure d'Antalya (UTC+3)</p>
+        <button class="cta a" type="button">S'inscrire</button></div></div>
+      <p>Un reflet de lumière traverse le bouton toutes les quatre secondes, comme sur une carte de billetterie.</p>
+    </div>
+    <div><small>B. Flèche qui avance</small>
+      <div class="ticket"><div class="ticket-date"><b>13</b><span>Vendredi<br>novembre 2026</span></div><div class="ticket-body"><div class="ticket-hours">08:00 à 18:00</div><p>Heure d'Antalya (UTC+3)</p>
+        <button class="cta b" type="button">S'inscrire à la journée<svg class="go" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div></div>
+      <p>La flèche fait un petit pas vers la droite puis revient, sans cesse : elle invite au clic sans bouger le bouton.</p>
+    </div>
+    <div><small>C. Anneau</small>
+      <div class="ticket"><div class="ticket-date"><b>8</b><span>Dimanche<br>novembre 2026</span></div><div class="ticket-body"><div class="ticket-hours">10:00 à 17:00</div><p>Hôtel DoubleTree by Hilton, Antalya</p>
+        <div class="cta-wrap c"><button class="cta" type="button">S'inscrire à l'atelier</button></div></div></div>
+      <p>Un fin contour jaune s'écarte du bouton et s'efface toutes les trois secondes, comme une onde.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">Jaune plus foncé</h2>
+  <p class="sub">Même bouton, nuance plus soutenue de la charte ; le texte vert reste lisible.</p>
+  <div class="grid">
+    <div><small>A. Reflet</small>
+      <div class="ticket"><div class="ticket-body"><button class="cta a dark" type="button">S'inscrire</button></div></div></div>
+    <div><small>B. Flèche</small>
+      <div class="ticket"><div class="ticket-body"><button class="cta b dark" type="button">S'inscrire à la journée<svg class="go" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div></div></div>
+    <div><small>C. Anneau</small>
+      <div class="ticket"><div class="ticket-body"><div class="cta-wrap c"><button class="cta dark" type="button">S'inscrire à l'atelier</button></div></div></div></div>
+  </div>
+
+  <h2 class="sec">Sur téléphone</h2>
+  <p class="sub">La barre collée en bas de l'écran, quand le billet est sorti de la vue.</p>
+  <div class="phone"><div class="fill"></div><div class="bar"><div><b>11:30 à 12:30</b><small>vendredi 13 novembre, heure d'Antalya</small></div><button class="cta a" type="button">S'inscrire</button></div></div>
+</main>
+<script src="icones.js"></script>
+</body>
+</html>
