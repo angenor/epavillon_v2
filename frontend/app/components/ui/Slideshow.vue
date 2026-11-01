@@ -8,6 +8,7 @@ import type { UiSlide } from '~/types/ui'
  * Avec `controls`, un diaporama : pastilles pour choisir, bouton lecture/pause
  * (WCAG 2.2.2), défilement suspendu au survol, au focus et onglet caché.
  * Sans, une vignette discrète, décorative, qui tourne seule plus lentement.
+ * Dans les deux cas, une barre d'avancement en bas du cadre, absente si « moins d'animations ».
  *
  * « Moins d'animations » arrête la minuterie, lue en JavaScript (`utils/showcase.ts`) :
  * la feuille de style coupe les fondus, pas un `setTimeout`. Le bouton lecture
@@ -56,11 +57,17 @@ const total = computed(() => props.slides.length)
 const running = computed(() => playing.value && !interacting.value && !hidden.value && total.value > 1)
 
 let timer: ReturnType<typeof setTimeout> | null = null
+/** Change à chaque départ de minuterie et à chaque image : la barre d'avancement repart de zéro avec elle. */
+const cycle = ref(0)
+const mounted = ref(false)
+const showProgress = computed(() => mounted.value && !reducedMotion.value && total.value > 1)
 
 function schedule(): void {
   if (timer !== null) clearTimeout(timer)
   timer = null
-  if (running.value) timer = setTimeout(() => (current.value = showcaseIndexAfter(current.value, total.value, 1)), props.interval)
+  if (!running.value) return
+  timer = setTimeout(() => (current.value = showcaseIndexAfter(current.value, total.value, 1)), props.interval)
+  cycle.value += 1
 }
 
 function onVisibilityChange(): void {
@@ -74,6 +81,7 @@ onMounted(() => {
   playing.value = !reducedMotion.value
   hidden.value = document.visibilityState === 'hidden'
   document.addEventListener('visibilitychange', onVisibilityChange)
+  mounted.value = true
   stopMotionWatch = onReducedMotionChange((reduced) => {
     reducedMotion.value = reduced
     if (reduced) {
@@ -92,6 +100,8 @@ onBeforeUnmount(() => {
 
 // Chaque image obtient son temps entier, y compris celle qu'on vient de choisir.
 watch([current, running], schedule)
+// Une image choisie en pause (survol compris) remet aussi la barre à zéro, figée.
+watch(current, () => (cycle.value += 1))
 watch(total, (count) => {
   current.value = clampShowcaseIndex(current.value, count)
 })
@@ -140,7 +150,7 @@ const fade = computed(() => (props.controls ? 'duration-700' : 'duration-1000'))
 
     <template v-if="props.controls && total > 1">
       <div class="scrim-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-2/5" aria-hidden="true" />
-      <div class="absolute right-2 bottom-1 flex items-center sm:right-3 sm:bottom-2">
+      <div class="absolute right-2 bottom-2 flex items-center sm:right-3 sm:bottom-3">
         <button
           v-for="(slide, index) in props.slides"
           :key="slide.key"
@@ -173,5 +183,36 @@ const fade = computed(() => (props.controls ? 'duration-700' : 'duration-1000'))
         <template v-if="reducedMotion && !playing">{{ t('slideshow.reducedMotion') }}</template>
       </p>
     </template>
+
+    <!-- Elle incite à attendre l'image suivante : elle avance avec la minuterie, se fige avec elle. -->
+    <div
+      v-if="showProgress"
+      class="pointer-events-none absolute inset-x-0 bottom-0 z-1"
+      :class="props.controls ? 'h-1 bg-glass-border' : 'h-0.75'"
+      aria-hidden="true"
+    >
+      <span
+        :key="cycle"
+        class="slideshow-progress block h-full"
+        :class="props.controls ? 'bg-[var(--color-day-mark,var(--color-accent))]' : 'bg-[var(--color-day-solid,var(--color-accent))]'"
+        :style="{ animationDuration: `${props.interval}ms`, animationPlayState: running ? 'running' : 'paused' }"
+      />
+    </div>
   </div>
 </template>
+
+<style scoped>
+.slideshow-progress {
+  transform: scaleX(0);
+  transform-origin: left;
+  animation-name: slideshow-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes slideshow-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+</style>

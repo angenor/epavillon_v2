@@ -7,7 +7,8 @@
 -- dossier propre ; programme.session_proposals dit quels dossiers elle réunit,
 -- et intervenants et organisations recopiés y sont rangés par dossier.
 -- Additive : les séances ordinaires ne changent pas (dossier NULL partout).
--- Jouer AVANT de démarrer l'API, qui lit ces colonnes.
+-- Jouer APRÈS 2026-11-01-temps-fort-programme.sql (la vue garde son
+-- `is_highlight`) et AVANT de démarrer l'API, qui lit ces colonnes.
 BEGIN;
 
 ALTER TABLE programme.session_speakers
@@ -146,7 +147,8 @@ SELECT
     s.capacity,
     COALESCE((
         SELECT jsonb_agg(jsonb_build_object(
-                   'slug', t.slug, 'title', t.title, 'color', t.color_hex, 'kind', t.kind)
+                   'slug', t.slug, 'title', t.title, 'color', t.color_hex, 'kind', t.kind,
+                   'is_highlight', st.is_highlight)
                ORDER BY st.sort_order, t.sort_order)
         FROM programme.session_tracks st
         JOIN event.programme_tracks t ON t.id = st.track_id
