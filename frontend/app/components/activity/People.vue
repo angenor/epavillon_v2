@@ -5,6 +5,8 @@ import type { PublicSessionSpeaker } from '~/types/programme/session'
 
 interface Props {
   speakers: PublicSessionSpeaker[]
+  /** Dans la carte d'un dossier de séance commune : une liste serrée, sans titre de section. */
+  compact?: boolean
 }
 
 const props = defineProps<Props>()
@@ -30,7 +32,32 @@ const speakers = computed(() =>
 </script>
 
 <template>
-  <section v-if="speakers.length" aria-labelledby="intervenants-titre">
+  <ul v-if="props.compact && speakers.length" class="grid gap-2 border-t border-border-subtle pt-3" :aria-label="t('activity.people.speakers')">
+    <li v-for="speaker in speakers" :key="speaker.id" class="flex min-w-0 items-center gap-2.5">
+      <UiImage
+        v-if="speaker.avatar"
+        :image="speaker.avatar"
+        ratio="1 / 1"
+        rounded="rounded-full"
+        class="size-9 shrink-0 rounded-full border-2 border-(--color-day-line)"
+        sizes="36px"
+      />
+      <span
+        v-else
+        class="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-(--color-day-line) bg-(--color-day-surface) font-condensed text-[0.85rem] font-bold text-(--color-day)"
+        aria-hidden="true"
+      >
+        {{ speaker.initials }}
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="font-condensed text-[1.05rem] leading-[1.1] font-bold text-heading">{{ speaker.name }}</p>
+        <p v-if="speaker.position" class="text-[0.8rem] leading-snug text-text-secondary">{{ speaker.position }}</p>
+      </div>
+      <p class="shrink-0 text-[0.68rem] font-bold tracking-[0.06em] text-(--color-day) uppercase">{{ speaker.role }}</p>
+    </li>
+  </ul>
+
+  <section v-else-if="!props.compact && speakers.length" aria-labelledby="intervenants-titre">
     <h2 id="intervenants-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
       {{ t('activity.people.speakers') }}
     </h2>

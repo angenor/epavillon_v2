@@ -144,6 +144,8 @@ export type PublicSessionSpeaker = Omit<
   display_name: string
   /** Image de profil, `media.attached_image('identity', 'people', …, 'avatar')` ; nulle sans image. */
   avatar: AttachedImage | null
+  /** Séance commune : le dossier de l'intervenant ; nul pour une séance ordinaire. */
+  proposal_id?: ProposalId | null
 }
 
 /** Table `programme.session_organizations` — `075` § 2 ter. */
@@ -160,6 +162,8 @@ export interface SessionOrganization {
   country?: I18nText | null
   /** Détail public : logo de l'organisation. */
   logo?: AttachedImage | null
+  /** Détail public d'une séance commune : le dossier de l'organisation ; nul pour une séance ordinaire. */
+  proposal_id?: ProposalId | null
 }
 
 // ---------------------------------------------------------------------------

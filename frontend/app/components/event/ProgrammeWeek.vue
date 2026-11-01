@@ -41,6 +41,7 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { time, intlLocale } = useDateTime()
 const { state, link } = useProgrammeSession()
+const { partsOf, slidesOf, namesOf } = useJointSession()
 const localePath = useLocalePath()
 
 const trackTo = (slug: string, hash?: string) =>
@@ -60,8 +61,12 @@ function card(session: PublicScheduleRow, weekday: string) {
   const current = state(session)
   const special = specialOf(session, props.tracks)
   const page = link(props.editionSlug, session)
+  const parts = partsOf(session)
   return {
     id: session.id,
+    parts,
+    slides: parts.length ? slidesOf(parts, session.cover, session.id) : [],
+    jointNames: namesOf(parts),
     to: special ? trackTo(special.slug, `#${trackActivityAnchor(session.slug)}`) : page,
     joinTo: `${page}#direct`,
     current,
@@ -353,9 +358,16 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
               class="wk-card group"
               :class="{ 'is-live': item.current === 'live', 'is-faded': item.faded }"
             >
-              <div class="wk-media" :class="{ 'wk-media-tile': !item.cover }">
+              <div class="wk-media" :class="{ 'wk-media-tile': !item.cover && !item.slides.length }">
+                <UiSlideshow
+                  v-if="item.slides.length"
+                  :slides="item.slides"
+                  :interval="5000"
+                  :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]', { grayscale: item.faded }]"
+                  sizes="(min-width: 960px) 216px, 104px"
+                />
                 <UiImage
-                  v-if="item.cover"
+                  v-else-if="item.cover"
                   :image="item.cover"
                   ratio="auto"
                   frame-class="size-full"
@@ -373,7 +385,26 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
                 <h4 class="wk-title" :class="{ 'line-through': item.current === 'cancelled' }">
                   <NuxtLink :to="item.to" class="wk-link">{{ item.title }}</NuxtLink>
                 </h4>
-                <p v-if="item.organization" class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
+                <template v-if="item.parts.length">
+                  <p class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
+                    <span class="flex shrink-0">
+                      <OrganizationLogoMark
+                        v-for="(part, index) in item.parts"
+                        :key="part.id"
+                        :name="part.name"
+                        :acronym="part.acronym"
+                        :logo="part.logo"
+                        size="sm"
+                        :class="{ '-ml-3 ring-2 ring-surface-raised': index > 0 }"
+                      />
+                    </span>
+                    <b class="min-w-0 truncate font-bold text-text">{{ item.jointNames }}</b>
+                  </p>
+                  <p class="wk-joint">
+                    <UiIcon name="users" size="1.05em" :stroke-width="2" />{{ t('programme.joint.tag') }}
+                  </p>
+                </template>
+                <p v-else-if="item.organization" class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
                   <OrganizationLogoMark :name="item.organization" :acronym="item.acronym" :logo="item.logo" size="sm" />
                   <b class="min-w-0 truncate font-bold text-text">{{ item.shortName }}</b>
                 </p>
@@ -755,6 +786,22 @@ a.wk-tag:hover {
 .wk-card:hover .wk-link {
   color: var(--color-accent);
   text-decoration: underline;
+}
+
+.wk-joint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.is-tinted .wk-joint {
+  color: var(--color-day);
 }
 
 .wk-foot {

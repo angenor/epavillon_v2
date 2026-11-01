@@ -769,3 +769,5 @@ export const TRACK_PAGE_SESSION = (n: number): Uuid => uuid('7115', n)
 export const TRACK_PAGE_ORG = (n: number): Uuid => uuid('7116', n)
 export const TRACK_PAGE_SPEAKER = (n: number): Uuid => uuid('7117', n)
 export const TRACK_PAGE_ASSET = (n: number): Uuid => uuid('7118', n)
+/** Dossiers d'une séance commune de la CdP31. */
+export const TRACK_PAGE_PROPOSAL = (n: number): Uuid => uuid('7119', n)

@@ -43,6 +43,13 @@ const state = computed(() => (session.value ? stateOf(session.value) : 'upcoming
 const timezone = computed(() => session.value?.timezone ?? 'UTC')
 const { incidents } = useSessionIncidents(session)
 
+// Séance commune : chaque dossier garde sa carte ; ses intervenants et organisations y vivent, pas dans les listes de la séance.
+const { jointParts } = useJointSession()
+const jointProposals = computed(() => detail.value?.proposals ?? [])
+const parts = computed(() => jointParts(jointProposals.value.length ? jointProposals.value : session.value?.proposals))
+/** La séance commune n'a en général pas d'image propre : le direct et la rediffusion se posent sur celle du premier dossier. */
+const stageCover = computed(() => session.value?.cover ?? parts.value.find((part) => part.cover)?.cover ?? null)
+
 const { data: schedule, refresh: refreshSchedule } = useLazyAsyncData(
   () => `activite-programme-${edition.value?.id ?? 'aucune'}`,
   async () => (edition.value ? api.sessions.schedule(edition.value.id).catch(() => []) : []),
@@ -182,11 +189,11 @@ useSeoMeta({
   ogDescription: () => summary.value || undefined,
   // La déclinaison `partage` (JPEG sous 100 Ko) : WhatsApp ignore une image d'aperçu trop lourde.
   ogImage: () => {
-    const cover = session.value?.cover
+    const cover = stageCover.value
     if (!cover) return undefined
     return new URL(cover.sources.partage?.url ?? cover.sources.md?.url ?? cover.url, requestUrl.origin).href
   },
-  ogImageAlt: () => (session.value?.cover ? tr(session.value.title) : undefined),
+  ogImageAlt: () => (session.value && stageCover.value ? tr(session.value.title) : undefined),
   twitterCard: 'summary_large_image',
 })
 </script>
@@ -222,6 +229,7 @@ useSeoMeta({
         :back-to="programmeTo"
         :trail="trail"
         :cancelled-reason="detail.cancelled_reason ? tr(detail.cancelled_reason) : null"
+        :parts="parts"
       />
 
       <!--
@@ -253,8 +261,9 @@ useSeoMeta({
               :session="session"
               :state="state"
               :streams="streams"
-              :cover="session.cover"
+              :cover="stageCover"
               :acronym="session.organization_acronym"
+              :parts="parts"
               :meeting="zoomShown ? meeting : null"
               :room-to="roomTo"
               :zone-label="edition.city ?? undefined"
@@ -269,9 +278,13 @@ useSeoMeta({
               <UiRichContent class="mt-3.5 max-w-[68ch]! text-[1.05rem] leading-[1.75]" :html="description" />
             </section>
 
-            <ActivityPeople :speakers="detail.speakers" />
+            <ActivityJointParts v-if="jointProposals.length > 1" :proposals="jointProposals" :faded="state === 'past' || state === 'cancelled'" />
 
-            <ActivityOrganizations :organizations="detail.organizations" />
+            <template v-else>
+              <ActivityPeople :speakers="detail.speakers" />
+
+              <ActivityOrganizations :organizations="detail.organizations" />
+            </template>
 
             <ClientOnly>
               <ActivityQuestions v-if="showQuestions" :session-id="session.id" :event-id="session.event_id" />

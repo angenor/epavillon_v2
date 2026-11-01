@@ -119,5 +119,18 @@
         "past": "Ended"
       }
     }
+  },
+  "joint": {
+    "tag": "Joint session",
+    "with": "joint session",
+    "count": "{count} activity in this slot | {count} activities in this slot",
+    "spelled": {
+      "2": "two",
+      "3": "three",
+      "4": "four",
+      "5": "five",
+      "6": "six"
+    },
+    "part": "{title}, {organization}"
   }
 }

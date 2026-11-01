@@ -14,6 +14,7 @@
  */
 
 import type { I18nText } from './shared'
+import type { AttachedImage } from './media'
 
 // ---------------------------------------------------------------------------
 // Vocabulaire commun
@@ -127,6 +128,12 @@ export interface TableColumn {
 // ---------------------------------------------------------------------------
 // Navigation
 // ---------------------------------------------------------------------------
+
+/** Une image de `Slideshow` ; nulle, le créneau `fallback` la remplace. */
+export interface UiSlide {
+  key: string
+  image: AttachedImage | null
+}
 
 /** Onglet de `Tabs`. */
 export interface TabItem {

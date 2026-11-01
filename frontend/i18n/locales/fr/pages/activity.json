@@ -3,6 +3,12 @@
   "trail": "Programmations / {edition} / {day}",
   "loading": "Chargement de l'activité",
   "about": "À propos",
+  "joint": {
+    "tag": "Séance commune",
+    "and": "&",
+    "covers": "Couvertures des activités de la séance",
+    "title": "Au programme de la séance"
+  },
   "error": {
     "title": "Activité indisponible",
     "description": "Cette activité n'a pas pu être chargée."
