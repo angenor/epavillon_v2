@@ -301,6 +301,7 @@ const sectionsVisibles = computed(() =>
 
     <div class="flex min-w-0 flex-1 flex-col">
       <UiApiOfflineBanner />
+    <UiNewVersionNotice />
       <UiMockDataBanner />
 
       <header

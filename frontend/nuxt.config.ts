@@ -68,7 +68,13 @@ export default defineNuxtConfig({
     // pour le rendu serveur seul — voir `composables/api/http.ts`. Vide en
     // développement, où le chemin public suffit.
     apiBaseServer: '',
+    // Instant avant lequel toute page ouverte doit se recharger d'office : voir
+    // `server/routes/version.json.get.ts`. Vide : aucun rechargement imposé.
+    forceReloadBefore: '',
     public: {
+      // Instant de construction : une page ouverte le compare à celui du serveur
+      // pour savoir qu'une nouvelle version est en ligne.
+      buildTime: new Date().toISOString(),
       apiBase: '',
       // Mot de passe des comptes simulés, pour le seul travail hors ligne. Vide en
       // production : aucune connexion simulée n'y aboutit.

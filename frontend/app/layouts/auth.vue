@@ -38,6 +38,7 @@ const legalLinks = [
     <a class="skip-link" href="#contenu-principal">{{ t('common.a11y.skipToContent') }}</a>
 
     <UiApiOfflineBanner />
+    <UiNewVersionNotice />
     <UiMockDataBanner />
 
     <header class="mx-auto flex w-full max-w-[64rem] items-center justify-between gap-4 px-4 py-5 sm:px-6">

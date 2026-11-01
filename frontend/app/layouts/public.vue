@@ -163,6 +163,7 @@ const currentYear = new Date().getFullYear()
     <a class="skip-link" href="#contenu-principal">{{ t('common.a11y.skipToContent') }}</a>
 
     <UiApiOfflineBanner />
+    <UiNewVersionNotice />
     <UiMockDataBanner />
 
     <!-- Le bandeau institutionnel (04/10) : même aplat que la barre, séparé d'un filet.

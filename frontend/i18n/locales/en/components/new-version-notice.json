@@ -1,0 +1,13 @@
+{
+  "title": "ePavillon has been updated.",
+  "description": "Reload the page to get the latest improvements.",
+  "later": "Later",
+  "reload": "Reload",
+  "forced": {
+    "kicker": "Important update",
+    "title": "This page is about to reload",
+    "description": "ePavillon must be reloaded to keep working properly. Automatic reload in",
+    "seconds": "{count} s",
+    "now": "Reload now"
+  }
+}

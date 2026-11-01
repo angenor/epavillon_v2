@@ -1393,3 +1393,12 @@ reste va à Nuxt ; les logos de la v2, en sous-dossiers `png/` et `svg/`, ne son
 - **Après chaque séance** : passer la séance en terminée avec sa rediffusion et ajouter la
   suivante dans le dépôt v1, reconstruire, redéposer. Comme en v1.
 - Les **redirections des anciennes adresses v1** (§ 17) devront éviter ces chemins.
+
+## 19. Prévenir les pages ouvertes d'une nouvelle version (01/11)
+
+Chaque page ouverte interroge `/version.json` (intercepteur `frontend/server/middleware/version.ts`) toutes les cinq minutes et à chaque retour sur l'onglet. Si la construction servie diffère de la sienne, elle affiche « Le ePavillon a été mis à jour » avec **Recharger** et **Plus tard** ; après « Plus tard », le changement de page suivant se fait par un vrai chargement, donc dans la nouvelle version (`plugins/app-version.client.ts`).
+
+- `./deploy.sh update` : le cas ordinaire, rien à faire.
+- `./deploy.sh update --imposer` : correction urgente ou de sécurité. Le script écrit `NUXT_FORCE_RELOAD_BEFORE=<instant>` dans `.env.prod` **avant** la construction ; toute page construite plus tôt se recharge d'office après un décompte de 10 s, sans bouton de refus. Les pages de la nouvelle construction, plus récentes, ne sont pas concernées : pas de boucle. La valeur reste dans `.env.prod` sans effet sur les mises en ligne suivantes.
+- Ce qu'une personne n'a pas enregistré dans un formulaire est perdu au rechargement imposé : à réserver à l'urgence.
+- Le mécanisme ne vaut qu'à partir de la mise en ligne qui suit son arrivée : les pages ouvertes avant ne le connaissent pas.

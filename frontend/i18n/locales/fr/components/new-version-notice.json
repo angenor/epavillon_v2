@@ -1,0 +1,13 @@
+{
+  "title": "Le ePavillon a été mis à jour.",
+  "description": "Rechargez la page pour profiter des dernières améliorations.",
+  "later": "Plus tard",
+  "reload": "Recharger",
+  "forced": {
+    "kicker": "Mise à jour importante",
+    "title": "La page va se recharger",
+    "description": "Le ePavillon doit être rechargé pour continuer à fonctionner correctement. Rechargement automatique dans",
+    "seconds": "{count} s",
+    "now": "Recharger maintenant"
+  }
+}

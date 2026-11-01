@@ -50,6 +50,9 @@ services:
       # Nuxt ne lit `runtimeConfig` qu'au démarrage : l'argument de construction ne
       # suffit pas. Sans elle, le navigateur retombe sur les données simulées.
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-/api}
+      # Rechargement imposé des pages ouvertes avant cet instant (`deploy.sh update
+      # --imposer`) ; vide, la mise en ligne se contente de le proposer.
+      NUXT_FORCE_RELOAD_BEFORE: ${NUXT_FORCE_RELOAD_BEFORE:-}
     ports:
       - "127.0.0.1:${FRONT_PORT:-3100}:3000"
 
