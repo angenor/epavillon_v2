@@ -24,6 +24,41 @@ export function weekStart(day: IsoDate): IsoDate {
   return addDays(day, -((weekday + 6) % 7))
 }
 
+/**
+ * Le jour de repos du calendrier : le premier dimanche de la conférence (dates
+ * de l'édition), s'il tombe entre le premier et le dernier jour du programme
+ * sans aucune activité. Règle du commanditaire (01/11), sans champ en base :
+ * le pavillon ferme ce jour-là. L'atelier préparatoire, la veille de
+ * l'ouverture, n'est pas la conférence. Il faut aussi un jour du programme à
+ * deux jours au plus de part et d'autre : un cycle de séances mensuelles n'a
+ * pas de jour de repos.
+ */
+export function restDayOf(days: IsoDate[], editionStart: IsoDate, editionEnd: IsoDate): IsoDate | null {
+  const first = days[0]
+  const last = days[days.length - 1]
+  if (!first || !last) return null
+  const from = editionStart > first ? editionStart : first
+  const sunday = addDays(from, (7 - new Date(`${from}T12:00:00Z`).getUTCDay()) % 7)
+  if (sunday <= first || sunday >= last || sunday > editionEnd || days.includes(sunday)) return null
+  const around = days.some((day) => day < sunday && day >= addDays(sunday, -2)) && days.some((day) => day > sunday && day <= addDays(sunday, 2))
+  return around ? sunday : null
+}
+
+/** Les colonnes du calendrier : les jours du programme, le jour de repos à sa place. */
+export function calendarDays(days: IsoDate[], rest: IsoDate | null): IsoDate[] {
+  return rest ? [...days, rest].sort() : [...days]
+}
+
+/** Rangs des colonnes qui ouvrent une nouvelle semaine, la première exceptée : un trait les précède. */
+export function weekBreaks(days: IsoDate[]): Set<number> {
+  const breaks = new Set<number>()
+  days.forEach((day, index) => {
+    const previous = days[index - 1]
+    if (previous && weekStart(previous) !== weekStart(day)) breaks.add(index)
+  })
+  return breaks
+}
+
 export interface SessionSpan {
   session: PublicScheduleRow
   /** Minutes depuis minuit, dans le fuseau de l'édition. */

@@ -60,13 +60,21 @@
   },
   "week": {
     "live": "Live",
-    "navigation": "Change week",
-    "previous": "Previous week",
-    "next": "Next week",
-    "openDay": "Show the list for {day}",
-    "range": "Week of {from} to {to}",
-    "single": "Day of {day}",
-    "position": "{week} of {weeks} · {count}",
+    "join": "Join",
+    "today": "Today",
+    "previous": "Previous days",
+    "next": "Next days",
+    "monthRange": "{from} to {to}",
+    "span": "{from} to {to}, {count}",
+    "single": "{day}, {count}",
+    "count": "no activities | {count} activity | {count} activities",
+    "until": "to {end}",
+    "visited": "Viewed",
+    "rest": {
+      "label": "Rest day",
+      "closed": "pavilion closed",
+      "note": "The pavilion is closed on the first Sunday of the conference."
+    },
     "emptyDay": "No activity matches this search."
   },
   "list": {

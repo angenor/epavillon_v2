@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { addDays, hourRange, layoutDay, spanOf, weekStart, type SessionSpan } from '../../app/utils/programme-week.ts'
+import { addDays, calendarDays, hourRange, layoutDay, restDayOf, spanOf, weekBreaks, weekStart, type SessionSpan } from '../../app/utils/programme-week.ts'
 import type { PublicScheduleRow } from '../../app/types/views.ts'
 
 const seance = (starts_at: string, ends_at: string) => ({ starts_at, ends_at }) as PublicScheduleRow
@@ -34,4 +34,28 @@ test('des séances qui se chevauchent sont mises côte à côte, jamais cachées
 test('la grille se cale sur les heures pleines du programme', () => {
   assert.deepEqual(hourRange([plage(9 * 60 + 30, 11 * 60), plage(17 * 60, 18 * 60 + 45)]), [9, 19])
   assert.deepEqual(hourRange([]), [9, 18])
+})
+
+const cdp31 = ['2026-11-08', '2026-11-09', '2026-11-13', '2026-11-14', '2026-11-16', '2026-11-20']
+
+test('le jour de repos est le premier dimanche de la conférence, sans activité', () => {
+  // Le 8 est la veille de l'ouverture (atelier) : le premier dimanche de l'édition est le 15.
+  assert.equal(restDayOf(cdp31, '2026-11-09', '2026-11-20'), '2026-11-15')
+  assert.deepEqual(calendarDays(cdp31, '2026-11-15').slice(3, 6), ['2026-11-14', '2026-11-15', '2026-11-16'])
+})
+
+test('un premier dimanche qui porte une activité n’est pas un jour de repos, le suivant non plus', () => {
+  assert.equal(restDayOf([...cdp31, '2026-11-15'].sort(), '2026-11-09', '2026-11-20'), null)
+  assert.equal(restDayOf(['2026-11-09', '2026-11-15', '2026-11-27'], '2026-11-09', '2026-11-27'), null)
+})
+
+test('aucun jour de repos hors du programme', () => {
+  assert.equal(restDayOf(['2026-11-09', '2026-11-13'], '2026-11-09', '2026-11-20'), null)
+  assert.equal(restDayOf([], '2026-11-09', '2026-11-20'), null)
+  // Un cycle de séances espacées : rien autour du premier dimanche.
+  assert.equal(restDayOf(['2026-02-12', '2026-03-16', '2026-04-11'], '2026-02-12', '2026-12-10'), null)
+})
+
+test('un trait précède la première colonne de chaque semaine', () => {
+  assert.deepEqual([...weekBreaks(calendarDays(cdp31, '2026-11-15'))], [1, 5])
 })

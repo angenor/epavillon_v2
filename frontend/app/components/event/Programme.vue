@@ -213,28 +213,10 @@ const stripDays = computed<ProgrammeStripDay[]>(() =>
   }),
 )
 
-const weeks = computed(() => [...new Set(programmeDays.value.map(weekStart))])
-const weekIndex = computed(() => weeks.value.indexOf(weekStart(selectedDay.value)))
-
-function moveWeek(step: -1 | 1): void {
-  const target = weeks.value[weekIndex.value + step]
-  const first = programmeDays.value.find((date) => weekStart(date) === target)
-  if (first) day.value = first
-}
-
-/** Un clic sur l'en-tête d'un jour de la semaine ouvre sa liste. */
-function onWeekDay(date: IsoDate): void {
-  void showInList(date)
-}
-
-const weekDays = computed(() => {
-  const start = weekStart(selectedDay.value)
-  return programmeDays.value.filter((date) => weekStart(date) === start)
-})
-
-const weekSessions = computed(() => {
-  const days = new Set(weekDays.value)
-  return data.value.schedule.filter((session) => days.has(dayOf(session)))
+/** Le calendrier montre tout le programme d'une traite, le jour de repos à sa place. */
+const restDay = computed(() => {
+  const edition = selectedEdition.value
+  return restDayOf(programmeDays.value, dayKeyInZone(edition.starts_at, timezone.value), dayKeyInZone(edition.ends_at, timezone.value))
 })
 
 const sortedSchedule = computed(() => [...data.value.schedule].sort((a, b) => a.starts_at.localeCompare(b.starts_at)))
@@ -340,8 +322,9 @@ const views = computed(() => [
 
       <EventProgrammeWeek
         v-else-if="view === 'week'"
-        :days="weekDays"
-        :sessions="weekSessions"
+        :days="programmeDays"
+        :rest-day="restDay"
+        :sessions="data.schedule"
         :matches="matches"
         :tracks="trackIndex"
         :matches-track="matchesTrack"
@@ -351,12 +334,6 @@ const views = computed(() => [
         :visited-id="visitedId"
         :edition-slug="selectedEdition.slug"
         :edition-past="selectedEdition.temporal_state === 'past'"
-        :week="weekIndex + 1"
-        :weeks="weeks.length"
-        :has-previous="weekIndex > 0"
-        :has-next="weekIndex < weeks.length - 1"
-        @week="moveWeek"
-        @day="onWeekDay"
       />
 
       <div v-else>
