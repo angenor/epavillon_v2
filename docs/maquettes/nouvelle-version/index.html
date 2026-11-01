@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nouvelle version</title>
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<style>
+  :root { --font: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); background: var(--color-surface); color: var(--color-text); }
+  .intro { max-width: 980px; margin: 0 auto; padding: 40px 24px 8px; }
+  .intro h1 { margin: 0 0 8px; font-size: 1.8rem; color: var(--color-heading); }
+  .intro p { margin: 0 0 6px; color: var(--color-text-secondary); max-width: 70ch; line-height: 1.55; }
+  .cases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; max-width: 1180px; margin: 24px auto 64px; padding: 0 24px; }
+  @media (max-width: 900px) { .cases { grid-template-columns: minmax(0, 1fr); } }
+  figure { margin: 0; }
+  figcaption { margin-bottom: 10px; font-weight: 700; color: var(--color-heading); }
+  figcaption span { display: block; font-weight: 400; font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 2px; }
+  .screen { position: relative; height: 420px; border-radius: 10px; overflow: hidden; border: 1px solid var(--color-border-strong); background: var(--color-surface); }
+  .screen iframe { width: 1440px; height: 900px; border: 0; transform: scale(0.37); transform-origin: 0 0; pointer-events: none; }
+  .screen.phone { width: 375px; height: 640px; margin: 0 auto; }
+  .screen.phone iframe { width: 375px; height: 640px; transform: none; }
+
+  /* Bandeau ordinaire : en bas de l'écran, aplat bleu nuit de la barre, il ne cache rien d'important. */
+  .update { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(720px, calc(100% - 24px)); display: flex; align-items: center; gap: 14px; padding: 12px 12px 12px 16px; border-radius: 8px; background: var(--color-surface-inverse); color: var(--color-text-on-inverse); box-shadow: 0 8px 24px rgb(0 0 0 / 0.25); border-top: 3px solid var(--color-accent-on-inverse); }
+  .update svg { flex: none; width: 22px; height: 22px; stroke: var(--color-accent-on-inverse); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .update p { margin: 0; flex: 1; font-size: 0.92rem; line-height: 1.4; }
+  .update b { display: block; font-size: 0.98rem; }
+  .update .acts { display: flex; gap: 8px; flex: none; }
+  .btn { min-height: 44px; padding: 0 16px; border-radius: 6px; border: 1px solid transparent; font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap; }
+  .btn-main { background: var(--ifdd-cyan); color: var(--ifdd-bleu-900); }
+  .btn-quiet { background: transparent; color: var(--color-text-on-inverse); border-color: rgb(255 255 255 / 0.35); }
+  .phone .update { flex-wrap: wrap; bottom: 12px; }
+  .phone .update .acts { width: 100%; }
+  .phone .update .btn { flex: 1; }
+
+  /* Mise à jour imposée : un voile, un message, un décompte. Pas de bouton pour refuser. */
+  .forced { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: rgb(29 26 91 / 0.72); backdrop-filter: blur(3px); }
+  .forced-card { width: min(460px, 100%); padding: 24px; border-radius: 10px; background: var(--color-surface-raised); color: var(--color-text); text-align: center; box-shadow: 0 16px 40px rgb(0 0 0 / 0.35); }
+  .forced-card h2 { margin: 0 0 8px; font-size: 1.25rem; color: var(--color-heading); }
+  .forced-card p { margin: 0 0 16px; font-size: 0.93rem; line-height: 1.5; color: var(--color-text-secondary); }
+  .count { font-size: 2.6rem; font-weight: 700; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+  .bar { height: 6px; margin: 12px 0 18px; border-radius: 3px; background: var(--color-surface-sunken); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 40%; background: var(--color-accent-solid); }
+  .forced-card .btn { width: 100%; background: var(--color-accent-solid); color: var(--color-accent-contrast); }
+</style>
+</head>
+<body>
+<section class="intro">
+  <h1>Prévenir d'une nouvelle version</h1>
+  <p>Deux cas, choisis au moment de la mise en ligne. Le bandeau est le même sur tout le site, l'espace organisation et le back-office.</p>
+</section>
+
+<div class="cases">
+  <figure>
+    <figcaption>1. À chaque mise en ligne : le visiteur choisit<span>En bas de l'écran, sans rien cacher. « Plus tard » le range ; la page suivante qu'il ouvre se charge de toute façon dans la nouvelle version.</span></figcaption>
+    <div class="screen">
+      <iframe src="../direction-condensee/programmation.html" title="Page de fond" tabindex="-1"></iframe>
+      <div class="update" role="status">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        <p><b>L'ePavillon a été mis à jour.</b>Rechargez la page pour profiter des dernières améliorations.</p>
+        <div class="acts"><button class="btn btn-quiet" type="button">Plus tard</button><button class="btn btn-main" type="button">Recharger</button></div>
+      </div>
+    </div>
+  </figure>
+
+  <figure>
+    <figcaption>2. Mise à jour importante : rechargement imposé<span>Pour une correction de sécurité ou un changement majeur. Dix secondes pour finir sa phrase, puis la page se recharge seule.</span></figcaption>
+    <div class="screen">
+      <iframe src="../direction-condensee/programmation.html" title="Page de fond" tabindex="-1"></iframe>
+      <div class="forced" role="alertdialog" aria-labelledby="f-titre">
+        <div class="forced-card">
+          <h2 id="f-titre">Mise à jour importante</h2>
+          <p>L'ePavillon doit être rechargé pour continuer à fonctionner correctement. La page se recharge dans</p>
+          <div class="count">6 s</div>
+          <div class="bar"><i></i></div>
+          <button class="btn" type="button">Recharger maintenant</button>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <figure>
+    <figcaption>Sur téléphone, cas 1</figcaption>
+    <div class="screen phone">
+      <iframe src="../direction-condensee/programmation.html" title="Page de fond" tabindex="-1"></iframe>
+      <div class="update" role="status">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        <p><b>L'ePavillon a été mis à jour.</b>Rechargez la page pour profiter des dernières améliorations.</p>
+        <div class="acts"><button class="btn btn-quiet" type="button">Plus tard</button><button class="btn btn-main" type="button">Recharger</button></div>
+      </div>
+    </div>
+  </figure>
+
+  <figure>
+    <figcaption>Sur téléphone, cas 2</figcaption>
+    <div class="screen phone">
+      <iframe src="../direction-condensee/programmation.html" title="Page de fond" tabindex="-1"></iframe>
+      <div class="forced" role="alertdialog" aria-labelledby="f-titre-2">
+        <div class="forced-card">
+          <h2 id="f-titre-2">Mise à jour importante</h2>
+          <p>L'ePavillon doit être rechargé pour continuer à fonctionner correctement. La page se recharge dans</p>
+          <div class="count">6 s</div>
+          <div class="bar"><i></i></div>
+          <button class="btn" type="button">Recharger maintenant</button>
+        </div>
+      </div>
+    </div>
+  </figure>
+</div>
+</body>
+</html>
