@@ -1,0 +1,156 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT i.id, i.session_id, s.title AS \"session_title?: Value\",\n                  s.starts_at AS \"session_starts_at?\", i.message AS \"message!: Value\",\n                  i.incident_kind_code, i.published_at AS \"published_at!\", i.published_by,\n                  p.display_name AS \"publisher_name?\", i.unpublished_at,\n                  u.display_name AS \"unpublisher_name?\",\n                  (i.unpublished_at IS NULL AND (i.display_until IS NULL OR i.display_until > now()))\n                      AS \"still_shown!\"\n             FROM live.incidents i\n             JOIN event.events e ON e.id = $1\n             LEFT JOIN programme.sessions s ON s.id = i.session_id\n             LEFT JOIN event.event_days d ON d.id = i.event_day_id\n             LEFT JOIN identity.people p ON p.id = i.published_by\n             LEFT JOIN identity.people u ON u.id = i.unpublished_by\n            WHERE i.published_at IS NOT NULL\n              AND (i.event_id = $1 OR s.event_id = $1 OR d.event_id = $1)\n              AND (i.published_at AT TIME ZONE e.timezone)::date = $2\n            ORDER BY i.published_at DESC\n            LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "session_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "session_title?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "session_starts_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "message!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "message"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "incident_kind_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "incident_kind_code"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "published_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "published_by"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "publisher_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "unpublished_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "unpublished_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "unpublisher_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "still_shown!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "6b77084683a6e4a0b1a8fec8964588a47baca952923d3259e8a88eadc8a22490"
+}

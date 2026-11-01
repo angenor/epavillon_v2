@@ -13,8 +13,12 @@
 //! partitions, lui : rien ne
 //! l'enfile, et son seul `enqueue` est celui qui pose **sa propre occurrence
 //! suivante**. C'est le patron de B1, écrit trois fois dans le dépôt avant lui.
+//!
+//! Troisième exception (02/11) : les courriels de la régie du jour
+//! (`regie_notice`), enfilés à l'heure dite par le consommateur `engagement.regie`.
 
 pub mod notification_email;
 pub mod partitions;
+pub mod regie_notice;
 pub mod send_mailing;
 pub mod send_reminder;

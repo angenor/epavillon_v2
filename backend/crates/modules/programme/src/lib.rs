@@ -157,13 +157,14 @@ pub fn event_consumers() -> Vec<std::sync::Arc<dyn kernel::events::EventConsumer
     ]
 }
 
-/// Les deux scopes **propres à ce module** : personne d'autre n'y dépose, il
-/// n'y a donc rien à composer dans l'API.
+/// Les trois scopes **propres à ce module** : personne d'autre n'y dépose, il
+/// n'y a donc rien à composer dans l'API. La régie du jour depuis le 02/11.
 pub fn comment_routes(cfg: &mut ServiceConfig) {
     use actix_web::web;
 
     cfg.service(
         web::scope("/proposal-comments").configure(routes::workspace::sous_proposal_comments),
     )
-    .service(web::scope("/admin/proposals").configure(routes::admin_ops::configurer));
+    .service(web::scope("/admin/proposals").configure(routes::admin_ops::configurer))
+    .service(web::scope("/admin/regie").configure(routes::regie::configurer));
 }

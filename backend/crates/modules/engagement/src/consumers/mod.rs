@@ -6,4 +6,5 @@
 //! jamais programmés.
 
 pub mod notifications;
+pub mod regie;
 pub mod reminders;

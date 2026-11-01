@@ -137,18 +137,27 @@ const SUJET_MAX: usize = 120;
 
 /// Le titre d'un sujet qui s'ouvre. L'équipe peut s'en passer : une note du
 /// comité n'est pas toujours un sujet.
-fn titre_du_sujet(cote: Cote, ouvre_un_fil: bool, payload: &PostCommentPayload) -> Result<Option<String>> {
+fn titre_du_sujet(
+    cote: Cote,
+    ouvre_un_fil: bool,
+    payload: &PostCommentPayload,
+) -> Result<Option<String>> {
     if !ouvre_un_fil {
         return Ok(None);
     }
-    let titre = payload.subject.as_deref().map(str::trim).filter(|t| !t.is_empty());
+    let titre = payload
+        .subject
+        .as_deref()
+        .map(str::trim)
+        .filter(|t| !t.is_empty());
     match titre {
-        None if cote == Cote::Organisation => Err(ApiError::validation("Donnez un titre au sujet.", "subject")),
+        None if cote == Cote::Organisation => {
+            Err(ApiError::validation("Donnez un titre au sujet.", "subject"))
+        }
         None => Ok(None),
-        Some(t) if t.chars().count() < 2 || t.chars().count() > SUJET_MAX => Err(ApiError::validation(
-            "Le titre du sujet compte de 2 à 120 caractères.",
-            "subject",
-        )),
+        Some(t) if t.chars().count() < 2 || t.chars().count() > SUJET_MAX => Err(
+            ApiError::validation("Le titre du sujet compte de 2 à 120 caractères.", "subject"),
+        ),
         Some(t) => Ok(Some(t.to_owned())),
     }
 }
@@ -524,7 +533,8 @@ pub async fn clore_sujet(
     .fetch_one(&mut *tx)
     .await?;
     let reserve_au_comite = ligne.visibility != VISIBILITE_DEPOSANT;
-    crate::realtime::signaler_echange(&mut tx, dossier, edition, organisation, reserve_au_comite).await?;
+    crate::realtime::signaler_echange(&mut tx, dossier, edition, organisation, reserve_au_comite)
+        .await?;
     tx.commit().await?;
 
     Ok(crate::repo::comments::message_depuis!(ligne))

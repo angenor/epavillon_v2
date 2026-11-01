@@ -265,6 +265,19 @@ codes! {
     LiveMeetingCancelled => "LIVE_MEETING_CANCELLED", StatusCode::CONFLICT,
         "Cette activité est annulée ou reportée : la salle n'ouvrira pas.";
 
+    // --- Régie du jour (02/11) ------------------------------------------------
+    // Ils répondent à l'équipe en pleine CdP : ce qui bloque, et quoi faire.
+    RegieLiveAlreadyRunning => "REGIE_LIVE_ALREADY_RUNNING", StatusCode::CONFLICT,
+        "Un autre direct est en cours : un seul à la fois. Terminez-le d'abord.";
+    RegieSessionStateChanged => "REGIE_SESSION_STATE_CHANGED", StatusCode::CONFLICT,
+        "Cette activité a changé entre-temps : la régie s'est mise à jour, vérifiez avant de recommencer.";
+    RegieResumeExpired => "REGIE_RESUME_EXPIRED", StatusCode::CONFLICT,
+        "Le direct est terminé depuis plus de quinze minutes : il ne se reprend plus.";
+    RegieActionAlreadyUndone => "REGIE_ACTION_ALREADY_UNDONE", StatusCode::CONFLICT,
+        "Ce geste a déjà été défait.";
+    RegieCancellationReasonUnknown => "REGIE_CANCELLATION_REASON_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
+        "Choisissez une raison d'annulation dans la liste.";
+
     // --- Guide Négo, admission (0b) -------------------------------------------
     // **Aucun de ces codes ne répond sur le chemin nominal de la saisie d'un
     // code** : les neuf issues sortent en 200 avec leur discriminant, comme

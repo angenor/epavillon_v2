@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions SET status = $2::text::programme.session_status WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "de143fa14be3ec806e712e3a2be8261aefb41381ce25c7a4d55f3284aa4b7565"
+}

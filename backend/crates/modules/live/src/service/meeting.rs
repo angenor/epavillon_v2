@@ -12,8 +12,8 @@ use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 use crate::domain::meeting::{
-    fermeture, AdminSessionMeeting, MeetingAccess, MeetingSyncInput, PublicSessionMeeting,
-    OUVERTURE_AVANT_MINUTES,
+    fermeture, AdminSessionMeeting, MeetingAccess, MeetingHostLink, MeetingSyncInput,
+    PublicSessionMeeting, OUVERTURE_AVANT_MINUTES,
 };
 use crate::repo::cross::programme;
 use crate::repo::{lecture, meetings};
@@ -158,6 +158,38 @@ async fn autoriser(state: &LiveState, perimetre: &Perimeter, session_id: Uuid) -
         return Err(ApiError::forbidden());
     }
     Ok(())
+}
+
+/// Le lien d'animateur (régie du jour, 02/11). Zoom en rend un neuf à chaque
+/// lecture de la réunion, celui gardé expire : on le redemande, et l'ancien ne
+/// sert que si Zoom ne répond pas. Jamais journalisé, jamais conservé.
+pub async fn lien_animateur(
+    state: &LiveState,
+    perimetre: &Perimeter,
+    session_id: Uuid,
+) -> Result<MeetingHostLink> {
+    autoriser(state, perimetre, session_id).await?;
+    let zoom = state.zoom()?;
+    let mut conn = state.pool().acquire().await?;
+    let (numero, garde) = meetings::lien_animateur(&mut conn, session_id)
+        .await?
+        .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingNotReady))?;
+    drop(conn);
+    let neuf = match zoom.client.lire_reunion(&numero).await {
+        Ok(reunion) => reunion["start_url"].as_str().map(str::to_owned),
+        Err(e) => {
+            tracing::warn!(seance = %session_id, erreur = %e, "lien d'animateur : Zoom ne répond pas");
+            None
+        }
+    };
+    let url = match neuf {
+        Some(u) => u,
+        None => garde
+            .map(|octets| zoom.coffre.dechiffrer(&octets))
+            .transpose()?
+            .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingNotReady))?,
+    };
+    Ok(MeetingHostLink { url })
 }
 
 pub async fn lire_admin(

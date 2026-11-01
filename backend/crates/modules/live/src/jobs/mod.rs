@@ -2,6 +2,7 @@
 //! parce que ces gestionnaires la déclarent.
 
 pub mod annonce;
+pub mod annulation_differee;
 pub mod cancel_meeting;
 pub mod cancel_participant;
 pub mod fenetre;

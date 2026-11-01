@@ -1,7 +1,8 @@
 //! `live.meetings` et `live.meeting_participants`.
 //!
-//! Aucune lecture de `passcode_encrypted` ni de `start_url_encrypted` hors du
-//! seul chemin qui les déchiffre (l'accès d'une personne inscrite).
+//! Aucune lecture de `passcode_encrypted` ni de `start_url_encrypted` hors des
+//! deux chemins qui les déchiffrent : l'accès d'une personne inscrite, et le
+//! lien d'animateur de la régie (`lien_animateur`, 02/11).
 
 use kernel::error::Result;
 use kernel::jobs::{self, NewJob};
@@ -434,6 +435,26 @@ pub async fn relancer_les_proches(conn: &mut PgConnection) -> Result<i64> {
 }
 
 /// Séance annulée : la réunion l'est aussi, et son annulation part chez Zoom.
+/// La réunion qu'un animateur peut ouvrir : son numéro Zoom et le lien
+/// d'animateur chiffré gardé à la dernière synchronisation.
+pub async fn lien_animateur(
+    conn: &mut PgConnection,
+    session_id: Uuid,
+) -> Result<Option<(String, Option<Vec<u8>>)>> {
+    let ligne = sqlx::query!(
+        r#"SELECT external_id AS "external_id!", start_url_encrypted
+             FROM live.meetings
+            WHERE session_id = $1 AND status IN ('scheduled', 'started')
+              AND external_id IS NOT NULL
+            ORDER BY created_at DESC
+            LIMIT 1"#,
+        session_id
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+    Ok(ligne.map(|l| (l.external_id, l.start_url_encrypted)))
+}
+
 pub async fn annuler_reunion(conn: &mut PgConnection, session_id: Uuid) -> Result<()> {
     let annulee = sqlx::query!(
         "UPDATE live.meetings

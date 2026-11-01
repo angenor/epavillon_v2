@@ -12,6 +12,7 @@ pub mod people;
 pub mod planner;
 pub mod public_schedule;
 pub mod questions;
+pub mod regie;
 pub mod registrations;
 pub mod sessions;
 pub mod submission;

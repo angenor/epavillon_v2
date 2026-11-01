@@ -99,6 +99,12 @@ pub struct ApiErrorBody {
         crate::routes::planner::placer_dans_le_fil,
         crate::routes::planner::reunir,
         crate::routes::planner::separer,
+        crate::routes::regie::ecran,
+        crate::routes::regie::presence,
+        crate::routes::regie::annuler,
+        crate::routes::regie::demarrer,
+        crate::routes::regie::terminer,
+        crate::routes::regie::defaire,
         crate::routes::registrations::formulaire,
         crate::routes::registrations::sinscrire,
         crate::routes::registrations::liste_nominative,
@@ -159,8 +165,8 @@ mod tests {
             .sum();
 
         assert_eq!(
-            operations, 83,
-            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10, les cinq du jour J et les deux de l'atelier de couverture du 29/10, la page d'un fil et le placement dans ses parties du 30/10, les fils de la programmation (`/schedule/tracks`), le changement de porteuse et de déposant du 31/10, clore et rouvrir un sujet du 01/11, réunir et séparer une séance commune du 01/11, ce qui a changé dans le programme du 01/11"
+            operations, 89,
+            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10, les cinq du jour J et les deux de l'atelier de couverture du 29/10, la page d'un fil et le placement dans ses parties du 30/10, les fils de la programmation (`/schedule/tracks`), le changement de porteuse et de déposant du 31/10, clore et rouvrir un sujet du 01/11, réunir et séparer une séance commune du 01/11, ce qui a changé dans le programme du 01/11, les six de la régie du jour du 02/11"
         );
     }
 

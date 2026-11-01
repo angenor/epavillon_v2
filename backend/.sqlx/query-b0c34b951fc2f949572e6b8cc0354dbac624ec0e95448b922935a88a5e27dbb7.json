@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_presence (session_id, is_present, noted_by)\n                 VALUES ($1, $2, platform.current_actor_id())\n                 ON CONFLICT (session_id) DO UPDATE\n                    SET is_present = EXCLUDED.is_present, noted_at = now(),\n                        noted_by = EXCLUDED.noted_by",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b0c34b951fc2f949572e6b8cc0354dbac624ec0e95448b922935a88a5e27dbb7"
+}

@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT a AS \"action_id!\",\n                  (SELECT j.completed_at FROM platform.jobs j\n                    WHERE j.task = $2 AND j.idempotency_key = 'cancelled:' || a::text\n                      AND j.status = 'succeeded'\n                    ORDER BY j.completed_at DESC LIMIT 1) AS done_at,\n                  (SELECT count(*) FROM platform.jobs j\n                    WHERE j.task = $3 AND j.idempotency_key LIKE 'regie:' || a::text || ':%'\n                      AND j.status <> 'cancelled') AS \"sent!\",\n                  (SELECT max(j.completed_at) FROM platform.jobs j\n                    WHERE j.task = $3 AND j.idempotency_key LIKE 'regie:' || a::text || ':%'\n                      AND j.status = 'succeeded') AS last_sent_at\n             FROM unnest($1::uuid[]) AS a",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "action_id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "done_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "sent!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_sent_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "e8c02af3a10deac7937bab6a2918cfe848ccc0fe16184a76d9a7279d204dd903"
+}

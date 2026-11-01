@@ -1,5 +1,6 @@
-//! Les événements de séance : la réunion Zoom suit sa séance (annulée chez
-//! Zoom, ou déplacée). Une séance reportée (`postponed`) garde sa réunion :
+//! Les événements de séance : la réunion Zoom suit sa séance (annulée chez Zoom
+//! cinq minutes plus tard, délai pour défaire l'annulation en régie ; ou
+//! déplacée). Une séance reportée (`postponed`) garde sa réunion :
 //! l'accès est refusé, rien n'est défait chez Zoom.
 //!
 //! Une séance diffusée en entrée libre n'aura aucune inscription pour faire
@@ -43,7 +44,7 @@ impl EventConsumer for SessionsConsumer {
             return Ok(());
         };
         if seance.status == "cancelled" {
-            return meetings::annuler_reunion(conn, seance.id).await;
+            return crate::jobs::annulation_differee::poser(conn, seance.id).await;
         }
         if event.event_type == DEPLACEE {
             let minutes = inscrits::duree_minutes(&seance);

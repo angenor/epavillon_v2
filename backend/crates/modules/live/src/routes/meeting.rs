@@ -30,6 +30,10 @@ pub fn chemins_admin(cfg: &mut web::ServiceConfig) {
     .route(
         "/admin/sessions/{session_id}/meeting/push",
         web::post().to(envoyer_maintenant),
+    )
+    .route(
+        "/admin/sessions/{session_id}/meeting/host",
+        web::get().to(lien_animateur),
     );
 }
 
@@ -180,4 +184,32 @@ pub(crate) async fn envoyer_maintenant(
     )
     .await?;
     Ok(HttpResponse::Ok().json(tableau))
+}
+
+#[utoipa::path(
+    get,
+    description = "`MeetingHostLink`, le lien d'animateur de la réunion Zoom (« Ouvrir Zoom (animateur) » de la régie du jour). Redemandé à Zoom à chaque appel (le lien expire), le dernier connu à défaut. Ne se met jamais en cache : `Cache-Control: no-store`.\n\nExige `live.meeting.manage` sur l'édition. `LIVE_MEETING_NOT_READY` (409) sans réunion créée chez Zoom, `LIVE_ZOOM_UNAVAILABLE` (503) si Zoom n'est pas configuré.",
+    path = "/admin/sessions/{session_id}/meeting/host",
+    tag = "Back-office : réunions Zoom",
+    operation_id = "admin_seance_reunion_lien_animateur",
+    params(("session_id" = Uuid, Path, description = "Séance")),
+    responses(
+        (status = 200, description = "MeetingHostLink", body = Object),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Périmètre vide ou permission absente", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Séance inconnue ou hors périmètre", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "LIVE_MEETING_NOT_READY", body = crate::routes::openapi::ApiErrorBody),
+        (status = 503, description = "LIVE_ZOOM_UNAVAILABLE", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn lien_animateur(
+    state: web::Data<LiveState>,
+    perimetre: Perimeter,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let lien = meeting::lien_animateur(&state, &perimetre, chemin.into_inner()).await?;
+    Ok(HttpResponse::Ok()
+        .insert_header((actix_web::http::header::CACHE_CONTROL, "no-store"))
+        .json(lien))
 }

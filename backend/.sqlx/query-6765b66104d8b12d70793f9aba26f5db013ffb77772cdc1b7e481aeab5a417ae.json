@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM reference.taxonomy_terms\n                           WHERE taxonomy_code = 'session_cancellation_reason'\n                             AND code = $1 AND is_active) AS \"connue!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "connue!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6765b66104d8b12d70793f9aba26f5db013ffb77772cdc1b7e481aeab5a417ae"
+}

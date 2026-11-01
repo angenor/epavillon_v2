@@ -267,8 +267,14 @@ pub(crate) async fn rouvrir_sujet(
     chemin: web::Path<Uuid>,
 ) -> Result<HttpResponse> {
     let ctx = contexte_de(&requete, acteur.0);
-    let message =
-        comments::clore_sujet(&state, &ctx, acteur.0, CommentId(chemin.into_inner()), false).await?;
+    let message = comments::clore_sujet(
+        &state,
+        &ctx,
+        acteur.0,
+        CommentId(chemin.into_inner()),
+        false,
+    )
+    .await?;
     Ok(HttpResponse::Ok().json(message))
 }
 

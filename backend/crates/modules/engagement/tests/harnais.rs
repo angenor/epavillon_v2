@@ -99,8 +99,9 @@ async fn le_semis_ne_fournit_ni_regle_ni_modele() {
             .await
             .expect("comptage des types");
     // 18, plus les quatre de Guide Négo (3b), les deux de l'étape 4 et les
-    // messages adressés du comité (27/10).
-    assert_eq!(types, 25);
+    // messages adressés du comité (27/10) et le « finalement maintenue » de
+    // la régie du jour (02/11).
+    assert_eq!(types, 26);
 }
 
 /// La fabrique de règle traverse les décalages **en minutes**, dans les deux
