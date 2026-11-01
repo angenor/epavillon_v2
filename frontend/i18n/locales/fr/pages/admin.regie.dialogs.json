@@ -1,0 +1,33 @@
+{
+  "cancel": {
+    "title": "Annuler l'activité de {time}",
+    "lead": "{title}, {orgs}.",
+    "reason": "Raison",
+    "note": "Note pour l'équipe",
+    "noteHint": "Non publiée : elle reste dans le journal de la régie.",
+    "publish": "Publier un message d'incident : « L'activité de {time} est annulée. »",
+    "message": "L'activité de {time} est annulée.",
+    "notify": "Prévenir par courriel les inscrits dans 5 minutes | Prévenir par courriel l'inscrit dans 5 minutes | Prévenir par courriel les {count} inscrits dans 5 minutes",
+    "notifyHint": "D'ici là, vous pouvez encore revenir en arrière sans que personne n'ait rien reçu.",
+    "keep": "Garder l'activité",
+    "confirm": "Annuler l'activité"
+  },
+  "end": {
+    "title": "Terminer le direct de {name} ?",
+    "titleBare": "Terminer le direct ?",
+    "remaining": "Le créneau est écoulé. | Il reste 1 minute au créneau. | Il reste {count} minutes au créneau.",
+    "withPresent": "{left} Personne n'est connecté. | {left} La personne connectée verra « Direct terminé ». | {left} Les {count} personnes connectées verront « Direct terminé ».",
+    "resume": "Une erreur ? Pendant 15 minutes, « Reprendre le direct » relance la même réunion Zoom, avec le même lien : les spectateurs reviennent sans rien changer.",
+    "keep": "Continuer le direct",
+    "confirm": "Terminer le direct"
+  },
+  "restore": {
+    "title": "Rétablir l'activité de {time} ?",
+    "lead": "{title}. Elle revient au programme, à son créneau, avec ses inscrits.",
+    "unpublish": "Retirer le message « {message} »",
+    "notify": "Écrire aux inscrits qui ont reçu l'annulation : « Finalement, l'activité est maintenue. » | Écrire à l'inscrit qui a reçu l'annulation : « Finalement, l'activité est maintenue. » | Écrire aux {count} inscrits qui ont reçu l'annulation : « Finalement, l'activité est maintenue. »",
+    "nothingElse": "Aucun message à retirer, aucun inscrit à prévenir.",
+    "keep": "Laisser annulée",
+    "confirm": "Rétablir l'activité"
+  }
+}

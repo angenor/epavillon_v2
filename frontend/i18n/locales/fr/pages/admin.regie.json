@@ -1,0 +1,217 @@
+{
+  "title": "Régie du jour",
+  "forbidden": "Tenir la régie, sur au moins un événement",
+  "side": "Journal, vigilance et messages",
+  "meetingCreated": "Réunion Zoom créée.",
+  "noEvent": {
+    "title": "Aucun événement choisi",
+    "description": "Choisissez l'édition à suivre dans le sélecteur en haut de page."
+  },
+  "empty": {
+    "title": "Aucune activité ce jour",
+    "description": "Rien n'est programmé sur cette journée. Choisissez un autre jour dans la barre de la régie."
+  },
+  "errors": {
+    "title": "Le geste n'a pas abouti"
+  },
+  "top": {
+    "title": "Régie",
+    "days": "Jour",
+    "today": "(aujourd'hui)",
+    "onAir": "À l'antenne : {name}",
+    "elsewhere": "une autre édition",
+    "zone": "{zone} ({offset})"
+  },
+  "now": {
+    "live": "En direct",
+    "next": "Prochaine activité",
+    "elapsed": "depuis {elapsed} min, reste {remaining} min",
+    "startsIn": "dans {minutes} min",
+    "due": "devrait commencer",
+    "until": "à {end}, {zone}",
+    "untilRoom": "à {end}, {zone}, {room}",
+    "present": "personne connectée | {count} personne connectée | {count} personnes connectées",
+    "progress": "Avancement du créneau",
+    "openHost": "Ouvrir Zoom (animateur)",
+    "endLive": "Terminer le direct",
+    "overrun": "Signaler un débordement"
+  },
+  "startBlock": {
+    "other_live": "Un seul direct à la fois : terminez d'abord celui de {name}.",
+    "not_published": "L'activité n'est pas publiée : publiez la programmation d'abord.",
+    "withdrawn": "L'activité est annulée ou reportée."
+  },
+  "documents": {
+    "title": "Présentations de l'organisation",
+    "none": "Aucune présentation déposée.",
+    "notReady": "En cours d'analyse, pas encore ouvrable",
+    "untitled": "Présentation",
+    "uploaded": "déposée le {date}",
+    "kind": {
+      "slides": "PowerPoint",
+      "pdf": "PDF",
+      "text": "Document Word",
+      "sheet": "Tableur",
+      "image": "Image",
+      "video": "Vidéo",
+      "other": "Fichier"
+    },
+    "badge": {
+      "slides": "PPT",
+      "pdf": "PDF",
+      "text": "DOC",
+      "sheet": "XLS",
+      "image": "IMG",
+      "video": "VID",
+      "other": "FIC"
+    }
+  },
+  "day": {
+    "count": "aucune activité | une activité | {count} activités",
+    "withCancelled": "{total}, aucune annulée | {total}, une annulée | {total}, {count} annulées",
+    "meta": "{count}, {zone}"
+  },
+  "state": {
+    "live": "En direct",
+    "upcoming": "À venir",
+    "ongoing": "Créneau en cours",
+    "past": "Terminée",
+    "cancelled": "Annulée",
+    "postponed": "Reportée"
+  },
+  "slot": {
+    "until": "à {end}",
+    "joint": "séance commune",
+    "present": "Présent",
+    "absent": "Absent",
+    "startLive": "Démarrer le direct",
+    "createMeeting": "Créer la réunion Zoom",
+    "restore": "Rétablir l'activité",
+    "resume": "Reprendre le direct",
+    "cancelledAt": "Annulée à {time} : {reason}.",
+    "noReason": "raison non précisée",
+    "flags": {
+      "meetingReady": "Réunion Zoom prête",
+      "meetingNotReady": "Réunion Zoom pas prête",
+      "noMeeting": "Pas de réunion Zoom",
+      "documents": "aucune présentation | 1 présentation | {count} présentations",
+      "noDocuments": "Aucune présentation déposée",
+      "presenceConfirmed": "Présence confirmée",
+      "presenceUnknown": "Présence pas encore confirmée",
+      "absent": "Organisateurs absents",
+      "unpublished": "Non publiée"
+    },
+    "menu": {
+      "label": "Autres actions",
+      "proposal": "Ouvrir le dossier",
+      "planner": "Ouvrir le planificateur",
+      "cancel": "Annuler l'activité"
+    }
+  },
+  "notice": {
+    "sent": "Aucun inscrit prévenu. | 1 inscrit prévenu à {time}. | {count} inscrits prévenus à {time}.",
+    "pending": "Aucun inscrit à prévenir. | 1 inscrit prévenu dans {minutes} min. | {count} inscrits prévenus dans {minutes} min.",
+    "none": "Aucun courriel parti.",
+    "withdrawn": "Courriel retiré avant l'envoi."
+  },
+  "journal": {
+    "title": "Journal de la régie",
+    "today": "aujourd'hui",
+    "empty": "Aucun geste pour l'instant.",
+    "byMe": "par vous",
+    "by": "par {name}",
+    "separator": " ; ",
+    "undone": "défait à {time} par {name}",
+    "kind": {
+      "presence_confirmed": "Présence confirmée pour l'activité de {time}",
+      "session_cancelled": "Activité de {time} annulée",
+      "live_started": "Direct de l'activité de {time} démarré",
+      "live_ended": "Direct de l'activité de {time} terminé",
+      "incident_published": "Message « {message} » publié"
+    },
+    "action": {
+      "undo": "Défaire",
+      "restore": "Rétablir",
+      "resume": "Reprendre le direct",
+      "unpublish": "Retirer"
+    }
+  },
+  "watch": {
+    "title": "À surveiller",
+    "empty": "Rien à signaler pour la suite de la journée.",
+    "line": "{when} : {text}",
+    "in": "Dans {minutes} min",
+    "theOrganizers": "les organisateurs",
+    "presence": "{orgs} n'a pas confirmé sa présence. | {orgs} n'a pas confirmé sa présence. | {orgs} n'ont pas confirmé leur présence.",
+    "documents": "{orgs} n'a déposé aucune présentation. | {orgs} n'a déposé aucune présentation. | {orgs} n'ont déposé aucune présentation.",
+    "no_meeting": "aucune réunion Zoom créée.",
+    "meeting_not_ready": "la réunion Zoom n'est pas prête."
+  },
+  "incidents": {
+    "title": "Messages d'incident",
+    "count": "aucun en ligne | 1 en ligne | {count} en ligne",
+    "empty": "Aucun message en ligne.",
+    "since": "{target}, depuis {time}",
+    "unpublishReason": "Retiré depuis la régie.",
+    "scope": {
+      "global": "Toute la plateforme",
+      "event": "Toute la programmation",
+      "event_day": "Journée",
+      "session": "Activité",
+      "organization": "Organisation"
+    }
+  },
+  "composer": {
+    "title": "Nouveau message",
+    "template": "Modèle",
+    "templates": {
+      "delay": "Retard",
+      "overrun": "Débordement",
+      "technical": "Son ou image coupés",
+      "room": "Changement de salle",
+      "free": "Libre"
+    },
+    "text": {
+      "delay": {
+        "session": "L'activité de {time} commence avec une dizaine de minutes de retard.",
+        "event": "La programmation prend une dizaine de minutes de retard."
+      },
+      "overrun": {
+        "session": "L'activité de {time} déborde de quelques minutes : la suite du programme est décalée d'autant.",
+        "event": "Une activité déborde de quelques minutes : la suite du programme est décalée d'autant."
+      },
+      "technical": {
+        "session": "Le son ou l'image du direct de {time} est coupé quelques minutes, nous rétablissons.",
+        "event": "Le son ou l'image du direct est coupé quelques minutes, nous rétablissons."
+      },
+      "room": {
+        "session": "L'activité de {time} change de salle.",
+        "event": "Une activité change de salle."
+      }
+    },
+    "textFr": "Texte du message",
+    "english": "Version anglaise",
+    "textEn": "Texte en anglais",
+    "englishHint": "Laissé vide, le texte français est repris.",
+    "where": "Où l'afficher",
+    "target": {
+      "session": "Activité de {time} et programmation",
+      "event": "Toute la programmation"
+    },
+    "publish": "Publier",
+    "published": "Message publié."
+  },
+  "undo": {
+    "action": "Défaire",
+    "delay": "{minutes} min {seconds} s",
+    "notifyIn": "Aucun inscrit à prévenir. | L'inscrit sera prévenu dans {delay}. | Les {count} inscrits seront prévenus dans {delay}.",
+    "resumeHint": "Reprise possible pendant 15 minutes, même lien Zoom.",
+    "presence": "Présence confirmée : {name}.",
+    "started": "Direct de {name} démarré.",
+    "ended": "Direct de {name} terminé.",
+    "cancelled": "Activité de {time} annulée.",
+    "done": "Geste défait.",
+    "resumed": "Direct repris.",
+    "restored": "Activité de {time} rétablie."
+  }
+}

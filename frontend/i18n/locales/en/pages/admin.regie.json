@@ -1,0 +1,217 @@
+{
+  "title": "Control room",
+  "forbidden": "Run the control room, on at least one event",
+  "side": "Log, watch list and notices",
+  "meetingCreated": "Zoom meeting created.",
+  "noEvent": {
+    "title": "No event selected",
+    "description": "Choose the edition to follow in the selector at the top of the page."
+  },
+  "empty": {
+    "title": "No activity on this day",
+    "description": "Nothing is scheduled on this day. Choose another day in the control room bar."
+  },
+  "errors": {
+    "title": "The action did not go through"
+  },
+  "top": {
+    "title": "Control room",
+    "days": "Day",
+    "today": "(today)",
+    "onAir": "On air: {name}",
+    "elsewhere": "another edition",
+    "zone": "{zone} ({offset})"
+  },
+  "now": {
+    "live": "Live",
+    "next": "Next activity",
+    "elapsed": "{elapsed} min in, {remaining} min left",
+    "startsIn": "in {minutes} min",
+    "due": "should be starting",
+    "until": "to {end}, {zone}",
+    "untilRoom": "to {end}, {zone}, {room}",
+    "present": "no one connected | {count} person connected | {count} people connected",
+    "progress": "Slot progress",
+    "openHost": "Open Zoom (host)",
+    "endLive": "End the live stream",
+    "overrun": "Report an overrun"
+  },
+  "startBlock": {
+    "other_live": "One live stream at a time: end {name}'s first.",
+    "not_published": "The activity is not published: publish the programme first.",
+    "withdrawn": "The activity is cancelled or postponed."
+  },
+  "documents": {
+    "title": "The organisation's presentations",
+    "none": "No presentation uploaded.",
+    "notReady": "Being scanned, cannot be opened yet",
+    "untitled": "Presentation",
+    "uploaded": "uploaded on {date}",
+    "kind": {
+      "slides": "PowerPoint",
+      "pdf": "PDF",
+      "text": "Word document",
+      "sheet": "Spreadsheet",
+      "image": "Image",
+      "video": "Video",
+      "other": "File"
+    },
+    "badge": {
+      "slides": "PPT",
+      "pdf": "PDF",
+      "text": "DOC",
+      "sheet": "XLS",
+      "image": "IMG",
+      "video": "VID",
+      "other": "FILE"
+    }
+  },
+  "day": {
+    "count": "no activity | one activity | {count} activities",
+    "withCancelled": "{total}, none cancelled | {total}, one cancelled | {total}, {count} cancelled",
+    "meta": "{count}, {zone}"
+  },
+  "state": {
+    "live": "Live",
+    "upcoming": "Upcoming",
+    "ongoing": "Slot under way",
+    "past": "Ended",
+    "cancelled": "Cancelled",
+    "postponed": "Postponed"
+  },
+  "slot": {
+    "until": "to {end}",
+    "joint": "joint session",
+    "present": "Present",
+    "absent": "Absent",
+    "startLive": "Start the live stream",
+    "createMeeting": "Create the Zoom meeting",
+    "restore": "Restore the activity",
+    "resume": "Resume the live stream",
+    "cancelledAt": "Cancelled at {time}: {reason}.",
+    "noReason": "no reason given",
+    "flags": {
+      "meetingReady": "Zoom meeting ready",
+      "meetingNotReady": "Zoom meeting not ready",
+      "noMeeting": "No Zoom meeting",
+      "documents": "no presentation | 1 presentation | {count} presentations",
+      "noDocuments": "No presentation uploaded",
+      "presenceConfirmed": "Attendance confirmed",
+      "presenceUnknown": "Attendance not confirmed yet",
+      "absent": "Organisers absent",
+      "unpublished": "Not published"
+    },
+    "menu": {
+      "label": "More actions",
+      "proposal": "Open the proposal",
+      "planner": "Open the planner",
+      "cancel": "Cancel the activity"
+    }
+  },
+  "notice": {
+    "sent": "No registrant notified. | 1 registrant notified at {time}. | {count} registrants notified at {time}.",
+    "pending": "No registrant to notify. | 1 registrant notified in {minutes} min. | {count} registrants notified in {minutes} min.",
+    "none": "No email sent.",
+    "withdrawn": "Email withdrawn before sending."
+  },
+  "journal": {
+    "title": "Control room log",
+    "today": "today",
+    "empty": "No action yet.",
+    "byMe": "by you",
+    "by": "by {name}",
+    "separator": "; ",
+    "undone": "undone at {time} by {name}",
+    "kind": {
+      "presence_confirmed": "Attendance confirmed for the {time} activity",
+      "session_cancelled": "{time} activity cancelled",
+      "live_started": "{time} activity live stream started",
+      "live_ended": "{time} activity live stream ended",
+      "incident_published": "Notice “{message}” published"
+    },
+    "action": {
+      "undo": "Undo",
+      "restore": "Restore",
+      "resume": "Resume the live stream",
+      "unpublish": "Remove"
+    }
+  },
+  "watch": {
+    "title": "To watch",
+    "empty": "Nothing to report for the rest of the day.",
+    "line": "{when}: {text}",
+    "in": "In {minutes} min",
+    "theOrganizers": "the organisers",
+    "presence": "{orgs} has not confirmed attendance. | {orgs} has not confirmed attendance. | {orgs} have not confirmed attendance.",
+    "documents": "{orgs} has not uploaded any presentation. | {orgs} has not uploaded any presentation. | {orgs} have not uploaded any presentation.",
+    "no_meeting": "no Zoom meeting created.",
+    "meeting_not_ready": "the Zoom meeting is not ready."
+  },
+  "incidents": {
+    "title": "Incident notices",
+    "count": "none online | 1 online | {count} online",
+    "empty": "No notice online.",
+    "since": "{target}, since {time}",
+    "unpublishReason": "Removed from the control room.",
+    "scope": {
+      "global": "Whole platform",
+      "event": "Whole programme",
+      "event_day": "Day",
+      "session": "Activity",
+      "organization": "Organisation"
+    }
+  },
+  "composer": {
+    "title": "New notice",
+    "template": "Template",
+    "templates": {
+      "delay": "Delay",
+      "overrun": "Overrun",
+      "technical": "Sound or picture cut",
+      "room": "Room change",
+      "free": "Free text"
+    },
+    "text": {
+      "delay": {
+        "session": "The {time} activity is starting about ten minutes late.",
+        "event": "The programme is running about ten minutes late."
+      },
+      "overrun": {
+        "session": "The {time} activity is running a few minutes over: the rest of the programme is pushed back accordingly.",
+        "event": "An activity is running a few minutes over: the rest of the programme is pushed back accordingly."
+      },
+      "technical": {
+        "session": "Sound or picture on the {time} live stream is cut for a few minutes; we are restoring it.",
+        "event": "Sound or picture on the live stream is cut for a few minutes; we are restoring it."
+      },
+      "room": {
+        "session": "The {time} activity is changing rooms.",
+        "event": "An activity is changing rooms."
+      }
+    },
+    "textFr": "Notice text (French)",
+    "english": "English version",
+    "textEn": "Text in English",
+    "englishHint": "Left empty, the French text is used.",
+    "where": "Where to show it",
+    "target": {
+      "session": "{time} activity and programme",
+      "event": "Whole programme"
+    },
+    "publish": "Publish",
+    "published": "Notice published."
+  },
+  "undo": {
+    "action": "Undo",
+    "delay": "{minutes} min {seconds} s",
+    "notifyIn": "No registrant to notify. | The registrant will be notified in {delay}. | The {count} registrants will be notified in {delay}.",
+    "resumeHint": "Can be resumed for 15 minutes, same Zoom link.",
+    "presence": "Attendance confirmed: {name}.",
+    "started": "{name} live stream started.",
+    "ended": "{name} live stream ended.",
+    "cancelled": "{time} activity cancelled.",
+    "done": "Action undone.",
+    "resumed": "Live stream resumed.",
+    "restored": "{time} activity restored."
+  }
+}

@@ -163,6 +163,7 @@ const sections: NavSection[] = [
   {
     labelKey: 'nav.admin.sections.operations',
     items: [
+      { labelKey: 'nav.admin.regie', to: '/admin/regie', icon: 'video' },
       { labelKey: 'nav.admin.incidents', to: '/admin/incidents', icon: 'broadcast' },
       { labelKey: 'nav.admin.mailings', to: '/admin/courriels', icon: 'mail' },
       { labelKey: 'nav.admin.settings', to: '/admin/parametres', icon: 'sliders' },

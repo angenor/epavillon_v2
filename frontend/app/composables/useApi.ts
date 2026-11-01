@@ -71,6 +71,7 @@ import { createAdminOrganizationsApi } from './api/admin-organizations'
 import { createInvitationApi } from './api/invitation'
 import { createAdminUsersApi } from './api/admin-users'
 import { createAdminIncidentsApi } from './api/admin-incidents'
+import { createAdminRegieApi } from './api/admin-regie'
 import { createAdminMailingsApi } from './api/admin-mailings'
 import { createAdminNegotiationsApi } from './api/admin-negotiations'
 import { createOrganizationWorkspaceApi } from './api/organization-workspace'
@@ -801,6 +802,7 @@ export function useApi() {
     // tant que l'API n'existe pas. Ce paramètre disparaît au prompt B6.
     // -----------------------------------------------------------------------
     adminIncidents: createAdminIncidentsApi(deps),
+    adminRegie: createAdminRegieApi(deps),
     /** Envois de courriels du back-office, bornés à l'édition (règle n° 8). */
     adminMailings: createAdminMailingsApi(deps),
 

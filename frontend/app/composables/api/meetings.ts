@@ -6,6 +6,7 @@ import type {
   PublicSessionMeeting,
   RegistrationJoinResult,
 } from '~/types/live'
+import type { MeetingHostLink } from '~/types/admin-regie'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -34,6 +35,10 @@ export function createMeetingsApi({ call, callOrNull, send }: Pick<ApiTransport,
     /** Crée la réunion chez Zoom, ou la resynchronise ; `external_id` rattache une réunion existante. */
     sync: (sessionId: Uuid, input: MeetingSyncInput): Promise<AdminSessionMeeting> =>
       send(`/admin/sessions/${sessionId}/meeting`, input, (m) => m.syncSessionMeeting(sessionId, input)),
+
+    /** Lien d'animateur, à ouvrir aussitôt : jamais gardé dans un état ni affiché. */
+    hostLink: (sessionId: Uuid): Promise<MeetingHostLink> =>
+      call(`/admin/sessions/${sessionId}/meeting/host`, (m) => m.meetingHostLink(sessionId)),
 
     /** Lève l'attente d'un déplacement (ou d'un quota) : la synchronisation part tout de suite. Inscrits non touchés. */
     push: (sessionId: Uuid): Promise<AdminSessionMeeting> =>
