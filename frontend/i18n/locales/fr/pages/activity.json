@@ -51,6 +51,9 @@
   "people": {
     "speakers": "Intervenantes et intervenants",
     "bio": "Biographie",
+    "jobTitle": "Fonction",
+    "organization": "Organisation",
+    "open": "Tout lire sur {name}",
     "role": {
       "speaker": "Intervention",
       "moderator": "Modération",

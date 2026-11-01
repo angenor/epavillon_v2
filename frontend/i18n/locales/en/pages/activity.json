@@ -51,6 +51,9 @@
   "people": {
     "speakers": "Speakers",
     "bio": "Biography",
+    "jobTitle": "Position",
+    "organization": "Organisation",
+    "open": "Read everything about {name}",
     "role": {
       "speaker": "Speaker",
       "moderator": "Moderator",
