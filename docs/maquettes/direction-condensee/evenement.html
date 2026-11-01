@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Édition CdP31 : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="programme.css">
+<style>
+  /* Bandeau : la photo de l'édition, le grand titre, les faits en verre comme en production. */
+  .hero-ev { padding: 24px 0 120px; }
+  .hero-ev .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 16px 0 16px; }
+  .hero-ev .kind { font-family: var(--font-heading); font-weight: 600; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgb(255 255 255 / 0.85); }
+  .hero-ev h1 { max-width: 34ch; font-size: clamp(2.2rem, 4.4vw, 3.6rem); line-height: 0.98; }
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; max-width: 860px; margin-top: 28px; }
+  .fact { padding: 12px 14px; border-radius: var(--radius); background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass)); -webkit-backdrop-filter: blur(var(--blur-glass)); }
+  .fact small { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: rgb(255 255 255 / 0.75); }
+  .fact b { display: block; margin-top: 4px; font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; line-height: 1.05; text-transform: uppercase; letter-spacing: 0.02em; }
+  .fact span { font-size: 0.78rem; color: rgb(255 255 255 / 0.75); }
+  @media (max-width: 860px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero-ev { padding-bottom: 36px; } }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 48px; align-items: start; }
+  .main { grid-column: 1; grid-row: 1; padding-top: 56px; }
+  .aside { grid-column: 2; grid-row: 1; margin-top: -72px; position: sticky; top: 88px; z-index: 1; display: grid; gap: 16px; }
+  @media (max-width: 1000px) { .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 24px; } .aside, .main { grid-column: 1; grid-row: auto; } .aside { position: static; margin-top: 0; } .main { padding-top: 40px; } }
+
+  /* Le billet de l'appel : même carte que la journée et l'activité, la bande dit l'état de l'appel. */
+  .ticket { border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-xl); }
+  .ticket-band { display: flex; align-items: center; gap: 14px; padding: 16px 22px; background: var(--ifdd-bleu-900); color: #fff; }
+  .ticket-band b { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; line-height: 1.05; text-transform: uppercase; letter-spacing: 0.02em; }
+  .ticket-band small { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: rgb(255 255 255 / 0.75); }
+  .ticket-band .icon { margin-left: auto; font-size: 1.8rem; stroke-width: 1.6; color: var(--ifdd-cyan-300); }
+  .ticket-body { padding: 18px 22px 22px; }
+  .deadline small { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--color-text-muted); }
+  .deadline b { display: block; margin-top: 4px; font-family: var(--font-heading); font-size: 2.1rem; font-weight: 700; line-height: 1; color: var(--ink); text-transform: uppercase; }
+  .deadline span { font-size: 0.85rem; color: var(--color-text-secondary); }
+  .ticket-body .note { margin: 14px 0 0; padding: 10px 12px; border-radius: var(--radius); background: var(--color-info-surface); color: var(--color-info); font-size: 0.85rem; font-weight: 600; }
+  .ticket-body .btns { display: grid; gap: 10px; margin-top: 16px; }
+  .ticket-body .btns .btn { width: 100%; }
+
+  /* Échéances : frise verticale, états de la charte (vert fait, cyan en cours, gris à venir). */
+  .card { padding: 20px 22px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); }
+  .card h2 { font-size: 1.45rem; margin-bottom: 4px; }
+  .card > p { margin: 0 0 12px; font-size: 0.85rem; color: var(--color-text-muted); }
+  .steps { margin: 0; padding: 0; list-style: none; }
+  .steps li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding-bottom: 16px; }
+  .steps li:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 26px; bottom: 0; width: 2px; background: var(--color-border); }
+  .steps li.is-done:not(:last-child)::before { background: var(--color-success); }
+  .steps i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-border-strong); background: var(--card); font-style: normal; font-size: 0.8rem; color: #fff; }
+  .steps .is-done i { background: var(--color-success); border-color: var(--color-success); }
+  .steps .is-current i { border-color: var(--color-accent-solid); box-shadow: inset 0 0 0 5px var(--card); background: var(--color-accent-solid); }
+  .steps b { display: block; font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; color: var(--ink); line-height: 1.1; }
+  .steps .is-future b { color: var(--color-text-secondary); }
+  .steps span { font-size: 0.8rem; color: var(--color-text-muted); }
+
+  .block { margin-top: 56px; }
+  .block:first-child { margin-top: 0; }
+  .block > h2 { font-size: clamp(1.9rem, 3.6vw, 2.5rem); margin-bottom: 16px; }
+  .block > p.intro { margin: -8px 0 18px; max-width: 64ch; color: var(--color-text-secondary); }
+  .lede { margin: 0; max-width: 68ch; font-size: 1.05rem; line-height: 1.75; }
+
+  /* La programmation de l'édition : un aplat bleu nuit, chiffres en grand, et ses jours. */
+  .prog { padding: 28px; border-radius: var(--radius-lg); background: var(--ifdd-bleu-900); color: #fff; }
+  .prog-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 28px; }
+  .prog h2 { color: #fff; font-size: 2.2rem; }
+  .prog-figures { display: flex; gap: 28px; margin-top: 14px; }
+  .prog-figures div { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgb(255 255 255 / 0.75); }
+  .prog-figures b { display: block; font-family: var(--font-heading); font-size: 2.6rem; font-weight: 700; line-height: 1; color: #fff; }
+  .prog-days { display: flex; gap: 6px; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgb(255 255 255 / 0.18); overflow-x: auto; scrollbar-width: none; }
+  .prog-days a { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 56px; min-height: 64px; border-radius: var(--radius); text-decoration: none; color: rgb(255 255 255 / 0.8); }
+  .prog-days a small { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .prog-days a b { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; line-height: 1; color: #fff; }
+  .prog-days a i { width: 18px; height: 4px; margin-top: 4px; border-radius: 2px; background: var(--day-solid, transparent); }
+  .prog-days a.day-plain i { background: transparent; }
+  .prog-days a:hover { background: rgb(255 255 255 / 0.1); }
+  .prog-days a.is-rest b { text-decoration: line-through; text-decoration-thickness: 1px; color: rgb(255 255 255 / 0.5); }
+
+  .days-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .days-grid .card-photo { min-height: 300px; padding: 56px 18px 18px; }
+  .days-grid .card-photo h3 { font-size: 1.45rem; }
+  .days-grid .card-photo .when b { font-size: 2.8rem; }
+  @media (max-width: 860px) { .days-grid { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Critères : un tableau dense, bien composé (ce public lit des documents de négociation). */
+  .criteria { width: 100%; border-collapse: collapse; background: var(--card); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--color-border-subtle); }
+  .criteria caption { caption-side: bottom; padding-top: 12px; text-align: left; font-size: 0.85rem; color: var(--color-text-muted); }
+  .criteria th { padding: 12px 16px; background: var(--ifdd-bleu-900); color: #fff; text-align: left; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .criteria th.num, .criteria td.num { text-align: right; }
+  .criteria td { padding: 14px 16px; border-top: 1px solid var(--color-border-subtle); font-size: 0.95rem; }
+  .criteria td.num { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: var(--ink); }
+  .criteria td.num.total { color: var(--color-accent); }
+  .criteria tr:nth-child(even) td { background: var(--color-surface-sunken); }
+  .criteria tfoot td { border-top: 2px solid var(--color-text); font-weight: 700; }
+  .tag-elim { background: var(--color-danger-surface, var(--color-live-surface)); color: var(--color-danger, var(--color-live)); border: 1px solid var(--color-live-border); }
+  @media (max-width: 640px) { .criteria .opt { display: none; } .criteria th, .criteria td { padding: 10px 10px; } }
+
+  .conditions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 4px; }
+  .conditions div { padding: 14px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--color-border-subtle); }
+  .conditions b { display: block; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; line-height: 1; color: var(--ink); }
+  .conditions span { font-size: 0.82rem; color: var(--color-text-secondary); }
+  @media (max-width: 640px) { .conditions { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="accueil.html"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale">
+      <a href="programmation.html">Programmations</a>
+      <a href="#">Communauté</a>
+      <a href="#">Négociations</a>
+    </nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<section class="hero hero-ev">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop31-32-9.jpg" alt="">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Fil d'Ariane">
+      <a href="accueil.html"><svg class="icon"><use href="#i-back"/></svg>Les éditions</a>
+    </nav>
+    <div class="tags">
+      <span class="kind">CdP climat (CCNUCC)</span>
+      <span class="tag tag-now">En cours</span>
+    </div>
+    <h1>31e Conférence des Nations unies sur le climat</h1>
+    <div class="facts">
+      <div class="fact"><small><svg class="icon"><use href="#i-calendar"/></svg>Dates</small><b>9 au 20 nov. 2026</b><span>heure d'Antalya</span></div>
+      <div class="fact"><small><svg class="icon"><use href="#i-pin"/></svg>Lieu</small><b>Antalya</b><span>Turquie</span></div>
+      <div class="fact"><small><svg class="icon"><use href="#i-users"/></svg>Participation</small><b>Hybride</b><span>sur place et en ligne</span></div>
+      <div class="fact"><small><svg class="icon"><use href="#i-door"/></svg>Pavillon</small><b>Zone bleue</b><span>la Francophonie y tient un pavillon</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap layout" style="padding-bottom:88px">
+  <aside class="aside" aria-label="Appel et échéances">
+    <div class="ticket">
+      <div class="ticket-band">
+        <div><small>Appel à propositions</small><b>Pavillon de la Francophonie, CdP31</b></div>
+        <svg class="icon"><use href="#i-file"/></svg>
+      </div>
+      <div class="ticket-body">
+        <span class="tag tag-done">Appel clos</span>
+        <div class="deadline" style="margin-top:12px"><small>Dépôts clos depuis le</small><b>15 octobre 2026</b><span>à 23:59, heure d'Antalya</span></div>
+        <p class="note">Les dossiers reçus sont en cours d'examen. Les organisations retenues sont prévenues une à une.</p>
+        <div class="btns">
+          <a class="btn btn-primary" href="programmation.html">Voir la programmation</a>
+          <a class="btn btn-outline btn-sm" href="#criteres">Critères d'évaluation</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Les échéances</h2>
+      <p>Les quatre dates qui rythment cette édition.</p>
+      <ol class="steps">
+        <li class="is-done"><i>✓</i><div><b>Ouverture de l'appel</b><span>17 septembre 2026, 00:00</span></div></li>
+        <li class="is-done"><i>✓</i><div><b>Clôture des dépôts</b><span>15 octobre 2026, 23:59</span></div></li>
+        <li class="is-current"><i></i><div><b>Annonce des résultats</b><span>au fil des décisions</span></div></li>
+        <li class="is-future"><i></i><div><b>Tenue de l'événement</b><span>9 novembre 2026, 09:00</span></div></li>
+      </ol>
+    </div>
+  </aside>
+
+  <div class="main">
+    <section class="block">
+      <h2>À propos de cette édition</h2>
+      <p class="lede">L'Organisation internationale de la Francophonie, à travers son organe subsidiaire l'IFDD, réunit au Pavillon de la Francophonie les États et gouvernements membres, les opérateurs de la Francophonie, l'Assemblée parlementaire et leurs partenaires, en marge de la 31e Conférence des Nations unies sur le climat, du 9 au 20 novembre 2026 à Antalya.</p>
+    </section>
+
+    <section class="block">
+      <article class="lead" style="margin-top:0" aria-label="En direct">
+        <div class="lead-media">
+          <img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt="">
+          <span class="tag tag-live">En direct</span>
+        </div>
+        <div class="lead-body">
+          <span class="lead-kicker">En ce moment au pavillon</span>
+          <div class="lead-main">
+            <div class="lead-time"><b>10:15</b><span>à 11:15, heure d'Antalya</span></div>
+            <h3>Du financement climatique à l'action régionale : les solutions du P2RS</h3>
+          </div>
+          <div class="lead-foot">
+            <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b></span></p>
+            <div class="lead-actions">
+              <a class="btn btn-live btn-sm" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre le direct</a>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="block">
+      <div class="prog">
+        <div class="prog-top">
+          <div>
+            <h2>La programmation</h2>
+            <div class="prog-figures">
+              <div><b>48</b>activités</div>
+              <div><b>62</b>organisations</div>
+              <div><b>12</b>jours</div>
+            </div>
+          </div>
+          <a class="btn btn-white" href="programmation.html">Voir la programmation<svg class="icon"><use href="#i-arrow"/></svg></a>
+        </div>
+        <nav class="prog-days" aria-label="Aller au jour">
+          <a class="day-atelier" href="semaine.html" style="--day-solid: var(--ifdd-cyan-300)"><small>dim.</small><b>8</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>lun.</small><b>9</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>mar.</small><b>10</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>mer.</small><b>11</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>jeu.</small><b>12</b><i></i></a>
+          <a class="day-finance" href="semaine.html"><small>ven.</small><b>13</b><i></i></a>
+          <a class="day-jeunesse" href="semaine.html"><small>sam.</small><b>14</b><i></i></a>
+          <a class="day-plain is-rest" href="semaine.html" title="Jour de repos"><small>dim.</small><b>15</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>lun.</small><b>16</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>mar.</small><b>17</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>mer.</small><b>18</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>jeu.</small><b>19</b><i></i></a>
+          <a class="day-plain" href="semaine.html"><small>ven.</small><b>20</b><i></i></a>
+        </nav>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Journées spéciales</h2>
+      <p class="intro">Des activités choisies par l'IFDD parmi celles qui ont été retenues, réunies autour d'un même sujet.</p>
+      <div class="days-grid">
+        <a class="card-photo no-photo day-atelier" href="#">
+          <svg class="icon ghost-icon"><use href="#i-book"/></svg>
+          <span class="tag tag-done">Terminé</span>
+          <div class="when"><b>8</b><span>dimanche<br>novembre</span></div>
+          <h3>Atelier préparatoire des négociateurs</h3>
+          <div class="card-bottom"><span>1 activité</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+        </a>
+        <a class="card-photo day-finance" href="journee.html">
+          <img src="../../../frontend/public/mocks/covers/finance-climatique.jpg" alt="">
+          <span class="tag tag-day"><svg class="icon"><use href="#i-coins"/></svg>Aujourd'hui</span>
+          <div class="when"><b>13</b><span>vendredi<br>novembre</span></div>
+          <h3>Journée finance durable</h3>
+          <div class="card-bottom"><span>9 activités</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+        </a>
+        <a class="card-photo day-jeunesse" href="#">
+          <img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt="">
+          <span class="tag tag-day"><svg class="icon"><use href="#i-sprout"/></svg>Demain</span>
+          <div class="when"><b>14</b><span>samedi<br>novembre</span></div>
+          <h3>Journée action jeunesse</h3>
+          <div class="card-bottom"><span>8 activités</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+        </a>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Conditions de l'appel</h2>
+      <div class="conditions">
+        <div><b>1</b><span>dossier au plus par organisation</span></div>
+        <div><b>1 à 6</b><span>intervenants par activité</span></div>
+        <div><b>60 min</b><span>par activité</span></div>
+      </div>
+    </section>
+
+    <section class="block" id="criteres">
+      <h2>Critères d'évaluation</h2>
+      <p class="intro">Chaque dossier est noté sur ces critères, chacun avec sa pondération. Ils sont publiés avant l'échéance : une organisation doit savoir sur quoi elle sera jugée.</p>
+      <table class="criteria">
+        <caption>Note maximale atteignable : 40 points, 2 évaluations indépendantes par dossier. Un critère éliminatoire noté zéro disqualifie le dossier, quelle que soit la moyenne.</caption>
+        <thead><tr><th>Critère</th><th class="num opt">Note max.</th><th class="num opt">Pondération</th><th class="num">Points max.</th></tr></thead>
+        <tbody>
+          <tr><td>Pertinence au regard des priorités de l'IFDD <span class="tag tag-elim">Éliminatoire</span></td><td class="num opt">5</td><td class="num opt">× 2</td><td class="num total">10</td></tr>
+          <tr><td>Qualité et clarté de la proposition</td><td class="num opt">5</td><td class="num opt">× 1,5</td><td class="num total">7,5</td></tr>
+          <tr><td>Impact et retombées attendues</td><td class="num opt">5</td><td class="num opt">× 1,5</td><td class="num total">7,5</td></tr>
+          <tr><td>Caractère innovant</td><td class="num opt">5</td><td class="num opt">× 1</td><td class="num total">5</td></tr>
+          <tr><td>Inclusion (genre, jeunesse, sociétés civiles)</td><td class="num opt">5</td><td class="num opt">× 1</td><td class="num total">5</td></tr>
+          <tr><td>Faisabilité logistique</td><td class="num opt">5</td><td class="num opt">× 1</td><td class="num total">5</td></tr>
+        </tbody>
+        <tfoot><tr><td>Total</td><td class="num opt"></td><td class="num opt"></td><td class="num total">40</td></tr></tfoot>
+      </table>
+    </section>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
+</footer>
+
+<script src="icones.js"></script>
+</body>
+</html>

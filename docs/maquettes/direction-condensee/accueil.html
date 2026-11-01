@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accueil : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="programme.css">
+<style>
+  /* Vitrine : la photo plein cadre de la production, la citation en condensé, le panneau « À venir » en verre. */
+  .showcase { position: relative; isolation: isolate; min-height: min(720px, calc(100vh - 72px)); color: #fff; background: var(--ifdd-bleu-900); overflow: hidden; }
+  .showcase > img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+  .showcase::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(29 26 91 / 0.85) 0%, rgb(29 26 91 / 0.55) 50%, rgb(29 26 91 / 0.25) 100%), linear-gradient(0deg, rgb(29 26 91 / 0.9) 0%, transparent 45%); }
+  .showcase-in { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 48px; align-items: end; min-height: inherit; padding-top: 56px; padding-bottom: 32px; }
+  .quote .tag { margin-bottom: 18px; }
+  .quote blockquote { margin: 0; max-width: 22ch; font-family: var(--font-heading); font-weight: 600; font-size: clamp(2.2rem, 4.6vw, 4rem); line-height: 1.02; letter-spacing: 0.005em; }
+  .quote blockquote::before { content: "« "; color: var(--ifdd-cyan-300); }
+  .quote blockquote::after { content: " »"; color: var(--ifdd-cyan-300); }
+  .quote figcaption { margin-top: 18px; font-size: 0.95rem; color: rgb(255 255 255 / 0.85); }
+  .quote figcaption b { display: block; font-family: var(--font-heading); font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; }
+  .rail { display: flex; gap: 10px; margin-top: 36px; }
+  .rail button { position: relative; width: 112px; height: 64px; padding: 0; border: 2px solid transparent; border-radius: var(--radius); overflow: hidden; cursor: pointer; background: none; opacity: 0.65; }
+  .rail button img { width: 100%; height: 100%; object-fit: cover; }
+  .rail button[aria-current] { border-color: #fff; opacity: 1; }
+  .rail button[aria-current]::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 60%; background: var(--ifdd-cyan); }
+
+  .glass { border-radius: var(--radius-lg); background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass-strong)); -webkit-backdrop-filter: blur(var(--blur-glass-strong)); box-shadow: var(--shadow-glass); }
+  .upcoming { padding: 22px; }
+  .upcoming h2 { color: #fff; font-size: 1.6rem; }
+  .upcoming .sub { margin: 2px 0 14px; font-size: 0.85rem; color: rgb(255 255 255 / 0.75); }
+  .up-list { margin: 0; padding: 0; list-style: none; }
+  .up-list li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--color-glass-border); }
+  .up-when { font-family: var(--font-heading); text-transform: uppercase; line-height: 1; }
+  .up-when b { display: block; font-size: 1.6rem; font-weight: 700; }
+  .up-when small { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; color: rgb(255 255 255 / 0.75); }
+  .up-list a { font-family: var(--font-heading); font-weight: 600; font-size: 1.12rem; line-height: 1.15; color: #fff; text-decoration: none; }
+  .up-list a:hover { text-decoration: underline; }
+  .up-list p { margin: 4px 0 0; font-size: 0.8rem; color: rgb(255 255 255 / 0.72); }
+  .up-list .tag { margin-top: 6px; }
+  .up-stats { display: flex; gap: 22px; margin: 14px 0 16px; padding-top: 14px; border-top: 1px solid var(--color-glass-border); }
+  .up-stats div { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgb(255 255 255 / 0.75); }
+  .up-stats b { display: block; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; line-height: 1; color: #fff; }
+  .upcoming .btn { width: 100%; }
+  @media (max-width: 1000px) { .showcase-in { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-top: 40px; } .rail { display: none; } }
+
+  /* Temps forts : les cartes photo que le commanditaire a aimées, à leur vraie place. */
+  .days-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 960px) { .days-grid { grid-template-columns: minmax(0, 1fr); } .days-grid .card-photo { min-height: 280px; } }
+
+  /* Appel à propositions : photo fondue dans l'aplat bleu nuit (dégradé arbitré de la production). */
+  .call { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); border-radius: var(--radius-lg); overflow: hidden; background: var(--ifdd-bleu-900); color: #fff; }
+  .call-text { padding: 44px 0 44px 44px; position: relative; z-index: 1; }
+  .call-text .meta-line { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .call-text .kind { font-family: var(--font-heading); font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgb(255 255 255 / 0.8); }
+  .call h2 { color: #fff; font-size: clamp(2.2rem, 4.2vw, 3.4rem); }
+  .call h2 span { color: var(--ifdd-cyan-300); }
+  .call p { margin: 14px 0 0; max-width: 54ch; color: rgb(255 255 255 / 0.85); }
+  .call-facts { display: flex; flex-wrap: wrap; gap: 18px 40px; margin-top: 26px; }
+  .call-facts small { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgb(255 255 255 / 0.7); }
+  .call-facts b { display: block; margin-top: 4px; font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; line-height: 1.05; text-transform: uppercase; }
+  .call-facts span { font-size: 0.8rem; color: rgb(255 255 255 / 0.7); }
+  .call-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .call-media { position: relative; }
+  .call-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .call-media::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, var(--ifdd-bleu-900) 0%, rgb(29 26 91 / 0.4) 45%, transparent 100%); }
+  @media (max-width: 860px) { .call { grid-template-columns: minmax(0, 1fr); } .call-text { padding: 28px 22px; } .call-media { min-height: 200px; order: -1; } .call-media::before { background: linear-gradient(0deg, var(--ifdd-bleu-900) 0%, transparent 70%); } }
+
+  /* Éditions : la liste éditoriale de la production, en condensé. */
+  .ed-tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .filters { display: flex; gap: 4px; border-bottom: 1px solid var(--color-border); }
+  .filters button { display: inline-flex; align-items: center; gap: 8px; min-height: var(--target); padding: 0 12px; border: 0; border-bottom: 3px solid transparent; background: none; cursor: pointer; font-family: var(--font-heading); font-weight: 600; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); }
+  .filters button i { font-style: normal; display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--color-surface-sunken); font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; letter-spacing: 0; }
+  .filters button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--color-accent-solid); }
+  .filters button[aria-pressed="true"] i { background: var(--color-accent-solid); color: var(--color-accent-contrast); }
+  .editions { margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--color-text); }
+  .ed { display: grid; grid-template-columns: 120px 200px minmax(0, 1fr) 220px auto 32px; gap: 24px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--color-border-subtle); text-decoration: none; color: inherit; }
+  .ed:hover .ed-title { color: var(--color-accent); text-decoration: underline; }
+  .ed-year { font-family: var(--font-heading); font-size: 3rem; font-weight: 700; line-height: 0.9; color: var(--ink); }
+  .ed.is-past .ed-year { color: var(--color-text-muted); }
+  .ed-thumb { aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: var(--color-surface-sunken); }
+  .ed-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 400ms ease; }
+  .ed:hover .ed-thumb img { transform: scale(1.05); }
+  .ed-kind { font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
+  .ed-title { margin-top: 4px; font-family: var(--font-heading); font-weight: 600; font-size: 1.55rem; line-height: 1.1; color: var(--ink); }
+  .ed-count { margin-top: 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-accent); }
+  .ed-when b { display: block; font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; color: var(--ink); }
+  .ed-when span { font-size: 0.82rem; color: var(--color-text-muted); }
+  .ed .arrow { font-size: 1.3rem; color: var(--color-accent); }
+  @media (max-width: 960px) { .ed { grid-template-columns: 96px minmax(0, 1fr); gap: 10px 16px; } .ed-year { font-size: 2.2rem; grid-row: span 2; } .ed-thumb, .ed .arrow { display: none; } .ed-when, .ed-state { grid-column: 2; } }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale">
+      <a href="programmation.html">Programmations</a>
+      <a href="#">Communauté</a>
+      <a href="#">Négociations</a>
+    </nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<section class="showcase" aria-label="Vitrine">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop30-32-9.jpg" alt="">
+  <div class="wrap showcase-in">
+    <figure class="quote" style="margin:0">
+      <span class="tag tag-glass">Paroles du pavillon</span>
+      <blockquote>Au pavillon, nos négociateurs arrivent préparés et repartent avec des alliés.</blockquote>
+      <figcaption><b>Aminata Diallo</b>Négociatrice, Sénégal, CdP30</figcaption>
+      <div class="rail" aria-label="Autres diapositives">
+        <button type="button" aria-current="true" aria-label="Diapositive 1"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-16-9.jpg" alt=""></button>
+        <button type="button" aria-label="Diapositive 2"><img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt=""></button>
+        <button type="button" aria-label="Diapositive 3"><img src="../../../frontend/public/mocks/covers/finance-climatique.jpg" alt=""></button>
+        <button type="button" aria-label="Diapositive 4"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></button>
+      </div>
+    </figure>
+
+    <aside class="glass upcoming" aria-labelledby="avenir">
+      <h2 id="avenir">À venir au pavillon</h2>
+      <p class="sub">CdP31, Antalya, heure d'Antalya</p>
+      <ol class="up-list">
+        <li>
+          <div class="up-when"><b>10:15</b><small>ven. 13</small></div>
+          <div><a href="activite.html">Du financement climatique à l'action régionale : les solutions du P2RS</a><p>CILSS</p><span class="tag tag-live">En direct</span></div>
+        </li>
+        <li>
+          <div class="up-when"><b>11:30</b><small>ven. 13</small></div>
+          <div><a href="activite.html">Enjeux de financements pour les régions et les municipalités</a><p>AIRF, journée finance durable</p></div>
+        </li>
+        <li>
+          <div class="up-when"><b>09:20</b><small>sam. 14</small></div>
+          <div><a href="activite.html">Les 10 minutes qui inspirent : pitchs des organisations de jeunes</a><p>Green OpenLab, journée action jeunesse</p></div>
+        </li>
+      </ol>
+      <div class="up-stats">
+        <div><b>48</b>activités</div>
+        <div><b>62</b>organisations</div>
+        <div><b>31</b>pays</div>
+      </div>
+      <a class="btn btn-white" href="programmation.html">Voir toute la programmation</a>
+    </aside>
+  </div>
+</section>
+
+<main>
+  <div class="wrap" style="padding-top:8px">
+    <article class="lead" aria-label="En direct">
+      <div class="lead-media">
+        <img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt="">
+        <span class="tag tag-live">En direct</span>
+      </div>
+      <div class="lead-body">
+        <span class="lead-kicker">En ce moment au pavillon</span>
+        <div class="lead-main">
+          <div class="lead-time"><b>10:15</b><span>à 11:15, heure d'Antalya</span></div>
+          <h3>Du financement climatique à l'action régionale : les solutions du P2RS</h3>
+        </div>
+        <div class="lead-foot">
+          <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b> Burkina Faso</span></p>
+          <div class="lead-actions">
+            <a class="btn btn-live btn-sm" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre le direct</a>
+            <a class="btn btn-outline btn-sm" href="activite.html">Voir l'activité</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>Les temps forts de la CdP31</h2>
+          <p>Trois rendez-vous composés par l'IFDD autour d'un thème, avec leurs partenaires.</p>
+        </div>
+        <a class="btn btn-outline" href="programmation.html">Toute la programmation</a>
+      </div>
+      <div class="days-grid">
+        <a class="card-photo no-photo day-atelier" href="#">
+          <svg class="icon ghost-icon"><use href="#i-book"/></svg>
+          <span class="tag tag-done">Terminé</span>
+          <div class="when"><b>8</b><span>dimanche<br>novembre</span></div>
+          <h3>Atelier préparatoire des négociateurs</h3>
+          <p>La veille de la CdP31, hors de la zone bleue.</p>
+          <div class="card-bottom"><span>Hôtel DoubleTree by Hilton</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+        </a>
+        <a class="card-photo day-finance" href="journee.html">
+          <img src="../../../frontend/public/mocks/covers/finance-climatique.jpg" alt="">
+          <span class="tag tag-day"><svg class="icon"><use href="#i-coins"/></svg>Aujourd'hui</span>
+          <div class="when"><b>13</b><span>vendredi<br>novembre</span></div>
+          <h3>Journée finance durable</h3>
+          <p>Opportunités et partenariats pour l'accès à la finance durable.</p>
+          <div class="card-bottom"><span>9 activités, 08:00 à 18:00</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+        </a>
+        <a class="card-photo day-jeunesse" href="#">
+          <img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt="">
+          <span class="tag tag-day"><svg class="icon"><use href="#i-sprout"/></svg>Demain</span>
+          <div class="when"><b>14</b><span>samedi<br>novembre</span></div>
+          <h3>Journée action jeunesse</h3>
+          <p>Hackathon, pitchs, jeu, scène.</p>
+          <div class="card-bottom"><span>8 activités, 08:00 à 17:30</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <article class="call">
+        <div class="call-text">
+          <div class="meta-line"><span class="tag tag-done">Appel clos</span><span class="kind">CdP climat (CCNUCC)</span></div>
+          <h2>Appel à propositions <span>CdP31</span></h2>
+          <p>L'IFDD invite États, opérateurs de la Francophonie et partenaires à proposer leurs activités pour le Pavillon de la Francophonie à Antalya. Les dossiers reçus sont en cours d'examen.</p>
+          <div class="call-facts">
+            <div><small>Dépôts clos depuis</small><b>15 octobre 2026</b><span>23:59, heure d'Antalya</span></div>
+            <div><small>Lieu</small><b>Antalya, Turquie</b><span>du 9 au 20 novembre</span></div>
+          </div>
+          <div class="call-actions">
+            <a class="btn btn-white" href="evenement.html">Voir l'édition</a>
+            <a class="btn btn-white-outline" href="evenement.html#criteres">Critères d'évaluation</a>
+          </div>
+        </div>
+        <div class="call-media"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>Les éditions</h2>
+          <p>Les rendez-vous de l'ePavillon, du plus récent au plus ancien.</p>
+        </div>
+        <div class="ed-tools">
+          <div class="filters" role="group" aria-label="Filtrer les éditions">
+            <button type="button" aria-pressed="true">Toutes <i>5</i></button>
+            <button type="button" aria-pressed="false">À venir <i>1</i></button>
+            <button type="button" aria-pressed="false">En cours <i>1</i></button>
+            <button type="button" aria-pressed="false">Passées <i>3</i></button>
+          </div>
+        </div>
+      </div>
+      <ul class="editions">
+        <li><a class="ed" href="evenement.html">
+          <span class="ed-year">2026</span>
+          <span class="ed-thumb"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""></span>
+          <span><span class="ed-kind">CdP climat (CCNUCC)</span><span class="ed-title" style="display:block">31e Conférence des Nations unies sur le climat</span><span class="ed-count" style="display:block">48 activités publiées</span></span>
+          <span class="ed-when"><b>9 au 20 novembre</b><span>Antalya, Turquie</span></span>
+          <span class="ed-state"><span class="tag tag-now">En cours</span></span>
+          <svg class="icon arrow"><use href="#i-arrow"/></svg>
+        </a></li>
+        <li><a class="ed" href="#">
+          <span class="ed-year">2026</span>
+          <span class="ed-thumb"><img src="../../../frontend/public/mocks/covers/cycle-paco-16-9.jpg" alt=""></span>
+          <span><span class="ed-kind">Cycle PACO</span><span class="ed-title" style="display:block">Préparation des négociations : cycle 2026</span><span class="ed-count" style="display:block">5 activités publiées</span></span>
+          <span class="ed-when"><b>12 février au 10 décembre</b><span>En ligne</span></span>
+          <span class="ed-state"><span class="tag tag-soon">À venir</span></span>
+          <svg class="icon arrow"><use href="#i-arrow"/></svg>
+        </a></li>
+        <li><a class="ed is-past" href="#">
+          <span class="ed-year">2025</span>
+          <span class="ed-thumb"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-16-9.jpg" alt=""></span>
+          <span><span class="ed-kind">CdP climat (CCNUCC)</span><span class="ed-title" style="display:block">30e Conférence des Nations unies sur le climat</span><span class="ed-count" style="display:block">56 activités</span></span>
+          <span class="ed-when"><b>10 au 21 novembre</b><span>Belém, Brésil</span></span>
+          <span class="ed-state"><span class="tag tag-done">Terminée</span></span>
+          <svg class="icon arrow"><use href="#i-arrow"/></svg>
+        </a></li>
+        <li><a class="ed is-past" href="#">
+          <span class="ed-year">2024</span>
+          <span class="ed-thumb"><img src="../../../frontend/public/mocks/covers/article-six.jpg" alt=""></span>
+          <span><span class="ed-kind">CdP climat (CCNUCC)</span><span class="ed-title" style="display:block">29e Conférence des Nations unies sur le climat</span><span class="ed-count" style="display:block">51 activités</span></span>
+          <span class="ed-when"><b>11 au 22 novembre</b><span>Bakou, Azerbaïdjan</span></span>
+          <span class="ed-state"><span class="tag tag-done">Terminée</span></span>
+          <svg class="icon arrow"><use href="#i-arrow"/></svg>
+        </a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
+</footer>
+
+<script src="icones.js"></script>
+</body>
+</html>
