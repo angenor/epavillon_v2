@@ -27,6 +27,8 @@
     "next": "Prochaine activité",
     "elapsed": "depuis {elapsed} min, reste {remaining} min",
     "startsIn": "dans {minutes} min",
+    "startsInHours": "dans {hours} h {minutes}",
+    "startsInDays": "dans {days} jour | dans {days} jours",
     "due": "devrait commencer",
     "until": "à {end}, {zone}",
     "untilRoom": "à {end}, {zone}, {room}",

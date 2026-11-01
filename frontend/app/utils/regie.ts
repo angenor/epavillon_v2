@@ -125,6 +125,12 @@ export function startLiveBlock(
   return null
 }
 
+/** Délai en minutes découpé pour le dire : « 7929 min » ne se lit pas. */
+export function splitDelay(totalMinutes: number): { days: number, hours: number, minutes: number } {
+  const days = Math.floor(totalMinutes / 1440)
+  return { days, hours: Math.floor((totalMinutes % 1440) / 60), minutes: totalMinutes % 60 }
+}
+
 export interface CountdownSplit {
   totalMs: number
   minutes: number

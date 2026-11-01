@@ -43,7 +43,13 @@ const band = computed(() => {
       remaining: progress.value.remainingMinutes,
     })
   }
-  return startsIn.value > 0 ? t('admin.regie.now.startsIn', { minutes: startsIn.value }) : t('admin.regie.now.due')
+  if (startsIn.value === 0) return t('admin.regie.now.due')
+  const delay = splitDelay(startsIn.value)
+  if (delay.days > 0) return t('admin.regie.now.startsInDays', { days: delay.days }, delay.days)
+  if (delay.hours > 0) {
+    return t('admin.regie.now.startsInHours', { hours: delay.hours, minutes: String(delay.minutes).padStart(2, '0') })
+  }
+  return t('admin.regie.now.startsIn', { minutes: delay.minutes })
 })
 
 const presenceDetail = computed(() => {
