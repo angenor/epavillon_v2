@@ -1,0 +1,55 @@
+/* Variante « Inter seule » : même page, une seule famille. La hiérarchie passe
+   par la graisse, la taille et un interlettrage resserré sur les grands corps ;
+   les capitales ne restent qu'aux petites étiquettes, très espacées. */
+
+:root { --font-heading: "Inter", "Helvetica Neue", Arial, sans-serif; }
+
+h1, h2, h3, .heading { font-weight: 800; text-transform: none; letter-spacing: -0.02em; line-height: 1.1; }
+.toolbar .heading { font-size: 1.3rem !important; }
+
+.bar-logo { text-transform: none; letter-spacing: -0.02em; font-weight: 800; font-size: 1.3rem; }
+.bar-links a { text-transform: none; letter-spacing: -0.005em; font-size: 0.95rem; font-weight: 600; }
+
+.btn { text-transform: none; letter-spacing: -0.005em; font-size: 0.95rem; font-weight: 600; }
+.btn-sm { font-size: 0.875rem; }
+.segmented button { text-transform: none; letter-spacing: 0; font-size: 0.9rem; }
+
+/* Étiquette sur filet : petite capitale espacée, la couleur porte le repère. */
+.rule-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; padding: 8px 14px 7px; }
+.rule-label .icon { font-size: 1.15em; }
+
+.hero-prog h1 { max-width: 24ch; font-size: clamp(2rem, 3.3vw, 2.8rem); letter-spacing: -0.035em; line-height: 1.06; }
+.figures b { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; }
+.figures div { font-size: 0.72rem; letter-spacing: 0.08em; }
+
+/* Chiffres : graisse forte, chasse fixe, approche serrée. */
+.row-time b, .moment b, .lead-time b, .wk-time b, .day-head b, .wk-head b, .daystrip a b { font-variant-numeric: tabular-nums; }
+.row-time b { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.04em; }
+.moment b { font-size: 1rem; letter-spacing: -0.02em; }
+.row-title { font-weight: 650; font-size: 1.1rem; letter-spacing: -0.012em; line-height: 1.3; }
+.row-thumb.initials, .row-org .logo, .wk-media.initials { font-weight: 800; letter-spacing: -0.02em; }
+.row-thumb.initials { font-size: 1.25rem; }
+
+.day-head b { font-size: 4.2rem; font-weight: 800; letter-spacing: -0.06em; }
+.day-head h2 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+.others-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; }
+.side-day h3 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.015em; }
+
+.lead-kicker { font-size: 0.72rem; letter-spacing: 0.09em; }
+.lead-time b { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.04em; }
+.lead-time span { text-transform: none; letter-spacing: 0; font-size: 0.85rem; font-weight: 500; }
+.lead h3 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.015em; line-height: 1.28; }
+
+/* Calendrier. */
+.cal-bar h2 { font-size: clamp(1.6rem, 3vw, 2rem); letter-spacing: -0.03em; }
+.wk-special { font-size: 0.72rem; letter-spacing: 0.08em; padding: 7px 10px 6px; }
+.wk-head b { font-size: 2.3rem; font-weight: 800; letter-spacing: -0.06em; }
+.wk-head h2 { font-size: 0.98rem; font-weight: 700; }
+.wk-time b { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.04em; }
+.wk-title { font-weight: 650; font-size: 0.96rem; letter-spacing: -0.01em; line-height: 1.3; }
+.rest-note { font-size: 0.8rem; letter-spacing: 0.08em; }
+.cal-sticky.is-stuck .wk-special { font-size: 0.66rem; }
+.cal-sticky.is-stuck .wk-head b { font-size: 1.3rem; }
+.cal-sticky.is-stuck .wk-head h2 { font-size: 0.88rem; }
+
+.foot b { text-transform: none; letter-spacing: -0.02em; font-weight: 800; }
