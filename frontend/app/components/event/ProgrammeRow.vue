@@ -160,7 +160,7 @@ const listTimeColor = computed(() => {
     <div class="col-start-2 flex flex-wrap items-center gap-2.5 min-[860px]:col-start-4 min-[860px]:flex-col min-[860px]:flex-nowrap min-[860px]:items-end">
       <UiStatusBadge :state="props.entry.current" size="sm" :label="props.entry.stateLabel" />
       <!-- Au-dessus du lien couvrant : le direct se rejoint sans passer par la fiche. -->
-      <UiButton v-if="props.entry.joinTo" :to="props.entry.joinTo" variant="danger" icon="broadcast" class="relative z-[1]">
+      <UiButton v-if="props.entry.joinTo" :to="props.entry.joinTo" variant="live" icon="broadcast" class="relative z-[1]">
         {{ t('programme.list.join') }}
       </UiButton>
     </div>

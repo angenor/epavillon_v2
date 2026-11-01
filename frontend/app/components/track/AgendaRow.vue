@@ -138,7 +138,7 @@ const timeColor = computed(() => (live.value ? 'text-live' : isMoment.value ? 't
       :class="props.media ? 'md:col-start-4' : 'md:col-start-3'"
     >
       <UiStatusBadge :state="props.entry.current" size="sm" :label="props.entry.stateLabel" />
-      <TrackLiveLink v-if="live && props.entry.liveTo" :to="props.entry.liveTo" :label="t('track.agenda.join')" />
+      <UiButton v-if="live && props.entry.liveTo" :to="props.entry.liveTo" variant="live" icon="broadcast" class="relative z-10">{{ t('track.agenda.join') }}</UiButton>
     </div>
   </article>
 </template>

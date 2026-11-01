@@ -83,7 +83,7 @@ const organization = computed(() => props.session.organization_acronym ?? props.
           </span>
         </p>
         <div class="flex flex-wrap gap-2.5 min-[860px]:ml-auto">
-          <UiButton :to="`${to}#direct`" variant="danger" icon="broadcast">{{ t('programme.lead.join') }}</UiButton>
+          <UiButton :to="`${to}#direct`" variant="live" icon="broadcast">{{ t('programme.lead.join') }}</UiButton>
           <UiButton :to="to" variant="secondary">{{ t('programme.lead.open') }}</UiButton>
         </div>
       </div>

@@ -187,7 +187,7 @@ const hasMore = computed(() => (props.page.is_off_site && venue.value) || props.
           <template v-if="now.by">{{ now.by }}</template>
         </p>
         <p v-if="now.note" class="mt-1 text-sm text-text-muted">{{ now.note }}</p>
-        <TrackLiveLink v-if="now.live && now.to" class="mt-2.5" block :to="now.to" :label="t('track.ticket.watch')" />
+        <UiButton v-if="now.live && now.to" class="mt-2.5" block :to="now.to" variant="live" icon="broadcast">{{ t('track.ticket.watch') }}</UiButton>
         <UiButton v-else-if="now.to" class="mt-2.5" block variant="secondary" icon-trailing="arrow-right" :to="now.to">
           {{ t('track.highlight.open') }}
         </UiButton>
