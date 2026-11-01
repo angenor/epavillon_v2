@@ -33,6 +33,7 @@ const details = computed(() => {
 <template>
   <section
     :aria-label="tr(props.track.title)"
+    :class="{ 'opacity-60': props.state === 'past' }"
     :style="{ '--rule-solid': 'var(--color-surface-inverse)', '--rule-on': 'var(--color-text-on-inverse)' }"
   >
     <div class="rule-line">
