@@ -15,6 +15,16 @@
   .updated em { display: inline-flex; align-items: center; gap: 6px; font-style: normal; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ifdd-cyan-300); text-decoration: underline; text-underline-offset: 4px; }
   .updated:hover em { color: #fff; }
 
+  /* Sous le fuseau, seulement s'il y a du neuf depuis la visite précédente ; vu dès la page ouverte. */
+  .tz-block { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .tz-block .tz { margin-left: 0; }
+  .since-link { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--color-live); text-decoration: underline; text-underline-offset: 3px; }
+  .since-link::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .since-link:hover { text-decoration-thickness: 2px; }
+  @media (max-width: 860px) { .tz-block { margin-left: 0; align-items: flex-start; } }
+  .change.is-new-since { background: color-mix(in srgb, var(--color-live) 5%, transparent); margin: 0 -10px; padding-left: 10px; padding-right: 10px; border-radius: var(--radius); }
+  .since-mark { grid-column: 2; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-live); }
+  [hidden] { display: none !important; }
   .veil { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgb(35 31 32 / 0.55); backdrop-filter: blur(2px); }
   .changes { display: flex; flex-direction: column; width: min(640px, 100%); max-height: calc(100dvh - 32px); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-xl); }
   .changes-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px 14px; border-bottom: 1px solid var(--color-border-subtle); }
@@ -85,7 +95,10 @@
         <button type="button" aria-pressed="true">Liste</button>
         <a href="semaine.html"><button type="button" aria-pressed="false">Calendrier</button></a>
       </div>
-      <span class="tz">Toutes les heures : heure d'Antalya (UTC+3)</span>
+      <div class="tz-block">
+        <span class="tz">Toutes les heures : heure d'Antalya (UTC+3)</span>
+        <button class="since-link" type="button" aria-haspopup="dialog">4 changements depuis votre dernière visite</button>
+      </div>
     </div>
   </div>
 </div>
@@ -324,32 +337,36 @@
     <header class="changes-head">
       <div>
         <h2 id="changements">Ce qui a changé</h2>
-        <p>Les quinze derniers jours, le plus récent en haut. Heures d'Antalya (UTC+3).</p>
+        <p>Les quinze derniers jours, le plus récent en haut. Heures d'Antalya (UTC+3). Les changements survenus depuis votre dernière visite sont signalés.</p>
       </div>
       <button class="close" type="button" aria-label="Fermer">×</button>
     </header>
     <div class="changes-body">
       <p class="when">Vendredi 13 novembre</p>
-      <article class="change">
+      <article class="change is-new-since">
         <span class="tag tag-changed kind">Horaire</span>
         <h3><a href="#">Du récif à la résilience : financer la protection des côtes mauriciennes</a></h3>
+        <span class="since-mark">Depuis votre visite</span>
         <p class="diff"><del>ven. 13, 13:00 à 14:00</del><svg class="icon"><use href="#i-arrow"/></svg><ins>ven. 13, 14:15 à 15:15</ins></p>
       </article>
-      <article class="change">
+      <article class="change is-new-since">
         <span class="tag tag-cancelled kind">Annulée</span>
         <h3>Femmes et transition énergétique en Afrique centrale</h3>
+        <span class="since-mark">Depuis votre visite</span>
         <p class="note">Prévue le mercredi 18, 15:00 à 16:00. Retirée du programme.</p>
       </article>
 
       <p class="when">Jeudi 12 novembre</p>
-      <article class="change">
+      <article class="change is-new-since">
         <span class="tag tag-changed kind">Titre</span>
         <h3><a href="activite-commune.html">Financer l'action climatique locale : régions et villes francophones</a></h3>
+        <span class="since-mark">Depuis votre visite</span>
         <p class="diff"><del>Enjeux de financements pour les régions et les municipalités</del><svg class="icon"><use href="#i-arrow"/></svg><ins>Financer l'action climatique locale : régions et villes francophones</ins></p>
       </article>
-      <article class="change">
+      <article class="change is-new-since">
         <span class="tag tag-postponed kind">Reportée</span>
         <h3><a href="#">Dialogue des bailleurs et des collectivités sur la finance locale</a></h3>
+        <span class="since-mark">Depuis votre visite</span>
         <p class="note">Était le vendredi 13, 18:30 à 19:30. Nouveau créneau à venir.</p>
       </article>
       <article class="change">
