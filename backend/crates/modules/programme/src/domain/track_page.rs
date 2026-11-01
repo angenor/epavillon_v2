@@ -112,7 +112,7 @@ pub struct PublicTrackMoment {
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum PublicTrackEntryBody {
-    Activity { activity: PublicTrackActivity },
+    Activity { activity: Box<PublicTrackActivity> },
     Moment { moment: PublicTrackMoment },
 }
 

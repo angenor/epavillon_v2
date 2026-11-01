@@ -120,12 +120,12 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
                 ends_at: Some(session.ends_at),
                 part_id,
                 body: PublicTrackEntryBody::Activity {
-                    activity: PublicTrackActivity {
+                    activity: Box::new(PublicTrackActivity {
                         is_highlight,
                         speakers: intervenants.remove(&id).unwrap_or_default(),
                         organizations: organisations.remove(&id).unwrap_or_default(),
                         session,
-                    },
+                    }),
                 },
             },
         ));

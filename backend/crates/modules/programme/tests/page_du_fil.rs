@@ -30,6 +30,7 @@ async fn fil(bac: &Bac, edition: Uuid, slug: &str, publie: bool, lieu: Option<Uu
 }
 
 /// Une séance posée en base, rattachée au fil. Heures murales de Belém.
+#[allow(clippy::too_many_arguments)]
 async fn seance(
     bac: &Bac,
     edition: Uuid,
