@@ -171,7 +171,7 @@ const ligne = (x: Activite, track: { slug: string; title: I18nText; color: strin
     is_streamed: x.diffusee ?? true,
     broadcast_channel_id: null,
     capacity: null,
-    tracks: [{ slug: track.slug, title: track.title, color: track.color, kind: track.kind }],
+    tracks: [{ slug: track.slug, title: track.title, color: track.color, kind: track.kind, is_highlight: x.tempsFort ?? false }],
     cover: null,
     temporal_state: 'upcoming',
     registered_count: 0,
@@ -473,6 +473,7 @@ const resume = (s: Source, courant: Source | null): PublicTrackSummary => {
     ends_at: max(e.map(fin)),
     venue_name: s.venue.name,
     is_off_site: s.venue.kind !== 'pavilion',
+    cover: s.cover,
     is_current: s === courant,
   }
 }
@@ -608,6 +609,7 @@ export const trackPagesSchedule: PublicScheduleRow[] = [
 /** `GET /schedule/tracks?event_id=` de la CdP31 d'Antalya. */
 export const trackPagesScheduleTracks: PublicScheduleTrack[] = SOURCES.map((s) => ({
   ...resume(s, null),
+  partners: s.partenaires,
   moments: s.moments
     .map((m) => ({ starts_at: a(m.jour, m.debut), ends_at: m.fin ? a(m.jour, m.fin) : null, label: fr(m.libelle) }))
     .sort((g, d) => g.starts_at.localeCompare(d.starts_at)),

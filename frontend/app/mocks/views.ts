@@ -112,13 +112,14 @@ export function publicSchedule(): PublicScheduleRow[] {
 
       const tracks: ScheduleTrackBadge[] = sessionTracks
         .filter((link) => link.session_id === s.id)
-        .map((link) => trackById.get(link.track_id))
-        .filter((track) => track !== undefined && track.published_at !== null)
-        .map((track) => ({
+        .map((link) => ({ link, track: trackById.get(link.track_id) }))
+        .filter(({ track }) => track !== undefined && track.published_at !== null)
+        .map(({ link, track }) => ({
           slug: track!.slug,
           title: track!.title,
           color: track!.color_hex,
           kind: track!.kind,
+          is_highlight: link.is_highlight,
         }))
 
       return {
@@ -194,8 +195,10 @@ export function scheduleTracks(eventId: string): PublicScheduleTrack[] {
         ends_at: own.map((row) => row.ends_at).sort().at(-1) ?? null,
         venue_name: null,
         is_off_site: false,
+        cover: null,
         is_current: false,
         moments: [],
+        partners: [],
       }
     })
 }

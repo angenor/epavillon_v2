@@ -27,15 +27,16 @@ use crate::domain::ids::{EventId, SessionId};
 use crate::domain::track_page::{
     PublicScheduleTrack, PublicScheduleTrackMoment, PublicTrackActivity, PublicTrackEdition,
     PublicTrackEntry, PublicTrackEntryBody, PublicTrackFeature, PublicTrackHeader,
-    PublicTrackMoment, PublicTrackPage, PublicTrackPart, PublicTrackVenue, TrackSessionPlacement,
-    TrackSessionPlacementPayload,
+    PublicTrackMoment, PublicTrackPage, PublicTrackPart, PublicTrackPartner, PublicTrackVenue,
+    TrackSessionPlacement, TrackSessionPlacementPayload,
 };
 use crate::repo::{cross, public_schedule, session_parts, track_page};
 use crate::state::ProgrammeState;
 
 /// Les fils publiés d'une édition et leurs moments, sans page lue : ce que
 /// `/programmations` regroupe en cadres (journée spéciale) ou en encadré
-/// (atelier). Deux lectures, quel que soit le nombre de fils.
+/// (atelier), avec leurs partenaires. Trois lectures, quel que soit le
+/// nombre de fils.
 pub async fn fils_de_ledition(
     pool: &PgPool,
     event_id: EventId,
@@ -55,11 +56,16 @@ pub async fn fils_de_ledition(
                 label: m.label,
             });
     }
+    let mut partenaires: HashMap<String, Vec<PublicTrackPartner>> = HashMap::new();
+    for p in cross::partenaires_des_fils_publies(pool, event_id.0).await? {
+        partenaires.entry(p.track_slug).or_default().push(p.partner);
+    }
 
     Ok(fils
         .into_iter()
         .map(|summary| PublicScheduleTrack {
             moments: moments.remove(&summary.slug).unwrap_or_default(),
+            partners: partenaires.remove(&summary.slug).unwrap_or_default(),
             summary,
         })
         .collect())

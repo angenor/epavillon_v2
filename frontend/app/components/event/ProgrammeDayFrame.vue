@@ -2,12 +2,14 @@
 import type { DayFrame } from '~/utils/programme-tracks'
 import type { ProgrammeRowData } from './ProgrammeRow.vue'
 import type { TimeZoneName } from '~/types/shared'
+import type { PublicScheduleRow } from '~/types/views'
 
 /**
  * Le cadre d'une journée spéciale publiée dans `/programmations` (direction
  * condensée, 01/11) : son nom en étiquette posée sur un filet à sa couleur,
  * puis un fond teinté qui porte le lien vers sa page, ses moments en lignes
- * pointillées et ses activités, les lignes de la liste.
+ * pointillées et ses activités, les lignes de la liste. Ses partenaires
+ * précèdent le lien, au sigle ; le nom complet reste au survol et au lecteur d'écran.
  */
 
 interface Props {
@@ -30,6 +32,18 @@ const style = computed(() => ({
 }))
 const icon = computed(() => trackIcon(props.frame.track.icon_code))
 const title = computed(() => tr(props.frame.track.title))
+const partners = computed(() =>
+  props.frame.track.partners.map((partner) => ({
+    id: partner.organization_id,
+    mark: partner.acronym ?? partner.name,
+    name: partner.name,
+  })),
+)
+
+/** Temps fort de cette journée-ci : une activité peut l'être dans une autre et pas dans celle-ci. */
+const isHighlight = (session: PublicScheduleRow) =>
+  session.tracks.some((badge) => badge.slug === props.frame.track.slug && badge.is_highlight)
+
 const kicker = computed(() => {
   const { start, end } = props.frame
   if (!start || !end) return t('programme.tracks.kicker')
@@ -49,6 +63,16 @@ const kicker = computed(() => {
 
     <div class="rounded-b-xl rounded-tr-xl bg-(--color-day-surface) px-3.5 pt-1 pb-2 sm:px-6 sm:pb-3">
       <div class="flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-4 pb-2">
+        <p v-if="partners.length" class="min-w-0 text-[0.92rem] text-text-secondary">
+          {{ t('programme.tracks.with') }}
+          <template v-for="(partner, index) in partners" :key="partner.id">
+            <template v-if="index">, </template>
+            <b class="font-bold text-text" :title="partner.mark === partner.name ? undefined : partner.name">
+              <template v-if="partner.mark === partner.name">{{ partner.name }}</template>
+              <template v-else><span aria-hidden="true">{{ partner.mark }}</span><span class="sr-only">{{ partner.name }}</span></template>
+            </b>
+          </template>
+        </p>
         <!-- Contour à la couleur de la journée : l'accent du site jurerait sur sa teinte. -->
         <UiButton
           :to="props.to"
@@ -66,7 +90,7 @@ const kicker = computed(() => {
           class="border-b border-border-subtle"
           :class="item.kind === 'activity' ? 'last:border-b-0' : 'border-dashed'"
         >
-          <EventProgrammeRow v-if="item.kind === 'activity'" :entry="item.row" tone="day" />
+          <EventProgrammeRow v-if="item.kind === 'activity'" :entry="item.row" tone="day" :highlight="isHighlight(item.session)" />
           <template v-else>
             <p
               v-for="moment in item.moments"

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "WITH bornes AS (\n               SELECT st.track_id, s.starts_at AS debut, s.ends_at AS fin\n                 FROM programme.session_tracks st\n                 JOIN programme.sessions s ON s.id = st.session_id\n                WHERE s.event_id = $1 AND s.published_at IS NOT NULL\n               UNION ALL\n               SELECT m.track_id, m.starts_at, COALESCE(m.ends_at, m.starts_at)\n                 FROM event.programme_track_moments m\n                 JOIN event.programme_tracks t ON t.id = m.track_id\n                WHERE t.event_id = $1\n           )\n           SELECT t.id, t.slug::text AS \"slug!\", t.kind::text AS \"kind!\",\n                  t.title AS \"title!: Value\", t.color_hex, t.icon_code, t.starts_on, t.ends_on,\n                  (SELECT min(b.debut) FROM bornes b WHERE b.track_id = t.id) AS starts_at,\n                  (SELECT max(b.fin)   FROM bornes b WHERE b.track_id = t.id) AS ends_at,\n                  COALESCE(v.name, (\n                      SELECT p.name FROM event.venues p\n                       WHERE p.event_id = t.event_id AND p.kind = 'pavilion'\n                       ORDER BY p.created_at, p.id LIMIT 1)) AS \"venue_name: Value\",\n                  (t.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS \"is_off_site!\"\n             FROM event.programme_tracks t\n             JOIN event.events e ON e.id = t.event_id\n             LEFT JOIN event.venues v ON v.id = t.venue_id\n            WHERE t.event_id = $1 AND t.published_at IS NOT NULL\n              AND e.status NOT IN ('draft', 'cancelled')\n            ORDER BY t.starts_on NULLS LAST, t.sort_order, t.code",
+  "query": "WITH bornes AS (\n               SELECT st.track_id, s.starts_at AS debut, s.ends_at AS fin\n                 FROM programme.session_tracks st\n                 JOIN programme.sessions s ON s.id = st.session_id\n                WHERE s.event_id = $1 AND s.published_at IS NOT NULL\n               UNION ALL\n               SELECT m.track_id, m.starts_at, COALESCE(m.ends_at, m.starts_at)\n                 FROM event.programme_track_moments m\n                 JOIN event.programme_tracks t ON t.id = m.track_id\n                WHERE t.event_id = $1\n           )\n           SELECT t.id, t.slug::text AS \"slug!\", t.kind::text AS \"kind!\",\n                  t.title AS \"title!: Value\", t.color_hex, t.icon_code, t.starts_on, t.ends_on,\n                  (SELECT min(b.debut) FROM bornes b WHERE b.track_id = t.id) AS starts_at,\n                  (SELECT max(b.fin)   FROM bornes b WHERE b.track_id = t.id) AS ends_at,\n                  COALESCE(v.name, (\n                      SELECT p.name FROM event.venues p\n                       WHERE p.event_id = t.event_id AND p.kind = 'pavilion'\n                       ORDER BY p.created_at, p.id LIMIT 1)) AS \"venue_name: Value\",\n                  (t.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS \"is_off_site!\",\n                  media.attached_image('event', 'programme_tracks', t.id, 'cover') AS \"cover: Value\"\n             FROM event.programme_tracks t\n             JOIN event.events e ON e.id = t.event_id\n             LEFT JOIN event.venues v ON v.id = t.venue_id\n            WHERE t.event_id = $1 AND t.published_at IS NOT NULL\n              AND e.status NOT IN ('draft', 'cancelled')\n            ORDER BY t.starts_on NULLS LAST, t.sort_order, t.code",
   "describe": {
     "columns": [
       {
@@ -104,6 +104,12 @@
         "name": "is_off_site!",
         "type_info": "Bool",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "cover: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -123,8 +129,9 @@
       null,
       null,
       null,
+      null,
       null
     ]
   },
-  "hash": "69310cb964ba3c9c7cb74b202f69987168c24d5af5d5447f7633225ac1ea61e4"
+  "hash": "0e4cbad5fa86306b0c5f6c05761de608a49eb5d4a26121917768972bc3c81f70"
 }

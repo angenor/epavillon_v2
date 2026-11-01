@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProgrammeTrack } from '~/types/event/edition'
+import type { AttachedImage } from '~/types/media'
 import type { TimeZoneName } from '~/types/shared'
 
 /**
@@ -10,11 +11,10 @@ import type { TimeZoneName } from '~/types/shared'
  * la main parmi les activités retenues (règle métier n° 7), et `starts_on` est
  * une date annoncée, indicative.
  *
- * La carte prend l'aplat de la couleur de la journée (`trackDayStyle` : le
- * texte posé dessus est choisi d'après la luminance de la teinte saisie) ;
- * sans couleur (l'atelier), le bleu nuit. Le pictogramme du fil s'y pose en
- * filigrane. Les fils n'ont pas de photo dans les données de cette page : la
- * carte photo voilée de la maquette attend cette donnée.
+ * La carte porte la photo du fil, voilée. Sans photo, l'aplat de la couleur
+ * de la journée (`trackDayStyle` : le texte posé dessus est choisi d'après la
+ * luminance de la teinte saisie), à défaut le bleu nuit, le pictogramme du
+ * fil en filigrane.
  */
 
 interface Props {
@@ -24,9 +24,11 @@ interface Props {
   timezone: TimeZoneName
   /** Nombre d'activités rattachées, par identifiant de fil. */
   sessionCounts?: Record<string, number>
+  /** Photo de chaque fil, par adresse (`GET /schedule/tracks`). */
+  covers?: Record<string, AttachedImage | null>
 }
 
-const props = withDefaults(defineProps<Props>(), { sessionCounts: () => ({}) })
+const props = withDefaults(defineProps<Props>(), { sessionCounts: () => ({}), covers: () => ({}) })
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -63,6 +65,7 @@ const cards = computed(() =>
       to: localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: track.slug } }),
       style: trackDayStyle(track.color_hex),
       icon: trackIcon(track.icon_code),
+      cover: props.covers[track.slug] ?? null,
       title: tr(track.title),
       subtitle: track.subtitle ? tr(track.subtitle) : '',
       day: start ? format(start, { day: 'numeric' }) : '',
@@ -88,10 +91,14 @@ const cards = computed(() =>
       <li v-for="card in cards" :key="card.id" :style="card.style">
         <NuxtLink
           :to="card.to"
-          class="group relative isolate flex h-full min-h-[300px] cursor-pointer flex-col justify-end overflow-hidden rounded-lg bg-(--color-day-solid) px-4.5 pt-16 pb-4.5 text-(--color-day-on-solid) no-underline shadow-md transition-[box-shadow,transform] duration-300 hover:shadow-xl hover:text-(--color-day-on-solid) motion-safe:hover:-translate-y-1"
+          class="group relative isolate flex h-full min-h-[300px] cursor-pointer flex-col justify-end overflow-hidden rounded-lg px-4.5 pt-16 pb-4.5 no-underline shadow-md transition-[box-shadow,transform] duration-300 hover:shadow-xl motion-safe:hover:-translate-y-1"
+          :class="card.cover
+            ? 'bg-surface-inverse text-text-on-inverse hover:text-text-on-inverse'
+            : 'bg-(--color-day-solid) text-(--color-day-on-solid) hover:text-(--color-day-on-solid)'"
         >
+          <TrackCardPhoto v-if="card.cover" :image="card.cover" sizes="(min-width: 1280px) 26rem, (min-width: 640px) 50vw, 100vw" />
           <UiIcon
-            v-if="card.icon"
+            v-else-if="card.icon"
             :name="card.icon"
             size="220px"
             :stroke-width="1.4"
@@ -109,7 +116,7 @@ const cards = computed(() =>
               <span class="block">{{ card.month }}</span>
             </span>
           </p>
-          <h3 class="heading-condensed mt-2.5 text-[1.45rem] text-(--color-day-on-solid) group-hover:underline">{{ card.title }}</h3>
+          <h3 class="heading-condensed mt-2.5 text-[1.45rem] text-inherit group-hover:underline">{{ card.title }}</h3>
           <p v-if="card.subtitle" class="mt-1.5 text-sm leading-snug opacity-85">{{ card.subtitle }}</p>
 
           <span class="mt-4.5 flex items-center justify-between gap-3 border-t border-current/25 pt-3.5 text-sm">

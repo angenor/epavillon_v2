@@ -9,11 +9,12 @@ import type { PublicEditionRow } from '~/types/views'
  * sont composées à la main par l'IFDD, ce ne sont pas des jours du calendrier.
  *
  * DEUX LECTURES DE L'API PUBLIQUE, AUCUNE ROUTE NOUVELLE. `GET /schedule/tracks`
- * donne les fils publiés de l'édition (titre, couleur, pictogramme, dates) ;
- * la page de chaque fil (`GET /events/{édition}/tracks/{fil}`) donne ce que la
- * carte montre en plus : photo, accroche, nombre d'activités et heures lues sur
- * son déroulé. Une lecture manquée efface la section (ou la carte) sans
- * message : elle n'est pas l'objet de l'accueil.
+ * donne les fils publiés de l'édition (titre, couleur, pictogramme, dates,
+ * photo, heures lues sur leur déroulé) ; la page de chaque fil
+ * (`GET /events/{édition}/tracks/{fil}`) donne ce que le résumé n'a pas :
+ * accroche et nombre d'activités. Une lecture manquée efface la section, ou
+ * seulement ces deux mentions de la carte, sans message : elle n'est pas
+ * l'objet de l'accueil.
  *
  * Sans photo (l'atelier), l'aplat bleu nuit institutionnel, avec le
  * pictogramme du fil en filigrane. La couleur saisie au back-office ne porte
@@ -90,10 +91,9 @@ function relation(track: PublicScheduleTrack): { past: boolean; label: string } 
 function footer(card: HighlightCard): string {
   const venue = card.track.venue_name ? tr(card.track.venue_name) : ''
   if (card.track.is_off_site && venue) return venue
-  const page = card.page
-  const count = page ? page.agenda.filter((entry) => entry.kind === 'activity').length : 0
-  const from = page?.opens_at ?? page?.starts_at ?? card.track.starts_at
-  const to = page?.ends_at ?? card.track.ends_at
+  const count = card.page ? card.page.agenda.filter((entry) => entry.kind === 'activity').length : 0
+  // Celles du résumé valent celles de la page : lues sur le même déroulé, accueil compris.
+  const { starts_at: from, ends_at: to } = card.track
   const hours = from && to ? t('home.highlights.hours', { start: time(from, timezone.value), end: time(to, timezone.value) }) : ''
   const activities = count ? t('home.highlights.activities', count) : ''
   return [activities, hours].filter(Boolean).join(', ') || venue
@@ -132,17 +132,7 @@ const editionName = computed(() => props.edition.edition_label ?? props.edition.
         <article
           class="group relative isolate flex min-h-[17.5rem] w-full flex-col justify-end overflow-hidden rounded-xl bg-surface-inverse px-6 pt-16 pb-6 text-text-on-inverse shadow-md transition duration-300 hover:shadow-xl motion-safe:hover:-translate-y-1 lg:min-h-[22.5rem]"
         >
-          <template v-if="card.page?.cover">
-            <UiImage
-              :image="card.page.cover"
-              ratio="auto"
-              frame-class="size-full"
-              class="absolute inset-0 -z-20 transition-transform duration-500 motion-safe:group-hover:scale-[1.06]"
-              sizes="(min-width: 1024px) 26rem, 100vw"
-            />
-            <div class="absolute inset-0 -z-10 bg-scrim/20" aria-hidden="true" />
-            <div class="scrim-fade-bottom absolute inset-0 -z-10" aria-hidden="true" />
-          </template>
+          <TrackCardPhoto v-if="card.track.cover" :image="card.track.cover" sizes="(min-width: 1024px) 26rem, 100vw" />
           <UiIcon
             v-else
             :name="trackIcon(card.track.icon_code) ?? 'calendar'"
@@ -179,7 +169,7 @@ const editionName = computed(() => props.edition.edition_label ?? props.edition.
           <p v-if="summary(card)" class="mt-2 line-clamp-2 text-[0.95rem] text-text-on-inverse-muted">{{ summary(card) }}</p>
           <p
             class="mt-4.5 flex items-center justify-between gap-3 border-t pt-3.5 text-[0.88rem] text-text-on-inverse-muted"
-            :class="card.page?.cover ? 'border-glass-border' : 'border-border-on-inverse'"
+            :class="card.track.cover ? 'border-glass-border' : 'border-border-on-inverse'"
           >
             <span>{{ footer(card) }}</span>
             <UiIcon name="arrow-right" size="1.2rem" class="shrink-0 text-text-on-inverse" />

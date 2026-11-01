@@ -2,9 +2,9 @@
 import type { PublicTrackSummary } from '~/types/programme/track-page'
 
 /**
- * Les autres fils publiés de l'édition, en cartes pleines à leur couleur : on
- * passe de l'atelier aux journées sans revenir à la programmation. Le résumé
- * d'un fil ne porte pas sa photo : l'aplat reçoit le pictogramme en filigrane.
+ * Les autres fils publiés de l'édition, en cartes photo voilées : on passe de
+ * l'atelier aux journées sans revenir à la programmation. Sans photo
+ * (l'atelier), l'aplat de sa couleur, le pictogramme en filigrane.
  */
 
 interface Props {
@@ -56,6 +56,7 @@ const items = computed(() =>
         title: tr(track.title),
         line: [venue, track.is_off_site ? '' : hours].filter(Boolean).join(', '),
         icon: trackIcon(track.icon_code),
+        cover: track.cover,
         tag: tag(track),
         style: trackDayStyle(track.color_hex),
       }
@@ -72,10 +73,14 @@ const items = computed(() =>
       <li v-for="item in items" :key="item.slug" :style="item.style">
         <NuxtLink
           :to="item.to"
-          class="group relative isolate flex h-full min-h-70 flex-col justify-end overflow-hidden rounded-lg bg-(--color-day-solid) px-6 pt-16 pb-6 text-(--color-day-on-solid) no-underline shadow-md transition duration-300 hover:text-(--color-day-on-solid) hover:shadow-lg motion-safe:hover:-translate-y-1"
+          class="group relative isolate flex h-full min-h-70 flex-col justify-end overflow-hidden rounded-lg px-6 pt-16 pb-6 no-underline shadow-md transition duration-300 hover:shadow-lg motion-safe:hover:-translate-y-1"
+          :class="item.cover
+            ? 'bg-surface-inverse text-text-on-inverse hover:text-text-on-inverse'
+            : 'bg-(--color-day-solid) text-(--color-day-on-solid) hover:text-(--color-day-on-solid)'"
         >
+          <TrackCardPhoto v-if="item.cover" :image="item.cover" sizes="(min-width: 768px) 36rem, 100vw" />
           <UiIcon
-            v-if="item.icon"
+            v-else-if="item.icon"
             :name="item.icon"
             size="13.75rem"
             :stroke-width="1.4"
