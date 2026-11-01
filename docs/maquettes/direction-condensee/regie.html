@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Régie du jour : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="programme.css">
+<style>
+  body { background: var(--color-surface-sunken); }
+  [hidden] { display: none !important; }
+
+  /* Bandeau de la régie : l'édition, le jour, l'heure du pavillon, l'état du direct. */
+  .rg-top { position: sticky; top: 0; z-index: 30; background: var(--color-surface-inverse); color: #fff; }
+  .rg-top-in { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; max-width: 1440px; margin: 0 auto; padding: 12px 24px; }
+  .rg-top .back { display: inline-flex; align-items: center; gap: 6px; min-height: var(--target); color: rgb(255 255 255 / 0.75); text-decoration: none; font-size: 0.88rem; }
+  .rg-top h1 { color: #fff; font-size: 1.7rem; }
+  .rg-top h1 span { color: var(--ifdd-cyan-300); }
+  .rg-day { display: flex; align-items: center; gap: 4px; }
+  .rg-day button { min-height: 40px; padding: 0 12px; border: 1px solid rgb(255 255 255 / 0.25); border-radius: var(--radius); background: transparent; color: #fff; font-family: var(--font-heading); font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; }
+  .rg-day button[aria-current] { background: #fff; color: var(--ifdd-bleu-900); }
+  .rg-clock { margin-left: auto; text-align: right; font-family: var(--font-heading); line-height: 1; }
+  .rg-clock b { font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .rg-clock small { display: block; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: rgb(255 255 255 / 0.7); }
+  .onair { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font-family: var(--font-heading); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; background: var(--color-live); color: #fff; }
+  .onair::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: pulse 1.6s ease-in-out infinite; }
+
+  .rg { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 24px; max-width: 1440px; margin: 0 auto; padding: 24px; align-items: start; }
+  .rg-side { position: sticky; top: 92px; display: grid; gap: 16px; }
+  @media (max-width: 1100px) { .rg { grid-template-columns: minmax(0, 1fr); } .rg-side { position: static; } }
+
+  .panel { border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); box-shadow: var(--shadow-sm); }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--color-border-subtle); }
+  .panel-head h2 { font-size: 1.35rem; }
+  .panel-head .count { font-size: 0.85rem; color: var(--color-text-muted); }
+
+  /* Maintenant : l'activité en cours ou la prochaine, et les gestes qui comptent. */
+  .now { overflow: hidden; border-color: var(--color-live-border); }
+  .now-band { display: flex; align-items: center; gap: 14px; padding: 10px 18px; background: var(--color-live-surface); color: var(--color-live); font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .now-band .elapsed { margin-left: auto; color: var(--color-text-secondary); font-weight: 600; }
+  .now-body { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; padding: 18px; }
+  .now-cover { aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; }
+  .now-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .now-time { font-family: var(--font-heading); color: var(--color-live); }
+  .now-time b { font-size: 2.4rem; font-weight: 700; line-height: 0.9; }
+  .now-time span { margin-left: 8px; font-size: 1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); }
+  .now h3 { margin-top: 8px; font-size: 1.6rem; font-weight: 600; text-transform: none; line-height: 1.1; }
+  .now .row-org { margin-top: 8px; }
+  .progress { height: 6px; margin-top: 12px; border-radius: 3px; background: var(--color-surface-sunken); overflow: hidden; }
+  .progress i { display: block; width: 42%; height: 100%; background: var(--color-live); }
+  .now-acts { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 18px 18px; }
+  .files { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--color-border-subtle); background: var(--color-surface-sunken); }
+  .files .lbl { width: 100%; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
+  .file { display: inline-flex; align-items: center; gap: 10px; min-height: var(--target); padding: 6px 12px 6px 8px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--color-border-subtle); text-decoration: none; }
+  .file i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--radius-sm); font-style: normal; font-family: var(--font-heading); font-weight: 700; font-size: 0.78rem; color: #fff; background: var(--ifdd-rouge-700, var(--color-live)); }
+  .file i.pdf { background: var(--ifdd-gris-700, var(--color-text-secondary)); }
+  .file b { display: block; font-size: 0.88rem; line-height: 1.2; }
+  .file small { font-size: 0.75rem; color: var(--color-text-muted); }
+  .file:hover { border-color: var(--color-accent-solid); }
+  @media (max-width: 760px) { .now-body { grid-template-columns: minmax(0, 1fr); } }
+
+  /* La journée, créneau par créneau, chaque ligne avec ses gestes. */
+  .day-list { margin: 0; padding: 0; list-style: none; }
+  .slot { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 6px 18px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--color-border-subtle); }
+  .slot:last-child { border-bottom: 0; }
+  .slot-time { font-family: var(--font-heading); }
+  .slot-time b { display: block; font-size: 1.8rem; font-weight: 700; line-height: 0.9; color: var(--ink); }
+  .slot-time span { font-family: var(--font-body); font-size: 0.78rem; color: var(--color-text-muted); }
+  .slot h3 { font-size: 1.15rem; font-weight: 600; text-transform: none; line-height: 1.15; }
+  .slot .row-org { margin-top: 4px; font-size: 0.82rem; }
+  .slot .row-org .logo { width: 28px; height: 28px; font-size: 0.6rem; }
+  .flags { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 6px; font-size: 0.78rem; color: var(--color-text-secondary); }
+  .flags span { display: inline-flex; align-items: center; gap: 5px; }
+  .flags .ok { color: var(--color-success); }
+  .flags .warn { color: var(--color-warning); font-weight: 600; }
+  .slot-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; }
+  .slot.is-done { opacity: 0.6; }
+  .slot.is-live { background: var(--color-live-surface); }
+  .slot.is-live .slot-time b { color: var(--color-live); }
+  .slot.is-next { box-shadow: inset 4px 0 0 var(--color-accent-solid); }
+  .slot.is-cancelled h3 { text-decoration: line-through; text-decoration-thickness: 1.5px; color: var(--color-text-muted); }
+  .menu-btn { display: grid; place-items: center; width: var(--target); height: var(--target); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--card); cursor: pointer; color: var(--color-text-secondary); font-size: 1.2rem; }
+  .menu-btn:hover { background: var(--color-surface-hover); }
+  @media (max-width: 760px) { .slot { grid-template-columns: 70px minmax(0, 1fr); } .slot-acts { grid-column: 1 / -1; justify-content: flex-start; } }
+
+  /* Messages d'incident : ceux en cours, et un message en trois gestes. */
+  .inc { margin: 0; padding: 0; list-style: none; }
+  .inc li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 18px; border-bottom: 1px solid var(--color-border-subtle); }
+  .inc .sev { width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--color-warning); }
+  .inc .sev.err { background: var(--color-live); }
+  .inc p { margin: 0; font-size: 0.88rem; }
+  .inc small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--color-text-muted); }
+  .quick { padding: 14px 18px 18px; display: grid; gap: 10px; }
+  .quick .lbl { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { min-height: 40px; padding: 0 12px; border: 1px solid var(--color-border-strong); border-radius: 999px; background: var(--card); cursor: pointer; font: inherit; font-size: 0.85rem; color: var(--color-text); }
+  .chip[aria-pressed="true"] { background: var(--color-accent-surface); border-color: var(--color-accent-solid); color: var(--color-accent); font-weight: 600; }
+  .quick textarea { width: 100%; min-height: 76px; padding: 10px 12px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); color: var(--color-text); font: inherit; font-size: 0.9rem; resize: vertical; }
+  .quick .row2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .quick select { min-height: 40px; padding: 0 10px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); color: var(--color-text); font: inherit; font-size: 0.85rem; }
+
+  .alerts { margin: 0; padding: 0 18px 14px; list-style: none; }
+  .alerts li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--color-border-subtle); font-size: 0.86rem; }
+  .alerts li:last-child { border-bottom: 0; }
+  .alerts .icon { flex: none; margin-top: 2px; color: var(--color-warning); }
+
+  /* Annuler une activité : la raison, ce qui suit, une confirmation. */
+  .veil { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgb(35 31 32 / 0.55); }
+  .dlg { width: min(560px, 100%); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-xl); }
+  .dlg-head { padding: 18px 22px 10px; }
+  .dlg-head h2 { font-size: 1.6rem; }
+  .dlg-head p { margin: 6px 0 0; font-size: 0.9rem; color: var(--color-text-secondary); }
+  .dlg-body { display: grid; gap: 14px; padding: 6px 22px 18px; }
+  .choice { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius); cursor: pointer; }
+  .choice:has(input:checked) { border-color: var(--color-accent-solid); background: var(--color-accent-surface); }
+  .choice b { display: block; font-size: 0.95rem; }
+  .choice small { font-size: 0.8rem; color: var(--color-text-secondary); }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: 0.9rem; }
+  .dlg-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--color-border-subtle); }
+  .btn-danger { background: var(--color-live); color: #fff; }
+  .btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .demo { position: fixed; left: 16px; bottom: 16px; z-index: 70; display: flex; gap: 6px; padding: 6px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-md); }
+</style>
+</head>
+<body>
+
+<header class="rg-top">
+  <div class="rg-top-in">
+    <a class="back" href="#"><svg class="icon"><use href="#i-back"/></svg>Back-office</a>
+    <h1>Régie <span>CdP31</span></h1>
+    <div class="rg-day" role="group" aria-label="Jour">
+      <button type="button">Jeu. 12</button>
+      <button type="button" aria-current="date">Ven. 13</button>
+      <button type="button">Sam. 14</button>
+    </div>
+    <span class="onair">À l'antenne : CILSS</span>
+    <div class="rg-clock"><b>10:41</b><small>Heure d'Antalya (UTC+3)</small></div>
+  </div>
+</header>
+
+<div class="rg">
+  <main style="display:grid;gap:24px">
+
+    <section class="panel now" aria-labelledby="maintenant">
+      <div class="now-band"><span id="maintenant">En direct</span><span class="elapsed">depuis 26 min, reste 34 min</span></div>
+      <div class="now-body">
+        <div class="now-cover"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
+        <div>
+          <div class="now-time"><b>10:15</b><span>à 11:15, salle principale</span></div>
+          <h3>Du financement climatique à l'action régionale : les solutions du P2RS</h3>
+          <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b> 3 intervenants présents, 1 en ligne</span></p>
+          <div class="progress" aria-label="Avancement du créneau"><i></i></div>
+        </div>
+      </div>
+      <div class="now-acts">
+        <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Ouvrir Zoom (animateur)</a>
+        <button class="btn btn-outline" type="button">Terminer le direct</button>
+        <button class="btn btn-ghost" type="button"><svg class="icon"><use href="#i-clock"/></svg>Signaler un débordement</button>
+      </div>
+      <div class="files">
+        <span class="lbl">Présentations de l'organisation</span>
+        <a class="file" href="#"><i>PPT</i><span><b>P2RS, outils de financement</b><small>PowerPoint, 4,2 Mo, déposée hier</small></span></a>
+        <a class="file" href="#"><i class="pdf">PDF</i><span><b>Note de synthèse</b><small>PDF, 620 Ko</small></span></a>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="journee">
+      <div class="panel-head">
+        <h2 id="journee">Vendredi 13, journée finance durable</h2>
+        <span class="count">5 activités, 1 annulée</span>
+      </div>
+      <ol class="day-list">
+        <li class="slot is-done">
+          <div class="slot-time"><b>09:15</b><span>à 10:00</span></div>
+          <div>
+            <h3>Panel de partenaires et d'experts : solutions et synergies</h3>
+            <p class="row-org"><span class="logo" aria-hidden="true">OIF</span><span><b>OIF</b></span></p>
+            <div class="flags"><span class="ok">Rediffusion prête</span></div>
+          </div>
+          <div class="slot-acts"><span class="tag tag-done">Terminée</span><button class="menu-btn" type="button" aria-label="Autres actions">⋯</button></div>
+        </li>
+        <li class="slot is-live">
+          <div class="slot-time"><b>10:15</b><span>à 11:15</span></div>
+          <div>
+            <h3>Du financement climatique à l'action régionale : les solutions du P2RS</h3>
+            <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b></span></p>
+          </div>
+          <div class="slot-acts"><span class="tag tag-live">En direct</span><button class="menu-btn" type="button" aria-label="Autres actions">⋯</button></div>
+        </li>
+        <li class="slot is-next">
+          <div class="slot-time"><b>11:30</b><span>à 12:30</span></div>
+          <div>
+            <h3>Financer l'action climatique locale : régions et villes francophones</h3>
+            <p class="row-org"><span class="logo" aria-hidden="true">AIRF</span><span class="logo" aria-hidden="true" style="margin-left:-10px">AIMF</span><span><b>AIRF et AIMF</b> séance commune</span></p>
+            <div class="flags"><span class="ok">Réunion Zoom prête</span><span class="ok">2 présentations</span><span class="warn">Présence pas encore confirmée</span></div>
+          </div>
+          <div class="slot-acts">
+            <button class="btn btn-outline btn-sm" type="button">Présent</button>
+            <button class="btn btn-ghost btn-sm" type="button" data-open-cancel>Absent</button>
+            <button class="btn btn-primary btn-sm" type="button" disabled title="Un seul direct à la fois : terminez d'abord celui du CILSS">Démarrer le direct</button>
+            <button class="menu-btn" type="button" aria-label="Autres actions">⋯</button>
+          </div>
+        </li>
+        <li class="slot is-cancelled">
+          <div class="slot-time"><b>13:00</b><span>à 14:00</span></div>
+          <div>
+            <h3>Autorité nationale de budgétisation climat : l'expérience du Sénégal</h3>
+            <p class="row-org"><span class="logo" aria-hidden="true">MEDD</span><span><b>Ministère de l'Environnement</b> Sénégal</span></p>
+            <div class="flags"><span>Annulée à 08:40 : l'organisation a prévenu de son absence. Message publié, 41 inscrits prévenus.</span></div>
+          </div>
+          <div class="slot-acts"><span class="tag tag-cancelled" style="background:var(--color-live-surface);color:var(--color-live);border:1px solid var(--color-live-border)">Annulée</span><button class="menu-btn" type="button" aria-label="Autres actions">⋯</button></div>
+        </li>
+        <li class="slot">
+          <div class="slot-time"><b>14:15</b><span>à 15:15</span></div>
+          <div>
+            <h3>Du récif à la résilience : financer la protection des côtes</h3>
+            <p class="row-org"><span class="logo" aria-hidden="true">BM</span><span><b>Business Maurice</b></span></p>
+            <div class="flags"><span class="ok">Présence confirmée</span><span class="warn">Aucune présentation déposée</span><span class="warn">Pas de réunion Zoom</span></div>
+          </div>
+          <div class="slot-acts">
+            <button class="btn btn-outline btn-sm" type="button">Créer la réunion Zoom</button>
+            <button class="menu-btn" type="button" aria-label="Autres actions">⋯</button>
+          </div>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <aside class="rg-side" aria-label="Messages et vigilance">
+    <section class="panel" aria-labelledby="vigilance">
+      <div class="panel-head"><h2 id="vigilance">À surveiller</h2></div>
+      <ul class="alerts">
+        <li><svg class="icon"><use href="#i-clock"/></svg><span>Dans <b>49 min</b> : AIRF et AIMF n'ont pas confirmé leur présence.</span></li>
+        <li><svg class="icon"><use href="#i-file"/></svg><span>14:15 : Business Maurice n'a déposé aucune présentation.</span></li>
+        <li><svg class="icon"><use href="#i-play"/></svg><span>14:15 : aucune réunion Zoom créée.</span></li>
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="incidents">
+      <div class="panel-head"><h2 id="incidents">Messages d'incident</h2><span class="count">2 en ligne</span></div>
+      <ul class="inc">
+        <li><span class="sev"></span><div><p>L'activité de 13:00 (Sénégal) est annulée.</p><small>Programmation et page de l'activité, depuis 08:42</small></div><button class="btn btn-ghost btn-sm" type="button">Retirer</button></li>
+        <li><span class="sev err"></span><div><p>Le son du direct est coupé quelques minutes, nous rétablissons.</p><small>Page du direct, depuis 10:37</small></div><button class="btn btn-ghost btn-sm" type="button">Retirer</button></li>
+      </ul>
+      <form class="quick" onsubmit="return false">
+        <span class="lbl">Nouveau message</span>
+        <div class="chips" role="group" aria-label="Modèle">
+          <button class="chip" type="button" aria-pressed="true">Retard</button>
+          <button class="chip" type="button" aria-pressed="false">Débordement</button>
+          <button class="chip" type="button" aria-pressed="false">Son ou image coupés</button>
+          <button class="chip" type="button" aria-pressed="false">Changement de salle</button>
+          <button class="chip" type="button" aria-pressed="false">Libre</button>
+        </div>
+        <textarea aria-label="Texte du message">L'activité de 11:30 commence avec une dizaine de minutes de retard.</textarea>
+        <div class="row2">
+          <select aria-label="Où l'afficher"><option>Activité de 11:30 et programmation</option><option>Toute la programmation</option><option>Page du direct</option></select>
+          <button class="btn btn-primary btn-sm" type="button">Publier</button>
+        </div>
+      </form>
+    </section>
+  </aside>
+</div>
+
+<div class="veil" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="annuler">
+    <div class="dlg-head">
+      <h2 id="annuler">Annuler l'activité de 11:30</h2>
+      <p>Financer l'action climatique locale : régions et villes francophones, AIRF et AIMF.</p>
+    </div>
+    <div class="dlg-body">
+      <label class="choice"><input type="radio" name="motif" checked><span><b>Les organisateurs ne sont pas venus</b><small>Constaté sur place.</small></span></label>
+      <label class="choice"><input type="radio" name="motif"><span><b>Les organisateurs ont prévenu de leur absence</b><small>Par courriel, téléphone ou message.</small></span></label>
+      <label class="choice"><input type="radio" name="motif"><span><b>Autre raison</b><small>À préciser pour l'équipe ; elle n'est pas publiée.</small></span></label>
+      <label class="check"><input type="checkbox" checked><span>Publier un message d'incident : « L'activité de 11:30 est annulée. »</span></label>
+      <label class="check"><input type="checkbox" checked><span>Prévenir par courriel les <b>38 inscrits</b></span></label>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn btn-ghost" type="button" data-close>Garder l'activité</button>
+      <button class="btn btn-danger" type="button" data-close>Annuler l'activité</button>
+    </div>
+  </div>
+</div>
+
+<div class="demo"><button class="btn btn-sm btn-outline" type="button" data-open-cancel>Voir : annuler une activité</button></div>
+
+<script src="icones.js"></script>
+<script>
+  {
+    const veil = document.querySelector('.veil')
+    document.querySelectorAll('[data-open-cancel]').forEach(b => b.addEventListener('click', () => { veil.hidden = false }))
+    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => { veil.hidden = true }))
+    veil.addEventListener('click', e => { if (e.target === veil) veil.hidden = true })
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') veil.hidden = true })
+    document.querySelectorAll('.chips .chip').forEach(c => c.addEventListener('click', () => {
+      document.querySelectorAll('.chips .chip').forEach(x => x.setAttribute('aria-pressed', 'false')); c.setAttribute('aria-pressed', 'true')
+    }))
+  }
+</script>
+</body>
+</html>
