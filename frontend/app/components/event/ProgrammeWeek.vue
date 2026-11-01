@@ -380,7 +380,7 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
                 <div class="wk-foot">
                   <UiStatusBadge :state="item.current" size="sm" :label="item.stateLabel" />
                   <span v-if="item.visited" class="text-xs text-accent">{{ t('programme.week.visited') }}</span>
-                  <UiButton v-if="item.current === 'live'" :to="item.joinTo" icon="video" class="relative z-10">
+                  <UiButton v-if="item.current === 'live'" variant="live" :to="item.joinTo" icon="video" class="relative z-10">
                     {{ t('programme.week.join') }}
                   </UiButton>
                 </div>
