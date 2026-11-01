@@ -168,7 +168,7 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
 
         <template v-else-if="phase === 'register'">
           <p class="max-w-md text-sm">{{ t('zoom-room.register.message') }}</p>
-          <UiButton size="lg" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
+          <UiButton variant="signup" size="lg" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
         </template>
 
         <template v-else-if="phase === 'ready'">

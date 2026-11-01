@@ -149,6 +149,13 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'border-transparent bg-live text-live-contrast ' +
     'hover:bg-[color-mix(in_srgb,var(--color-live)_85%,var(--color-text))]',
 
+  // S'inscrire (activité, journée, atelier) : jaune de charte, texte vert très
+  // foncé, un reflet et une flèche qui avance (arbitré le 01/11, maquette
+  // `bouton-inscription`). Le mouvement vit dans le <style> plus bas.
+  signup:
+    'ui-signup relative isolate overflow-hidden border-transparent bg-signup text-signup-contrast ' +
+    'shadow-[0_1px_0_var(--color-signup-edge)] hover:bg-signup-hover active:bg-signup-active',
+
   // SUR UN MÉDIA VOILÉ, ET NULLE PART AILLEURS. Le contour accent du secondaire
   // est un cyan foncé en thème clair : posé sur une photographie sombre, il
   // disparaît. Cette variante prend la matière du bandeau — les jetons du verre,
@@ -254,5 +261,59 @@ const iconSize = computed(() => (props.size === 'lg' ? '1.15em' : '1.05em'))
     </span>
 
     <UiIcon v-if="props.iconTrailing && !props.loading" :name="props.iconTrailing" :size="iconSize" />
+    <span v-else-if="props.variant === 'signup' && !props.loading && !props.iconOnly" class="ui-signup-arrow" aria-hidden="true">
+      <UiIcon name="arrow-right" :size="iconSize" />
+    </span>
   </component>
 </template>
+
+<style scoped>
+/* Le reflet passe toutes les quatre secondes ; la flèche fait un pas et revient. */
+.ui-signup::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 -60%;
+  z-index: -1;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.65), transparent);
+  transform: skewX(-18deg);
+  animation: ui-signup-sheen 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.ui-signup-arrow {
+  display: inline-flex;
+  animation: ui-signup-nudge 1.8s ease-in-out infinite;
+}
+
+@keyframes ui-signup-sheen {
+  0%,
+  62% {
+    left: -60%;
+  }
+  100% {
+    left: 120%;
+  }
+}
+
+@keyframes ui-signup-nudge {
+  0%,
+  55%,
+  100% {
+    transform: translateX(0);
+  }
+  70% {
+    transform: translateX(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-signup::after {
+    display: none;
+  }
+
+  .ui-signup-arrow {
+    animation: none;
+  }
+}
+</style>

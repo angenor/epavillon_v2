@@ -23,7 +23,7 @@ const label = (action: TicketCallToAction) => t(props.compact ? `activity.ticket
 <template>
   <UiButton
     v-if="props.action === 'register' || props.action === 'waitlist'"
-    :variant="props.action === 'register' ? 'primary' : 'secondary'"
+    :variant="props.action === 'register' ? 'signup' : 'secondary'"
     size="lg"
     class="min-h-12!"
     @click="emit('register')"

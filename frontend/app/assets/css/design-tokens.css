@@ -400,6 +400,17 @@
   --color-live-surface: var(--ifdd-rouge-50);
   --color-live-border: var(--ifdd-rouge-300);
 
+  /* S'inscrire — jaune de charte, texte vert très foncé (arbitré le 01/11) : le
+     bouton qu'on doit trouver sans chercher sur une activité, une journée,
+     l'atelier. Ce n'est pas le jaune « attention » des états : il ne colore
+     qu'un aplat d'action. Identique dans les deux thèmes, le jaune porte déjà
+     du texte sombre. */
+  --color-signup: var(--ifdd-jaune-400); /* texte vert-900 : 9:1 */
+  --color-signup-hover: var(--ifdd-jaune-300);
+  --color-signup-active: var(--ifdd-jaune-500);
+  --color-signup-contrast: var(--ifdd-vert-900);
+  --color-signup-edge: var(--ifdd-jaune-700);
+
   /* Hauteur de la barre de navigation, liseré compris (68 + 4 px depuis le 04/10). Elle existe pour UNE
      raison : le bandeau d'accueil doit occuper exactement un écran, ni plus ni
      moins, et il ne peut le calculer qu'en retranchant cette hauteur de
