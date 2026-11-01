@@ -62,3 +62,6 @@ docs/note.md
 
 # Marqueur du banc de répétition, posé par ops/reprise-v1/repeter.sh
 ops/reprise-v1/BANC_PRET
+
+# Brouillons personnels : jamais versionnés
+brouillons/
