@@ -1,13 +1,13 @@
-<!-- Silhouette de la page d'une activité : mêmes conteneurs, débords et points de rupture que Hero, Stage, Ticket et People, pour que rien ne saute à l'arrivée des données. -->
+<!-- Silhouette de la page d'une activité : mêmes conteneurs, débords et points de rupture que Hero, Ticket, Stage et People (billet d'abord sur téléphone), pour que rien ne saute à l'arrivée des données. -->
 <template>
-  <header class="relative isolate overflow-hidden bg-surface-inverse pt-6 pb-28 lg:pb-30">
+  <header class="relative isolate overflow-hidden bg-surface-inverse pt-6 pb-9 lg:pb-30">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
       <div class="flex min-h-11 items-center gap-x-5">
         <UiSkeletonLoader tone="inverse" variant="text" width="7rem" height="1rem" />
         <UiSkeletonLoader tone="inverse" variant="text" width="11rem" />
       </div>
 
-      <div class="mt-8 flex flex-wrap gap-2 sm:mt-10">
+      <div class="mt-5 flex flex-wrap gap-2">
         <UiSkeletonLoader tone="inverse" width="7.5rem" height="2.25rem" rounded="var(--radius-full)" />
         <UiSkeletonLoader tone="inverse" width="6rem" height="2.25rem" rounded="var(--radius-full)" />
       </div>
@@ -46,70 +46,63 @@
     </div>
   </header>
 
-  <div class="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6">
-    <div class="relative -mt-12 flex flex-col gap-10 lg:-mt-[72px] lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-x-8">
-      <div class="contents min-w-0 lg:flex lg:flex-col lg:gap-14 lg:pr-8">
-        <div class="order-1 aspect-video min-w-0 overflow-hidden rounded-lg shadow-lg lg:-mr-8">
-          <UiSkeletonLoader height="100%" rounded="0" />
-        </div>
-
-        <div class="order-4">
-          <div class="border-b border-text pb-3">
-            <UiSkeletonLoader width="9rem" height="1.75rem" />
-          </div>
-          <div class="mt-5">
-            <UiSkeletonLoader :lines="2" height="1.25rem" />
-          </div>
-          <div class="mt-5">
-            <UiSkeletonLoader variant="text" :lines="5" height="1rem" />
+  <div class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
+    <div class="grid grid-cols-1 gap-7 pt-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 lg:pt-0">
+      <div class="relative z-1 overflow-hidden rounded-lg bg-surface-raised shadow-lg lg:col-start-2 lg:row-start-1 lg:-mt-18">
+        <div class="flex items-center gap-4 bg-border-subtle px-6 py-4">
+          <UiSkeletonLoader width="3.5rem" height="3.2rem" />
+          <div class="flex flex-col gap-1.5">
+            <UiSkeletonLoader variant="text" width="6rem" height="1rem" />
+            <UiSkeletonLoader variant="text" width="8rem" height="1rem" />
           </div>
         </div>
-
-        <div class="order-5">
-          <div class="border-b border-text pb-3">
-            <UiSkeletonLoader width="11rem" height="1.75rem" />
+        <div class="flex flex-col px-6 pt-4.5 pb-5.5">
+          <UiSkeletonLoader width="11rem" height="2.4rem" />
+          <div class="mt-2.5">
+            <UiSkeletonLoader variant="text" width="9rem" height="0.875rem" />
           </div>
-          <div class="mt-8 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3">
-            <div v-for="index in 3" :key="index" class="flex min-w-0 flex-col items-center gap-2">
-              <div class="mb-2 size-24 sm:size-28">
-                <UiSkeletonLoader variant="circle" width="100%" height="100%" />
+
+          <div class="mt-4.5 border-t border-border-subtle pt-3.5">
+            <UiSkeletonLoader variant="text" width="6rem" height="1rem" />
+            <div class="mt-2 grid grid-cols-4">
+              <div v-for="index in 4" :key="index" class="flex flex-col items-center gap-1.5 border-l border-border-subtle first:border-l-0">
+                <UiSkeletonLoader width="2.5rem" height="2.5rem" />
+                <UiSkeletonLoader variant="text" width="2rem" height="0.6875rem" />
               </div>
-              <UiSkeletonLoader variant="text" width="75%" height="1.125rem" />
-              <UiSkeletonLoader variant="text" width="55%" />
             </div>
+          </div>
+
+          <div class="mt-4">
+            <UiSkeletonLoader height="3rem" />
+          </div>
+          <div class="mt-4 grid grid-cols-2 gap-2.5">
+            <UiSkeletonLoader height="var(--target-min)" />
+            <UiSkeletonLoader height="var(--target-min)" />
           </div>
         </div>
       </div>
 
-      <div class="contents lg:flex lg:flex-col lg:gap-10">
-        <div class="order-2 overflow-hidden rounded-lg bg-surface-raised shadow-lg">
-          <div class="h-1 bg-border-subtle" />
-          <div class="flex flex-col p-6">
-            <UiSkeletonLoader variant="text" width="9rem" height="0.75rem" />
-            <div class="mt-2.5 flex items-end gap-3">
-              <UiSkeletonLoader width="8.5rem" height="2.925rem" />
-              <UiSkeletonLoader variant="text" width="4.5rem" />
-            </div>
+      <div class="relative z-1 flex min-w-0 flex-col gap-13 lg:col-start-1 lg:row-start-1 lg:-mt-18">
+        <div class="aspect-video min-w-0 overflow-hidden rounded-lg shadow-lg">
+          <UiSkeletonLoader height="100%" rounded="0" />
+        </div>
 
-            <div class="mt-5 border-t border-border-subtle pt-5">
-              <UiSkeletonLoader variant="text" width="6rem" height="0.75rem" />
-              <div class="mt-3 grid grid-cols-4">
-                <div v-for="index in 4" :key="index" class="flex flex-col items-center gap-2 border-l border-border-subtle first:border-l-0">
-                  <UiSkeletonLoader width="2.75rem" height="2.75rem" />
-                  <UiSkeletonLoader variant="text" width="2rem" height="0.6875rem" />
-                </div>
+        <div>
+          <UiSkeletonLoader width="9rem" height="2.2rem" />
+          <div class="mt-4.5">
+            <UiSkeletonLoader variant="text" :lines="5" height="1rem" />
+          </div>
+        </div>
+
+        <div>
+          <UiSkeletonLoader width="13rem" height="2.2rem" />
+          <div class="mt-4.5 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+            <div v-for="index in 2" :key="index" class="flex items-center gap-3.5 rounded-lg border border-border-subtle p-3.5">
+              <UiSkeletonLoader variant="circle" width="3.5rem" height="3.5rem" />
+              <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+                <UiSkeletonLoader variant="text" width="70%" height="1.125rem" />
+                <UiSkeletonLoader variant="text" width="50%" />
               </div>
-            </div>
-
-            <div class="mt-5">
-              <UiSkeletonLoader height="3rem" />
-            </div>
-            <div class="mt-4">
-              <UiSkeletonLoader variant="text" width="60%" height="0.8125rem" />
-            </div>
-            <div class="mt-4 grid grid-cols-2 gap-2">
-              <UiSkeletonLoader height="var(--target-min)" />
-              <UiSkeletonLoader height="var(--target-min)" />
             </div>
           </div>
         </div>

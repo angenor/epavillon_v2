@@ -52,18 +52,22 @@
       "keynote": "Discours principal",
       "facilitator": "Animation",
       "interpreter": "Interprétation"
-    },
-    "orgRole": {
-      "lead": "Porteur",
-      "co_organizer": "Co-organisateur",
+    }
+  },
+  "organizations": {
+    "title": "Organisations",
+    "role": {
+      "lead": "Porteuse",
+      "co_organizer": "Co-organisatrice",
       "partner": "Partenaire",
       "sponsor": "Soutien"
     }
   },
   "sameDay": {
-    "title": "Le même jour",
-    "here": "Vous êtes ici",
-    "all": "Toute la journée"
+    "title": "Dans la même journée",
+    "here": "vous y êtes",
+    "all": "Tout le programme de la journée",
+    "until": "à {end}, {duration}"
   },
   "questions": {
     "title": "Questions du public",
@@ -116,7 +120,17 @@
     "bar": "Inscription à l'activité",
     "live": "Diffusée en direct sur cette page",
     "startsIn": "Commence dans",
-    "places": "aucune place restante | {count} place restante | {count} places restantes"
+    "places": "aucune place restante | {count} place restante | {count} places restantes",
+    "hours": "{start} à {end}",
+    "liveSince": "En direct depuis {time}",
+    "toDay": "Voir la {day}",
+    "short": {
+      "register": "S'inscrire",
+      "waitlist": "Liste d'attente",
+      "watch": "Le direct",
+      "join": "Rejoindre",
+      "replay": "Revoir"
+    }
   },
   "gallery": {
     "title": "Galerie",

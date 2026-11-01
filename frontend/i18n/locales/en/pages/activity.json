@@ -52,8 +52,11 @@
       "keynote": "Keynote",
       "facilitator": "Facilitator",
       "interpreter": "Interpreter"
-    },
-    "orgRole": {
+    }
+  },
+  "organizations": {
+    "title": "Organisations",
+    "role": {
       "lead": "Lead",
       "co_organizer": "Co-organiser",
       "partner": "Partner",
@@ -61,9 +64,10 @@
     }
   },
   "sameDay": {
-    "title": "Same day",
-    "here": "You are here",
-    "all": "The whole day"
+    "title": "On the same day",
+    "here": "you are here",
+    "all": "The whole day programme",
+    "until": "to {end}, {duration}"
   },
   "questions": {
     "title": "Audience questions",
@@ -116,7 +120,17 @@
     "bar": "Activity registration",
     "live": "Streamed live on this page",
     "startsIn": "Starts in",
-    "places": "no seat left | {count} seat left | {count} seats left"
+    "places": "no seat left | {count} seat left | {count} seats left",
+    "hours": "{start} to {end}",
+    "liveSince": "Live since {time}",
+    "toDay": "See the {day}",
+    "short": {
+      "register": "Register",
+      "waitlist": "Waiting list",
+      "watch": "Watch live",
+      "join": "Join",
+      "replay": "Replay"
+    }
   },
   "gallery": {
     "title": "Gallery",
