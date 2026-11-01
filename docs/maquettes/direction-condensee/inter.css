@@ -53,3 +53,38 @@ h1, h2, h3, .heading { font-weight: 800; text-transform: none; letter-spacing: -
 .cal-sticky.is-stuck .wk-head h2 { font-size: 0.88rem; }
 
 .foot b { text-transform: none; letter-spacing: -0.02em; font-weight: 800; }
+
+/* Journée et activité. */
+.date-tile b { font-weight: 800; letter-spacing: -0.05em; }
+.date-tile small { font-size: 0.7rem; letter-spacing: 0.08em; }
+.ticket-date b { font-weight: 800; letter-spacing: -0.06em; }
+.ticket-date span { text-transform: none; letter-spacing: -0.01em; font-size: 1.02rem; font-weight: 700; }
+.ticket-date span small { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.ticket-hours { font-weight: 800; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; font-size: 2rem; }
+.ticket-hours span { letter-spacing: 0; font-size: 0.95rem; }
+.ticket-with h3, .countdown h3 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.countdown b { font-weight: 800; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; font-size: 2rem; }
+.seats-top b { font-weight: 800; letter-spacing: -0.03em; font-size: 1.15rem; }
+.cta-bar b { font-weight: 800; letter-spacing: -0.03em; font-size: 1.15rem; }
+
+.parts-card h2 { font-size: 1.2rem; }
+.highlight .label { font-size: 0.75rem; letter-spacing: 0.08em; }
+.highlight h3 { font-weight: 800; font-size: 1.6rem; letter-spacing: -0.025em; line-height: 1.15; }
+.highlight .when { font-weight: 800; letter-spacing: -0.03em; font-size: 1.3rem; }
+.agenda-part .rule-label b { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.03em; }
+.agenda-part h3.part-title { font-weight: 700; font-size: 1.2rem; letter-spacing: -0.015em; line-height: 1.3; }
+.block > h2 { font-size: clamp(1.5rem, 2.8vw, 1.9rem); letter-spacing: -0.03em; }
+.org i, .partner i, .carrier i { font-weight: 800; letter-spacing: -0.02em; }
+.org i { font-size: 1.2rem; }
+.card-photo h3 { font-size: 1.4rem; letter-spacing: -0.025em; }
+.card-photo .when b { font-weight: 800; letter-spacing: -0.06em; font-size: 3rem; }
+.card-photo .when span { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; }
+
+.hero-day h1, .hero-act h1 { font-weight: 800; letter-spacing: -0.035em; line-height: 1.06; }
+.hero-day h1 { font-size: clamp(2rem, 3.8vw, 3rem); }
+.hero-act h1 { font-size: clamp(2rem, 4vw, 3.2rem); }
+.carrier small { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; }
+.speaker b { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
+.speaker i { font-weight: 800; letter-spacing: -0.02em; font-size: 1rem; }
+.player h2 { font-size: 1.4rem; }
+.state-switch a { text-transform: none; letter-spacing: 0; font-size: 0.82rem; }
