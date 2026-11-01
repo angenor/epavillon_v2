@@ -332,7 +332,7 @@
 </footer>
 
 
-<div class="veil" role="dialog" aria-modal="true" aria-labelledby="changements">
+<div hidden class="veil" role="dialog" aria-modal="true" aria-labelledby="changements">
   <section class="changes">
     <header class="changes-head">
       <div>
@@ -390,6 +390,18 @@
   // Comme en production : la bande s'ouvre sur le jour courant.
   const current = document.querySelector('.daystrip a[aria-current]')
   if (current) current.parentElement.scrollLeft = current.offsetLeft - 80
+</script>
+<script>
+  {
+    // Maquette : fermée à l'arrivée ; ouverte par le lien rouge ou celui du bandeau.
+    const veil = document.querySelector('.veil')
+    const open = () => { veil.hidden = false; veil.querySelector('.close').focus() }
+    const close = () => { veil.hidden = true }
+    document.querySelectorAll('.since-link, .updated').forEach(b => b.addEventListener('click', open))
+    veil.querySelector('.close').addEventListener('click', close)
+    veil.addEventListener('click', e => { if (e.target === veil) close() })
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close() })
+  }
 </script>
 </body>
 </html>
