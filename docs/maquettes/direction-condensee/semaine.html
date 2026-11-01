@@ -88,20 +88,19 @@
 
   .daystrip a.is-rest b { text-decoration: line-through; text-decoration-thickness: 1px; }
 
-  /* Téléphone : un jour par écran sous la bande de dates ; l'en-tête vit dans la colonne. */
+  /* Téléphone : un jour par écran ; la rangée des en-têtes reste collée comme sur grand écran,
+     la bande de dates n'apporte plus rien ici. Les deux rangées se suivent dans les deux sens. */
   @media (max-width: 960px) {
-    :root { --col: 86vw; --rest: 60vw; --gutter: 16px; }
-    .cal-sticky { display: none; }
-    .wk-head-m { display: block; }
+    :root { --col: 86vw; --rest: 60vw; --gutter: 16px; --sticky-top: 72px; }
+    .daystrip { display: none !important; }
+    .cal-arrow { display: none; }
+    .cal-head-scroll { overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding: 0 var(--gutter); }
     .cal-body-scroll { scroll-snap-type: x mandatory; scroll-padding: 0 var(--gutter); scrollbar-width: none; }
-    .cal-body .cal-col { scroll-snap-align: start; }
-    .cal-body .cal-col .wk-head { border-bottom: 2px solid var(--color-text); }
-    .cal-body .cal-col.is-special .wk-head { border-color: var(--day-solid); }
-    .cal-body .cal-col.is-special { border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg); }
+    .cal-head .cal-col, .cal-body .cal-col { scroll-snap-align: start; }
     .wk-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); }
     .wk-media { aspect-ratio: auto; min-height: 100%; }
-    .rest-note { position: static; }
-    .cal-bar .cal-nav { display: none; }
+    .rest-note { top: calc(var(--sticky-top) + 110px); }
+    .cal-bar .cal-nav { display: block; }
   }
 </style>
 </head>
@@ -524,11 +523,14 @@
 
   // La rangée des en-têtes suit le défilement des colonnes.
   function sync() {
-    headScroll.scrollLeft = body.scrollLeft
+    if (Math.abs(headScroll.scrollLeft - body.scrollLeft) > 1) headScroll.scrollLeft = body.scrollLeft
     prev.disabled = body.scrollLeft < 4
     next.disabled = body.scrollLeft + body.clientWidth >= body.scrollWidth - 4
   }
   body.addEventListener('scroll', sync, { passive: true })
+  headScroll.addEventListener('scroll', () => {
+    if (Math.abs(headScroll.scrollLeft - body.scrollLeft) > 1) body.scrollLeft = headScroll.scrollLeft
+  }, { passive: true })
   headScroll.parentElement.addEventListener('wheel', e => {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { body.scrollLeft += e.deltaX; e.preventDefault() }
   }, { passive: false })

@@ -96,18 +96,20 @@
   .row-org .logo img { width: 100%; height: 100%; object-fit: contain; }
   .row-org > span:last-child { align-self: center; }
 
-  /* L'activité en direct, à la une (première maquette). */
-  .lead { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); margin-top: 28px; border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-md); border: 1px solid var(--color-live-border); }
-  .lead-media { position: relative; min-height: 320px; }
+  /* L'activité en direct, à la une : moitié de la hauteur de la première maquette, sans description. */
+  .lead { display: grid; grid-template-columns: 340px minmax(0, 1fr); margin-top: 24px; border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-md); border: 1px solid var(--color-live-border); }
+  .lead-media { position: relative; min-height: 196px; }
   .lead-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .lead-media .tag { position: absolute; top: 18px; left: 18px; }
-  .lead-body { padding: 30px; display: flex; flex-direction: column; }
-  .lead-kicker { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-live); }
-  .lead-time { margin-top: 8px; font-family: var(--font-heading); text-transform: uppercase; color: var(--color-live); }
-  .lead-time b { font-size: 3.4rem; font-weight: 700; line-height: 0.9; }
-  .lead-time span { margin-left: 8px; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.04em; color: var(--color-text-secondary); }
-  .lead h3 { margin-top: 12px; font-size: 1.9rem; text-transform: none; font-weight: 600; line-height: 1.08; }
-  .lead p { margin: 10px 0 0; color: var(--color-text-secondary); max-width: 60ch; }
-  .lead .row-org { margin-top: 16px; }
-  .lead-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; padding-top: 22px; }
-  @media (max-width: 860px) { .lead { grid-template-columns: minmax(0, 1fr); } .lead-media { min-height: 200px; } .lead-body { padding: 20px; } .lead-time b { font-size: 2.6rem; } .lead h3 { font-size: 1.5rem; } }
+  .lead-media .tag { position: absolute; top: 12px; left: 12px; }
+  .lead-body { display: flex; flex-direction: column; justify-content: center; padding: 18px 26px; }
+  .lead-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+  .lead-kicker { font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-live); }
+  .lead-time { font-family: var(--font-heading); color: var(--color-live); }
+  .lead-time b { font-size: 1.9rem; font-weight: 700; line-height: 1; }
+  .lead-time span { margin-left: 6px; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); }
+  .lead h3 { margin-top: 6px; font-size: 1.45rem; text-transform: none; font-weight: 600; line-height: 1.1; }
+  .lead-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 12px; }
+  .lead .row-org { margin: 0; font-size: 0.85rem; }
+  .lead .row-org .logo { width: 34px; height: 34px; font-size: 0.65rem; }
+  .lead-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto; }
+  @media (max-width: 860px) { .lead { grid-template-columns: minmax(0, 1fr); } .lead-media { min-height: 150px; } .lead-body { padding: 16px; } .lead-actions { margin-left: 0; } }
