@@ -2,64 +2,32 @@
 import type { EventEdition } from '~/types/event/edition'
 
 /**
- * LES QUATRE FAITS D'UNE ÉDITION — dates, lieu, mode, pavillon.
+ * LES QUATRE FAITS D'UNE ÉDITION, dans le bandeau : dates, lieu, participation,
+ * pavillon. Une carte chacun : libellé en petites capitales, valeur en
+ * condensé gras, précision dessous. Une `<dl>`, ce sont des données.
  *
- * ── POURQUOI CE COMPOSANT EXISTE ────────────────────────────────────────────
+ * `glass` sur la photo de l'édition (jetons du verre) ; `inverse` sur l'aplat
+ * bleu nuit, où le verre n'a pas de média à séparer.
  *
- * `EventHero` a DEUX rendus : un bandeau plein cadre quand l'édition porte un
- * visuel, l'en-tête sobre sinon. Les faits sont les mêmes dans les deux, seule
- * la MATIÈRE change — du verre sur la photographie, une surface de page sinon.
- * Écrits deux fois, ils auraient divergé au premier ajout, et c'est justement là
- * qu'une divergence se voit le moins : un seul des deux rendus est à l'écran.
- *
- * ── DES TUILES, ET PLUS UNE LISTE EN DEUX COLONNES (19/08) ──────────────────
- *
- * La liste de définitions posait ses quatre entrées à même le fond. Sur une
- * photographie, chacune flottait sans attache et l'ensemble se lisait comme un
- * paragraphe éclaté. Chaque fait tient désormais dans sa propre tuile : un cadre
- * léger, une icône, un intitulé, une valeur. Le contraste ne dépend plus de ce
- * que montre l'image derrière — c'est la tuile qui porte le fond.
- *
- * Cela reste une `<dl>` : ce sont des données, pas une accroche. L'icône n'a
- * jamais le sens à sa charge, l'intitulé est toujours écrit.
- *
- * ── TOUTE DATE PORTE SON FUSEAU ─────────────────────────────────────────────
- *
- * Celui de l'édition (`event.events.timezone`), jamais celui du visiteur :
- * « du 9 au 20 novembre 2027, heure de Belém ».
+ * Toute date porte le fuseau de l'édition, jamais celui du visiteur.
  */
 
 interface Props {
   edition: EventEdition
-  /** Nom du pays hôte, déjà résolu depuis `reference.countries`. */
+  /** Nom du pays hôte, déjà résolu. */
   country?: string | null
-  /** `glass` : posées sur un média voilé. `surface` : sur un fond de page. */
-  tone?: 'glass' | 'surface'
+  tone?: 'glass' | 'inverse'
 }
 
-const props = withDefaults(defineProps<Props>(), { tone: 'surface' })
+const props = withDefaults(defineProps<Props>(), { country: null, tone: 'glass' })
 
 const { t } = useI18n()
 const { dateRange, zoneLabel } = useDateTime()
 
-/** « du 9 au 20 novembre 2027 » dans le fuseau de l'édition. */
-const dates = computed(() =>
-  dateRange(props.edition.starts_at, props.edition.ends_at, props.edition.timezone),
-)
-
-/** « heure de Belém » — le lieu prime sur la ville déduite de l'identifiant IANA. */
-const zone = computed(() => zoneLabel(props.edition.timezone, props.edition.city ?? undefined))
-
-/** « Belém, Brésil » ; rien du tout pour une édition entièrement en ligne. */
-const place = computed(() => {
-  const parts = [props.edition.city, props.country].filter((part): part is string => Boolean(part))
-  return parts.join(', ')
-})
-
 const FORMAT_ICONS: Record<EventEdition['participation_mode'], string> = {
   online: 'monitor',
   in_person: 'map-pin',
-  hybrid: 'globe',
+  hybrid: 'users',
 }
 
 interface Fact {
@@ -68,92 +36,74 @@ interface Fact {
   label: string
   value: string
   detail?: string
-  /** Le vert du pavillon reste le vert : c'est une information CONFIRMÉE. */
-  iconClass?: string
 }
 
 const facts = computed<Fact[]>(() => {
+  const edition = props.edition
   const list: Fact[] = [
     {
       key: 'dates',
       icon: 'calendar',
       label: t('event.public.hero.dates'),
-      value: dates.value,
-      detail: zone.value,
+      value: dateRange(edition.starts_at, edition.ends_at, edition.timezone),
+      detail: zoneLabel(edition.timezone, edition.city ?? undefined),
     },
   ]
 
-  if (place.value) {
+  // La ville en grand, le pays dessous ; sans ville, le pays seul.
+  const place = edition.city ?? props.country
+  if (place) {
+    const detail = [edition.city ? props.country : null, edition.address].filter((part): part is string => Boolean(part))
     list.push({
       key: 'place',
       icon: 'map-pin',
       label: t('event.public.hero.place'),
-      value: place.value,
-      detail: props.edition.address ?? undefined,
+      value: place,
+      detail: detail.join(', ') || undefined,
     })
   }
 
   list.push({
     key: 'mode',
-    icon: FORMAT_ICONS[props.edition.participation_mode],
+    icon: FORMAT_ICONS[edition.participation_mode],
     label: t('event.public.hero.mode'),
-    value: t(`session-card.format.${props.edition.participation_mode}`),
+    value: t(`session-card.format.${edition.participation_mode}`),
+    detail: t(`event.public.hero.modeDetail.${edition.participation_mode}`),
   })
 
-  if (props.edition.has_pavilion) {
+  if (edition.has_pavilion) {
     list.push({
       key: 'pavilion',
-      icon: 'check',
+      icon: 'building',
       label: t('event.public.hero.pavilion'),
-      value: t('event.public.hero.pavilionHeld'),
-      iconClass: 'text-success',
+      value: t('event.public.hero.pavilionValue'),
+      detail: t('event.public.hero.pavilionHeld'),
     })
   }
 
   return list
 })
 
-const glass = computed(() => props.tone === 'glass')
-
 const tileClass = computed(() =>
-  glass.value
-    ? 'border-glass-border bg-glass-raised backdrop-blur-glass'
-    : 'border-border bg-surface-raised',
-)
-const labelClass = computed(() => (glass.value ? 'text-text-on-inverse-muted' : 'text-text-subtle'))
-const valueClass = computed(() => (glass.value ? 'text-text-on-inverse' : 'text-text'))
-const detailClass = computed(() =>
-  glass.value ? 'text-text-on-inverse-muted' : 'text-text-muted',
+  props.tone === 'glass'
+    ? 'border-glass-border bg-glass backdrop-blur-glass'
+    : 'border-border-on-inverse bg-surface-inverse-raised',
 )
 </script>
 
 <template>
-  <dl class="grid gap-3 sm:grid-cols-2">
-    <div
-      v-for="fact in facts"
-      :key="fact.key"
-      class="flex items-start gap-3 rounded-lg border px-4 py-3"
-      :class="tileClass"
-    >
-      <UiIcon
-        :name="fact.icon"
-        size="1.05rem"
-        class="mt-0.5 shrink-0"
-        :class="fact.iconClass ?? detailClass"
-      />
-      <div class="min-w-0">
-        <dt
-          class="text-xs uppercase"
-          :class="labelClass"
-          :style="{ letterSpacing: 'var(--tracking-caps)' }"
-        >
-          {{ fact.label }}
-        </dt>
-        <dd class="mt-0.5 text-sm" :class="valueClass">
+  <dl class="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+    <div v-for="fact in facts" :key="fact.key" class="min-w-0 rounded-lg border px-3.5 py-3" :class="tileClass">
+      <dt class="flex items-center gap-1.5 text-[0.7rem] font-bold tracking-[0.07em] text-text-on-inverse-muted uppercase">
+        <UiIcon :name="fact.icon" size="0.95rem" class="shrink-0" />
+        {{ fact.label }}
+      </dt>
+      <dd class="mt-1">
+        <span class="block font-condensed text-[1.3rem] leading-[1.05] font-bold tracking-[0.02em] text-text-on-inverse uppercase [overflow-wrap:anywhere]">
           {{ fact.value }}
-          <span v-if="fact.detail" class="block text-xs" :class="detailClass">{{ fact.detail }}</span>
-        </dd>
-      </div>
+        </span>
+        <span v-if="fact.detail" class="mt-0.5 block text-[0.78rem] leading-snug text-text-on-inverse-muted">{{ fact.detail }}</span>
+      </dd>
     </div>
   </dl>
 </template>

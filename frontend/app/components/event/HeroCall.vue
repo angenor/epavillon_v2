@@ -3,130 +3,107 @@ import type { CallForProposals } from '~/types/event/call'
 import type { EventEdition } from '~/types/event/edition'
 
 /**
- * L'ACTION DE DÉPÔT, DANS LE BANDEAU — le panneau flottant de la page publique
- * d'une édition.
+ * LE BILLET DE L'APPEL À PROPOSITIONS, en tête de la colonne de droite : la
+ * même carte que la journée et l'activité (`UiTicket`), bande bleu nuit au nom
+ * de l'appel. C'est la raison de la visite : il remonte sur le bandeau et reste
+ * collé sur grand écran.
  *
- * ── POURQUOI ELLE A QUITTÉ L'ENCART D'APPEL (19/08) ─────────────────────────
- *
- * Le bouton « Déposer une proposition » vivait dans `EventCallDetails`, à mi-page.
- * C'est LA raison pour laquelle une organisation ouvre cet écran, et il fallait
- * défiler pour le trouver : sur un portable, le premier écran ne montrait que le
- * titre de la conférence. Le panneau remonte donc dans le bandeau, à côté du
- * titre, avec les deux seules informations qui décident du clic — le temps qui
- * reste, et la date qui fait foi.
- *
- * L'encart garde tout le reste : la description de l'appel, les conditions, les
- * consignes, la grille. Rien n'est perdu, et la page ne porte toujours qu'UN
- * bouton principal.
- *
- * ── TROIS PHASES, TROIS PANNEAUX ────────────────────────────────────────────
- *
- *   · À VENIR  la date d'ouverture, et rien à faire aujourd'hui. Annoncer une
- *              action impossible use la confiance.
- *   · OUVERT   le rebours, l'échéance, le dépôt, les critères.
- *   · CLOS     la date de clôture et l'annonce des résultats. Aucun bouton.
- *
- * L'état vient du MODÈLE : `utils/call.ts` rejoue `event.is_call_open()` et
- * `event.effective_deadline()`, prolongation comprise.
- *
- * ── SUR PHOTOGRAPHIE, L'URGENCE PASSE PAR LA PASTILLE, PAS PAR LE CHIFFRE ───
- *
- * Les jetons d'état sont calibrés sur les surfaces de page : `--color-warning`
- * est un jaune sombre en thème clair, illisible sur un bandeau voilé. Le rebours
- * garde donc la couleur du texte inversé, et c'est la pastille — un APLAT opaque,
- * lisible sur n'importe quelle image — qui porte le jaune des dernières
- * quarante-huit heures. Sur la surface de page, le rendu sobre reprend les jetons
- * habituels.
+ * Trois phases, trois contenus, l'état venant du modèle (`utils/call.ts` rejoue
+ * `event.is_call_open()` et `event.effective_deadline()`, prolongation comprise) :
+ *   · à venir : la date d'ouverture, rien à faire aujourd'hui ;
+ *   · ouvert  : le rebours, l'échéance, le dépôt (seul bouton principal) ;
+ *   · clos    : la date de clôture, l'annonce des résultats, la programmation.
  */
 
 interface Props {
-  /** `null` quand l'édition n'ouvre aucun appel : le panneau n'est pas rendu. */
+  /** `null` quand l'édition n'ouvre aucun appel : le billet n'est pas rendu. */
   call: CallForProposals | null
   edition: EventEdition
   /** Destination du dépôt (écran A4). */
   submitTo: string
-  /** Ancre de la grille d'évaluation, sur cette même page ; nulle quand l'appel n'en publie pas. */
+  /** La programmation de l'édition, ou la liste des programmations tant qu'elle n'est pas publiée. */
+  programmeTo: string
+  programmePublished: boolean
+  /** Ancre de la grille d'évaluation ; nulle quand l'appel n'en publie pas. */
   criteriaHref?: string | null
-  /** `glass` sur le bandeau photographique, `surface` sur l'en-tête sobre. */
-  tone?: 'glass' | 'surface'
 }
 
-const props = withDefaults(defineProps<Props>(), { tone: 'surface', criteriaHref: null })
+const props = withDefaults(defineProps<Props>(), { criteriaHref: null })
 
 const { t } = useI18n()
-const { date, dateTime, zoneOf } = useDateTime()
+const { tr } = useI18nText()
+const { date, dateTime, timeWithZone } = useDateTime()
 
 const phase = computed<CallPhase | null>(() => (props.call ? callPhase(props.call) : null))
 const deadline = computed(() => (props.call ? effectiveDeadline(props.call) : null))
 const countdown = useCountdown(deadline)
 
 const zone = computed(() => props.edition.timezone)
-const zoneName = computed(() => props.edition.city ?? props.edition.timezone)
+const city = computed(() => props.edition.city ?? undefined)
 
-const deadlineLabel = computed(() => (deadline.value ? dateTime(deadline.value, zone.value) : ''))
-const opensLabel = computed(() =>
-  props.call ? dateTime(props.call.opens_at, zone.value) : '',
+/** L'instant qui fait foi : l'ouverture tant qu'elle n'a pas eu lieu, l'échéance ensuite. */
+const keyInstant = computed(() => (phase.value === 'upcoming' ? (props.call?.opens_at ?? null) : deadline.value))
+const keyDate = computed(() => (keyInstant.value ? date(keyInstant.value, zone.value) : ''))
+const keyTime = computed(() =>
+  keyInstant.value ? t('event.public.call.atTime', { time: timeWithZone(keyInstant.value, zone.value, city.value) }) : '',
+)
+
+const originalDeadlineLabel = computed(() =>
+  props.call && wasExtended(props.call) ? dateTime(props.call.closes_at, zone.value) : '',
 )
 /** `results_expected_at` est une DATE : midi UTC pour qu'aucun fuseau ne la décale. */
 const resultsLabel = computed(() =>
-  props.call?.results_expected_at
-    ? date(`${props.call.results_expected_at}T12:00:00Z`, zone.value)
-    : '',
+  props.call?.results_expected_at ? date(`${props.call.results_expected_at}T12:00:00Z`, zone.value) : '',
 )
 
 const isUrgent = computed(() => phase.value === 'open' && Boolean(countdown.value?.imminent))
 
-const glass = computed(() => props.tone === 'glass')
+const keyLabel = computed(() =>
+  t(
+    phase.value === 'upcoming'
+      ? 'event.public.call.opensAt'
+      : phase.value === 'open'
+        ? 'event.public.call.deadline'
+        : 'event.public.call.closedAt',
+  ),
+)
 
-const panelClass = computed(() => {
-  if (glass.value) {
-    return 'border-glass-border bg-glass shadow-glass backdrop-blur-glass'
-  }
-  if (phase.value === 'open') {
-    return isUrgent.value
-      ? 'border-(length:--border-medium) border-warning-border bg-warning-surface'
-      : 'border-(length:--border-medium) border-accent bg-info-surface'
-  }
-  return 'border-border bg-surface-raised'
-})
-
-const labelClass = computed(() => (glass.value ? 'text-text-on-inverse-muted' : 'text-text-subtle'))
-const valueClass = computed(() => (glass.value ? 'text-text-on-inverse' : 'text-text'))
-const mutedClass = computed(() => (glass.value ? 'text-text-on-inverse-muted' : 'text-text-muted'))
-
-/** Le chiffre du rebours : neutre sur photographie, coloré sur fond de page. */
-const countdownClass = computed(() => {
-  if (glass.value) return 'text-text-on-inverse'
-  return isUrgent.value ? 'text-warning' : 'text-accent'
-})
+const capsClass = 'text-[0.72rem] font-bold tracking-[0.07em] text-text-muted uppercase'
 </script>
 
 <template>
-  <aside
-    v-if="props.call && phase"
-    class="rounded-xl border p-5 sm:p-6"
-    :class="panelClass"
-    :aria-label="t('event.public.call.phase.' + phase)"
-  >
-    <UiBadge
-      :intent="phase === 'open' ? (isUrgent ? 'warning' : 'info') : 'neutral'"
-      size="sm"
-      :solid="phase !== 'closed'"
-    >
-      {{ t(`event.public.call.phase.${phase}`) }}
-    </UiBadge>
+  <UiTicket v-if="props.call && phase" :label="t('event.public.call.band')">
+    <template #band>
+      <div class="flex items-center gap-3.5 bg-surface-inverse px-5.5 py-4 text-text-on-inverse">
+        <div class="min-w-0">
+          <small class="block text-[0.72rem] font-bold tracking-[0.07em] text-text-on-inverse-muted uppercase">
+            {{ t('event.public.call.band') }}
+          </small>
+          <b class="block font-condensed text-2xl leading-[1.05] font-bold tracking-[0.02em] uppercase">
+            {{ tr(props.call.title) }}
+          </b>
+        </div>
+        <UiIcon name="document" size="1.8rem" :stroke-width="1.6" class="ml-auto shrink-0 text-accent-on-inverse" />
+      </div>
+    </template>
 
-    <!-- LE REBOURS. Absent du rendu serveur au premier affichage, il se remplit à
-         l'hydratation — `useCountdown()` explique pourquoi. -->
-    <template v-if="phase === 'open' && countdown && !countdown.expired">
-      <p
-        class="mt-4 text-xs uppercase"
-        :class="labelClass"
-        :style="{ letterSpacing: 'var(--tracking-caps)' }"
+    <div>
+      <UiBadge
+        :intent="phase === 'open' ? (isUrgent ? 'warning' : 'info') : 'neutral'"
+        size="sm"
+        :solid="phase === 'open'"
       >
-        {{ t('event.public.call.remaining') }}
-      </p>
-      <p class="font-display text-4xl leading-none tabular-nums sm:text-5xl" :class="countdownClass">
+        {{ t(`event.public.call.phase.${phase}`) }}
+      </UiBadge>
+    </div>
+
+    <!-- Le rebours se remplit à l'hydratation : `useCountdown()` dit pourquoi. -->
+    <div v-if="phase === 'open' && countdown && !countdown.expired" class="mt-4">
+      <p :class="capsClass">{{ t('event.public.call.remaining') }}</p>
+      <p
+        class="mt-1 font-condensed text-[2.6rem] leading-none font-bold tabular-nums uppercase"
+        :class="isUrgent ? 'text-warning' : 'text-accent'"
+      >
         <template v-if="countdown.days > 0">
           {{ t('event.public.call.countdown.days', { count: countdown.days }, countdown.days) }}
         </template>
@@ -137,48 +114,31 @@ const countdownClass = computed(() => {
           {{ t('event.public.call.countdown.minutes', { count: countdown.minutes }, countdown.minutes) }}
         </template>
       </p>
-    </template>
+    </div>
 
-    <!-- La date qui fait foi. Le rebours dit l'urgence, elle dit le fait. -->
+    <!-- La date qui fait foi : le rebours dit l'urgence, elle dit le fait. -->
     <dl class="mt-4">
-      <dt
-        class="text-xs uppercase"
-        :class="labelClass"
-        :style="{ letterSpacing: 'var(--tracking-caps)' }"
-      >
-        {{
-          t(
-            phase === 'upcoming'
-              ? 'event.public.call.opensAt'
-              : phase === 'open'
-                ? 'event.public.call.deadline'
-                : 'event.public.call.closedAt',
-          )
-        }}
-      </dt>
-      <dd class="mt-1 text-sm" :class="valueClass">
-        {{ phase === 'upcoming' ? opensLabel : deadlineLabel }}
-        <span class="block text-xs" :class="mutedClass">
-          {{ zoneOf(zoneName) }}
+      <dt :class="capsClass">{{ keyLabel }}</dt>
+      <dd class="mt-1">
+        <span class="block font-condensed text-[2.1rem] leading-none font-bold text-heading uppercase">{{ keyDate }}</span>
+        <span class="mt-1 block text-sm text-text-secondary">{{ keyTime }}</span>
+        <!-- La prolongation ne remplace pas l'échéance annoncée : elle s'ajoute. -->
+        <span v-if="originalDeadlineLabel" class="mt-1 block text-xs text-text-muted">
+          {{ t('event.public.call.extendedFrom', { date: originalDeadlineLabel }) }}
         </span>
       </dd>
 
       <template v-if="phase !== 'open' && resultsLabel">
-        <dt
-          class="mt-3 text-xs uppercase"
-          :class="labelClass"
-          :style="{ letterSpacing: 'var(--tracking-caps)' }"
-        >
-          {{ t('event.public.call.results') }}
-        </dt>
-        <dd class="mt-1 text-sm" :class="valueClass">{{ resultsLabel }}</dd>
+        <dt class="mt-4" :class="capsClass">{{ t('event.public.call.results') }}</dt>
+        <dd class="mt-1 text-sm font-semibold text-text">{{ resultsLabel }}</dd>
       </template>
     </dl>
 
-    <!-- L'ACTION. Pleine largeur : c'est la seule de la page, et le panneau est
-         étroit — un bouton flottant à gauche d'un vide ne se lit pas comme une
-         invitation. -->
-    <div class="mt-5 flex flex-col gap-2">
+    <p v-if="phase === 'closed'" class="mt-4 rounded-lg bg-info-surface px-3 py-2.5 text-sm font-semibold text-info">
+      {{ t('event.public.call.closedNote') }}
+    </p>
+
+    <div class="mt-5 flex flex-col gap-2.5">
       <UiButton
         v-if="phase === 'open'"
         :to="props.submitTo"
@@ -188,12 +148,19 @@ const countdownClass = computed(() => {
         :label="t('event.public.call.submit')"
       />
       <UiButton
+        v-else
+        :to="props.programmeTo"
+        size="lg"
+        block
+        :label="props.programmePublished ? t('event.public.programmeLink.see') : t('event.public.programmeLink.seePast')"
+      />
+      <UiButton
         v-if="props.criteriaHref"
-        :variant="glass ? 'glass' : 'secondary'"
+        variant="secondary"
         :to="props.criteriaHref"
         block
         :label="t('event.public.call.seeCriteria')"
       />
     </div>
-  </aside>
+  </UiTicket>
 </template>

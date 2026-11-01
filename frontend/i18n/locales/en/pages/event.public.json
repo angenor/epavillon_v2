@@ -13,7 +13,7 @@
     "place": "Location",
     "mode": "Participation",
     "pavilion": "Pavilion",
-    "pavilionHeld": "La Francophonie runs a pavilion here",
+    "pavilionHeld": "la Francophonie runs a pavilion there",
     "status": {
       "draft": "Draft",
       "announced": "Announced",
@@ -21,6 +21,13 @@
       "completed": "Completed",
       "cancelled": "Cancelled",
       "suspended": "Suspended"
+    },
+    "back": "Editions",
+    "pavilionValue": "Present",
+    "modeDetail": {
+      "online": "fully online",
+      "in_person": "on site",
+      "hybrid": "on site and online"
     }
   },
   "call": {
@@ -40,12 +47,22 @@
     "closedAt": "Submissions closed on",
     "extendedFrom": "Extended; deadline originally announced: {date}",
     "results": "Results announced",
-    "rules": "Conditions",
-    "rulesValue": "Up to {max} submissions per organization · {speakers} speakers · {duration} minutes per activity",
     "submit": "Submit a proposal",
     "seeCriteria": "See the review criteria",
     "guidelines": "Submission guidelines",
-    "closedNote": "Submissions received are under review. Selected organizations are notified individually, and the programme is published as decisions are made."
+    "closedNote": "Submissions received are under review. Selected organizations are notified individually, and the programme is published as decisions are made.",
+    "band": "Call for proposals",
+    "atTime": "at {time}",
+    "conditions": {
+      "title": "Call conditions",
+      "unlimited": "No limit",
+      "proposals": "submission at most per organization | submission at most per organization | submissions at most per organization",
+      "proposalsUnlimited": "on submissions per organization",
+      "range": "{min} to {max}",
+      "speakers": "speaker per activity | speaker per activity | speakers per activity",
+      "minutes": "{count} min",
+      "duration": "per activity"
+    }
   },
   "milestones": {
     "title": "Key dates",
@@ -59,18 +76,27 @@
     "title": "About this edition"
   },
   "programmeLink": {
-    "title": "Programme",
-    "countUnit": "published activity | published activity | published activities",
-    "dayCount": "{count} day | {count} day | {count} days",
+    "title": "The programme",
     "unpublished": "The programme will be published once activities have been selected. Programmes of past editions remain available.",
     "see": "See the programme",
-    "seePast": "See the programmes"
+    "seePast": "See the programmes",
+    "daysLabel": "Go to a day of the programme",
+    "figures": {
+      "sessions": "activity | activity | activities",
+      "organizations": "lead organization | lead organization | lead organizations",
+      "days": "day | day | days"
+    }
   },
   "specialDays": {
     "title": "Special days",
     "description": "Activities chosen by IFDD among those selected, brought together around a single subject. A special day does not necessarily fill a whole day, and may run over into the next one.",
-    "indicative": "indicative dates",
-    "activityCount": "{count} activity | {count} activity | {count} activities"
+    "activityCount": "{count} activity | {count} activity | {count} activities",
+    "open": "See the day",
+    "state": {
+      "past": "Over",
+      "today": "Today",
+      "tomorrow": "Tomorrow"
+    }
   },
   "criteria": {
     "title": "Review criteria",
@@ -80,15 +106,17 @@
       "criterion": "Criterion",
       "maxScore": "Max. score",
       "weight": "Weight",
-      "total": "Max. points"
+      "total": "Max. points",
+      "sum": "Total"
     },
     "knockout": "Knockout",
     "knockoutNote": "A knockout criterion scored zero disqualifies the submission, whatever the overall average.",
     "maxTotal": "Maximum achievable score: {total} points.",
-    "reviews": "{count} independent reviews per submission",
+    "reviews": "{count} independent review per submission. | {count} independent review per submission. | {count} independent reviews per submission.",
     "empty": {
       "title": "Grid not published",
       "description": "The review criteria for this edition have not been published yet."
     }
-  }
+  },
+  "aside": "Call for proposals and key dates"
 }
