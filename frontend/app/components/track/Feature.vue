@@ -50,27 +50,36 @@ const files = computed(() =>
   >
     <UiImage v-if="props.feature.visual" :image="props.feature.visual" ratio="3 / 4" rounded="var(--radius-md)" sizes="120px" class="w-30" />
     <div class="min-w-0" :class="{ 'sm:col-span-2': !props.feature.visual }">
-      <p v-if="props.feature.kicker" class="text-xs font-bold text-text-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
+      <p v-if="props.feature.kicker" class="heading-condensed text-[1.05rem] tracking-[0.06em] text-(--color-day)">
         {{ tr(props.feature.kicker) }}
       </p>
-      <h2 id="journee-encart-titre" class="mt-1 font-sans text-xl font-bold text-heading">{{ tr(props.feature.title) }}</h2>
+      <h2 id="journee-encart-titre" class="mt-1 font-condensed text-[1.75rem] leading-[1.08] font-semibold text-heading">{{ tr(props.feature.title) }}</h2>
       <p v-if="props.feature.body" class="mt-2 max-w-(--measure) text-text-secondary">{{ tr(props.feature.body) }}</p>
-      <p class="mt-3 flex flex-wrap gap-x-5 gap-y-1">
-        <UiButton v-if="link" variant="link" icon="document" :to="link.to" :href="link.href">{{ link.label }}</UiButton>
-        <UiButton v-for="file in files" :key="file.id" variant="link" icon="download" :href="file.url">
-          {{ file.label }}<span class="font-normal text-text-muted"> · {{ file.size }}</span>
-        </UiButton>
-      </p>
+      <ul class="mt-3 flex flex-wrap gap-x-6">
+        <li v-if="link">
+          <NuxtLink v-if="link.to" :to="link.to" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+            <UiIcon name="document" size="1.1rem" />{{ link.label }}
+          </NuxtLink>
+          <a v-else :href="link.href" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+            <UiIcon name="document" size="1.1rem" />{{ link.label }}
+          </a>
+        </li>
+        <li v-for="file in files" :key="file.id">
+          <a :href="file.url" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+            <UiIcon name="download" size="1.1rem" />{{ file.label }}<small class="text-sm font-normal text-text-muted">{{ file.size }}</small>
+          </a>
+        </li>
+      </ul>
     </div>
   </section>
 
   <section v-else-if="files.length" aria-labelledby="journee-documents-titre">
-    <h2 id="journee-documents-titre" class="font-sans text-2xl font-bold text-heading">{{ t('track.documents.title') }}</h2>
-    <ul class="mt-4 flex flex-col gap-1">
+    <h2 id="journee-documents-titre" class="heading-condensed text-[clamp(1.9rem,3.6vw,2.5rem)] text-heading">{{ t('track.documents.title') }}</h2>
+    <ul class="mt-3 flex flex-col">
       <li v-for="file in files" :key="file.id">
-        <UiButton variant="link" icon="download" :href="file.url">
-          {{ file.label }}<span class="font-normal text-text-muted"> · {{ file.size }}</span>
-        </UiButton>
+        <a :href="file.url" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+          <UiIcon name="document" size="1.1rem" />{{ file.label }}<small class="text-sm font-normal text-text-muted">{{ file.size }}</small>
+        </a>
       </li>
     </ul>
   </section>

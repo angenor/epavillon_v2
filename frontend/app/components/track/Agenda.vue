@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { PublicTrackEntry, PublicTrackPage } from '~/types/programme/track-page'
 import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
-import type { ProgrammeRowData } from '~/components/event/ProgrammeRow.vue'
+import type { TrackAgendaRowData } from '~/components/track/AgendaRow.vue'
 
 /**
- * Le déroulé d'un fil (journée spéciale, atelier) : une partie = un grand
- * numéro à la couleur de la journée, puis les lignes de la liste éditoriale
- * (`EventProgrammeRow`). Activités et moments sans activité y sont mêlés, dans
- * l'ordre de l'heure ; ce qui n'appartient à aucune partie vient en tête.
+ * Le déroulé d'un fil (journée spéciale, atelier) : une partie = une étiquette
+ * posée sur un filet à la couleur de la journée (« 1 Partie 1 », ses heures),
+ * son intitulé, puis ses lignes (`TrackAgendaRow`). Activités et moments sans
+ * activité y sont mêlés, dans l'ordre de l'heure ; ce qui n'appartient à
+ * aucune partie vient en tête.
  *
  * Chaque activité porte une ancre (`trackActivityAnchor`) : `/programmations`
  * y mène, et l'activité visée s'encadre quelques secondes à l'arrivée.
@@ -20,10 +21,10 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
-const { link, duration, titleParts } = useProgrammeSession()
+const { link, duration } = useProgrammeSession()
 const route = useRoute()
 
 const timezone = computed(() => props.page.edition.timezone)
@@ -34,56 +35,63 @@ const media = computed(() =>
 )
 
 const label = (entry: { acronym?: string | null; name?: string }) => entry.acronym ?? entry.name ?? ''
-
-function row(entry: PublicTrackEntry, index: number) {
-  const current = props.entryState(entry)
-  const stateLabel = current === 'live' ? t('programme.list.live') : t(`session-card.state.${current}`)
-  if (entry.kind === 'moment') {
-    const data: ProgrammeRowData = {
-      id: entry.moment.id,
-      to: null,
-      start: time(entry.starts_at, timezone.value),
-      until: entry.ends_at ? t('track.agenda.until', { end: time(entry.ends_at, timezone.value) }) : '',
-      title: { lead: tr(entry.moment.label), rest: '' },
-      acronym: null,
-      organization: null,
-      country: '',
-      cover: null,
-      current,
-      faded: current === 'past',
-      stateLabel,
-    }
-    return { key: `m-${index}`, anchor: undefined, data, highlight: false, points: lines(entry.moment.description ? tr(entry.moment.description) : '') }
-  }
-  const { session, organizations, is_highlight: highlight } = entry.activity
-  const [lead, ...others] = organizations
-  const data: ProgrammeRowData = {
-    id: session.id,
-    to: link(props.page.edition.slug, session),
-    start: time(session.starts_at, timezone.value),
-    until: t('programme.list.until', { end: time(session.ends_at, timezone.value), duration: duration(session) }),
-    title: titleParts(tr(session.title)),
-    acronym: lead ? label(lead) : session.organization_acronym,
-    placeholder: session.organization_acronym ?? lead?.acronym ?? '',
-    organization: others.length ? others.map(label).join(' · ') : null,
-    country: '',
-    cover: session.cover,
-    current,
-    faded: current === 'cancelled' || current === 'past',
-    stateLabel,
-  }
-  return {
-    key: `a-${session.id}`,
-    anchor: trackActivityAnchor(session.slug),
-    data,
-    highlight,
-    points: lines(session.summary ? tr(session.summary) : ''),
-  }
-}
+const list = computed(() => new Intl.ListFormat(locale.value, { type: 'conjunction' }))
 
 // Une précision par ligne : « Mot de l'OIF », « Mot du Secrétariat de la CCNUCC ».
 function lines(text: string): string[] {
   return text.split('\n').map((line) => line.trim()).filter(Boolean)
+}
+
+function row(entry: PublicTrackEntry, index: number): { key: string; anchor: string | undefined; moment: boolean; data: TrackAgendaRowData } {
+  const current = props.entryState(entry)
+  const stateLabel = current === 'live' ? t('programme.list.live') : t(`session-card.state.${current}`)
+  if (entry.kind === 'moment') {
+    return {
+      key: `m-${index}`,
+      anchor: undefined,
+      moment: true,
+      data: {
+        to: null,
+        start: time(entry.starts_at, timezone.value),
+        until: entry.ends_at ? t('track.agenda.until', { end: time(entry.ends_at, timezone.value) }) : '',
+        title: tr(entry.moment.label),
+        lead: null,
+        others: '',
+        cover: null,
+        placeholder: '',
+        current,
+        stateLabel,
+        liveTo: null,
+        points: lines(entry.moment.description ? tr(entry.moment.description) : ''),
+        highlight: false,
+      },
+    }
+  }
+  const { session, organizations, is_highlight: highlight } = entry.activity
+  const [lead, ...others] = organizations
+  const to = link(props.page.edition.slug, session)
+  const leadName = lead?.name ?? session.organization_name ?? ''
+  const leadAcronym = lead ? (lead.acronym ?? null) : session.organization_acronym
+  return {
+    key: `a-${session.id}`,
+    anchor: trackActivityAnchor(session.slug),
+    moment: false,
+    data: {
+      to,
+      start: time(session.starts_at, timezone.value),
+      until: t('track.agenda.untilDuration', { end: time(session.ends_at, timezone.value), duration: duration(session) }),
+      title: tr(session.title),
+      lead: leadName || leadAcronym ? { name: leadName || leadAcronym || '', acronym: leadAcronym, logo: lead?.logo ?? session.organization_logo ?? null } : null,
+      others: others.length ? t('track.agenda.with', { list: list.value.format(others.map(label).filter(Boolean)) }) : '',
+      cover: session.cover,
+      placeholder: leadAcronym ?? initialsOf(leadName),
+      current,
+      stateLabel,
+      liveTo: current === 'live' ? `${to}#direct` : null,
+      points: lines(session.summary ? tr(session.summary) : ''),
+      highlight,
+    },
+  }
 }
 
 const groups = computed(() => {
@@ -126,24 +134,25 @@ async function reach(hash: string): Promise<void> {
 onMounted(() => reach(route.hash))
 watch(() => route.hash, reach)
 onBeforeUnmount(() => clearTimeout(flashTimer))
+
+const itemClass = (item: { anchor: string | undefined; moment: boolean; data: TrackAgendaRowData }) => [
+  item.moment ? 'border-b border-dashed border-border-subtle' : 'border-b border-border-subtle last:border-b-0',
+  item.data.current === 'live' ? 'border-transparent' : '',
+  flashed.value && flashed.value === item.anchor ? 'rounded-md outline-accent' : 'outline-transparent',
+]
 </script>
 
 <template>
-  <div>
-    <ol v-if="groups.loose.length" class="mt-8">
+  <div class="mt-7">
+    <ol v-if="groups.loose.length" class="mb-10">
       <li
-        v-for="(item, index) in groups.loose"
+        v-for="item in groups.loose"
         :id="item.anchor"
         :key="item.key"
         class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
-        :class="[{ 'border-t border-separator': index > 0 && !item.highlight }, flashed && flashed === item.anchor ? 'rounded-md outline-accent' : 'outline-transparent']"
+        :class="itemClass(item)"
       >
-        <EventProgrammeRow :entry="item.data" density="day" :media="media" :highlight="item.highlight" quiet-upcoming>
-          <template v-if="item.highlight" #kicker>
-            <TrackHighlightMark />
-          </template>
-          <TrackAgendaPoints :points="item.points" />
-        </EventProgrammeRow>
+        <TrackAgendaRow :entry="item.data" :media="media" />
       </li>
     </ol>
 
@@ -151,39 +160,33 @@ onBeforeUnmount(() => clearTimeout(flashTimer))
       v-for="(part, partIndex) in groups.parts"
       :id="part.anchor"
       :key="part.id"
-      class="scroll-mt-28 border-t border-text pt-8"
-      :class="partIndex === 0 && !groups.loose.length ? 'mt-8' : 'mt-10'"
+      class="scroll-mt-28"
+      :class="partIndex ? 'mt-10' : ''"
       :aria-labelledby="`${part.anchor}-titre`"
+      :style="{ '--rule-solid': 'var(--color-day-solid)', '--rule-on': 'var(--color-day-on-solid)' }"
     >
-      <header class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <p class="text-5xl leading-[0.9] font-light text-(--color-day) tabular-nums" aria-hidden="true">{{ part.number }}</p>
-        <h3
-          :id="`${part.anchor}-titre`"
-          class="font-sans text-xs font-bold text-text-muted uppercase"
-          :style="{ letterSpacing: 'var(--tracking-caps)' }"
-        >
-          {{ part.label }}
-        </h3>
-        <p v-if="part.hours" class="text-sm text-text-muted tabular-nums">{{ part.hours }}</p>
+      <header class="rule-line">
+        <component :is="part.title ? 'p' : 'h3'" :id="part.title ? undefined : `${part.anchor}-titre`" class="rule-label">
+          <b class="text-[1.6rem] leading-[0.9] tabular-nums" aria-hidden="true">{{ part.number }}</b>{{ part.label }}
+        </component>
+        <p v-if="part.hours" class="pb-1.5 text-sm text-text-secondary tabular-nums">{{ part.hours }}</p>
       </header>
-      <p v-if="part.title" class="mt-4 mb-2 text-xl leading-snug font-bold text-balance text-heading">{{ part.title }}</p>
-      <ol :class="part.title ? '' : 'mt-4'">
+      <h3
+        v-if="part.title"
+        :id="`${part.anchor}-titre`"
+        class="mt-3.5 mb-1 font-condensed text-2xl leading-[1.1] font-semibold text-balance text-(--color-day)"
+      >
+        {{ part.title }}
+      </h3>
+      <ol>
         <li
-          v-for="(item, index) in part.rows"
+          v-for="item in part.rows"
           :id="item.anchor"
           :key="item.key"
           class="scroll-mt-[calc(var(--nav-height)+1.5rem)] outline-2 outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-700"
-          :class="[
-            { 'border-t border-separator': index > 0 && !item.highlight && !part.rows[index - 1]?.highlight },
-            flashed && flashed === item.anchor ? 'rounded-md outline-accent' : 'outline-transparent',
-          ]"
+          :class="itemClass(item)"
         >
-          <EventProgrammeRow :entry="item.data" density="day" :media="media" :highlight="item.highlight" quiet-upcoming>
-            <template v-if="item.highlight" #kicker>
-              <TrackHighlightMark />
-            </template>
-            <TrackAgendaPoints :points="item.points" />
-          </EventProgrammeRow>
+          <TrackAgendaRow :entry="item.data" :media="media" />
         </li>
       </ol>
     </section>

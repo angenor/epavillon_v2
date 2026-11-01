@@ -1,13 +1,11 @@
 <script setup lang="ts">
-/** « Temps fort » au-dessus du titre d'une activité mise en avant (`session_tracks.is_highlight`). */
+/** « Temps fort » sous une activité mise en avant (`session_tracks.is_highlight`), à la couleur de la journée. */
 const { t } = useI18n()
 </script>
 
 <template>
-  <span
-    class="mb-2 inline-flex rounded-sm bg-(--color-day-solid) px-2 py-0.5 text-xs font-bold text-(--color-day-on-solid) uppercase"
-    :style="{ letterSpacing: 'var(--tracking-caps)' }"
-  >
+  <p class="mt-2 inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-(--color-day)">
+    <UiIcon name="star" size="0.95rem" :stroke-width="2" />
     {{ t('track.highlight.mark') }}
-  </span>
+  </p>
 </template>

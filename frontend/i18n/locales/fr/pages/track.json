@@ -39,26 +39,28 @@
   },
   "ticket": {
     "label": "Date et accès",
-    "zone": "{zone}, {offset}",
-    "opens": "accueil dès {time}",
-    "home": "Chez vous ({zone}) : {range}",
+    "zone": "{zone} ({offset})",
+    "home": "Chez vous, à {city} ({offset}) : {range}",
     "now": "En ce moment, depuis {time}",
     "liveSince": "En direct depuis {time}",
     "notStreamed": "En salle, sans diffusion.",
-    "watch": "Suivre le direct",
+    "watch": "Rejoindre le direct",
     "calendar": "Ajouter à mon agenda",
     "route": "Itinéraire vers le lieu",
     "replays": "Revoir les enregistrements",
     "share": "Partager",
     "copied": "Lien copié",
     "access": "Plan d'accès",
-    "accessShort": "Accès",
     "map": "Plan d'accès",
     "mapOf": "Plan : {place}",
     "itinerary": "Itinéraire",
     "copyAddress": "Copier l'adresse",
     "addressCopied": "Adresse copiée",
-    "with": "Avec"
+    "with": "Avec",
+    "hours": "{start} à {end}",
+    "zoneOpens": "{zone}, accueil dès {time}",
+    "byUntil": "{organization}, jusqu'à {time}",
+    "until": "Jusqu'à {time}"
   },
   "overview": {
     "day": "La journée en {count} temps",
@@ -78,15 +80,17 @@
       "other": "Ordre du jour"
     },
     "zone": "Toutes les heures : {zone} ({offset}). Chaque activité a sa fiche : intervenants, direct et enregistrement.",
-    "until": "→ {end}",
+    "until": "à {end}",
     "empty": {
       "title": "Déroulé à venir",
       "description": "Les activités de cette journée seront annoncées ici."
-    }
+    },
+    "untilDuration": "à {end}, {duration}",
+    "with": "avec {list}",
+    "join": "Rejoindre"
   },
   "highlight": {
     "mark": "Temps fort",
-    "kicker": "Temps fort · {start} à {end}",
     "by": "Proposé par {organization}.",
     "open": "Fiche de l'activité"
   },
@@ -103,6 +107,14 @@
   },
   "others": {
     "title": "Les autres temps forts francophones de la {edition}",
-    "here": "Vous y êtes"
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "done": {
+      "day": "Terminée",
+      "other": "Terminé"
+    }
+  },
+  "hero": {
+    "live": "En direct"
   }
 }
