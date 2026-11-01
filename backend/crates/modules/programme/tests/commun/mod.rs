@@ -41,10 +41,10 @@ pub mod seances;
 /// La fabrique de l'évaluation : un comité, une grille, des notations.
 pub mod comite;
 
-use kernel::Db;
 use kernel::config::Config;
 use kernel::context::RequestContext;
 use kernel::testing::TestDb;
+use kernel::Db;
 use programme::state::ProgrammeState;
 use std::sync::Arc;
 use time::OffsetDateTime;
