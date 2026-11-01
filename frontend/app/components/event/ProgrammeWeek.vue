@@ -114,6 +114,8 @@ const columns = computed(() =>
       isPast,
       isRest,
       isTinted: !!tag,
+      isSide: !special && !!side,
+      isAlt: index % 2 === 1,
       weekBreak: breaks.value.has(index),
       count: isRest ? t('programme.week.rest.closed') : t('programme.week.count', { count: kept.length + sides.length }, kept.length + sides.length),
       tag,
@@ -286,7 +288,7 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
             v-for="column in columns"
             :key="column.date"
             class="cal-col cal-head-col"
-            :class="{ 'week-start': column.weekBreak, 'is-tinted': column.isTinted, 'is-rest': column.isRest, 'is-past': column.isPast }"
+            :class="{ 'week-start': column.weekBreak, 'is-tinted': column.isTinted, 'is-side': column.isSide, 'is-alt': column.isAlt, 'is-rest': column.isRest, 'is-past': column.isPast }"
             :style="column.dayStyle"
           >
             <NuxtLink v-if="column.tag" :to="column.tag.to" class="rule-label wk-tag">
@@ -323,7 +325,7 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
           v-for="column in columns"
           :key="column.date"
           class="cal-col cal-body-col"
-          :class="{ 'week-start': column.weekBreak, 'is-tinted': column.isTinted, 'is-rest': column.isRest }"
+          :class="{ 'week-start': column.weekBreak, 'is-tinted': column.isTinted, 'is-side': column.isSide, 'is-alt': column.isAlt, 'is-rest': column.isRest }"
           :style="column.dayStyle"
           :aria-label="column.label"
         >
@@ -475,6 +477,20 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
   padding-left: 9px;
 }
 
+/* Un jour ordinaire sur deux, un gris à peine posé, de l'en-tête au bas de la colonne. */
+.cal-col.is-alt:not(.is-tinted, .is-rest) {
+  background: color-mix(in srgb, var(--color-text) 4.5%, transparent);
+}
+
+/* Une journée spéciale se détache plus que l'atelier, qui garde le fond léger. */
+.cal-col.is-tinted:not(.is-side) {
+  --cal-day-bg: color-mix(in srgb, var(--color-day-line) 24%, var(--color-surface-raised));
+}
+
+.cal-col.is-tinted.is-side {
+  --cal-day-bg: var(--color-day-surface);
+}
+
 .cal-head-col {
   display: flex;
   flex-direction: column;
@@ -514,7 +530,7 @@ a.wk-tag:hover {
 }
 
 .is-tinted .wk-head {
-  background: var(--color-day-surface);
+  background: var(--cal-day-bg);
 }
 
 .is-rest .wk-head {
@@ -617,13 +633,23 @@ a.wk-tag:hover {
 }
 
 .cal-body-col.is-tinted {
-  background: var(--color-day-surface);
+  background: var(--cal-day-bg);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.is-tinted:not(.is-side) .wk-card {
+  border-color: color-mix(in srgb, var(--color-day-line) 30%, transparent);
 }
 
 /* Le jour de repos : hachuré sur toute la hauteur, et dit. */
 .cal-body-col.is-rest {
   background: var(--cal-hatch);
+}
+
+/* Le fond du corps s'arrête aux marges de la colonne, comme celui de l'en-tête : les bords tombent d'aplomb. */
+.cal-body-col.is-tinted,
+.cal-body-col.is-rest {
+  background-clip: content-box;
 }
 
 .rest-note {
