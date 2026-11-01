@@ -236,6 +236,50 @@ pub async fn partenaires_du_fil<'e>(
     Ok(lignes)
 }
 
+/// Un partenaire d'un fil publié de l'édition, désigné par l'adresse du fil.
+pub struct PartenaireDeLedition {
+    pub track_slug: String,
+    pub partner: PublicTrackPartner,
+}
+
+/// Les partenaires de tous les fils publiés de l'édition, en une lecture,
+/// dans l'ordre de chaque fil.
+pub async fn partenaires_des_fils_publies<'e>(
+    executor: impl PgExecutor<'e>,
+    event_id: Uuid,
+) -> Result<Vec<PartenaireDeLedition>> {
+    let lignes = sqlx::query!(
+        r#"SELECT tr.slug::text AS "track_slug!", p.organization_id, o.legal_name AS name,
+                  o.acronym,
+                  media.attached_image('org', 'organizations', o.id, 'logo') AS "logo: Value",
+                  t.code AS role_code, t.label AS "role_label!: Value"
+             FROM event.programme_track_partners p
+             JOIN event.programme_tracks tr ON tr.id = p.track_id
+             JOIN org.organizations o ON o.id = p.organization_id
+             JOIN reference.taxonomy_terms t ON t.id = p.role_term_id
+            WHERE tr.event_id = $1 AND tr.published_at IS NOT NULL
+            ORDER BY tr.slug, p.sort_order, o.legal_name"#,
+        event_id
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes
+        .into_iter()
+        .map(|l| PartenaireDeLedition {
+            track_slug: l.track_slug,
+            partner: PublicTrackPartner {
+                organization_id: l.organization_id,
+                name: l.name,
+                acronym: l.acronym,
+                logo: l.logo,
+                role_code: l.role_code,
+                role_label: l.role_label,
+            },
+        })
+        .collect())
+}
+
 /// Les fils publiés de l'édition, chacun avec l'étendue de son déroulé publié
 /// (activités publiées et moments) et son lieu, pour relier les pages entre
 /// elles et regrouper leurs activités dans `/programmations`. `courant` marque
@@ -265,7 +309,8 @@ pub async fn fils_publies_de_ledition<'e>(
                       SELECT p.name FROM event.venues p
                        WHERE p.event_id = t.event_id AND p.kind = 'pavilion'
                        ORDER BY p.created_at, p.id LIMIT 1)) AS "venue_name: Value",
-                  (t.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS "is_off_site!"
+                  (t.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS "is_off_site!",
+                  media.attached_image('event', 'programme_tracks', t.id, 'cover') AS "cover: Value"
              FROM event.programme_tracks t
              JOIN event.events e ON e.id = t.event_id
              LEFT JOIN event.venues v ON v.id = t.venue_id
@@ -292,6 +337,7 @@ pub async fn fils_publies_de_ledition<'e>(
             ends_at: l.ends_at,
             venue_name: l.venue_name,
             is_off_site: l.is_off_site,
+            cover: l.cover,
         })
         .collect())
 }

@@ -293,6 +293,8 @@ pub struct PublicScheduleRow {
     pub is_streamed: bool,
     pub broadcast_channel_id: Option<Uuid>,
     pub capacity: Option<i32>,
+    /// `ScheduleTrackBadge[]` : fils publiés, chacun avec `is_highlight`, le
+    /// temps fort posé dans CE fil.
     pub tracks: serde_json::Value,
     /// Couverture de la séance, **à défaut celle du dossier d'origine**. Le repli
     /// est la règle, pas une commodité : une organisation joint son image au

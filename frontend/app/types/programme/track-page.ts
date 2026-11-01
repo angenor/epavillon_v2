@@ -148,6 +148,8 @@ export interface PublicTrackSummary {
   ends_at: IsoDateTime | null
   venue_name: I18nText | null
   is_off_site: boolean
+  /** Photo du fil, celle du bandeau de sa page ; nulle sans (l'atelier) : l'aplat de sa couleur. */
+  cover: AttachedImage | null
   /** La page qu'on lit. */
   is_current: boolean
 }
@@ -187,11 +189,14 @@ export interface PublicScheduleTrackMoment {
 
 /**
  * `GET /schedule/tracks?event_id=` : un fil publié de l'édition (`is_current`
- * toujours faux) et ses moments, dans l'ordre de l'heure. Ses activités sont
- * dans la programmation (`PublicScheduleRow.tracks`), pas recopiées ici.
+ * toujours faux), ses moments dans l'ordre de l'heure et ses partenaires. Ses
+ * activités sont dans la programmation (`PublicScheduleRow.tracks`), pas
+ * recopiées ici.
  */
 export interface PublicScheduleTrack extends PublicTrackSummary {
   moments: PublicScheduleTrackMoment[]
+  /** « Avec OIF, GIZ… », dans l'ordre du fil. */
+  partners: PublicTrackPartner[]
 }
 
 /** `PUT /admin/planner/tracks/{trackId}/sessions/{sessionId}`. */

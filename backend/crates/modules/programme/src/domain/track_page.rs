@@ -149,6 +149,9 @@ pub struct PublicTrackSummary {
     /// Nom du lieu du fil, à défaut celui du pavillon.
     pub venue_name: Option<Value>,
     pub is_off_site: bool,
+    /// `AttachedImage | null` : la photo du fil (rôle `cover`), celle du
+    /// bandeau de sa page ; nulle sans photo (l'atelier).
+    pub cover: Option<Value>,
     /// La page qu'on lit.
     pub is_current: bool,
 }
@@ -165,13 +168,15 @@ pub struct PublicScheduleTrackMoment {
 }
 
 /// Un fil publié de l'édition pour `/programmations` : `PublicScheduleTrack`,
-/// le résumé (jamais `is_current`) et ses moments dans l'ordre de l'heure.
-/// Les activités, elles, sont déjà dans la programmation.
+/// le résumé (jamais `is_current`), ses moments dans l'ordre de l'heure et
+/// ses partenaires dans leur ordre (« Avec OIF, GIZ »). Les activités, elles,
+/// sont déjà dans la programmation.
 #[derive(Debug, Clone, Serialize)]
 pub struct PublicScheduleTrack {
     #[serde(flatten)]
     pub summary: PublicTrackSummary,
     pub moments: Vec<PublicScheduleTrackMoment>,
+    pub partners: Vec<PublicTrackPartner>,
 }
 
 /// Le fil lui-même : `PublicTrackHeader`.

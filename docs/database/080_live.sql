@@ -1609,7 +1609,8 @@ SELECT
     s.capacity,
     COALESCE((
         SELECT jsonb_agg(jsonb_build_object(
-                   'slug', t.slug, 'title', t.title, 'color', t.color_hex, 'kind', t.kind)
+                   'slug', t.slug, 'title', t.title, 'color', t.color_hex, 'kind', t.kind,
+                   'is_highlight', st.is_highlight)
                ORDER BY st.sort_order, t.sort_order)
         FROM programme.session_tracks st
         JOIN event.programme_tracks t ON t.id = st.track_id

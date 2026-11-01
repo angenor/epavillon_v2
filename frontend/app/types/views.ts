@@ -67,6 +67,8 @@ export interface ScheduleTrackBadge {
   title: I18nText
   color: ColorHex | null
   kind: TrackKind
+  /** Temps fort de CE fil (`session_tracks.is_highlight`) : une activité peut l'être dans une journée et pas dans l'autre. */
+  is_highlight: boolean
 }
 
 /**

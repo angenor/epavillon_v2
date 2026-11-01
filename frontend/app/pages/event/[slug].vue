@@ -30,9 +30,10 @@
  *
  * ── CE QUE LA PAGE CHARGE, ET POURQUOI EN UNE FOIS ──────────────────────────
  *
- * Neuf lectures, groupées en un seul `useAsyncData` : l'édition, sa série, sa
+ * Dix lectures, groupées en un seul `useAsyncData` : l'édition, sa série, sa
  * bannière, son pays, son appel, les critères de cet appel, ses journées
- * spéciales, la liste des éditions publiques, et les séances publiées. Elles
+ * spéciales et leurs photos, la liste des éditions publiques, et les séances
+ * publiées. Elles
  * partent en parallèle et le rendu serveur les attend toutes: un écran qui se
  * remplit par morceaux fait sauter la mise en page trois fois de suite.
  *
@@ -72,13 +73,15 @@ const { data, status, error, refresh } = await useAsyncData(
     // l'appel : ni l'un ni l'autre ne demande un aller-retour de plus. Recharger
     // les deux cent quarante-neuf pays pour en nommer un que la réponse porte
     // déjà, c'était une seconde d'attente offerte à chaque visiteur.
-    const [series, images, call, tracks, editions, schedule] = await Promise.all([
+    const [series, images, call, tracks, editions, schedule, published] = await Promise.all([
       api.events.series(),
       api.events.images(edition.id),
       api.events.call(edition.id),
       api.events.tracks(edition.id),
       api.events.publicList(),
       api.sessions.schedule(edition.id),
+      // Seulement pour la photo des cartes : manquée, elles gardent leur aplat.
+      api.sessions.scheduleTracks(edition.id).catch(() => []),
     ])
 
     return {
@@ -94,6 +97,7 @@ const { data, status, error, refresh } = await useAsyncData(
       // page publique d'une journée spéciale, et une journée en préparation
       // n'engage pas encore l'IFDD.
       tracks: tracks.filter((track) => track.published_at !== null),
+      trackCovers: Object.fromEntries(published.map((track) => [track.slug, track.cover])),
       editions,
       schedule,
       // Jours qui portent au moins une activité PUBLIÉE, et non tous les jours
@@ -222,6 +226,7 @@ useHead(() => ({
               :edition-slug="data.edition.slug"
               :timezone="data.edition.timezone"
               :session-counts="trackCounts"
+              :covers="data.trackCovers"
             />
 
             <EventCallDetails :call="data.call" :edition="data.edition" />

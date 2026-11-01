@@ -537,3 +537,10 @@ Demande du commanditaire : « Écrire au déposant » depuis la fiche d'un dossi
 - Les fils existants gardent un titre nul ; l'écran les nomme par leur nature, sinon par le début de leur premier message. Aucune reprise.
 
 **En production** : `ops/migrations/2026-11-01-echanges-par-sujet.sql`, rejouable, avant l'API. Jouée deux fois en local.
+
+## 01/11/2026, `075_programme_sessions.sql` et `080_live.sql` : le temps fort dans la programmation publique
+
+- **`programme.v_public_schedule.tracks`** : chaque pastille de fil porte `is_highlight` (`programme.session_tracks`), le temps fort posé par le planificateur DANS CE FIL. Seul le `jsonb_build_object` change, dans les deux définitions ; colonnes et ordre inchangés.
+- Partenaires et photo d'un fil ne touchent pas le modèle : `GET /schedule/tracks` les lit dans `event.programme_track_partners` et par `media.attached_image(…, 'cover')`, déjà là.
+
+**En production** : `ops/migrations/2026-11-01-temps-fort-programme.sql`, rejouable (la définition de `080` rejouée), avant l'API. Jouée deux fois sur une copie locale.

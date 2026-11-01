@@ -226,6 +226,10 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
         PublicTrackEntryBody::Activity { activity } => {
             assert_eq!(activity.session.id, tot);
             assert!(activity.is_highlight);
+            assert_eq!(
+                activity.session.tracks[0]["is_highlight"], true,
+                "la programmation dit le temps fort de ce fil"
+            );
             assert_eq!(activity.organizations.len(), 1, "le porteur");
             assert!(activity.organizations[0].get("logo").is_some());
         }
@@ -318,6 +322,21 @@ async fn les_fils_publies_dune_edition_pour_la_programmation() {
         Some("2027-11-08 15:00"),
     )
     .await;
+    let role = sqlx::query_scalar!(
+        "SELECT id FROM reference.taxonomy_terms WHERE taxonomy_code = 'track_partner_role' AND code = 'partner'"
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    sqlx::query!(
+        "INSERT INTO event.programme_track_partners (track_id, organization_id, role_term_id) VALUES ($1, $2, $3)",
+        finance,
+        terrain.organisation,
+        role
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
 
     let fils = track_page::fils_de_ledition(bac.pool(), EventId(terrain.edition))
         .await
@@ -362,6 +381,10 @@ async fn les_fils_publies_dune_edition_pour_la_programmation() {
         (Some(heure("08", "09:00")), Some(heure("08", "15:00")))
     );
     assert_eq!(atelier.moments.len(), 1);
+    let partenaires: Vec<Uuid> = journee.partners.iter().map(|p| p.organization_id).collect();
+    assert_eq!(partenaires, [terrain.organisation], "ceux du fil");
+    assert!(atelier.partners.is_empty());
+    assert!(journee.summary.cover.is_none(), "sans photo posée");
 
     sqlx::query!(
         "UPDATE event.events SET status = 'draft' WHERE id = $1",

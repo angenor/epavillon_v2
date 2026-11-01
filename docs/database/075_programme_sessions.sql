@@ -964,10 +964,12 @@ SELECT
     s.capacity,
     -- Journées spéciales et fils thématiques auxquels la session est rattachée :
     -- alimente les pastilles « Journée finance durable » de la vue grille sans
-    -- requête supplémentaire.
+    -- requête supplémentaire. `is_highlight` (01/11) : l'activité est un temps
+    -- fort DE CE FIL ; elle peut l'être dans une journée et pas dans l'autre.
     COALESCE((
         SELECT jsonb_agg(jsonb_build_object(
-                   'slug', t.slug, 'title', t.title, 'color', t.color_hex, 'kind', t.kind)
+                   'slug', t.slug, 'title', t.title, 'color', t.color_hex, 'kind', t.kind,
+                   'is_highlight', st.is_highlight)
                ORDER BY st.sort_order, t.sort_order)
         FROM programme.session_tracks st
         JOIN event.programme_tracks t ON t.id = st.track_id
