@@ -1,34 +1,27 @@
 <script setup lang="ts">
 /**
- * PAGE PUBLIQUE D'UNE ÉDITION — écran A3.
+ * PAGE PUBLIQUE D'UNE ÉDITION, écran A3.
  *
  * ── L'ORDRE EST LE CONTENU ──────────────────────────────────────────────────
  *
  * Une organisation qui arrive ici veut savoir si elle peut encore déposer, et
  * jusqu'à quand. Tout ce qui retarde cette réponse la fait partir.
  *
- *   1. DE QUOI S'AGIT-IL, ET QUE PUIS-JE FAIRE ?  le bandeau — titre, faits, et
- *      le PANNEAU D'ACTION : rebours, échéance, dépôt
- *   2. QUELLES ÉCHÉANCES, À QUELLES CONDITIONS ?  la colonne de droite
- *   3. DE QUOI PARLE-T-ON ?                       la présentation, les journées
- *   4. ET APRÈS ?                                 la programmation, les critères
+ *   1. DE QUOI S'AGIT-IL ?                 le bandeau : titre, quatre faits
+ *   2. QUE PUIS-JE FAIRE, ET JUSQU'À QUAND ? la colonne de droite : le billet
+ *                                           de l'appel, puis les échéances
+ *   3. DE QUOI PARLE-T-ON ?                 la présentation, le direct, la
+ *                                           programmation, les journées
+ *   4. À QUELLES CONDITIONS ?               conditions et critères de l'appel
  *
- * ── LE DÉPÔT EST REMONTÉ DANS LE BANDEAU (19/08) ────────────────────────────
+ * ── DIRECTION CONDENSÉE (01/11) ─────────────────────────────────────────────
  *
- * Il vivait à mi-page, dans l'encart d'appel : sur un portable, le premier écran
- * ne montrait que le titre de la conférence, et il fallait défiler pour trouver
- * la seule chose qu'on vient faire. Le bandeau porte désormais l'action. LA PAGE
- * NE PORTE QU'UN SEUL BOUTON PRINCIPAL, ET IL N'EN EXISTE PAS DE SECOND
- * EXEMPLAIRE : `EventCallDetails` a été allégé d'autant, et garde ce qu'on vient
- * VÉRIFIER — conditions, prolongation, consignes.
- *
- * ── DEUX COLONNES, PARCE QUE LES DEUX SE LISENT ENSEMBLE ────────────────────
- *
- * Les échéances et les conditions de l'appel tiennent dans une colonne COLLANTE
- * à droite : elles restent visibles pendant qu'on lit la présentation et les
- * journées spéciales, c'est-à-dire au moment précis où l'on se demande s'il
- * reste du temps. Sous `lg`, la colonne repasse en tête du flux — l'ordre des
- * priorités ne change pas parce que l'écran rétrécit.
+ * Maquette : docs/maquettes/direction-condensee/evenement.html. Le bandeau dit
+ * de quoi il s'agit (titre, quatre faits) ; le billet de l'appel, dans la
+ * colonne de droite, remonte de 72 px sur le bandeau et reste COLLÉ sur grand
+ * écran avec les échéances : on lit la page sans perdre de vue le temps qui
+ * reste. Il porte le seul bouton principal de la page. Sous `lg`, la colonne
+ * suit le bandeau, sans chevauchement.
  *
  * LA PROGRAMMATION N'EST PAS ICI. Elle a sa page, parce qu'elle porte un
  * sélecteur d'édition : présentée sous le titre de la COP31, elle affichait
@@ -40,7 +33,7 @@
  * Neuf lectures, groupées en un seul `useAsyncData` : l'édition, sa série, sa
  * bannière, son pays, son appel, les critères de cet appel, ses journées
  * spéciales, la liste des éditions publiques, et les séances publiées. Elles
- * partent en parallèle et le rendu serveur les attend toutes — un écran qui se
+ * partent en parallèle et le rendu serveur les attend toutes: un écran qui se
  * remplit par morceaux fait sauter la mise en page trois fois de suite.
  *
  * Les séances ne sont pas affichées ici, mais elles restent nécessaires : ce
@@ -54,7 +47,7 @@
  * ── L'ADRESSE EST DANS LA LANGUE, LE FICHIER SUIT LA CONVENTION ─────────────
  *
  * `/evenements/cop31-belem-2027` et `/en/events/cop31-belem-2027`, par
- * `defineI18nRoute`. Le chemin du fichier, lui, reste `pages/event/[slug].vue` —
+ * `defineI18nRoute`. Le chemin du fichier, lui, reste `pages/event/[slug].vue`,
  * même règle qu'aux écrans d'authentification.
  */
 
@@ -103,7 +96,7 @@ const { data, status, error, refresh } = await useAsyncData(
       tracks: tracks.filter((track) => track.published_at !== null),
       editions,
       schedule,
-      // Jours qui portent au moins une activité PUBLIÉE — et non tous les jours
+      // Jours qui portent au moins une activité PUBLIÉE, et non tous les jours
       // ouvrables de l'édition : c'est le volume du programme qu'annonce le
       // renvoi, pas la durée de la conférence, déjà lisible dans l'en-tête.
       programmeDayCount: new Set(
@@ -114,7 +107,7 @@ const { data, status, error, refresh } = await useAsyncData(
   { watch: [slug], lazy: true },
 )
 
-/** Nombre d'activités par journée spéciale — dit ce que le fil contient vraiment. */
+/** Nombre d'activités par journée spéciale : dit ce que le fil contient vraiment. */
 const trackCounts = computed<Record<string, number>>(() => {
   const counts: Record<string, number> = {}
   for (const session of data.value?.schedule ?? []) {
@@ -126,34 +119,49 @@ const trackCounts = computed<Record<string, number>>(() => {
   return counts
 })
 
+// Le direct se lit dans les séances déjà chargées : aucune lecture de plus.
+const { isLive, declareFrom } = useLiveSession()
+watch(() => data.value?.schedule, (schedule) => schedule && declareFrom(schedule), { immediate: true })
+const liveSession = computed(() => data.value?.schedule.find((session) => isLive(session.id)) ?? null)
+
+const programmeTo = computed(() => {
+  const edition = data.value?.edition
+  if (!edition) return localePath('/programmations')
+  return edition.programme_published_at !== null
+    ? localePath({ name: 'programme', query: { edition: edition.slug } })
+    : localePath('/programmations')
+})
+
 useHead(() => ({
   title: data.value ? tr(data.value.edition.title) : t('event.public.notFound.title'),
 }))
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div data-direction="condensee" class="full-bleed -mt-8 -mb-8 bg-surface text-text sm:-mt-10 sm:-mb-10">
     <UiLoadingState v-if="status === 'pending'" :label="t('event.public.loading')">
       <EventPublicSkeleton />
     </UiLoadingState>
 
-    <UiErrorState
-      v-else-if="error"
-      :title="t('common.states.error.title')"
-      :description="t('common.states.error.description')"
-      @retry="refresh()"
-    />
+    <div v-else-if="error" class="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+      <UiErrorState
+        :title="t('common.states.error.title')"
+        :description="t('common.states.error.description')"
+        @retry="refresh()"
+      />
+    </div>
 
     <!-- Édition inconnue : ce n'est pas une erreur technique, et le dire comme
          telle enverrait le visiteur chercher une panne. -->
-    <UiEmptyState
-      v-else-if="!data"
-      icon="calendar"
-      :title="t('event.public.notFound.title')"
-      :description="t('event.public.notFound.description')"
-      :action-label="t('common.states.notFound.action')"
-      :action-to="localePath('/')"
-    />
+    <div v-else-if="!data" class="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+      <UiEmptyState
+        icon="calendar"
+        :title="t('event.public.notFound.title')"
+        :description="t('event.public.notFound.description')"
+        :action-label="t('common.states.notFound.action')"
+        :action-to="localePath('/')"
+      />
+    </div>
 
     <template v-else>
       <EventHero
@@ -161,52 +169,65 @@ useHead(() => ({
         :series="data.series"
         :images="data.images"
         :country="data.country ? tr(data.country) : null"
-        :has-action="Boolean(data.call)"
-      >
-        <template #action="{ tone }">
-          <EventHeroCall
-            :call="data.call"
-            :edition="data.edition"
-            :tone="tone"
-            :submit-to="localePath('proposal-form')"
-            :criteria-href="data.showCriteria ? '#criteres' : null"
-          />
-        </template>
-      </EventHero>
+        :has-aside="Boolean(data.call)"
+      />
 
-      <div class="mt-12 grid gap-12 lg:grid-cols-12 lg:gap-x-12">
-        <!-- LA COLONNE DE DROITE VIENT EN PREMIER DANS LE FLUX. Sous `lg`, les
-             échéances et les conditions se lisent avant la présentation : c'est
-             l'ordre des priorités, et il ne change pas parce que l'écran
-             rétrécit. `lg:order-2` le rétablit visuellement à partir de là. -->
-        <aside v-if="data.call" class="lg:order-2 lg:col-span-4">
-          <div class="flex flex-col gap-6 lg:sticky lg:top-24">
-            <EventMilestones :edition="data.edition" :call="data.call" />
-            <EventCallDetails :call="data.call" :edition="data.edition" />
-          </div>
-        </aside>
-
+      <div class="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6 lg:pb-22">
+        <!-- La colonne de droite vient d'abord dans le flux : sous `lg`, l'appel
+             et ses échéances suivent le bandeau. La marge négative n'existe qu'à
+             partir de `lg` : sur un élément de grille, elle raccourcirait sa
+             ligne et ferait remonter la suite dessous. -->
         <div
-          class="flex flex-col gap-14 lg:order-1"
-          :class="data.call ? 'lg:col-span-8' : 'lg:col-span-12'"
+          class="grid gap-10 pt-6 lg:items-start lg:gap-12 lg:pt-0"
+          :class="data.call ? 'lg:grid-cols-[minmax(0,1fr)_380px]' : ''"
         >
-          <EventPresentation :edition="data.edition" />
+          <aside
+            v-if="data.call"
+            class="relative z-10 flex flex-col gap-4 lg:sticky lg:top-[calc(var(--nav-height)+1rem)] lg:col-start-2 lg:row-start-1 lg:-mt-[72px]"
+            :aria-label="t('event.public.aside')"
+          >
+            <EventHeroCall
+              :call="data.call"
+              :edition="data.edition"
+              :submit-to="localePath('proposal-form')"
+              :programme-to="programmeTo"
+              :programme-published="data.edition.programme_published_at !== null"
+              :criteria-href="data.showCriteria ? '#criteres' : null"
+            />
+            <EventMilestones :edition="data.edition" :call="data.call" />
+          </aside>
 
-          <EventSpecialDays
-            :tracks="data.tracks"
-            :edition-slug="data.edition.slug"
-            :timezone="data.edition.timezone"
-            :zone-label="data.edition.city ?? undefined"
-            :session-counts="trackCounts"
-          />
+          <div class="flex min-w-0 flex-col gap-14 lg:col-start-1 lg:row-start-1 lg:pt-14">
+            <EventPresentation :edition="data.edition" />
 
-          <EventProgrammeLink
-            :edition="data.edition"
-            :session-count="data.schedule.length"
-            :day-count="data.programmeDayCount"
-          />
+            <EventProgrammeLiveLead
+              v-if="liveSession"
+              :session="liveSession"
+              :edition-slug="data.edition.slug"
+              :timezone="data.edition.timezone"
+              compact
+            />
 
-          <EventCriteria v-if="data.showCriteria" :criteria="data.criteria" :call="data.call" />
+            <EventProgrammeLink
+              :edition="data.edition"
+              :to="programmeTo"
+              :schedule="data.schedule"
+              :tracks="data.tracks"
+              :session-count="data.schedule.length"
+              :day-count="data.programmeDayCount"
+            />
+
+            <EventSpecialDays
+              :tracks="data.tracks"
+              :edition-slug="data.edition.slug"
+              :timezone="data.edition.timezone"
+              :session-counts="trackCounts"
+            />
+
+            <EventCallDetails :call="data.call" :edition="data.edition" />
+
+            <EventCriteria v-if="data.showCriteria" :criteria="data.criteria" :call="data.call" />
+          </div>
         </div>
       </div>
     </template>

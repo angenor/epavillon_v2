@@ -2,9 +2,8 @@
 import type { EventEdition } from '~/types/event/edition'
 
 /**
- * Sortie de `EventHero` le 19/08 : sous le bandeau, elle repoussait la frise
- * des échéances de deux cents pixels, alors que c'est la frise qui répond à la
- * question pour laquelle on vient. Placée après l'encart d'appel.
+ * « À propos de cette édition », en tête de la colonne principale. Sortie du
+ * bandeau le 19/08 : sur la photo, un long paragraphe se lit mal même voilé.
  */
 
 interface Props {
@@ -19,21 +18,18 @@ const { tr } = useI18nText()
 
 <template>
   <section aria-labelledby="presentation-titre">
-    <h2 id="presentation-titre" class="font-display text-2xl sm:text-3xl">
+    <h2 id="presentation-titre" class="heading-condensed text-[clamp(1.9rem,3.6vw,2.5rem)] text-heading">
       {{ t('event.public.presentation.title') }}
     </h2>
 
-    <!-- La description est saisie dans l'éditeur riche du back-office : titres,
-         listes, liens. Rendue comme du texte, elle affichait ses balises. -->
-    <UiRichContent class="mt-5 text-lg leading-relaxed" :html="tr(props.edition.description)" />
+    <!-- Saisie dans l'éditeur riche du back-office : titres, listes, liens. -->
+    <UiRichContent class="mt-4 max-w-[68ch] text-[1.05rem] leading-[1.75]" :html="tr(props.edition.description)" />
 
-    <!-- `highlights` porte les consignes pratiques — accès, badge, inscription.
-         D'où le cadre et l'icône : ce n'est pas la suite de la description, c'est
-         ce qu'il faut avoir lu avant de venir. -->
+    <!-- `highlights` porte les consignes pratiques (accès, badge, inscription) :
+         ce qu'il faut avoir lu avant de venir, d'où le cadre. -->
     <aside
       v-if="props.edition.highlights"
-      class="mt-6 flex items-start gap-3 rounded-xl border border-border border-l-4 border-l-accent bg-surface-sunken px-5 py-4"
-      :style="{ maxWidth: 'var(--measure)' }"
+      class="mt-6 flex max-w-(--measure) items-start gap-3 rounded-lg border border-border border-l-4 border-l-accent bg-surface-sunken px-5 py-4"
     >
       <UiIcon name="info" size="1.1rem" class="mt-0.5 shrink-0 text-accent" />
       <p class="text-sm text-text-secondary">{{ tr(props.edition.highlights) }}</p>
