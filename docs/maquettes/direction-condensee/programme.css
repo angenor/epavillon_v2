@@ -101,14 +101,15 @@
   .lead-media { position: relative; min-height: 196px; }
   .lead-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .lead-media .tag { position: absolute; top: 12px; left: 12px; }
-  .lead-body { display: flex; flex-direction: column; justify-content: center; padding: 18px 26px; }
+  /* L'étiquette en haut, les boutons en bas, l'heure et le titre entre les deux : aucune bande vide. */
+  .lead-body { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 16px 26px 18px; }
   .lead-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
   .lead-kicker { font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-live); }
   .lead-time { font-family: var(--font-heading); color: var(--color-live); }
-  .lead-time b { font-size: 1.9rem; font-weight: 700; line-height: 1; }
+  .lead-time b { font-size: 2.1rem; font-weight: 700; line-height: 1; }
   .lead-time span { margin-left: 6px; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); }
-  .lead h3 { margin-top: 6px; font-size: 1.45rem; text-transform: none; font-weight: 600; line-height: 1.1; }
-  .lead-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 12px; }
+  .lead h3 { margin-top: 4px; font-size: 1.45rem; text-transform: none; font-weight: 600; line-height: 1.1; }
+  .lead-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
   .lead .row-org { margin: 0; font-size: 0.85rem; }
   .lead .row-org .logo { width: 34px; height: 34px; font-size: 0.65rem; }
   .lead-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto; }
