@@ -31,6 +31,11 @@
  * (arbitré le 28/09).
  */
 export default defineNuxtRouteMiddleware(async (to) => {
+  // Session pas encore tranchée au rendu serveur (jeton expiré, seul le navigateur
+  // le renouvelle) : sans personne, on enverrait au rattachement quelqu'un qui en
+  // a un. Le navigateur rejoue ce garde à l'hydratation, session faite (01/11).
+  if (import.meta.server && useSessionDeferred().value) return
+
   const memberships = useMembershipStore()
   await memberships.ensureLoaded()
 
