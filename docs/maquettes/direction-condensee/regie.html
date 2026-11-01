@@ -123,7 +123,23 @@
   .btn-danger { background: var(--color-live); color: #fff; }
   .btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  .demo { position: fixed; left: 16px; bottom: 16px; z-index: 70; display: flex; gap: 6px; padding: 6px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-md); }
+
+  /* Réparer une erreur : un bandeau « Défaire » après chaque geste, un journal de la régie, des envois différés. */
+  .undo { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 65; display: flex; align-items: center; gap: 14px; width: min(640px, calc(100% - 24px)); padding: 12px 12px 12px 16px; border-radius: var(--radius-lg); background: var(--ifdd-gris-900, #231f20); color: #fff; box-shadow: var(--shadow-xl); }
+  .undo p { margin: 0; flex: 1; font-size: 0.92rem; }
+  .undo p small { display: block; color: rgb(255 255 255 / 0.7); font-size: 0.8rem; }
+  .undo .btn { background: #fff; color: var(--ifdd-bleu-900); }
+  .undo .timer { position: absolute; left: 0; bottom: 0; height: 3px; width: 60%; border-radius: 0 0 0 var(--radius-lg); background: var(--ifdd-cyan); }
+  .journal { margin: 0; padding: 0; list-style: none; }
+  .journal li { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--color-border-subtle); font-size: 0.86rem; }
+  .journal li:last-child { border-bottom: 0; }
+  .journal time { font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; color: var(--ink); }
+  .journal small { display: block; color: var(--color-text-muted); font-size: 0.76rem; }
+  .journal .undone { color: var(--color-text-muted); text-decoration: line-through; }
+  .pending { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--color-warning); }
+  .confirm-live { display: grid; gap: 10px; }
+  .confirm-live b { font-family: var(--font-heading); font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .demo { position: fixed; left: 16px; bottom: 96px; z-index: 70; display: flex; gap: 6px; padding: 6px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-md); }
 </style>
 </head>
 <body>
@@ -158,7 +174,7 @@
       </div>
       <div class="now-acts">
         <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Ouvrir Zoom (animateur)</a>
-        <button class="btn btn-outline" type="button">Terminer le direct</button>
+        <button class="btn btn-outline" type="button" data-open-end>Terminer le direct</button>
         <button class="btn btn-ghost" type="button"><svg class="icon"><use href="#i-clock"/></svg>Signaler un débordement</button>
       </div>
       <div class="files">
@@ -212,7 +228,7 @@
             <p class="row-org"><span class="logo" aria-hidden="true">MEDD</span><span><b>Ministère de l'Environnement</b> Sénégal</span></p>
             <div class="flags"><span>Annulée à 08:40 : l'organisation a prévenu de son absence. Message publié, 41 inscrits prévenus.</span></div>
           </div>
-          <div class="slot-acts"><span class="tag tag-cancelled" style="background:var(--color-live-surface);color:var(--color-live);border:1px solid var(--color-live-border)">Annulée</span><button class="menu-btn" type="button" aria-label="Autres actions">⋯</button></div>
+          <div class="slot-acts"><button class="btn btn-outline btn-sm" type="button" data-open-restore>Rétablir l'activité</button><span class="tag tag-cancelled" style="background:var(--color-live-surface);color:var(--color-live);border:1px solid var(--color-live-border)">Annulée</span><button class="menu-btn" type="button" aria-label="Autres actions">⋯</button></div>
         </li>
         <li class="slot">
           <div class="slot-time"><b>14:15</b><span>à 15:15</span></div>
@@ -231,6 +247,16 @@
   </main>
 
   <aside class="rg-side" aria-label="Messages et vigilance">
+    <section class="panel" aria-labelledby="journal">
+      <div class="panel-head"><h2 id="journal">Journal de la régie</h2><span class="count">aujourd'hui</span></div>
+      <ul class="journal">
+        <li><time>10:38</time><span>Message « son coupé » publié<small>par vous</small></span><button class="btn btn-ghost btn-sm" type="button">Défaire</button></li>
+        <li><time>10:15</time><span>Direct du CILSS démarré<small>par Aïcha K.</small></span><button class="btn btn-ghost btn-sm" type="button">Défaire</button></li>
+        <li><time>10:02</time><span class="undone">Direct de l'OIF terminé</span><span><small>défait à 10:02, direct repris</small></span></li>
+        <li><time>08:40</time><span>Activité de 13:00 annulée<small>par vous ; 41 inscrits prévenus à 08:45</small></span><button class="btn btn-ghost btn-sm" type="button" data-open-restore>Rétablir</button></li>
+      </ul>
+    </section>
+
     <section class="panel" aria-labelledby="vigilance">
       <div class="panel-head"><h2 id="vigilance">À surveiller</h2></div>
       <ul class="alerts">
@@ -265,7 +291,7 @@
   </aside>
 </div>
 
-<div class="veil" hidden>
+<div class="veil" hidden data-dialog="cancel">
   <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="annuler">
     <div class="dlg-head">
       <h2 id="annuler">Annuler l'activité de 11:30</h2>
@@ -276,25 +302,83 @@
       <label class="choice"><input type="radio" name="motif"><span><b>Les organisateurs ont prévenu de leur absence</b><small>Par courriel, téléphone ou message.</small></span></label>
       <label class="choice"><input type="radio" name="motif"><span><b>Autre raison</b><small>À préciser pour l'équipe ; elle n'est pas publiée.</small></span></label>
       <label class="check"><input type="checkbox" checked><span>Publier un message d'incident : « L'activité de 11:30 est annulée. »</span></label>
-      <label class="check"><input type="checkbox" checked><span>Prévenir par courriel les <b>38 inscrits</b></span></label>
+      <label class="check"><input type="checkbox" checked><span>Prévenir par courriel les <b>38 inscrits</b>, <b>dans 5 minutes</b> : d'ici là, vous pouvez encore revenir en arrière sans que personne n'ait rien reçu.</span></label>
     </div>
     <div class="dlg-foot">
       <button class="btn btn-ghost" type="button" data-close>Garder l'activité</button>
-      <button class="btn btn-danger" type="button" data-close>Annuler l'activité</button>
+      <button class="btn btn-danger" type="button" data-close data-show-undo="cancel">Annuler l'activité</button>
     </div>
   </div>
 </div>
 
-<div class="demo"><button class="btn btn-sm btn-outline" type="button" data-open-cancel>Voir : annuler une activité</button></div>
+
+<div class="veil" hidden data-dialog="end">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="terminer">
+    <div class="dlg-head">
+      <h2 id="terminer">Terminer le direct du CILSS ?</h2>
+      <p>Il reste 34 minutes au créneau. Les 212 personnes connectées verront « Direct terminé ».</p>
+    </div>
+    <div class="dlg-body confirm-live">
+      <p style="margin:0;font-size:0.9rem;color:var(--color-text-secondary)">Une erreur ? Pendant 15 minutes, « Reprendre le direct » relance la même réunion Zoom, avec le même lien : les spectateurs reviennent sans rien changer.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn btn-ghost" type="button" data-close>Continuer le direct</button>
+      <button class="btn btn-danger" type="button" data-close data-show-undo="end">Terminer le direct</button>
+    </div>
+  </div>
+</div>
+
+<div class="veil" hidden data-dialog="restore">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="retablir">
+    <div class="dlg-head">
+      <h2 id="retablir">Rétablir l'activité de 13:00 ?</h2>
+      <p>Autorité nationale de budgétisation climat : l'expérience du Sénégal. Elle revient au programme, à son créneau, avec ses inscrits.</p>
+    </div>
+    <div class="dlg-body">
+      <label class="check"><input type="checkbox" checked><span>Retirer le message « L'activité de 13:00 est annulée »</span></label>
+      <label class="check"><input type="checkbox" checked><span>Écrire aux <b>41 inscrits</b> qui ont reçu l'annulation : « Finalement, l'activité est maintenue. »</span></label>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn btn-ghost" type="button" data-close>Laisser annulée</button>
+      <button class="btn btn-primary" type="button" data-close>Rétablir l'activité</button>
+    </div>
+  </div>
+</div>
+
+<div class="undo" role="status" hidden>
+  <p><span data-undo-text>Activité de 11:30 annulée.</span><small data-undo-sub>Les 38 inscrits seront prévenus dans 4 min 52 s.</small></p>
+  <button class="btn btn-sm" type="button" data-undo>Défaire</button>
+  <span class="timer" aria-hidden="true"></span>
+</div>
+<div class="demo">
+  <button class="btn btn-sm btn-outline" type="button" data-open-cancel>Annuler une activité</button>
+  <button class="btn btn-sm btn-outline" type="button" data-open-end>Terminer le direct</button>
+  <button class="btn btn-sm btn-outline" type="button" data-open-restore>Rétablir</button>
+</div>
 
 <script src="icones.js"></script>
 <script>
   {
-    const veil = document.querySelector('.veil')
-    document.querySelectorAll('[data-open-cancel]').forEach(b => b.addEventListener('click', () => { veil.hidden = false }))
-    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => { veil.hidden = true }))
-    veil.addEventListener('click', e => { if (e.target === veil) veil.hidden = true })
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') veil.hidden = true })
+    const dlg = name => document.querySelector(`[data-dialog="${name}"]`)
+    const openers = { cancel: '[data-open-cancel]', end: '[data-open-end]', restore: '[data-open-restore]' }
+    for (const [name, sel] of Object.entries(openers)) document.querySelectorAll(sel).forEach(b => b.addEventListener('click', () => { dlg(name).hidden = false }))
+    const closeAll = () => document.querySelectorAll('.veil').forEach(v => { v.hidden = true })
+    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeAll))
+    document.querySelectorAll('.veil').forEach(v => v.addEventListener('click', e => { if (e.target === v) closeAll() }))
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll() })
+    const undo = document.querySelector('.undo')
+    const texts = {
+      cancel: ['Activité de 11:30 annulée.', 'Les 38 inscrits seront prévenus dans 4 min 52 s.'],
+      end: ['Direct du CILSS terminé.', 'Reprise possible pendant 15 minutes, même lien Zoom.'],
+    }
+    document.querySelectorAll('[data-show-undo]').forEach(b => b.addEventListener('click', () => {
+      const [a, c] = texts[b.dataset.showUndo]
+      undo.querySelector('[data-undo-text]').textContent = a
+      undo.querySelector('[data-undo-sub]').textContent = c
+      undo.querySelector('[data-undo]').textContent = b.dataset.showUndo === 'end' ? 'Reprendre le direct' : 'Défaire'
+      undo.hidden = false
+    }))
+    undo.querySelector('[data-undo]').addEventListener('click', () => { undo.hidden = true })
     document.querySelectorAll('.chips .chip').forEach(c => c.addEventListener('click', () => {
       document.querySelectorAll('.chips .chip').forEach(x => x.setAttribute('aria-pressed', 'false')); c.setAttribute('aria-pressed', 'true')
     }))
