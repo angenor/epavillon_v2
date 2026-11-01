@@ -59,14 +59,22 @@
     "monthYear": "{month} · {count}"
   },
   "week": {
-    "live": "Direct",
-    "navigation": "Changer de semaine",
-    "previous": "Semaine précédente",
-    "next": "Semaine suivante",
-    "openDay": "Voir la liste du {day}",
-    "range": "Semaine du {from} au {to}",
-    "single": "Journée du {day}",
-    "position": "{week} sur {weeks} · {count}",
+    "live": "En direct",
+    "join": "Rejoindre",
+    "today": "Aujourd'hui",
+    "previous": "Jours précédents",
+    "next": "Jours suivants",
+    "monthRange": "{from} à {to}",
+    "span": "Du {from} au {to}, {count}",
+    "single": "Le {day}, {count}",
+    "count": "aucune activité | {count} activité | {count} activités",
+    "until": "à {end}",
+    "visited": "Consultée",
+    "rest": {
+      "label": "Jour de repos",
+      "closed": "pavillon fermé",
+      "note": "Le pavillon est fermé le premier dimanche de la conférence."
+    },
     "emptyDay": "Aucune activité avec cette recherche."
   },
   "list": {
