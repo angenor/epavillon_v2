@@ -21,6 +21,7 @@ fn message(
         recipient_ids: Vec::new(),
         topic: topic.map(str::to_owned),
         topic_other: topic_other.map(str::to_owned),
+        subject: Some("Sujet d'essai".to_owned()),
     }
 }
 

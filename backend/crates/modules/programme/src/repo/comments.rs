@@ -50,6 +50,12 @@ pub struct Message {
     pub topic: Option<String>,
     /// Intitulé libre de la nature « Autre ».
     pub topic_other: Option<String>,
+    /// Titre du sujet, sur le message qui l'ouvre (01/11). Nul : fil d'avant les sujets.
+    pub subject: Option<String>,
+    /// Sujet résolu, sur le message racine. Une réponse le rouvre (base).
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub closed_at: Option<OffsetDateTime>,
+    pub closed_by: Option<Uuid>,
 }
 
 macro_rules! message_depuis {
@@ -68,9 +74,13 @@ macro_rules! message_depuis {
             created_at: $l.created_at,
             topic: $l.topic,
             topic_other: $l.topic_other,
+            subject: $l.subject,
+            closed_at: $l.closed_at,
+            closed_by: $l.closed_by,
         }
     };
 }
+pub(crate) use message_depuis;
 
 /// De quel côté le lecteur se trouve. **Ce n'est pas un niveau de droit mais
 /// une place** : le comité voit le fil interne, l'organisation ne voit que ce
@@ -100,7 +110,7 @@ pub async fn fil<'e>(
                   visibility::text AS "visibility!", body, is_change_request,
                   resolved_at, resolved_by, edited_at, created_at,
                   (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
-                  topic_other
+                  topic_other, subject, closed_at, closed_by
              FROM programme.proposal_comments
             WHERE proposal_id = $1
               AND deleted_at IS NULL
@@ -126,6 +136,8 @@ pub struct NouveauMessage<'a> {
     /// Terme de `proposal_comment_topic`, résolu par le service.
     pub topic_term_id: Option<Uuid>,
     pub topic_other: Option<&'a str>,
+    /// Titre du sujet, seulement sur un message qui ouvre un fil.
+    pub subject: Option<&'a str>,
 }
 
 /// Écrire un message. **Le corps est refusé vide par la base** — `length(btrim(
@@ -139,13 +151,13 @@ pub async fn ecrire(
     let ligne = sqlx::query!(
         r#"INSERT INTO programme.proposal_comments
                (proposal_id, parent_id, author_id, visibility, body, is_change_request,
-                topic_term_id, topic_other)
-           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6, $7, $8)
+                topic_term_id, topic_other, subject)
+           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6, $7, $8, $9)
         RETURNING id, proposal_id, parent_id, author_id,
                   visibility::text AS "visibility!", body, is_change_request,
                   resolved_at, resolved_by, edited_at, created_at,
                   (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
-                  topic_other"#,
+                  topic_other, subject, closed_at, closed_by"#,
         dossier.as_uuid(),
         nouveau.parent_id,
         auteur,
@@ -153,7 +165,8 @@ pub async fn ecrire(
         nouveau.body,
         nouveau.is_change_request,
         nouveau.topic_term_id,
-        nouveau.topic_other
+        nouveau.topic_other,
+        nouveau.subject
     )
     .fetch_one(conn)
     .await?;
@@ -186,7 +199,7 @@ pub async fn par_id<'e>(
                   visibility::text AS "visibility!", body, is_change_request,
                   resolved_at, resolved_by, edited_at, created_at,
                   (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
-                  topic_other
+                  topic_other, subject, closed_at, closed_by
              FROM programme.proposal_comments
             WHERE id = $1 AND deleted_at IS NULL"#,
         message.as_uuid()

@@ -77,6 +77,10 @@ pub struct PostCommentPayload {
     /// Intitulé libre, exigé avec la nature « Autre » et seulement avec elle.
     #[serde(default)]
     pub topic_other: Option<String>,
+    /// Titre du sujet (01/11) : exigé de l'organisation quand elle ouvre un fil,
+    /// ignoré sur une réponse.
+    #[serde(default)]
+    pub subject: Option<String>,
 }
 
 /// Le code de la nature qui appelle un intitulé libre.
@@ -127,6 +131,26 @@ async fn nature_du_fil(
         ));
     }
     Ok((Some(terme), Some(libre.to_owned())))
+}
+
+const SUJET_MAX: usize = 120;
+
+/// Le titre d'un sujet qui s'ouvre. L'équipe peut s'en passer : une note du
+/// comité n'est pas toujours un sujet.
+fn titre_du_sujet(cote: Cote, ouvre_un_fil: bool, payload: &PostCommentPayload) -> Result<Option<String>> {
+    if !ouvre_un_fil {
+        return Ok(None);
+    }
+    let titre = payload.subject.as_deref().map(str::trim).filter(|t| !t.is_empty());
+    match titre {
+        None if cote == Cote::Organisation => Err(ApiError::validation("Donnez un titre au sujet.", "subject")),
+        None => Ok(None),
+        Some(t) if t.chars().count() < 2 || t.chars().count() > SUJET_MAX => Err(ApiError::validation(
+            "Le titre du sujet compte de 2 à 120 caractères.",
+            "subject",
+        )),
+        Some(t) => Ok(Some(t.to_owned())),
+    }
 }
 
 /// Écrire un message sur un dossier.
@@ -195,6 +219,7 @@ pub async fn ecrire(
 
     let (topic_term_id, topic_other) =
         nature_du_fil(state, cote, payload.parent_id.is_none(), &payload).await?;
+    let sujet = titre_du_sujet(cote, payload.parent_id.is_none(), &payload)?;
 
     let etat = proposals::etat(state.pool(), dossier)
         .await?
@@ -212,6 +237,7 @@ pub async fn ecrire(
             is_change_request: demande_de_correction,
             topic_term_id,
             topic_other: topic_other.as_deref(),
+            subject: sujet.as_deref(),
         },
     )
     .await?;
@@ -425,7 +451,7 @@ pub async fn resoudre(
                   visibility::text AS "visibility!", body, is_change_request,
                   resolved_at, resolved_by, edited_at, created_at,
                   (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
-                  topic_other"#,
+                  topic_other, subject, closed_at, closed_by"#,
         message.as_uuid(),
         resolu,
         acteur
@@ -436,19 +462,70 @@ pub async fn resoudre(
     crate::realtime::signaler_echange(&mut tx, dossier, edition, organisation, false).await?;
     tx.commit().await?;
 
-    Ok(Message {
-        id: mise_a_jour.id,
-        proposal_id: mise_a_jour.proposal_id,
-        parent_id: mise_a_jour.parent_id,
-        author_id: mise_a_jour.author_id,
-        visibility: mise_a_jour.visibility,
-        body: mise_a_jour.body,
-        is_change_request: mise_a_jour.is_change_request,
-        resolved_at: mise_a_jour.resolved_at,
-        resolved_by: mise_a_jour.resolved_by,
-        edited_at: mise_a_jour.edited_at,
-        created_at: mise_a_jour.created_at,
-        topic: mise_a_jour.topic,
-        topic_other: mise_a_jour.topic_other,
-    })
+    Ok(crate::repo::comments::message_depuis!(mise_a_jour))
+}
+
+// -----------------------------------------------------------------------------
+// Le sujet résolu (01/11)
+// -----------------------------------------------------------------------------
+
+/// Marquer un sujet résolu, ou le rouvrir. Les deux côtés le peuvent, sur un
+/// sujet qu'ils lisent : un sujet est une question, et celui qui l'a posée sait
+/// quand elle a sa réponse. Une réponse le rouvre de toute façon (base).
+///
+/// Distinct de `resoudre` : une demande de correction résolue est un
+/// arbitrage du comité, un sujet résolu ne l'est pas.
+pub async fn clore_sujet(
+    state: &ProgrammeState,
+    ctx: &RequestContext,
+    acteur: Uuid,
+    message: CommentId,
+    clos: bool,
+) -> Result<Message> {
+    let racine = comments::par_id(state.pool(), message)
+        .await?
+        .ok_or_else(ApiError::not_found)?;
+    if racine.parent_id.is_some() {
+        return Err(ApiError::validation(
+            "Seul le message qui ouvre un sujet se marque résolu.",
+            "comment_id",
+        ));
+    }
+
+    let dossier = ProposalId(racine.proposal_id);
+    let (edition, acces) = perimeter::acces_au_dossier(state.pool(), acteur, dossier).await?;
+    let cote = match acces {
+        Acces::BackOffice => Cote::Comite,
+        Acces::Organisation => Cote::Organisation,
+    };
+    if !comments::lisible(state.pool(), racine.id, acteur, cote).await? {
+        return Err(ApiError::not_found());
+    }
+    let organisation = proposals::etat(state.pool(), dossier)
+        .await?
+        .ok_or_else(ApiError::not_found)?
+        .organization_id;
+
+    let mut tx = state.db().write(ctx).await?;
+    let ligne = sqlx::query!(
+        r#"UPDATE programme.proposal_comments
+              SET closed_at = CASE WHEN $2 THEN now() END,
+                  closed_by = CASE WHEN $2 THEN $3::uuid END
+            WHERE id = $1 AND deleted_at IS NULL
+        RETURNING id, proposal_id, parent_id, author_id,
+                  visibility::text AS "visibility!", body, is_change_request,
+                  resolved_at, resolved_by, edited_at, created_at,
+                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,
+                  topic_other, subject, closed_at, closed_by"#,
+        racine.id,
+        clos,
+        acteur
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+    let reserve_au_comite = ligne.visibility != VISIBILITE_DEPOSANT;
+    crate::realtime::signaler_echange(&mut tx, dossier, edition, organisation, reserve_au_comite).await?;
+    tx.commit().await?;
+
+    Ok(crate::repo::comments::message_depuis!(ligne))
 }

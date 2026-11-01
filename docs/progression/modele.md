@@ -529,3 +529,11 @@ Demande du commanditaire : « Écrire au déposant » depuis la fiche d'un dossi
 - **Semence** : les neuf textes de la v1 (`activityEmailTemplates.js`), communs, dans une table vide seulement. « CdP31 » devient `{{edition}}` ; dates limites et lien du formulaire d'engagement deviennent des passages à compléter entre crochets ; les deux adresses personnelles en copie de la v1 ne sont pas reprises.
 
 **En production** : `ops/migrations/2026-11-01-textes-types.sql`, rejouable, jouée deux fois en local sur `epavillon` ; schéma complet rechargé dans une base jetable (neuf textes semés). À jouer **avant** de démarrer l'API et le worker.
+
+## 01/11/2026, `070_programme_proposals.sql` : les échanges d'un dossier deviennent des sujets
+
+- **`programme.proposal_comments`** : `subject` (titre du sujet, 2 à 120 caractères), `closed_at` et `closed_by` (sujet résolu), sur le message racine seulement (`ck_proposal_comments_subject_on_root`, `ck_proposal_comments_subject_length`, `xmod_fk_proposal_comments_closer`). Distincts de `resolved_at`, qui suit une demande de correction : une racine peut être les deux, et le compteur des demandes ouvertes ne doit rien voir d'un sujet résolu.
+- **`tg_proposal_comments_reopen_subject`** : une réponse rouvre son sujet (la racine se remonte, `parent_id` pouvant désigner une réponse).
+- Les fils existants gardent un titre nul ; l'écran les nomme par leur nature, sinon par le début de leur premier message. Aucune reprise.
+
+**En production** : `ops/migrations/2026-11-01-echanges-par-sujet.sql`, rejouable, avant l'API. Jouée deux fois en local.

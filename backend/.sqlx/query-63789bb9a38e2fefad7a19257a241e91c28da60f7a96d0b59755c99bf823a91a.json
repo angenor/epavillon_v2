@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other\n             FROM programme.proposal_comments\n            WHERE proposal_id = $1\n              AND deleted_at IS NULL\n              AND CASE WHEN $2 THEN programme.comment_in_committee_circle(id, $3)\n                       ELSE visibility = 'submitter' END\n            ORDER BY created_at, id",
+  "query": "UPDATE programme.proposal_comments\n              SET resolved_at = CASE WHEN $2 THEN now() END,\n                  resolved_by = CASE WHEN $2 THEN $3::uuid END\n            WHERE id = $1 AND deleted_at IS NULL\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other, subject, closed_at, closed_by",
   "describe": {
     "columns": [
       {
@@ -135,6 +135,39 @@
             "name": "topic_other"
           }
         }
+      },
+      {
+        "ordinal": 13,
+        "name": "subject",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "closed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "closed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_by"
+          }
+        }
       }
     ],
     "parameters": {
@@ -157,8 +190,11 @@
       true,
       false,
       null,
+      true,
+      true,
+      true,
       true
     ]
   },
-  "hash": "ba6f89ecbe69093bad9c2c42b02c6f8d20fb49c7e8922ab324ee2668ac1a35e3"
+  "hash": "63789bb9a38e2fefad7a19257a241e91c28da60f7a96d0b59755c99bf823a91a"
 }

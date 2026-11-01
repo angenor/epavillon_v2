@@ -539,6 +539,7 @@ async fn les_trois_visibilites_ne_franchissent_que_ce_quelles_doivent() {
                 recipient_ids: Vec::new(),
                 topic: None,
                 topic_other: None,
+                subject: Some("Sujet d'essai".to_owned()),
             },
         )
         .await
@@ -592,6 +593,7 @@ async fn une_demande_de_correction_est_forcee_en_visibilite_partagee() {
             recipient_ids: Vec::new(),
             topic: None,
             topic_other: None,
+            subject: Some("Sujet d'essai".to_owned()),
         },
     )
     .await
@@ -618,6 +620,7 @@ async fn une_demande_de_correction_est_forcee_en_visibilite_partagee() {
             recipient_ids: Vec::new(),
             topic: None,
             topic_other: None,
+            subject: Some("Sujet d'essai".to_owned()),
         },
     )
     .await
@@ -642,6 +645,7 @@ async fn une_demande_de_correction_est_forcee_en_visibilite_partagee() {
             recipient_ids: Vec::new(),
             topic: None,
             topic_other: None,
+            subject: Some("Sujet d'essai".to_owned()),
         },
     )
     .await

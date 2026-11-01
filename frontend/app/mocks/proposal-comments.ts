@@ -264,6 +264,9 @@ export function postProposalComment(
     created_at: new Date(at).toISOString(),
     topic: null,
     topic_other: null,
+    subject: payload.parent_id ? null : (payload.subject?.trim() || null),
+    closed_at: null,
+    closed_by: null,
   }
   const recipients = [...new Set(payload.recipient_ids ?? [])].filter((id) => id !== personId)
   if (recipients.length > 0) {
@@ -273,6 +276,7 @@ export function postProposalComment(
     recipientsByRoot.set(comment.id, recipients)
   }
   sessionComments.push(comment)
+  if (comment.parent_id) reopenSubjectOf(comment.parent_id)
   return asCommentView(comment, personId)
 }
 
@@ -307,4 +311,28 @@ export function markCommentsRead(personId: PersonId, payload: MarkCommentsReadPa
 /** `DELETE /proposal-comments/{id}/read`. */
 export function markCommentUnread(personId: PersonId, commentId: Uuid): void {
   reads.delete(readKey(commentId, personId))
+}
+
+// ---------------------------------------------------------------------------
+// Les sujets (01/11)
+// ---------------------------------------------------------------------------
+
+/** Un sujet résolu, ou rouvert. Les messages d'exemple sont modifiés pour la visite. */
+export function closeSubject(personId: PersonId, rootId: Uuid, closed: boolean): ProposalComment | null {
+  const root = allComments().find((c) => c.id === rootId && c.parent_id === null)
+  if (!root) return null
+  root.closed_at = closed ? new Date().toISOString() : null
+  root.closed_by = closed ? personId : null
+  return root
+}
+
+/** Une réponse rouvre son sujet, comme `tg_proposal_comments_reopen_subject`. */
+export function reopenSubjectOf(parentId: Uuid): void {
+  const all = allComments()
+  const parent = all.find((c) => c.id === parentId)
+  const root = parent ? rootOf(parent, all) : undefined
+  if (root) {
+    root.closed_at = null
+    root.closed_by = null
+  }
 }

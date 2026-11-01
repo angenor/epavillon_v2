@@ -58,6 +58,7 @@ fn charge(
         recipient_ids: destinataires,
         topic: None,
         topic_other: None,
+        subject: Some("Sujet d'essai".to_owned()),
     }
 }
 

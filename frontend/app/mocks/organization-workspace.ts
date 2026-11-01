@@ -53,7 +53,7 @@ import type {
 } from '~/types/organization-workspace'
 import { MEMBERSHIP, PERSON_INVITED, PROPOSAL_COMMENT } from './ids'
 import { resolveToken } from './auth'
-import { hasReadComment, sessionProposalComments } from './proposal-comments'
+import { hasReadComment, reopenSubjectOf, sessionProposalComments } from './proposal-comments'
 import { events } from './event'
 import { attachedImage } from './covers'
 import { rooms } from './rooms'
@@ -91,10 +91,10 @@ const sessionResolutions = new Map<string, { resolved_at: string | null; resolve
 
 /** Les messages du jeu, tels qu'ils sont APRÈS les écritures de la session. */
 function commentsWithSession(): ProposalComment[] {
-  const merged = [...proposalComments, ...sessionComments].map((comment) => {
-    const resolution = sessionResolutions.get(comment.id)
-    return resolution ? { ...comment, ...resolution } : comment
-  })
+  const merged = [...proposalComments, ...sessionComments].map((comment) => ({
+    ...comment,
+    ...sessionResolutions.get(comment.id),
+  }))
   return merged
 }
 
@@ -678,8 +678,12 @@ export function replyToComment(authorId: string, payload: ReplyToCommentPayload)
     created_at: now,
     topic: payload.parent_id ? null : (payload.topic ?? null),
     topic_other: payload.parent_id || payload.topic !== 'other' ? null : (payload.topic_other?.trim() ?? null),
+    subject: payload.parent_id ? null : (payload.subject?.trim() ?? null),
+    closed_at: null,
+    closed_by: null,
   }
   sessionComments.push(reply)
+  if (payload.parent_id) reopenSubjectOf(payload.parent_id)
   return reply
 }
 

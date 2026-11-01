@@ -541,24 +541,25 @@ useRealtime(
 const busy = ref(false)
 const sendError = ref<string | null>(null)
 
-async function sendMessage(message: CommentsDeskMessage): Promise<boolean> {
+async function sendMessage(message: CommentsDeskMessage): Promise<Uuid | null> {
   const person = auth.person
-  if (!person || !file.value) return false
+  if (!person || !file.value) return null
   busy.value = true
   sendError.value = null
   try {
-    await api.workspace.reply(person.id, {
+    const sent = await api.workspace.reply(person.id, {
       proposal_id: file.value.tracking.proposal.id,
       parent_id: message.parentId,
       body: message.body,
       topic: message.topic,
       topic_other: message.topicOther,
+      subject: message.subject,
     })
     await refreshComments()
-    return true
+    return sent.id
   } catch (thrown) {
     sendError.value = apiErrorMessage(thrown, (key) => t(key))
-    return false
+    return null
   } finally {
     busy.value = false
   }
@@ -570,6 +571,21 @@ async function markCommentsRead(ids: Uuid[]): Promise<void> {
   if (!person || !file.value) return
   await api.proposals.markCommentsRead(person.id, file.value.tracking.proposal.id, ids)
   for (const comment of comments.value) if (ids.includes(comment.id)) comment.is_read = true
+}
+
+async function closeSubject(rootId: Uuid, closed: boolean): Promise<void> {
+  const person = auth.person
+  if (!person) return
+  busy.value = true
+  sendError.value = null
+  try {
+    await api.proposals.closeSubject(person.id, rootId, closed)
+    await refreshComments()
+  } catch (thrown) {
+    sendError.value = apiErrorMessage(thrown, (key) => t(key))
+  } finally {
+    busy.value = false
+  }
 }
 
 async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
@@ -1019,6 +1035,7 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
         :submit="sendMessage"
         :mark-read="markCommentsRead"
         @resolve="resolve"
+        @close-subject="closeSubject"
         @retry="refreshComments()"
       />
     </template>

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE programme.proposal_comments\n              SET resolved_at = CASE WHEN $2 THEN now() END,\n                  resolved_by = CASE WHEN $2 THEN $3::uuid END\n            WHERE id = $1 AND deleted_at IS NULL\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other",
+  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other, subject, closed_at, closed_by\n             FROM programme.proposal_comments\n            WHERE id = $1 AND deleted_at IS NULL",
   "describe": {
     "columns": [
       {
@@ -135,12 +135,43 @@
             "name": "topic_other"
           }
         }
+      },
+      {
+        "ordinal": 13,
+        "name": "subject",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "closed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "closed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_by"
+          }
+        }
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Bool",
         "Uuid"
       ]
     },
@@ -157,8 +188,11 @@
       true,
       false,
       null,
+      true,
+      true,
+      true,
       true
     ]
   },
-  "hash": "fd2b28dabf3e788f98682e1ecc89b84d467fb97f1820908d3ced5017ffe737d3"
+  "hash": "bb11f96daf45871a0fea12b05401c8b8b75cbb1a7c858384761c610764a160c9"
 }

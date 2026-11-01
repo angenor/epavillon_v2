@@ -40,6 +40,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-10T08:30:00Z',
   },
   {
@@ -55,6 +58,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-11T14:05:00Z',
   },
   {
@@ -70,6 +76,9 @@ export const proposalComments = [
     edited_at: '2026-08-12T15:10:00Z',
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-12T15:00:00Z',
   },
   {
@@ -85,6 +94,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-13T09:20:00Z',
   },
 
@@ -102,6 +114,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-07-08T11:00:00Z',
   },
   {
@@ -117,6 +132,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-07-11T16:20:00Z',
   },
 
@@ -134,6 +152,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-07-25T10:40:00Z',
   },
   {
@@ -149,6 +170,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-07-25T13:15:00Z',
   },
   {
@@ -164,6 +188,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-01T09:00:00Z',
   },
 
@@ -181,6 +208,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-05T07:45:00Z',
   },
 
@@ -204,6 +234,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-04T10:20:00Z',
   },
   {
@@ -219,6 +252,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-05T16:40:00Z',
   },
   {
@@ -237,6 +273,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-07T08:15:00Z',
   },
   {
@@ -252,6 +291,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-08T11:30:00Z',
   },
   {
@@ -270,6 +312,9 @@ export const proposalComments = [
     edited_at: null,
     topic: null,
     topic_other: null,
+    subject: null,
+    closed_at: null,
+    closed_by: null,
     created_at: '2026-08-09T07:05:00Z',
   },
 

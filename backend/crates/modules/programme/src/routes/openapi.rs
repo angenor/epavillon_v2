@@ -67,6 +67,8 @@ pub struct ApiErrorBody {
         crate::routes::workspace::ecrire,
         crate::routes::workspace::resoudre,
         crate::routes::workspace::rouvrir,
+        crate::routes::workspace::clore_sujet,
+        crate::routes::workspace::rouvrir_sujet,
         crate::routes::detail::audience,
         crate::routes::workspace::marquer_lus,
         crate::routes::workspace::marquer_non_lu,
@@ -154,8 +156,8 @@ mod tests {
             .sum();
 
         assert_eq!(
-            operations, 76,
-            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10, les cinq du jour J et les deux de l'atelier de couverture du 29/10, la page d'un fil et le placement dans ses parties du 30/10, les fils de la programmation (`/schedule/tracks`)"
+            operations, 80,
+            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10, l'aperçu de l'annulation du 28/10, les cinq du jour J et les deux de l'atelier de couverture du 29/10, la page d'un fil et le placement dans ses parties du 30/10, les fils de la programmation (`/schedule/tracks`), le changement de porteuse et de déposant du 31/10, clore et rouvrir un sujet du 01/11"
         );
     }
 

@@ -303,6 +303,8 @@ export interface ReplyToCommentPayload {
   topic?: string | null
   /** Intitulé libre, avec la nature « Autre » seulement. */
   topic_other?: string | null
+  /** Titre du sujet, exigé quand on en ouvre un (01/11). */
+  subject?: string | null
 }
 
 /**

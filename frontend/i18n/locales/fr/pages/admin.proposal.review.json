@@ -325,6 +325,13 @@
     "arrived": {
       "title": "Nouveau message",
       "message": "{author}, sur le dossier {reference}."
+    },
+    "subject": {
+      "label": "Titre du sujet",
+      "hint": "Facultatif pour l'équipe ; l'organisation en donne toujours un.",
+      "resolved": "Sujet résolu",
+      "markResolved": "Marquer le sujet résolu",
+      "reopen": "Rouvrir le sujet"
     }
   },
   "mode": {

@@ -45,6 +45,8 @@ const VISIBILITIES: CommentVisibility[] = ['committee', 'submitter', 'private']
 
 const visibility = ref<CommentVisibility>('committee')
 const body = ref('')
+/** Titre du sujet (01/11), sur un nouveau fil seulement ; facultatif pour l'équipe. */
+const subject = ref('')
 const isChangeRequest = ref(false)
 const recipients = ref<PersonId[]>([])
 const bodyError = ref('')
@@ -92,6 +94,7 @@ function addMentioned(person: CommentPerson): void {
 
 function reset(): void {
   body.value = ''
+  subject.value = ''
   isChangeRequest.value = false
   visibility.value = 'committee'
   recipients.value = []
@@ -124,6 +127,7 @@ async function send(): Promise<void> {
     body: body.value.trim(),
     is_change_request: isChangeRequest.value,
     ...(canAddress.value && recipients.value.length > 0 ? { recipient_ids: recipients.value } : {}),
+    ...(props.replyTo === null && subject.value.trim() ? { subject: subject.value.trim() } : {}),
   })
   confirmOpen.value = false
   if (!ok) return
@@ -159,6 +163,17 @@ async function send(): Promise<void> {
     <p v-else-if="props.replyCircle" class="mt-4 text-sm text-text-muted">
       {{ t('admin.proposal.review.comments.recipients.replyCircle', { names: props.replyCircle }) }}
     </p>
+
+    <UiInput
+      v-if="props.replyTo === null"
+      id="review-comment-subject"
+      v-model="subject"
+      class="mt-4"
+      :label="t('admin.proposal.review.comments.subject.label')"
+      :hint="t('admin.proposal.review.comments.subject.hint')"
+      :maxlength="120"
+      :disabled="props.busy"
+    />
 
     <AdminReviewCommentMentionField
       v-model="body"

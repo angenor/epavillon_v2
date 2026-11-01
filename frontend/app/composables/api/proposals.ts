@@ -220,6 +220,10 @@ export function createProposalsApi({ call, callOrNull, send, assertEventInScope 
   markCommentUnread: (personId: Uuid, commentId: Uuid): Promise<void> =>
     send(`/proposal-comments/${commentId}/read`, {}, (m) => m.markCommentUnread(personId, commentId), 'DELETE'),
 
+  /** SUJET RÉSOLU, OU ROUVERT (01/11) : les deux côtés, sur le message qui ouvre le sujet. */
+  closeSubject: (personId: Uuid, rootId: Uuid, closed: boolean) =>
+    send(`/proposal-comments/${rootId}/closure`, {}, (m) => m.closeSubject(personId, rootId, closed), closed ? 'POST' : 'DELETE'),
+
   history: (id: Uuid) =>
     call(`/proposals/${id}/transitions`, (m) => m.proposalTransitions.filter((t) => t.proposal_id === id)),
   /**

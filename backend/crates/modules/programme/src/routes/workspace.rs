@@ -37,6 +37,8 @@ pub fn sous_organizations(cfg: &mut web::ServiceConfig) {
 pub fn sous_proposal_comments(cfg: &mut web::ServiceConfig) {
     cfg.route("/{id}/resolution", web::post().to(resoudre))
         .route("/{id}/resolution", web::delete().to(rouvrir))
+        .route("/{id}/closure", web::post().to(clore_sujet))
+        .route("/{id}/closure", web::delete().to(rouvrir_sujet))
         .route("/{id}/recipients", web::post().to(ajouter_destinataires))
         .route("/{id}/read", web::delete().to(marquer_non_lu));
 }
@@ -213,6 +215,60 @@ pub(crate) async fn rouvrir(
     )
     .await?;
 
+    Ok(HttpResponse::Ok().json(message))
+}
+
+/// Marquer un sujet résolu (01/11).
+#[utoipa::path(
+    post,
+    description = "→ `ProposalComment`. Marque résolu le sujet que ce message ouvre. Les deux côtés le peuvent, sur un sujet qu'ils lisent ; une réponse le rouvre. Distinct de la résolution d'une demande de correction.",
+    path = "/proposal-comments/{id}/closure",
+    tag = "Espace organisation",
+    operation_id = "propositions_clore_un_sujet",
+    params(("id" = Uuid, Path, description = "Message qui ouvre le sujet")),
+    responses(
+        (status = 200, description = "ProposalComment", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Message inexistant **ou hors d'accès**", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Le message n'ouvre pas un sujet", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn clore_sujet(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, acteur.0);
+    let message =
+        comments::clore_sujet(&state, &ctx, acteur.0, CommentId(chemin.into_inner()), true).await?;
+    Ok(HttpResponse::Ok().json(message))
+}
+
+/// Rouvrir un sujet résolu (01/11).
+#[utoipa::path(
+    delete,
+    description = "→ `ProposalComment`. Rouvre le sujet que ce message ouvre. Les deux côtés le peuvent.",
+    path = "/proposal-comments/{id}/closure",
+    tag = "Espace organisation",
+    operation_id = "propositions_rouvrir_un_sujet",
+    params(("id" = Uuid, Path, description = "Message qui ouvre le sujet")),
+    responses(
+        (status = 200, description = "ProposalComment", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Message inexistant **ou hors d'accès**", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Le message n'ouvre pas un sujet", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn rouvrir_sujet(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, acteur.0);
+    let message =
+        comments::clore_sujet(&state, &ctx, acteur.0, CommentId(chemin.into_inner()), false).await?;
     Ok(HttpResponse::Ok().json(message))
 }
 

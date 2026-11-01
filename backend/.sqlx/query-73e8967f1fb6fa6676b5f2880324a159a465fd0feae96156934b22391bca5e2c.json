@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other\n             FROM programme.proposal_comments\n            WHERE id = $1 AND deleted_at IS NULL",
+  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other, subject, closed_at, closed_by\n             FROM programme.proposal_comments\n            WHERE proposal_id = $1\n              AND deleted_at IS NULL\n              AND CASE WHEN $2 THEN programme.comment_in_committee_circle(id, $3)\n                       ELSE visibility = 'submitter' END\n            ORDER BY created_at, id",
   "describe": {
     "columns": [
       {
@@ -135,10 +135,45 @@
             "name": "topic_other"
           }
         }
+      },
+      {
+        "ordinal": 13,
+        "name": "subject",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "closed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "closed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_by"
+          }
+        }
       }
     ],
     "parameters": {
       "Left": [
+        "Uuid",
+        "Bool",
         "Uuid"
       ]
     },
@@ -155,8 +190,11 @@
       true,
       false,
       null,
+      true,
+      true,
+      true,
       true
     ]
   },
-  "hash": "5127fd09618ecdaaf1f9f84c299c71a7e946fbf7dae425ea57272ea8f89735d1"
+  "hash": "73e8967f1fb6fa6676b5f2880324a159a465fd0feae96156934b22391bca5e2c"
 }

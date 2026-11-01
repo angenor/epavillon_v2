@@ -361,6 +361,7 @@ export {
   addCommentRecipients,
   markCommentsRead,
   markCommentUnread,
+  closeSubject,
 } from './proposal-comments'
 
 export {

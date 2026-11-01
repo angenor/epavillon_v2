@@ -500,6 +500,8 @@ export interface PostCommentPayload {
   is_change_request: boolean
   /** Destinataires d'un fil du comité ; absent ou vide : tout le comité. */
   recipient_ids?: PersonId[]
+  /** Titre du sujet, quand le message en ouvre un (01/11). Facultatif pour l'équipe. */
+  subject?: string | null
 }
 
 /**

@@ -5342,6 +5342,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposal-comments/{id}/closure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Marquer un sujet résolu (01/11).
+         * @description → `ProposalComment`. Marque résolu le sujet que ce message ouvre. Les deux côtés le peuvent, sur un sujet qu'ils lisent ; une réponse le rouvre. Distinct de la résolution d'une demande de correction.
+         */
+        post: operations["propositions_clore_un_sujet"];
+        /**
+         * Rouvrir un sujet résolu (01/11).
+         * @description → `ProposalComment`. Rouvre le sujet que ce message ouvre. Les deux côtés le peuvent.
+         */
+        delete: operations["propositions_rouvrir_un_sujet"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposal-comments/{id}/read": {
         parameters: {
             query?: never;
@@ -22134,6 +22158,106 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    propositions_clore_un_sujet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Message qui ouvre le sujet */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ProposalComment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Message inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Le message n'ouvre pas un sujet */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_rouvrir_un_sujet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Message qui ouvre le sujet */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ProposalComment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Message inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Le message n'ouvre pas un sujet */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };

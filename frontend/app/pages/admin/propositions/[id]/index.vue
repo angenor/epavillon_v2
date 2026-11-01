@@ -447,6 +447,22 @@ async function postComment(payload: Omit<PostCommentPayload, 'proposal_id'>): Pr
   }
 }
 
+/** Un sujet résolu, ou rouvert (01/11). */
+async function closeCommentSubject(rootId: Uuid, closed: boolean): Promise<void> {
+  const person = auth.person
+  if (!person) return
+  busy.value = true
+  commentError.value = null
+  try {
+    await api.proposals.closeSubject(person.id, rootId, closed)
+    await refreshComments()
+  } catch (thrown) {
+    commentError.value = writeError(thrown)
+  } finally {
+    busy.value = false
+  }
+}
+
 function patchRead(ids: Set<Uuid>, isRead: boolean): void {
   comments.value = comments.value.map((comment) =>
     ids.has(comment.id) ? { ...comment, is_read: isRead } : comment,
@@ -894,6 +910,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             :add-recipients="addCommentRecipients"
             @update:open="(value: boolean) => setDesk('comments', value)"
             @unread="markCommentUnread"
+            @close-subject="closeCommentSubject"
             @retry="refreshComments()"
           />
 

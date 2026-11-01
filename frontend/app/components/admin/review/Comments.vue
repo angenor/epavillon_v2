@@ -46,9 +46,25 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ unread: [commentId: Uuid] }>()
+const emit = defineEmits<{ unread: [commentId: Uuid]; closeSubject: [rootId: Uuid, closed: boolean] }>()
 
 const { t } = useI18n()
+const { tr } = useI18nText()
+const api = useApi()
+
+// Les sujets (01/11) : un titre et un état sur la racine, la nature pour les fils d'avant.
+const { data: topics } = useAsyncData('proposal-comment-topics', () => api.reference.terms('proposal_comment_topic'), {
+  server: false,
+  lazy: true,
+  default: () => [],
+})
+
+function subjectOf(rootComment: ProposalCommentView): string | null {
+  if (rootComment.subject) return rootComment.subject
+  if (rootComment.topic === 'other' && rootComment.topic_other) return rootComment.topic_other
+  const term = topics.value.find((candidate) => candidate.code === rootComment.topic)
+  return term ? tr(term.label) : null
+}
 
 const root = ref<HTMLElement | null>(null)
 
@@ -177,6 +193,16 @@ async function confirmWidening(): Promise<void> {
           class="rounded-md border"
           :class="SURFACE[thread.root.visibility]"
         >
+          <header v-if="subjectOf(thread.root) || thread.root.closed_at" class="flex flex-wrap items-center gap-2 border-b border-border-subtle px-4 py-2">
+            <p class="min-w-0 flex-1 font-semibold text-text">{{ subjectOf(thread.root) }}</p>
+            <UiBadge
+              v-if="thread.root.closed_at"
+              size="sm"
+              intent="success"
+              icon="check"
+              :label="t('admin.proposal.review.comments.subject.resolved')"
+            />
+          </header>
           <AdminReviewCommentMessage
             :comment="thread.root"
             :author-name="nameOf(thread.root.author_id)"
@@ -222,6 +248,14 @@ async function confirmWidening(): Promise<void> {
             <p v-else class="py-1 text-sm text-text-muted">
               {{ t('admin.proposal.review.comments.compose.label') }} ↓
             </p>
+            <UiButton
+              variant="ghost"
+              :icon="thread.root.closed_at ? undefined : 'check'"
+              :disabled="props.busy"
+              @click="emit('closeSubject', thread.root.id, !thread.root.closed_at)"
+            >
+              {{ t(thread.root.closed_at ? 'admin.proposal.review.comments.subject.reopen' : 'admin.proposal.review.comments.subject.markResolved') }}
+            </UiButton>
             <UiButton
               v-if="thread.root.recipients.length > 0"
               variant="ghost"

@@ -265,6 +265,11 @@ export interface ProposalComment {
   topic: string | null
   /** Intitulé libre de la nature « Autre ». */
   topic_other: string | null
+  /** Titre du sujet, sur le message qui l'ouvre (01/11). Nul : fil d'avant les sujets. */
+  subject: string | null
+  /** Sujet résolu, sur le message racine ; une réponse le rouvre. Distinct de `resolved_at` (demande de correction). */
+  closed_at: IsoDateTime | null
+  closed_by: PersonId | null
 }
 
 /** Une personne nommée dans un fil : destinataire, membre du comité. */

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO programme.proposal_comments\n               (proposal_id, parent_id, author_id, visibility, body, is_change_request,\n                topic_term_id, topic_other)\n           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6, $7, $8)\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other",
+  "query": "INSERT INTO programme.proposal_comments\n               (proposal_id, parent_id, author_id, visibility, body, is_change_request,\n                topic_term_id, topic_other, subject)\n           VALUES ($1, $2, $3, $4::text::programme.comment_visibility, $5, $6, $7, $8, $9)\n        RETURNING id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at,\n                  (SELECT t.code FROM reference.taxonomy_terms t WHERE t.id = topic_term_id) AS topic,\n                  topic_other, subject, closed_at, closed_by",
   "describe": {
     "columns": [
       {
@@ -135,6 +135,39 @@
             "name": "topic_other"
           }
         }
+      },
+      {
+        "ordinal": 13,
+        "name": "subject",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "closed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "closed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "closed_by"
+          }
+        }
       }
     ],
     "parameters": {
@@ -146,6 +179,7 @@
         "Text",
         "Bool",
         "Uuid",
+        "Text",
         "Text"
       ]
     },
@@ -162,8 +196,11 @@
       true,
       false,
       null,
+      true,
+      true,
+      true,
       true
     ]
   },
-  "hash": "2a73748be1ef3bb5440f120f9d5a93427043970c7901b6a367d4ff59a05febdd"
+  "hash": "ec0ca0ca2ca9535cfb0465ab46308c681eef219d79310e34da7ebd763d68b1af"
 }

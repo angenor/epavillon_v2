@@ -979,6 +979,22 @@ CREATE TABLE programme.proposal_comments (
     -- exige son intitulé libre, vérifié par tg_check_proposal_comment_topic.
     topic_term_id uuid       REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
     topic_other  text,
+    -- SUJET (01/11, demande du commanditaire) : un fil est un sujet, comme un
+    -- ticket d'assistance. Son titre et son état vivent sur le message racine ;
+    -- la nature, déjà posée là, ne se redemande plus aux réponses. Titre nul :
+    -- fil ouvert avant les sujets, l'écran le nomme par sa nature.
+    subject      text,
+    -- Sujet résolu, par l'organisation ou l'équipe. Distinct de `resolved_at`,
+    -- qui suit une DEMANDE DE CORRECTION : une racine peut être les deux, et
+    -- confondre les deux sens fausserait le compteur des demandes ouvertes. Une
+    -- réponse rouvre le sujet (tg_proposal_comments_reopen_subject).
+    closed_at    timestamptz,
+    closed_by    uuid        CONSTRAINT xmod_fk_proposal_comments_closer
+                             REFERENCES identity.people(id) ON DELETE SET NULL,
+    CONSTRAINT ck_proposal_comments_subject_on_root
+        CHECK (parent_id IS NULL OR (subject IS NULL AND closed_at IS NULL AND closed_by IS NULL)),
+    CONSTRAINT ck_proposal_comments_subject_length
+        CHECK (subject IS NULL OR length(btrim(subject)) BETWEEN 2 AND 120),
     CONSTRAINT ck_proposal_comments_topic_on_root
         CHECK (parent_id IS NULL OR (topic_term_id IS NULL AND topic_other IS NULL)),
     CONSTRAINT ck_proposal_comments_topic_other
@@ -1038,6 +1054,32 @@ $$;
 CREATE TRIGGER tg_proposal_comments_check_topic
     BEFORE INSERT OR UPDATE OF topic_term_id, topic_other ON programme.proposal_comments
     FOR EACH ROW EXECUTE FUNCTION programme.tg_check_proposal_comment_topic();
+
+-- Une réponse rouvre son sujet : écrire dans un sujet résolu, c'est dire qu'il
+-- ne l'est plus. La racine se remonte, `parent_id` pouvant désigner une réponse.
+CREATE OR REPLACE FUNCTION programme.tg_reopen_proposal_comment_subject()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE programme.proposal_comments r
+       SET closed_at = NULL, closed_by = NULL
+     WHERE r.closed_at IS NOT NULL
+       AND r.id = (
+           WITH RECURSIVE fil AS (
+               SELECT id, parent_id FROM programme.proposal_comments WHERE id = NEW.parent_id
+               UNION ALL
+               SELECT c.id, c.parent_id FROM programme.proposal_comments c JOIN fil f ON c.id = f.parent_id
+           )
+           SELECT id FROM fil WHERE parent_id IS NULL);
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_proposal_comments_reopen_subject
+    AFTER INSERT ON programme.proposal_comments
+    FOR EACH ROW WHEN (NEW.parent_id IS NOT NULL)
+    EXECUTE FUNCTION programme.tg_reopen_proposal_comment_subject();
 
 -- Accusés de lecture : reprend `revisionniste_activity_views` en le généralisant
 -- (le back-office affiche « lu par 3 membres du comité sur 5 »).

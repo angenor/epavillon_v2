@@ -84,6 +84,7 @@ async fn lespace_du_deposant_ne_porte_rien_du_comite() {
                 recipient_ids: Vec::new(),
                 topic: None,
                 topic_other: None,
+                subject: Some("Sujet d'essai".to_owned()),
             },
         )
         .await
@@ -167,6 +168,7 @@ async fn le_deposant_ne_recoit_que_ce_qui_lui_est_adresse() {
                 recipient_ids: Vec::new(),
                 topic: None,
                 topic_other: None,
+                subject: Some("Sujet d'essai".to_owned()),
             },
         )
         .await
@@ -218,6 +220,7 @@ async fn la_resolution_se_pose_et_se_retire_et_le_compteur_suit() {
             recipient_ids: Vec::new(),
             topic: None,
             topic_other: None,
+            subject: Some("Sujet d'essai".to_owned()),
         },
     )
     .await
@@ -392,6 +395,7 @@ async fn les_editions_et_les_actions_se_composent_sur_les_dossiers() {
             recipient_ids: Vec::new(),
             topic: None,
             topic_other: None,
+            subject: Some("Sujet d'essai".to_owned()),
         },
     )
     .await

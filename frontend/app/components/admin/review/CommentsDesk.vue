@@ -38,6 +38,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
   unread: [commentId: Uuid]
+  closeSubject: [rootId: Uuid, closed: boolean]
   retry: []
 }>()
 
@@ -90,6 +91,7 @@ const launcherLabel = computed(() =>
       :mark-read="props.markRead"
       :add-recipients="props.addRecipients"
       @unread="(id: Uuid) => emit('unread', id)"
+      @close-subject="(id: Uuid, closed: boolean) => emit('closeSubject', id, closed)"
     />
   </UiFloatingPanel>
 </template>

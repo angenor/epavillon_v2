@@ -325,6 +325,13 @@
     "arrived": {
       "title": "New message",
       "message": "{author}, on submission {reference}."
+    },
+    "subject": {
+      "label": "Subject title",
+      "hint": "Optional for the team; the organization always gives one.",
+      "resolved": "Subject resolved",
+      "markResolved": "Mark subject resolved",
+      "reopen": "Reopen subject"
     }
   },
   "mode": {

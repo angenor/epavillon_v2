@@ -83,7 +83,36 @@
     "arrived": {
       "title": "Nouveau message de l'équipe",
       "message": "Dossier {reference} : ouvrez les échanges pour le lire."
-    }
+    },
+    "filterLabel": "Filtrer les sujets",
+    "filter": {
+      "open": "Ouverts · {count}",
+      "resolved": "Résolus · {count}"
+    },
+    "newSubject": "Nouveau sujet",
+    "newSubjectHint": "Un sujet par question : l'équipe y répond, et vous le retrouvez d'un coup d'œil.",
+    "subjectLabel": "Titre du sujet",
+    "subjectPlaceholder": "Remplacer une intervenante, lien de connexion…",
+    "openSubject": "Ouvrir le sujet",
+    "backToSubjects": "Tous les sujets",
+    "state": {
+      "waiting": "En attente de l'équipe",
+      "answered": "Réponse reçue",
+      "resolved": "Résolu"
+    },
+    "markSubjectResolved": "Marquer comme résolu",
+    "reopenSubject": "Rouvrir",
+    "resolvedNotice": "Sujet résolu. Écrire ici le rouvre.",
+    "unreadInSubject": "Un message non lu | {count} messages non lus",
+    "emptyOpen": {
+      "title": "Aucun sujet ouvert",
+      "description": "Une question pour l'équipe ? Ouvrez un sujet."
+    },
+    "emptyResolved": {
+      "title": "Aucun sujet résolu"
+    },
+    "replyLabel": "Votre réponse",
+    "replyPlaceholder": "Votre réponse"
   },
   "sessions": {
     "title": "Quand et où",
