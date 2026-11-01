@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  .intro { padding: 56px 0 24px; }
+  .intro h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); }
+  .intro p { max-width: 70ch; color: var(--color-text-secondary); }
+  .links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+  .notes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 48px; margin-top: 40px; }
+  .notes h2 { font-size: 1.5rem; margin-bottom: 8px; }
+  .notes ul { margin: 0; padding-left: 18px; color: var(--color-text-secondary); font-size: 0.95rem; }
+  .notes li { margin: 6px 0; }
+  @media (max-width: 800px) { .notes { grid-template-columns: minmax(0, 1fr); } }
+  .phones { display: flex; flex-wrap: wrap; gap: 32px; padding: 40px 0 80px; }
+  .phones figure { margin: 0; }
+  .phones figcaption { margin-bottom: 10px; font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .phones iframe { width: 375px; height: 812px; border: 1px solid var(--color-border-strong); border-radius: 24px; background: #fff; }
+</style>
+</head>
+<body class="day-plain">
+<main class="wrap">
+  <section class="intro">
+    <h1>Direction condensée</h1>
+    <p>Programmation et journées spéciales dans le langage graphique du site TI : titres en Barlow Condensed gras et capitales, texte en Inter, boutons en capitales, étiquettes posées sur un filet, cartes photo voilées, carte de titre qui chevauche la photo. Couleurs : la charte de l'IFDD seule, rôles d'état inchangés.</p>
+    <div class="links">
+      <a class="btn btn-primary" href="programmation.html">Programmation</a>
+      <a class="btn btn-outline" href="journee.html">Journée finance durable</a>
+      <a class="btn btn-ghost" href="programmation.html?theme=dark">Thème sombre</a>
+    </div>
+    <div class="notes">
+      <div>
+        <h2>Ce qui change</h2>
+        <ul>
+          <li>Deux polices au lieu d'Helvetica seule : Barlow Condensed pour titres, heures, dates et boutons ; Inter pour le texte.</li>
+          <li>Chaque journée et chaque partie du déroulé s'ouvre sur une étiquette à la couleur de la journée, posée sur un filet de la même couleur.</li>
+          <li>Les journées spéciales ont leur rangée de cartes photo en tête de la programmation.</li>
+          <li>Boutons et pastilles en capitales, avec un léger relèvement au survol.</li>
+          <li>La salle s'affiche sur la ligne d'une activité quand elle est connue.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>À arbitrer</h2>
+        <ul>
+          <li>Titres d'activité en condensé mais pas en capitales : sur deux lignes, des capitales deviennent illisibles.</li>
+          <li>Coins de 12 px et ombres plus marquées que le guide (6 à 8 px, ombres très discrètes) : c'est le style TI.</li>
+          <li>Voile horizontal du bandeau : un quatrième dégradé, sur média seulement.</li>
+          <li>Polices embarquées dans le site (fichiers locaux), pas chargées depuis Google.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <section class="phones" aria-label="Téléphone, 375 px">
+    <figure><figcaption>Programmation, 375 px</figcaption><iframe src="programmation.html" title="Programmation sur téléphone"></iframe></figure>
+    <figure><figcaption>Journée, 375 px</figcaption><iframe src="journee.html" title="Journée sur téléphone"></iframe></figure>
+  </section>
+</main>
+<script src="icones.js"></script>
+</body>
+</html>

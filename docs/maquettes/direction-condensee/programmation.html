@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programmation CdP31 : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  .hero-prog { padding: 72px 0 64px; }
+  .hero-prog .tag { margin-bottom: 18px; }
+  .hero-prog h1 { max-width: 15ch; font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 0.95; }
+  .hero-prog h1 span { display: block; color: var(--ifdd-cyan-300); }
+  .hero-prog .meta { margin-top: 22px; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .figures { display: flex; flex-wrap: wrap; gap: 8px 40px; margin-top: 40px; padding-top: 22px; border-top: 1px solid rgb(255 255 255 / 0.2); }
+  .figures div { font-size: 0.9rem; color: rgb(255 255 255 / 0.78); }
+  .figures b { display: block; font-family: var(--font-heading); font-size: 2.6rem; font-weight: 600; line-height: 1; color: #fff; }
+  .figures small { align-self: flex-end; margin-left: auto; font-size: 0.82rem; color: rgb(255 255 255 / 0.65); }
+
+  .days-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 960px) { .days-grid { grid-template-columns: minmax(0, 1fr); } .days-grid .card-photo { min-height: 280px; } }
+
+  /* L'activité en direct, à la une. */
+  .lead { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-md); border: 1px solid var(--color-live-border); }
+  .lead-media { position: relative; min-height: 340px; }
+  .lead-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lead-media .tag { position: absolute; top: 18px; left: 18px; }
+  .lead-body { padding: 32px; display: flex; flex-direction: column; }
+  .lead-time { font-family: var(--font-heading); text-transform: uppercase; color: var(--color-live); }
+  .lead-time b { font-size: 3.6rem; font-weight: 600; line-height: 0.9; }
+  .lead-time span { margin-left: 8px; font-size: 1.15rem; font-weight: 600; letter-spacing: 0.04em; color: var(--color-text-secondary); }
+  .lead h3 { margin-top: 14px; font-size: 2rem; text-transform: none; font-weight: 600; line-height: 1.08; }
+  .lead p { margin: 12px 0 0; color: var(--color-text-secondary); max-width: 60ch; }
+  .lead .row-org { margin-top: 16px; }
+  .lead-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; padding-top: 24px; }
+  @media (max-width: 860px) { .lead { grid-template-columns: minmax(0, 1fr); } .lead-media { min-height: 220px; } .lead-body { padding: 22px; } .lead-time b { font-size: 2.8rem; } .lead h3 { font-size: 1.6rem; } }
+
+  .toolbar { position: sticky; top: 72px; z-index: 10; background: var(--page); padding: 14px 0; border-bottom: 1px solid var(--color-border-subtle); }
+  .toolbar-in { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+  .toolbar .tz { margin-left: auto; font-size: 0.85rem; color: var(--color-text-muted); }
+  .strip { display: flex; gap: 6px; overflow-x: auto; padding: 14px 0 2px; scrollbar-width: none; }
+  .strip a {
+    flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 58px; min-height: 64px;
+    border-radius: var(--radius); text-decoration: none; color: var(--color-text-secondary); border: 1px solid transparent;
+  }
+  .strip a small { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .strip a b { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 600; line-height: 1; color: var(--ink); }
+  .strip a i { width: 18px; height: 4px; border-radius: 2px; background: var(--day-solid); }
+  .strip a.day-plain i { background: transparent; }
+  .strip a:hover { background: var(--color-surface-hover); }
+  .strip a[aria-current] { background: var(--ifdd-bleu-900); border-color: var(--ifdd-bleu-900); }
+  .strip a[aria-current] small, .strip a[aria-current] b { color: #fff; }
+  .strip a.is-past b { color: var(--color-text-muted); }
+  .past-toggle { margin-top: 10px; }
+
+  .day { margin-top: 56px; }
+  .day-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .day-title h2 { font-size: clamp(2.2rem, 4.5vw, 3.2rem); }
+  .day-title span { color: var(--color-text-secondary); font-size: 0.95rem; }
+  .day-title .tag { align-self: center; }
+
+  /* Une journée spéciale dans le fil du jour. */
+  .frame { margin-top: 24px; background: var(--day-tint); border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg); }
+  .frame .rule { background: var(--page); }
+  .frame-body { padding: 4px 24px 12px; }
+  .frame-intro { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; padding: 16px 0 8px; font-size: 0.92rem; color: var(--color-text-secondary); }
+  .frame-intro b { color: var(--color-text); }
+  .frame-intro .btn { margin-left: auto; }
+  .others-label { margin: 36px 0 4px; }
+  @media (max-width: 860px) { .frame-body { padding: 4px 14px 8px; } .frame-intro .btn { margin-left: 0; } .toolbar { top: 72px; } .toolbar .tz { margin-left: 0; } }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale">
+      <a href="#">Événements</a>
+      <a href="#" aria-current="page">Programmations</a>
+      <a href="#">En direct</a>
+      <a href="#">Organisations</a>
+    </nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<section class="hero hero-prog">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop31-32-9.jpg" alt="">
+  <div class="wrap">
+    <span class="tag tag-glass">Édition en cours</span>
+    <h1>Programme du Pavillon de la Francophonie <span>CdP31</span></h1>
+    <div class="meta">
+      <span><svg class="icon"><use href="#i-calendar"/></svg>9 au 20 novembre 2026</span>
+      <span><svg class="icon"><use href="#i-pin"/></svg>Zone bleue, Antalya, Turquie</span>
+      <span><svg class="icon"><use href="#i-clock"/></svg>Toutes les heures : heure d'Antalya (UTC+3)</span>
+    </div>
+    <div class="hero-actions">
+      <a class="btn btn-live" href="#direct"><svg class="icon"><use href="#i-play"/></svg>Suivre le direct</a>
+      <a class="btn btn-white-outline" href="#journees">Les journées spéciales</a>
+    </div>
+    <div class="figures">
+      <div><b>48</b>activités</div>
+      <div><b>62</b>organisations</div>
+      <div><b>31</b>pays</div>
+      <small>Mis à jour le 13 novembre à 08:12, heure d'Antalya</small>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="journees">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2>Journées spéciales</h2>
+        <p>Trois rendez-vous composés par l'IFDD autour d'un thème, avec leurs partenaires.</p>
+      </div>
+    </div>
+    <div class="days-grid">
+      <a class="card-photo no-photo day-atelier" href="#">
+        <svg class="icon ghost-icon"><use href="#i-book"/></svg>
+        <span class="tag tag-done">Terminé</span>
+        <div class="when"><b>8</b><span>dimanche<br>novembre</span></div>
+        <h3>Atelier préparatoire des négociateurs</h3>
+        <p>La veille de la CdP31, hors de la zone bleue.</p>
+        <div class="card-bottom"><span>Hôtel DoubleTree by Hilton</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+      </a>
+      <a class="card-photo day-finance" href="journee.html">
+        <img src="../../../frontend/public/mocks/covers/finance-climatique.jpg" alt="">
+        <span class="tag tag-day"><svg class="icon"><use href="#i-coins"/></svg>Aujourd'hui</span>
+        <div class="when"><b>13</b><span>vendredi<br>novembre</span></div>
+        <h3>Journée finance durable</h3>
+        <p>Opportunités et partenariats pour l'accès à la finance durable.</p>
+        <div class="card-bottom"><span>9 activités, 09:00 à 18:00</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+      </a>
+      <a class="card-photo day-jeunesse" href="#">
+        <img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt="">
+        <span class="tag tag-day"><svg class="icon"><use href="#i-sprout"/></svg>Demain</span>
+        <div class="when"><b>14</b><span>samedi<br>novembre</span></div>
+        <h3>Journée action jeunesse</h3>
+        <p>Hackathon, pitchs, jeu, scène.</p>
+        <div class="card-bottom"><span>8 activités, 08:00 à 17:30</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="direct">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2>En ce moment au pavillon</h2>
+        <p>Une activité est diffusée en direct. Le lien reste valable jusqu'à la fin.</p>
+      </div>
+    </div>
+    <article class="lead">
+      <div class="lead-media">
+        <img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt="">
+        <span class="tag tag-live">En direct</span>
+      </div>
+      <div class="lead-body">
+        <div class="lead-time"><b>10:15</b><span>à 11:15, heure d'Antalya</span></div>
+        <h3>Du financement climatique à l'action régionale : les solutions du P2RS</h3>
+        <p>Le programme régional de résilience présente ses outils de financement et ce qu'ils changent pour les exploitations du Sahel.</p>
+        <p class="row-org"><b>CILSS</b> Comité permanent inter-États de lutte contre la sécheresse dans le Sahel, Burkina Faso</p>
+        <div class="lead-actions">
+          <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Suivre le direct</a>
+          <a class="btn btn-outline" href="#">Voir l'activité</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<div class="toolbar">
+  <div class="wrap">
+    <div class="toolbar-in">
+      <h2 class="heading" style="font-size:1.6rem">Le programme</h2>
+      <div class="segmented" role="group" aria-label="Affichage">
+        <button type="button" aria-pressed="true">Liste</button>
+        <button type="button" aria-pressed="false">Semaine</button>
+      </div>
+      <label class="field">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Titre, organisation, sigle" aria-label="Rechercher une activité">
+      </label>
+      <span class="tz">Heure d'Antalya (UTC+3)</span>
+    </div>
+    <nav class="strip" aria-label="Aller au jour">
+      <a class="day-atelier is-past" href="#"><small>dim.</small><b>8</b><i></i></a>
+      <a class="day-plain is-past" href="#"><small>lun.</small><b>9</b><i></i></a>
+      <a class="day-plain is-past" href="#"><small>mar.</small><b>10</b><i></i></a>
+      <a class="day-plain is-past" href="#"><small>mer.</small><b>11</b><i></i></a>
+      <a class="day-plain is-past" href="#"><small>jeu.</small><b>12</b><i></i></a>
+      <a class="day-finance" href="#j13" aria-current="date"><small>ven.</small><b>13</b><i></i></a>
+      <a class="day-jeunesse" href="#j14"><small>sam.</small><b>14</b><i></i></a>
+      <a class="day-plain" href="#"><small>lun.</small><b>16</b><i></i></a>
+      <a class="day-plain" href="#"><small>mar.</small><b>17</b><i></i></a>
+      <a class="day-plain" href="#"><small>mer.</small><b>18</b><i></i></a>
+      <a class="day-plain" href="#"><small>jeu.</small><b>19</b><i></i></a>
+      <a class="day-plain" href="#"><small>ven.</small><b>20</b><i></i></a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap" style="padding-bottom:80px">
+  <button class="btn btn-ghost btn-sm past-toggle" type="button">Afficher les journées passées (6)</button>
+
+  <section class="day day-finance" id="j13">
+    <div class="day-title">
+      <h2>Vendredi 13</h2>
+      <span>novembre 2026, 11 activités</span>
+      <span class="tag tag-now">Aujourd'hui</span>
+    </div>
+
+    <div class="frame">
+      <div class="rule">
+        <span class="rule-label"><svg class="icon"><use href="#i-coins"/></svg>Journée finance durable</span>
+        <span class="rule-meta">Journée spéciale, 09:00 à 18:00</span>
+      </div>
+      <div class="frame-body">
+        <div class="frame-intro">
+          <span>Avec <b>OIF</b>, <b>GIZ</b>, <b>Fonds pour l'adaptation</b>, <b>Fonds vert</b></span>
+          <a class="btn btn-day-outline btn-sm" href="journee.html">Programme de la journée</a>
+        </div>
+        <div class="moment"><b>08:00</b><span>Accueil et installation, puis ouverture de la journée à 09:00</span></div>
+        <ul class="rows">
+          <li class="row is-past">
+            <div class="row-time"><b>09:15</b><span>à 10:00, 45 min</span></div>
+            <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/cycle-paco-16-9.jpg" alt=""></div>
+            <div>
+              <h3 class="row-title"><a href="#">Panel de partenaires et d'experts : solutions et synergies en Francophonie</a></h3>
+              <p class="row-org"><b>OIF</b> avec l'OCDE, le Fonds pour l'adaptation, le GCF et les CIF</p>
+            </div>
+            <div class="row-side"><span class="tag tag-done">Terminée</span></div>
+          </li>
+          <li class="row is-live">
+            <div class="row-time"><b>10:15</b><span>à 11:15, 1 h</span></div>
+            <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
+            <div>
+              <h3 class="row-title"><a href="#">Du financement climatique à l'action régionale : les solutions du P2RS</a></h3>
+              <p class="row-org"><b>CILSS</b> Comité permanent inter-États de lutte contre la sécheresse, Burkina Faso</p>
+              <div class="row-facts"><span><svg class="icon"><use href="#i-door"/></svg>Salle principale</span></div>
+            </div>
+            <div class="row-side"><span class="tag tag-live">En direct</span></div>
+          </li>
+          <li class="row is-highlight">
+            <div class="row-time"><b>11:30</b><span>à 12:30, 1 h</span></div>
+            <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""></div>
+            <div>
+              <h3 class="row-title"><a href="#">Enjeux de financements pour les régions et les municipalités</a></h3>
+              <p class="row-org"><b>AIRF</b> Association internationale des régions francophones, avec la Commune de Sakété</p>
+              <div class="row-facts"><span><svg class="icon"><use href="#i-star"/></svg>Temps fort de la journée</span><span><svg class="icon"><use href="#i-door"/></svg>Salle principale</span></div>
+            </div>
+            <div class="row-side"><span class="tag tag-soon">À venir</span></div>
+          </li>
+          <li class="row">
+            <div class="row-time"><b>14:15</b><span>à 15:15, 1 h</span></div>
+            <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
+            <div>
+              <h3 class="row-title"><a href="#">Du récif à la résilience : financer la protection des côtes mauriciennes</a></h3>
+              <p class="row-org"><b>Business Maurice</b> Maurice</p>
+            </div>
+            <div class="row-side"><span class="tag tag-soon">À venir</span></div>
+          </li>
+        </ul>
+        <div class="moment"><b>18:00</b><span>Clôture de la journée</span></div>
+      </div>
+    </div>
+
+    <p class="others-label rule-meta">Hors de la journée spéciale</p>
+    <ul class="rows">
+      <li class="row day-plain">
+        <div class="row-time"><b>18:30</b><span>à 19:30, 1 h</span></div>
+        <div class="row-thumb initials">AIMF</div>
+        <div>
+          <h3 class="row-title"><a href="#">Dialogue des bailleurs et des collectivités sur la finance locale</a></h3>
+          <p class="row-org"><b>AIMF</b> Association internationale des maires francophones, France</p>
+        </div>
+        <div class="row-side"><span class="tag tag-postponed">Reportée</span></div>
+      </li>
+    </ul>
+  </section>
+
+  <section class="day day-jeunesse" id="j14">
+    <div class="day-title">
+      <h2>Samedi 14</h2>
+      <span>novembre 2026, 9 activités</span>
+    </div>
+
+    <div class="frame">
+      <div class="rule">
+        <span class="rule-label"><svg class="icon"><use href="#i-sprout"/></svg>Journée action jeunesse</span>
+        <span class="rule-meta">Journée spéciale, 08:00 à 17:30</span>
+      </div>
+      <div class="frame-body">
+        <div class="frame-intro">
+          <span>Avec le soutien du <b>gouvernement du Québec</b></span>
+          <a class="btn btn-day-outline btn-sm" href="#">Programme de la journée</a>
+        </div>
+        <div class="moment"><b>08:00</b><span>Arrivée des jeunes, ouverture officielle à 09:00</span></div>
+        <ul class="rows">
+          <li class="row">
+            <div class="row-time"><b>09:20</b><span>à 10:10, 50 min</span></div>
+            <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt=""></div>
+            <div>
+              <h3 class="row-title"><a href="#">Les 10 minutes qui inspirent : pitchs des organisations de jeunes</a></h3>
+              <p class="row-org"><b>Green OpenLab</b> avec JVE Centrafrique, Youth Voices Cameroun et trois autres</p>
+            </div>
+            <div class="row-side"><span class="tag tag-soon">À venir</span></div>
+          </li>
+          <li class="row is-highlight">
+            <div class="row-time"><b>10:20</b><span>à 11:20, 1 h</span></div>
+            <div class="row-thumb initials">IA</div>
+            <div>
+              <h3 class="row-title"><a href="#">Hackathon francophone sur l'IA appliquée au climat</a></h3>
+              <p class="row-org"><b>OIF</b> Organisation internationale de la Francophonie</p>
+              <div class="row-facts"><span><svg class="icon"><use href="#i-star"/></svg>Temps fort de la journée</span></div>
+            </div>
+            <div class="row-side"><span class="tag tag-soon">À venir</span></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
+</footer>
+
+<script src="icones.js"></script>
+</body>
+</html>
