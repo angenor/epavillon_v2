@@ -2,7 +2,7 @@
 import type { PublicEditionRow } from '~/types/views'
 
 /**
- * UNE ÉDITION DANS LE RAIL DE L'ACCUEIL — une AFFICHE, plus une fiche.
+ * UNE ÉDITION DANS LE RAIL DE L'ACCUEIL, une AFFICHE, plus une fiche.
  *
  * ── CE QUI A CHANGÉ, ET POURQUOI ────────────────────────────────────────────
  *
@@ -16,12 +16,12 @@ import type { PublicEditionRow } from '~/types/views'
  *
  * `.scrim-fade-bottom` est l'unique dégradé de la charte, et il ne décore rien :
  * il rend lisible un texte clair sur une image dont on ignore la luminosité. Une
- * bannière d'édition est exactement ce cas — elle est téléversée par un
+ * bannière d'édition est exactement ce cas, elle est téléversée par un
  * administrateur, personne ne sait si son bas est sombre ou surexposé.
  *
  * Il ne se pose donc QUE sur une image. Sur le repli, il n'y a rien à voiler :
  * l'aplat institutionnel est déjà sombre, et un dégradé posé dessus serait de
- * l'ornement — ce que la charte refuse.
+ * l'ornement, ce que la charte refuse.
  *
  * PAS DE VERRE NON PLUS. Le média est là, le verre serait autorisé ; il n'est
  * pas utile. Le voile suffit à porter le contraste, et un panneau flou sur une
@@ -31,7 +31,7 @@ import type { PublicEditionRow } from '~/types/views'
  *
  * Depuis le 19/08, une édition porte trois recadrages téléversés à la main.
  * L'affiche fait 352 × 712 px : aucun des trois n'a sa forme et `object-cover`
- * recadrera de toute façon — mais un 32:9 ramené à cette largeur ne laisserait
+ * recadrera de toute façon, mais un 32:9 ramené à cette largeur ne laisserait
  * qu'une bande, là où le 16:9 garde une scène. On prend donc `cover`, et
  * `banner` en repli.
  *
@@ -46,13 +46,13 @@ import type { PublicEditionRow } from '~/types/views'
  * Retirées, et c'est un choix. Une affiche dit QUAND, OÙ et COMBIEN ; la
  * taxonomie est un outil de recherche, et sa place est sur la page de l'édition
  * où l'on cherche vraiment. Sur un média voilé, trois pastilles claires de plus
- * — après la pastille d'état — auraient surtout rendu le titre moins lisible.
+ *, après la pastille d'état, auraient surtout rendu le titre moins lisible.
  *
  * ── « EN COURS » EST JAUNE, PAS VERT ────────────────────────────────────────
  *
  * Le jaune signale ce qui demande attention ; le vert, ce qui est confirmé. Une
  * édition en cours n'est pas une réussite, c'est un événement qui se tient en ce
- * moment. `UiStatusBadge` porte cette table de couleurs — la carte lui passe
+ * moment. `UiStatusBadge` porte cette table de couleurs, la carte lui passe
  * l'état temporel et le libellé, elle ne choisit aucune teinte. Son fond est
  * OPAQUE, ce qui est la raison pour laquelle elle peut se poser en haut de la
  * carte, hors du voile.
@@ -67,7 +67,7 @@ import type { PublicEditionRow } from '~/types/views'
 
 interface Props {
   edition: PublicEditionRow
-  /** Séances publiées — déjà résolu, l'absence de ligne valant zéro. */
+  /** Séances publiées, déjà résolu, l'absence de ligne valant zéro. */
   sessionCount: number
 }
 
@@ -79,7 +79,7 @@ const { to, image: poster, dates, zone, place, stamp } = useEditionSummary(() =>
 </script>
 
 <template>
-  <!-- `rounded-xl` — 12 px, l'usage exceptionnel que ce jeton attendait. La
+  <!-- `rounded-xl`, 12 px, l'usage exceptionnel que ce jeton attendait. La
        charte plafonne à 8 px sur les blocs d'interface ; celui-ci n'en est pas
        un, c'est une affiche de 320 px de large sur toute la hauteur de l'écran,
        où 8 px se lisent comme un angle droit. Le rayon suit la taille du bloc,
@@ -107,14 +107,14 @@ const { to, image: poster, dates, zone, place, stamp } = useEditionSummary(() =>
       class="absolute inset-x-0 top-0 flex justify-center px-6 pt-16"
       aria-hidden="true"
     >
-      <span class="font-display text-5xl tabular-nums text-text-on-inverse/10">
+      <span class="font-condensed text-6xl font-bold tabular-nums text-text-on-inverse/10">
         {{ stamp }}
       </span>
     </div>
 
     <!-- LE VOILE, SEULEMENT SOUS UNE IMAGE, ET EN DEUX TEMPS.
-         · L'APLAT couvre toute l'affiche. Il ne sert pas le titre — le fondu s'en
-           charge — mais la pastille d'état et le SURTITRE, qui se posent sur une
+         · L'APLAT couvre toute l'affiche. Il ne sert pas le titre, le fondu s'en
+           charge, mais la pastille d'état et le SURTITRE, qui se posent sur une
            zone dont on ne sait rien : une photographie surexposée y rendait
            « COP CLIMAT (CCNUCC) » illisible en gris clair sur blanc.
          · LE FONDU porte le contraste du bloc de texte, sur les deux tiers bas.
@@ -142,8 +142,7 @@ const { to, image: poster, dates, zone, place, stamp } = useEditionSummary(() =>
     <div class="relative mt-auto flex flex-col gap-2 p-4 sm:p-5">
       <p
         v-if="props.edition.series_name"
-        class="text-xs uppercase text-text-on-inverse"
-        :style="{ letterSpacing: 'var(--tracking-caps)' }"
+        class="font-condensed text-[0.95rem] font-semibold tracking-[0.06em] text-text-on-inverse uppercase"
       >
         {{ tr(props.edition.series_name) }}
       </p>
@@ -151,9 +150,9 @@ const { to, image: poster, dates, zone, place, stamp } = useEditionSummary(() =>
       <!-- LIEN COUVRANT : `after:inset-0` étend la zone cliquable à la carte
            entière, sans dupliquer le titre dans un second lien invisible que
            les lecteurs d'écran énonceraient deux fois. L'anneau de focus, lui,
-           reste dessiné autour du texte — visible, et non rogné par
+           reste dessiné autour du texte, visible, et non rogné par
            `overflow-hidden`. -->
-      <h3 class="font-display text-xl leading-tight text-text-on-inverse sm:text-2xl">
+      <h3 class="font-condensed text-[1.6rem] leading-[1.1] font-semibold text-text-on-inverse">
         <NuxtLink
           :to="to"
           class="text-text-on-inverse no-underline after:absolute after:inset-0 hover:underline"
@@ -172,7 +171,7 @@ const { to, image: poster, dates, zone, place, stamp } = useEditionSummary(() =>
       <p class="flex items-start gap-2 text-sm text-text-on-inverse-muted">
         <UiIcon name="calendar" size="1rem" class="mt-0.5 shrink-0" />
         <span>
-          {{ dates }}
+          <span class="block font-condensed text-[1.15rem] leading-tight font-bold tracking-[0.02em] text-text-on-inverse uppercase">{{ dates }}</span>
           <span class="block text-xs">{{ zone }}</span>
         </span>
       </p>

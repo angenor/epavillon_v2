@@ -2,50 +2,34 @@
 import type { PublicScheduleRow } from '~/types/views'
 
 /**
- * UNE ACTIVITÉ DE LA FRISE DU PANNEAU « À VENIR ».
+ * UNE ACTIVITÉ DU PANNEAU « À VENIR » : l'heure en grand, le jour abrégé, le
+ * titre et qui l'organise. Ni salle ni thématiques (arbitrage du 03/10).
  *
- * POURQUOI PAS `UiSessionCard`. Celle-ci porte l'image de couverture, le pays,
- * la jauge de places et le motif d'annulation — tout ce qu'il faut dans une
- * programmation, et bien trop pour une colonne de 340 px qui en aligne six. La
- * carte du panneau ne retient que le créneau, le titre et qui l'organise : ni
- * salle ni thématiques, arbitrage du commanditaire du 03/10.
+ * L'HEURE EST CELLE DE LA SÉANCE, dans son fuseau. Quand le panneau ne nomme
+ * pas une édition commune (et donc son fuseau), la ligne porte le sien.
  *
- * LA DATE N'EST PAS ICI, elle est dans l'en-tête de journée de la frise. D'où
- * `format="short"` : les bornes et le fuseau, sans répéter le jour sur chaque
- * carte.
- *
- * TOUTE HEURE PORTE SON FUSEAU, et c'est celui de la SÉANCE : le panneau mêle
- * les éditions — une séance de Belém et un webinaire à l'heure de Montréal s'y
- * suivent. Sans le fuseau, deux cartes voisines seraient incomparables.
- *
- * UN SEUL DIRECT À LA FOIS (règle métier n° 4) : `UiLiveBadge` ne s'affiche que
- * pour la séance déclarée en direct par `useLiveSession()`. Les autres séances
- * en cours portent l'état temporel ordinaire — « En cours », en jaune, parce
- * qu'« en cours » demande attention et n'est pas une réussite.
+ * UN SEUL DIRECT À LA FOIS (règle n° 4) : `UiLiveBadge` ne s'affiche que pour la
+ * séance déclarée par `useLiveSession()` ; une autre séance en cours porte
+ * « En cours », en jaune.
  */
 
 interface Props {
   session: PublicScheduleRow
-  /** Destination — la programmation de l'édition concernée. */
+  /** Destination : la programmation de l'édition concernée. */
   to?: string
-  /**
-   * Ville de l'édition — « Belém ». À passer dès qu'elle est connue : la ville
-   * déduite de l'identifiant IANA n'est qu'un repli, et elle est sans accent
-   * (« Belem »).
-   */
+  /** Ville de l'édition (« Belém ») ; la ville tirée de l'identifiant IANA n'est qu'un repli, sans accent. */
   zoneLabel?: string
-  /**
-   * Sigle de l'édition, à ne passer QUE lorsque la frise en mêle plusieurs :
-   * répété sous chaque carte d'une frise qui n'en montre qu'une, il n'apprend
-   * rien et vole la place de l'organisation.
-   */
+  /** Sigle de l'édition, seulement quand le panneau en mêle plusieurs. */
   editionLabel?: string | null
+  /** Écrire le fuseau sur la ligne : le panneau ne le nomme pas. */
+  showZone?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { showZone: false })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
+const { intlLocale, time, zoneLabel } = useDateTime()
 const { isLive } = useLiveSession()
 
 const title = computed(() => tr(props.session.title))
@@ -53,55 +37,47 @@ const title = computed(() => tr(props.session.title))
 const organization = computed(
   () => props.session.organization_acronym ?? props.session.organization_name ?? '',
 )
+
+/** « ven. 13 » */
+const day = computed(() =>
+  new Intl.DateTimeFormat(intlLocale.value, {
+    weekday: 'short',
+    day: 'numeric',
+    timeZone: props.session.timezone,
+  }).format(new Date(props.session.starts_at)),
+)
+
+const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, props.zoneLabel) : ''))
 </script>
 
 <template>
-  <!-- CARTE DE VERRE. Le panneau qui la porte est sombre — sur la photographie
-       à partir de `lg`, sur l'aplat institutionnel en dessous : dans les deux
-       cas, une carte claire y ferait un trou. La matière vient des jetons
-       (`--color-glass-raised`, `--color-glass-border`), jamais d'un `bg-white/10`
-       écrit ici — c'est ainsi que la v1 s'est retrouvée avec treize opacités.
-
-       LA SÉANCE EN DIRECT PREND LE VERRE RELEVÉ ET LE TRAIT FRANC : c'est la
-       seule de toute la plateforme à cet instant, elle doit se repérer sans
-       lire. -->
-  <article
-    data-bird-perch
-    class="rounded-lg border p-3 shadow-glass backdrop-blur-glass transition-colors"
-    :class="
-      isLive(props.session.id)
-        ? 'border-glass-border-strong bg-glass-hover'
-        : 'border-glass-border bg-glass-raised hover:bg-glass-hover'
-    "
-  >
-    <div class="flex flex-wrap items-center gap-2">
-      <UiLiveBadge :session-id="props.session.id" size="sm" />
-      <UiStatusBadge
-        v-if="!isLive(props.session.id) && props.session.temporal_state === 'ongoing'"
-        state="ongoing"
-        size="sm"
-        :label="t('home.aside.sessions.ongoing')"
-      />
-      <UiZonedTime
-        :start="props.session.starts_at"
-        :end="props.session.ends_at"
-        :timezone="props.session.timezone"
-        :zone-label="props.zoneLabel"
-        format="short"
-        class="text-xs text-text-on-inverse-muted"
-      />
-    </div>
-
-    <h4 class="mt-1.5 text-sm leading-snug font-bold text-text-on-inverse">
-      <NuxtLink v-if="props.to" :to="props.to" class="text-text-on-inverse no-underline hover:underline">
-        {{ title }}
-      </NuxtLink>
-      <template v-else>{{ title }}</template>
-    </h4>
-
-    <p v-if="props.editionLabel || organization" class="mt-1 truncate text-xs text-text-on-inverse-muted">
-      <span v-if="props.editionLabel" class="font-bold text-text-on-inverse">{{ props.editionLabel }}</span>
-      <template v-if="props.editionLabel && organization"> · </template>{{ organization }}
+  <article data-bird-perch class="grid grid-cols-[4rem_minmax(0,1fr)] gap-3 py-3">
+    <p class="font-condensed leading-none uppercase">
+      <b class="block text-[1.6rem] font-bold tabular-nums">{{ time(props.session.starts_at, props.session.timezone) }}</b>
+      <small class="text-[0.78rem] font-semibold tracking-[0.05em] text-text-on-inverse-muted">{{ day }}</small>
     </p>
+
+    <div class="min-w-0">
+      <h3 class="font-condensed text-[1.12rem] leading-[1.15] font-semibold text-text-on-inverse">
+        <NuxtLink v-if="props.to" :to="props.to" class="text-text-on-inverse no-underline hover:underline">
+          {{ title }}
+        </NuxtLink>
+        <template v-else>{{ title }}</template>
+      </h3>
+      <p v-if="props.editionLabel || organization || zone" class="mt-1 text-[0.8rem] text-text-on-inverse-muted">
+        <span v-if="props.editionLabel" class="font-bold text-text-on-inverse">{{ props.editionLabel }}</span>
+        <template v-if="props.editionLabel && organization">, </template>{{ organization }}
+        <span v-if="zone" class="block">{{ zone }}</span>
+      </p>
+      <div v-if="isLive(props.session.id) || props.session.temporal_state === 'ongoing'" class="mt-1.5">
+        <UiLiveBadge :session-id="props.session.id" size="sm" />
+        <UiStatusBadge
+          v-if="!isLive(props.session.id)"
+          state="ongoing"
+          size="sm"
+          :label="t('home.aside.sessions.ongoing')"
+        />
+      </div>
+    </div>
   </article>
 </template>

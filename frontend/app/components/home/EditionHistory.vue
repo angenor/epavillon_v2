@@ -1,62 +1,30 @@
 <script setup lang="ts">
-import type { EditionHistoryGroup, EditionPeriod } from '~/types/home'
+import type { EditionPeriod } from '~/types/home'
 import type { TabItem } from '~/types/ui'
 import type { EditionStatsRow, PublicEditionRow } from '~/types/views'
 import type { EventId } from '~/types/shared'
 
 /**
- * L'HISTORIQUE DES ÉVÉNEMENTS — la troisième section de l'accueil.
+ * LES ÉDITIONS : la dernière section de l'accueil, en liste éditoriale (par
+ * défaut) ou en affiches (arbitré le 03/10), même habit condensé (01/11).
  *
- * ── UNE FRISE QUI DÉFILE, PLUS UNE PILE QUI S'ALLONGE ───────────────────────
+ * `groupEditionsByYear()` reste la source de l'ORDRE et du millésime ANNONCÉ
+ * (une édition à cheval sur le 1er janvier garde le sien) ; chaque ligne,
+ * chaque affiche porte ce millésime.
  *
- * La section empilait des rangées de cartes, une par millésime : au troisième
- * millésime, l'accueil mesurait quatre écrans et personne n'atteignait le bas.
- * Elle occupe désormais UN écran et pas davantage — en-tête fixe, rail
- * horizontal qui prend toute la hauteur restante. Ce que la pile disait par la
- * longueur, le rail le dit par le mouvement.
+ * LE FILTRE NE COÛTE AUCUNE REQUÊTE : `api.home.screen()` rend l'historique
+ * complet, et les onglets annoncent leurs décomptes calculés sur l'ensemble non
+ * filtré. Son état vit dans l'URL (`?periode=a-venir`) : il se partage et
+ * survit au retour arrière.
  *
- * SEUL LE RAIL DÉFILE HORIZONTALEMENT ; le corps de page, jamais. C'est la
- * règle des 375 px, et elle se joue à deux endroits ici : `overflow-x-auto` sur
- * la liste, et `min-w-0` sur tout parent flex qui la contient — sans quoi la
- * largeur minimale d'un élément flex vaut celle de son contenu, et ce sont
- * cinq affiches qui élargissent la page entière.
- *
- * ── LE MILLÉSIME N'EST PLUS UNE COLONNE ─────────────────────────────────────
- *
- * `groupEditionsByYear()` reste la source de l'ORDRE — années décroissantes,
- * éditions triées à l'intérieur — mais les groupes sont aplatis à l'affichage.
- * Un intertitre d'année dans un rail horizontal serait un repère qu'on dépasse
- * sans le voir ; chaque affiche porte donc son millésime, là où l'œil est déjà.
- *
- * L'utilitaire n'est pas contourné pour autant : c'est lui qui garantit qu'une
- * édition à cheval sur le 1er janvier se range sur son millésime ANNONCÉ et non
- * sur l'année de `starts_at`.
- *
- * ── LE FILTRE NE COÛTE AUCUNE REQUÊTE ───────────────────────────────────────
- *
- * `api.home.screen()` rend l'historique COMPLET : changer d'onglet ne fait que
- * recomposer ce qu'on a déjà. C'est ce qui permet aux onglets d'annoncer leurs
- * décomptes — « Passées (2) » se lit AVANT d'y aller — et ces décomptes se
- * calculent sur l'ensemble non filtré, jamais sur la sélection courante.
- *
- * ── L'ÉTAT VIT DANS L'URL ───────────────────────────────────────────────────
- *
- * `?periode=a-venir`, comme partout dans ce projet. Le composant n'en décide
- * pas : il reçoit la période et signale qu'on en demande une autre. Un état de
- * filtre enfermé dans un composant ne se partage pas, ne se recharge pas et ne
- * revient pas au retour arrière.
- *
- * ── LE DÉFILEMENT DOUX NE S'IMPOSE PAS ──────────────────────────────────────
- *
- * `scrollBy({ behavior: 'auto' })` n'est PAS l'absence d'animation : `auto`
- * délègue à la propriété CSS `scroll-behavior`, que la liste ne porte que sous
- * `motion-safe`. Une personne qui demande moins d'animations obtient donc un
- * saut net, sans que ce composant ait à interroger sa préférence — écrire
- * `behavior: 'smooth'` ici l'aurait ignorée.
+ * SEUL LE RAIL DES AFFICHES DÉFILE HORIZONTALEMENT, jamais le corps de page :
+ * `overflow-x-auto` sur la liste, `min-w-0` sur ses parents flex.
+ * `scrollBy({ behavior: 'auto' })` délègue à `scroll-behavior`, posé sous
+ * `motion-safe` seulement : moins d'animations donne un saut net.
  */
 
 interface Props {
-  /** L'historique COMPLET — le filtre est appliqué ici, pas en amont. */
+  /** L'historique COMPLET, le filtre est appliqué ici, pas en amont. */
   editions: PublicEditionRow[]
   /** `programme.v_edition_stats`, indexée par `event_id`. Clé absente = zéro. */
   stats: Record<EventId, EditionStatsRow>
@@ -82,7 +50,7 @@ const tabs = computed<TabItem[]>(() =>
   })),
 )
 
-/** Une valeur d'onglet est une période — `UiTabs` ne connaît que des chaînes. */
+/** Une valeur d'onglet est une période, `UiTabs` ne connaît que des chaînes. */
 function onTab(value: string): void {
   const period = EDITION_PERIODS.find((entry) => entry === value)
   if (period) emit('update:period', period)
@@ -108,11 +76,6 @@ const view = computed<HistoryView>({
   },
 })
 
-/** Une année se grise quand toutes ses éditions sont closes — l'état vient de la base, pas de l'horloge du visiteur. */
-function isPastYear(group: EditionHistoryGroup): boolean {
-  return group.editions.every((edition) => edition.temporal_state === 'past')
-}
-
 const views = computed(() => [
   { value: 'list' as const, icon: 'list', label: t('home.history.view.list') },
   { value: 'posters' as const, icon: 'grid', label: t('home.history.view.posters') },
@@ -128,7 +91,7 @@ const rail = ref<HTMLElement | null>(null)
  * TROIS ÉTATS MESURÉS, PAS DEVINÉS. Le nombre d'affiches ne dit pas si le rail
  * déborde : cinq tiennent sur un écran large et deux débordent sur un
  * téléphone. Les commandes n'apparaissent donc que sur mesure réelle, et se
- * désactivent aux extrémités plutôt que de tourner en boucle — une boucle
+ * désactivent aux extrémités plutôt que de tourner en boucle, une boucle
  * silencieuse fait croire qu'il reste des éditions à voir.
  */
 const overflows = ref(false)
@@ -192,33 +155,26 @@ watch(
 </script>
 
 <template>
-  <!-- UN ÉCRAN, PAS DAVANTAGE. La section se donne la hauteur disponible sous la
-       barre de navigation ; l'en-tête garde sa taille, le rail prend le reste.
-       `min-h` et non `h` : si l'en-tête passe sur trois lignes à 375 px, la
-       section grandit plutôt que d'écraser les affiches. -->
-  <!-- `id="editions"` : le panneau « À venir » y renvoie depuis son bloc des
-       prochains rendez-vous, comme le pied de page renvoie à l'appel. -->
+  <!-- `id="editions"` : le panneau « À venir » y renvoie, comme le pied de page renvoie à l'appel.
+       En affiches, la section prend un écran : l'en-tête garde sa taille, le rail le reste. -->
   <section
     id="editions"
     aria-labelledby="historique-titre"
     class="flex scroll-mt-24 flex-col"
     :class="{ 'min-h-[calc(100svh-var(--nav-height))]': view === 'posters' }"
   >
-    <div class="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
       <div class="min-w-0">
-        <h2 id="historique-titre" class="font-display text-2xl">
+        <h2 id="historique-titre" class="heading-condensed text-[clamp(2rem,4vw,2.75rem)]">
           {{ t('home.history.title') }}
         </h2>
-        <p class="mt-1 text-text-muted" :style="{ maxWidth: 'var(--measure)' }">
+        <p class="mt-2 max-w-[62ch] text-text-secondary">
           {{ t('home.history.description') }}
         </p>
       </div>
 
-      <div class="flex min-w-0 max-w-full items-center gap-3">
-        <!-- `min-w-0` : sans lui, la barre d'onglets est un élément flex dont la
-             largeur minimale vaut celle de son contenu — quatre onglets et leurs
-             compteurs élargissent alors la page entière au lieu de défiler dans
-             leur propre `overflow-x-auto`. -->
+      <div class="flex min-w-0 max-w-full flex-wrap items-center gap-3">
+        <!-- `min-w-0` : sans lui, les onglets élargissent la page au lieu de défiler dans leur barre. -->
         <UiTabs
           class="min-w-0 max-w-full"
           :model-value="props.period"
@@ -226,13 +182,13 @@ watch(
           :label="t('home.history.filterLabel')"
           :panel-id="() => 'historique-panneau'"
           @update:model-value="onTab"
-        />
+        >
+          <template #tab="{ item, selected }">
+            <span class="font-condensed text-[1.05rem] font-semibold tracking-[0.05em] uppercase">{{ item.label }}</span>
+            <UiCounter v-if="item.count !== undefined" :value="item.count" :tone="selected ? 'accent' : 'neutral'" />
+          </template>
+        </UiTabs>
 
-        <!-- LES COMMANDES SONT UN CONFORT, PAS LE SEUL ACCÈS : le rail se fait
-             au doigt, à la molette et à la tabulation — un lien qui prend le
-             focus amène son affiche à l'écran de lui-même. Elles disparaissent
-             donc sous `sm`, où le doigt est plus rapide qu'elles, et quand rien
-             ne déborde. -->
         <div
           role="group"
           class="flex shrink-0 items-center gap-0.5 rounded-lg border border-border p-0.5"
@@ -250,11 +206,11 @@ watch(
             @click="view = option.value"
           />
         </div>
+        <!-- Un confort, pas le seul accès : le rail se fait au doigt, à la molette et à la tabulation. -->
         <div v-if="overflows && view === 'posters'" class="hidden shrink-0 items-center gap-2 sm:flex">
           <button
             type="button"
-            class="flex cursor-pointer items-center justify-center rounded-full border border-border bg-surface-raised text-text-secondary transition-colors hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40"
-            :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
+            class="flex size-(--target-min) cursor-pointer items-center justify-center rounded-full border border-border bg-surface-raised text-text-secondary transition-colors hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40"
             :disabled="atStart"
             :aria-label="t('home.history.rail.previous')"
             @click="move(-1)"
@@ -263,8 +219,7 @@ watch(
           </button>
           <button
             type="button"
-            class="flex cursor-pointer items-center justify-center rounded-full border border-border bg-surface-raised text-text-secondary transition-colors hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40"
-            :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
+            class="flex size-(--target-min) cursor-pointer items-center justify-center rounded-full border border-border bg-surface-raised text-text-secondary transition-colors hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40"
             :disabled="atEnd"
             :aria-label="t('home.history.rail.next')"
             @click="move(1)"
@@ -275,13 +230,7 @@ watch(
       </div>
     </div>
 
-    <!-- En liste, la première ligne s'appuie sur le trait de l'en-tête : c'est son bord
-         haut, celui où l'oiseau se pose. -->
-    <div
-      id="historique-panneau"
-      class="flex min-h-0 flex-1 flex-col"
-      :class="view === 'list' && editions.length ? 'mt-0' : 'mt-6'"
-    >
+    <div id="historique-panneau" class="flex min-h-0 flex-1 flex-col">
       <UiEmptyState
         v-if="!editions.length"
         icon="calendar"
@@ -292,31 +241,24 @@ watch(
         @action="emit('update:period', 'all')"
       />
 
-      <!-- `-mx-1 px-1` : la gouttière qui laisse respirer l'ombre et l'anneau de
-           focus des affiches de bord, sans décaler le rail par rapport au titre.
-           `scroll-px-1` accorde l'accrochage à ce même retrait. -->
-      <ul v-else-if="view === 'list'" :aria-label="t('home.history.list.label')">
-        <li
-          v-for="group in history.groups"
-          :key="group.year"
-          class="grid border-b border-border md:grid-cols-[6.5rem_minmax(0,1fr)] md:gap-x-6"
-        >
-          <p
-            class="pt-4 font-display text-2xl leading-none font-light tabular-nums md:pt-5 md:text-4xl"
-            :class="isPastYear(group) ? 'text-text-muted' : 'text-text'"
-          >
-            {{ group.year }}
-          </p>
-          <ul class="divide-y divide-border">
-            <li v-for="edition in group.editions" :key="edition.id">
-              <HomeEditionRow
-                :edition="edition"
-                :session-count="publishedSessionCount(history.stats, edition.id)"
-              />
-            </li>
-          </ul>
-        </li>
+      <!-- La liste éditoriale sous un trait épais ; chaque ligne porte son millésime. -->
+      <ul
+        v-else-if="view === 'list'"
+        class="m-0 list-none border-t-2 border-text p-0"
+        :aria-label="t('home.history.list.label')"
+      >
+        <template v-for="group in history.groups" :key="group.year">
+          <li v-for="edition in group.editions" :key="edition.id" class="border-b border-border-subtle">
+            <HomeEditionRow
+              :edition="edition"
+              :year="group.year"
+              :session-count="publishedSessionCount(history.stats, edition.id)"
+            />
+          </li>
+        </template>
       </ul>
+
+      <!-- `-mx-1 px-1` : l'ombre et l'anneau de focus des affiches de bord respirent sans décaler le rail. -->
       <ul
         v-else
         ref="rail"
