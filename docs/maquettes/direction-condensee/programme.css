@@ -114,3 +114,12 @@
   .lead .row-org .logo { width: 34px; height: 34px; font-size: 0.65rem; }
   .lead-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto; }
   @media (max-width: 860px) { .lead { grid-template-columns: minmax(0, 1fr); } .lead-media { min-height: 150px; } .lead-body { padding: 16px; } .lead-actions { margin-left: 0; } }
+
+/* Séance commune : deux couvertures côte à côte, deux logos qui se chevauchent, les deux activités nommées. */
+.row-thumb.split, .wk-media.split { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--card); }
+.row-thumb.split img, .wk-media.split img { width: 100%; height: 100%; object-fit: cover; }
+.row-org .logo + .logo { margin-left: -12px; box-shadow: 0 0 0 2px var(--card); }
+.joint-tag { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--day-ink, var(--color-accent)); }
+.joint-list { margin: 4px 0 0; padding: 0; list-style: none; font-size: 0.85rem; color: var(--color-text-secondary); }
+.joint-list li { display: flex; gap: 8px; padding: 2px 0; }
+.joint-list b { flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; background: var(--day-solid, var(--color-text)); color: var(--day-on, var(--color-surface)); font-size: 0.7rem; }
