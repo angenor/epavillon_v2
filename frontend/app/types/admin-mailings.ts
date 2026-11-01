@@ -71,6 +71,8 @@ export interface MailingSummary {
   event_id: EventId
   status: MailingStatus
   subject: string
+  /** L'objet à afficher : édition et dossier remplis, variables du destinataire laissées écrites. */
+  shown_subject: string
   created_by_name: string | null
   queued_by_name: string | null
   queued_at: string | null
@@ -135,6 +137,7 @@ export interface Mailing {
   event_id: EventId
   status: MailingStatus
   subject: string
+  shown_subject: string
   /** HTML assaini par l'API. */
   body_html: string
   audience: MailingCriterion[]

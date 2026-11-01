@@ -84,6 +84,22 @@ pub fn rendre(gabarit: &str, valeurs: &HashMap<String, String>) -> Result<String
     Ok(sortie)
 }
 
+/// Le rendu partiel d'un affichage : les variables connues prennent leur valeur,
+/// les autres restent écrites (le prénom dépend du destinataire).
+pub fn remplir(gabarit: &str, valeurs: &HashMap<String, String>) -> String {
+    let connues: HashMap<String, String> = variables_citees(gabarit)
+        .into_iter()
+        .map(|nom| {
+            let valeur = valeurs
+                .get(&nom)
+                .cloned()
+                .unwrap_or_else(|| format!("{{{{{nom}}}}}"));
+            (nom, valeur)
+        })
+        .collect();
+    rendre(gabarit, &connues).unwrap_or_else(|_| gabarit.to_owned())
+}
+
 /// Un nom de variable : minuscules, chiffres, soulignés. C'est la grammaire de
 /// `notification_types.expected_variables`, où le modèle écrit `{prenom}` et
 /// `{titre_session}`.
@@ -181,6 +197,15 @@ mod tests {
         assert_eq!(
             rendu.unwrap(),
             r#"<a href="https://x.fr/s/1">Rejoindre</a>"#
+        );
+    }
+
+    #[test]
+    fn le_remplissage_garde_les_variables_inconnues() {
+        let v = valeurs(&[("edition", "COP31"), ("activite", "Atelier")]);
+        assert_eq!(
+            remplir("{{prenom}}, ({{edition}}) - {{ activite }}", &v),
+            "{{prenom}}, (COP31) - Atelier"
         );
     }
 }

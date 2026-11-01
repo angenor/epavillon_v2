@@ -91,10 +91,10 @@ function open(row: MailingSummary): void {
         >
           <span class="min-w-0 flex-1">
             <span class="block font-semibold wrap-break-word text-text">
-              {{ row.mail_text_name ?? (row.subject || t('admin.mailing.common.noSubject')) }}
+              {{ row.mail_text_name ?? (row.shown_subject || t('admin.mailing.common.noSubject')) }}
             </span>
-            <span v-if="row.mail_text_name && row.subject" class="block text-sm wrap-break-word text-text-secondary">
-              {{ row.subject }}
+            <span v-if="row.mail_text_name && row.shown_subject" class="block text-sm wrap-break-word text-text-secondary">
+              {{ row.shown_subject }}
             </span>
             <span class="mt-0.5 block text-xs text-text-subtle">
               <template v-if="row.to">{{ t('admin-mailing-proposal-mailings.to', { to: row.to }) }}</template>

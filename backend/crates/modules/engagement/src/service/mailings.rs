@@ -26,12 +26,15 @@
 //! ne sert plus. Un envoi en échec se relance (ses seuls destinataires encore en
 //! file), s'arrête ou se supprime.
 
+use std::collections::HashMap;
+
 use kernel::auth::{administered_events, has_permission, Scope};
 use kernel::error::{ApiError, ErrorCode, Result};
 use kernel::jobs::{self, NewJob};
 use kernel::RequestContext;
 use uuid::Uuid;
 
+use crate::domain::dossier::MailingProposal;
 use crate::domain::gabarits::GABARITS;
 use crate::domain::mailing::{
     jetons_connus, normaliser_adresses, variable_connue, CreateMailingPayload, Mailing,
@@ -140,8 +143,28 @@ pub(crate) async fn ecran_garde(
     verifier_les_envois_en_cours(state, event_id).await?;
     let team_cc = mailings::equipe_en_copie(state.pool()).await?;
     let (timezone, city) = cross::fuseau_edition(state.pool(), event_id).await?;
+    let mut rows = mailings::lister(state.pool(), event_id, proposal_id).await?;
+    let edition = mailings::titre_edition(state.pool(), event_id).await?;
+    let mut dossiers: HashMap<Uuid, Option<MailingProposal>> = HashMap::new();
+    for row in &mut rows {
+        if !row.subject.contains("{{") {
+            continue;
+        }
+        let dossier = match row.proposal_id {
+            Some(id) => match dossiers.get(&id) {
+                Some(d) => d.clone(),
+                None => {
+                    let d = mailing_dossier::dossier_de(state.pool(), Some(id)).await?;
+                    dossiers.insert(id, d.clone());
+                    d
+                }
+            },
+            None => None,
+        };
+        row.shown_subject = objet_affiche(&row.subject, &edition, dossier.as_ref());
+    }
     Ok(MailingListScreen {
-        rows: mailings::lister(state.pool(), event_id, proposal_id).await?,
+        rows,
         team_cc,
         variables: VARIABLES.iter().map(|v| (*v).to_owned()).collect(),
         proposal_variables: VARIABLES_DOSSIER.iter().map(|v| (*v).to_owned()).collect(),
@@ -168,7 +191,10 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
         .into_iter()
         .map(|p| p.fiche)
         .collect();
+    let proposal = mailing_dossier::dossier_de(state.pool(), e.proposal_id).await?;
+    let edition = mailings::titre_edition(state.pool(), e.event_id).await?;
     Ok(Mailing {
+        shown_subject: objet_affiche(&e.subject, &edition, proposal.as_ref()),
         attachments_total_bytes: attachments.iter().map(|a| a.byte_size).sum(),
         attachments_max_bytes: mailings::poids_permis(state.pool()).await?,
         attachments,
@@ -191,7 +217,7 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
         cta_url: e.habillage.cta_url,
         mail_template_id: e.habillage.mail_template_id,
         mail_text_id: e.mail_text_id,
-        proposal: mailing_dossier::dossier_de(state.pool(), e.proposal_id).await?,
+        proposal,
         duplicated_from: e.duplicated_from,
         created_by_name: e.created_by_name,
         queued_by_name: e.queued_by_name,
@@ -205,6 +231,14 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
         created_at: e.created_at,
         updated_at: e.updated_at,
     })
+}
+
+fn objet_affiche(objet: &str, edition: &str, dossier: Option<&MailingProposal>) -> String {
+    let mut valeurs = HashMap::from([("edition".to_owned(), edition.to_owned())]);
+    if let Some(d) = dossier {
+        valeurs.extend(d.values.clone());
+    }
+    render::remplir(objet, &valeurs)
 }
 
 /// La liste telle qu'elle partirait maintenant, avec le décompte et le nombre

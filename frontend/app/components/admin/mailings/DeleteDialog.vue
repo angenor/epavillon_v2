@@ -9,7 +9,7 @@ import type { Uuid } from '~/types/shared'
  */
 interface Target {
   id: Uuid
-  subject: string
+  shown_subject: string
   status: MailingStatus
 }
 
@@ -59,7 +59,7 @@ async function confirm(): Promise<void> {
     :description="t(`admin.mailing.list.delete.${props.target?.status === 'draft' ? 'draft' : props.target?.status === 'failed' ? 'failed' : 'sent'}`)"
   >
     <p v-if="props.target" class="font-semibold wrap-break-word">
-      {{ props.target.subject || t('admin.mailing.common.noSubject') }}
+      {{ props.target.shown_subject || t('admin.mailing.common.noSubject') }}
     </p>
     <UiAlert v-if="error" class="mt-4" intent="danger" live :message="error" />
     <template #footer>

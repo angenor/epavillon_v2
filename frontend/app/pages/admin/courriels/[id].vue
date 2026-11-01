@@ -39,7 +39,7 @@ const {
   lazy: true,
 })
 
-useHead(() => ({ title: mailing.value?.subject || t('admin.mailing.compose.title') }))
+useHead(() => ({ title: mailing.value?.shown_subject || t('admin.mailing.compose.title') }))
 
 const isDraft = computed(() => mailing.value?.status === 'draft')
 watch(
@@ -167,7 +167,7 @@ async function cancelSending(): Promise<void> {
           {{ t('admin.mailing.compose.backToList') }}
         </NuxtLink>
         <h1 class="text-3xl leading-tight font-semibold text-balance break-words">
-          {{ mailing.subject || t('admin.mailing.common.noSubject') }}
+          {{ mailing.shown_subject || t('admin.mailing.common.noSubject') }}
         </h1>
       </header>
 

@@ -218,14 +218,14 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
               class="cursor-pointer text-left font-semibold text-text hover:underline"
               @click.stop="open(row)"
             >
-              {{ row.subject || t('admin.mailing.common.noSubject') }}
+              {{ row.shown_subject || t('admin.mailing.common.noSubject') }}
             </button>
             <NuxtLink
               v-else
               :to="localePath(`/admin/courriels/${row.id}`)"
               class="font-semibold text-text no-underline hover:underline"
             >
-              {{ row.subject || t('admin.mailing.common.noSubject') }}
+              {{ row.shown_subject || t('admin.mailing.common.noSubject') }}
             </NuxtLink>
             <span class="block text-xs text-text-subtle">
               {{ row.queued_by_name ?? row.created_by_name ?? '' }}
@@ -261,7 +261,7 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
               variant="ghost"
               icon="trash"
               icon-only
-              :label="t('admin.mailing.list.delete.actionFor', { subject: row.subject || t('admin.mailing.common.noSubject') })"
+              :label="t('admin.mailing.list.delete.actionFor', { subject: row.shown_subject || t('admin.mailing.common.noSubject') })"
               @click.stop="toDelete = row"
             />
           </template>

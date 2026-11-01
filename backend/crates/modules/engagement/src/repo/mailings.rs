@@ -193,6 +193,7 @@ pub async fn lister(
             id: l.id,
             event_id: l.event_id,
             status: l.status,
+            shown_subject: l.subject.clone(),
             subject: l.subject,
             created_by_name: l.created_by_name,
             queued_by_name: l.queued_by_name,

@@ -112,6 +112,9 @@ pub struct MailingSummary {
     /// `draft`, `queued`, `sent`, `cancelled`, `failed`.
     pub status: String,
     pub subject: String,
+    /// L'objet à afficher : édition et dossier remplis, les variables du
+    /// destinataire laissées écrites.
+    pub shown_subject: String,
     pub created_by_name: Option<String>,
     pub queued_by_name: Option<String>,
     #[serde(with = "time::serde::rfc3339::option")]
@@ -160,6 +163,8 @@ pub struct Mailing {
     pub event_id: Uuid,
     pub status: String,
     pub subject: String,
+    /// Comme `MailingSummary::shown_subject`.
+    pub shown_subject: String,
     pub body_html: String,
     pub audience: Vec<MailingCriterion>,
     pub extra_addresses: Vec<String>,
