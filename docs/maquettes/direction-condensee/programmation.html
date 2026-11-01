@@ -98,6 +98,28 @@
     .daystrip a.day-atelier .dots i, .daystrip a.day-finance .dots i, .daystrip a.day-jeunesse .dots i { width: 5px; height: 5px; margin-top: -1px; opacity: 1; background: var(--day-solid); }
     .daystrip a[aria-current] .dots i { width: 4px; height: 4px; margin-top: 0; background: currentColor; opacity: 0.7; }
   }
+  /* Logo de l'organisation devant son nom ; à défaut de logo, une tuile au sigle. */
+  .row-org { display: flex; align-items: flex-start; gap: 10px; }
+  .row-org .logo { flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 3px; border-radius: var(--radius-sm); background: #fff; border: 1px solid var(--color-border-subtle); font-family: var(--font-heading); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.02em; color: var(--ifdd-bleu-900); overflow: hidden; }
+  .row-org .logo:has(img) { width: 72px; padding: 4px 6px; }
+  .row-org .logo img { width: 100%; height: 100%; object-fit: contain; }
+  .row-org > span:last-child { align-self: center; }
+
+  /* L'activité en direct, à la une (première maquette). */
+  .lead { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); margin-top: 28px; border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-md); border: 1px solid var(--color-live-border); }
+  .lead-media { position: relative; min-height: 320px; }
+  .lead-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lead-media .tag { position: absolute; top: 18px; left: 18px; }
+  .lead-body { padding: 30px; display: flex; flex-direction: column; }
+  .lead-kicker { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-live); }
+  .lead-time { margin-top: 8px; font-family: var(--font-heading); text-transform: uppercase; color: var(--color-live); }
+  .lead-time b { font-size: 3.4rem; font-weight: 700; line-height: 0.9; }
+  .lead-time span { margin-left: 8px; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.04em; color: var(--color-text-secondary); }
+  .lead h3 { margin-top: 12px; font-size: 1.9rem; text-transform: none; font-weight: 600; line-height: 1.08; }
+  .lead p { margin: 10px 0 0; color: var(--color-text-secondary); max-width: 60ch; }
+  .lead .row-org { margin-top: 16px; }
+  .lead-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; padding-top: 22px; }
+  @media (max-width: 860px) { .lead { grid-template-columns: minmax(0, 1fr); } .lead-media { min-height: 200px; } .lead-body { padding: 20px; } .lead-time b { font-size: 2.6rem; } .lead h3 { font-size: 1.5rem; } }
 </style>
 </head>
 <body>
@@ -169,11 +191,23 @@
 
 <main class="wrap" style="padding-bottom:80px">
 
-  <aside class="live-bar" aria-label="En direct">
-    <div class="lb-head"><span class="tag tag-live">En direct</span><span class="lb-time">10:15</span></div>
-    <p><a href="#">Du financement climatique à l'action régionale : les solutions du P2RS</a><br>CILSS, journée finance durable, jusqu'à 11:15</p>
-    <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre le direct</a>
-  </aside>
+  <article class="lead" aria-label="En direct">
+    <div class="lead-media">
+      <img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt="">
+      <span class="tag tag-live">En direct</span>
+    </div>
+    <div class="lead-body">
+      <span class="lead-kicker">En ce moment au pavillon</span>
+      <div class="lead-time"><b>10:15</b><span>à 11:15, heure d'Antalya</span></div>
+      <h3>Du financement climatique à l'action régionale : les solutions du P2RS</h3>
+      <p>Le programme régional de résilience présente ses outils de financement et ce qu'ils changent pour les exploitations du Sahel.</p>
+      <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b> Comité permanent inter-États de lutte contre la sécheresse dans le Sahel, Burkina Faso</span></p>
+      <div class="lead-actions">
+        <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre le direct</a>
+        <a class="btn btn-outline" href="#">Voir l'activité</a>
+      </div>
+    </div>
+  </article>
 
   <section class="day day-atelier is-special is-past" aria-labelledby="j8">
     <header class="day-head">
@@ -214,7 +248,7 @@
           <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
           <div>
             <h3 class="row-title"><a href="#">Restaurer les mangroves du golfe de Guinée : retours de cinq pays</a></h3>
-            <p class="row-org"><b>UICN</b> Union internationale pour la conservation de la nature</p>
+            <p class="row-org"><span class="logo" aria-hidden="true">UICN</span><span><b>UICN</b> Union internationale pour la conservation de la nature</span></p>
           </div>
           <div class="row-side"><span class="tag tag-done">Terminée</span></div>
         </li>
@@ -223,7 +257,7 @@
           <div class="row-thumb initials">AIMF</div>
           <div>
             <h3 class="row-title"><a href="#">Villes francophones et adaptation : financer les plans locaux</a></h3>
-            <p class="row-org"><b>AIMF</b> Association internationale des maires francophones, France</p>
+            <p class="row-org"><span class="logo" aria-hidden="true">AIMF</span><span><b>AIMF</b> Association internationale des maires francophones, France</span></p>
           </div>
           <div class="row-side"><span class="tag tag-done">Terminée</span></div>
         </li>
@@ -256,7 +290,7 @@
               <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/cycle-paco-16-9.jpg" alt=""></div>
               <div>
                 <h3 class="row-title"><a href="#">Panel de partenaires et d'experts : solutions et synergies en Francophonie</a></h3>
-                <p class="row-org"><b>OIF</b> avec l'OCDE, le Fonds pour l'adaptation, le GCF et les CIF</p>
+                <p class="row-org"><span class="logo"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span><span><b>OIF</b> avec l'OCDE, le Fonds pour l'adaptation, le GCF et les CIF</span></p>
               </div>
               <div class="row-side"><span class="tag tag-done">Terminée</span></div>
             </li>
@@ -265,7 +299,7 @@
               <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
               <div>
                 <h3 class="row-title"><a href="#">Du financement climatique à l'action régionale : les solutions du P2RS</a></h3>
-                <p class="row-org"><b>CILSS</b> Comité permanent inter-États de lutte contre la sécheresse, Burkina Faso</p>
+                <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b> Comité permanent inter-États de lutte contre la sécheresse, Burkina Faso</span></p>
                 <div class="row-facts"><span><svg class="icon"><use href="#i-door"/></svg>Salle principale</span></div>
               </div>
               <div class="row-side"><span class="tag tag-live">En direct</span><a class="btn btn-live btn-sm" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre</a></div>
@@ -275,7 +309,7 @@
               <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""></div>
               <div>
                 <h3 class="row-title"><a href="#">Enjeux de financements pour les régions et les municipalités</a></h3>
-                <p class="row-org"><b>AIRF</b> Association internationale des régions francophones, avec la Commune de Sakété</p>
+                <p class="row-org"><span class="logo" aria-hidden="true">AIRF</span><span><b>AIRF</b> Association internationale des régions francophones, avec la Commune de Sakété</span></p>
                 <div class="row-facts"><span><svg class="icon"><use href="#i-star"/></svg>Temps fort de la journée</span></div>
               </div>
               <div class="row-side"><span class="tag tag-soon">À venir</span></div>
@@ -285,7 +319,7 @@
               <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
               <div>
                 <h3 class="row-title"><a href="#">Du récif à la résilience : financer la protection des côtes mauriciennes</a></h3>
-                <p class="row-org"><b>Business Maurice</b> Maurice</p>
+                <p class="row-org"><span class="logo" aria-hidden="true">BM</span><span><b>Business Maurice</b> Maurice</span></p>
               </div>
               <div class="row-side"><span class="tag tag-soon">À venir</span></div>
             </li>
@@ -301,7 +335,7 @@
           <div class="row-thumb initials">AIMF</div>
           <div>
             <h3 class="row-title"><a href="#">Dialogue des bailleurs et des collectivités sur la finance locale</a></h3>
-            <p class="row-org"><b>AIMF</b> Association internationale des maires francophones, France</p>
+            <p class="row-org"><span class="logo" aria-hidden="true">AIMF</span><span><b>AIMF</b> Association internationale des maires francophones, France</span></p>
           </div>
           <div class="row-side"><span class="tag tag-postponed">Reportée</span></div>
         </li>
@@ -333,7 +367,7 @@
               <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt=""></div>
               <div>
                 <h3 class="row-title"><a href="#">Les 10 minutes qui inspirent : pitchs des organisations de jeunes</a></h3>
-                <p class="row-org"><b>Green OpenLab</b> avec JVE Centrafrique, Youth Voices Cameroun et trois autres</p>
+                <p class="row-org"><span class="logo" aria-hidden="true">GOL</span><span><b>Green OpenLab</b> avec JVE Centrafrique, Youth Voices Cameroun et trois autres</span></p>
               </div>
               <div class="row-side"><span class="tag tag-soon">À venir</span></div>
             </li>
@@ -342,7 +376,7 @@
               <div class="row-thumb initials">IA</div>
               <div>
                 <h3 class="row-title"><a href="#">Hackathon francophone sur l'IA appliquée au climat</a></h3>
-                <p class="row-org"><b>OIF</b> Organisation internationale de la Francophonie</p>
+                <p class="row-org"><span class="logo"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span><span><b>OIF</b> Organisation internationale de la Francophonie</span></p>
                 <div class="row-facts"><span><svg class="icon"><use href="#i-star"/></svg>Temps fort de la journée</span></div>
               </div>
               <div class="row-side"><span class="tag tag-soon">À venir</span></div>
