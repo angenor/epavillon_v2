@@ -173,6 +173,14 @@ codes! {
     RegistrationLocked => "REGISTRATION_LOCKED", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette inscription ne peut plus être modifiée. Elle ne vous engage plus à rien.";
 
+    // --- Séances communes (01/11/2026) -----------------------------------------
+    // Réunir ou séparer ne refuse jamais un chevauchement non plus : seulement ce
+    // qui perdrait des inscrits, ou des dossiers qui ne peuvent pas l'être.
+    JointSessionHasRegistrations => "JOINT_SESSION_HAS_REGISTRATIONS", StatusCode::CONFLICT,
+        "Des personnes sont déjà inscrites à cette séance : la réunir ou la séparer perdrait leurs inscriptions.";
+    JointSessionInvalid => "JOINT_SESSION_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ces dossiers ne peuvent pas être réunis dans une séance commune.";
+
     // --- Média (B6) -----------------------------------------------------------
     // Onze. Neuf situations qui ressemblent à des erreurs sortent en 200 avec
     // leur valeur : un fichier annoncé qui serait refusé, un contenu déjà

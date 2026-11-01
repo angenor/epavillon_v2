@@ -176,5 +176,29 @@
     "save": "Les modifications n'ont pas pu être enregistrées.",
     "publish": "La publication n'a pas abouti.",
     "noRoom": "Cette édition n'a aucune salle : ajoutez-en une dans l'onglet « Lieux et salles » de l'édition pour placer des activités."
+  },
+  "joint": {
+    "section": "Séance commune",
+    "members": "Dossiers réunis dans ce créneau",
+    "join": "Réunir avec d'autres activités",
+    "joinHint": "Faute de créneaux pour tous, des activités aux thèmes proches partagent un créneau sous un titre commun : une inscription, une réunion, un direct.",
+    "split": "Séparer",
+    "splitHint": "Chaque dossier retrouve sa séance : le premier garde ce créneau, les autres reviennent au panneau des activités à placer, non publiées.",
+    "joinTitle": "Réunir dans une séance commune",
+    "joinDescription": "La séance commune prend le créneau, la salle et la diffusion de « {title} ». Les séances des autres activités sont retirées.",
+    "titleFr": "Titre commun en français",
+    "titleEn": "Titre commun en anglais",
+    "candidates": "Activités à réunir",
+    "candidatesHint": "Activités retenues de l'édition, affichées dans l'ordre où vous les cochez.",
+    "noCandidates": "Aucune autre activité retenue ne peut rejoindre ce créneau.",
+    "confirmJoin": "Réunir",
+    "splitTitle": "Séparer la séance commune",
+    "splitDescription": "« {title} » redevient une séance par dossier.",
+    "confirmSplit": "Séparer",
+    "joined": "Séance commune « {title} » créée.",
+    "separated": "Séance commune séparée : chaque dossier a retrouvé sa séance.",
+    "titleRequired": "Saisissez le titre commun en français.",
+    "pickOne": "Cochez au moins une autre activité.",
+    "badge": "Commune"
   }
 }

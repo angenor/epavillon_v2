@@ -176,5 +176,29 @@
     "save": "The changes could not be saved.",
     "publish": "Publishing did not go through.",
     "noRoom": "This edition has no room: add one in the edition's “Venues and rooms” tab to place activities."
+  },
+  "joint": {
+    "section": "Joint session",
+    "members": "Proposals joined in this slot",
+    "join": "Join with other activities",
+    "joinHint": "When there are not enough slots, activities on close themes share one slot under a common title: one registration, one meeting, one live stream.",
+    "split": "Split",
+    "splitHint": "Each proposal gets its own session back: the first keeps this slot, the others return to the panel of activities to place, unpublished.",
+    "joinTitle": "Join into a joint session",
+    "joinDescription": "The joint session takes the slot, room and broadcast of “{title}”. The sessions of the other activities are removed.",
+    "titleFr": "Common title in French",
+    "titleEn": "Common title in English",
+    "candidates": "Activities to join",
+    "candidatesHint": "Accepted activities of this edition, shown in the order you tick them.",
+    "noCandidates": "No other accepted activity can join this slot.",
+    "confirmJoin": "Join",
+    "splitTitle": "Split the joint session",
+    "splitDescription": "“{title}” becomes one session per proposal again.",
+    "confirmSplit": "Split",
+    "joined": "Joint session “{title}” created.",
+    "separated": "Joint session split: each proposal has its own session again.",
+    "titleRequired": "Enter the common title in French.",
+    "pickOne": "Tick at least one other activity.",
+    "badge": "Joint"
   }
 }

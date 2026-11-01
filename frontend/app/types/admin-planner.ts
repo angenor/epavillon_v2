@@ -112,6 +112,31 @@ export interface PlannerSession {
   /** Nombre d'intervenants déclarés : `publication_readiness()` s'en inquiète. */
   speaker_count: number
   published_at: IsoDateTime | null
+  /** Séance commune : les dossiers réunis, dans l'ordre d'affichage ; vide sinon. */
+  joint_proposals: PlannerJointProposal[]
+}
+
+/** Un dossier réuni dans une séance commune, tel que le planificateur le montre. */
+export interface PlannerJointProposal {
+  proposal_id: ProposalId
+  sort_order: number
+  /** Titre d'origine du dossier. */
+  title: I18nText
+  reference_code: string
+  organization_name: string
+  organization_acronym: string | null
+}
+
+/**
+ * `POST /admin/planner/joint-sessions` : réunir des dossiers retenus dans une
+ * séance commune, au créneau de la séance du premier. Rend tout l'écran.
+ */
+export interface JointSessionPayload {
+  event_id: EventId
+  /** Dans l'ordre d'affichage ; deux au moins. */
+  proposal_ids: ProposalId[]
+  /** Titre commun choisi par l'équipe, français exigé. */
+  title: I18nText
 }
 
 /** Salle offerte au placement, avec ce qui décide du choix. */

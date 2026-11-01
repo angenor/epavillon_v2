@@ -182,6 +182,7 @@ function toPlannerSession(session: Session): PlannerSession {
     themes: termBadges('sessions', session.id),
     speaker_count: sessionSpeakers.filter((speaker) => speaker.session_id === session.id).length,
     published_at: session.published_at,
+    joint_proposals: [],
   }
 }
 
@@ -436,4 +437,18 @@ export function publishProgramme(eventId: Uuid): PublishProgrammeResult {
   if (event) (event as { programme_published_at: string | null }).programme_published_at = now
 
   return { blocked: false, published_count: published, published_at: now, issues }
+}
+
+/**
+ * Réunir et séparer : les données d'exemple sont en lecture seule, l'écran
+ * relit donc la grille telle quelle (hors ligne, rien n'est réuni).
+ */
+export function joinSessions(eventId: Uuid): PlannerScreen {
+  const screen = plannerScreen(eventId)
+  if (!screen) throw new Error(`Édition ${eventId} introuvable.`)
+  return screen
+}
+
+export function splitJointSession(eventId: Uuid): PlannerScreen {
+  return joinSessions(eventId)
 }

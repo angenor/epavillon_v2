@@ -11,6 +11,7 @@ pub mod detail;
 pub mod documents;
 pub mod draft_read;
 pub mod draft_write;
+pub mod joint;
 pub mod list;
 pub mod perimeter;
 pub mod planner;

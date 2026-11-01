@@ -74,6 +74,9 @@ const emit = defineEmits<{
   ]
   /** Retirer du calendrier : la séance retourne au panneau, elle n'est pas supprimée. */
   unplace: [session: PlannerSession]
+  /** Réunir ce dossier avec d'autres dans une séance commune, ou la séparer. */
+  join: [session: PlannerSession]
+  split: [session: PlannerSession]
 }>()
 
 const { t } = useI18n()
@@ -322,6 +325,51 @@ const isPlaced = computed(() => props.session?.room_id !== null && props.session
             {{ t('admin.planner.dialog.openProposal') }}
           </NuxtLink>
         </p>
+      </section>
+
+      <!-- SÉANCE COMMUNE : un créneau, un titre commun, plusieurs dossiers. -->
+      <section
+        v-if="props.session.joint_proposals.length || props.session.proposal_status === 'accepted'"
+        class="space-y-2"
+      >
+        <h3 class="text-sm font-semibold tracking-wide text-text uppercase">
+          {{ t('admin.planner.joint.section') }}
+        </h3>
+        <template v-if="props.session.joint_proposals.length">
+          <p class="text-xs text-text-muted">{{ t('admin.planner.joint.members') }}</p>
+          <ol class="space-y-1 text-sm">
+            <li v-for="part in props.session.joint_proposals" :key="part.proposal_id" class="flex gap-2">
+              <span class="font-semibold text-accent tabular-nums">{{ part.sort_order }}.</span>
+              <span class="min-w-0">
+                <NuxtLink :to="localePath(`/admin/propositions/${part.proposal_id}`)" class="text-accent underline">
+                  {{ tr(part.title) }}
+                </NuxtLink>
+                <span class="text-text-muted"> · {{ part.organization_acronym || part.organization_name }}</span>
+              </span>
+            </li>
+          </ol>
+          <p class="text-xs text-text-muted">{{ t('admin.planner.joint.splitHint') }}</p>
+          <UiButton
+            variant="secondary"
+            size="sm"
+            :disabled="!props.editable || props.busy"
+            @click="props.session && emit('split', props.session)"
+          >
+            {{ t('admin.planner.joint.split') }}
+          </UiButton>
+        </template>
+        <template v-else>
+          <p class="text-xs text-text-muted">{{ t('admin.planner.joint.joinHint') }}</p>
+          <UiButton
+            variant="secondary"
+            size="sm"
+            icon="users"
+            :disabled="!props.editable || props.busy"
+            @click="props.session && emit('join', props.session)"
+          >
+            {{ t('admin.planner.joint.join') }}
+          </UiButton>
+        </template>
       </section>
 
       <div

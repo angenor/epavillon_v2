@@ -69,7 +69,10 @@ pub async fn ecran(pool: &PgPool, event_id: EventId) -> Result<Option<PlannerScr
     Ok(ecran)
 }
 
-async fn composer(conn: &mut PgConnection, event_id: EventId) -> Result<Option<PlannerScreen>> {
+pub(crate) async fn composer(
+    conn: &mut PgConnection,
+    event_id: EventId,
+) -> Result<Option<PlannerScreen>> {
     let Some(edition) = cross::contexte_edition(&mut *conn, event_id).await? else {
         return Ok(None);
     };

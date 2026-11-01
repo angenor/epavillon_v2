@@ -407,6 +407,31 @@ async function submitSessionChanges(changes: {
   }
 }
 
+/**
+ * RÉUNIR OU SÉPARER : la fenêtre écrit elle-même et rend tout l'écran, car
+ * plusieurs séances changent à la fois.
+ */
+const jointMode = ref<'join' | 'split' | null>(null)
+const jointSession = ref<PlannerSession | null>(null)
+
+function openJoint(mode: 'join' | 'split', session: PlannerSession): void {
+  actionError.value = null
+  jointSession.value = session
+  jointMode.value = mode
+}
+
+function closeJoint(): void {
+  jointMode.value = null
+  jointSession.value = null
+}
+
+function jointDone(next: PlannerScreen, notice: string): void {
+  screen.value = next
+  actionNotice.value = notice
+  closeJoint()
+  updateQuery({ seance: null })
+}
+
 /** Retirer du calendrier : la séance retourne au panneau, son créneau reste. */
 async function unplace(session: PlannerSession): Promise<void> {
   await schedule({
@@ -735,6 +760,17 @@ onBeforeUnmount(() => {
       @update:open="(value: boolean) => !value && updateQuery({ seance: null })"
       @submit="submitSessionChanges"
       @unplace="unplace"
+      @join="(session: PlannerSession) => openJoint('join', session)"
+      @split="(session: PlannerSession) => openJoint('split', session)"
+    />
+
+    <AdminPlannerJointDialog
+      :mode="jointMode"
+      :session="jointSession"
+      :sessions="allSessions"
+      :event-id="adminScope.currentEventId"
+      @close="closeJoint"
+      @done="jointDone"
     />
 
     <AdminPlannerPublishDialog

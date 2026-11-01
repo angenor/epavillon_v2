@@ -26,10 +26,13 @@ pub struct EditionDemandee {
 
 /// Ce que ce module dépose sous `/admin/planner`, **sans le préfixe**.
 pub fn configurer(cfg: &mut web::ServiceConfig) {
-    cfg.route("", web::get().to(ecran)).route(
-        "/tracks/{trackId}/sessions/{sessionId}",
-        web::put().to(placer_dans_le_fil),
-    );
+    cfg.route("", web::get().to(ecran))
+        .route(
+            "/tracks/{trackId}/sessions/{sessionId}",
+            web::put().to(placer_dans_le_fil),
+        )
+        .route("/joint-sessions", web::post().to(reunir))
+        .route("/joint-sessions/{sessionId}", web::delete().to(separer));
 }
 
 /// Le garde de l'écran : **ascendance, périmètre, puis permission de
@@ -123,4 +126,73 @@ pub(crate) async fn placer_dans_le_fil(
             .await?;
 
     Ok(HttpResponse::Ok().json(place))
+}
+
+/// Réunir des dossiers retenus dans une séance commune (01/11).
+#[utoipa::path(
+    post,
+    description = "`JointSessionPayload` → `PlannerScreen`. Réunit deux dossiers **retenus** de l'édition ou plus (`proposal_ids`, dans l'ordre d'affichage) dans une séance commune au titre `title` (`I18nText`, français exigé). La séance commune prend le créneau, la salle, la diffusion et la publication de la séance du premier dossier ; intervenants, organisations, thématiques et journées spéciales des dossiers y sont recopiés, rangés par dossier ; leurs séances propres sont retirées. **Refusé si l'une d'elles a des inscrits** (409, rien n'est perdu) ou si un dossier n'est pas retenu, déjà réuni, ou a une séance en cours ou terminée (422). Rend tout l'écran, lu dans la transaction : plusieurs séances changent à la fois.",
+    path = "/admin/planner/joint-sessions",
+    tag = "Planificateur de séances",
+    operation_id = "seances_reunir",
+    request_body = Object,
+    responses(
+        (status = 200, description = "PlannerScreen", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Permission de planifier absente, ou périmètre vide", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Édition inexistante ou hors périmètre, indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "Une des séances à retirer a des inscrits", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Dossiers non réunissables, ou titre commun absent", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn reunir(
+    requete: actix_web::HttpRequest,
+    state: web::Data<ProgrammeState>,
+    perimetre: Perimeter,
+    corps: web::Json<crate::service::joint::JointSessionPayload>,
+) -> Result<HttpResponse> {
+    let corps = corps.into_inner();
+    let event_id = garder(
+        &state,
+        &perimetre,
+        perimeter::Cible::Edition(EventId(corps.event_id)),
+    )
+    .await?;
+
+    let ctx = crate::routes::contexte_de(&requete, perimetre.person_id);
+    let ecran = crate::service::joint::reunir(&state, &ctx, event_id, corps).await?;
+
+    Ok(HttpResponse::Ok().json(ecran))
+}
+
+/// Séparer une séance commune (01/11).
+#[utoipa::path(
+    delete,
+    description = "→ `PlannerScreen`. Défait une séance commune : elle est supprimée, chaque dossier retrouve une séance propre (le premier au créneau et dans la salle de la séance commune, les autres au panneau « à placer »), non publiée. **Refusé si la séance commune a des inscrits** (409) ou si elle est en cours ou terminée (422). Une séance ordinaire rend 422.",
+    path = "/admin/planner/joint-sessions/{sessionId}",
+    tag = "Planificateur de séances",
+    operation_id = "seances_separer",
+    params(("sessionId" = Uuid, Path, description = "Séance commune")),
+    responses(
+        (status = 200, description = "PlannerScreen", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Permission de planifier absente, ou périmètre vide", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Séance inexistante ou hors périmètre, indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "La séance commune a des inscrits", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Séance ordinaire, ou en cours ou terminée", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn separer(
+    requete: actix_web::HttpRequest,
+    state: web::Data<ProgrammeState>,
+    perimetre: Perimeter,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let session = crate::domain::ids::SessionId::from(chemin.into_inner());
+    let event_id = garder(&state, &perimetre, perimeter::Cible::Seance(session)).await?;
+
+    let ctx = crate::routes::contexte_de(&requete, perimetre.person_id);
+    let ecran = crate::service::joint::separer(&state, &ctx, event_id, session).await?;
+
+    Ok(HttpResponse::Ok().json(ecran))
 }

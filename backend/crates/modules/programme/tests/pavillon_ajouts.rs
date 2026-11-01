@@ -52,7 +52,7 @@ const CLES_DAVANT: [&str; 28] = [
     "themes",
 ];
 
-const CLES_AJOUTEES: [&str; 11] = [
+const CLES_AJOUTEES: [&str; 12] = [
     "waitlist_enabled",
     "registration_required",
     "registration_opens_at",
@@ -64,6 +64,8 @@ const CLES_AJOUTEES: [&str; 11] = [
     "replay_duration_seconds",
     "organization_logo",
     "organization_type_code",
+    // Séance commune (01/11) : `[]` pour une séance ordinaire.
+    "proposals",
 ];
 
 // L'identité d'un intervenant sans personne (D16) ne sort que fondue dans
