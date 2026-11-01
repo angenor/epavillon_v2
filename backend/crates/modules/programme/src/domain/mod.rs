@@ -21,6 +21,7 @@ pub mod ids;
 pub mod limits;
 pub mod ownership;
 pub mod permissions;
+pub mod regie;
 pub mod registration;
 pub mod sanitize;
 pub mod sessions;

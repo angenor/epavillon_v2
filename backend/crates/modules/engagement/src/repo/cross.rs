@@ -23,6 +23,7 @@
 //! | `platform.modules` | à quel module appartient un type de notification |
 //! | `media.attached_image()` | la bannière et le logo de l'édition d'un courriel (29/10) |
 //! | `programme.proposals`, `programme.sessions`, `event.rooms` | le dossier d'un courriel écrit depuis sa fiche : titre, déposant et contact, séance retenue et sa salle (01/11) |
+//! | `programme.control_room_actions`, `programme.sessions` | l'annulation décidée en régie tient-elle encore au moment d'écrire aux inscrits (02/11) ; lue sous verrou partagé, jamais écrite |
 //!
 //! Rien d'autre.
 
@@ -554,4 +555,44 @@ pub async fn visuels_edition(pool: &PgPool, event_id: Uuid) -> Result<Option<Vis
         banniere: l.banniere,
         logo: l.logo,
     }))
+}
+
+/// L'annulation de régie tient-elle encore ? Le verrou partagé sur le geste
+/// fait attendre un « Défaire » concurrent jusqu'à ce que les courriels soient
+/// posés : le correctif qui suit les retrouve tous.
+pub async fn annulation_de_regie_tient(
+    conn: &mut sqlx::postgres::PgConnection,
+    action_id: Uuid,
+) -> Result<bool> {
+    let tient = sqlx::query_scalar!(
+        r#"SELECT (a.undone_at IS NULL AND s.status = 'cancelled') AS "tient!"
+             FROM programme.control_room_actions a
+             JOIN programme.sessions s ON s.id = a.session_id
+            WHERE a.id = $1
+              FOR SHARE OF a"#,
+        action_id
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+    Ok(tient.unwrap_or(false))
+}
+
+/// Ceux à qui la régie a écrit l'annulation : les courriels posés sous le
+/// préfixe du geste (lecture de la file de ce module).
+pub async fn prevenus_par_la_regie(
+    conn: &mut sqlx::postgres::PgConnection,
+    tache: &str,
+    prefixe: &str,
+) -> Result<Vec<Uuid>> {
+    let ids = sqlx::query_scalar!(
+        r#"SELECT DISTINCT (payload ->> 'person_id')::uuid AS "person_id!"
+             FROM platform.jobs
+            WHERE task = $1 AND idempotency_key LIKE $2 || '%' AND status <> 'cancelled'
+            ORDER BY 1"#,
+        tache,
+        prefixe
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+    Ok(ids)
 }

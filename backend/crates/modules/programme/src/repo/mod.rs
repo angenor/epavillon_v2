@@ -25,6 +25,7 @@ pub mod proposals;
 pub mod public_schedule;
 pub mod questions;
 pub mod reads;
+pub mod regie;
 pub mod registrations;
 pub mod reviews;
 pub mod scores;

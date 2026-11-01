@@ -8,6 +8,7 @@
 //! | `organization:<id>` | espace organisation | adhésion ouverte (`workspace::espace`) |
 //! | `event:<id>:proposals` | liste du comité, autres dossiers | périmètre d'administration (`list::ecran`) |
 //! | `event:<id>:planner` | planificateur | périmètre, puis `programme.session.schedule` sur l'édition (`routes::planner::garder`) |
+//! | `event:<id>:regie` | régie du jour | la même, celle de `service::regie::garder` |
 
 use std::sync::Arc;
 
@@ -106,7 +107,11 @@ struct SujetsDeLEdition;
 #[async_trait]
 impl TopicAuthorizer for SujetsDeLEdition {
     fn handles(&self, topic: &Topic) -> bool {
-        topic.kind() == "event" && matches!(topic.rest().as_slice(), ["proposals"] | ["planner"])
+        topic.kind() == "event"
+            && matches!(
+                topic.rest().as_slice(),
+                ["proposals"] | ["planner"] | ["regie"]
+            )
     }
 
     async fn authorize(
@@ -122,7 +127,7 @@ impl TopicAuthorizer for SujetsDeLEdition {
         if !perimetre.allows(id) || !cross::event_exists(pool, EventId(id)).await? {
             return Ok(TopicAccess::Denied);
         }
-        if topic.rest() == ["planner"]
+        if matches!(topic.rest().as_slice(), ["planner"] | ["regie"])
             && !kernel::auth::has_permission(
                 pool,
                 personne,

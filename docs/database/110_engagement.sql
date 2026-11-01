@@ -1051,6 +1051,8 @@ INSERT INTO engagement.notification_types (code, module_code, label, default_cha
     ('programme.session.reminder',      'programme',   '{"fr":"Rappel de session","en":"Session reminder"}',                    '{email}',        'normal',    '{prenom,titre_session,date_session,delai,lien_participation}'),
     ('programme.session.cancelled',     'programme',   '{"fr":"Session annulée","en":"Session cancelled"}',                     '{in_app,email}', 'critical',  '{titre_session,motif}'),
     ('programme.session.rescheduled',   'programme',   '{"fr":"Session reprogrammée","en":"Session rescheduled"}',              '{in_app,email}', 'critical',  '{titre_session,nouvelle_date}'),
+    -- Régie du jour (02/11) : l'annulation est défaite après le courriel, on écrit « finalement maintenue ».
+    ('programme.session.restored',      'programme',   '{"fr":"Session finalement maintenue","en":"Session going ahead after all"}', '{email}',   'critical',  '{titre_session}'),
     ('live.session.started',            'live',        '{"fr":"La session commence","en":"Session starting"}',                  '{in_app,push}',  'normal',    '{titre_session,lien_participation}'),
     ('publication.article.moderated',   'publication', '{"fr":"Article modéré","en":"Article moderated"}',                      '{in_app,email}', 'important', '{titre_article,decision}'),
     ('negotiation.document.published',  'negotiation', '{"fr":"Nouveau document de négociation","en":"New negotiation document"}', '{in_app}',    'normal',    '{titre_document}'),

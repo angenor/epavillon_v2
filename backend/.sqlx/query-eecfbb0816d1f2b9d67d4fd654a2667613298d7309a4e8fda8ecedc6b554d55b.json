@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (a.undone_at IS NULL AND s.status = 'cancelled') AS \"tient!\"\n             FROM programme.control_room_actions a\n             JOIN programme.sessions s ON s.id = a.session_id\n            WHERE a.id = $1\n              FOR SHARE OF a",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tient!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "eecfbb0816d1f2b9d67d4fd654a2667613298d7309a4e8fda8ecedc6b554d55b"
+}

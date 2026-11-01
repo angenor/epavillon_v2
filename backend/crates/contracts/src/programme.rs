@@ -146,3 +146,35 @@ pub const SESSION_CANCELLED: &str = "programme.session.cancelled";
 /// Le seul qui ne soit pas un état : émis quand le créneau change **sans** que
 /// le statut bouge. La charge utile porte alors `previous_starts_at`.
 pub const SESSION_RESCHEDULED: &str = "programme.session.rescheduled";
+
+/// Régie du jour (02/11) : une activité annulée en régie, courriel aux
+/// inscrits dû à `notify_at`. Celui qui envoie vérifie à l'heure dite que le
+/// geste `action_id` n'a pas été défait : un retour en arrière dans les cinq
+/// minutes ne laisse partir aucun courriel.
+pub const REGIE_CANCELLATION_NOTICE: &str = "programme.regie.cancellation_notice";
+/// L'annulation `action_id` est défaite : écrire « finalement maintenue » à
+/// ceux qui ont reçu le courriel d'annulation, et à eux seuls.
+pub const REGIE_RESTORATION_NOTICE: &str = "programme.regie.restoration_notice";
+
+/// Le travail qui envoie (module `engagement`) et la clé des courriels d'une
+/// annulation : la régie lit leur état dans `platform.jobs` pour dire « prévenus
+/// à 08:45 », sans table de plus.
+pub const REGIE_NOTICE_TASK: &str = "engagement.regie_notice";
+pub const NOTIFICATION_EMAIL_TASK: &str = "engagement.notification_email";
+
+pub fn regie_notice_key(kind: &str, action_id: Uuid) -> String {
+    format!("{kind}:{action_id}")
+}
+
+/// Préfixe des courriels d'annulation d'un geste, un par personne.
+pub fn regie_email_prefix(action_id: Uuid) -> String {
+    format!("regie:{action_id}:")
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RegieNotice {
+    pub action_id: Uuid,
+    pub session_id: Uuid,
+    #[serde(with = "time::serde::rfc3339")]
+    pub notify_at: OffsetDateTime,
+}

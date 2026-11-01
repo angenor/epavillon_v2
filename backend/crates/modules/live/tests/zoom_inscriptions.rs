@@ -252,6 +252,40 @@ async fn la_reunion_suit_sa_seance_annulee_ou_deplacee() {
     .await
     .unwrap();
     traiter("programme.session.cancelled").await;
+    // Régie du jour (02/11) : la réunion attend cinq minutes, le temps de
+    // défaire l'annulation, puis le travail différé l'annule s'il le faut.
+    let avant: String = sqlx::query_scalar("SELECT status::text FROM live.meetings WHERE id = $1")
+        .bind(m.id)
+        .fetch_one(bac.pool())
+        .await
+        .unwrap();
+    assert_eq!(
+        avant, "scheduled",
+        "rien d'annulé chez Zoom avant cinq minutes"
+    );
+    let differe = sqlx::query(
+        "SELECT id, queue, task, payload, attempts, max_attempts,
+                run_at > now() + interval '4 minutes' AS plus_tard
+           FROM platform.jobs WHERE task = 'live.cancel_session_meeting'",
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    use kernel::jobs::JobHandler;
+    use sqlx::Row;
+    assert!(differe.get::<bool, _>("plus_tard"));
+    let job = kernel::jobs::ClaimedJob {
+        id: differe.get("id"),
+        queue: differe.get("queue"),
+        task: differe.get("task"),
+        payload: differe.get("payload"),
+        attempts: differe.get("attempts"),
+        max_attempts: differe.get("max_attempts"),
+    };
+    live::jobs::annulation_differee::CancelSessionMeeting::new(bac.db())
+        .run(&job)
+        .await
+        .unwrap();
     let statut = sqlx::query_scalar!(
         r#"SELECT status::text AS "s!" FROM live.meetings WHERE id = $1"#,
         m.id

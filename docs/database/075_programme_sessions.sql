@@ -125,6 +125,20 @@ CREATE TABLE programme.sessions (
 
     published_at     timestamptz,
     cancelled_reason platform.i18n_text,
+    -- Régie du jour (02/11). Instant et auteur de l'annulation, tenus par
+    -- `tg_sessions_status_times` quel que soit le chemin (régie, dossier
+    -- annulé). Raison et note : celles de la régie seule.
+    cancelled_at     timestamptz,
+    cancelled_by     uuid        CONSTRAINT xmod_fk_sessions_canceller
+                                 REFERENCES identity.people(id) ON DELETE SET NULL,
+    -- reference.taxonomy_terms.code (taxonomie session_cancellation_reason).
+    cancellation_reason_code text,
+    -- Note interne de l'équipe, jamais publiée.
+    cancellation_note text,
+    -- Bornes réelles du direct, tenues par `tg_sessions_status_times` : la
+    -- reprise d'un direct terminé par erreur se décide sur `live_ended_at`.
+    live_started_at  timestamptz,
+    live_ended_at    timestamptz,
     created_by       uuid        CONSTRAINT xmod_fk_sessions_creator
                                  REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at       timestamptz NOT NULL DEFAULT now(),
@@ -137,6 +151,8 @@ CREATE TABLE programme.sessions (
     -- Pas de `ck_sessions_cancelled_reason` depuis le 28/10/2026 : annuler un
     -- dossier retenu annule ses séances avec son motif, devenu facultatif. Une
     -- séance annulée sans motif s'affiche « annulée », sans explication.
+    CONSTRAINT ck_sessions_cancellation_note CHECK (
+        cancellation_note IS NULL OR length(cancellation_note) <= 2000),
     CONSTRAINT ux_sessions_slug UNIQUE (event_id, slug),
     CONSTRAINT ux_sessions_proposal_sequence UNIQUE (proposal_id, sequence_number)
 );
@@ -237,6 +253,47 @@ CREATE TRIGGER tg_sessions_listing_changed
        OR NEW.room_id   IS DISTINCT FROM OLD.room_id
        OR NEW.status    IS DISTINCT FROM OLD.status)
     EXECUTE FUNCTION programme.tg_sessions_touch_listing();
+
+-- Régie du jour (02/11) : les instants d'un changement d'état, posés par la
+-- base pour que la régie, l'annulation d'un dossier et la réunion Zoom
+-- (`programme.direct`) les tiennent de la même façon. Une reprise (`completed`
+-- vers `live`) garde le début du direct ; quitter l'annulation efface son
+-- instant, son auteur, sa raison et sa note.
+CREATE OR REPLACE FUNCTION programme.tg_sessions_status_times()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NEW.status = 'live' THEN
+        IF OLD.status <> 'completed' OR NEW.live_started_at IS NULL THEN
+            NEW.live_started_at := now();
+        END IF;
+        NEW.live_ended_at := NULL;
+    ELSIF NEW.status = 'completed' AND OLD.status = 'live' THEN
+        NEW.live_ended_at := now();
+    ELSIF OLD.status = 'live' THEN
+        NEW.live_started_at := NULL;
+    END IF;
+
+    IF NEW.status = 'cancelled' THEN
+        NEW.cancelled_at := now();
+        NEW.cancelled_by := platform.current_actor_id();
+    ELSIF OLD.status = 'cancelled' THEN
+        NEW.cancelled_at := NULL;
+        NEW.cancelled_by := NULL;
+        NEW.cancellation_reason_code := NULL;
+        NEW.cancellation_note := NULL;
+        NEW.cancelled_reason := NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_sessions_status_times
+    BEFORE UPDATE OF status ON programme.sessions
+    FOR EACH ROW
+    WHEN (NEW.status IS DISTINCT FROM OLD.status)
+    EXECUTE FUNCTION programme.tg_sessions_status_times();
 
 -- Publication d'un événement de domaine à chaque changement d'état : c'est ce
 -- qui déclenche la création de la réunion visio, les rappels et les
@@ -1552,3 +1609,130 @@ GROUP BY s.event_id;
 
 COMMENT ON VIEW programme.v_edition_stats IS
     'Volume du programme publié par édition. Complète event.v_public_editions, qui ne peut pas dépendre de programme (ordre de chargement).';
+
+-- -----------------------------------------------------------------------------
+-- 9. Régie du jour (02/11)
+--
+-- Pendant une CdP, l'équipe pilote la journée depuis une régie : présence des
+-- organisateurs, annulation d'une activité, direct démarré, terminé, repris.
+-- Le commanditaire a posé une exigence avant toute autre : POUVOIR RÉPARER
+-- TOUTE ERREUR. D'où un journal où chaque geste garde ce qu'il faut pour être
+-- défait, même plus tard, par un autre membre de l'équipe.
+--
+-- POURQUOI DANS `programme` : chaque geste écrit une séance (état, présence,
+-- annulation), qui appartient à ce module. Les messages d'incident restent au
+-- module `live` : la régie les lit dans `live.incidents` (publiés, retirés), ne
+-- les recopie pas dans ce journal.
+--
+-- Les courriels aux inscrits ne partent pas d'ici : la régie émet
+-- `programme.regie.cancellation_notice` (envoi dû dans cinq minutes) ou
+-- `programme.regie.restoration_notice` (« finalement maintenue »), et le module
+-- `engagement` envoie à l'heure dite, après avoir vérifié que le geste n'a pas
+-- été défait entre-temps.
+-- -----------------------------------------------------------------------------
+
+-- Présence des organisateurs le jour J. Pas de ligne : présence inconnue. Une
+-- ligne porte « confirmée » (vrai) ou « absente » (faux), l'instant et l'auteur.
+-- Une table plutôt qu'un ENUM sur la séance : trois états sans transition
+-- imposée ne font pas une machine à états.
+CREATE TABLE programme.session_presence (
+    session_id  uuid        PRIMARY KEY REFERENCES programme.sessions(id) ON DELETE CASCADE,
+    is_present  boolean     NOT NULL,
+    noted_at    timestamptz NOT NULL DEFAULT now(),
+    noted_by    uuid        CONSTRAINT xmod_fk_session_presence_author
+                            REFERENCES identity.people(id) ON DELETE SET NULL
+);
+
+COMMENT ON TABLE programme.session_presence IS
+    'Présence des organisateurs d''une activité, notée en régie. Absence de ligne : inconnue.';
+
+-- Journal de la régie : un geste par ligne, avec ce qu'il faut pour le défaire.
+-- `data` selon le geste :
+--   presence_confirmed  {previous}                  présence d'avant (true, false ou null)
+--   session_cancelled   {previous_status, previous_presence, reason_code,
+--                        notify_registrants, notify_at, registrants,
+--                        restore_notice}             la dernière clé posée en le défaisant
+--   live_started        {previous_status}
+--   live_ended          {}
+-- Ni adresse ni nom : l'auteur est une référence, les inscrits un nombre.
+CREATE TABLE programme.control_room_actions (
+    id          uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    event_id    uuid        NOT NULL CONSTRAINT xmod_fk_control_room_actions_event
+                            REFERENCES event.events(id) ON DELETE CASCADE,
+    session_id  uuid        NOT NULL REFERENCES programme.sessions(id) ON DELETE CASCADE,
+    action_code text        NOT NULL,
+    data        jsonb       NOT NULL DEFAULT '{}'::jsonb,
+    acted_by    uuid        CONSTRAINT xmod_fk_control_room_actions_actor
+                            REFERENCES identity.people(id) ON DELETE SET NULL,
+    acted_at    timestamptz NOT NULL DEFAULT now(),
+    undone_at   timestamptz,
+    undone_by   uuid        CONSTRAINT xmod_fk_control_room_actions_undoer
+                            REFERENCES identity.people(id) ON DELETE SET NULL,
+    -- Liste fermée : chaque geste a son retour en arrière écrit dans l'API.
+    CONSTRAINT ck_control_room_actions_code CHECK (action_code IN (
+        'presence_confirmed', 'session_cancelled', 'live_started', 'live_ended')),
+    CONSTRAINT ck_control_room_actions_data CHECK (jsonb_typeof(data) = 'object'),
+    CONSTRAINT ck_control_room_actions_undone CHECK (undone_at IS NOT NULL OR undone_by IS NULL)
+);
+
+CREATE INDEX ix_control_room_actions_event   ON programme.control_room_actions (event_id, acted_at DESC);
+CREATE INDEX ix_control_room_actions_session ON programme.control_room_actions (session_id, acted_at DESC);
+
+COMMENT ON TABLE programme.control_room_actions IS
+    'Journal de la régie du jour : chaque geste (présence, annulation, direct) et de quoi le défaire. Défaire pose undone_at, la ligne reste.';
+COMMENT ON COLUMN programme.control_room_actions.data IS
+    'Ce qu''il faut pour défaire le geste : état d''avant, choix d''envoi des courriels. Aucune donnée personnelle.';
+
+-- `event:<id>:regie` : la régie d'un collègue se relit. Les changements d'une
+-- séance passent déjà par `event:<id>:planner`.
+CREATE OR REPLACE FUNCTION programme.tg_control_room_signal()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_event uuid;
+BEGIN
+    IF TG_TABLE_NAME = 'control_room_actions' THEN
+        v_event := CASE WHEN TG_OP = 'DELETE' THEN OLD.event_id ELSE NEW.event_id END;
+    ELSE
+        SELECT event_id INTO v_event FROM programme.sessions
+         WHERE id = CASE WHEN TG_OP = 'DELETE' THEN OLD.session_id ELSE NEW.session_id END;
+    END IF;
+    IF v_event IS NOT NULL THEN
+        PERFORM platform.signal('event:' || v_event || ':regie');
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_control_room_actions_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.control_room_actions
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_control_room_signal();
+
+CREATE TRIGGER tg_session_presence_signal
+    AFTER INSERT OR UPDATE OR DELETE ON programme.session_presence
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_control_room_signal();
+
+-- Raisons d'annulation proposées en régie. Vocabulaire ouvert : l'équipe peut
+-- en ajouter sans migration.
+INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_hierarchical, is_system) VALUES
+    ('session_cancellation_reason',
+     '{"fr":"Raisons d''annulation d''une activité","en":"Activity cancellation reasons"}',
+     '{"fr":"Choisies en régie le jour J ; la note qui les accompagne n''est jamais publiée.","en":"Chosen in the control room; the accompanying note is never published."}',
+     false, false, false)
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, description, sort_order) VALUES
+    ('session_cancellation_reason', 'no_show',
+     '{"fr":"Les organisateurs ne sont pas venus","en":"The organisers did not come"}',
+     '{"fr":"Constaté sur place.","en":"Noted on site."}', 10),
+    ('session_cancellation_reason', 'notified_absence',
+     '{"fr":"Les organisateurs ont prévenu de leur absence","en":"The organisers notified their absence"}',
+     '{"fr":"Par courriel, téléphone ou message.","en":"By email, phone or message."}', 20),
+    ('session_cancellation_reason', 'other',
+     '{"fr":"Autre raison","en":"Other reason"}',
+     '{"fr":"À préciser pour l''équipe ; elle n''est pas publiée.","en":"To be specified for the team; it is not published."}', 30)
+ON CONFLICT (taxonomy_code, code) DO NOTHING;
+
+COMMENT ON COLUMN programme.sessions.cancellation_reason_code IS
+    'reference.taxonomy_terms.code (taxonomie session_cancellation_reason), posée par la régie. NULL pour une annulation venue du dossier.';

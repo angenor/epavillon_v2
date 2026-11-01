@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.control_room_actions\n              SET undone_at = now(), undone_by = platform.current_actor_id(), data = data || $2\n            WHERE id = $1\n        RETURNING undone_at AS \"undone_at!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "undone_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.control_room_actions",
+            "name": "undone_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "9f787dff95f0c04d57c44e3e0f98db80a29e93398b91dee14d2f87a962fe2f34"
+}

@@ -121,6 +121,9 @@ pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
             zoom.clone(),
         )),
         Arc::new(jobs::cancel_meeting::CancelMeeting::new(db.clone(), zoom)),
+        Arc::new(jobs::annulation_differee::CancelSessionMeeting::new(
+            db.clone(),
+        )),
         Arc::new(jobs::filet::RequeueParticipants::new(db.clone())),
         Arc::new(jobs::annonce::AnnounceMeetingStart::new(db.clone())),
         Arc::new(jobs::webhook::ProcessWebhook::new(db)),

@@ -2691,6 +2691,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/regie": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `RegieScreen` : la régie d'une journée : séances publiées du jour (organisations, présentations déposées, réunion Zoom, présence, annulation et état des courriels aux inscrits), journal des gestes et des messages d'incident publiés ce jour, direct en cours ailleurs (un seul à la fois, toutes éditions), raisons d'annulation. `day` facultatif : aujourd'hui dans le fuseau de l'édition s'il est au programme, sinon le prochain jour, sinon le premier. */
+        get: operations["regie_ecran"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/actions/{actionId}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `RegieUndoPayload` → `RegieGesture`. Défait une ligne du journal, même plus tard et par un autre membre de l'équipe : présence remise comme avant ; annulation rétablie (l'activité revient à son créneau avec ses inscrits ; `notify_registrants` écrit « finalement maintenue » à ceux qui ont reçu le courriel d'annulation, un courriel parti ne se reprenant pas) ; direct démarré remis programmé ; direct terminé repris, dans les quinze minutes seulement (`REGIE_RESUME_EXPIRED` après), un seul direct à la fois. Refus 409 si la séance a changé entre-temps ou si le geste est déjà défait. */
+        post: operations["regie_defaire"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/sessions/{sessionId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `RegieCancelPayload` → `RegieGesture`. Annule une activité publiée (programmée, en direct ou reportée) avec une raison de la taxonomie `session_cancellation_reason` et une note interne jamais publiée ; « pas venus » et « ont prévenu » notent les organisateurs absents. `notify_registrants` : les inscrits reçoivent un courriel **cinq minutes plus tard** (`notify_at`), et défaire l'annulation d'ici là le retire avant tout envoi. Le message d'incident se publie à part (`POST /admin/incidents`). */
+        post: operations["regie_annuler"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/sessions/{sessionId}/live/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `RegieGesture` : termine le direct. `resumable_until` : pendant quinze minutes, défaire ce geste reprend le direct (même réunion Zoom, même lien). */
+        post: operations["regie_terminer_le_direct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/sessions/{sessionId}/live/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `RegieGesture` : met en direct une activité publiée et programmée. **Un seul direct à la fois, toutes éditions confondues** : refus 409 `REGIE_LIVE_ALREADY_RUNNING` tant qu'un autre tourne. */
+        post: operations["regie_demarrer_le_direct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/sessions/{sessionId}/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `RegieGesture` : les organisateurs sont là : présence confirmée, inscrite au journal. Refusé (409) pour une activité annulée. */
+        post: operations["regie_confirmer_la_presence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/reminder-rules": {
         parameters: {
             query?: never;
@@ -2807,6 +2909,27 @@ export interface paths {
          *     Exige `live.meeting.manage` sur l'édition. `LIVE_ZOOM_UNAVAILABLE` (503) si Zoom n'est pas configuré, `LIVE_MEETING_EXTERNAL_ID_TAKEN` (409) si la réunion Zoom pilote déjà une autre séance.
          */
         post: operations["admin_seance_reunion_synchroniser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/sessions/{session_id}/meeting/host": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `MeetingHostLink`, le lien d'animateur de la réunion Zoom (« Ouvrir Zoom (animateur) » de la régie du jour). Redemandé à Zoom à chaque appel (le lien expire), le dernier connu à défaut. Ne se met jamais en cache : `Cache-Control: no-store`.
+         *
+         *     Exige `live.meeting.manage` sur l'édition. `LIVE_MEETING_NOT_READY` (409) sans réunion créée chez Zoom, `LIVE_ZOOM_UNAVAILABLE` (503) si Zoom n'est pas configuré.
+         */
+        get: operations["admin_seance_reunion_lien_animateur"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7041,6 +7164,11 @@ export interface components {
          *     - `LIVE_MEETING_REGISTRATION_REQUIRED` (403) — Inscrivez-vous à cette activité pour rejoindre la salle.
          *     - `LIVE_MEETING_EXTERNAL_ID_TAKEN` (409) — Cette réunion Zoom est déjà rattachée à une autre activité.
          *     - `LIVE_MEETING_CANCELLED` (409) — Cette activité est annulée ou reportée : la salle n'ouvrira pas.
+         *     - `REGIE_LIVE_ALREADY_RUNNING` (409) — Un autre direct est en cours : un seul à la fois. Terminez-le d'abord.
+         *     - `REGIE_SESSION_STATE_CHANGED` (409) — Cette activité a changé entre-temps : la régie s'est mise à jour, vérifiez avant de recommencer.
+         *     - `REGIE_RESUME_EXPIRED` (409) — Le direct est terminé depuis plus de quinze minutes : il ne se reprend plus.
+         *     - `REGIE_ACTION_ALREADY_UNDONE` (409) — Ce geste a déjà été défait.
+         *     - `REGIE_CANCELLATION_REASON_UNKNOWN` (422) — Choisissez une raison d'annulation dans la liste.
          *     - `NEGOTIATION_ACCESS_REQUEST_PENDING` (409) — Vous avez déjà une demande en attente. Vous recevrez un courriel dès qu'elle sera tranchée.
          *     - `NEGOTIATION_ACCESS_REQUEST_DECIDED` (409) — Cette demande a déjà été tranchée : elle ne peut plus l'être une seconde fois.
          *     - `NEGOTIATION_INVITATION_CODE_DUPLICATE` (409) — Ce code existe déjà. Les codes se comparent sans tenir compte de la casse ni des tirets.
@@ -7104,7 +7232,7 @@ export interface components {
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "PLATFORM_MAINTENANCE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_MEMBERSHIP_NOT_ACTIVE" | "ORG_PENDING_VALIDATION" | "ORG_MANAGER_APPOINTED_BY_TEAM" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "JOINT_SESSION_HAS_REGISTRATIONS" | "JOINT_SESSION_INVALID" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_TOTAL_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "ENGAGEMENT_MAILING_NOT_DRAFT" | "ENGAGEMENT_MAILING_EMPTY" | "ENGAGEMENT_MAILING_IN_PROGRESS" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "LIVE_ZOOM_UNAVAILABLE" | "LIVE_MEETING_NOT_OPEN" | "LIVE_MEETING_NOT_READY" | "LIVE_MEETING_REGISTRATION_REQUIRED" | "LIVE_MEETING_EXTERNAL_ID_TAKEN" | "LIVE_MEETING_CANCELLED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN" | "NEGOTIATION_REPORT_FORBIDDEN" | "NEGOTIATION_REPORT_DUPLICATE" | "NEGOTIATION_REPORT_INVALID" | "NEGOTIATION_REPORT_UNKNOWN" | "NEGOTIATION_REPORT_ALREADY_DECIDED" | "NEGOTIATION_REPORT_UNDO_EXPIRED" | "NEGOTIATION_MEETING_UNKNOWN" | "NEGOTIATION_MEETING_FORBIDDEN" | "NEGOTIATION_MEETING_FULL" | "NEGOTIATION_MEETING_CLOSED" | "NEGOTIATION_MEETING_UNAVAILABLE" | "NEGOTIATION_MEETING_INVALID";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "PLATFORM_MAINTENANCE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_MEMBERSHIP_NOT_ACTIVE" | "ORG_PENDING_VALIDATION" | "ORG_MANAGER_APPOINTED_BY_TEAM" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "JOINT_SESSION_HAS_REGISTRATIONS" | "JOINT_SESSION_INVALID" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_TOTAL_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "ENGAGEMENT_MAILING_NOT_DRAFT" | "ENGAGEMENT_MAILING_EMPTY" | "ENGAGEMENT_MAILING_IN_PROGRESS" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "LIVE_ZOOM_UNAVAILABLE" | "LIVE_MEETING_NOT_OPEN" | "LIVE_MEETING_NOT_READY" | "LIVE_MEETING_REGISTRATION_REQUIRED" | "LIVE_MEETING_EXTERNAL_ID_TAKEN" | "LIVE_MEETING_CANCELLED" | "REGIE_LIVE_ALREADY_RUNNING" | "REGIE_SESSION_STATE_CHANGED" | "REGIE_RESUME_EXPIRED" | "REGIE_ACTION_ALREADY_UNDONE" | "REGIE_CANCELLATION_REASON_UNKNOWN" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN" | "NEGOTIATION_REPORT_FORBIDDEN" | "NEGOTIATION_REPORT_DUPLICATE" | "NEGOTIATION_REPORT_INVALID" | "NEGOTIATION_REPORT_UNKNOWN" | "NEGOTIATION_REPORT_ALREADY_DECIDED" | "NEGOTIATION_REPORT_UNDO_EXPIRED" | "NEGOTIATION_MEETING_UNKNOWN" | "NEGOTIATION_MEETING_FORBIDDEN" | "NEGOTIATION_MEETING_FULL" | "NEGOTIATION_MEETING_CLOSED" | "NEGOTIATION_MEETING_UNAVAILABLE" | "NEGOTIATION_MEETING_INVALID";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -15938,6 +16066,325 @@ export interface operations {
             };
         };
     };
+    regie_ecran: {
+        parameters: {
+            query: {
+                /** @description Édition */
+                event_id: string;
+                /** @description Jour, AAAA-MM-JJ */
+                day?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RegieScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission de planifier absente sur l'édition, ou périmètre vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante ou hors périmètre, indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_defaire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Geste du journal */
+                actionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description RegieGesture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Geste inexistant ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà défait, séance changée, reprise expirée, autre direct en cours */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_annuler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description RegieGesture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description La séance n'est plus annulable (déjà annulée, terminée, non publiée) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Raison inconnue, note trop longue */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_terminer_le_direct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RegieGesture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description La séance n'est pas en direct */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_demarrer_le_direct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RegieGesture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Un autre direct tourne, ou la séance n'est pas programmée */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_confirmer_la_presence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RegieGesture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description La séance a changé entre-temps */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     engagement_regles_de_rappel: {
         parameters: {
             query: {
@@ -16339,6 +16786,74 @@ export interface operations {
             };
             /** @description Numéro de réunion mal formé */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description LIVE_ZOOM_UNAVAILABLE */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_seance_reunion_lien_animateur: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MeetingHostLink */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre vide ou permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inconnue ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description LIVE_MEETING_NOT_READY */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

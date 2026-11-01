@@ -1,0 +1,73 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, event_id, status::text AS \"status!\", (published_at IS NOT NULL) AS \"is_published!\",\n                  live_ended_at, now() AS \"now!\"\n             FROM programme.sessions WHERE id = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_published!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "live_ended_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "live_ended_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "now!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "a24c7ba7066fc80eaab37c616934b88b7415ccefea6b56944372b5b273ceb6c5"
+}

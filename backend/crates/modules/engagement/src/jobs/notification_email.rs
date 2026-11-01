@@ -34,6 +34,16 @@ struct Charge {
 /// Un travail par destinataire, clé `(événement, personne)` : le rejeu d'un
 /// événement ne double aucun courriel.
 pub async fn poser(conn: &mut PgConnection, event_id: Uuid, n: &Notification) -> Result<()> {
+    poser_avec_cle(conn, &format!("avis:{event_id}"), n).await
+}
+
+/// Clé `{prefixe}:{personne}` : la régie lit ces travaux pour savoir qui a
+/// reçu le courriel d'annulation (`contracts::programme::regie_email_prefix`).
+pub async fn poser_avec_cle(
+    conn: &mut PgConnection,
+    prefixe: &str,
+    n: &Notification,
+) -> Result<()> {
     for &person_id in &n.recipients {
         let charge = serde_json::to_value(Charge {
             person_id,
@@ -49,7 +59,7 @@ pub async fn poser(conn: &mut PgConnection, event_id: Uuid, n: &Notification) ->
                 queue: crate::jobs::send_reminder::QUEUE,
                 ..NewJob::new(NOTIFICATION_EMAIL, charge)
             }
-            .idempotent(format!("avis:{event_id}:{person_id}")),
+            .idempotent(format!("{prefixe}:{person_id}")),
         )
         .await?;
     }

@@ -1,0 +1,33 @@
+{
+  "cancel": {
+    "title": "Cancel the {time} activity",
+    "lead": "{title}, {orgs}.",
+    "reason": "Reason",
+    "note": "Note for the team",
+    "noteHint": "Not published: it stays in the control room log.",
+    "publish": "Publish an incident notice: “The {time} activity is cancelled.”",
+    "message": "The {time} activity is cancelled.",
+    "notify": "Email the registrants in 5 minutes | Email the registrant in 5 minutes | Email the {count} registrants in 5 minutes",
+    "notifyHint": "Until then, you can still go back without anyone receiving anything.",
+    "keep": "Keep the activity",
+    "confirm": "Cancel the activity"
+  },
+  "end": {
+    "title": "End {name}'s live stream?",
+    "titleBare": "End the live stream?",
+    "remaining": "The slot is over. | 1 minute left in the slot. | {count} minutes left in the slot.",
+    "withPresent": "{left} No one is connected. | {left} The connected person will see “Live stream ended”. | {left} The {count} connected people will see “Live stream ended”.",
+    "resume": "A mistake? For 15 minutes, “Resume the live stream” restarts the same Zoom meeting, with the same link: viewers come back without changing anything.",
+    "keep": "Keep the live stream going",
+    "confirm": "End the live stream"
+  },
+  "restore": {
+    "title": "Restore the {time} activity?",
+    "lead": "{title}. It returns to the programme, in its slot, with its registrants.",
+    "unpublish": "Remove the notice “{message}”",
+    "notify": "Write to the registrants who received the cancellation: “The activity is going ahead after all.” | Write to the registrant who received the cancellation: “The activity is going ahead after all.” | Write to the {count} registrants who received the cancellation: “The activity is going ahead after all.”",
+    "nothingElse": "No notice to remove, no registrant to notify.",
+    "keep": "Leave it cancelled",
+    "confirm": "Restore the activity"
+  }
+}

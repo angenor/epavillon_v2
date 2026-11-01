@@ -75,6 +75,12 @@ pub struct MeetingSyncInput {
     pub external_id: Option<String>,
 }
 
+/// Le lien d'animateur Zoom de la régie du jour (02/11), lu à la demande.
+#[derive(Debug, Serialize)]
+pub struct MeetingHostLink {
+    pub url: String,
+}
+
 #[derive(Debug, Serialize)]
 pub struct AdminSessionMeeting {
     pub id: Uuid,
