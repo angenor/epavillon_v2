@@ -3,46 +3,23 @@ import type { EditionStatsRow, PublicEditionRow, PublicScheduleRow } from '~/typ
 import type { EventId, IsoDateTime } from '~/types/shared'
 
 /**
- * LE PANNEAU « À VENIR » — la colonne gauche du bandeau.
+ * LE PANNEAU « À VENIR AU PAVILLON », à droite de la vitrine (maquette du 01/11).
  *
- * ── CE N'EST PAS UN TIROIR, ET CE N'EST PAS NÉGOCIABLE ──────────────────────
+ * Automatique (arbitrage du 24/08) : rien ne s'y compose au back-office. Il
+ * montre trois lignes au plus : les prochaines activités retenues, complétées
+ * par les prochaines éditions dont le programme n'y figure pas encore
+ * (arbitrage du 03/10) ; puis les chiffres clés de l'édition et le lien vers la
+ * programmation. Au-delà de trois lignes, le panneau dépassait l'écran et
+ * poussait les vignettes sous le pli. Rien n'est re-filtré : l'API sert
+ * des séances déjà réduites aux premières à venir ou en cours.
  *
- * Sur grand écran, une colonne de 340 px posée dans le bandeau, avec son propre
- * défilement. En dessous de `lg`, il sort du bandeau et devient une section à
- * part entière, juste en dessous — jamais un bouton « Voir plus ». C'est
- * l'information la PLUS utile de la page : ce qui commence bientôt. La cacher
- * derrière une interaction serait un contresens.
- *
- * ── DEUX BLOCS, ET RIEN QUI SE COMPOSE À LA MAIN ────────────────────────────
- *
- *   1. LES ÉVÉNEMENTS À VENIR — le prochain rendez-vous en carte pleine, les
- *      suivants en lignes. Dès qu'une édition à venir existe, elle est là —
- *      sauf si son programme est publié et visible dans la frise, qui la nomme
- *      déjà (arbitrage du commanditaire du 03/10).
- *   2. LA FRISE DES ACTIVITÉS RETENUES — jour par jour, la programmation qui
- *      vient. Dès qu'une activité est retenue et publiée, elle est là.
- *
- * CE PANNEAU EST AUTOMATIQUE, arbitrage du commanditaire du 24/08. Il portait
- * jusque-là les épingles éditoriales de la vitrine (`home_aside`), et sur une
- * plateforme dont la base ne portait encore ni édition ni séance, elles étaient
- * seules à s'afficher : un panneau qui promet un calendrier ne montrait que des
- * annonces. Rien ne s'y compose plus depuis le back-office — la vitrine reste
- * ce qu'elle est, mais pour le BANDEAU, pas pour cette colonne.
- *
- * ── RIEN N'EST RE-FILTRÉ ────────────────────────────────────────────────────
- *
- * `api.home.screen()` sert des séances déjà réduites aux premières à venir ou
- * en cours, annulations exclues. Le seul choix fait ici est celui des trois
- * prochaines éditions dont la frise ne montre pas déjà le programme.
- *
- * ── LE DIRECT SE DÉCLARE, IL NE SE DEVINE PAS ───────────────────────────────
- *
- * Règle métier n° 4 : un seul direct à la fois, tous événements confondus.
- * `useLiveSession()` porte cette unicité pour toute l'application ; sans
- * déclaration, aucune carte ne montre le repère. L'accueil déclare donc la
- * séance qu'il connaît, et une seule — la première de sa liste dont le statut
- * est `live`.
+ * Sur la photographie, du verre ; sans photographie (téléphone, vitrine vide),
+ * l'aplat institutionnel : le verre ne se pose que sur un média. Le texte est
+ * clair dans les deux cas.
  */
+
+/** La maquette en montre trois ; la suite est dans la programmation. */
+const SHOWN_SESSIONS = 3
 
 interface Props {
   /** Les prochaines séances, déjà choisies par l'API. */
@@ -51,126 +28,155 @@ interface Props {
   editions: PublicEditionRow[]
   /** `programme.v_edition_stats`, indexée par édition. Absent vaut zéro. */
   stats: Record<EventId, EditionStatsRow>
-  /** Instant de composition de la réponse — l'horloge qui fait autorité. */
+  /** L'édition du pavillon (`HomeScreen.currentEdition`) : ses chiffres à défaut d'une édition commune. */
+  edition: PublicEditionRow | null
+  /** Instant de composition de la réponse : l'horloge qui fait autorité. */
   now: IsoDateTime
+  /** Le panneau flotte sur la photographie de la vitrine (grand écran seulement). */
+  onMedia?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { onMedia: false })
 
 const { t } = useI18n()
+const { tr } = useI18nText()
+const { zoneLabel } = useDateTime()
 const localePath = useLocalePath()
-const { declareFrom } = useLiveSession()
 
-const nextThree = computed(() =>
+const shown = computed(() => props.sessions.slice(0, SHOWN_SESSIONS))
+
+const upcomingEditions = computed(() =>
   nextEditions(
     props.editions.filter(
       (edition) =>
         !edition.programme_published_at || !nextSessionOfEdition(props.sessions, edition.id),
     ),
-    3,
+    SHOWN_SESSIONS - shown.value.length,
   ),
 )
 
-/** La séance en direct, déclarée UNE fois pour toute l'application. */
-watch(() => props.sessions, declareFrom, { immediate: true })
+/** L'édition commune aux séances montrées : elle nomme le panneau, et les lignes n'ont pas à la répéter. */
+const singleEdition = computed(() => {
+  const eventId = commonEditionId(shown.value)
+  if (!eventId) return null
+  return props.editions.find((edition) => edition.id === eventId) ?? null
+})
 
-const isEmpty = computed(() => props.sessions.length === 0 && nextThree.value.length === 0)
+/** « CdP31, Antalya, heure d'Antalya » */
+const subtitle = computed(() => {
+  const edition = singleEdition.value
+  if (!edition) return ''
+  return [
+    edition.edition_label ?? edition.acronym ?? tr(edition.title),
+    edition.city,
+    zoneLabel(edition.timezone, edition.city ?? undefined),
+  ]
+    .filter(Boolean)
+    .join(', ')
+})
+
+const statsEdition = computed(() => singleEdition.value ?? props.edition)
+
+/** Zéro ne s'affiche pas : une édition sans programme n'a pas à annoncer « 0 activité ». */
+const figures = computed(() => {
+  const edition = statsEdition.value
+  const row = edition ? props.stats[edition.id] : undefined
+  if (!row) return []
+  return [
+    { key: 'sessions', value: row.published_session_count },
+    { key: 'organizations', value: row.organization_count },
+    { key: 'countries', value: row.country_count },
+  ].filter((figure) => figure.value > 0)
+})
+
+const programmeTo = computed(() => {
+  const edition = statsEdition.value
+  return edition ? localePath(`/programmations?edition=${edition.slug}`) : localePath('/programmations')
+})
+
+const isEmpty = computed(() => shown.value.length === 0 && upcomingEditions.value.length === 0)
 </script>
 
 <template>
-  <!-- LE PANNEAU EST UNE SURFACE DE VERRE, comme sur la plateforme de référence
-       (arbitrage du 19/08).
-
-       DEUX FONDS POUR UNE SEULE MATIÈRE. À partir de `lg`, il flotte sur la
-       photographie du bandeau : le verre suffit, il laisse voir l'image
-       derrière. En dessous, il sort du bandeau et n'a plus rien sous lui — d'où
-       l'aplat institutionnel, qui donne au verre de quoi se poser. Le TEXTE, lui,
-       ne change pas : `--color-text-on-inverse` dans les deux cas, parce que le
-       fond est sombre dans les deux cas. Faire basculer les cartes d'une
-       matière à l'autre selon la largeur aurait donné deux dessins à tenir. -->
   <aside
-    class="relative flex h-full flex-col bg-surface-inverse text-text-on-inverse lg:bg-glass lg:backdrop-blur-glass"
-    :aria-label="t('home.aside.title')"
+    class="flex flex-col rounded-xl border p-5 text-text-on-inverse sm:p-6"
+    :class="
+      props.onMedia
+        ? 'border-border-on-inverse bg-surface-inverse-raised lg:border-glass-border lg:bg-glass lg:shadow-glass lg:backdrop-blur-glass-strong'
+        : 'border-border-on-inverse bg-surface-inverse-raised'
+    "
+    aria-labelledby="a-venir-titre"
   >
-    <div class="border-b border-glass-border px-4 py-4 sm:px-6 lg:px-5">
-      <div class="mx-auto w-full max-w-[1280px] lg:mx-0">
-        <!-- LA COULEUR EST EXPLICITE, et il le faut : `main.css` peint tous les
-             `h1..h6` en `--color-heading` par une règle d'ÉLÉMENT, laquelle ne
-             connaît pas le fond sur lequel le titre se pose. Sur ce panneau
-             sombre, le bleu nuit institutionnel devenait invisible. -->
-        <h2 class="font-display text-xl text-text-on-inverse" :data-bird-say="t('home.bird.aside')">
-          {{ t('home.aside.title') }}
-        </h2>
-      </div>
-    </div>
-
-    <!-- LE DÉFILEMENT EST INTERNE, ET SEULEMENT SUR GRAND ÉCRAN : `min-h-0` est
-         indispensable dans une colonne flex, sans quoi le contenu pousse le
-         panneau au lieu de défiler dedans. En dessous de `lg`, la section suit
-         le flux de la page — un panneau qui défilerait dans un téléphone
-         emprisonnerait le geste. -->
-    <div class="min-h-0 flex-1 px-4 py-4 sm:px-6 lg:overflow-y-auto lg:px-5" :class="props.sessions.length ? 'lg:pb-28' : ''">
-      <div class="mx-auto flex w-full max-w-[1280px] flex-col gap-6 lg:mx-0">
-        <UiEmptyState
-          v-if="isEmpty"
-          compact
-          icon="calendar"
-          :title="t('home.aside.empty.title')"
-          :description="t('home.aside.empty.description')"
-        />
-
-        <!-- 1. LES ÉVÉNEMENTS À VENIR -->
-        <section v-if="nextThree.length">
-          <div class="flex items-baseline justify-between gap-2">
-            <h3
-              class="text-xs font-bold uppercase text-text-on-inverse-muted"
-              :style="{ letterSpacing: 'var(--tracking-caps)' }"
-            >
-              {{ t('home.aside.editions.title') }}
-            </h3>
-            <NuxtLink
-              :to="{ path: localePath('/'), query: { periode: 'a-venir' }, hash: '#editions' }"
-              class="text-xs text-text-on-inverse no-underline hover:underline"
-            >
-              {{ t('home.aside.editions.all') }}
-            </NuxtLink>
-          </div>
-          <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-            <HomeAsideEdition
-              v-for="(edition, index) in nextThree"
-              :key="edition.id"
-              :edition="edition"
-              :featured="index === 0"
-              :session-count="publishedSessionCount(props.stats, edition.id)"
-              :next-session="nextSessionOfEdition(props.sessions, edition.id)"
-              :now="props.now"
-              :class="index === 0 ? 'sm:col-span-2 lg:col-span-1' : ''"
-            />
-          </div>
-        </section>
-
-        <!-- 2. LA FRISE DES ACTIVITÉS RETENUES -->
-        <HomeAsideTimeline :sessions="props.sessions" :editions="props.editions" :now="props.now" />
-      </div>
-    </div>
-
-    <!-- Le bas du panneau (05/10) : le fondu du média (`.scrim-fade-bottom`) dit que la
-         liste continue dessous, et le bouton mène au programme complet. Sous `lg`, le
-         panneau ne défile pas : le bouton suit la liste, sans fondu. -->
-    <div
-      v-if="props.sessions.length"
-      class="relative px-4 pb-5 sm:px-6 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-5 lg:pt-16"
+    <!-- La couleur est explicite : `main.css` peint les titres en `--color-heading`, invisible ici. -->
+    <h2
+      id="a-venir-titre"
+      class="heading-condensed text-[1.6rem] text-text-on-inverse"
+      :data-bird-say="t('home.bird.aside')"
     >
-      <span class="pointer-events-none absolute inset-0 hidden scrim-fade-bottom lg:block" aria-hidden="true" />
-      <UiButton
-        variant="primary"
-        icon-trailing="arrow-right"
-        block
-        :to="localePath('/programmations')"
-        class="relative lg:pointer-events-auto"
-      >
-        {{ t('home.aside.programme.cta') }}
-      </UiButton>
-    </div>
+      {{ t('home.aside.title') }}
+    </h2>
+    <p v-if="subtitle" class="mt-0.5 text-sm text-text-on-inverse-muted">{{ subtitle }}</p>
+
+    <UiEmptyState
+      v-if="isEmpty"
+      class="mt-4"
+      compact
+      icon="calendar"
+      :title="t('home.aside.empty.title')"
+      :description="t('home.aside.empty.description')"
+    />
+
+    <HomeAsideTimeline
+      v-if="shown.length"
+      class="mt-3"
+      :sessions="shown"
+      :editions="props.editions"
+      :single-edition="singleEdition"
+    />
+
+    <section
+      v-if="upcomingEditions.length"
+      class="mt-3 border-t pt-3"
+      :class="props.onMedia ? 'border-border-on-inverse lg:border-glass-border' : 'border-border-on-inverse'"
+    >
+      <h3 class="font-condensed text-base font-semibold tracking-[0.05em] text-text-on-inverse-muted uppercase">
+        {{ t('home.aside.editions.title') }}
+      </h3>
+      <ul class="mt-1">
+        <li v-for="edition in upcomingEditions" :key="edition.id">
+          <HomeAsideEdition
+            :edition="edition"
+            :next-session="nextSessionOfEdition(props.sessions, edition.id)"
+            :now="props.now"
+          />
+        </li>
+      </ul>
+    </section>
+
+    <dl
+      v-if="figures.length"
+      class="mt-3 flex flex-wrap gap-x-6 gap-y-2 border-t pt-3.5"
+      :class="props.onMedia ? 'border-border-on-inverse lg:border-glass-border' : 'border-border-on-inverse'"
+    >
+      <div v-for="figure in figures" :key="figure.key" class="flex flex-col-reverse">
+        <dt class="text-xs font-semibold tracking-[0.06em] text-text-on-inverse-muted uppercase">
+          {{ t(`home.aside.figures.${figure.key}`, figure.value) }}
+        </dt>
+        <dd class="font-condensed text-[1.8rem] leading-none font-bold text-text-on-inverse tabular-nums">
+          {{ figure.value }}
+        </dd>
+      </div>
+    </dl>
+
+    <UiButton
+      v-if="props.sessions.length || figures.length"
+      variant="on-inverse"
+      block
+      class="mt-4"
+      :to="programmeTo"
+      :data-bird-say="t('home.bird.programme')"
+    >
+      {{ t('home.aside.programme.cta') }}
+    </UiButton>
   </aside>
 </template>

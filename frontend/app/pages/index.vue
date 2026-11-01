@@ -2,7 +2,7 @@
 import type { EditionPeriod } from '~/types/home'
 
 /**
- * ACCUEIL PUBLIC — `/`.
+ * ACCUEIL PUBLIC, `/`.
  *
  * ── LA REDIRECTION DU 17/08 EST RÉVOQUÉE ────────────────────────────────────
  *
@@ -11,19 +11,19 @@ import type { EditionPeriod } from '~/types/home'
  * presque identiques divergent en six mois.
  *
  * Ce qui l'a périmé, c'est que la plateforme porte désormais PLUSIEURS éditions
- * vivantes en même temps — une COP, un cycle de webinaires, une édition
- * régionale — plus une vitrine éditoriale administrable (`content.highlights`)
+ * vivantes en même temps, une COP, un cycle de webinaires, une édition
+ * régionale, plus une vitrine éditoriale administrable (`content.highlights`)
  * qui n'appartient à aucune d'elles. Rediriger vers une seule édition, c'était
  * choisir pour le visiteur et rendre les autres invisibles.
  *
  * DEUX CHOSES SURVIVENT À LA RÉVOCATION, et ce sont les deux qu'il aurait été
  * facile de perdre :
  *   · l'ancre `#appel-a-propositions`, câblée dans le pied de page de CHAQUE
- *     écran (`layouts/public.vue`) — voir `HomeCallSection`, qui la rend même
+ *     écran (`layouts/public.vue`), voir `HomeCallSection`, qui la rend même
  *     lorsqu'aucun appel n'est ouvert ;
  *   · le choix de l'édition en cours PAR LES DONNÉES. Il n'est plus fait ici :
  *     `api.home.screen()` rend `currentEdition` déjà choisie, selon la même
- *     règle qu'appliquait cette page — première édition à pavillon non terminée,
+ *     règle qu'appliquait cette page, première édition à pavillon non terminée,
  *     à défaut la plus récente.
  *
  * `/evenements/<slug>` reste l'adresse canonique d'une édition ; l'accueil y
@@ -81,7 +81,7 @@ useRealtime(
 /**
  * L'ÉTAT DU FILTRE VIT DANS L'URL, en français comme partout ailleurs
  * (`?periode=a-venir`). Il se partage, il survit au retour arrière, et il est
- * rendu par le serveur — un onglet choisi dans une `ref` ne fait rien de tout
+ * rendu par le serveur, un onglet choisi dans une `ref` ne fait rien de tout
  * cela.
  */
 const period = computed<EditionPeriod>(() => periodFromQuery(route.query.periode))
@@ -96,10 +96,24 @@ function setPeriod(next: EditionPeriod): void {
 
 /**
  * L'accueil est public : un refus de périmètre n'y a rien à faire. On le traite
- * quand même — c'est le quatrième état exigé de tout écran, et une API mal
+ * quand même, c'est le quatrième état exigé de tout écran, et une API mal
  * configurée qui répondrait 403 doit le DIRE plutôt que se taire.
  */
 const isForbidden = computed(() => isForbiddenError(error.value))
+
+/**
+ * Le direct (règle n° 4 : un seul à la fois) se déclare ICI, avant le rendu :
+ * le bloc « En ce moment au pavillon » et le panneau « À venir » lisent la même
+ * déclaration, sans route de plus (les prochaines séances incluent celle en cours).
+ */
+const { isLive, declareFrom } = useLiveSession()
+watch(() => data.value?.upcomingSessions ?? [], declareFrom, { immediate: true })
+
+const liveSession = computed(() => data.value?.upcomingSessions.find((session) => isLive(session.id)) ?? null)
+const liveEdition = computed(() => {
+  const session = liveSession.value
+  return session ? (data.value?.editions.find((edition) => edition.id === session.event_id) ?? null) : null
+})
 
 // L'oiseau du commanditaire (`docs/bird-cursor/`), sur l'accueil seulement.
 // 25 : au-dessus du contenu de l'accueil (20 au plus), sous la barre de navigation (`z-30`).
@@ -122,7 +136,9 @@ useHead(() => ({
 </script>
 
 <template>
-  <div class="flex flex-col gap-16">
+  <!-- Direction condensée (01/11) : Inter pour le texte, Barlow Condensed pour
+       titres, heures et boutons, bornée à cette racine. -->
+  <div data-direction="condensee" class="flex flex-col gap-16 lg:gap-20">
     <!--
       LE TITRE DE LA PAGE EST INVISIBLE, ET C'EST UN CHOIX.
 
@@ -164,10 +180,22 @@ useHead(() => ({
             :sessions="data.upcomingSessions"
             :editions="data.editions"
             :stats="data.stats"
+            :edition="data.currentEdition"
             :now="data.generated_at"
+            :on-media="data.hero.length > 0"
           />
         </template>
       </HomeShowcase>
+
+      <EventProgrammeLiveLead
+        v-if="liveSession && liveEdition"
+        class="-mt-8 lg:-mt-12"
+        :session="liveSession"
+        :edition-slug="liveEdition.slug"
+        :timezone="liveSession.timezone"
+      />
+
+      <HomeHighlights v-if="data.currentEdition" :edition="data.currentEdition" :now="data.generated_at" />
 
       <HomeCallSection :edition="data.currentEdition" />
 
