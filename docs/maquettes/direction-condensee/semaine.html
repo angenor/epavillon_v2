@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendrier CdP31 : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="programme.css">
+<style>
+  .wk-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 28px 0 20px; }
+  .wk-bar h2 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); }
+  .wk-bar h2 span { font-weight: 500; color: var(--color-text-secondary); }
+  .wk-bar p { margin: 2px 0 0; font-size: 0.88rem; color: var(--color-text-muted); }
+  .wk-nav { display: flex; gap: 8px; }
+
+  /* Une colonne par jour, du lundi au samedi. */
+  .week { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; align-items: start; padding-bottom: 80px; }
+  .wk-day { display: flex; flex-direction: column; min-width: 0; border-radius: var(--radius-lg); }
+  .wk-day.is-special { background: var(--day-tint); border-top-left-radius: 0; }
+  .wk-special { align-self: flex-start; font-size: 1.05rem; padding: 6px 12px 5px; text-decoration: none; }
+  .wk-special:hover { text-decoration: underline; }
+  .wk-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 12px 10px 12px; border-bottom: 2px solid var(--color-text); }
+  .wk-day.is-special .wk-head { border-color: var(--day-solid); }
+  .wk-head b { font-family: var(--font-heading); font-size: 3rem; font-weight: 700; line-height: 0.85; color: var(--ink); }
+  .wk-day.is-special .wk-head b { color: var(--day-ink); }
+  .wk-day.is-past .wk-head b { color: var(--color-text-muted); }
+  .wk-head h2 { font-size: 1.15rem; }
+  .wk-head p { margin: 0; font-size: 0.78rem; color: var(--color-text-muted); }
+  .wk-list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 10px 6px 8px; list-style: none; }
+  .wk-day:not(.is-special) .wk-list { padding-left: 0; padding-right: 0; }
+
+  .wk-card { border-radius: var(--radius); overflow: hidden; background: var(--card); border: 1px solid var(--color-border-subtle); box-shadow: var(--shadow-sm); transition: box-shadow 300ms ease, transform 300ms ease; }
+  .wk-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .wk-media { aspect-ratio: 16 / 9; background: var(--color-surface-sunken); }
+  .wk-media img { width: 100%; height: 100%; object-fit: cover; }
+  .wk-media.initials { display: grid; place-items: center; font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; color: var(--day-ink); background: var(--day-tint); }
+  .wk-day.day-plain .wk-media.initials { background: var(--color-surface-sunken); color: var(--color-text-muted); }
+  .wk-body { padding: 10px 12px 12px; }
+  .wk-time b { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; line-height: 1; color: var(--ink); }
+  .wk-day.is-special .wk-time b { color: var(--day-ink); }
+  .wk-time span { margin-left: 6px; font-size: 0.78rem; color: var(--color-text-muted); }
+  .wk-title { margin: 6px 0 0; font-family: var(--font-heading); font-weight: 600; font-size: 1.08rem; line-height: 1.15; text-transform: none; letter-spacing: 0.005em; }
+  .wk-title a { text-decoration: none; }
+  .wk-title a:hover { color: var(--color-accent); text-decoration: underline; }
+  .wk-card .row-org { margin-top: 8px; font-size: 0.8rem; }
+  .wk-card .row-org .logo { width: 30px; height: 30px; font-size: 0.62rem; }
+  .wk-card .row-org .logo:has(img) { width: 54px; }
+  .wk-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+  .wk-card.is-done, .wk-card.is-postponed { opacity: 0.72; }
+  .wk-card.is-live { border: 2px solid var(--color-live); }
+  .wk-card.is-live .wk-time b { color: var(--color-live); }
+
+  @media (max-width: 1100px) { .week { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* Téléphone : un jour par écran, on glisse d'un jour à l'autre ; la bande de dates suit. */
+  @media (max-width: 960px) {
+    .wk-bar { padding-top: 20px; }
+    .week { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 88%; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 0 16px 48px; scroll-padding: 0 16px; scrollbar-width: none; }
+    .wk-day { scroll-snap-align: start; }
+    .wk-card { display: grid; grid-template-columns: 112px minmax(0, 1fr); }
+    .wk-media { aspect-ratio: auto; min-height: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale">
+      <a href="#" aria-current="page">Programmations</a>
+      <a href="#">Communauté</a>
+      <a href="#">Négociations</a>
+    </nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<section class="hero hero-prog">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop31-32-9.jpg" alt="">
+  <div class="wrap">
+    <span class="tag tag-glass">Programmation, en cours</span>
+    <h1>Programme du Pavillon de la Francophonie à la CdP31</h1>
+    <div class="meta">
+      <span><svg class="icon"><use href="#i-calendar"/></svg>9 au 20 novembre 2026</span>
+      <span><svg class="icon"><use href="#i-pin"/></svg>Zone bleue, Antalya, Turquie</span>
+    </div>
+    <div class="figures">
+      <div><b>48</b>activités</div>
+      <div><b>62</b>organisations</div>
+      <div><b>31</b>pays</div>
+      <small>Mis à jour le 13 novembre à 08:12<br>heure d'Antalya</small>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar">
+  <div class="wrap">
+    <div class="toolbar-in">
+      <h2 class="heading" style="font-size:1.6rem">Le programme</h2>
+      <label class="field">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="search" placeholder="Titre, organisation, sigle" aria-label="Rechercher une activité">
+      </label>
+      <div class="segmented" role="group" aria-label="Affichage">
+        <a href="programmation.html"><button type="button" aria-pressed="false">Liste</button></a>
+        <button type="button" aria-pressed="true">Calendrier</button>
+      </div>
+      <span class="tz">Toutes les heures : heure d'Antalya (UTC+3)</span>
+    </div>
+  </div>
+</div>
+
+<nav class="daystrip" aria-label="Aller au jour">
+  <div class="daystrip-in">
+    <span class="month">Novembre</span>
+      <a class="day-atelier is-past" href="#j8" aria-label="dim. 8 novembre"><small>dim.</small><b>8</b><span class="dots" aria-hidden="true"><i></i></span></a>
+      <a class="is-past" href="#j9" aria-label="lun. 9 novembre"><small>lun.</small><b>9</b><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></a>
+      <a class="is-past" href="#j10" aria-label="mar. 10 novembre"><small>mar.</small><b>10</b><span class="dots" aria-hidden="true"><i></i><i></i></span></a>
+      <a class="is-past" href="#j11" aria-label="mer. 11 novembre"><small>mer.</small><b>11</b><span class="dots" aria-hidden="true"><i></i><i></i></span></a>
+      <a class="is-past" href="#j12" aria-label="jeu. 12 novembre"><small>jeu.</small><b>12</b><span class="dots" aria-hidden="true"><i></i><i></i></span></a>
+      <a class="day-finance" href="#j13" aria-current="date" aria-label="ven. 13 novembre"><small>ven.</small><b>13</b><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span></a>
+      <a class="day-jeunesse" href="#j14" aria-label="sam. 14 novembre"><small>sam.</small><b>14</b><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></a>
+      <a class="" href="#j16" aria-label="lun. 16 novembre"><small>lun.</small><b>16</b><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span></a>
+      <a class="" href="#j17" aria-label="mar. 17 novembre"><small>mar.</small><b>17</b><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></a>
+      <a class="" href="#j18" aria-label="mer. 18 novembre"><small>mer.</small><b>18</b><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></a>
+      <a class="" href="#j19" aria-label="jeu. 19 novembre"><small>jeu.</small><b>19</b><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span></a>
+      <a class="" href="#j20" aria-label="ven. 20 novembre"><small>ven.</small><b>20</b><span class="dots" aria-hidden="true"><i></i><i></i></span></a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="wk-bar">
+    <div>
+      <h2>Semaine du 9 au 14 <span>novembre</span></h2>
+      <p>Semaine 1 sur 2, 16 activités</p>
+    </div>
+    <div class="wk-nav">
+      <button class="btn btn-outline btn-sm" type="button" aria-label="Semaine précédente" disabled style="opacity:.4"><svg class="icon"><use href="#i-left"/></svg></button>
+      <button class="btn btn-outline btn-sm" type="button">Semaine suivante<svg class="icon"><use href="#i-right"/></svg></button>
+    </div>
+  </div>
+
+  <div class="week">
+      <section class="wk-day day-plain is-past" id="j9" aria-label="Lundi 9 novembre">
+        <header class="wk-head"><b>9</b><div><h2>Lundi</h2><p>3 activités</p></div></header>
+        <ol class="wk-list">
+          <li class="wk-card is-done">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>10:00</b><span>à 11:00</span></div>
+              <h3 class="wk-title"><a href="activite.html">Ouverture du Pavillon de la Francophonie</a></h3>
+              <p class="row-org"><span class="logo"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span><span><b>OIF</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-done">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/article-six.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>14:00</b><span>à 15:00</span></div>
+              <h3 class="wk-title"><a href="activite.html">Article 6 : ce que les marchés carbone changent pour l'Afrique</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">ENDA</span><span><b>ENDA</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-done">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>16:30</b><span>à 17:30</span></div>
+              <h3 class="wk-title"><a href="activite.html">Pastoralisme et résilience au Sahel</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+        </ol>
+      </section>
+      <section class="wk-day day-plain is-past" id="j10" aria-label="Mardi 10 novembre">
+        <header class="wk-head"><b>10</b><div><h2>Mardi</h2><p>2 activités</p></div></header>
+        <ol class="wk-list">
+          <li class="wk-card is-done">
+            <div class="wk-media initials">AIMF</div>
+            <div class="wk-body">
+              <div class="wk-time"><b>09:30</b><span>à 10:30</span></div>
+              <h3 class="wk-title"><a href="activite.html">Adaptation côtière : les villes du golfe de Guinée</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">AIMF</span><span><b>AIMF</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-done">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/cycle-paco-16-9.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>11:00</b><span>à 12:30</span></div>
+              <h3 class="wk-title"><a href="activite.html">Cycle PACO : bilan des négociations intersessions</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">IFDD</span><span><b>IFDD</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+        </ol>
+      </section>
+      <section class="wk-day day-plain is-past" id="j11" aria-label="Mercredi 11 novembre">
+        <header class="wk-head"><b>11</b><div><h2>Mercredi</h2><p>2 activités</p></div></header>
+        <ol class="wk-list">
+          <li class="wk-card is-done">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>10:00</b><span>à 11:00</span></div>
+              <h3 class="wk-title"><a href="activite.html">Mangroves : restaurer et compter le carbone bleu</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">UICN</span><span><b>UICN</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-postponed">
+            <div class="wk-media initials">CEEAC</div>
+            <div class="wk-body">
+              <div class="wk-time"><b>15:00</b><span>à 16:00</span></div>
+              <h3 class="wk-title"><a href="activite.html">Femmes et transition énergétique en Afrique centrale</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">CEEAC</span><span><b>CEEAC</b></span></p>
+              <div class="wk-foot"><span class="tag tag-postponed">Reportée</span></div>
+            </div>
+          </li>
+        </ol>
+      </section>
+      <section class="wk-day day-plain is-past" id="j12" aria-label="Jeudi 12 novembre">
+        <header class="wk-head"><b>12</b><div><h2>Jeudi</h2><p>2 activités</p></div></header>
+        <ol class="wk-list">
+          <li class="wk-card is-done">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>10:00</b><span>à 11:00</span></div>
+              <h3 class="wk-title"><a href="activite.html">Restaurer les mangroves du golfe de Guinée : retours de cinq pays</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">UICN</span><span><b>UICN</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-done">
+            <div class="wk-media initials">AIMF</div>
+            <div class="wk-body">
+              <div class="wk-time"><b>14:30</b><span>à 15:30</span></div>
+              <h3 class="wk-title"><a href="activite.html">Villes francophones et adaptation : financer les plans locaux</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">AIMF</span><span><b>AIMF</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+        </ol>
+      </section>
+      <section class="wk-day day-finance is-special" id="j13" aria-label="Vendredi 13 novembre">
+        <a class="rule-label wk-special" href="journee.html"><svg class="icon"><use href="#i-coins"/></svg>Finance durable</a>
+        <header class="wk-head"><b>13</b><div><h2>Vendredi</h2><p>4 activités</p></div><span class="tag tag-now">Aujourd'hui</span></header>
+        <ol class="wk-list">
+          <li class="wk-card is-done">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/finance-climatique.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>09:15</b><span>à 10:00</span></div>
+              <h3 class="wk-title"><a href="activite.html">Panel de partenaires et d'experts : solutions et synergies</a></h3>
+              <p class="row-org"><span class="logo"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span><span><b>OIF</b></span></p>
+              <div class="wk-foot"><span class="tag tag-done">Terminée</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-live">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>10:15</b><span>à 11:15</span></div>
+              <h3 class="wk-title"><a href="activite.html">Du financement climatique à l'action régionale : les solutions du P2RS</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">CILSS</span><span><b>CILSS</b></span></p>
+              <div class="wk-foot"><span class="tag tag-live">En direct</span><a class="btn btn-live btn-sm" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre</a></div>
+            </div>
+          </li>
+          <li class="wk-card is-soon">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>11:30</b><span>à 12:30</span></div>
+              <h3 class="wk-title"><a href="activite.html">Enjeux de financements pour les régions et les municipalités</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">AIRF</span><span><b>AIRF</b></span></p>
+              <div class="wk-foot"><span class="tag tag-soon">À venir</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-soon">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>14:15</b><span>à 15:15</span></div>
+              <h3 class="wk-title"><a href="activite.html">Du récif à la résilience : financer la protection des côtes</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">BM</span><span><b>BM</b></span></p>
+              <div class="wk-foot"><span class="tag tag-soon">À venir</span></div>
+            </div>
+          </li>
+        </ol>
+      </section>
+      <section class="wk-day day-jeunesse is-special" id="j14" aria-label="Samedi 14 novembre">
+        <a class="rule-label wk-special" href="journee.html"><svg class="icon"><use href="#i-sprout"/></svg>Action jeunesse</a>
+        <header class="wk-head"><b>14</b><div><h2>Samedi</h2><p>3 activités</p></div></header>
+        <ol class="wk-list">
+          <li class="wk-card is-soon">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>09:20</b><span>à 10:10</span></div>
+              <h3 class="wk-title"><a href="activite.html">Les 10 minutes qui inspirent : pitchs des organisations de jeunes</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">GOL</span><span><b>GOL</b></span></p>
+              <div class="wk-foot"><span class="tag tag-soon">À venir</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-soon">
+            <div class="wk-media initials">OIF</div>
+            <div class="wk-body">
+              <div class="wk-time"><b>10:20</b><span>à 11:20</span></div>
+              <h3 class="wk-title"><a href="activite.html">Hackathon francophone sur l'IA appliquée au climat</a></h3>
+              <p class="row-org"><span class="logo"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span><span><b>OIF</b></span></p>
+              <div class="wk-foot"><span class="tag tag-soon">À venir</span></div>
+            </div>
+          </li>
+          <li class="wk-card is-soon">
+            <div class="wk-media"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-16-9.jpg" alt=""></div>
+            <div class="wk-body">
+              <div class="wk-time"><b>14:00</b><span>à 15:30</span></div>
+              <h3 class="wk-title"><a href="activite.html">Jeu de rôle : négocier comme à la CdP</a></h3>
+              <p class="row-org"><span class="logo" aria-hidden="true">JVE</span><span><b>JVE</b></span></p>
+              <div class="wk-foot"><span class="tag tag-soon">À venir</span></div>
+            </div>
+          </li>
+        </ol>
+      </section>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
+</footer>
+
+<script src="icones.js"></script>
+<script>
+  // Comme en production : la bande s'ouvre sur le jour courant ; sur téléphone, le calendrier aussi.
+  const current = document.querySelector('.daystrip a[aria-current]')
+  if (current) current.parentElement.scrollLeft = current.offsetLeft - 80
+  const week = document.querySelector('.week')
+  if (matchMedia('(max-width: 960px)').matches) week.scrollLeft = document.getElementById('j13').offsetLeft - 16
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activité : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Deux états dans la même maquette : à venir (par défaut) et en direct (?etat=direct). */
+  .live-only { display: none !important; }
+  body.is-live .live-only { display: revert !important; }
+  body.is-live .player.live-only { display: flex !important; }
+  body.is-live .soon-only { display: none !important; }
+
+  /* Bandeau de la production : photo de l'édition voilée, étiquettes, grand titre, lieu, date, porteur. */
+  .hero-act { padding: 20px 0 112px; }
+  .hero-act::before { background: linear-gradient(0deg, rgb(29 26 91 / 0.9) 0%, rgb(29 26 91 / 0.55) 60%, rgb(29 26 91 / 0.35) 100%); }
+  .hero-act .crumbs b { color: #fff; }
+  .hero-act .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 16px; }
+  .hero-act .tags a { text-decoration: none; }
+  .hero-act h1 { max-width: 30ch; font-size: clamp(2.2rem, 4.6vw, 3.8rem); font-weight: 600; line-height: 1.02; text-transform: none; letter-spacing: 0.005em; }
+  .hero-act .meta { margin-top: 18px; }
+  .carrier { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+  .carrier i { display: grid; place-items: center; width: 64px; height: 64px; padding: 6px; border-radius: var(--radius); background: #fff; font-style: normal; font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; color: var(--ifdd-bleu-900); }
+  .carrier small { display: block; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgb(255 255 255 / 0.72); }
+  .carrier b { font-size: 1.02rem; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 40px; align-items: start; }
+  .main { grid-column: 1; grid-row: 1; margin-top: -72px; position: relative; z-index: 1; }
+  .aside { grid-column: 2; grid-row: 1; margin-top: -72px; position: sticky; top: 88px; z-index: 1; }
+  @media (max-width: 1000px) {
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    .aside, .main { grid-column: 1; grid-row: auto; }
+    /* Pas de chevauchement sur téléphone : une marge négative raccourcit la ligne de grille et la suite remonte sous le billet. */
+    .hero-act { padding-bottom: 36px; }
+    .layout { padding-top: 24px; }
+    .aside, .main { margin-top: 0; }
+  }
+
+  /* L'image de l'activité ; en direct, le lecteur prend sa place. */
+  .media { aspect-ratio: 16 / 9; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-xl); background: var(--ifdd-bleu-900); }
+  .media img { width: 100%; height: 100%; object-fit: cover; }
+  .player { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; padding: 24px; text-align: center; color: #fff; }
+  .player .cam { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--color-live); font-size: 2rem; }
+  .player .cam .icon { stroke-width: 1.8; }
+  .player h2 { color: #fff; font-size: 1.6rem; }
+  .player p { margin: 0; max-width: 46ch; font-size: 0.92rem; color: rgb(255 255 255 / 0.8); }
+  @media (max-width: 640px) { body.is-live .media { aspect-ratio: auto; } .player { padding: 28px 20px; } }
+
+  /* Le billet, comme sur la journée. */
+  .ticket { display: flex; flex-direction: column; max-height: calc(100dvh - 104px); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-xl); }
+  .ticket-date { flex: none; display: flex; align-items: center; gap: 16px; padding: 16px 24px; background: var(--day-solid); color: var(--day-on); text-decoration: none; }
+  .ticket-date b { font-family: var(--font-heading); font-size: 3.8rem; font-weight: 700; line-height: 0.8; }
+  .ticket-date span { font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; }
+  .ticket-date span small { display: block; font-size: 0.9rem; opacity: 0.85; }
+  .ticket-date .icon { margin-left: auto; font-size: 2rem; stroke-width: 1.6; }
+  .ticket-body { overflow-y: auto; padding: 18px 24px 22px; }
+  .ticket-hours { font-family: var(--font-heading); font-size: 2.4rem; font-weight: 700; line-height: 1; color: var(--ink); }
+  .ticket-hours span { font-size: 1.1rem; font-weight: 600; color: var(--color-text-secondary); }
+  .ticket-body p { margin: 6px 0 0; font-size: 0.88rem; color: var(--color-text-secondary); }
+  .countdown { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--color-border-subtle); }
+  .countdown h3 { grid-column: 1 / -1; margin-bottom: 8px; font-size: 1rem; letter-spacing: 0.05em; color: var(--color-text-secondary); }
+  .countdown div { text-align: center; border-left: 1px solid var(--color-border-subtle); }
+  .countdown div:nth-of-type(1) { border-left: 0; }
+  .countdown b { display: block; font-family: var(--font-heading); font-size: 2.3rem; font-weight: 700; line-height: 1; color: var(--day-ink); }
+  .countdown small { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
+  .ticket-live { margin-top: 16px; padding: 12px; border-radius: var(--radius); background: var(--color-live-surface); border: 1px solid var(--color-live-border); }
+  .ticket-live p { margin: 8px 0 10px; color: var(--color-text); }
+  .ticket-live .btn { width: 100%; }
+  .entry { margin-top: 14px !important; padding: 10px 12px; border-radius: var(--radius); background: var(--color-info-surface); color: var(--color-info) !important; font-weight: 600; }
+  .ticket-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  @media (max-width: 1000px) { .ticket { max-height: none; } }
+
+  .block { margin-top: 52px; }
+  .block > h2 { font-size: clamp(1.8rem, 3.4vw, 2.3rem); margin-bottom: 18px; }
+  .lede { margin: 0; max-width: 68ch; font-size: 1.05rem; line-height: 1.75; }
+  .lede + .lede { margin-top: 14px; }
+
+  .speakers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .speaker { display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); }
+  .speaker i { display: grid; place-items: center; flex: none; width: 56px; height: 56px; border-radius: 50%; background: var(--day-tint); border: 2px solid var(--day-solid); font-style: normal; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; color: var(--day-ink); }
+  .speaker b { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; line-height: 1.1; }
+  .speaker span { display: block; font-size: 0.84rem; color: var(--color-text-secondary); }
+  .speaker small { display: inline-block; margin-top: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--day-ink); }
+  @media (max-width: 640px) { .speakers { grid-template-columns: minmax(0, 1fr); } }
+
+  .partners { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .partner { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); text-decoration: none; }
+  .partner i { display: grid; place-items: center; flex: none; width: 52px; height: 52px; padding: 4px; border-radius: var(--radius); border: 1px solid var(--color-border-subtle); background: #fff; font-style: normal; font-family: var(--font-heading); font-weight: 700; font-size: 0.9rem; color: var(--ifdd-bleu-900); }
+  .partner i img { width: 100%; height: 100%; object-fit: contain; }
+  .partner b { display: block; font-size: 0.92rem; line-height: 1.3; }
+  .partner small { font-size: 0.78rem; color: var(--color-text-muted); }
+  @media (max-width: 640px) { .partners { grid-template-columns: minmax(0, 1fr); } }
+
+  .questions { padding: 22px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); }
+  .questions p { margin: 0; font-size: 0.92rem; color: var(--color-text-secondary); }
+  .questions .btn { margin-top: 14px; }
+
+  .same-day .rule { margin-bottom: 4px; }
+  .same-day .row { grid-template-columns: 96px 160px minmax(0, 1fr) auto; }
+  .same-day .row-time b { color: var(--day-ink); }
+  .same-day .row.is-current { background: var(--day-tint); margin: 0 -14px; padding-left: 14px; padding-right: 14px; border-radius: var(--radius); }
+  .row-org { display: flex; align-items: center; gap: 10px; }
+  .row-org .logo { flex: none; display: grid; place-items: center; width: 36px; height: 36px; padding: 3px; border-radius: var(--radius-sm); background: #fff; border: 1px solid var(--color-border-subtle); font-family: var(--font-heading); font-weight: 700; font-size: 0.7rem; color: var(--ifdd-bleu-900); }
+  .row-org .logo:has(img) { width: 64px; }
+  .row-org .logo img { width: 100%; height: 100%; object-fit: contain; }
+  @media (max-width: 860px) { .same-day .row { grid-template-columns: 76px minmax(0, 1fr); } }
+
+  .state-switch { position: fixed; left: 16px; bottom: 16px; z-index: 50; }
+</style>
+</head>
+<body class="day-finance">
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale">
+      <a href="programmation.html" aria-current="page">Programmations</a>
+      <a href="#">Communauté</a>
+      <a href="#">Négociations</a>
+    </nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<section class="hero hero-act">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop31-32-9.jpg" alt="">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Fil d'Ariane">
+      <a href="programmation.html"><svg class="icon"><use href="#i-back"/></svg><b>Retour au programme</b></a>
+      <span>Programmations / CdP31 / vendredi 13 novembre</span>
+    </nav>
+    <div class="tags">
+      <span class="tag tag-soon soon-only">À venir</span>
+      <span class="tag tag-live live-only">En direct</span>
+      <span class="tag tag-glass"><svg class="icon"><use href="#i-door"/></svg>Sur place</span>
+      <a class="tag tag-day" href="journee.html"><svg class="icon"><use href="#i-coins"/></svg>Journée finance durable</a>
+    </div>
+    <h1>Enjeux de financements pour les régions et les municipalités</h1>
+    <div class="meta">
+      <span><svg class="icon"><use href="#i-pin"/></svg>Pavillon de la Francophonie, salle principale, Antalya</span>
+      <span><svg class="icon"><use href="#i-calendar"/></svg>Vendredi 13 novembre 2026</span>
+    </div>
+    <div class="carrier">
+      <i>AIRF</i>
+      <div><small>Porté par</small><b>Association internationale des régions francophones</b></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap layout" style="padding-bottom:88px">
+  <aside class="aside" aria-label="Infos pratiques">
+    <div class="ticket">
+      <a class="ticket-date" href="journee.html">
+        <b>13</b><span>vendredi<br>novembre 2026<small>Journée finance durable</small></span>
+        <svg class="icon"><use href="#i-coins"/></svg>
+      </a>
+      <div class="ticket-body">
+        <div class="ticket-hours">11:30 à 12:30 <span>1 h</span></div>
+        <p>Heure d'Antalya (UTC+3)</p>
+        <p>Chez vous, à Abidjan (UTC+0) : 08:30 à 09:30</p>
+
+        <div class="countdown soon-only">
+          <h3>Commence dans</h3>
+          <div><b>00</b><small>jours</small></div>
+          <div><b>01</b><small>heure</small></div>
+          <div><b>14</b><small>min</small></div>
+          <div><b>52</b><small>sec</small></div>
+        </div>
+        <p class="entry soon-only">Entrée libre, sans inscription, dans la limite des places.</p>
+
+        <div class="ticket-live live-only">
+          <span class="tag tag-live">En direct depuis 11:30</span>
+          <p>Le direct se suit sur Zoom, en plein écran.</p>
+          <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre le direct</a>
+        </div>
+
+        <div class="ticket-actions">
+          <a class="btn btn-outline btn-sm" href="#"><svg class="icon"><use href="#i-calendar-plus"/></svg>Agenda</a>
+          <a class="btn btn-outline btn-sm" href="#"><svg class="icon"><use href="#i-share"/></svg>Partager</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="media">
+      <img class="soon-only" src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt="">
+      <div class="player live-only">
+        <span class="cam"><svg class="icon"><use href="#i-play"/></svg></span>
+        <h2>Réunion Zoom en cours</h2>
+        <p>Jusqu'à 300 personnes ; au-delà, une liste d'attente vous fait entrer dès qu'une place se libère.</p>
+        <a class="btn btn-live" href="#"><svg class="icon"><use href="#i-play"/></svg>Rejoindre le direct</a>
+      </div>
+    </div>
+
+    <section class="block">
+      <h2>À propos</h2>
+      <p class="lede">Régions et communes francophones portent une part croissante de l'action climatique, mais accèdent rarement aux grands fonds. Élus et techniciens disent ce qui bloque, et ce qui a permis de débloquer.</p>
+      <p class="lede">La Commune de Sakété présente son premier projet financé par le Fonds pour l'adaptation : montage du dossier, partenaires, délais réels.</p>
+    </section>
+
+    <section class="block">
+      <h2>Intervenants</h2>
+      <div class="speakers">
+        <div class="speaker"><i>AD</i><div><b>Aminata Diallo</b><span>Secrétaire générale, AIRF</span><small>Modératrice</small></div></div>
+        <div class="speaker"><i>JH</i><div><b>Jean Houngbo</b><span>Maire de Sakété, Bénin</span><small>Intervenant</small></div></div>
+        <div class="speaker"><i>CL</i><div><b>Claire Lefebvre</b><span>Chargée de programme, Fonds pour l'adaptation</span><small>Intervenante</small></div></div>
+        <div class="speaker"><i>MK</i><div><b>Moussa Koné</b><span>Directeur de la planification, région de Sikasso</span><small>Intervenant</small></div></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Organisations</h2>
+      <div class="partners">
+        <a class="partner" href="#"><i>AIRF</i><div><b>Association internationale des régions francophones</b><small>Porteuse</small></div></a>
+        <a class="partner" href="#"><i>Sakété</i><div><b>Commune de Sakété, Bénin</b><small>Co-organisatrice</small></div></a>
+        <a class="partner" href="#"><i>FA</i><div><b>Fonds pour l'adaptation</b><small>Partenaire</small></div></a>
+        <a class="partner" href="#"><i><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></i><div><b>Organisation internationale de la Francophonie</b><small>Soutien</small></div></a>
+      </div>
+    </section>
+
+    <section class="block questions">
+      <h2 style="font-size:1.6rem;margin-bottom:10px">Questions du public</h2>
+      <p>Posez une question aux intervenants ou soutenez celles des autres ; la modératrice les reprend en séance.</p>
+      <a class="btn btn-primary btn-sm" href="#">Se connecter pour poser une question</a>
+    </section>
+
+    <section class="block same-day">
+      <h2>Dans la même journée</h2>
+      <div class="rule">
+        <a class="rule-label" href="journee.html" style="text-decoration:none"><svg class="icon"><use href="#i-coins"/></svg>Journée finance durable</a>
+        <span class="rule-meta">Partie 2, 10:15 à 15:15</span>
+      </div>
+      <ul class="rows">
+        <li class="row">
+          <div class="row-time"><b>10:15</b><span>à 11:15, 1 h</span></div>
+          <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
+          <div>
+            <h3 class="row-title"><a href="#">Du financement climatique à l'action régionale : les solutions du P2RS</a></h3>
+            <p class="row-org"><span class="logo">CILSS</span><span><b>CILSS</b></span></p>
+          </div>
+          <div class="row-side"><span class="tag tag-done">Terminée</span></div>
+        </li>
+        <li class="row is-current">
+          <div class="row-time"><b>11:30</b><span>à 12:30, 1 h</span></div>
+          <div class="row-thumb"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""></div>
+          <div>
+            <h3 class="row-title">Enjeux de financements pour les régions et les municipalités</h3>
+            <p class="row-org"><span class="logo">AIRF</span><span><b>AIRF</b> vous y êtes</span></p>
+          </div>
+          <div class="row-side"></div>
+        </li>
+        <li class="row">
+          <div class="row-time"><b>13:00</b><span>à 14:00, 1 h</span></div>
+          <div class="row-thumb initials">MEDD</div>
+          <div>
+            <h3 class="row-title"><a href="#">Autorité nationale de budgétisation climat : institutionnaliser et budgétiser la CDN</a></h3>
+            <p class="row-org"><span class="logo">MEDD</span><span><b>Ministère de l'Environnement</b> Sénégal</span></p>
+          </div>
+          <div class="row-side"><span class="tag tag-soon">À venir</span></div>
+        </li>
+      </ul>
+      <a class="btn btn-day-outline btn-sm" href="journee.html" style="margin-top:16px">Tout le programme de la journée</a>
+    </section>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
+</footer>
+
+<a class="btn btn-sm btn-white state-switch" id="state" href="?etat=direct">Voir en direct</a>
+<script src="icones.js"></script>
+<script>
+  const live = new URLSearchParams(location.search).get('etat') === 'direct'
+  document.body.classList.toggle('is-live', live)
+  const link = document.getElementById('state')
+  link.href = live ? '?' : '?etat=direct'
+  link.textContent = live ? 'Voir à venir' : 'Voir en direct'
+</script>
+</body>
+</html>

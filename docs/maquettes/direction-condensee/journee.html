@@ -28,8 +28,10 @@
   @media (max-width: 1000px) {
     .layout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
     .aside, .main { grid-column: 1; grid-row: auto; }
-    .aside { position: relative; margin-top: -72px; }
-    .main { margin-top: 0; }
+    /* Pas de chevauchement sur téléphone : une marge négative raccourcit la ligne de grille et la suite remonte sous le billet. */
+    .hero-day { padding-bottom: 36px; }
+    .layout { padding-top: 24px; }
+    .aside, .main { margin-top: 0; }
   }
 
   /* La journée en 3 temps : le bloc de la production, tel quel, posé sur le bandeau. */
