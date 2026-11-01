@@ -143,6 +143,12 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'border-transparent bg-danger-solid text-danger-contrast ' +
     'hover:bg-danger-solid-hover active:bg-danger-solid-active',
 
+  // Rejoindre un direct : le rouge du direct (règle des couleurs d'état), pas celui
+  // de la suppression, qui garde son sens propre.
+  live:
+    'border-transparent bg-live text-live-contrast ' +
+    'hover:bg-[color-mix(in_srgb,var(--color-live)_85%,var(--color-text))]',
+
   // SUR UN MÉDIA VOILÉ, ET NULLE PART AILLEURS. Le contour accent du secondaire
   // est un cyan foncé en thème clair : posé sur une photographie sombre, il
   // disparaît. Cette variante prend la matière du bandeau — les jetons du verre,
