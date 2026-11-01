@@ -3,50 +3,61 @@ import type { PublicScheduleTrack } from '~/types/programme/track-page'
 import type { TimeZoneName } from '~/types/shared'
 
 /**
- * L'atelier préparatoire dans `/programmations` : un encadré bleu nuit, sans
- * déroulé, qui mène à sa page. Ce n'est pas une journée spéciale et il ne
- * s'appelle jamais ainsi.
+ * L'atelier préparatoire dans `/programmations` : son étiquette sur un filet
+ * bleu nuit, puis un panneau bleu nuit, sans déroulé, qui mène à sa page. Ce
+ * n'est pas une journée spéciale et il ne s'appelle jamais ainsi.
  */
 
 interface Props {
   track: PublicScheduleTrack
   to: string
   timezone: TimeZoneName
+  /** Nul tant que l'horloge du navigateur n'a pas parlé. */
+  state?: 'upcoming' | 'ongoing' | 'past' | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { state: null })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
 
-const kicker = computed(() =>
-  props.track.venue_name
-    ? t('programme.tracks.side.kickerVenue', { venue: tr(props.track.venue_name) })
-    : t('programme.tracks.side.kicker'),
-)
+const icon = computed(() => trackIcon(props.track.icon_code))
 const details = computed(() => {
   const { starts_at: start, ends_at: end } = props.track
   const hours = start && end ? t('programme.tracks.side.hours', { start: time(start, props.timezone), end: time(end, props.timezone) }) : ''
-  return [hours, t('programme.tracks.side.audience')].filter(Boolean).join(' · ')
+  return [hours, props.track.venue_name ? tr(props.track.venue_name) : ''].filter(Boolean).join(', ')
 })
 </script>
 
 <template>
   <section
-    class="flex flex-col gap-4 rounded-[10px] lg:-ml-3 bg-surface-inverse px-5 py-5 text-text-on-inverse sm:flex-row sm:items-center sm:justify-between sm:px-6"
     :aria-label="tr(props.track.title)"
+    :style="{ '--rule-solid': 'var(--color-surface-inverse)', '--rule-on': 'var(--color-text-on-inverse)' }"
   >
-    <div class="flex min-w-0 items-start gap-4">
-      <TrackIconBadge :code="props.track.icon_code" :color="props.track.color_hex" class="mt-0.5" />
+    <div class="rule-line">
+      <span class="rule-label">
+        <UiIcon v-if="icon" :name="icon" size="1.05em" />
+        {{ t('programme.tracks.side.kicker') }}
+      </span>
+      <span class="pb-1.5 text-sm text-text-secondary">{{ t('programme.tracks.side.audience') }}</span>
+    </div>
+
+    <div
+      class="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 rounded-b-xl rounded-tr-xl bg-surface-inverse px-4 py-5 text-text-on-inverse sm:px-6"
+    >
       <div class="min-w-0">
-        <p class="text-xs font-bold text-text-on-inverse/75 uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">{{ kicker }}</p>
-        <p class="mt-1.5 text-lg leading-snug font-bold text-balance text-text-on-inverse sm:text-xl">{{ tr(props.track.title) }}</p>
-        <p class="mt-1.5 text-sm text-text-on-inverse/80 tabular-nums">{{ details }}</p>
+        <p class="font-condensed text-[1.45rem] leading-[1.1] font-semibold text-balance text-text-on-inverse sm:text-[1.6rem]">
+          {{ tr(props.track.title) }}
+        </p>
+        <p v-if="details" class="mt-1.5 text-sm text-text-on-inverse-muted tabular-nums">{{ details }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <UiStatusBadge v-if="props.state" :state="props.state" size="sm" :label="t(`programme.tracks.side.state.${props.state}`)" />
+        <UiButton variant="on-inverse" :to="props.to">
+          {{ t('programme.tracks.side.open') }}
+        </UiButton>
       </div>
     </div>
-    <UiButton variant="on-inverse" :to="props.to" icon-trailing="arrow-right" class="shrink-0 self-start sm:self-center">
-      {{ t('programme.tracks.side.open') }}
-    </UiButton>
   </section>
 </template>

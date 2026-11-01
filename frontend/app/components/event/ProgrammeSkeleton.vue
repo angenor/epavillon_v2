@@ -22,31 +22,26 @@ const WEEK_GRID =
 </script>
 
 <template>
-  <section class="full-bleed -mb-8 bg-surface font-sans sm:-mb-10">
-    <div class="mx-auto flex w-full max-w-[1280px] flex-col px-4 pt-10 pb-14 sm:px-6 lg:pt-14 lg:pb-18">
-      <header class="flex flex-wrap items-end justify-between gap-4 border-b border-border-subtle pb-4">
-        <div class="min-w-0">
-          <!-- `h-lh` et les tailles d'origine : chaque bloc prend la hauteur de ligne du texte qu'il remplace. -->
-          <div class="flex h-lh w-44 items-center text-[30px] leading-tight">
-            <UiSkeletonLoader height="0.8em" />
+  <section class="full-bleed -mb-8 bg-surface sm:-mb-10">
+    <div class="mx-auto flex w-full max-w-[1280px] flex-col px-4 pb-14 sm:px-6 lg:pb-18">
+      <header class="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border-subtle py-3.5">
+        <!-- `h-lh` et les tailles d'origine : chaque bloc prend la hauteur de ligne du texte qu'il remplace. -->
+        <div class="flex h-lh w-40 items-center font-condensed text-[1.6rem] leading-[1.05]">
+          <UiSkeletonLoader height="0.8em" />
+        </div>
+        <div class="min-w-0 flex-[1_1_280px] sm:max-w-90">
+          <UiSkeletonLoader height="var(--target-min)" />
+        </div>
+        <div class="inline-flex shrink-0 gap-0.5 rounded-md border border-border-subtle bg-surface-sunken p-0.75">
+          <div class="flex h-(--target-min) w-24 items-center justify-center px-5">
+            <UiSkeletonLoader width="70%" height="0.875rem" />
           </div>
-          <!-- Le sous-titre réel est assez long pour renvoyer recherche et bascule sous le titre. -->
-          <div class="mt-1.5 flex h-lh w-2xl max-w-full items-center text-base">
-            <UiSkeletonLoader variant="text" height="0.8em" />
+          <div class="flex h-(--target-min) w-32 items-center justify-center px-5">
+            <UiSkeletonLoader width="75%" height="0.875rem" />
           </div>
         </div>
-        <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
-          <div class="min-w-0 sm:w-[300px]">
-            <UiSkeletonLoader height="var(--target-min)" />
-          </div>
-          <div class="order-first grid shrink-0 grid-cols-2 gap-0.5 rounded-[10px] border border-border p-0.75 sm:order-none sm:flex">
-            <div class="flex h-(--target-min) items-center justify-center px-5 sm:w-32">
-              <UiSkeletonLoader width="70%" height="0.875rem" />
-            </div>
-            <div class="flex h-(--target-min) items-center justify-center px-5 sm:w-40">
-              <UiSkeletonLoader width="75%" height="0.875rem" />
-            </div>
-          </div>
+        <div class="flex h-lh basis-full items-center text-sm min-[860px]:ml-auto min-[860px]:w-64 min-[860px]:basis-auto">
+          <UiSkeletonLoader variant="text" height="0.8em" />
         </div>
       </header>
 
@@ -145,8 +140,8 @@ const WEEK_GRID =
       </div>
 
       <div v-else>
-        <div class="flex flex-col gap-1 border-b border-border-subtle bg-surface py-3.5 lg:flex-row lg:items-center lg:gap-4">
-          <div class="-mx-4 flex min-w-0 items-center gap-1 overflow-hidden px-4 py-0.5 sm:mx-0 sm:px-0.5 lg:flex-1">
+        <div class="flex flex-col gap-1 border-b border-border-subtle bg-surface py-3.5 min-[960px]:hidden">
+          <div class="-mx-4 flex min-w-0 items-center gap-1 overflow-hidden px-4 py-0.5 sm:mx-0 sm:px-0.5">
             <div class="mr-3 flex h-4 w-24 shrink-0 items-center text-xs">
               <UiSkeletonLoader variant="text" height="0.8em" />
             </div>
@@ -159,59 +154,56 @@ const WEEK_GRID =
         <section
           v-for="(day, dayIndex) in DAYS"
           :key="dayIndex"
-          class="grid gap-y-4 border-b border-text pt-8 pb-3 lg:grid-cols-[184px_minmax(0,1fr)] lg:gap-x-8"
+          class="grid gap-x-8 gap-y-4 border-b-2 border-text pt-9 pb-7 min-[960px]:grid-cols-[184px_minmax(0,1fr)]"
         >
-          <header class="flex flex-wrap items-baseline gap-x-3 self-start lg:block">
-            <div class="flex h-[3.15rem] w-16 items-center lg:h-[4.05rem] lg:w-22">
+          <header class="flex flex-wrap items-baseline gap-x-3.5 gap-y-1 self-start min-[960px]:block">
+            <div class="flex h-[3.06rem] w-16 items-center min-[960px]:h-[4.42rem] min-[960px]:w-24">
               <UiSkeletonLoader height="85%" />
             </div>
-            <div class="flex h-lh w-24 items-center text-lg lg:mt-2.5">
+            <div class="flex h-lh w-28 items-center font-condensed text-2xl leading-[1.05] min-[960px]:mt-2.5">
               <UiSkeletonLoader height="0.8em" />
             </div>
-            <div class="flex h-lh basis-full items-center text-sm lg:mt-0.5">
-              <UiSkeletonLoader variant="text" width="9rem" height="0.8em" />
+            <div class="flex h-lh w-36 items-center text-sm min-[960px]:mt-0.5">
+              <UiSkeletonLoader variant="text" height="0.8em" />
             </div>
           </header>
 
           <ol>
-            <li v-for="row in day.rows" :key="row">
+            <li v-for="row in day.rows" :key="row" class="border-b border-border-subtle last:border-b-0">
               <div
-                class="relative -ml-3 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-md px-3 py-4 lg:grid-cols-[112px_208px_minmax(0,1fr)_172px_24px] lg:items-center lg:gap-x-7 lg:gap-y-0 lg:py-4.5"
-                :class="row % 2 === 0 ? 'bg-text/3' : ''"
+                class="grid grid-cols-[76px_minmax(0,1fr)] gap-x-3.5 gap-y-2 py-5 min-[860px]:grid-cols-[112px_176px_minmax(0,1fr)_auto] min-[860px]:gap-x-5.5"
               >
-                <div class="col-start-2 row-start-1 flex flex-wrap items-baseline gap-x-2 self-start lg:col-start-1 lg:block lg:pt-1">
-                  <div class="flex h-5 w-13 items-center lg:h-9.5 lg:w-24">
+                <div class="row-span-2 min-[860px]:row-span-1">
+                  <div class="flex h-[1.76rem] w-16 items-center min-[860px]:h-[2.34rem] min-[860px]:w-24">
                     <UiSkeletonLoader height="85%" />
                   </div>
-                  <div class="flex h-lh w-28 items-center text-[13px] lg:mt-1.5">
+                  <div class="mt-1.5 flex h-lh w-18 items-center text-[0.82rem]">
                     <UiSkeletonLoader variant="text" height="0.8em" />
                   </div>
                 </div>
 
-                <div class="col-start-1 row-span-3 row-start-1 aspect-video self-start lg:col-start-2 lg:row-span-1 lg:w-52 lg:self-center">
+                <div class="hidden aspect-video min-[860px]:block">
                   <UiSkeletonLoader height="100%" rounded="var(--radius-lg)" />
                 </div>
 
-                <div class="col-start-2 min-w-0 lg:col-start-3 lg:row-start-1">
-                  <div class="text-base leading-[1.25] sm:text-lg lg:text-[21px]">
+                <div class="min-w-0">
+                  <div class="font-condensed text-[1.25rem] leading-[1.12] min-[860px]:text-[1.45rem]">
                     <div class="flex h-lh items-center">
                       <UiSkeletonLoader :width="TITLE_WIDTHS[(row + dayIndex) % 4]" height="0.8em" />
                     </div>
-                    <div class="flex h-lh items-center">
-                      <UiSkeletonLoader width="45%" height="0.8em" />
+                  </div>
+                  <div class="mt-2 flex items-center gap-2.5 text-[0.9rem]">
+                    <div class="size-10 shrink-0">
+                      <UiSkeletonLoader height="100%" rounded="var(--radius-md)" />
+                    </div>
+                    <div class="flex h-lh flex-1 items-center">
+                      <UiSkeletonLoader variant="text" :width="ORG_WIDTHS[(row + dayIndex) % 4]" height="0.8em" />
                     </div>
                   </div>
-                  <div class="mt-1.5 flex h-lh items-center text-sm">
-                    <UiSkeletonLoader variant="text" :width="ORG_WIDTHS[(row + dayIndex) % 4]" height="0.8em" />
-                  </div>
                 </div>
 
-                <div class="col-start-2 h-5 w-24 justify-self-start lg:col-start-4 lg:row-start-1">
+                <div class="col-start-2 h-5 w-20 min-[860px]:col-start-4">
                   <UiSkeletonLoader height="100%" rounded="var(--radius-sm)" />
-                </div>
-
-                <div class="hidden size-5.5 lg:col-start-5 lg:row-start-1 lg:block">
-                  <UiSkeletonLoader height="100%" />
                 </div>
               </div>
             </li>

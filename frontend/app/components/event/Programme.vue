@@ -6,10 +6,10 @@ import type { IsoDate } from '~/types/shared'
 import type { LocationQueryRaw } from 'vue-router'
 
 /**
- * Le corps de `/programmations`, sous le bandeau qui nomme l'édition : un
- * en-tête, puis la semaine ou la liste. Direction « liste éditoriale » arbitrée
- * le 04/10 : elle remplace l'affiche, qui ne vaut plus que pour la page d'une
- * activité. La recherche est le seul filtre ; les thématiques ont été retirées.
+ * Le corps de `/programmations`, sous le bandeau qui nomme l'édition : une
+ * barre d'outils (recherche, bascule, fuseau), puis la semaine ou la liste.
+ * Liste éditoriale du 04/10, habillée en direction condensée le 01/11. La
+ * recherche est le seul filtre ; les thématiques ont été retirées.
  *
  * Les deux vues lisent le même programme et les mêmes filtres. L'URL porte
  * l'édition, la vue et le jour : un lien vers « la liste du 12 novembre » se
@@ -28,7 +28,7 @@ const emit = defineEmits<{ 'update:edition': [edition: PublicEditionRow] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
-const { zoneLabel, zoneOffsetShort, dateRange } = useDateTime()
+const { zoneLabel, zoneOffsetShort } = useDateTime()
 const { isLive, declareFrom } = useLiveSession()
 const api = useApi()
 const route = useRoute()
@@ -105,11 +105,9 @@ const search = ref('')
 const day = ref<IsoDate | null>(typeof route.query.jour === 'string' ? route.query.jour : null)
 
 const timezone = computed(() => selectedEdition.value.timezone)
-const subtitle = computed(() => {
+const zoneNote = computed(() => {
   const edition = selectedEdition.value
-  return t('programme.board.subtitle', {
-    edition: edition.acronym ?? edition.edition_label ?? tr(edition.title),
-    dates: dateRange(edition.starts_at, edition.ends_at, edition.timezone),
+  return t('programme.toolbar.timezone', {
     zone: zoneLabel(edition.timezone, edition.city ?? undefined),
     offset: zoneOffsetShort(edition.timezone, edition.starts_at),
   })
@@ -161,12 +159,17 @@ function tick(): void {
 
 const list = useTemplateRef<{ scrollToDay: (date: IsoDate, smooth?: boolean) => void }>('list')
 const strip = useTemplateRef<HTMLElement>('strip')
+const toolbar = useTemplateRef<HTMLElement>('toolbar')
 const stickyOffset = ref(0)
+
+// Sur téléphone la bande des jours reste figée, sur grand écran la barre d'outils : on mesure celle qui l'est.
+const pinnedHeight = (element: HTMLElement | null): number =>
+  element && getComputedStyle(element).position === 'sticky' ? element.offsetHeight : 0
 
 function measure(): void {
   const root = getComputedStyle(document.documentElement)
   const nav = parseFloat(root.getPropertyValue('--nav-height')) * parseFloat(root.fontSize)
-  stickyOffset.value = (Number.isFinite(nav) ? nav : 0) + (strip.value?.offsetHeight ?? 0)
+  stickyOffset.value = (Number.isFinite(nav) ? nav : 0) + pinnedHeight(strip.value) + pinnedHeight(toolbar.value)
 }
 
 async function showInList(date: IsoDate, smooth = true): Promise<void> {
@@ -247,40 +250,40 @@ watch(() => data.value.schedule, declareFrom, { immediate: true })
 const liveSession = computed(() => data.value.schedule.find((session) => isLive(session.id)) ?? null)
 
 const views = computed(() => [
-  { value: 'list' as const, icon: 'list', label: t('programme.views.list') },
-  { value: 'week' as const, icon: 'calendar', label: t('programme.views.week') },
+  { value: 'list' as const, label: t('programme.toolbar.list') },
+  { value: 'week' as const, label: t('programme.toolbar.week') },
 ])
 
 </script>
 <template>
-  <section class="full-bleed -mb-8 bg-surface font-sans text-text sm:-mb-10" aria-labelledby="programmation-titre">
-    <div class="mx-auto flex w-full max-w-[1280px] flex-col px-4 pt-10 pb-14 sm:px-6 lg:pt-14 lg:pb-18">
-      <header class="flex flex-wrap items-end justify-between gap-4 border-b border-border-subtle pb-4">
-        <div class="min-w-0">
-          <h2 id="programmation-titre" class="font-sans text-[30px] leading-tight font-normal text-text">
-            {{ t('programme.board.title') }}
-          </h2>
-          <p class="mt-1.5 text-base text-text-muted">{{ subtitle }}</p>
-        </div>
-        <div v-if="isPublished && (data.schedule.length || sideDays.length)" class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
+  <section class="full-bleed -mb-8 bg-surface text-text sm:-mb-10" aria-labelledby="programmation-titre">
+    <div class="mx-auto flex w-full max-w-[1280px] flex-col px-4 pb-14 sm:px-6 lg:pb-18">
+      <!-- Figée sur grand écran dans la liste : le jour à gauche se cale dessous. -->
+      <header
+        ref="toolbar"
+        class="z-20 flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border-subtle bg-surface py-3.5"
+        :class="{ 'min-[960px]:sticky min-[960px]:top-(--nav-height)': view === 'list' }"
+      >
+        <h2 id="programmation-titre" class="heading-condensed text-[1.6rem] text-heading">
+          {{ t('programme.board.title') }}
+        </h2>
+        <template v-if="isPublished && (data.schedule.length || sideDays.length)">
           <UiSearchInput
             v-model="search"
-            class="min-w-0 sm:w-[300px]"
+            class="min-w-0 flex-[1_1_280px] sm:max-w-90"
             :label="t('programme.filters.search')"
             hide-label
             :placeholder="t('programme.filters.searchPlaceholder')"
           />
-          <!-- Sur téléphone, la bascule passe sous le titre, avant la recherche, en deux moitiés. -->
           <div
             role="group"
-            class="order-first grid shrink-0 grid-cols-2 gap-0.5 rounded-[10px] border border-border p-0.75 sm:order-none sm:flex"
+            class="inline-flex shrink-0 gap-0.5 rounded-md border border-border-subtle bg-surface-sunken p-0.75"
             :aria-label="t('programme.views.label')"
           >
             <UiButton
               v-for="option in views"
               :key="option.value"
               variant="ghost"
-              :icon="option.icon"
               :pressed="view === option.value"
               class="justify-center whitespace-nowrap"
               @click="option.value === 'list' ? showInList(selectedDay) : (view = 'week')"
@@ -288,7 +291,8 @@ const views = computed(() => [
               {{ option.label }}
             </UiButton>
           </div>
-        </div>
+        </template>
+        <p class="basis-full text-sm text-text-muted min-[860px]:ml-auto min-[860px]:basis-auto">{{ zoneNote }}</p>
       </header>
 
       <UiErrorState
@@ -337,7 +341,8 @@ const views = computed(() => [
       />
 
       <div v-else>
-        <div ref="strip" class="sticky top-(--nav-height) z-20 bg-surface">
+        <!-- Sur téléphone, la bande des dates remplace la colonne des jours, figée. -->
+        <div ref="strip" class="sticky top-(--nav-height) z-20 bg-surface min-[960px]:hidden">
           <EventProgrammeDayStrip
             :days="stripDays"
             :selected="selectedDay"
@@ -348,11 +353,21 @@ const views = computed(() => [
             @toggle-past="pastHidden = !pastHidden"
           />
         </div>
+        <button
+          v-if="hasPast"
+          type="button"
+          class="mt-2 hidden min-h-11 cursor-pointer items-center text-sm font-bold text-accent hover:underline min-[960px]:inline-flex"
+          @click="pastHidden = !pastHidden"
+        >
+          {{ t(pastHidden ? 'programme.days.showPast' : 'programme.days.hidePast') }}
+        </button>
         <EventProgrammeLiveLead
           v-if="liveSession"
+          class="mt-6"
           :session="liveSession"
           :edition-slug="selectedEdition.slug"
           :timezone="timezone"
+          :city="selectedEdition.city"
         />
         <EventProgrammeDayList
           ref="list"

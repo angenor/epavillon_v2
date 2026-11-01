@@ -3,9 +3,7 @@
   "description": "Les activités publiées, édition par édition, à la semaine ou jour par jour.",
   "loading": "Chargement du programme",
   "views": {
-    "label": "Affichage",
-    "week": "Vue calendrier",
-    "list": "Vue liste"
+    "label": "Affichage"
   },
   "filters": {
     "search": "Rechercher une activité",
@@ -47,16 +45,21 @@
     },
     "others": "Autres programmations"
   },
+  "toolbar": {
+    "list": "Liste",
+    "week": "Calendrier",
+    "timezone": "Toutes les heures : {zone} ({offset})"
+  },
   "board": {
-    "title": "Le programme",
-    "subtitle": "{edition} · {dates} · toutes les heures : {zone} ({offset})"
+    "title": "Le programme"
   },
   "days": {
     "count": "aucune activité | {count} activité | {count} activités",
     "jump": "Aller à la journée",
     "showPast": "Afficher les journées passées",
     "hidePast": "Masquer les journées passées",
-    "monthYear": "{month} · {count}"
+    "monthCount": "{month}, {count}",
+    "today": "Aujourd'hui"
   },
   "week": {
     "live": "En direct",
@@ -79,6 +82,8 @@
   },
   "list": {
     "until": "→ {end} · {duration}",
+    "untilShort": "à {end}, {duration}",
+    "join": "Rejoindre",
     "minutes": "{minutes} min",
     "hours": "{hours} h",
     "hoursMinutes": "{hours} h {minutes}",
@@ -90,20 +95,28 @@
   "lead": {
     "label": "À la une : en direct",
     "watch": "Suivre le direct",
-    "open": "Voir l'activité"
+    "open": "Voir l'activité",
+    "kicker": "En ce moment au pavillon",
+    "until": "à {end}, {zone}",
+    "join": "Rejoindre le direct"
   },
   "tracks": {
     "kicker": "Journée spéciale",
-    "kickerHours": "Journée spéciale · {start} à {end}",
+    "kickerHours": "Journée spéciale, {start} à {end}",
+    "others": "Le même jour, hors de la journée spéciale",
     "open": "Programme de la journée",
     "eve": "la veille",
     "before": "avant l'ouverture",
     "side": {
       "kicker": "Atelier préparatoire",
-      "kickerVenue": "Atelier préparatoire · {venue}",
       "hours": "{start} à {end}",
       "audience": "réservé principalement aux négociateurs et négociatrices",
-      "open": "Voir l'atelier"
+      "open": "Voir l'atelier",
+      "state": {
+        "upcoming": "À venir",
+        "ongoing": "En cours",
+        "past": "Terminé"
+      }
     }
   }
 }
