@@ -56,39 +56,6 @@ export function daysBetweenInZone(
   if (Number.isNaN(start) || Number.isNaN(end)) return 0
   return Math.round((end - start) / 86_400_000)
 }
-
-/**
- * Les séances groupées par journée, dans l'ordre du temps.
- *
- * RIEN N'EST FILTRÉ : l'API rend déjà des séances à venir ou en cours, annulations
- * exclues, et bornées. Rejouer ce filtre ici, c'est se donner deux endroits où
- * la règle peut diverger.
- */
-export function groupProgrammeDays(
-  sessions: PublicScheduleRow[],
-  now: DateInput,
-): ProgrammeDay[] {
-  const days = new Map<string, ProgrammeDay>()
-
-  for (const session of [...sessions].sort((a, b) => a.starts_at.localeCompare(b.starts_at))) {
-    const key = dayKeyInZone(session.starts_at, session.timezone)
-    const day = days.get(key)
-    if (day) {
-      day.sessions.push(session)
-      continue
-    }
-    days.set(key, {
-      key,
-      startsAt: session.starts_at,
-      timezone: session.timezone,
-      daysAhead: daysBetweenInZone(now, session.starts_at, session.timezone),
-      sessions: [session],
-    })
-  }
-
-  return [...days.values()]
-}
-
 /**
  * L'édition commune à toutes les séances, s'il y en a une.
  *
@@ -119,15 +86,4 @@ export function nextSessionOfEdition(
       .filter((session) => session.event_id === eventId)
       .sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0] ?? null
   )
-}
-
-/**
- * Le nombre de journées que couvre une édition, bornes comprises.
- *
- * Bornes COMPRISES : une édition qui ouvre le 9 et ferme le 20 dure douze jours,
- * pas onze. C'est le décompte qu'annonce le pavillon, et la soustraction nue
- * donne l'autre.
- */
-export function editionDayCount(edition: PublicEditionRow): number {
-  return daysBetweenInZone(edition.starts_at, edition.ends_at, edition.timezone) + 1
 }
