@@ -34,6 +34,7 @@ const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { dayLong } = useDateTime()
 const localePath = useLocalePath()
+const NuxtLink = resolveComponent('NuxtLink')
 
 const isPublished = computed(() => props.edition.programme_published_at !== null)
 
@@ -60,6 +61,8 @@ interface DayTile {
   /** Couleur du trait : la journée spéciale du jour, l'atelier, ou rien. */
   mark: string | null
   label: string
+  /** Le premier dimanche sans activité, barré (règle du commanditaire, `restDayOf`). */
+  rest: boolean
 }
 
 const days = computed<DayTile[]>(() => {
@@ -82,6 +85,9 @@ const days = computed<DayTile[]>(() => {
   // Midi UTC : la clé est déjà un jour civil de l'édition, aucun fuseau ne doit le décaler.
   const format = (date: string, options: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat(locale.value, { ...options, timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`))
+  const keys = [...byDay.keys()].sort()
+  const rest = restDayOf(keys, dayKeyInZone(props.edition.starts_at, zone), dayKeyInZone(props.edition.ends_at, zone))
+  if (rest) byDay.set(rest, { special: null, side: false })
   return [...byDay.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, entry]) => {
@@ -98,7 +104,8 @@ const days = computed<DayTile[]>(() => {
         number: format(date, { day: 'numeric' }),
         to: localePath({ name: 'programme', query: { edition: props.edition.slug, jour: date } }),
         mark,
-        label: special ? `${day}, ${tr(special.title)}` : day,
+        label: date === rest ? t('event.public.programmeLink.restDay', { day }) : special ? `${day}, ${tr(special.title)}` : day,
+        rest: date === rest,
       }
     })
 })
@@ -145,19 +152,22 @@ const days = computed<DayTile[]>(() => {
       class="mt-5.5 flex gap-1.5 overflow-x-auto border-t border-border-on-inverse pt-4.5 [scrollbar-width:none]"
       :aria-label="t('event.public.programmeLink.daysLabel')"
     >
-      <NuxtLink
+      <component
+        :is="day.rest ? 'span' : NuxtLink"
         v-for="day in days"
         :key="day.date"
-        :to="day.to"
+        :to="day.rest ? undefined : day.to"
         :aria-label="day.label"
-        class="flex min-h-16 w-14 shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg text-text-on-inverse-muted no-underline transition-colors hover:bg-surface-inverse-raised hover:text-text-on-inverse"
+        :title="day.rest ? day.label : undefined"
+        class="flex min-h-16 w-14 shrink-0 flex-col items-center justify-center rounded-lg text-text-on-inverse-muted no-underline"
+        :class="day.rest ? 'opacity-60 [&_b]:line-through [&_b]:decoration-1' : 'cursor-pointer transition-colors hover:bg-surface-inverse-raised hover:text-text-on-inverse'"
       >
         <small class="text-[0.68rem] font-semibold tracking-[0.05em] uppercase" aria-hidden="true">{{ day.weekday }}</small>
         <b class="font-condensed text-[1.6rem] leading-none font-bold text-text-on-inverse tabular-nums" aria-hidden="true">
           {{ day.number }}
         </b>
         <i class="mt-1 block h-1 w-4.5 rounded-full" :style="day.mark ? { backgroundColor: day.mark } : undefined" aria-hidden="true" />
-      </NuxtLink>
+      </component>
     </nav>
   </section>
 </template>

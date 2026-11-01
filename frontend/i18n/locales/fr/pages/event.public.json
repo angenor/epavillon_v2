@@ -81,6 +81,7 @@
     "see": "Voir la programmation",
     "seePast": "Voir les programmations",
     "daysLabel": "Aller à un jour de la programmation",
+    "restDay": "{day}, jour de repos : le pavillon est fermé",
     "figures": {
       "sessions": "activité | activité | activités",
       "organizations": "organisation porteuse | organisation porteuse | organisations porteuses",

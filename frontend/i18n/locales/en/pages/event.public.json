@@ -81,6 +81,7 @@
     "see": "See the programme",
     "seePast": "See the programmes",
     "daysLabel": "Go to a day of the programme",
+    "restDay": "{day}, rest day: the pavilion is closed",
     "figures": {
       "sessions": "activity | activity | activities",
       "organizations": "lead organization | lead organization | lead organizations",
