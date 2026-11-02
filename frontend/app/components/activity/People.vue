@@ -2,8 +2,9 @@
 import type { PublicSessionSpeaker } from '~/types/programme/session'
 
 /**
- * Les intervenants de l'activité, en cartes verticales à la couleur du jour : ce que la base publie, sans rien de plus.
- * Fonction et organisation s'arrêtent sur des points de suspension ; la carte ouvre la fiche entière (jamais le courriel, qui n'est pas public).
+ * Les intervenants de l'activité, assis derrière leur chevalet (maquette `intervenants-directions`, 02/11) : ce que la base publie, sans rien de plus.
+ * Le carton porte nom, organisation et rôle, la modération en carton plein à la couleur du jour ; la fonction, souvent longue, est dans la fiche
+ * qu'ouvre le clic (jamais le courriel, qui n'est pas public).
  */
 
 interface Props {
@@ -29,6 +30,7 @@ const speakers = computed(() =>
       jobTitle: speaker.job_title_snapshot ?? '',
       organization: speaker.organization_snapshot ?? '',
       role: t(`activity.people.role.${speaker.role}`),
+      isLead: speaker.role === 'moderator',
       bio: speaker.bio ? tr(speaker.bio) : '',
       avatar: speaker.avatar,
       initials: initialsOf(speaker.display_name),
@@ -75,11 +77,12 @@ const isOpen = computed({
     <h2 id="intervenants-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
       {{ t('activity.people.speakers') }}
     </h2>
-    <ul class="mt-4.5 grid grid-cols-2 gap-2.5 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] sm:gap-3.5">
-      <li v-for="speaker in speakers" :key="speaker.id" class="min-w-0">
+    <ul class="mt-5 grid grid-cols-2 gap-y-7.5 sm:grid-cols-[repeat(auto-fill,minmax(10rem,1fr))]">
+      <li v-for="speaker in speakers" :key="speaker.id" class="flex min-w-0">
         <button
           type="button"
-          class="flex size-full cursor-pointer flex-col items-center rounded-lg border border-border-subtle bg-surface-raised px-2.5 pt-4 pb-3.5 text-center transition-colors duration-(--duration-fast) hover:border-(--color-day-line) sm:px-3.5 sm:pt-5 sm:pb-4.5"
+          class="seat flex flex-1 cursor-pointer flex-col items-center justify-end pb-3.5"
+          :class="{ 'seat-lead': speaker.isLead }"
           :aria-label="t('activity.people.open', { name: speaker.name })"
           @click="opened = speaker"
         >
@@ -88,20 +91,21 @@ const isOpen = computed({
             :image="speaker.avatar"
             ratio="1 / 1"
             rounded="rounded-full"
-            class="size-19 shrink-0 rounded-full border-3 border-(--color-day-line) sm:size-24"
-            sizes="96px"
+            class="seat-face size-22 sm:size-26"
+            sizes="104px"
           />
           <span
             v-else
-            class="flex size-19 shrink-0 items-center justify-center rounded-full border-3 border-(--color-day-line) bg-(--color-day-surface) font-condensed text-[1.5rem] font-bold text-(--color-day) sm:size-24 sm:text-[1.9rem]"
+            class="seat-face seat-initials flex size-22 items-center justify-center font-condensed text-[1.7rem] font-bold text-(--color-day) sm:size-26 sm:text-[2rem]"
             aria-hidden="true"
           >
             {{ speaker.initials }}
           </span>
-          <span class="mt-3.5 font-condensed text-[1.15rem] leading-[1.05] font-bold text-heading sm:text-[1.3rem]">{{ speaker.name }}</span>
-          <span class="mt-1.5 text-[0.72rem] font-bold tracking-[0.05em] text-(--color-day) uppercase">{{ speaker.role }}</span>
-          <span v-if="speaker.jobTitle" class="mt-2.5 line-clamp-3 text-[0.86rem] leading-snug text-text-secondary">{{ speaker.jobTitle }}</span>
-          <span v-if="speaker.organization" class="mt-1 line-clamp-2 text-[0.82rem] leading-snug font-semibold text-text-muted">{{ speaker.organization }}</span>
+          <span class="tent flex min-h-26 w-[calc(100%-1.125rem)] flex-col items-center px-3 pt-4 pb-3 text-center">
+            <span class="tent-name font-condensed text-[1.12rem] leading-none font-bold text-heading uppercase sm:text-[1.32rem]">{{ speaker.name }}</span>
+            <span v-if="speaker.organization" class="tent-org mt-1.5 line-clamp-2 text-[0.78rem] leading-snug font-semibold text-text-secondary">{{ speaker.organization }}</span>
+            <span class="tent-role mt-auto pt-1.5 text-[0.7rem] font-bold tracking-[0.06em] text-(--color-day) uppercase">{{ speaker.role }}</span>
+          </span>
         </button>
       </li>
     </ul>
@@ -144,3 +148,52 @@ const isOpen = computed({
     </UiModal>
   </section>
 </template>
+
+<style scoped>
+/* Le plateau de la table, continu d'un siège à l'autre : les sièges d'un rang s'y alignent, quelle que soit la hauteur du carton. */
+.seat {
+  position: relative;
+}
+.seat::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 0.875rem;
+  border-top: 2px solid var(--color-border-strong);
+  background: var(--color-surface-sunken);
+}
+/* Assis derrière son carton : le bas du portrait passe sous le chevalet. */
+.seat-face {
+  flex-shrink: 0;
+  margin-bottom: -1.375rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: 0 0 0 4px var(--color-surface);
+}
+.seat-initials {
+  background: color-mix(in srgb, var(--color-day-line) 22%, var(--color-surface-raised));
+}
+.tent {
+  position: relative;
+  z-index: 1;
+  background: var(--color-surface-raised);
+  clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
+  box-shadow: inset 0 5px 0 var(--color-day-line), inset 0 0 0 1px var(--color-border-subtle);
+  transition: transform var(--duration-fast) ease-out;
+}
+.seat-lead .tent {
+  background: var(--color-day-solid);
+  box-shadow: none;
+}
+.seat-lead .tent-name,
+.seat-lead .tent-org,
+.seat-lead .tent-role {
+  color: var(--color-day-on-solid);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .seat:hover .tent,
+  .seat:focus-visible .tent {
+    transform: translateY(-4px);
+  }
+}
+</style>

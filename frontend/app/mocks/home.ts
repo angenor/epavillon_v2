@@ -228,6 +228,7 @@ export function publicEditions(at: number = Date.now()): PublicEditionRow[] {
         banner: attachedImage('event', 'events', edition.id, 'banner'),
         cover: attachedImage('event', 'events', edition.id, 'cover'),
         thumbnail: attachedImage('event', 'events', edition.id, 'thumbnail'),
+        logo: attachedImage('event', 'events', edition.id, 'logo'),
 
         temporal_state: editionTemporalState(edition, at),
 

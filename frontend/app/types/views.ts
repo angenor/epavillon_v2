@@ -489,6 +489,8 @@ export interface PublicEditionRow
   banner: AttachedImage | null
   cover: AttachedImage | null
   thumbnail: AttachedImage | null
+  /** Logo de la conférence (CdP31…), sans forme imposée : l'API le joint à la vue. */
+  logo: AttachedImage | null
 
   temporal_state: EditionTemporalState
 

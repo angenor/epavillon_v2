@@ -78,6 +78,12 @@ const subtitle = computed(() => {
 
 const statsEdition = computed(() => singleEdition.value ?? props.edition)
 
+/** Le logo de la conférence, en face du titre ; sur une tuile blanche, il garde ses couleurs sur l'aplat sombre. */
+const logo = computed(() => {
+  const asset = statsEdition.value?.logo
+  return asset ? { src: asset.sources.thumb?.url ?? asset.url, alt: tr(asset.alt_text) } : null
+})
+
 /**
  * Ruban un jour, épingle le lendemain (demande du 02/11). Le jour se compte dans
  * le fuseau de l'édition, d'après l'horloge de l'API : serveur et navigateur
@@ -121,15 +127,25 @@ const isEmpty = computed(() => shown.value.length === 0 && upcomingEditions.valu
     "
     aria-labelledby="a-venir-titre"
   >
-    <!-- La couleur est explicite : `main.css` peint les titres en `--color-heading`, invisible ici. -->
-    <h2
-      id="a-venir-titre"
-      class="heading-condensed text-[1.6rem] text-text-on-inverse"
-      :data-bird-say="t('home.bird.aside')"
-    >
-      {{ t('home.aside.title') }}
-    </h2>
-    <p v-if="subtitle" class="mt-0.5 text-sm text-text-on-inverse-muted">{{ subtitle }}</p>
+    <div class="flex items-start gap-3">
+      <div class="min-w-0 flex-1">
+        <!-- La couleur est explicite : `main.css` peint les titres en `--color-heading`, invisible ici. -->
+        <h2
+          id="a-venir-titre"
+          class="heading-condensed text-[1.6rem] text-text-on-inverse"
+          :data-bird-say="t('home.bird.aside')"
+        >
+          {{ t('home.aside.title') }}
+        </h2>
+        <p v-if="subtitle" class="mt-0.5 text-sm text-text-on-inverse-muted">{{ subtitle }}</p>
+      </div>
+      <span
+        v-if="logo"
+        class="flex h-12 max-w-[26%] shrink-0 items-center justify-center rounded-lg bg-surface-inverse-selected p-1.5 sm:max-w-30"
+      >
+        <img :src="logo.src" :alt="logo.alt" class="max-h-9 max-w-full object-contain">
+      </span>
+    </div>
 
     <UiEmptyState
       v-if="isEmpty"
