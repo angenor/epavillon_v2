@@ -205,6 +205,8 @@ export interface PublicSessionDetail {
   session: PublicScheduleRow
   /** `programme.sessions.description` ; nulle si la séance n'en a pas. */
   description: I18nText | null
+  /** Objectifs du dossier, texte simple ; nuls sans dossier unique (séance commune, hors appel). */
+  objectives?: I18nText | null
   allows_questions: boolean
   is_recorded: boolean
   /** Motif public d'une séance annulée ; nul sinon. */

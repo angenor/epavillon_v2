@@ -166,6 +166,13 @@ const languages = computed(() =>
 const description = computed(() => (detail.value?.description ? tr(detail.value.description) : ''))
 const hasDescription = computed(() => richTextToPlain(description.value).length > 0)
 const summary = computed(() => (session.value?.summary ? tr(session.value.summary) : ''))
+/** Les objectifs du dossier, en paragraphes : le dossier les saisit en texte simple. */
+const objectives = computed(() =>
+  (detail.value?.objectives ? tr(detail.value.objectives) : '')
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean),
+)
 const dayLabel = computed(() => (session.value ? dayLong(session.value.starts_at, timezone.value) : ''))
 const programmeTo = computed(() =>
   localePath({ name: 'programme', query: edition.value ? { edition: edition.value.slug, jour: session.value ? dayKeyInZone(session.value.starts_at, timezone.value) : undefined } : {} }),
@@ -292,12 +299,30 @@ useSeoMeta({
               :day-track-id="dayPage?.track.id ?? null"
             />
 
-            <section v-if="summary || hasDescription" aria-labelledby="a-propos-titre">
+            <section v-if="summary || hasDescription || objectives.length" aria-labelledby="a-propos-titre">
               <h2 id="a-propos-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
                 {{ t('activity.about') }}
               </h2>
               <p v-if="summary" class="mt-4.5 max-w-[68ch] text-lg leading-relaxed text-text">{{ summary }}</p>
-              <UiRichContent class="mt-3.5 max-w-[68ch]! text-[1.05rem] leading-[1.75]" :html="description" />
+              <template v-if="objectives.length">
+                <h3 class="mt-4.5 mb-2.5 font-condensed text-[1.25rem] font-bold tracking-[0.04em] text-heading uppercase">
+                  {{ t('activity.aboutObjectives') }}
+                </h3>
+                <ActivityFold>
+                  <p v-for="(paragraph, index) in objectives" :key="index" class="mb-3.5 max-w-[68ch] text-[1.05rem] leading-[1.75] whitespace-pre-line text-text">
+                    {{ paragraph }}
+                  </p>
+                </ActivityFold>
+              </template>
+              <h3
+                v-if="objectives.length && hasDescription"
+                class="mt-6 mb-2.5 font-condensed text-[1.25rem] font-bold tracking-[0.04em] text-heading uppercase"
+              >
+                {{ t('activity.aboutPresentation') }}
+              </h3>
+              <ActivityFold v-if="hasDescription">
+                <UiRichContent class="mt-3.5 max-w-[68ch]! text-[1.05rem] leading-[1.75]" :class="{ 'mt-0!': objectives.length }" :html="description" />
+              </ActivityFold>
             </section>
 
             <ActivityJointParts v-if="jointProposals.length > 1" :proposals="jointProposals" :faded="state === 'past' || state === 'cancelled'" :edition-image="editionImage" />

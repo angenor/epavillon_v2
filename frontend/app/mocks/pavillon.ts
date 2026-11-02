@@ -234,6 +234,7 @@ export function activite(eventId: string, slug: string): PublicSessionDetail | n
   return {
     session,
     description: { fr: "Un échange entre négociatrices, chercheurs et partenaires sur les priorités francophones de la COP.", en: 'An exchange between negotiators, researchers and partners on francophone priorities at the COP.' },
+    objectives: { fr: "Faire le point sur les priorités francophones de la COP.\n\nIdentifier les convergences entre délégations avant les négociations de la deuxième semaine, et les sujets où une position commune reste possible.", en: 'Take stock of francophone priorities at the COP.\n\nIdentify convergences between delegations ahead of the second week of negotiations.' },
     allows_questions: session.id !== MODELES[6]!.id,
     is_recorded: true,
     cancelled_reason:

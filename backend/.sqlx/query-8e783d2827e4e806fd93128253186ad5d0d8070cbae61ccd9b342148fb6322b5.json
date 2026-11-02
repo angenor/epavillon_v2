@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT s.description AS \"description: serde_json::Value\",\n                  s.allows_questions, s.is_recorded,\n                  s.cancelled_reason AS \"cancelled_reason: serde_json::Value\"\n             FROM programme.sessions s\n            WHERE s.id = $1",
+  "query": "SELECT s.description AS \"description: serde_json::Value\",\n                  p.objectives AS \"objectives?: serde_json::Value\",\n                  s.allows_questions, s.is_recorded,\n                  s.cancelled_reason AS \"cancelled_reason: serde_json::Value\"\n             FROM programme.sessions s\n             LEFT JOIN programme.proposals p ON p.id = s.proposal_id\n            WHERE s.id = $1",
   "describe": {
     "columns": [
       {
@@ -16,6 +16,17 @@
       },
       {
         "ordinal": 1,
+        "name": "objectives?: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "objectives"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
         "name": "allows_questions",
         "type_info": "Bool",
         "origin": {
@@ -26,7 +37,7 @@
         }
       },
       {
-        "ordinal": 2,
+        "ordinal": 3,
         "name": "is_recorded",
         "type_info": "Bool",
         "origin": {
@@ -37,7 +48,7 @@
         }
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "cancelled_reason: serde_json::Value",
         "type_info": "Jsonb",
         "origin": {
@@ -55,10 +66,11 @@
     },
     "nullable": [
       true,
+      true,
       false,
       false,
       true
     ]
   },
-  "hash": "7ca67ac4b72bf01311ba5e1877777bdc44a6c0fa97ec54db14a8e1d2e26e6229"
+  "hash": "8e783d2827e4e806fd93128253186ad5d0d8070cbae61ccd9b342148fb6322b5"
 }

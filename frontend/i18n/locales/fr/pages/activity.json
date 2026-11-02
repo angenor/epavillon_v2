@@ -2,6 +2,9 @@
   "back": "Retour au programme",
   "trail": "Programmations / {edition} / {day}",
   "loading": "Chargement de l'activité",
+  "fold": { "more": "Lire la suite", "less": "Réduire" },
+  "aboutObjectives": "Objectifs",
+  "aboutPresentation": "Présentation",
   "about": "À propos",
   "joint": {
     "tag": "Séance commune",

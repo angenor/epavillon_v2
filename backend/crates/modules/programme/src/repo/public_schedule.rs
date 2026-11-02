@@ -167,6 +167,9 @@ pub async fn par_adresse<'e>(
 /// séance déjà trouvée dans la vue : elle est donc publiée.
 pub struct ComplementDeSeance {
     pub description: Option<serde_json::Value>,
+    /// Les objectifs du dossier de la séance, montrés sur sa page (02/11) ;
+    /// nuls pour une séance sans dossier ou une séance commune.
+    pub objectives: Option<serde_json::Value>,
     pub allows_questions: bool,
     pub is_recorded: bool,
     pub cancelled_reason: Option<serde_json::Value>,
@@ -179,9 +182,11 @@ pub async fn complement<'e>(
     let ligne = sqlx::query_as!(
         ComplementDeSeance,
         r#"SELECT s.description AS "description: serde_json::Value",
+                  p.objectives AS "objectives?: serde_json::Value",
                   s.allows_questions, s.is_recorded,
                   s.cancelled_reason AS "cancelled_reason: serde_json::Value"
              FROM programme.sessions s
+             LEFT JOIN programme.proposals p ON p.id = s.proposal_id
             WHERE s.id = $1"#,
         session_id.as_uuid()
     )

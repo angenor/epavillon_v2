@@ -2,6 +2,9 @@
   "back": "Back to the programme",
   "trail": "Programmes / {edition} / {day}",
   "loading": "Loading the activity",
+  "fold": { "more": "Read more", "less": "Show less" },
+  "aboutObjectives": "Objectives",
+  "aboutPresentation": "Presentation",
   "about": "About",
   "joint": {
     "tag": "Joint session",

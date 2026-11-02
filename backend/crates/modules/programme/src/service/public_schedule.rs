@@ -30,6 +30,8 @@ use crate::repo::{joint, public_schedule, session_parts};
 pub struct SeancePublique {
     pub session: PublicScheduleRow,
     pub description: Option<serde_json::Value>,
+    /// Objectifs du dossier, en texte simple ; nuls sans dossier unique.
+    pub objectives: Option<serde_json::Value>,
     pub allows_questions: bool,
     pub is_recorded: bool,
     /// Motif public d'une séance annulée ; nul sinon.
@@ -83,6 +85,7 @@ pub async fn seance(pool: &PgPool, event_id: EventId, slug: &str) -> Result<Sean
 
     Ok(SeancePublique {
         description: complement.description,
+        objectives: complement.objectives,
         allows_questions: complement.allows_questions,
         is_recorded: complement.is_recorded,
         cancelled_reason: complement.cancelled_reason,
