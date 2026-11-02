@@ -277,7 +277,7 @@ async fn ecrire(
     let associations = associations(&payload.draft, porteur)?;
     let ajoutees = organizations::remplacer(&mut tx, dossier, acteur, &associations).await?;
 
-    let intervenants = resoudre_intervenants(&mut tx, &payload.draft.speakers).await?;
+    let intervenants = resoudre_intervenants(&mut tx, &payload.draft.speakers, acteur).await?;
     let lignes: Vec<speakers::Intervenant<'_>> = intervenants
         .iter()
         .enumerate()
@@ -809,6 +809,7 @@ pub struct IntervenantResolu {
 async fn resoudre_intervenants(
     conn: &mut PgConnection,
     saisis: &[DraftSpeaker],
+    acteur: Uuid,
 ) -> Result<Vec<IntervenantResolu>> {
     let mut resolus = Vec::with_capacity(saisis.len());
 
@@ -863,7 +864,18 @@ async fn resoudre_intervenants(
             }
             Some(fiche) => {
                 let change = fiche.first_name.trim() != prenom || fiche.last_name.trim() != nom;
-                if change && fiche.has_account {
+                // L'auteur qui s'est lui-même déclaré intervenant corrige son propre
+                // profil depuis le dossier, civilité comprise (02/11) ; l'adresse,
+                // clé du rapprochement, ne bouge pas.
+                let soi = fiche.id == acteur;
+                let civilite = saisi
+                    .civility
+                    .as_deref()
+                    .map(str::trim)
+                    .filter(|c| !c.is_empty());
+                let civilite_changee =
+                    soi && civilite.is_some() && civilite != fiche.civility.as_deref();
+                if change && fiche.has_account && !soi {
                     return Err(ApiError::with_message(
                         ErrorCode::ProposalSpeakerIdentityLocked,
                         format!(
@@ -873,7 +885,10 @@ async fn resoudre_intervenants(
                     )
                     .field("speakers"));
                 }
-                if change {
+                if soi && (change || civilite_changee) {
+                    people::corriger_son_profil(&mut *conn, fiche.id, prenom, nom, civilite)
+                        .await?;
+                } else if change {
                     people::corriger_identite(
                         &mut *conn,
                         fiche.id,

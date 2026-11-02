@@ -23,6 +23,8 @@
     "foundWithAccount": "Elle a un compte : en la retenant, vous reprenez son profil tel qu'elle le tient à jour.",
     "foundWithoutAccount": "Elle n'a pas encore de compte : vous pourrez corriger ses informations si elles ont changé.",
     "useProfile": "Retenir ce profil",
+    "selfTitle": "C'est vous",
+    "selfDescription": "Vous pouvez corriger ici votre civilité, votre prénom et votre nom : ils seront enregistrés dans votre profil ePavillon. L'adresse électronique ne se modifie pas depuis un dossier.",
     "lockedTitle": "Profil de la plateforme retenu",
     "lockedDescription": "L'identité de cette personne lui appartient : seul son titulaire, ou l'IFDD, peut la modifier. Sa fonction et son organisation pour CETTE activité restent à votre main, ainsi que son rôle. Vous pouvez aussi la retirer du dossier.",
     "linkedTitle": "Personne déjà connue retenue",

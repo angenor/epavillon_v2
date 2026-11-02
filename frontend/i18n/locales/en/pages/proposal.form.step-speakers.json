@@ -23,6 +23,8 @@
     "foundWithAccount": "They have an account: keeping this profile means using the details they maintain themselves.",
     "foundWithoutAccount": "They do not have an account yet: you will be able to correct their details if anything has changed.",
     "useProfile": "Use this profile",
+    "selfTitle": "This is you",
+    "selfDescription": "You can correct your title, first name and last name here: they will be saved to your ePavillon profile. The email address cannot be changed from a proposal.",
     "lockedTitle": "Platform profile selected",
     "lockedDescription": "This person's identity belongs to them: only the account holder, or IFDD, can change it. Their position and organization FOR THIS ACTIVITY remain yours to set, as does their role. You can also remove them from the submission.",
     "linkedTitle": "Known person selected",

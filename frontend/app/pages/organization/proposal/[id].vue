@@ -479,7 +479,8 @@ function sectionProps(section: ProposalFileSection) {
   return {
     canEdit: canEditSections.value,
     editing: editor.editing.value === section,
-    locked: editor.editing.value !== null && editor.editing.value !== section,
+    // Les autres rubriques restent ouvrables : passer à l'une enregistre celle en cours.
+    locked: editor.saving.value && editor.editing.value !== section,
     saving: editor.saving.value,
     error: editor.editing.value === section ? editor.error.value : null,
   }

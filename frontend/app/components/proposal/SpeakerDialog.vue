@@ -138,7 +138,11 @@ let timer: ReturnType<typeof setTimeout> | null = null
  * COMPTE. Une personne connue sans compte reste corrigible : c'est le dossier
  * qui l'entretient, et personne d'autre ne le fera.
  */
-const isIdentityLocked = computed(() => form.value.person_id !== null && form.value.has_account)
+const auth = useAuthStore()
+/** L'auteur s'est déclaré intervenant : il corrige son propre profil d'ici, l'adresse exceptée (02/11). */
+const isSelf = computed(() => form.value.person_id !== null && form.value.person_id === auth.person?.id)
+const isIdentityLocked = computed(() => form.value.person_id !== null && form.value.has_account && !isSelf.value)
+const isEmailLocked = computed(() => form.value.person_id !== null && form.value.has_account)
 
 /**
  * LA CIVILITÉ FAIT EXCEPTION AU VERROUILLAGE quand le profil n'en porte pas.
@@ -182,7 +186,7 @@ async function runLookup(email: string): Promise<void> {
  */
 async function runSuggestions(value: string): Promise<void> {
   const needle = value.trim().toLowerCase()
-  if (needle.length < SUGGEST_MIN || isIdentityLocked.value) {
+  if (needle.length < SUGGEST_MIN || isEmailLocked.value) {
     suggestions.value = []
     return
   }
@@ -427,7 +431,7 @@ function removePhoto(): void {
             ? undefined
             : t('proposal.form.step-speakers.fields.email.hint')"
           :error="emailError"
-          :readonly="isIdentityLocked"
+          :readonly="isEmailLocked"
           @update:model-value="onEmailInput"
           @keydown="onEmailKeydown"
           @blur="touched = true; closeSuggestionsSoon()"
@@ -521,13 +525,17 @@ function removePhoto(): void {
       <!-- PROFIL RETENU. Dire ce qui est verrouillé, et pourquoi. -->
       <UiAlert
         v-else-if="form.person_id !== null"
-        :intent="isIdentityLocked ? 'success' : 'info'"
-        :title="isIdentityLocked
-          ? t('proposal.form.step-speakers.dialog.lockedTitle')
-          : t('proposal.form.step-speakers.dialog.linkedTitle')"
-        :message="isIdentityLocked
-          ? t('proposal.form.step-speakers.dialog.lockedDescription')
-          : t('proposal.form.step-speakers.dialog.linkedDescription')"
+        :intent="isIdentityLocked || isSelf ? 'success' : 'info'"
+        :title="isSelf
+          ? t('proposal.form.step-speakers.dialog.selfTitle')
+          : isIdentityLocked
+            ? t('proposal.form.step-speakers.dialog.lockedTitle')
+            : t('proposal.form.step-speakers.dialog.linkedTitle')"
+        :message="isSelf
+          ? t('proposal.form.step-speakers.dialog.selfDescription')
+          : isIdentityLocked
+            ? t('proposal.form.step-speakers.dialog.lockedDescription')
+            : t('proposal.form.step-speakers.dialog.linkedDescription')"
       >
         <template #actions>
           <UiButton
@@ -612,11 +620,8 @@ function removePhoto(): void {
       <UiTextarea
         v-model="form.bio"
         :label="t('proposal.form.step-speakers.fields.bio.label')"
-        :hint="isIdentityLocked
-          ? t('proposal.form.step-speakers.fields.bio.locked')
-          : t('proposal.form.step-speakers.fields.bio.hint')"
+        :hint="t('proposal.form.step-speakers.fields.bio.hint')"
         :maxlength="TEXT_LIMITS.speaker_bio"
-        :readonly="isIdentityLocked"
         :rows="4"
         auto-grow
       />

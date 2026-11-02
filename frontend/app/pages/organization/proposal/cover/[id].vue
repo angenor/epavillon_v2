@@ -109,7 +109,7 @@ const textsBlockedReason = computed(() => {
 watch(
   [() => editor.saved.value, textsBlockedReason],
   ([saved, blocked]) => {
-    if (saved && !blocked && !editor.working.value) editor.edit('presentation', 'speakers')
+    if (saved && !blocked && !editor.working.value) void editor.edit('presentation', 'speakers')
   },
   { immediate: true },
 )

@@ -136,6 +136,30 @@ pub async fn corriger_identite(
     Ok(())
 }
 
+/// L'auteur du dossier, intervenant lui-même, corrige son propre profil (02/11) :
+/// la seule écriture d'identité permise sur un compte depuis un dossier.
+pub async fn corriger_son_profil(
+    conn: &mut PgConnection,
+    person_id: Uuid,
+    first_name: &str,
+    last_name: &str,
+    civility: Option<&str>,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE identity.people
+            SET first_name = $2, last_name = $3, civility = COALESCE($4, civility)
+          WHERE id = $1",
+        person_id,
+        first_name.trim(),
+        last_name.trim(),
+        civility
+    )
+    .execute(conn)
+    .await?;
+
+    Ok(())
+}
+
 /// **COMPLÉTER une civilité absente, y compris sur un compte** (16/09).
 ///
 /// Ce n'est pas une exception au verrouillage d'identité, c'est son revers :

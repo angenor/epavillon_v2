@@ -64,7 +64,18 @@ export function useProposalFileEditor(proposalId: Ref<string>, onSaved: () => Pr
   /** Les défauts ne s'affichent qu'après une tentative : une rubrique qui s'ouvre en rouge réprimande avant la faute. */
   const shownIssues = computed(() => (tried.value ? issues.value : []))
 
-  function edit(section: ProposalFileSection, ...also: ProposalFileSection[]): void {
+  /**
+   * Ouvrir une autre rubrique enregistre d'abord celle qui est ouverte, si elle a
+   * changé (02/11) : on passe d'un bloc à l'autre sans bouton à chercher. Un
+   * refus garde la rubrique ouverte avec son message.
+   */
+  async function edit(section: ProposalFileSection, ...also: ProposalFileSection[]): Promise<void> {
+    if (!saved.value || saving.value) return
+    if (editing.value && editing.value !== section) {
+      const changed = JSON.stringify(working.value) !== JSON.stringify(saved.value)
+      if (changed && !(await save())) return
+      cancel()
+    }
     if (!saved.value) return
     // Copie détachée : annuler ne doit rien laisser dans le dossier affiché.
     working.value = JSON.parse(JSON.stringify(saved.value)) as ProposalDraft
@@ -81,13 +92,14 @@ export function useProposalFileEditor(proposalId: Ref<string>, onSaved: () => Pr
     error.value = null
   }
 
-  async function save(): Promise<void> {
+  /** Vrai quand la rubrique est enregistrée et refermée. */
+  async function save(): Promise<boolean> {
     const current = working.value
     const context = data.value
     const person = auth.person
-    if (!current || !context || !person || !context.editable.call_id) return
+    if (!current || !context || !person || !context.editable.call_id) return false
     tried.value = true
-    if (issues.value.some((issue) => issue.severity === 'error')) return
+    if (issues.value.some((issue) => issue.severity === 'error')) return false
 
     saving.value = true
     error.value = null
@@ -100,8 +112,10 @@ export function useProposalFileEditor(proposalId: Ref<string>, onSaved: () => Pr
       })
       await Promise.all([refresh(), onSaved()])
       cancel()
+      return true
     } catch (thrown) {
       error.value = apiErrorMessage(thrown, (key) => t(key))
+      return false
     } finally {
       saving.value = false
     }
