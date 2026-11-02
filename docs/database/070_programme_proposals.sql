@@ -72,6 +72,9 @@ INSERT INTO programme.proposal_transitions_allowed
     ('changes_requested', 'withdrawn',         NULL,                        true,  false),
     ('changes_requested', 'rejected',          'programme.proposal.decide', false, false),
     ('accepted',          'cancelled',         'programme.proposal.decide', false, false),
+    -- 02/11/2026 : une activité retenue puis retirée du programme avant toute
+    -- annonce redevient « en évaluation » ; « annulé » est définitif.
+    ('accepted',          'under_review',      'programme.proposal.decide', false, true),
     ('rejected',          'under_review',      'programme.proposal.decide', false, true)
 ON CONFLICT DO NOTHING;
 

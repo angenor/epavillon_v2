@@ -584,3 +584,10 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - **`programme.tg_session_tracks_follow_registrations`** : une activité ajoutée à une journée l'est d'office aux inscrits de la journée (une inscription ordinaire déjà prise y est rattachée) ; retirée, leurs lignes rattachées sont annulées, sans courriel. Rien en cascade de suppression.
 
 **En production** : `ops/migrations/2026-11-02-inscription-journee-jauge.sql`, rejouable, sans colonne nouvelle, à jouer APRÈS `2026-11-02-inscription-journee.sql` et avant de déployer l'API et le worker. Syntaxe vérifiée par libpg_query ; les deux fonctions remplacées sont identiques en production à celles du dépôt avant changement. Pas jouée (aucune base locale).
+
+## 2026-11-02 : un dossier retenu peut repasser en évaluation
+
+- **`programme.proposal_transitions_allowed`** : `accepted -> under_review` (permission `programme.proposal.decide`, motif exigé, comme `rejected -> under_review`). Cas : une activité retenue puis retirée du programme avant l'annonce ; `cancelled` est définitif.
+- Aucun bouton du back-office ne l'offre encore : la transition existe en base seulement.
+
+**En production** : `ops/migrations/2026-11-02-programme-cdp31-non-retenus.sql`, jouée (cinq dossiers CdP31 repassés en évaluation).
