@@ -114,9 +114,9 @@ export const SPEAKER_PHOTO_ENABLED = false
  * passe en rouge et l'envoi refuse, avec un message.
  */
 export const TEXT_LIMITS = {
-  title: 180,
-  objectives: 1200,
-  detailed_presentation: 4000,
+  title: 250,
+  objectives: 2000,
+  detailed_presentation: 6000,
   expected_outcomes: 1200,
   target_audience: 600,
   scheduling_constraints: 500,

@@ -30,9 +30,11 @@ const fn borne(champ: &'static str, max: usize) -> Borne {
     Borne { champ, max }
 }
 
-pub const TITRE: Borne = borne("title", 180);
-pub const OBJECTIFS: Borne = borne("objectives", 1200);
-pub const PRESENTATION: Borne = borne("detailed_presentation", 4000);
+// Relevées le 02/11 : les textes repris de la v1 allaient jusqu'à 234, 1 788 et
+// 5 338 caractères, et un dossier qui dépasse ne s'enregistrait plus du tout.
+pub const TITRE: Borne = borne("title", 250);
+pub const OBJECTIFS: Borne = borne("objectives", 2000);
+pub const PRESENTATION: Borne = borne("detailed_presentation", 6000);
 pub const RESULTATS: Borne = borne("expected_outcomes", 1200);
 pub const PUBLIC_VISE: Borne = borne("target_audiences", 600);
 pub const CONTRAINTES: Borne = borne("scheduling_constraints", 500);

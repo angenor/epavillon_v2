@@ -130,10 +130,10 @@ fn un_champ_vide_de_lediteur_est_reconnu_vide() {
 
 #[test]
 fn la_longueur_se_compte_en_caracteres_pas_en_octets() {
-    // Refuser un titre de 180 signes accentués parce qu'il fait 360 octets,
+    // Refuser un titre de 250 signes accentués parce qu'il fait 500 octets,
     // ce serait refuser le français.
-    assert!(limits::tient(&"é".repeat(180), &limits::TITRE));
-    assert!(!limits::tient(&"é".repeat(181), &limits::TITRE));
+    assert!(limits::tient(&"é".repeat(250), &limits::TITRE));
+    assert!(!limits::tient(&"é".repeat(251), &limits::TITRE));
 }
 
 #[test]
@@ -148,9 +148,9 @@ fn la_presentation_se_mesure_sur_le_texte_pas_sur_le_balisage() {
 #[test]
 fn les_bornes_sont_celles_du_front() {
     // Relevées sur `frontend/app/types/proposal-form.ts` — `TEXT_LIMITS`.
-    assert_eq!(limits::TITRE.max, 180);
-    assert_eq!(limits::OBJECTIFS.max, 1200);
-    assert_eq!(limits::PRESENTATION.max, 4000);
+    assert_eq!(limits::TITRE.max, 250);
+    assert_eq!(limits::OBJECTIFS.max, 2000);
+    assert_eq!(limits::PRESENTATION.max, 6000);
     assert_eq!(limits::RESULTATS.max, 1200);
     assert_eq!(limits::PUBLIC_VISE.max, 600);
     assert_eq!(limits::CONTRAINTES.max, 500);
