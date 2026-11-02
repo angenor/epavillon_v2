@@ -127,7 +127,7 @@ const isEmpty = computed(() => shown.value.length === 0 && upcomingEditions.valu
     "
     aria-labelledby="a-venir-titre"
   >
-    <div class="flex items-start gap-3">
+    <div class="flex gap-3">
       <div class="min-w-0 flex-1">
         <!-- La couleur est explicite : `main.css` peint les titres en `--color-heading`, invisible ici. -->
         <h2
@@ -139,11 +139,13 @@ const isEmpty = computed(() => shown.value.length === 0 && upcomingEditions.valu
         </h2>
         <p v-if="subtitle" class="mt-0.5 text-sm text-text-on-inverse-muted">{{ subtitle }}</p>
       </div>
+      <!-- Plus haute que l'en-tête : les marges négatives la font déborder dans le blanc du panneau sans l'agrandir. -->
       <span
         v-if="logo"
-        class="flex h-12 max-w-[26%] shrink-0 items-center justify-center rounded-lg bg-surface-inverse-selected p-1.5 sm:max-w-30"
+        class="flex h-16 max-w-[26%] shrink-0 items-center justify-center self-center rounded-lg bg-surface-inverse-selected p-1.5 sm:max-w-36"
+        :class="subtitle ? '-my-2' : '-my-4.5'"
       >
-        <img :src="logo.src" :alt="logo.alt" class="max-h-9 max-w-full object-contain">
+        <img :src="logo.src" :alt="logo.alt" class="max-h-13 max-w-full object-contain">
       </span>
     </div>
 
