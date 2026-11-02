@@ -132,6 +132,7 @@ pub async fn create(conn: &mut PgConnection, fiche: NewOrganization<'_>) -> Resu
 /// Les champs que l'équipe corrige (31/10). Rend les colonnes changées, `None`
 /// si la fiche n'existe pas. `tg_organizations_sync_names` fait de l'ancien nom
 /// et de l'ancien sigle des anciens noms, toujours cherchables.
+#[allow(clippy::too_many_arguments)]
 pub async fn update_profile(
     conn: &mut PgConnection,
     id: OrganizationId,

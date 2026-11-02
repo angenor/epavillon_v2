@@ -29,8 +29,9 @@ pub async fn identite(
     id: OrganizationId,
 ) -> Result<Option<OrganizationDetail>> {
     let ligne = sqlx::query!(
-        r#"SELECT o.id, o.legal_name, o.acronym, o.acronym_well_known, o.slug::text AS "slug!",
-                  o.status::text AS "statut!", o.organization_type_code,
+        r#"SELECT o.id AS "id!", o.legal_name AS "legal_name!", o.acronym,
+                  o.acronym_well_known AS "acronym_well_known!", o.slug::text AS "slug!",
+                  o.status::text AS "statut!", o.organization_type_code AS "organization_type_code!",
                   t.label::jsonb AS "type_label?",
                   o.country_id, c.name::jsonb AS "country_name?", o.city,
                   o.description::jsonb AS "description?",
@@ -39,7 +40,7 @@ pub async fn identite(
                   o.contact_phone,
                   o.verified_at,
                   v.display_name AS "verified_by_name?",
-                  o.trust_score, o.created_at,
+                  o.trust_score AS "trust_score!", o.created_at AS "created_at!",
                   cr.display_name AS "created_by_name?",
                   o.merged_into_id, o.merged_at,
                   cible.legal_name AS "merged_into_name?"

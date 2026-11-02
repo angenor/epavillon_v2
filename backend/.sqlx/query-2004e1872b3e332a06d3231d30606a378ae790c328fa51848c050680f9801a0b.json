@@ -1,0 +1,490 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id AS \"id!\", v.event_id AS \"event_id!\", v.event_day_id,\n                  v.proposal_id, v.slug::text AS \"slug!\", v.title AS \"title!\",\n                  v.summary, v.starts_at AS \"starts_at!\", v.ends_at AS \"ends_at!\",\n                  v.timezone::text AS \"timezone!\", v.format::text AS \"format!\",\n                  v.status::text AS \"status!\",\n                  v.room_id, v.room_name, v.organization_id, v.organization_name,\n                  v.organization_acronym, v.organization_country_code,\n                  v.organization_country,\n                  v.is_streamed AS \"is_streamed!\", v.broadcast_channel_id,\n                  v.capacity::int4 AS \"capacity?\",\n                  v.tracks AS \"tracks!\", v.cover,\n                  v.temporal_state AS \"temporal_state!\",\n                  v.registered_count AS \"registered_count!\",\n                  v.theme_codes AS \"theme_codes!\", v.themes AS \"themes!\",\n                  v.waitlist_enabled AS \"waitlist_enabled!\",\n                  v.registration_required AS \"registration_required!\",\n                  v.registration_opens_at, v.registration_closes_at,\n                  v.waitlisted_count AS \"waitlisted_count!\",\n                  v.listing_changed_at AS \"listing_changed_at!\",\n                  v.language_codes::text[] AS \"language_codes?\",\n                  v.replay_url, v.replay_duration_seconds,\n                  v.organization_logo, v.organization_type_code,\n                  v.proposals AS \"proposals!\",\n                  v.organization_acronym_well_known AS \"organization_acronym_well_known!\"\n             FROM programme.v_public_schedule v\n            WHERE ($1::uuid IS NULL OR v.event_id = $1)\n              AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))\n              AND ($3::uuid[] IS NULL OR v.id = ANY($3))\n            ORDER BY v.starts_at, v.id\n            LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "event_day_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "event_day_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "proposal_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "proposal_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "summary",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "summary"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "starts_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "ends_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "room_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "room_id"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "room_name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "room_name"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "organization_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_name"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "organization_acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "organization_country_code",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_country_code"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "organization_country",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_country"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "is_streamed!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "is_streamed"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "broadcast_channel_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "broadcast_channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "capacity?",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "capacity"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "tracks!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "tracks"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "cover",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "cover"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "temporal_state!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "temporal_state"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "registered_count!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "registered_count"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "theme_codes!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "theme_codes"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "themes!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "themes"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "waitlist_enabled!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "waitlist_enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 29,
+        "name": "registration_required!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "registration_required"
+          }
+        }
+      },
+      {
+        "ordinal": 30,
+        "name": "registration_opens_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "registration_opens_at"
+          }
+        }
+      },
+      {
+        "ordinal": 31,
+        "name": "registration_closes_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "registration_closes_at"
+          }
+        }
+      },
+      {
+        "ordinal": 32,
+        "name": "waitlisted_count!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "waitlisted_count"
+          }
+        }
+      },
+      {
+        "ordinal": 33,
+        "name": "listing_changed_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "listing_changed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 34,
+        "name": "language_codes?",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "language_codes"
+          }
+        }
+      },
+      {
+        "ordinal": 35,
+        "name": "replay_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "replay_url"
+          }
+        }
+      },
+      {
+        "ordinal": 36,
+        "name": "replay_duration_seconds",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "replay_duration_seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 37,
+        "name": "organization_logo",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_logo"
+          }
+        }
+      },
+      {
+        "ordinal": 38,
+        "name": "organization_type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 39,
+        "name": "proposals!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "proposals"
+          }
+        }
+      },
+      {
+        "ordinal": 40,
+        "name": "organization_acronym_well_known!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_acronym_well_known"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "2004e1872b3e332a06d3231d30606a378ae790c328fa51848c050680f9801a0b"
+}
