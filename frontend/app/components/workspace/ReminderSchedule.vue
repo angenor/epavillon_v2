@@ -96,8 +96,6 @@ function stateOf(slot: ReminderSlot): 'sent' | 'pending' | 'skipped' {
         </time>
 
         <span class="text-sm text-text-muted">
-          {{ t('organization.workspace.proposal.sessions.reminders.recipients', slot.recipient_count) }}
-          ·
           {{ t(`organization.workspace.proposal.sessions.reminders.channel.${slot.channel}`) }}
         </span>
       </li>

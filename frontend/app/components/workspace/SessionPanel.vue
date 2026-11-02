@@ -84,14 +84,8 @@ const { date, timeRangeFull } = useDateTime()
           </div>
         </dl>
 
+        <!-- Le nombre d'inscrits ne se montre pas aux organisations (décision du commanditaire, 02/11). -->
         <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-          <span v-if="!props.editionOver" class="inline-flex items-center gap-2 font-semibold text-text">
-            <UiIcon name="users" size="1rem" class="text-text-subtle" />
-            {{ t('organization.workspace.proposal.sessions.registered', tracked.registered_count) }}
-          </span>
-          <span v-if="!props.editionOver && tracked.waitlisted_count > 0" class="text-text-muted">
-            {{ t('organization.workspace.proposal.sessions.waitlisted', tracked.waitlisted_count) }}
-          </span>
           <span v-if="tracked.capacity !== null" class="text-text-muted">
             {{ t('organization.workspace.proposal.sessions.capacity', { count: tracked.capacity }) }}
           </span>
