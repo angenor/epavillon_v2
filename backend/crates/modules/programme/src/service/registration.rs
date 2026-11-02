@@ -150,6 +150,9 @@ pub async fn sinscrire(
         Fenetre::SeanceAnnulee | Fenetre::SansInscription => {
             return Err(ApiError::new(ErrorCode::RegistrationNotAccepted));
         }
+        Fenetre::Terminee => {
+            return Err(ApiError::new(ErrorCode::RegistrationSessionEnded));
+        }
         Fenetre::PasEncoreOuverte(opens_at) => {
             return Ok(IssueDInscription::NotOpenYet { opens_at });
         }
@@ -195,15 +198,19 @@ pub async fn sinscrire(
 /// La fenêtre, telle que le domaine la décide, sur des valeurs **relues sous
 /// verrou**.
 fn fenetre_de(seance: &registrations::SeanceVerrouillee) -> Fenetre {
+    let maintenant = OffsetDateTime::now_utc();
     registration::fenetre(
         EtatDInscription {
             publiee: seance.published,
             annulee: seance.status == "cancelled",
+            // Un direct qui déborde reste ouvert : seule sa fin par la régie le clôt.
+            terminee: seance.status == "completed"
+                || (seance.status != "live" && maintenant > seance.ends_at),
             inscription_requise: seance.registration_required,
             ouvre_le: seance.registration_opens_at,
             ferme_le: seance.registration_closes_at,
         },
-        OffsetDateTime::now_utc(),
+        maintenant,
     )
 }
 

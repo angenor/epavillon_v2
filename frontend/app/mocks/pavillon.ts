@@ -272,6 +272,9 @@ export function inscrire(sessionId: string, payload: SessionRegisterPayload): Re
   if (!l.registration_required || l.status === 'cancelled') {
     throw new ApiRequestError({ code: 'REGISTRATION_NOT_ACCEPTED', message: "Cette séance ne prend pas d'inscription." }, 422)
   }
+  if (l.status === 'completed' || (l.status !== 'live' && Date.now() > Date.parse(l.ends_at))) {
+    throw new ApiRequestError({ code: 'REGISTRATION_SESSION_ENDED', message: "Cette activité est terminée : on ne peut plus s'y inscrire." }, 409)
+  }
   const deja = vivante(sessionId)
   if (deja) return { status: 'already_registered', registration: deja }
   if (l.registration_closes_at && Date.now() >= new Date(l.registration_closes_at).getTime()) {

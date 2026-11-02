@@ -155,6 +155,9 @@ pub async fn garder(
                 tr.source, tr.id
            FROM unnest($2::uuid[]) AS g(session_id)
            JOIN programme.track_registrations tr ON tr.id = $1
+           JOIN programme.sessions s ON s.id = g.session_id
+          -- Une activité terminée ne se prend plus (02/11) ; déjà gardée, elle le reste.
+          WHERE s.status <> 'completed' AND (s.status = 'live' OR s.ends_at >= now())
          ON CONFLICT (session_id, person_id) WHERE status <> 'cancelled'
          DO UPDATE SET track_registration_id = EXCLUDED.track_registration_id,
                        waitlist_position = NULL,

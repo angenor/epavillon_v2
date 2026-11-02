@@ -75,6 +75,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (ticker) clearInterval(ticker)
   if (noticeTimer) clearTimeout(noticeTimer)
+  if (hostPoll) clearInterval(hostPoll)
 })
 
 const timezone = computed(() => screen.value?.timezone ?? 'UTC')
@@ -124,6 +125,26 @@ async function reload(): Promise<void> {
 }
 
 useRealtime(() => regieTopics(eventId.value), () => void reload())
+
+// Démarrer fait créer la réunion chez Zoom, en file : le signal du poste l'annonce, mais il n'est
+// servi qu'avec `live.meeting.manage`. Sans lui, on relit tant que le lien d'animateur manque.
+const HOST_POLL_MS = 5_000
+const awaitingHost = computed(() => Boolean(live.value?.is_streamed && !live.value.meeting?.ready))
+let hostPoll: ReturnType<typeof setInterval> | null = null
+watch(
+  awaitingHost,
+  (waiting) => {
+    if (hostPoll) clearInterval(hostPoll)
+    hostPoll = import.meta.client && waiting ? setInterval(() => void reload(), HOST_POLL_MS) : null
+  },
+  { immediate: true },
+)
+watch(
+  () => (live.value?.meeting?.ready ? live.value.session_id : null),
+  (ready, before) => {
+    if (ready && before === null) toast.success(t('admin.regie.now.hostArrived'))
+  },
+)
 
 let noticeTimer: ReturnType<typeof setTimeout> | null = null
 watch(
@@ -231,10 +252,16 @@ async function confirmPresence(session: RegieSession): Promise<void> {
   await reload()
 }
 
+/** Réunion déjà prête : Zoom s'ouvre du même clic. Sinon son lien viendra s'afficher en grand. */
 async function startLive(session: RegieSession): Promise<void> {
+  const popup = session.meeting?.ready && canManageMeeting.value ? window.open('', '_blank') : null
   const gesture = await run(`start:${session.session_id}`, () => api.adminRegie.startLive(session.session_id))
-  if (!gesture) return
+  if (!gesture) {
+    popup?.close()
+    return
+  }
   offerUndo(gesture, t('admin.regie.undo.started', { name: nameOf(session) }))
+  if (popup) void sendHost(popup, session)
   await reload()
 }
 
@@ -255,7 +282,10 @@ async function createMeeting(session: RegieSession): Promise<void> {
 
 /** L'onglet s'ouvre au clic, avant l'appel : ouvert après, un bloqueur de fenêtres le refuserait. */
 async function openHost(session: RegieSession): Promise<void> {
-  const popup = window.open('', '_blank')
+  await sendHost(window.open('', '_blank'), session)
+}
+
+async function sendHost(popup: Window | null, session: RegieSession): Promise<void> {
   const link = await run(`host:${session.session_id}`, () => api.meetings.hostLink(session.session_id))
   if (!link) {
     popup?.close()

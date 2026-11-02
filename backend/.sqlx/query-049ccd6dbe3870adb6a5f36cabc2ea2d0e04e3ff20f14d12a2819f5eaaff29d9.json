@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.registrations\n                (session_id, person_id, organization_id, answers, locale, source,\n                 track_registration_id)\n         SELECT g.session_id, tr.person_id, tr.organization_id, tr.answers, tr.locale,\n                tr.source, tr.id\n           FROM unnest($2::uuid[]) AS g(session_id)\n           JOIN programme.track_registrations tr ON tr.id = $1\n           JOIN programme.sessions s ON s.id = g.session_id\n          -- Une activité terminée ne se prend plus (02/11) ; déjà gardée, elle le reste.\n          WHERE s.status <> 'completed' AND (s.status = 'live' OR s.ends_at >= now())\n         ON CONFLICT (session_id, person_id) WHERE status <> 'cancelled'\n         DO UPDATE SET track_registration_id = EXCLUDED.track_registration_id,\n                       waitlist_position = NULL,\n                       status = CASE WHEN programme.registrations.status = 'waitlisted'\n                                     THEN 'registered'::programme.registration_status\n                                     ELSE programme.registrations.status END\n                 WHERE programme.registrations.track_registration_id\n                       IS DISTINCT FROM EXCLUDED.track_registration_id",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "049ccd6dbe3870adb6a5f36cabc2ea2d0e04e3ff20f14d12a2819f5eaaff29d9"
+}

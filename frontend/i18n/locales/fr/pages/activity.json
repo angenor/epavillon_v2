@@ -120,7 +120,8 @@
       "meeting": "La réunion a commencé : l'entrée se fait dans l'ordre d'arrivée, dans la limite des places.",
       "meetingStarts": "La réunion commence le {date} à {time}. Si elle n'a pas encore commencé, vous patienterez dans la salle d'attente de Zoom.",
       "meetingAfter": "L'horaire prévu est passé, mais la réunion peut se prolonger : entrez pour voir si elle est encore en cours.",
-      "freeMeeting": "Entrée libre, sans inscription."
+      "freeMeeting": "Entrée libre, sans inscription.",
+      "liveRegister": "Le direct a commencé : inscrivez-vous, la salle Zoom s'ouvre aussitôt après."
     },
     "languages": "Langues",
     "calendar": "Agenda",
@@ -149,7 +150,8 @@
       "guest": "Le lien du direct de la journée vous arrive par courriel ; son lien de gestion permet de changer vos activités.",
       "joinLead": "Inscrit·e à la journée : ce direct est celui de toute la journée, de l'ouverture à la clôture.",
       "edit": "Modifier mes activités",
-      "join": "Rejoindre le direct de la journée"
+      "join": "Rejoindre le direct de la journée",
+      "endedNote": "Cette activité est terminée. La journée « {day} » continue : l'inscription se fait depuis sa page."
     }
   },
   "gallery": {

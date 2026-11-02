@@ -58,8 +58,10 @@ const { now, mounted, timezone, phase, countdown, entryState, current } = useTra
 
 const { mine } = useDayRegistration(() => page.value?.track.id ?? null)
 const kept = computed(() => (mine.value ? new Set(mine.value.session_ids) : null))
-const { meeting } = useTrackMeeting(() => (page.value ? { id: page.value.track.id, eventId: page.value.edition.id } : null))
-const meetingJoinable = computed(() => isMeetingJoinable(meeting.value))
+const dayLive = computed(() => (page.value ? isDayLive(page.value) : false))
+const { meeting } = useTrackMeeting(() => (page.value ? { id: page.value.track.id, eventId: page.value.edition.id, expected: dayLive.value } : null))
+// Direct démarré : « Rejoindre » mène à la salle, qui attend la réunion en création.
+const meetingJoinable = computed(() => isMeetingJoinable(meeting.value) || dayLive.value)
 const roomTo = computed(() =>
   localePath({ name: 'track-edition-track-room', params: { edition: editionSlug.value, track: trackSlug.value }, query: { entrer: '1' } }),
 )

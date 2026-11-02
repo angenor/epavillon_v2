@@ -3,20 +3,23 @@
   "checking": "Vérification de votre accès…",
   "login": {
     "message": "Connectez-vous pour entrer dans la réunion.",
-    "action": "Se connecter"
+    "action": "Se connecter",
+    "registerMessage": "La réunion est réservée aux personnes inscrites. Inscrivez-vous, ou connectez-vous si vous l'êtes déjà."
   },
   "register": {
     "message": "La réunion est réservée aux personnes inscrites.",
     "action": "S'inscrire",
     "day": "S'inscrire à la journée",
-    "dayMessage": "Le direct de la journée est réservé à ses inscrits. Une inscription vaut pour toute la journée."
+    "dayMessage": "Le direct de la journée est réservé à ses inscrits. Une inscription vaut pour toute la journée.",
+    "ended": "Cette activité est terminée : on ne peut plus s'y inscrire."
   },
   "ready": "Entrez depuis cette page, sans installer Zoom. Si la réunion n'a pas commencé, Zoom vous fait patienter.",
   "join": "Rejoindre la réunion",
   "step": {
     "access": "Vérification de votre inscription…",
     "sdk": "Chargement de Zoom…",
-    "joining": "Entrée dans la réunion…"
+    "joining": "Entrée dans la réunion…",
+    "waiting": "Votre place dans la réunion se prépare chez Zoom…"
   },
   "joined": "Vous êtes dans la réunion.",
   "waitlisted": "Vous êtes en liste d'attente : l'entrée se fait dans l'ordre d'arrivée, dans la limite des places.",

@@ -70,7 +70,7 @@ const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, 
         <template v-if="props.editionLabel && organization">, </template>{{ organization }}
         <span v-if="zone" class="block">{{ zone }}</span>
       </p>
-      <div v-if="isLive(props.session.id) || props.session.temporal_state === 'ongoing'" class="mt-1.5">
+      <div v-if="isLive(props.session.id) || (props.session.temporal_state === 'ongoing' && props.session.status !== 'completed')" class="mt-1.5">
         <UiLiveBadge :session-id="props.session.id" size="sm" />
         <UiStatusBadge
           v-if="!isLive(props.session.id)"

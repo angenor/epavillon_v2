@@ -6,7 +6,7 @@ import type { PublicScheduleRow } from '~/types/views'
 export type MeetingRoomPhase = 'checking' | 'login' | 'register' | 'ready' | 'loading' | 'joined' | 'error'
 
 /** Étapes de `loading`, dans l'ordre. */
-export type MeetingRoomStep = 'access' | 'sdk' | 'joining'
+export type MeetingRoomStep = 'access' | 'waiting' | 'sdk' | 'joining'
 
 /**
  * La salle d'une activité, ou celle d'une journée (journée spéciale, atelier) :
@@ -28,6 +28,11 @@ export function isMeetingJoinable(meeting: PublicSessionMeeting | null): boolean
 /** Relecture rapprochée après un changement, espacée tant que rien ne bouge. */
 const POLL_FAST_MS = 60_000
 const POLL_SLOW_MS = 120_000
+/** Direct en cours sans salle encore : la régie vient de la faire créer, elle arrive en quelques secondes. */
+const POLL_EXPECTED_MS = 8_000
+
+const NOT_READY_ATTEMPTS = 10
+const NOT_READY_DELAY_MS = 4_000
 
 interface PolledMeetingSource {
   /** Séance ou fil. */
@@ -35,6 +40,8 @@ interface PolledMeetingSource {
   eventId: string
   /** Faux : rien à relire (séance non diffusée, annulée). */
   watched: boolean
+  /** La réunion doit exister (direct en cours) : on la guette de près tant qu'elle manque. */
+  expected?: boolean
 }
 
 /**
@@ -80,8 +87,13 @@ function usePolledMeeting(
     if (!mounted) return
     timer = setTimeout(async () => {
       const changed = source()?.watched && document.visibilityState === 'visible' ? await load() : false
-      schedule(changed ? POLL_FAST_MS : POLL_SLOW_MS)
+      schedule(nextDelay(changed))
     }, delay)
+  }
+
+  function nextDelay(changed: boolean): number {
+    if (source()?.expected && meeting.value === null) return POLL_EXPECTED_MS
+    return changed ? POLL_FAST_MS : POLL_SLOW_MS
   }
 
   const onReturn = () => {
@@ -97,7 +109,7 @@ function usePolledMeeting(
   onMounted(() => {
     mounted = true
     void load()
-    schedule(POLL_FAST_MS)
+    schedule(source()?.expected ? POLL_EXPECTED_MS : POLL_FAST_MS)
     document.addEventListener('visibilitychange', onReturn)
     window.addEventListener('focus', onReturn)
   })
@@ -127,7 +139,8 @@ export function useSessionMeeting(session: MaybeRefOrGetter<PublicScheduleRow | 
     () => {
       const current = toValue(session)
       if (!current) return null
-      return { id: current.id, eventId: current.event_id, watched: Boolean(current.is_streamed) && current.temporal_state !== 'cancelled' }
+      const watched = Boolean(current.is_streamed) && current.temporal_state !== 'cancelled'
+      return { id: current.id, eventId: current.event_id, watched, expected: watched && current.status === 'live' }
     },
     (id) => api.meetings.forSession(id),
     keep,
@@ -135,7 +148,10 @@ export function useSessionMeeting(session: MaybeRefOrGetter<PublicScheduleRow | 
 }
 
 /** La réunion unique d'une journée : la même de l'ouverture à la clôture. */
-export function useTrackMeeting(track: MaybeRefOrGetter<{ id: string; eventId: string } | null>, keep: () => boolean = () => false) {
+export function useTrackMeeting(
+  track: MaybeRefOrGetter<{ id: string; eventId: string; expected?: boolean } | null>,
+  keep: () => boolean = () => false,
+) {
   const api = useApi()
   return usePolledMeeting(
     () => {
@@ -206,6 +222,23 @@ export function useMeetingRoom(target: MaybeRefOrGetter<MeetingRoomTarget>) {
     return 'ready'
   })
 
+  /**
+   * Juste inscrit, la place chez Zoom se crée en file : « pas prête » le temps qu'elle arrive.
+   * On patiente plutôt que d'opposer une erreur à qui vient de s'inscrire pour entrer.
+   */
+  async function fetchAccessPatiently(): Promise<MeetingAccess> {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await fetchAccess()
+      } catch (failure) {
+        const notReady = failure instanceof ApiRequestError && failure.code === 'LIVE_MEETING_NOT_READY'
+        if (!notReady || attempt >= NOT_READY_ATTEMPTS) throw failure
+        step.value = 'waiting'
+        await new Promise((resolve) => setTimeout(resolve, NOT_READY_DELAY_MS))
+      }
+    }
+  }
+
   async function fetchAccess(): Promise<MeetingAccess> {
     const known = access.value
     if (known && Date.parse(known.expires_at) - Date.now() > 60_000) return known
@@ -224,7 +257,7 @@ export function useMeetingRoom(target: MaybeRefOrGetter<MeetingRoomTarget>) {
     errorStatus.value = null
     step.value = 'access'
     try {
-      const granted = await fetchAccess()
+      const granted = await fetchAccessPatiently()
       step.value = 'sdk'
       await start(granted, (next) => (step.value = next))
       step.value = 'joined'

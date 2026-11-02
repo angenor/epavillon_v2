@@ -36,7 +36,12 @@
     "progress": "Slot progress",
     "openHost": "Open Zoom (host)",
     "endLive": "End the live stream",
-    "overrun": "Report an overrun"
+    "overrun": "Report an overrun",
+    "hostReady": "The Zoom meeting is ready: open it to start the live stream. Zoom opens in a new tab.",
+    "hostPreparing": "Creating the Zoom meeting: the host link will appear here in a moment.",
+    "hostFailed": "Zoom has not accepted the meeting yet. It retries on its own; you can also try again now.",
+    "retryMeeting": "Try again",
+    "hostArrived": "The Zoom meeting is ready: the host link is shown."
   },
   "startBlock": {
     "other_live": "One live stream at a time: end {name}'s first.",
@@ -146,7 +151,7 @@
     "theOrganizers": "the organisers",
     "presence": "{orgs} has not confirmed attendance. | {orgs} has not confirmed attendance. | {orgs} have not confirmed attendance.",
     "documents": "{orgs} has not uploaded any presentation. | {orgs} has not uploaded any presentation. | {orgs} have not uploaded any presentation.",
-    "no_meeting": "no Zoom meeting created.",
+    "no_meeting": "no Zoom meeting yet: it will be created when the live stream starts.",
     "meeting_not_ready": "the Zoom meeting is not ready."
   },
   "incidents": {

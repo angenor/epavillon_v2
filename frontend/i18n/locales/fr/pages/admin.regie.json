@@ -36,7 +36,12 @@
     "progress": "Avancement du créneau",
     "openHost": "Ouvrir Zoom (animateur)",
     "endLive": "Terminer le direct",
-    "overrun": "Signaler un débordement"
+    "overrun": "Signaler un débordement",
+    "hostReady": "La réunion Zoom est prête : ouvrez-la pour lancer le direct. Zoom s'ouvre dans un nouvel onglet.",
+    "hostPreparing": "Création de la réunion Zoom en cours : le lien d'animateur s'affichera ici dans un instant.",
+    "hostFailed": "Zoom n'a pas encore accepté la réunion. Un nouvel essai part de lui-même ; vous pouvez aussi relancer.",
+    "retryMeeting": "Relancer la création",
+    "hostArrived": "La réunion Zoom est prête : le lien d'animateur est affiché."
   },
   "startBlock": {
     "other_live": "Un seul direct à la fois : terminez d'abord celui de {name}.",
@@ -146,7 +151,7 @@
     "theOrganizers": "les organisateurs",
     "presence": "{orgs} n'a pas confirmé sa présence. | {orgs} n'a pas confirmé sa présence. | {orgs} n'ont pas confirmé leur présence.",
     "documents": "{orgs} n'a déposé aucune présentation. | {orgs} n'a déposé aucune présentation. | {orgs} n'ont déposé aucune présentation.",
-    "no_meeting": "aucune réunion Zoom créée.",
+    "no_meeting": "pas encore de réunion Zoom : elle sera créée au démarrage du direct.",
     "meeting_not_ready": "la réunion Zoom n'est pas prête."
   },
   "incidents": {

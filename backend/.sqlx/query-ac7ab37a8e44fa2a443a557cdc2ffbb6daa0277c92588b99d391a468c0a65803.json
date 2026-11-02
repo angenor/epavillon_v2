@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, event_id, status::text AS \"status!\",\n                  published_at IS NOT NULL AS \"published!\", registration_required,\n                  registration_opens_at, registration_closes_at,\n                  capacity, waitlist_enabled\n             FROM programme.sessions\n            WHERE id = $1\n              FOR UPDATE",
+  "query": "SELECT id, event_id, status::text AS \"status!\", ends_at,\n                  published_at IS NOT NULL AS \"published!\", registration_required,\n                  registration_opens_at, registration_closes_at,\n                  capacity, waitlist_enabled\n             FROM programme.sessions\n            WHERE id = $1\n              FOR UPDATE",
   "describe": {
     "columns": [
       {
@@ -33,12 +33,23 @@
       },
       {
         "ordinal": 3,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
         "name": "published!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "registration_required",
         "type_info": "Bool",
         "origin": {
@@ -49,7 +60,7 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "registration_opens_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -60,7 +71,7 @@
         }
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "registration_closes_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -71,7 +82,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "capacity",
         "type_info": "Int4",
         "origin": {
@@ -82,7 +93,7 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 9,
         "name": "waitlist_enabled",
         "type_info": "Bool",
         "origin": {
@@ -102,6 +113,7 @@
       false,
       false,
       null,
+      false,
       null,
       false,
       true,
@@ -110,5 +122,5 @@
       false
     ]
   },
-  "hash": "52710b747e4e2d73b0b84b816f4a8da5e1787b449975008199cbfcd461d4e47e"
+  "hash": "ac7ab37a8e44fa2a443a557cdc2ffbb6daa0277c92588b99d391a468c0a65803"
 }

@@ -66,7 +66,14 @@ const until = computed(() => {
   return params.room ? t('admin.regie.now.untilRoom', params) : t('admin.regie.now.until', params)
 })
 
-const needsMeeting =computed(() => props.session.is_streamed && !props.session.meeting)
+const needsMeeting = computed(() => props.session.is_streamed && !props.session.meeting)
+/** En direct, la réunion qui manque se crée d'elle-même : on l'attend, le lien d'animateur prendra sa place. */
+const hostState = computed<'ready' | 'preparing' | 'failed' | null>(() => {
+  if (!isLive.value || !props.session.is_streamed) return null
+  const meeting = props.session.meeting
+  if (meeting?.ready) return 'ready'
+  return meeting && ['failed', 'abandoned'].includes(meeting.sync_status) ? 'failed' : 'preparing'
+})
 const blockText = computed(() =>
   props.startBlock ? t(`admin.regie.startBlock.${props.startBlock}`, { name: props.onAir ?? '' }) : null,
 )
@@ -125,15 +132,41 @@ const blockText = computed(() =>
 
     <div v-if="props.canSchedule || props.canPublishIncident" class="flex flex-wrap items-center gap-2.5 px-4 pb-4 sm:px-5 sm:pb-5">
       <template v-if="isLive">
-        <UiButton
-          v-if="props.session.meeting?.ready"
-          variant="live"
-          icon="video"
-          :loading="props.busy === `host:${id}`"
-          @click="emit('open-host')"
+        <div
+          v-if="hostState"
+          class="flex w-full flex-wrap items-center gap-x-4 gap-y-2.5 rounded-md border border-live-border bg-live-surface p-3 sm:p-4"
+          aria-live="polite"
         >
-          {{ t('admin.regie.now.openHost') }}
-        </UiButton>
+          <template v-if="hostState === 'ready'">
+            <UiButton
+              variant="live"
+              size="lg"
+              icon="video"
+              icon-trailing="external-link"
+              :loading="props.busy === `host:${id}`"
+              @click="emit('open-host')"
+            >
+              {{ t('admin.regie.now.openHost') }}
+            </UiButton>
+            <p class="min-w-0 flex-1 text-sm text-text">{{ t('admin.regie.now.hostReady') }}</p>
+          </template>
+          <template v-else>
+            <p class="flex min-w-0 flex-1 items-center gap-2 text-sm text-text" role="status">
+              <UiSpinner v-if="hostState === 'preparing'" size="1rem" />
+              <UiIcon v-else name="warning" size="1rem" class="shrink-0 text-warning" />
+              {{ t(hostState === 'preparing' ? 'admin.regie.now.hostPreparing' : 'admin.regie.now.hostFailed') }}
+            </p>
+            <UiButton
+              v-if="props.canManageMeeting"
+              variant="secondary"
+              icon="video"
+              :loading="props.busy === `meeting:${id}`"
+              @click="emit('create-meeting')"
+            >
+              {{ t(props.session.meeting ? 'admin.regie.now.retryMeeting' : 'admin.regie.slot.createMeeting') }}
+            </UiButton>
+          </template>
+        </div>
         <UiButton v-if="props.canSchedule" variant="secondary" @click="emit('end-live')">
           {{ t('admin.regie.now.endLive') }}
         </UiButton>

@@ -37,11 +37,13 @@ const dayStyle = computed(() => trackDayStyle(page.value?.track.kind === 'specia
 
 // Une fois entré, on reste, même si la réunion change d'état sous la personne.
 const inMeeting = ref(false)
+const liveNow = computed(() => (page.value ? isDayLive(page.value) : false))
 const { meeting, loaded: meetingLoaded } = useTrackMeeting(
-  () => (page.value ? { id: page.value.track.id, eventId: page.value.edition.id } : null),
+  () => (page.value ? { id: page.value.track.id, eventId: page.value.edition.id, expected: liveNow.value } : null),
   () => inMeeting.value,
 )
-const open = computed(() => isMeetingJoinable(meeting.value) || inMeeting.value)
+// Le direct a démarré : la réunion en création arrive en quelques secondes, l'entrée l'attend.
+const open = computed(() => isMeetingJoinable(meeting.value) || liveNow.value || inMeeting.value)
 
 const day = useDayRegistration(trackId)
 const { dialogOpen, highlight } = day
@@ -94,7 +96,7 @@ useHead(() => ({
           <UiSkeletonLoader height="20rem" />
         </UiLoadingState>
 
-        <div v-else-if="open && meeting" class="relative min-h-[26rem] flex-1 overflow-hidden rounded-lg shadow-lg">
+        <div v-else-if="open" class="relative min-h-[26rem] flex-1 overflow-hidden rounded-lg shadow-lg">
           <ActivityZoomRoom
             class="absolute! inset-0"
             mode="page"

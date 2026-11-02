@@ -85,6 +85,9 @@ pub enum Fenetre {
     NonPubliee,
     /// La séance est annulée : `REGISTRATION_NOT_ACCEPTED`.
     SeanceAnnulee,
+    /// Le direct est terminé, ou l'heure de fin passée hors direct (02/11) :
+    /// `REGISTRATION_SESSION_ENDED`.
+    Terminee,
     /// `registration_required` est faux : la séance ne prend pas d'inscription.
     SansInscription,
     /// Avant `registration_opens_at`.
@@ -98,6 +101,7 @@ pub enum Fenetre {
 pub struct EtatDInscription {
     pub publiee: bool,
     pub annulee: bool,
+    pub terminee: bool,
     pub inscription_requise: bool,
     pub ouvre_le: Option<OffsetDateTime>,
     pub ferme_le: Option<OffsetDateTime>,
@@ -115,6 +119,9 @@ pub fn fenetre(etat: EtatDInscription, maintenant: OffsetDateTime) -> Fenetre {
     }
     if etat.annulee {
         return Fenetre::SeanceAnnulee;
+    }
+    if etat.terminee {
+        return Fenetre::Terminee;
     }
     if !etat.inscription_requise {
         return Fenetre::SansInscription;
@@ -141,6 +148,7 @@ mod tests {
         EtatDInscription {
             publiee: true,
             annulee: false,
+            terminee: false,
             inscription_requise: true,
             ouvre_le: None,
             ferme_le: None,
@@ -209,5 +217,14 @@ mod tests {
             ..etat()
         };
         assert_eq!(fenetre(etat, MAINTENANT), Fenetre::SeanceAnnulee);
+    }
+
+    #[test]
+    fn une_seance_terminee_ne_prend_plus_dinscription() {
+        let etat = EtatDInscription {
+            terminee: true,
+            ..etat()
+        };
+        assert_eq!(fenetre(etat, MAINTENANT), Fenetre::Terminee);
     }
 }
