@@ -23,6 +23,9 @@ export function pickableIds(page: PublicTrackPage): string[] {
   return page.agenda.flatMap((entry) => (entry.kind === 'activity' && isPickable(entry.activity) ? [entry.activity.session.id] : []))
 }
 
+/** Moins de deux activités (les moments ne comptent pas) : rien à choisir, on s'inscrit à la journée et c'est tout. */
+export const hasActivityChoice = (page: PublicTrackPage): boolean => pickableIds(page).length >= 2
+
 /**
  * Terminée : direct clos par la régie, ou heure de fin passée hors direct (comme l'API, 02/11).
  * Elle ne se prend plus ; déjà gardée, elle le reste.

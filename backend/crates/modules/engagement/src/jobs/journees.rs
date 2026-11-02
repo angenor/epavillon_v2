@@ -57,6 +57,21 @@ fn page(app: &str, j: &JourneePourCourriel, suite: Option<(&str, &str)>) -> Stri
     }
 }
 
+/// Les activités suivies, en un paragraphe. Une journée de moins de deux
+/// activités n'offre rien à choisir : le paragraphe se tait.
+fn suivi(anglais: bool, n: i64, m: i64) -> String {
+    let phrase = match (anglais, m < 2, n) {
+        (_, true, _) => return String::new(),
+        (false, _, 0) => "Vous n'avez gardé aucune activité en particulier : le direct reste ouvert toute la journée.".to_owned(),
+        (false, _, 1) => format!("Vous suivez 1 activité sur {m} : vous recevrez un rappel avant son début."),
+        (false, _, n) => format!("Vous suivez {n} activités sur {m} : vous recevrez un rappel avant le début de chacune."),
+        (true, _, 0) => "You have not kept any activity in particular: the live stream stays open all day.".to_owned(),
+        (true, _, 1) => format!("You are following 1 of {m} activities: you will get a reminder before it starts."),
+        (true, _, n) => format!("You are following {n} of {m} activities: you will get a reminder before each of them starts."),
+    };
+    phrase + "\n\n"
+}
+
 /// La confirmation, en français ou en anglais selon la langue d'inscription.
 pub fn confirmation(
     j: &JourneePourCourriel,
@@ -91,15 +106,15 @@ pub fn confirmation(
         let texte = format!(
             "Hello {prenom},\n\n\
              {intro} \"{titre}\" starts on {quand}. One link is all you need to follow the whole day live, from the welcome to the closing.\n\n\
-             You are following {n} of {m} activities: you will get a reminder before each of them starts.\n\n\
+             {suivi}\
              Join the live stream of the day, on the day:\n{direct}\n\n\
-             Change your activities or cancel your registration:\n{gestion}\n\n\
+             {changer}\n{gestion}\n\n\
              {perso}",
             prenom = j.first_name,
             intro = if renvoi { "Here is your link again." } else { "Your registration is confirmed." },
             titre = j.titre,
-            n = j.gardees,
-            m = j.activites,
+            suivi = suivi(true, j.gardees, j.activites),
+            changer = if j.activites < 2 { "Cancel your registration:" } else { "Change your activities or cancel your registration:" },
             perso = if jeton.is_some() { "These links are personal: please do not forward them." } else { "" },
         );
         (sujet, texte)
@@ -112,15 +127,15 @@ pub fn confirmation(
         let texte = format!(
             "Bonjour {prenom},\n\n\
              {intro} « {titre} » commence le {quand}. Un seul lien suffit pour suivre tout le direct de la journée, de l'accueil à la clôture.\n\n\
-             Vous suivez {n} activité(s) sur {m} : vous recevrez un rappel avant le début de chacune.\n\n\
+             {suivi}\
              Rejoindre le direct de la journée, le jour même :\n{direct}\n\n\
-             Changer vos activités ou vous désinscrire :\n{gestion}\n\n\
+             {changer}\n{gestion}\n\n\
              {perso}",
             prenom = j.first_name,
             intro = if renvoi { "Voici de nouveau votre lien." } else { "Votre inscription est confirmée." },
             titre = j.titre,
-            n = j.gardees,
-            m = j.activites,
+            suivi = suivi(false, j.gardees, j.activites),
+            changer = if j.activites < 2 { "Vous désinscrire :" } else { "Changer vos activités ou vous désinscrire :" },
             perso = if jeton.is_some() { "Ces liens vous sont personnels : ne les transférez pas." } else { "" },
         );
         (sujet, texte)
@@ -394,9 +409,19 @@ mod tests {
         assert!(m.text.contains(
             "https://site.org/programmations/cdp31/journees/finance/mon-inscription?jeton=abc"
         ));
-        assert!(m.text.contains("6 activité(s) sur 8"));
+        assert!(m.text.contains("Vous suivez 6 activités sur 8"));
         assert!(m.text.contains("(Europe/Istanbul)"));
         assert!(!m.text.contains('\u{2014}'));
+    }
+
+    #[test]
+    fn une_journee_sans_choix_ne_parle_pas_d_activites() {
+        let mut j = journee("fr");
+        j.gardees = 0;
+        j.activites = 0;
+        let m = confirmation(&j, None, false, "https://site.org/", "j");
+        assert!(!m.text.contains("activité"));
+        assert!(m.text.contains("Vous désinscrire :"));
     }
 
     #[test]

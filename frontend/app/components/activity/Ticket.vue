@@ -140,6 +140,7 @@ const dayNote = computed(() => {
   const value = dayMine.value
   const page = props.day?.page
   if (!value || !page) return t('activity.ticket.day.guest')
+  if (!hasActivityChoice(page)) return ''
   const count = keptIds(value.session_ids, page).length
   const following = t('activity.ticket.day.following', { count, total: value.activity_count }, count)
   return `${following} ${t(value.session_ids.includes(props.session.id) ? 'activity.ticket.day.kept' : 'activity.ticket.day.notKept')}`
@@ -346,7 +347,7 @@ function downloadCalendar(): void {
             {{ t(props.day ? 'activity.ticket.day.registered' : mine?.status === 'waitlisted' ? 'activity.ticket.onWaitlist' : 'activity.ticket.registered') }}
           </span>
           <p v-if="note" class="text-sm leading-relaxed text-text">{{ note }}</p>
-          <UiButton v-if="props.day && dayMine" variant="link" @click="dayRegistration.openDialog(props.session.id)">
+          <UiButton v-if="props.day && dayMine && hasActivityChoice(props.day.page)" variant="link" @click="dayRegistration.openDialog(props.session.id)">
             {{ t('activity.ticket.day.edit') }}
           </UiButton>
           <UiButton v-else-if="!props.day" variant="link" :loading="cancelling" @click="onCancel">

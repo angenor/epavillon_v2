@@ -62,6 +62,7 @@
     "when": "{day}, {start} to {end}, {zone}",
     "notFound": "This day does not take registrations.",
     "intro": "One link for the whole day: opening, activities, breaks and closing. Untick what does not interest you; you will get a reminder before each activity you keep.",
+    "introSingle": "One link to follow the whole day live, from opening to closing.",
     "introEdit": "The live link stays the same all day. Tick the activities you want a reminder for.",
     "emailHint": "We use it to confirm your registration and to send you the live link and the reminders for the activities you keep.",
     "yourActivities": "Your activities",

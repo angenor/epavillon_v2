@@ -374,6 +374,7 @@ const when = (value: string) =>
 type Outcome = { intent: Intent; title: string; message: string }
 
 const dayTitle = computed(() => (props.day ? tr(props.day.page.track.title) : ''))
+const dayChoice = computed(() => (props.day ? hasActivityChoice(props.day.page) : false))
 
 /** « Vendredi 13 novembre, 08:00 à 18:00, heure d'Antalya » */
 const dayWhen = computed(() => {
@@ -497,7 +498,7 @@ const outcome = computed<Outcome | null>(() => {
     >
       <p v-if="props.day" class="flex gap-2.5 rounded-md bg-surface-sunken p-3 text-sm leading-normal text-text">
         <UiIcon name="info" size="1.25rem" class="mt-px shrink-0 text-accent" />
-        <span>{{ k(editing ? 'day.introEdit' : 'day.intro') }}</span>
+        <span>{{ k(!dayChoice ? 'day.introSingle' : editing ? 'day.introEdit' : 'day.intro') }}</span>
       </p>
 
       <template v-if="!editing">
@@ -652,7 +653,7 @@ const outcome = computed<Outcome | null>(() => {
       </template>
       </template>
 
-      <div v-if="props.day">
+      <div v-if="props.day && dayChoice">
         <p
           v-if="!editing && (isGuest || visibleFields.length)"
           class="mb-1 font-condensed text-[1.15rem] font-bold tracking-[0.03em] text-heading uppercase"

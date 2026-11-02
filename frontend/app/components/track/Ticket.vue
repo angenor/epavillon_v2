@@ -56,7 +56,7 @@ const signup = computed<'register' | 'registered' | null>(() => {
 const canJoin = computed(() => props.phase === 'during' && mine.value !== null && props.meetingJoinable)
 const following = computed(() => {
   const value = mine.value
-  if (!value) return ''
+  if (!value || !hasActivityChoice(props.page)) return ''
   const count = keptIds(value.session_ids, props.page).length
   return t('track.ticket.signup.following', { count, total: value.activity_count }, count)
 })
@@ -227,9 +227,9 @@ const hasMore = computed(() => (props.page.is_off_site && venue.value) || props.
           <p class="mb-1.5 flex items-center gap-2 font-condensed text-[1.15rem] font-bold tracking-[0.03em] text-success uppercase">
             <UiIcon name="check" size="1.25rem" :stroke-width="2.4" />{{ t('track.ticket.signup.done') }}
           </p>
-          <p class="text-sm leading-relaxed">{{ mine ? following : t('track.ticket.signup.guestDone') }}</p>
+          <p v-if="!mine || following" class="text-sm leading-relaxed">{{ mine ? following : t('track.ticket.signup.guestDone') }}</p>
           <p v-if="mine" class="mt-1 flex flex-wrap gap-x-5">
-            <UiButton variant="link" @click="day.openDialog()">{{ t('track.ticket.signup.edit') }}</UiButton>
+            <UiButton v-if="hasActivityChoice(props.page)" variant="link" @click="day.openDialog()">{{ t('track.ticket.signup.edit') }}</UiButton>
             <UiButton variant="link" :loading="cancelling" @click="onCancel">{{ t('track.ticket.signup.cancel') }}</UiButton>
           </p>
           <p v-else-if="guestRegistered" class="mt-1.5 text-sm text-text-secondary">{{ t('track.ticket.signup.guestEdit') }}</p>

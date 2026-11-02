@@ -82,9 +82,10 @@ const kept = computed(() => {
     entry.kind === 'activity' && keep.has(entry.activity.session.id) && isPickable(entry.activity) ? [entry.activity] : [],
   )
 })
+const choice = computed(() => (page.value ? hasActivityChoice(page.value) : false))
 const following = computed(() => {
   const value = registration.value
-  if (!value) return ''
+  if (!value || !page.value || !hasActivityChoice(page.value)) return ''
   const count = kept.value.length
   return t('track.my-registration.following', { count, total: value.activity_count }, count)
 })
@@ -191,7 +192,7 @@ useHead(() => ({
                   <p class="flex items-center gap-2 font-condensed text-[1.25rem] font-bold tracking-[0.03em] text-success uppercase">
                     <UiIcon name="check" size="1.25rem" :stroke-width="2.4" />{{ k('registered', { name: firstName }) }}
                   </p>
-                  <p class="mt-1.5 text-sm leading-relaxed">{{ following }}</p>
+                  <p v-if="following" class="mt-1.5 text-sm leading-relaxed">{{ following }}</p>
                 </div>
 
                 <div v-if="dayPhase === 'during'" class="rounded-md border border-live-border bg-live-surface p-3.5">
@@ -201,24 +202,26 @@ useHead(() => ({
                 <p v-else-if="dayPhase === 'before'" class="rounded-md bg-surface-sunken p-3 text-sm leading-relaxed">{{ k('live.before') }}</p>
 
                 <section v-if="dayPhase !== 'after'" aria-labelledby="mes-activites-titre">
-                  <h2 id="mes-activites-titre" class="font-condensed text-[1.15rem] font-bold tracking-[0.03em] text-heading uppercase">
-                    {{ k('activities') }}
-                  </h2>
-                  <ul v-if="kept.length" class="mt-1">
-                    <li
-                      v-for="activity in kept"
-                      :key="activity.session.id"
-                      class="grid grid-cols-[54px_minmax(0,1fr)] gap-x-3 border-t border-border-subtle py-2.5 first:border-t-0"
-                    >
-                      <time :datetime="activity.session.starts_at" class="font-condensed text-[1.15rem] leading-tight font-bold text-(--color-day) tabular-nums">
-                        {{ time(activity.session.starts_at, page.edition.timezone) }}
-                      </time>
-                      <span class="text-[0.92rem] leading-snug font-semibold">{{ tr(activity.session.title) }}</span>
-                    </li>
-                  </ul>
-                  <p v-else class="mt-1.5 text-sm text-text-muted">{{ k('none') }}</p>
-                  <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-                    <UiButton variant="secondary" icon="edit" @click="dialogOpen = true">{{ k('edit') }}</UiButton>
+                  <template v-if="choice">
+                    <h2 id="mes-activites-titre" class="font-condensed text-[1.15rem] font-bold tracking-[0.03em] text-heading uppercase">
+                      {{ k('activities') }}
+                    </h2>
+                    <ul v-if="kept.length" class="mt-1">
+                      <li
+                        v-for="activity in kept"
+                        :key="activity.session.id"
+                        class="grid grid-cols-[54px_minmax(0,1fr)] gap-x-3 border-t border-border-subtle py-2.5 first:border-t-0"
+                      >
+                        <time :datetime="activity.session.starts_at" class="font-condensed text-[1.15rem] leading-tight font-bold text-(--color-day) tabular-nums">
+                          {{ time(activity.session.starts_at, page.edition.timezone) }}
+                        </time>
+                        <span class="text-[0.92rem] leading-snug font-semibold">{{ tr(activity.session.title) }}</span>
+                      </li>
+                    </ul>
+                    <p v-else class="mt-1.5 text-sm text-text-muted">{{ k('none') }}</p>
+                  </template>
+                  <div class="flex flex-wrap items-center gap-x-5 gap-y-2" :class="{ 'mt-4': choice }">
+                    <UiButton v-if="choice" variant="secondary" icon="edit" @click="dialogOpen = true">{{ k('edit') }}</UiButton>
                     <UiButton variant="link" @click="confirmOpen = true">{{ k('cancel.action') }}</UiButton>
                   </div>
                 </section>

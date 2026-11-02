@@ -62,6 +62,7 @@
     "when": "{day}, {start} à {end}, {zone}",
     "notFound": "Cette journée ne prend pas d'inscription.",
     "intro": "Un seul lien pour toute la journée : ouverture, activités, pauses et clôture. Décochez ce qui ne vous intéresse pas ; vous recevrez un rappel avant chaque activité gardée.",
+    "introSingle": "Un seul lien pour suivre tout le direct de la journée, de l'ouverture à la clôture.",
     "introEdit": "Le lien du direct reste le même toute la journée. Cochez les activités dont vous voulez le rappel.",
     "emailHint": "Elle sert à vous confirmer l'inscription, à vous envoyer le lien du direct et les rappels des activités gardées.",
     "yourActivities": "Vos activités",
