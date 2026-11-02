@@ -47,6 +47,8 @@ pub struct ApiErrorBody {
         crate::routes::admin::decision_de_doublon,
         crate::routes::admin::apercu_de_fusion,
         crate::routes::admin::fusionner,
+        crate::routes::visits::noter,
+        crate::routes::visits::lire,
     ),
     components(schemas(ApiErrorBody)),
     tags(
@@ -60,15 +62,15 @@ pub struct OrgApi;
 mod tests {
     use super::*;
 
-    /// **Les vingt-quatre routes du module sont décrites.**
+    /// **Les vingt-six routes du module sont décrites.**
     ///
     /// Le compte est écrit pour qu'une route ajoutée sans son annotation fasse
-    /// échouer ce test plutôt que de passer inaperçue. Vingt-trois chemins seulement :
+    /// échouer ce test plutôt que de passer inaperçue. Vingt-cinq chemins seulement :
     /// `/organizations` en porte deux — la liste et la création.
     #[test]
     fn les_routes_du_module_sont_toutes_decrites() {
         let document = OrgApi::openapi();
-        assert_eq!(document.paths.paths.len(), 23, "chemins distincts");
+        assert_eq!(document.paths.paths.len(), 25, "chemins distincts");
 
         let rendu = document.to_json().expect("sérialisation du document");
         let chemins: serde_json::Value = serde_json::from_str(&rendu).expect("document JSON");
@@ -78,7 +80,7 @@ mod tests {
             .values()
             .map(|c| c.as_object().expect("un chemin").len())
             .sum();
-        assert_eq!(operations, 24, "opérations");
+        assert_eq!(operations, 26, "opérations");
     }
 
     /// **Les quatorze codes du module sont au catalogue du noyau.** Ils sont

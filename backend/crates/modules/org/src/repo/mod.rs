@@ -11,3 +11,4 @@ pub mod merge_counts;
 pub mod names;
 pub mod organizations;
 pub mod search;
+pub mod visits;

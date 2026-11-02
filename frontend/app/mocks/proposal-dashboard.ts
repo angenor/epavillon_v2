@@ -131,6 +131,7 @@ export function proposalDeskDashboard(
       speakers: speakerCount,
       documents: documentCount,
     },
+    organization_last_visit_at: null,
   }
 }
 

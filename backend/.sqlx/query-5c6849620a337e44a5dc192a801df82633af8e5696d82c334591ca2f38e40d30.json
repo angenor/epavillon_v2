@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT min(first_at) AS \"debut\" FROM org.space_visits",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "debut",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5c6849620a337e44a5dc192a801df82633af8e5696d82c334591ca2f38e40d30"
+}

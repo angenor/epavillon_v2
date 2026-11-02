@@ -61,6 +61,7 @@ import type {
   OrganizationProfilePayload,
   OrganizationDetail,
   OrganizationListScreen,
+  OrganizationVisits,
   OrganizationVerificationPayload,
   OrganizationWriteResult,
 } from '~/types/admin-organizations'
@@ -154,6 +155,14 @@ export function createAdminOrganizationsApi({ call, send }: ApiTransport) {
         payload,
         (m) => m.decideDuplicatePair(payload, actorId),
         'PUT',
+      ),
+
+    /** L'onglet « Visites ». `days` à 0 : depuis le début. `null` hors périmètre, comme la fiche. */
+    visits: (organizationId: Uuid, days: number): Promise<OrganizationVisits | null> =>
+      call(
+        `/admin/organizations/${organizationId}/visits`,
+        (m) => m.organizationVisits(organizationId, days),
+        { days },
       ),
 
     /** TOUTE LA FICHE. Rend `null` pour une fiche inexistante — pas pour une fiche absorbée. */

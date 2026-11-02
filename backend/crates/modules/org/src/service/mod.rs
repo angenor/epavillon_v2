@@ -10,3 +10,4 @@ pub mod join;
 pub mod membership;
 pub mod merge;
 pub mod search;
+pub mod visits;

@@ -39,6 +39,10 @@ interface Props {
   busy?: boolean
   /** Le bloc de décision ; la fiche du dossier l'ouvre par « Changer le statut » (01/11). */
   showDecision?: boolean
+  /** Dernière ouverture du dossier dans l'espace de l'organisation (02/11). */
+  organizationVisitAt?: string | null
+  /** L'onglet « Visites » de la fiche de l'organisation porteuse. */
+  visitsLink?: string
 }
 
 const props = withDefaults(defineProps<Props>(), { busy: false, showDecision: true })
@@ -98,6 +102,21 @@ function decisionVariant(status: ProposalStatus): 'primary' | 'secondary' | 'dan
               })
             : t('admin.proposal.review.header.notSubmitted')
         }}
+        <template v-if="props.visitsLink">
+          ·
+          <span :class="props.organizationVisitAt ? 'text-text' : 'text-warning'">
+            {{
+              props.organizationVisitAt
+                ? t('admin.proposal.review.header.seenByOrganization', {
+                    date: date(props.organizationVisitAt, props.timezone),
+                  })
+                : t('admin.proposal.review.header.notSeenByOrganization')
+            }}
+          </span>
+          <NuxtLink :to="props.visitsLink" class="ml-1 font-semibold text-text-link hover:underline">
+            {{ t('admin.proposal.review.header.visitsDetail') }}
+          </NuxtLink>
+        </template>
       </p>
       <div class="flex flex-wrap items-center gap-2">
         <slot name="actions" />

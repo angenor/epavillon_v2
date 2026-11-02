@@ -5,6 +5,7 @@ pub mod admin;
 pub mod memberships;
 pub mod openapi;
 pub mod public;
+pub mod visits;
 
 use actix_web::{HttpMessage, HttpRequest};
 use kernel::auth::Actor;

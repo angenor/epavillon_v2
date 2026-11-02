@@ -22,12 +22,21 @@ import type {
   ResolveCommentPayload,
   WorkspaceOverview,
 } from '~/types/organization-workspace'
+import type { SpaceVisitPayload } from '~/types/admin-organizations'
 import type { ProposalCommentView } from '~/types/programme/proposal'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
 export function createOrganizationWorkspaceApi({ call, send }: ApiTransport) {
   return {
+    /**
+     * Note l'ouverture de l'espace ou d'un dossier, pour l'onglet « Visites » du
+     * back-office. Une panne ici ne doit jamais gêner la page : l'appelant
+     * l'ignore.
+     */
+    recordVisit: (payload: SpaceVisitPayload): Promise<void> =>
+      send('/organizations/space-visits', payload, (m) => m.recordSpaceVisit()),
+
     /**
      * TOUT L'ÉCRAN D'ACCUEIL EN UNE RÉPONSE : l'organisation, l'adhésion de la
      * personne connectée, ses dossiers avec leur avancement, ses membres, ce

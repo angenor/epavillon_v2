@@ -133,6 +133,7 @@ const TAB_PARAM: Record<string, string> = {
   domaines: 'domains',
   membres: 'members',
   activites: 'activities',
+  visites: 'visits',
   historique: 'history',
 }
 const PARAM_BY_TAB = Object.fromEntries(
@@ -162,6 +163,7 @@ const tabs = computed<TabItem[]>(() => [
     label: t('admin.organization.detail.tabs.activities'),
     count: detail.value?.activities.length,
   },
+  { value: 'visits', label: t('admin.organization.detail.tabs.visits') },
   { value: 'history', label: t('admin.organization.detail.tabs.history') },
 ])
 
@@ -572,6 +574,12 @@ function pairLink(pairId: string, otherId: string): string {
           <AdminOrganizationsDetailActivities
             v-else-if="activeTab === 'activities'"
             :activities="detail.activities"
+            :timezone="timezone"
+          />
+
+          <AdminOrganizationsDetailVisits
+            v-else-if="activeTab === 'visits'"
+            :organization-id="detail.organization_id"
             :timezone="timezone"
           />
 

@@ -60,6 +60,7 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
             "/{id}/members/{membershipId}/role",
             web::put().to(role_d_adhesion),
         );
+    crate::routes::visits::admin(cfg);
 }
 
 /// La liste du back-office, **bornée par le périmètre**.

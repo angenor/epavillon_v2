@@ -205,6 +205,8 @@ pub async fn ouvrir(
         &autres,
     );
     let a_joindre_lus = cross::personnes_a_joindre(&mut *tx, &ids_a_joindre).await?;
+    let organization_last_visit_at =
+        reads::derniere_visite_de_l_organisation(&mut *tx, dossier).await?;
 
     tx.commit().await?;
 
@@ -236,6 +238,7 @@ pub async fn ouvrir(
         lead_type_label: habillage.type_label,
         lead_country_name: habillage.country_name,
         other_proposals: autres,
+        organization_last_visit_at,
     };
 
     let maintenant = OffsetDateTime::now_utc();

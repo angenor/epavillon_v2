@@ -156,3 +156,14 @@ Demande du commanditaire transmise par epavillon-v2-8b, d'après la maquette val
 - **Règle n° 1** : l'ancien nom et l'ancien sigle deviennent des anciens noms, toujours trouvés (voir `modele.md`).
 - **Écran** : bouton « Modifier la fiche » dans l'en-tête, tiroir `AdminOrganizationsProfileDrawer` (props `organizationId`, `v-model:open` ; événement `saved(detail)`), qui charge lui-même la fiche, les pays, les types, la règle et le logo : il s'ouvre aussi depuis la fiche d'un dossier. Avertissement « La fiche est partagée : la corriger ici la corrige pour ses N dossiers et ses N membres » (dossiers déposés et membres actifs du tableau de bord), logo, nom, sigle, pays, type, site, rappel que l'ancien nom reste connu.
 - **Vérifié** : `fiche_corrigee` (2 tests : renommage avec ancien nom et ancien sigle en `former` et retrouvés par `find_similar_organizations`, un seul nom légal, événement ; homonyme nommé sans rien changer, type inconnu refusé), suite du module verte sauf `decompte_de_fusion_exact` ; typecheck, contrat, `test:site`. Au navigateur sur les données d'exemple (fiche du ROAC, 1440 px) : tiroir conforme, sigle changé et « Modification enregistrée ».
+
+## Visites de l'espace (02/11/2026)
+
+Demande du commanditaire : des organisations disent être allées dans leur espace sans pouvoir agir ; l'équipe ne pouvait pas le vérifier. Maquette validée : `docs/maquettes/visites-espace/index.html`.
+
+- **Modèle** : `org.space_visits` (040 § 8), une ligne par personne, page (« Mon organisation » ou un dossier) et jour UTC, avec première et dernière ouverture et leur nombre. Nominative, à l'inverse d'`analytics.page_views`. Migration `2026-11-02-visites-espace`, jouée en production le 02/11.
+- **Écriture** : `POST /organizations/space-visits`, appelée par `useSpaceVisit()` sur `/mon-organisation` et la page d'un dossier, avant le chargement des données (une page qui échoue compte comme visitée). Rien n'est noté pour qui n'est pas membre actif.
+- **Lecture** : `GET /admin/organizations/{id}/visits?days=` (7, 30, 0 = tout), onglet « Visites » de la fiche (`?onglet=visites`). Croise les sessions web (rotations à moins de 45 min = un même moment), les visites, l'audit (`programme`, `org`, `media`, une modification par requête) et `platform.ops_log` (refus et pannes, message du catalogue retrouvé par `ErrorCode::from_code`).
+- **Dossier** : `dashboard.organization_last_visit_at` dans la fiche du back-office, rappel sous le numéro avec lien vers l'onglet.
+- **Écarts avec la maquette** : la fenêtre par défaut est 30 jours pour tout l'onglet (cases du haut et tableau compris) ; « Refus et erreurs » compte sur la période choisie ; le rappel du dossier donne la date sans le nom (appel en aveugle).
+- **Non vérifié** : aucun parcours réel ; l'enregistrement commence à la mise en ligne.

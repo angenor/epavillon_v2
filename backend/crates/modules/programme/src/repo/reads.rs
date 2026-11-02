@@ -100,3 +100,19 @@ pub async fn compter_lecteurs<'e>(
 
     Ok(compte)
 }
+
+/// La dernière ouverture de ce dossier par un membre de l'une de ses
+/// organisations, dans son espace (`org.space_visits`, 02/11/2026).
+pub async fn derniere_visite_de_l_organisation<'e>(
+    executor: impl PgExecutor<'e>,
+    dossier: crate::domain::ids::ProposalId,
+) -> Result<Option<time::OffsetDateTime>> {
+    let derniere = sqlx::query_scalar!(
+        r#"SELECT max(last_at) AS "derniere" FROM org.space_visits WHERE proposal_id = $1"#,
+        dossier.as_uuid()
+    )
+    .fetch_one(executor)
+    .await?;
+
+    Ok(derniere)
+}

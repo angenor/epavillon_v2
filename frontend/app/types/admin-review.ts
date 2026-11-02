@@ -411,6 +411,8 @@ export interface ProposalDashboard {
   lead_country_name: I18nText | null
   other_proposals: OrganizationOtherProposal[]
   counts: { registrations: number; speakers: number; documents: number }
+  /** Dernière ouverture du dossier dans l'espace de l'organisation, par l'un de ses membres. */
+  organization_last_visit_at: IsoDateTime | null
 }
 
 /** `PUT /proposals/{id}/lead-organization`. */

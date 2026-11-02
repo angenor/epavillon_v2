@@ -30,6 +30,11 @@ macro_rules! codes {
                 match self { $( Self::$variant => $code, )* }
             }
 
+            /// Le code relu d'un journal (`platform.ops_log.error_code`).
+            pub fn from_code(code: &str) -> Option<Self> {
+                Self::ALL.iter().copied().find(|c| c.as_str() == code)
+            }
+
             pub fn status(self) -> StatusCode {
                 match self { $( Self::$variant => $status, )* }
             }

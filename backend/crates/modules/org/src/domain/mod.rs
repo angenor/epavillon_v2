@@ -8,3 +8,4 @@ pub mod merge;
 pub mod organization;
 pub mod permissions;
 pub mod search;
+pub mod visits;

@@ -43,7 +43,10 @@
     "decidedAt": "Décidé le {date}",
     "notSubmitted": "Jamais déposé",
     "openInList": "Voir dans la liste",
-    "reading": "Lecture"
+    "reading": "Lecture",
+    "seenByOrganization": "Vu par l'organisation le {date}",
+    "notSeenByOrganization": "Pas ouvert par l'organisation depuis l'enregistrement des visites",
+    "visitsDetail": "Détail"
   },
   "decision": {
     "title": "Décision",

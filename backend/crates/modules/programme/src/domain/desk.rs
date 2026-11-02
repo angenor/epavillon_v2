@@ -214,6 +214,10 @@ pub struct TableauDuDossier {
     /// Autres dossiers de la porteuse, **dans le périmètre** du lecteur (règle 8).
     pub other_proposals: Vec<AutreDossier>,
     pub counts: ChiffresDuDossier,
+    /// Dernière ouverture du dossier dans l'espace de l'organisation, par l'un
+    /// de ses membres. Nulle s'il ne l'a pas été depuis l'enregistrement.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub organization_last_visit_at: Option<time::OffsetDateTime>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, ToSchema)]

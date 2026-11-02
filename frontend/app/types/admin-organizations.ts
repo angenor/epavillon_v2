@@ -85,6 +85,7 @@ import type {
   Numeric,
   OrganizationId,
   PersonId,
+  ProposalId,
   Slug,
   TaxonomyTermCode,
   Url,
@@ -770,3 +771,56 @@ export type OrganizationWriteResult =
   | { status: 'last_manager' }
   /** Une autre fiche vivante porte déjà ce nom dans ce pays — `ux_organizations_name_country`. */
   | { status: 'name_taken'; conflict_with: OrganizationRef }
+
+// ---------------------------------------------------------------------------
+// Visites de l'espace (02/11/2026) — `GET /admin/organizations/{id}/visits`
+// ---------------------------------------------------------------------------
+
+/** `POST /organizations/space-visits` : l'une ou l'autre, jamais les deux. */
+export type SpaceVisitPayload =
+  | { organization_id: OrganizationId; proposal_id?: never }
+  | { proposal_id: ProposalId; organization_id?: never }
+
+export interface VisitMember {
+  person_id: PersonId
+  display_name: string
+  /** `manager`, `member`… ; `former` pour une personne qui n'est plus membre. */
+  role: string
+  active: boolean
+  last_connection_at: IsoDateTime | null
+  last_visit_at: IsoDateTime | null
+  last_visit_reference: string | null
+  visit_days: number
+  changes: number
+  last_change_at: IsoDateTime | null
+}
+
+export type VisitEventKind = 'connection' | 'visit' | 'change' | 'refusal'
+
+export interface VisitEvent {
+  kind: VisitEventKind
+  person_id: PersonId
+  at: IsoDateTime
+  until: IsoDateTime | null
+  count: number | null
+  proposal_id: ProposalId | null
+  proposal_reference: string | null
+  proposal_title: I18nText | null
+  /** « Chrome, ordinateur » — rédigé par l'API, comme un nom propre. */
+  device: string | null
+  tables: string[]
+  route: string | null
+  status: number | null
+  /** Message du catalogue de l'API, tel que la personne l'a lu. */
+  message: string | null
+  request_id: string | null
+}
+
+export interface OrganizationVisits {
+  /** Première visite enregistrée sur la plateforme ; nulle avant la première. */
+  recording_since: IsoDateTime | null
+  /** Début de la fenêtre ; nul pour « depuis le début ». */
+  window_start: IsoDateTime | null
+  members: VisitMember[]
+  events: VisitEvent[]
+}

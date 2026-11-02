@@ -122,6 +122,8 @@ useRealtime(
   () => refresh(),
 )
 
+useSpaceVisit(() => (currentOrganizationId.value ? { organization_id: currentOrganizationId.value } : null))
+
 // ---------------------------------------------------------------------------
 // Une édition à la fois (28/10), dans l'URL (`?edition=slug`) pour qu'un lien
 // envoyé ouvre le même onglet.

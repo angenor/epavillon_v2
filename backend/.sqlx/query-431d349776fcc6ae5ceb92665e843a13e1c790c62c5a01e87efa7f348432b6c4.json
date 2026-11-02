@@ -1,0 +1,102 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH gens AS (\n               SELECT m.person_id, m.role::text AS role, true AS active\n                 FROM org.memberships m\n                WHERE m.organization_id = $1 AND m.status = 'active'\n               UNION\n               SELECT v.person_id, 'former', false\n                 FROM org.space_visits v\n                WHERE v.organization_id = $1 AND ($2::timestamptz IS NULL OR v.last_at >= $2)\n                  AND NOT EXISTS (SELECT 1 FROM org.memberships m\n                                   WHERE m.organization_id = $1 AND m.person_id = v.person_id\n                                     AND m.status = 'active')\n           )\n           SELECT g.person_id AS \"person_id!\", p.display_name AS \"display_name!\",\n                  g.role AS \"role!\", g.active AS \"active!\",\n                  GREATEST(\n                      (SELECT max(a.last_login_at) FROM identity.accounts a WHERE a.person_id = g.person_id),\n                      (SELECT max(s.issued_at) FROM identity.sessions s\n                        WHERE s.person_id = g.person_id AND s.client_kind = 'web')\n                  ) AS \"last_connection_at?\",\n                  dv.last_at AS \"last_visit_at?\", dv.reference_code AS \"last_visit_reference?\",\n                  (SELECT count(DISTINCT v.visit_on) FROM org.space_visits v\n                    WHERE v.organization_id = $1 AND v.person_id = g.person_id\n                      AND ($2::timestamptz IS NULL OR v.last_at >= $2)) AS \"visit_days!\",\n                  ch.n AS \"changes!\", ch.derniere AS \"last_change_at?\"\n             FROM gens g\n             JOIN identity.people p ON p.id = g.person_id\n             LEFT JOIN LATERAL (\n                 SELECT v.last_at, pr.reference_code\n                   FROM org.space_visits v\n                   LEFT JOIN programme.proposals pr ON pr.id = v.proposal_id\n                  WHERE v.organization_id = $1 AND v.person_id = g.person_id\n                  ORDER BY v.last_at DESC\n                  LIMIT 1\n             ) dv ON true\n             CROSS JOIN LATERAL (\n                 SELECT count(DISTINCT COALESCE(a.request_id, a.id::text)) AS n,\n                        max(a.occurred_at) AS derniere\n                   FROM platform.audit_log a\n                  WHERE a.actor_id = g.person_id\n                    AND a.entity_schema IN ('programme', 'org', 'media')\n                    AND ($2::timestamptz IS NULL OR a.occurred_at >= $2)\n             ) ch\n            ORDER BY g.active DESC, p.display_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "active!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_connection_at?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "last_visit_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.space_visits",
+            "name": "last_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "last_visit_reference?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "visit_days!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "changes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "last_change_at?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      null,
+      null,
+      null,
+      false,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "431d349776fcc6ae5ceb92665e843a13e1c790c62c5a01e87efa7f348432b6c4"
+}

@@ -2630,6 +2630,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/organizations/{id}/visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * L'onglet « Visites » de la fiche.
+         * @description `OrganizationVisits | null` — membres, connexions, pages ouvertes de l'espace, modifications et refus des membres, sur la fenêtre demandée. Hors périmètre : `null`, comme la fiche.
+         */
+        get: operations["admin_organisation_visites"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/planner": {
         parameters: {
             query?: never;
@@ -5462,6 +5482,26 @@ export interface paths {
         get: operations["organisations_similaires"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organizations/space-visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Une page de l'espace s'est ouverte.
+         * @description Note l'ouverture de « Mon organisation » (`organization_id`) ou d'un dossier (`proposal_id`), une ligne par personne, page et jour. Rien n'est noté pour qui n'est pas membre actif, et la réponse ne le dit pas.
+         */
+        post: operations["organisation_visite_de_l_espace"];
         delete?: never;
         options?: never;
         head?: never;
@@ -16282,6 +16322,50 @@ export interface operations {
             };
         };
     };
+    admin_organisation_visites: {
+        parameters: {
+            query?: {
+                /** @description Fenêtre en jours ; 0 : depuis le début. Défaut 30 */
+                days?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Organisation */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OrganizationVisits | null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     seances_ecran_du_planificateur: {
         parameters: {
             query: {
@@ -23356,6 +23440,46 @@ export interface operations {
             };
             /** @description Aucune session, ou session close */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    organisation_visite_de_l_espace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Notée, ou ignorée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Ni organisation ni dossier, ou les deux */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

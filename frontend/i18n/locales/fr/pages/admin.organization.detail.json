@@ -51,7 +51,8 @@
     "domains": "Domaines",
     "members": "Membres",
     "activities": "Activités",
-    "history": "Historique"
+    "history": "Historique",
+    "visits": "Visites"
   },
   "names": {
     "title": "Dénominations",
@@ -237,5 +238,73 @@
     "rows": "{count} élément déplacé | {count} élément déplacé | {count} éléments déplacés",
     "reason": "Motif : {reason}"
   },
-  "saved": "Modification enregistrée."
+  "saved": "Modification enregistrée.",
+  "visits": {
+    "error": "Les visites n'ont pas pu être lues.",
+    "summary": {
+      "lastVisit": "Dernière visite de l'espace",
+      "lastConnection": "Dernière connexion",
+      "refusals": "Refus et erreurs sur la période",
+      "refusalCount": "Aucun refus | 1 refus | {n} refus",
+      "withoutSpace": "{name}, sans ouvrir l'espace"
+    },
+    "members": {
+      "title": "Par membre",
+      "person": "Personne",
+      "lastConnection": "Dernière connexion",
+      "lastVisit": "Dernière visite de l'espace",
+      "visitDays": "Jours de visite",
+      "changes": "Modifications",
+      "lastChange": "Dernière le {date}"
+    },
+    "timeline": "Chronologie",
+    "period": {
+      "label": "Période",
+      "days": "{n} derniers jours",
+      "all": "Depuis le début"
+    },
+    "person": "Personne",
+    "allMembers": "Tous les membres",
+    "empty": {
+      "since": "Personne de cette organisation n'a ouvert son espace depuis le {date}.",
+      "never": "Personne de cette organisation n'a encore ouvert son espace.",
+      "hint": "Les visites sont enregistrées depuis la mise en ligne de cette fonction : rien n'est connu avant."
+    },
+    "never": "Jamais",
+    "neverConnected": "Jamais connecté",
+    "none": "Aucune",
+    "former": "Ancien membre",
+    "space": "Mon organisation",
+    "proposal": "Dossier {reference}",
+    "times": "1 fois | {n} fois",
+    "range": "{start} à {end}",
+    "withoutSpace": "Sur le site, sans ouvrir l'espace de l'organisation.",
+    "kind": {
+      "connection": "Connexion",
+      "visit": "Visite",
+      "change": "Modification",
+      "refusal": "Refus",
+      "failure": "Panne"
+    },
+    "change": {
+      "proposal": "Dossier {reference} : {what}"
+    },
+    "tables": {
+      "proposals": "dossier",
+      "proposal_speakers": "intervenants",
+      "proposal_organizations": "organisations associées",
+      "proposal_documents": "documents",
+      "proposal_themes": "thématiques",
+      "proposal_comments": "messages",
+      "proposal_focal_points": "points focaux",
+      "proposal_social_posts": "publications",
+      "sessions": "séance",
+      "organizations": "fiche de l'organisation",
+      "memberships": "membres",
+      "attachments": "fichiers",
+      "assets": "fichiers"
+    },
+    "refusal": "Le site a répondu « {message} ».",
+    "openJournal": "Ouvrir dans le journal"
+  }
 }

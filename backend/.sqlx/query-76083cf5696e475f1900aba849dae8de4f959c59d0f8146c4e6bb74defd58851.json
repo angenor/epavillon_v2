@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH gestes AS (\n               SELECT a.actor_id, min(a.occurred_at) AS at, min(a.request_id) AS request_id,\n                      array_agg(DISTINCT a.entity_table) AS tables,\n                      (array_agg(x.proposal_id) FILTER (WHERE x.proposal_id IS NOT NULL))[1] AS proposal_id\n                 FROM platform.audit_log a\n                CROSS JOIN LATERAL (\n                    SELECT CASE\n                        WHEN a.entity_schema = 'programme' AND a.entity_table = 'proposals' THEN a.entity_id\n                        WHEN a.entity_schema = 'programme' THEN\n                            COALESCE(a.new_data->>'proposal_id', a.old_data->>'proposal_id')::uuid\n                    END AS proposal_id\n                ) x\n                WHERE a.actor_id = ANY($1)\n                  AND a.entity_schema IN ('programme', 'org', 'media')\n                  AND ($2::timestamptz IS NULL OR a.occurred_at >= $2)\n                GROUP BY a.actor_id, COALESCE(a.request_id, a.id::text)\n           )\n           SELECT g.actor_id AS \"person_id!\", g.at AS \"at!\", g.request_id,\n                  g.tables AS \"tables!\", g.proposal_id AS \"proposal_id?\",\n                  pr.reference_code AS \"reference?\", pr.title::jsonb AS \"title?\"\n             FROM gestes g\n             LEFT JOIN programme.proposals pr ON pr.id = g.proposal_id\n            ORDER BY g.at DESC\n            LIMIT 500",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "platform.audit_log",
+            "name": "actor_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "at!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "request_id",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "tables!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "proposal_id?",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "reference?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "title?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      true,
+      null,
+      null,
+      null,
+      null,
+      false,
+      null
+    ]
+  },
+  "hash": "76083cf5696e475f1900aba849dae8de4f959c59d0f8146c4e6bb74defd58851"
+}

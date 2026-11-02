@@ -1,0 +1,89 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.actor_id AS \"person_id!\", o.occurred_at AS \"at!\", o.route AS \"route!\",\n                  o.status AS \"status!\", o.error_code, o.request_id\n             FROM platform.ops_log o\n            WHERE o.actor_id = ANY($1)\n              AND o.kind IN ('http_refused', 'http_error')\n              AND ($2::timestamptz IS NULL OR o.occurred_at >= $2)\n            ORDER BY o.occurred_at DESC\n            LIMIT 300",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "actor_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "occurred_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "route!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "route"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "error_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "error_code"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "request_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "request_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "b5d7d4f1ce14b1b48a110e7f57b3c87f99cde79b7016a686837697453fc26e93"
+}

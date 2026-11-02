@@ -51,6 +51,7 @@ const memberships = useMembershipStore()
 const requestUrl = useRequestURL()
 
 const proposalId = computed(() => String(route.params.id ?? ''))
+useSpaceVisit(() => (proposalId.value ? { proposal_id: proposalId.value } : null))
 
 const {
   data: file,

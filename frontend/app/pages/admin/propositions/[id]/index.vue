@@ -672,6 +672,8 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
             :committee="screen.committee"
             :read-count="screen.read_count"
             :first-visit="screen.first_visit"
+            :organization-visit-at="screen.dashboard.organization_last_visit_at"
+            :visits-link="localePath({ path: `/admin/organisations/${screen.dashboard.lead_organization_id}`, query: { onglet: 'visites' } })"
             :timezone="timezone"
             :decisions="decisions"
             :can-decide="screen.permissions.can_decide"

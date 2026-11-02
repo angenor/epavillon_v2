@@ -896,3 +896,48 @@ AS $$
     FROM org.organizations o
     WHERE o.id = p_organization_id;
 $$;
+
+-- -----------------------------------------------------------------------------
+-- 8. Visites de l'espace d'une organisation (02/11/2026)
+--
+-- Demande du commanditaire : des organisations disent « je suis allé dans mon
+-- espace et je n'ai pas pu », et l'équipe n'avait aucun moyen de le vérifier.
+-- Une ligne par personne, par page et par jour (UTC) : « Mon organisation »
+-- (proposal_id NULL) ou la page d'un dossier. Première et dernière ouverture,
+-- nombre d'ouvertures : de quoi dire « venue trois fois le 11/11 », pas un
+-- journal de navigation.
+--
+-- NOMINATIF, ET C'EST VOULU : à l'inverse d'analytics.page_views, qui mesure une
+-- audience sans personne, cette table sert à savoir QUI d'une organisation est
+-- venu. Elle ne porte que les pages de l'espace réservé, ouvertes par un membre
+-- actif ; lue au back-office par l'équipe centrale, jamais par l'organisation.
+--
+-- proposal_id SANS CLÉ ÉTRANGÈRE : programme vient après ce fichier. Une visite
+-- survit à l'effacement du dossier visité. Une fiche absorbée par une fusion
+-- garde ses visites : elles disent qui est venu, sous quel nom.
+-- -----------------------------------------------------------------------------
+CREATE TABLE org.space_visits (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    organization_id uuid        NOT NULL REFERENCES org.organizations(id) ON DELETE CASCADE,
+    person_id       uuid        NOT NULL CONSTRAINT xmod_fk_space_visits_person
+                                REFERENCES identity.people(id) ON DELETE CASCADE,
+    visit_on        date        NOT NULL DEFAULT ((now() AT TIME ZONE 'UTC')::date),
+    proposal_id     uuid,
+    first_at        timestamptz NOT NULL DEFAULT now(),
+    last_at         timestamptz NOT NULL DEFAULT now(),
+    open_count      integer     NOT NULL DEFAULT 1,
+    CONSTRAINT ck_space_visits_count CHECK (open_count > 0),
+    CONSTRAINT ck_space_visits_span  CHECK (last_at >= first_at),
+    CONSTRAINT ux_space_visits UNIQUE NULLS NOT DISTINCT (organization_id, person_id, visit_on, proposal_id)
+);
+
+CREATE INDEX ix_space_visits_organization ON org.space_visits (organization_id, last_at DESC);
+CREATE INDEX ix_space_visits_proposal     ON org.space_visits (proposal_id, last_at DESC)
+    WHERE proposal_id IS NOT NULL;
+
+COMMENT ON TABLE org.space_visits IS
+    'Ouvertures de l''espace réservé d''une organisation par ses membres actifs : une ligne par personne, page et jour UTC. Lue par l''onglet « Visites » de la fiche du back-office.';
+COMMENT ON COLUMN org.space_visits.proposal_id IS
+    'Dossier ouvert (programme.proposals.id, sans clé étrangère), NULL pour la page « Mon organisation ».';
+COMMENT ON COLUMN org.space_visits.open_count IS
+    'Ouvertures de cette page ce jour-là, la première comprise.';

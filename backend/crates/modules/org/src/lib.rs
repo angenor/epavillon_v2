@@ -62,6 +62,7 @@ pub fn people_routes(cfg: &mut ServiceConfig) {
 /// **Aucune route n'a changé de chemin** : l'ordre d'enregistrement est celui
 /// d'avant, et `crates/api/tests/routes_org.rs` frappe les vingt et une.
 pub fn organization_routes(cfg: &mut ServiceConfig) {
+    routes::visits::organisations(cfg);
     routes::public::configurer(cfg);
     routes::memberships::organisations(cfg);
 }

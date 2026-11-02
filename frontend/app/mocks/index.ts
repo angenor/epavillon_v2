@@ -404,6 +404,8 @@ export {
   mergePreview,
   pendingDuplicatesOf,
   organizationDetail,
+  organizationVisits,
+  recordSpaceVisit,
   decideDuplicatePair,
   decideOrganizationMembership,
   mergeOrganizations,

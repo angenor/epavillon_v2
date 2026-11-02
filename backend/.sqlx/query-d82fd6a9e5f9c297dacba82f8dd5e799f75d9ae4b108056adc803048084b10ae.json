@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.space_visits (organization_id, person_id, proposal_id)\n           SELECT m.organization_id, m.person_id, $3\n             FROM org.memberships m\n            WHERE m.person_id = $1 AND m.status = 'active'\n              AND m.organization_id IN (\n                    SELECT $2::uuid WHERE $3::uuid IS NULL\n                    UNION\n                    SELECT p.organization_id FROM programme.proposals p\n                     WHERE p.id = $3 AND p.deleted_at IS NULL\n                    UNION\n                    SELECT po.organization_id FROM programme.proposal_organizations po\n                      JOIN programme.proposals p ON p.id = po.proposal_id AND p.deleted_at IS NULL\n                     WHERE po.proposal_id = $3)\n           ON CONFLICT ON CONSTRAINT ux_space_visits DO UPDATE\n              SET last_at = now(), open_count = org.space_visits.open_count + 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d82fd6a9e5f9c297dacba82f8dd5e799f75d9ae4b108056adc803048084b10ae"
+}

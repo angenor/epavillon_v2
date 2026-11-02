@@ -20,6 +20,7 @@
 export { organizationListScreen, organizationScorecards } from './core'
 export { duplicateQueue, mergePreview, pendingDuplicatesOf } from './duplicates'
 export { organizationDetail } from './detail'
+export { organizationVisits, recordSpaceVisit } from './visits'
 export {
   decideDuplicatePair,
   decideOrganizationMembership,

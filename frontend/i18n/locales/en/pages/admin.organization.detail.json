@@ -51,7 +51,8 @@
     "domains": "Domains",
     "members": "Members",
     "activities": "Activities",
-    "history": "History"
+    "history": "History",
+    "visits": "Visits"
   },
   "names": {
     "title": "Names",
@@ -237,5 +238,73 @@
     "rows": "{count} item moved | {count} item moved | {count} items moved",
     "reason": "Reason: {reason}"
   },
-  "saved": "Change saved."
+  "saved": "Change saved.",
+  "visits": {
+    "error": "Visits could not be loaded.",
+    "summary": {
+      "lastVisit": "Last visit to the space",
+      "lastConnection": "Last sign-in",
+      "refusals": "Refusals and errors in the period",
+      "refusalCount": "No refusal | 1 refusal | {n} refusals",
+      "withoutSpace": "{name}, without opening the space"
+    },
+    "members": {
+      "title": "By member",
+      "person": "Person",
+      "lastConnection": "Last sign-in",
+      "lastVisit": "Last visit to the space",
+      "visitDays": "Days visited",
+      "changes": "Changes",
+      "lastChange": "Last on {date}"
+    },
+    "timeline": "Timeline",
+    "period": {
+      "label": "Period",
+      "days": "Last {n} days",
+      "all": "Since the beginning"
+    },
+    "person": "Person",
+    "allMembers": "All members",
+    "empty": {
+      "since": "Nobody from this organization has opened its space since {date}.",
+      "never": "Nobody from this organization has opened its space yet.",
+      "hint": "Visits are recorded since this feature went live: nothing is known before."
+    },
+    "never": "Never",
+    "neverConnected": "Never signed in",
+    "none": "None",
+    "former": "Former member",
+    "space": "My organization",
+    "proposal": "Proposal {reference}",
+    "times": "once | {n} times",
+    "range": "{start} to {end}",
+    "withoutSpace": "On the site, without opening the organization space.",
+    "kind": {
+      "connection": "Sign-in",
+      "visit": "Visit",
+      "change": "Change",
+      "refusal": "Refusal",
+      "failure": "Failure"
+    },
+    "change": {
+      "proposal": "Proposal {reference}: {what}"
+    },
+    "tables": {
+      "proposals": "proposal",
+      "proposal_speakers": "speakers",
+      "proposal_organizations": "partner organizations",
+      "proposal_documents": "documents",
+      "proposal_themes": "themes",
+      "proposal_comments": "messages",
+      "proposal_focal_points": "focal points",
+      "proposal_social_posts": "posts",
+      "sessions": "session",
+      "organizations": "organization profile",
+      "memberships": "members",
+      "attachments": "files",
+      "assets": "files"
+    },
+    "refusal": "The site answered “{message}”.",
+    "openJournal": "Open in the log"
+  }
 }
