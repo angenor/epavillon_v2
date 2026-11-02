@@ -1464,6 +1464,7 @@ WITH indicateurs AS (
         jsonb_build_object('tables', COALESCE(array_agg(t.schema_name || '.' || t.table_name), '{}'))
     FROM (VALUES
             ('platform',    'audit_log'),
+            ('platform',    'ops_log'),
             ('engagement',  'email_messages'),
             ('negotiation', 'channel_messages'),
             ('analytics',   'page_views')
