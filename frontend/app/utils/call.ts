@@ -31,7 +31,7 @@ import type { IsoDateTime } from '~/types/shared'
 export type CallPhase = 'upcoming' | 'open' | 'closed'
 
 /** `event.effective_deadline()` — prolongation comprise. */
-export function effectiveDeadline(call: CallForProposals): IsoDateTime {
+export function effectiveDeadline(call: Pick<CallForProposals, 'closes_at' | 'extended_until'>): IsoDateTime {
   return call.extended_until ?? call.closes_at
 }
 
