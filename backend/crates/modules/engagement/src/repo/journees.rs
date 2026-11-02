@@ -3,6 +3,8 @@
 //! journée. L'heure de début se lit sur le déroulé (activités non annulées et
 //! moments), comme sur la page de la journée, et se formate dans le fuseau de
 //! l'édition par la base, pour la même raison que `seance_pour_rappel`.
+//!
+//! Et l'inscription à une activité seule, pour sa confirmation.
 
 use kernel::error::Result;
 use sqlx::PgPool;
@@ -120,4 +122,66 @@ pub async fn inscriptions_de_la_journee_de(pool: &PgPool, session_id: Uuid) -> R
     .fetch_all(pool)
     .await?;
     Ok(ids)
+}
+
+/// Une inscription à une activité seule, de quoi composer sa confirmation.
+#[derive(Debug, Clone)]
+pub struct ActivitePourCourriel {
+    pub status: String,
+    pub person_id: Uuid,
+    pub first_name: String,
+    pub email: String,
+    pub locale: String,
+    pub event_id: Uuid,
+    pub titre: String,
+    pub event_slug: String,
+    pub session_slug: String,
+    pub timezone: String,
+    pub debut_local: Option<String>,
+    pub track_registration_id: Option<Uuid>,
+    /// La journée dont l'activité fait partie : son direct est celui de la journée.
+    pub track_slug: Option<String>,
+}
+
+pub async fn activite_pour_courriel(
+    pool: &PgPool,
+    registration_id: Uuid,
+) -> Result<Option<ActivitePourCourriel>> {
+    let ligne = sqlx::query!(
+        r#"SELECT r.status::text AS "status!", r.person_id, p.first_name,
+                  p.primary_email::text AS "email!", r.locale, s.event_id,
+                  platform.t(s.title, r.locale) AS "titre!",
+                  e.slug::text AS "event_slug!", s.slug::text AS "session_slug!",
+                  s.timezone::text AS "timezone!",
+                  to_char(s.starts_at AT TIME ZONE s.timezone,
+                          CASE WHEN r.locale LIKE 'en%' THEN 'YYYY-MM-DD "at" HH24:MI'
+                               ELSE 'DD/MM/YYYY "à" HH24"h"MI' END) AS debut_local,
+                  r.track_registration_id,
+                  (SELECT t.slug::text FROM event.programme_tracks t
+                    WHERE t.id = programme.day_track_of(s.id)) AS track_slug
+             FROM programme.registrations r
+             JOIN identity.people p ON p.id = r.person_id
+             JOIN programme.sessions s ON s.id = r.session_id
+             JOIN event.events e ON e.id = s.event_id
+            WHERE r.id = $1"#,
+        registration_id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(ligne.map(|l| ActivitePourCourriel {
+        status: l.status,
+        person_id: l.person_id,
+        first_name: l.first_name,
+        email: l.email,
+        locale: l.locale,
+        event_id: l.event_id,
+        titre: l.titre,
+        event_slug: l.event_slug,
+        session_slug: l.session_slug,
+        timezone: l.timezone,
+        debut_local: l.debut_local,
+        track_registration_id: l.track_registration_id,
+        track_slug: l.track_slug,
+    }))
 }

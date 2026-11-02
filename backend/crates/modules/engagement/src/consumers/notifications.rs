@@ -78,6 +78,9 @@ impl EventConsumer for NotificationsConsumer {
     }
 
     async fn handle(&self, conn: &mut PgConnection, event: &OutboxEvent) -> Result<()> {
+        if event.event_type == "programme.registration.created" {
+            crate::jobs::inscription::poser(conn, event).await?;
+        }
         if event.payload.get("notification").is_some() {
             return self.generique(conn, event).await;
         }

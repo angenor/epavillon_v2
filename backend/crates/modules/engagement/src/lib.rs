@@ -98,6 +98,12 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             mailer.clone(),
         )),
         Arc::new(jobs::regie_notice::RegieNotice::new(db.clone())),
+        // Inscription à une activité seule (02/11) : sa confirmation.
+        Arc::new(jobs::inscription::SendRegistration::new(
+            db.clone(),
+            config,
+            mailer.clone(),
+        )),
         // Inscription à une journée (02/11) : confirmation et rappels de la journée.
         Arc::new(jobs::journees::SendDayRegistration::new(
             db.clone(),

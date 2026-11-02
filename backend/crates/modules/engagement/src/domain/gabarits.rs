@@ -500,7 +500,7 @@ fn signature() -> String {
 }
 
 /// Un bouton « à l'épreuve d'Outlook » : une cellule colorée, un lien dedans.
-fn bouton(lien: &str, texte: &str) -> String {
+pub fn bouton(lien: &str, texte: &str) -> String {
     format!(
         "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:20px 0\"><tr>\
 <td style=\"background:{CYAN};border-radius:6px\"><a href=\"{}\" style=\"display:inline-block;padding:12px 24px;font-family:{POLICE};font-size:15px;font-weight:bold;color:#ffffff;text-decoration:none\">{}</a></td>\

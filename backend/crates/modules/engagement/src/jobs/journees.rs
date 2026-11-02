@@ -2,10 +2,10 @@
 //!
 //! - **La confirmation** (`engagement.send_day_registration`), mise en file par
 //!   le module Programmation dans la transaction de l'inscription. Sans compte,
-//!   elle porte le jeton en clair du lien de gestion : le travail le déclare
+//!   elle porte le jeton en clair dans le lien du direct : le travail le déclare
 //!   (`carries_secret`), sa charge est vidée à la réussite comme à la mort.
-//!   Zoom n'envoie pas sa propre confirmation pour une réunion de journée :
-//!   c'est ce courriel qui porte le lien du direct.
+//!   Zoom n'envoie pas sa propre confirmation : c'est ce courriel qui porte le
+//!   lien du direct ([`courriel_direct`]).
 //! - **Les rappels de la journée** (`engagement.send_day_reminder`), un par
 //!   décalage d'un jour ou plus de la règle de l'édition (2 jours, 1 jour avec la
 //!   règle par défaut). Ceux de moins d'un jour partent par activité gardée.
@@ -22,13 +22,16 @@ use kernel::config::Config;
 use kernel::db::Db;
 use kernel::error::{ApiError, Result};
 use kernel::jobs::{self, ClaimedJob, JobHandler, NewJob};
-use kernel::mail::{Mailer, OutgoingMail};
+use kernel::mail::{Extras, Mailer, OutgoingMail};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgConnection;
 use std::sync::Arc;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::domain::courriel_direct::{self, CourrielDirect};
+use crate::domain::gabarits::{images_integrees, Visuels};
+use crate::jobs::send_mailing::apparence;
 use crate::repo::delivery;
 use crate::repo::journees::{self, JourneePourCourriel};
 
@@ -58,7 +61,7 @@ fn page(app: &str, j: &JourneePourCourriel, suite: Option<(&str, &str)>) -> Stri
 }
 
 /// Les activités suivies, en un paragraphe. Une journée de moins de deux
-/// activités n'offre rien à choisir : le paragraphe se tait.
+/// activités n'offre rien à choisir : le paragraphe est vide.
 fn suivi(anglais: bool, n: i64, m: i64) -> String {
     let phrase = match (anglais, m < 2, n) {
         (_, true, _) => return String::new(),
@@ -69,85 +72,87 @@ fn suivi(anglais: bool, n: i64, m: i64) -> String {
         (true, _, 1) => format!("You are following 1 of {m} activities: you will get a reminder before it starts."),
         (true, _, n) => format!("You are following {n} of {m} activities: you will get a reminder before each of them starts."),
     };
-    phrase + "\n\n"
+    phrase
 }
 
 /// La confirmation, en français ou en anglais selon la langue d'inscription.
+/// Sans lien de gestion (02/11) : le courriel ne mène qu'au direct.
 pub fn confirmation(
     j: &JourneePourCourriel,
     jeton: Option<&str>,
     renvoi: bool,
     app: &str,
     message_id: &str,
+    visuels: Option<&Visuels>,
 ) -> OutgoingMail {
     let anglais = j.locale.starts_with("en");
-    let (direct, gestion) = match jeton {
-        Some(t) => (
-            format!("{}?jeton={t}", page(app, j, Some(("direct", "live")))),
-            format!(
-                "{}?jeton={t}",
-                page(app, j, Some(("mon-inscription", "my-registration")))
-            ),
-        ),
-        None => (page(app, j, None), page(app, j, None)),
+    let lien = match jeton {
+        Some(t) => format!("{}?jeton={t}", page(app, j, Some(("direct", "live")))),
+        None => page(app, j, None),
     };
     let quand = j
         .debut_local
         .as_deref()
         .map(|d| format!("{d} ({})", j.timezone))
         .unwrap_or_default();
+    let suivi = suivi(anglais, j.gardees, j.activites);
 
-    let (sujet, texte) = if anglais {
-        let sujet = if renvoi {
-            format!("Your link for {}", j.titre)
-        } else {
-            format!("Registration confirmed: {}", j.titre)
-        };
-        let texte = format!(
-            "Hello {prenom},\n\n\
-             {intro} \"{titre}\" starts on {quand}. One link is all you need to follow the whole day live, from the welcome to the closing.\n\n\
-             {suivi}\
-             Join the live stream of the day, on the day:\n{direct}\n\n\
-             {changer}\n{gestion}\n\n\
-             {perso}",
-            prenom = j.first_name,
-            intro = if renvoi { "Here is your link again." } else { "Your registration is confirmed." },
-            titre = j.titre,
-            suivi = suivi(true, j.gardees, j.activites),
-            changer = if j.activites < 2 { "Cancel your registration:" } else { "Change your activities or cancel your registration:" },
-            perso = if jeton.is_some() { "These links are personal: please do not forward them." } else { "" },
-        );
-        (sujet, texte)
+    let c = if anglais {
+        CourrielDirect {
+            anglais,
+            sujet: if renvoi {
+                format!("Your link for {}", j.titre)
+            } else {
+                format!("Registration confirmed: {}", j.titre)
+            },
+            avant: [
+                format!("Hello {},", j.first_name),
+                format!(
+                    "{} \"{}\" starts on {quand}. One link is all you need to follow the whole day live, from the welcome to the closing.",
+                    if renvoi { "Here is your link again." } else { "Your registration is confirmed." },
+                    j.titre
+                ),
+                suivi,
+                "Join the live stream of the day, on the day:".to_owned(),
+            ]
+            .into_iter()
+            .filter(|p| !p.is_empty())
+            .collect(),
+            lien,
+            apres: jeton
+                .map(|_| "This link is personal: please do not forward it.".to_owned())
+                .into_iter()
+                .collect(),
+        }
     } else {
-        let sujet = if renvoi {
-            format!("Votre lien pour {}", j.titre)
-        } else {
-            format!("Inscription confirmée : {}", j.titre)
-        };
-        let texte = format!(
-            "Bonjour {prenom},\n\n\
-             {intro} « {titre} » commence le {quand}. Un seul lien suffit pour suivre tout le direct de la journée, de l'accueil à la clôture.\n\n\
-             {suivi}\
-             Rejoindre le direct de la journée, le jour même :\n{direct}\n\n\
-             {changer}\n{gestion}\n\n\
-             {perso}",
-            prenom = j.first_name,
-            intro = if renvoi { "Voici de nouveau votre lien." } else { "Votre inscription est confirmée." },
-            titre = j.titre,
-            suivi = suivi(false, j.gardees, j.activites),
-            changer = if j.activites < 2 { "Vous désinscrire :" } else { "Changer vos activités ou vous désinscrire :" },
-            perso = if jeton.is_some() { "Ces liens vous sont personnels : ne les transférez pas." } else { "" },
-        );
-        (sujet, texte)
+        CourrielDirect {
+            anglais,
+            sujet: if renvoi {
+                format!("Votre lien pour {}", j.titre)
+            } else {
+                format!("Inscription confirmée : {}", j.titre)
+            },
+            avant: [
+                format!("Bonjour {},", j.first_name),
+                format!(
+                    "{} « {} » commence le {quand}. Un seul lien suffit pour suivre tout le direct de la journée, de l'accueil à la clôture.",
+                    if renvoi { "Voici de nouveau votre lien." } else { "Votre inscription est confirmée." },
+                    j.titre
+                ),
+                suivi,
+                "Rejoignez le direct de la journée, le jour même :".to_owned(),
+            ]
+            .into_iter()
+            .filter(|p| !p.is_empty())
+            .collect(),
+            lien,
+            apres: jeton
+                .map(|_| "Ce lien vous est personnel : ne le transférez pas.".to_owned())
+                .into_iter()
+                .collect(),
+        }
     };
-    OutgoingMail {
-        message_id: message_id.to_owned(),
-        to: j.email.clone(),
-        locale: j.locale.clone(),
-        subject: sujet,
-        text: texte.trim_end().to_owned() + "\n",
-        html: None,
-    }
+    courriel_direct::composer(&c, visuels, &j.email, &j.locale, message_id)
 }
 
 /// Le rappel de la journée, `minutes` avant son début.
@@ -247,16 +252,32 @@ impl JobHandler for SendDayRegistration {
         {
             return Ok(());
         }
+        let habit = apparence(
+            &self.db,
+            j.event_id,
+            courriel_direct::GABARIT,
+            None,
+            &self.app_public_url,
+        )
+        .await?;
         let mail = confirmation(
             &j,
             c.token.as_deref(),
             c.resent,
             &self.app_public_url,
             &job.id.to_string(),
+            habit.visuels.as_ref(),
         );
-        self.mailer.send(&mail).await.map_err(|_| {
-            ApiError::internal("envoi de la confirmation de journée refusé par le relais")
-        })
+        let extras = Extras {
+            inline_images: images_integrees(&habit.gabarit, habit.visuels.as_ref()),
+            ..Extras::default()
+        };
+        self.mailer
+            .send_with_extras(&mail, &extras)
+            .await
+            .map_err(|_| {
+                ApiError::internal("envoi de la confirmation de journée refusé par le relais")
+            })
     }
 }
 
@@ -401,17 +422,23 @@ mod tests {
     }
 
     #[test]
-    fn un_invite_recoit_ses_deux_liens_avec_le_jeton() {
-        let m = confirmation(&journee("fr"), Some("abc"), false, "https://site.org/", "j");
+    fn un_invite_recoit_le_lien_du_direct_avec_le_jeton_et_rien_d_autre() {
+        let m = confirmation(
+            &journee("fr"),
+            Some("abc"),
+            false,
+            "https://site.org/",
+            "j",
+            None,
+        );
         assert!(m
             .text
             .contains("https://site.org/programmations/cdp31/journees/finance/direct?jeton=abc"));
-        assert!(m.text.contains(
-            "https://site.org/programmations/cdp31/journees/finance/mon-inscription?jeton=abc"
-        ));
+        assert!(!m.text.contains("mon-inscription"));
+        assert!(!m.text.contains("désinscrire"));
         assert!(m.text.contains("Vous suivez 6 activités sur 8"));
         assert!(m.text.contains("(Europe/Istanbul)"));
-        assert!(!m.text.contains('\u{2014}'));
+        assert!(m.html.unwrap().contains(">Rejoindre le direct</a>"));
     }
 
     #[test]
@@ -419,14 +446,20 @@ mod tests {
         let mut j = journee("fr");
         j.gardees = 0;
         j.activites = 0;
-        let m = confirmation(&j, None, false, "https://site.org/", "j");
+        let m = confirmation(&j, None, false, "https://site.org/", "j", None);
         assert!(!m.text.contains("activité"));
-        assert!(m.text.contains("Vous désinscrire :"));
     }
 
     #[test]
     fn en_anglais_les_pages_sont_celles_du_site_anglais() {
-        let m = confirmation(&journee("en"), Some("abc"), true, "https://site.org", "j");
+        let m = confirmation(
+            &journee("en"),
+            Some("abc"),
+            true,
+            "https://site.org",
+            "j",
+            None,
+        );
         assert!(m.subject.starts_with("Your link for"));
         assert!(m
             .text
@@ -435,7 +468,7 @@ mod tests {
 
     #[test]
     fn avec_un_compte_le_lien_mene_a_la_page_de_la_journee() {
-        let m = confirmation(&journee("fr"), None, false, "https://site.org", "j");
+        let m = confirmation(&journee("fr"), None, false, "https://site.org", "j", None);
         assert!(!m.text.contains("jeton"));
         assert!(m
             .text

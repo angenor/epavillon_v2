@@ -16,7 +16,10 @@
 //!
 //! Troisième exception (02/11) : les courriels de la régie du jour
 //! (`regie_notice`), enfilés à l'heure dite par le consommateur `engagement.regie`.
+//! Quatrième (02/11) : la confirmation d'une inscription à une activité
+//! (`inscription`), enfilée par le consommateur des avis à sa création.
 
+pub mod inscription;
 pub mod journees;
 pub mod notification_email;
 pub mod partitions;
