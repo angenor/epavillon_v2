@@ -7,49 +7,89 @@
         "ordinal": 0,
         "name": "id!",
         "type_info": "Uuid",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "id"
+          }
+        }
       },
       {
         "ordinal": 1,
         "name": "occurred_at!",
         "type_info": "Timestamptz",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "occurred_at"
+          }
+        }
       },
       {
         "ordinal": 2,
         "name": "source!",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "source"
+          }
+        }
       },
       {
         "ordinal": 3,
         "name": "kind!",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "kind"
+          }
+        }
       },
       {
         "ordinal": 4,
         "name": "level!",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "level"
+          }
+        }
       },
       {
         "ordinal": 5,
         "name": "request_id?",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "request_id"
+          }
+        }
       },
       {
         "ordinal": 6,
         "name": "actor_id?",
         "type_info": "Uuid",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "actor_id"
+          }
+        }
       },
       {
         "ordinal": 7,
         "name": "actor_name?",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
       },
       {
         "ordinal": 8,
@@ -61,49 +101,89 @@
         "ordinal": 9,
         "name": "method?",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "method"
+          }
+        }
       },
       {
         "ordinal": 10,
         "name": "route?",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "route"
+          }
+        }
       },
       {
         "ordinal": 11,
         "name": "status?",
         "type_info": "Int2",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "status"
+          }
+        }
       },
       {
         "ordinal": 12,
         "name": "duration_ms?",
         "type_info": "Int4",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "duration_ms"
+          }
+        }
       },
       {
         "ordinal": 13,
         "name": "error_code?",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "error_code"
+          }
+        }
       },
       {
         "ordinal": 14,
         "name": "task?",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "task"
+          }
+        }
       },
       {
         "ordinal": 15,
         "name": "job_id?",
         "type_info": "Uuid",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "job_id"
+          }
+        }
       },
       {
         "ordinal": 16,
         "name": "detail?",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "platform.ops_log",
+            "name": "detail"
+          }
+        }
       },
       {
         "ordinal": 17,
@@ -142,7 +222,7 @@
       true,
       true,
       true,
-      false
+      null
     ]
   },
   "hash": "ce1ab40e966c8a264a55b9ecdfa7e6e219d40936c8af4b1407dbdfd80a96bdd4"
