@@ -63,7 +63,7 @@ pub fn demande_admise(ctx: &MailContext<'_>) -> OutgoingMail {
                  Your access request has been approved: {ouvre} are now open to you.\n\n\
                  Open Guide Négo to see them:\n\n\
                  {acces}\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -79,7 +79,7 @@ pub fn demande_admise(ctx: &MailContext<'_>) -> OutgoingMail {
                  Votre demande d'accès a été acceptée : {ouvre} ouverts.\n\n\
                  Ouvrez Guide Négo pour les retrouver :\n\n\
                  {acces}\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -107,7 +107,7 @@ pub fn demande_refusee(ctx: &MailContext<'_>, motif: Option<&str>) -> OutgoingMa
                  Your access request to the reserved modules has not been approved.{raison}\n\n\
                  If you belong to a francophone negotiators' network, ask your group for the \
                  current invitation code: it opens the modules straight away.\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -124,7 +124,7 @@ pub fn demande_refusee(ctx: &MailContext<'_>, motif: Option<&str>) -> OutgoingMa
                  Si vous faites partie d'un réseau francophone de négociatrices et de \
                  négociateurs, demandez à votre groupe le code d'invitation en cours : il ouvre \
                  les modules aussitôt.\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -149,7 +149,7 @@ pub fn question_repondue(ctx: &MailContext<'_>, question: &str) -> OutgoingMail 
                  \"{question}\"\n\n\
                  Read the answer in Guide Négo, under \"My questions\":\n\n\
                  {lien}\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -162,7 +162,7 @@ pub fn question_repondue(ctx: &MailContext<'_>, question: &str) -> OutgoingMail 
                  « {question} »\n\n\
                  Lisez la réponse dans Guide Négo, sous « Mes questions » :\n\n\
                  {lien}\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -187,7 +187,7 @@ pub fn terme_publie(ctx: &MailContext<'_>, term: &str, slug: &str) -> OutgoingMa
                  \"{term}\"\n\n\
                  Read its entry:\n\n\
                  {lien}\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -201,7 +201,7 @@ pub fn terme_publie(ctx: &MailContext<'_>, term: &str, slug: &str) -> OutgoingMa
                  « {term} »\n\n\
                  Lisez son entrée :\n\n\
                  {lien}\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -497,12 +497,12 @@ fn avis_par_courriel(
     let lien = format!("{}{chemin}", e.app_public_url.trim_end_matches('/'));
     let (subject, text) = if en {
         (
-            format!("{} — {titre}", etat.en()),
+            format!("{}: {titre}", etat.en()),
             format!(
-                "Hello,\n\n{} — {titre}\n\n{}\n\nOpen the page:\n\n{lien}\n\n\
+                "Hello,\n\n{}: {titre}\n\n{}\n\nOpen the page:\n\n{lien}\n\n\
                  You receive this email because {}. \
                  To stop these emails: Guide Négo, About, Notifications.\n\n\
-                 {} — Guide Négo, IFDD",
+                 {}, Guide Négo, IFDD",
                 etat.en(),
                 lignes.join("\n"),
                 pied.pourquoi_en,
@@ -511,12 +511,12 @@ fn avis_par_courriel(
         )
     } else {
         (
-            format!("{} — {titre}", etat.fr()),
+            format!("{} : {titre}", etat.fr()),
             format!(
-                "Bonjour,\n\n{} — {titre}\n\n{}\n\nOuvrir la fiche :\n\n{lien}\n\n\
+                "Bonjour,\n\n{} : {titre}\n\n{}\n\nOuvrir la fiche :\n\n{lien}\n\n\
                  Vous recevez ce courriel parce que {}. \
                  Pour ne plus en recevoir : Guide Négo, À propos, Notifications.\n\n\
-                 {} — Guide Négo, IFDD",
+                 {}, Guide Négo, IFDD",
                 etat.fr(),
                 lignes.join("\n"),
                 pied.pourquoi_fr,

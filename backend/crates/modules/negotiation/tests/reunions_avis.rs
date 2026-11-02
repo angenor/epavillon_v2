@@ -295,7 +295,7 @@ async fn lannulation_previent_inscrites_et_attente() {
     assert_eq!(messages.len(), 2);
     for m in &messages {
         assert!(
-            m.subject.starts_with("Annulée — Concertation"),
+            m.subject.starts_with("Annulée : Concertation"),
             "{}",
             m.subject
         );
@@ -343,7 +343,7 @@ async fn un_changement_dheure_dit_la_nouvelle_heure() {
     let messages = boite.messages();
     assert_eq!(messages.len(), 2);
     assert!(
-        messages[0].subject.starts_with("Déplacée — "),
+        messages[0].subject.starts_with("Déplacée : "),
         "{}",
         messages[0].subject
     );
@@ -436,7 +436,7 @@ async fn se_desinscrire_previent_la_promue() {
     assert_eq!(messages.len(), 1);
     assert_eq!(messages[0].to, "bea@example.org");
     assert!(
-        messages[0].subject.starts_with("Inscrite — "),
+        messages[0].subject.starts_with("Inscrite : "),
         "{}",
         messages[0].subject
     );

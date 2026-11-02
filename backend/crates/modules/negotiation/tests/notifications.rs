@@ -185,7 +185,7 @@ async fn un_changement_importe_previent_lagenda_et_la_thematique_allumee() {
         .find(|m| m.to == "fatou@example.org")
         .expect("courriel de Fatou");
     assert!(
-        a_fatou.subject.starts_with("Déplacée — "),
+        a_fatou.subject.starts_with("Déplacée : "),
         "{}",
         a_fatou.subject
     );
@@ -286,7 +286,7 @@ async fn la_publication_emet_et_pose_les_courriels() {
         .find(|m| m.to == "fatou@example.org")
         .expect("Fatou");
     assert!(
-        a_fatou.subject.starts_with("Salle changée — "),
+        a_fatou.subject.starts_with("Salle changée : "),
         "{}",
         a_fatou.subject
     );
@@ -300,7 +300,7 @@ async fn la_publication_emet_et_pose_les_courriels() {
         .iter()
         .find(|m| m.to == "binta@example.org")
         .expect("Binta");
-    assert!(a_binta.subject.starts_with("Non annoncée — Groupe Afrique"));
+    assert!(a_binta.subject.starts_with("Non annoncée : Groupe Afrique"));
     assert!(a_binta.text.contains("/guide-nego/negociations/reseau/"));
 }
 
