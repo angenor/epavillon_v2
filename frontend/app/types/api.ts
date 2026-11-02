@@ -466,6 +466,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/journal/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `JournalChangePage` : l'audit de toute la plateforme, le plus récent d'abord. Les valeurs des champs sensibles (identité personnelle, secrets, jetons, empreintes) ne sortent jamais : le champ est nommé avec `masked: true`. Filtres : `period`, `entity` (`schema.table`), `action` (insert, update, delete), `q` (auteur ou identifiant de l'objet). */
+        get: operations["admin_journal_modifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/journal/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `JournalEntryPage` : lignes de `platform.ops_log`, les plus récentes d'abord. Filtres : `period` (24h, 7d, 30d, 90d), `kind`, `source`, `q` (personne, route, code d'erreur ou code de la demande) ; `page` dès 1, `per_page` 50 par défaut, 200 au plus. */
+        get: operations["admin_journal_entrees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/journal/entries.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Les lignes de `/admin/journal/entries` (mêmes filtres, 5 000 au plus) en CSV, séparateur virgule, UTF-8 avec marque d'ordre. */
+        get: operations["admin_journal_entrees_csv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/journal/events/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Rend un événement de l'outbox non relayé disponible tout de suite et réveille le relais. Exige aussi `identity.platform.maintenance`. */
+        post: operations["admin_journal_relancer_evenement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/journal/failures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `JournalFailures` : travaux morts, en échec ou remis en file après un échec (`state` : dead, failed, retrying), et événements de l'outbox non relayés après au moins un essai. 200 de chaque au plus, sans charge utile ; dernière erreur nettoyée des adresses et des jetons. */
+        get: operations["admin_journal_echecs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/journal/jobs/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Relance un travail mort ou en échec par `platform.retry_job()` : un essai de plus, tout de suite, compteur et dernière erreur gardés. Exige aussi `identity.platform.maintenance`. */
+        post: operations["admin_journal_relancer_travail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/journal/requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `JournalRequestTrace` : tout ce qui porte ce code de demande, dans l'ordre chronologique : lignes du journal d'exploitation, modifications de l'audit (valeurs sensibles masquées par `platform.audit_is_sensitive`) et événements de l'outbox (`correlation_id`). Listes vides si rien ne correspond. */
+        get: operations["admin_journal_demande"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/journal/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `JournalSummary` : les quatre chiffres des 24 dernières heures (`platform.ops_log`), les travaux et événements en échec à relancer, et les lignes perdues par ce processus depuis son démarrage. */
+        get: operations["admin_journal_resume"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/mail-templates": {
         parameters: {
             query?: never;
@@ -2583,7 +2719,7 @@ export interface paths {
         };
         /**
          * Ce qui doit être réglé avant de publier.
-         * @description `PublicationReadinessIssue[]` — **lecture seule**, consultable avant toute tentative : l'équipe voit ce qui bloque avant d'essayer, plutôt que de découvrir la liste après un clic. Conflits détectés et manques : séance sans créneau valide, séance sans lieu ni précision de lieu, diffusion sans canal, intervenant absent. **`occurs_at` est un instant, jamais un intervalle mis en forme** — une chaîne figée en base ne peut ni se traduire ni se situer dans le fuseau de l'édition. Seule la gravité `blocking` retient la publication.
+         * @description `PublicationReadinessIssue[]` — **lecture seule**, consultable avant toute tentative : l'équipe voit ce qui bloque avant d'essayer, plutôt que de découvrir la liste après un clic. Conflits détectés et manques : séance sans créneau valide, diffusion sans canal, intervenant absent. Une séance à placer (ni salle ni précision de lieu) n'y figure pas : la publication la laisse privée. **`occurs_at` est un instant, jamais un intervalle mis en forme** — une chaîne figée en base ne peut ni se traduire ni se situer dans le fuseau de l'édition. Seule la gravité `blocking` retient la publication.
          */
         get: operations["planificateur_controle_de_publication"];
         put?: never;
@@ -9315,6 +9451,413 @@ export interface operations {
                 };
             };
             /** @description Périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_modifications: {
+        parameters: {
+            query?: {
+                /** @description 24h, 7d, 30d ou 90d */
+                period?: string;
+                /** @description schema.table */
+                entity?: string;
+                /** @description insert, update ou delete */
+                action?: string;
+                /** @description Auteur ou identifiant */
+                q?: string;
+                /** @description Dès 1 */
+                page?: number;
+                /** @description 200 au plus */
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JournalChangePage */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Filtre inconnu */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_entrees: {
+        parameters: {
+            query?: {
+                /** @description 24h, 7d, 30d ou 90d */
+                period?: string;
+                /** @description http_error, http_refused, http_slow ou job_failed */
+                kind?: string;
+                /** @description api ou worker */
+                source?: string;
+                /** @description Recherche libre */
+                q?: string;
+                /** @description Dès 1 */
+                page?: number;
+                /** @description 200 au plus */
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JournalEntryPage */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Filtre inconnu */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_entrees_csv: {
+        parameters: {
+            query?: {
+                /** @description 24h, 7d, 30d ou 90d */
+                period?: string;
+                /** @description http_error, http_refused, http_slow ou job_failed */
+                kind?: string;
+                /** @description api ou worker */
+                source?: string;
+                /** @description Recherche libre */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Fichier CSV */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Filtre inconnu */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_relancer_evenement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de l'événement */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disponible pour le relais */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` ou `identity.platform.maintenance` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Événement inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Événement déjà relayé */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_echecs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JournalFailures */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_relancer_travail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du travail */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Remis en file */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` ou `identity.platform.maintenance` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Travail inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Le travail n'est ni mort ni en échec */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_demande: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Valeur de l'en-tête X-Request-Id, ou `job:<uuid>` pour un travail */
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JournalRequestTrace */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_journal_resume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JournalSummary */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `identity.platform.journal` absente en portée globale */
             403: {
                 headers: {
                     [name: string]: unknown;

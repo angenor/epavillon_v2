@@ -771,3 +771,9 @@ export const TRACK_PAGE_SPEAKER = (n: number): Uuid => uuid('7117', n)
 export const TRACK_PAGE_ASSET = (n: number): Uuid => uuid('7118', n)
 /** Dossiers d'une séance commune de la CdP31. */
 export const TRACK_PAGE_PROPOSAL = (n: number): Uuid => uuid('7119', n)
+
+/** Journal du back-office (`/admin/journal`) : lignes de `platform.ops_log`, de `platform.audit_log`, travaux et événements en échec. */
+export const JOURNAL_ENTRY = (n: number): Uuid => uuid('7120', n)
+export const JOURNAL_CHANGE = (n: number): Uuid => uuid('7121', n)
+export const JOURNAL_JOB = (n: number): Uuid => uuid('7122', n)
+export const JOURNAL_EVENT = (n: number): Uuid => uuid('7123', n)

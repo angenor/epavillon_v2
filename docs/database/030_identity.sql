@@ -609,6 +609,12 @@ INSERT INTO identity.permissions (code, label, module_code) VALUES
     -- données (drapeau `platform.maintenance`, 900_seed.sql § 2). Testée en portée
     -- globale : un administrateur détaché sur une édition ne ferme pas les autres.
     ('identity.platform.maintenance', '{"fr":"Mettre la plateforme en maintenance","en":"Put the platform under maintenance"}', 'identity'),
+    -- Lire le journal du back-office (02/11/2026) : pannes, refus, pages lentes,
+    -- travaux en échec et audit de toute la plateforme. Testée en portée
+    -- globale : le journal mêle toutes les éditions, un administrateur détaché
+    -- sur une seule n'y a pas accès. Relancer un travail exige en plus
+    -- `identity.platform.maintenance`.
+    ('identity.platform.journal', '{"fr":"Consulter le journal d''exploitation","en":"Read the operations log"}', 'identity'),
     ('org.organization.read',       '{"fr":"Consulter les organisations","en":"Read organizations"}', 'org'),
     ('org.organization.manage',     '{"fr":"Gérer les organisations","en":"Manage organizations"}', 'org'),
     ('org.organization.merge',      '{"fr":"Fusionner des organisations","en":"Merge organizations"}', 'org'),
@@ -660,6 +666,7 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     -- (`allowed_scopes`), sur laquelle il n'a rien.
     ('admin', 'identity.role.assign'),
     ('admin', 'identity.platform.maintenance'),
+    ('admin', 'identity.platform.journal'),
     ('admin', 'identity.person.read'), ('admin', 'identity.person.manage'),
     ('admin', 'org.organization.read'), ('admin', 'org.organization.manage'), ('admin', 'org.organization.merge'),
     ('admin', 'event.event.manage'), ('admin', 'event.call.manage'),

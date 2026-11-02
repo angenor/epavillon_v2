@@ -54,6 +54,7 @@ pub fn build_app(
         .configure(routes::reference::configurer)
         .configure(routes::platform::configurer)
         .configure(routes::legal::configurer)
+        .configure(routes::journal::configurer)
         // Le socle du temps réel ne dépend d'aucun module : `person:` et
         // `edition:…:public` sont servis même quand tout le reste est démonté.
         .configure(realtime::configurer);
@@ -237,8 +238,11 @@ pub fn build_app(
         }));
     }
 
-    App::new()
-        .app_data(web::Data::new(etat.db.clone()))
+    let mut app = App::new();
+    if let Some(journal) = &etat.ops_log {
+        app = app.app_data(web::Data::new(journal.clone()));
+    }
+    app.app_data(web::Data::new(etat.db.clone()))
         .app_data(web::Data::from(etat.config.clone()))
         .app_data(web::Data::from(etat.passwords.clone()))
         .app_data(web::Data::from(etat.mailer.clone()))

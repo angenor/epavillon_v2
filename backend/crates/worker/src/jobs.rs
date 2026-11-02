@@ -7,6 +7,7 @@ use kernel::context::RequestContext;
 use kernel::db::Db;
 use kernel::error::Result;
 use kernel::jobs::{self, ClaimedJob};
+use kernel::ops_log::{self, OpsEntry};
 use std::time::Duration;
 
 use crate::registry::JobRegistry;
@@ -99,6 +100,7 @@ async fn executer(db: &Db, registry: &JobRegistry, travail: ClaimedJob) {
     let Some(handler) = registry.get(&travail.task) else {
         let message = format!("aucun gestionnaire pour la tâche « {} »", travail.task);
         tracing::error!("{message}");
+        consigner_echec(db, &travail, &message).await;
         marquer(db, &travail, Err(message)).await;
         return;
     };
@@ -107,7 +109,9 @@ async fn executer(db: &Db, registry: &JobRegistry, travail: ClaimedJob) {
         Ok(()) => marquer(db, &travail, Ok(())).await,
         Err(e) => {
             tracing::warn!(erreur = %e, "travail en échec");
-            marquer(db, &travail, Err(e.to_string())).await;
+            let message = e.to_string();
+            consigner_echec(db, &travail, &message).await;
+            marquer(db, &travail, Err(message)).await;
             if handler.carries_secret() {
                 effacer_si_mort(db, &travail).await;
             }
@@ -157,5 +161,20 @@ async fn marquer(db: &Db, travail: &ClaimedJob, issue: std::result::Result<(), S
 
     if let Err(e) = resultat {
         tracing::error!(erreur = %e, "marquage du travail impossible, il sera repris");
+    }
+}
+
+/// Hors de la transaction du travail : une ligne de journal qui ne s'écrit pas
+/// ne doit ni bloquer la boucle ni changer le sort du travail.
+async fn consigner_echec(db: &Db, travail: &ClaimedJob, erreur: &str) {
+    let ligne = OpsEntry::job_failed(
+        &travail.task,
+        travail.id,
+        &travail.context().request_id,
+        travail.attempts >= travail.max_attempts,
+        erreur,
+    );
+    if let Err(e) = ops_log::insert(db.pool(), &[ligne]).await {
+        tracing::warn!(erreur = %e, "journal d'exploitation : échec non consigné");
     }
 }

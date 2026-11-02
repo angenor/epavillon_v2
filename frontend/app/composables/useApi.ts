@@ -72,6 +72,7 @@ import { createInvitationApi } from './api/invitation'
 import { createAdminUsersApi } from './api/admin-users'
 import { createAdminIncidentsApi } from './api/admin-incidents'
 import { createAdminRegieApi } from './api/admin-regie'
+import { createAdminJournalApi } from './api/admin-journal'
 import { createAdminMailingsApi } from './api/admin-mailings'
 import { createAdminNegotiationsApi } from './api/admin-negotiations'
 import { createOrganizationWorkspaceApi } from './api/organization-workspace'
@@ -810,6 +811,7 @@ export function useApi() {
     // -----------------------------------------------------------------------
     adminIncidents: createAdminIncidentsApi(deps),
     adminRegie: createAdminRegieApi(deps),
+    adminJournal: createAdminJournalApi(deps),
     /** Envois de courriels du back-office, bornés à l'édition (règle n° 8). */
     adminMailings: createAdminMailingsApi(deps),
 

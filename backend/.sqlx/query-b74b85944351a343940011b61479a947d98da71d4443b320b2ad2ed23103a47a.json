@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.outbox_events SET available_at = now()\n          WHERE id = $1 AND published_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b74b85944351a343940011b61479a947d98da71d4443b320b2ad2ed23103a47a"
+}

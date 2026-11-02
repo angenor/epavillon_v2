@@ -1,0 +1,361 @@
+{
+  "title": "Journal de la plateforme",
+  "subtitle": "Ce qui a échoué, ce qui a été refusé, ce qui a changé. Conservé {count} mois.",
+  "zoneUtc": "temps universel (UTC)",
+  "lookup": {
+    "label": "Code de la demande",
+    "placeholder": "Code affiché à l'écran (ex. 01a19c…)",
+    "submit": "Retrouver"
+  },
+  "forbidden": {
+    "scope": "membre de l'équipe centrale, avec la consultation du journal",
+    "action": "Retour au tableau de bord"
+  },
+  "dropped": "Aucune ligne perdue. | {count} ligne n'a pas pu être consignée depuis le dernier démarrage de l'API : le journal est incomplet. | {count} lignes n'ont pas pu être consignées depuis le dernier démarrage de l'API : le journal est incomplet.",
+  "figures": {
+    "label": "Les 24 dernières heures",
+    "http_error": "panne, 24 dernières heures | panne, 24 dernières heures | pannes, 24 dernières heures",
+    "http_refused": "accès refusé | accès refusé | accès refusés",
+    "http_slow": "page lente (plus d'une seconde) | page lente (plus d'une seconde) | pages lentes (plus d'une seconde)",
+    "failing": "tâche en échec à relancer | tâche en échec à relancer | tâches en échec à relancer"
+  },
+  "tabs": {
+    "label": "Journal",
+    "erreurs": "Erreurs et refus",
+    "taches": "Tâches en échec",
+    "modifications": "Modifications"
+  },
+  "filters": {
+    "label": "Filtres"
+  },
+  "period": {
+    "label": "Période",
+    "24h": "24 dernières heures",
+    "7j": "7 jours",
+    "30j": "30 jours",
+    "90j": "90 jours"
+  },
+  "kind": {
+    "http_error": "Panne",
+    "http_refused": "Refusé",
+    "http_slow": "Lent",
+    "job_failed": "Tâche en échec"
+  },
+  "kindFilter": {
+    "label": "Gravité",
+    "all": "Toutes les gravités",
+    "http_error": "Pannes",
+    "http_refused": "Accès refusés",
+    "http_slow": "Pages lentes",
+    "job_failed": "Tâches en échec"
+  },
+  "kindTitle": {
+    "http_error": "Panne du serveur",
+    "http_refused": "Demande refusée",
+    "http_slow": "Réponse lente",
+    "job_failed": "Tâche de fond en échec"
+  },
+  "source": {
+    "label": "Origine",
+    "all": "Toutes les origines",
+    "api": "Serveur web",
+    "worker": "Tâches de fond"
+  },
+  "search": {
+    "label": "Rechercher",
+    "entries": "Personne, page, code d'erreur ou de demande",
+    "changes": "Auteur ou identifiant"
+  },
+  "entries": {
+    "caption": "Erreurs, refus et lenteurs, du plus récent au plus ancien",
+    "columns": {
+      "kind": "Gravité",
+      "route": "Page ou action",
+      "actor": "Personne",
+      "message": "Ce qui s'est passé"
+    },
+    "visitor": "Visiteur",
+    "worker": "Tâche de fond",
+    "count": "Aucune ligne | {shown} ligne sur {total} | {shown} lignes sur {total}",
+    "export": "Exporter en CSV",
+    "exportOffline": "L'export en CSV demande l'API branchée.",
+    "empty": {
+      "title": "Rien à signaler",
+      "description": "Aucune panne, aucun refus ni aucune lenteur sur cette période."
+    },
+    "noResults": {
+      "title": "Aucune ligne pour ces filtres",
+      "description": "Élargissez la période, ou retirez un filtre.",
+      "action": "Retirer les filtres"
+    }
+  },
+  "detail": {
+    "label": "Détail de la ligne",
+    "close": "Fermer le détail",
+    "when": "Quand",
+    "whenValue": "{day}, {time} ({zone})",
+    "person": "Personne",
+    "route": "Page",
+    "response": "Réponse",
+    "responseValue": "{status} en {duration} ms",
+    "errorCode": "Code d'erreur",
+    "task": "Tâche",
+    "seeFailures": "Voir les tâches en échec",
+    "requestId": "Code de la demande",
+    "copy": "Copier le code de la demande",
+    "copied": "Code de la demande copié",
+    "copyFailed": "Le navigateur a refusé la copie : sélectionnez le code à la main.",
+    "sameRequest": "Même demande, dans l'ordre",
+    "noRequest": "Cette ligne ne porte pas de code de demande : elle vient d'une tâche de fond, ou d'une page sans session.",
+    "traceEmpty": "Rien d'autre ne porte ce code de demande.",
+    "lookupTitle": "Demande retrouvée",
+    "lookupEmpty": "Aucune ligne ne porte ce code. Vérifiez-le : il date peut-être de plus de trois mois."
+  },
+  "trace": {
+    "change": "{action} : {entity}",
+    "event": "Événement : {label}",
+    "published": "relayé à {time}",
+    "pending": "pas encore relayé | pas encore relayé, {count} essai | pas encore relayé, {count} essais"
+  },
+  "action": {
+    "insert": "Créé",
+    "update": "Modifié",
+    "delete": "Supprimé"
+  },
+  "changes": {
+    "caption": "Modifications enregistrées, de la plus récente à la plus ancienne",
+    "columns": {
+      "actor": "Auteur",
+      "action": "Action",
+      "entity": "Objet",
+      "fields": "Champs changés"
+    },
+    "system": "Système",
+    "wholeRow": "ligne entière",
+    "masked": "valeur masquée",
+    "maskedField": "{name} (valeur masquée)",
+    "entityFilter": {
+      "label": "Objet",
+      "all": "Tous les objets",
+      "dossiers": "Dossiers",
+      "activites": "Activités",
+      "organisations": "Organisations",
+      "personnes": "Personnes"
+    },
+    "actionFilter": {
+      "label": "Action",
+      "all": "Créé, modifié, supprimé"
+    },
+    "empty": {
+      "title": "Aucune modification",
+      "description": "Rien n'a été créé, modifié ni supprimé sur cette période."
+    },
+    "noResults": {
+      "title": "Aucune modification pour ces filtres",
+      "description": "Élargissez la période, ou retirez un filtre.",
+      "action": "Retirer les filtres"
+    },
+    "detail": {
+      "entityId": "Identifiant",
+      "table": "Table",
+      "seeRequest": "Voir toute la demande",
+      "fields": "Champs",
+      "noFields": {
+        "insert": "Création : la ligne entière, sans détail des champs.",
+        "update": "Aucun champ suivi n'a changé.",
+        "delete": "Suppression : la ligne entière, sans détail des champs."
+      },
+      "before": "Avant",
+      "after": "Après",
+      "emptyValue": "vide"
+    }
+  },
+  "failures": {
+    "jobs": {
+      "title": "Travaux de fond",
+      "empty": "Aucun travail en échec pour ces filtres."
+    },
+    "events": {
+      "title": "Événements à relayer",
+      "subtitle": "Ce que les modules se signalent entre eux : tant qu'un événement n'est pas relayé, ses effets (courriels, mises à jour) n'ont pas lieu.",
+      "empty": "Aucun événement en échec pour ces filtres."
+    },
+    "columns": {
+      "lastAttempt": "Dernier essai ({zone})",
+      "occurred": "Émis ({zone})",
+      "task": "Nature",
+      "attempts": "Essais",
+      "error": "Dernière erreur",
+      "actions": "Action"
+    },
+    "filters": {
+      "stateLabel": "État",
+      "stateAll": "Tous les états",
+      "state": {
+        "dead": "Abandonnées",
+        "failed": "En échec",
+        "retrying": "Nouvel essai prévu"
+      },
+      "taskLabel": "Nature",
+      "taskAll": "Toutes les natures"
+    },
+    "state": {
+      "dead": "Abandonnée",
+      "failed": "En échec",
+      "retrying": "Nouvel essai à {time}"
+    },
+    "attemptsOf": "{attempts} sur {max}",
+    "attempts": "aucun essai | {count} essai | {count} essais",
+    "notLogged": "non consigné",
+    "retry": "Relancer",
+    "retryNow": "Relancer maintenant",
+    "retried": "Relance demandée",
+    "retriedMessage": "« {label} » repart dans la file.",
+    "readOnly": "Relancer demande le droit de mettre la plateforme en maintenance : vous voyez les échecs, sans pouvoir les relancer.",
+    "empty": {
+      "title": "Rien n'attend",
+      "description": "Aucun travail de fond ni aucun événement en échec."
+    }
+  },
+  "entities": {
+    "programme_proposals": "Dossier",
+    "programme_sessions": "Activité",
+    "programme_registrations": "Inscription",
+    "programme_reviews": "Évaluation",
+    "org_organizations": "Organisation",
+    "org_memberships": "Adhésion",
+    "identity_people": "Personne",
+    "identity_accounts": "Compte",
+    "identity_role_assignments": "Attribution de rôle",
+    "event_events": "Édition",
+    "live_incidents": "Message d'incident",
+    "content_highlights": "Diapositive de la vitrine"
+  },
+  "fields": {
+    "title": "titre",
+    "summary": "résumé",
+    "detailed_description": "présentation détaillée",
+    "objectives": "objectifs",
+    "status": "statut",
+    "acronym": "sigle",
+    "name": "nom",
+    "first_name": "prénom",
+    "last_name": "nom de famille",
+    "job_title": "fonction",
+    "phone": "téléphone",
+    "primary_email": "adresse principale",
+    "contact_email": "adresse de contact",
+    "password_hash": "mot de passe",
+    "starts_at": "début",
+    "ends_at": "fin",
+    "room_id": "salle"
+  },
+  "tasks": {
+    "analytics_refresh_all": "Mise à jour des tableaux de bord",
+    "engagement_ensure_partitions": "Préparation des partitions du mois",
+    "engagement_notification_email": "Courriel de notification",
+    "engagement_regie_notice": "Avis de la régie",
+    "engagement_send_day_registration": "Confirmation d'inscription à une journée",
+    "engagement_send_day_reminder": "Rappel d'une journée",
+    "engagement_send_mailing": "Envoi d'un courriel groupé",
+    "engagement_send_mailing_test": "Essai d'un courriel groupé",
+    "engagement_send_reminder": "Rappel d'une activité",
+    "event_call_autoclose": "Clôture automatique de l'appel à propositions",
+    "identity_purge_expired_tokens": "Purge des jetons expirés",
+    "identity_send_existing_account_notice": "Avis de compte déjà existant",
+    "identity_send_password_reset_email": "Courriel de réinitialisation du mot de passe",
+    "identity_send_verification_email": "Courriel de vérification d'adresse",
+    "live_announce_meeting_start": "Annonce du début d'une réunion",
+    "live_cancel_meeting": "Annulation d'une réunion Zoom",
+    "live_cancel_meeting_participant": "Retrait d'un participant Zoom",
+    "live_cancel_session_meeting": "Annulation de la réunion d'une activité",
+    "live_incident_window": "Fenêtre d'un message d'incident",
+    "live_process_webhook_event": "Notification reçue de Zoom",
+    "live_requeue_participants": "Reprise des inscriptions Zoom",
+    "live_sync_meeting": "Réunion Zoom",
+    "live_sync_meeting_participant": "Inscription à une réunion Zoom",
+    "media_process_asset": "Traitement d'un fichier",
+    "media_purge_assets": "Purge des fichiers",
+    "media_reconcile_quotas": "Recalcul des quotas de fichiers",
+    "negotiation_access_request_approved_email": "Courriel d'accès accordé (Guide Négo)",
+    "negotiation_access_request_rejected_email": "Courriel d'accès refusé (Guide Négo)",
+    "negotiation_document_extract": "Lecture d'un document (Guide Négo)",
+    "negotiation_expert_question_answered_email": "Courriel de réponse d'expert (Guide Négo)",
+    "negotiation_glossary_proposal_published_email": "Courriel de terme publié (Guide Négo)",
+    "negotiation_import_official_sessions": "Import des sessions officielles",
+    "negotiation_meeting_promotion_email": "Courriel de place libérée dans une réunion",
+    "negotiation_purge_invitation_attempts": "Purge des essais de code d'invitation",
+    "negotiation_report_publish": "Publication d'un signalement",
+    "negotiation_session_change_email": "Courriel de changement de session",
+    "negotiation_translate_session_titles": "Traduction des titres de session",
+    "org_duplicates_scan": "Recherche de doublons d'organisations",
+    "org_membership_approved_email": "Courriel d'adhésion acceptée",
+    "org_membership_invitation_email": "Courriel d'invitation dans une organisation",
+    "org_membership_request_email": "Courriel de demande d'adhésion",
+    "org_scorecard_refresh": "Mise à jour des fiches d'organisation",
+    "org_trust_score_recompute": "Recalcul de l'indice de confiance"
+  },
+  "events": {
+    "engagement_email_suppressed": "Adresse écartée des envois",
+    "event_call_closed": "Appel à propositions clos",
+    "event_call_deadline_extended": "Date limite de l'appel prolongée",
+    "event_call_opened": "Appel à propositions ouvert",
+    "event_edition_created": "Édition créée",
+    "event_edition_updated": "Édition modifiée",
+    "event_programme_published": "Programme publié",
+    "identity_account_locked": "Compte verrouillé",
+    "identity_account_password_changed": "Mot de passe changé",
+    "identity_person_anonymized": "Personne anonymisée",
+    "identity_person_email_verified": "Adresse vérifiée",
+    "identity_person_registered": "Compte créé",
+    "identity_person_status_changed": "Statut d'un compte changé",
+    "identity_privacy_request_received": "Demande RGPD reçue",
+    "identity_role_granted": "Rôle attribué",
+    "identity_role_revoked": "Rôle retiré",
+    "live_meeting_ended": "Réunion terminée",
+    "live_meeting_started": "Réunion commencée",
+    "media_asset_purged": "Fichier purgé",
+    "negotiation_access_request_approved": "Accès accordé (Guide Négo)",
+    "negotiation_access_request_rejected": "Accès refusé (Guide Négo)",
+    "negotiation_access_request_submitted": "Demande d'accès reçue (Guide Négo)",
+    "negotiation_francophone_meeting_changed": "Réunion de la Francophonie modifiée",
+    "negotiation_invitation_code_revoked": "Code d'invitation révoqué",
+    "negotiation_meeting_changed": "Réunion modifiée (Guide Négo)",
+    "negotiation_meeting_registration_promoted": "Place libérée dans une réunion",
+    "negotiation_network_meeting_published": "Réunion du réseau publiée",
+    "negotiation_report_decided": "Signalement tranché",
+    "negotiation_report_publish": "Signalement à publier",
+    "negotiation_report_published": "Signalement publié",
+    "negotiation_space_access_granted": "Accès à l'espace de négociation accordé",
+    "negotiation_space_access_revoked": "Accès à l'espace de négociation retiré",
+    "org_membership_approved": "Adhésion acceptée",
+    "org_membership_requested": "Adhésion demandée",
+    "org_membership_revoked": "Adhésion retirée",
+    "org_membership_role_changed": "Rôle dans l'organisation changé",
+    "org_organization_created": "Organisation créée",
+    "org_organization_merged": "Organisations fusionnées",
+    "org_organization_unverified": "Organisation non vérifiée",
+    "org_organization_updated": "Organisation modifiée",
+    "org_organization_verified": "Organisation vérifiée",
+    "programme_comment_addressed": "Commentaire traité",
+    "programme_comment_shared": "Commentaire partagé",
+    "programme_coorganization_requested": "Co-organisation demandée",
+    "programme_regie_cancellation_notice": "Avis d'annulation de la régie",
+    "programme_regie_restoration_notice": "Avis de rétablissement de la régie",
+    "programme_registration_attended": "Présence confirmée",
+    "programme_registration_cancelled": "Inscription annulée",
+    "programme_registration_created": "Inscription créée",
+    "programme_registration_no_show": "Absence constatée",
+    "programme_registration_registered": "Inscription confirmée",
+    "programme_registration_waitlisted": "Inscription en liste d'attente",
+    "programme_review_assigned": "Évaluation confiée",
+    "programme_session_cancelled": "Activité annulée",
+    "programme_session_completed": "Activité terminée",
+    "programme_session_created": "Activité créée",
+    "programme_session_live": "Activité en direct",
+    "programme_session_planned": "Activité planifiée",
+    "programme_session_postponed": "Activité reportée",
+    "programme_session_rescheduled": "Activité déplacée",
+    "programme_session_scheduled": "Activité programmée"
+  }
+}

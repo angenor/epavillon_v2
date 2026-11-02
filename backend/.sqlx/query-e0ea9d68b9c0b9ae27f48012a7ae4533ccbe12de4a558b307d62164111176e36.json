@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.purge_ops_log($1) AS \"supprimees!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "supprimees!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e0ea9d68b9c0b9ae27f48012a7ae4533ccbe12de4a558b307d62164111176e36"
+}

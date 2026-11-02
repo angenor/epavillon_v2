@@ -40,6 +40,9 @@ pub struct AppState {
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre —
     /// schéma et autorité, sans le chemin de base.
     pub allowed_origins: Vec<String>,
+    /// Canal vers `platform.ops_log`. Ouvert par le binaire (`OpsLog::spawn`) ;
+    /// absent, rien n'est journalisé en base, comme dans les tests.
+    pub ops_log: Option<kernel::ops_log::OpsLog>,
 }
 
 impl AppState {
@@ -94,6 +97,7 @@ impl AppState {
             realtime: crate::realtime::Hub::new(),
             topics: crate::realtime::autorisations(),
             allowed_origins,
+            ops_log: None,
         })
     }
 }

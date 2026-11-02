@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AdminDashboard } from '~/types/admin-dashboard'
+import type { EffectivePermission } from '~/types/identity'
 
 /**
  * TABLEAU DE BORD DU BACK-OFFICE — `/admin`.
@@ -75,6 +76,10 @@ const {
 )
 
 const figures = computed(() => dashboard.value?.figures ?? null)
+
+// Lues par le layout, déjà en cache : le lien vers le journal ne paraît qu'à qui peut l'ouvrir.
+const { data: navPermissions } = useNuxtData<EffectivePermission[]>('admin-nav-permissions')
+const canReadJournal = computed(() => hasPermission(navPermissions.value, 'identity.platform.journal'))
 const timezone = computed(() => dashboard.value?.timezone ?? 'UTC')
 
 /**
@@ -244,7 +249,7 @@ function total(points: { cumul: number }[]): number {
         </section>
 
         <!-- ZONE 3 -->
-        <AdminHealthPanel class="mt-12" :rows="dashboard.health" />
+        <AdminHealthPanel class="mt-12" :rows="dashboard.health" :journal-link="canReadJournal" />
       </template>
     </template>
   </div>

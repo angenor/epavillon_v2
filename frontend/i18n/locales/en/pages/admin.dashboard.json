@@ -104,6 +104,8 @@
     "threshold": "threshold {value}",
     "showHealthy": "Show the healthy indicator | Show the healthy indicator | Show the {count} healthy indicators",
     "hideHealthy": "Hide healthy indicators",
+    "openJournal": "Open the platform log",
+    "seeFailures": "See and retry in the platform log",
     "severity": {
       "critique": "Critical",
       "attention": "Warning",

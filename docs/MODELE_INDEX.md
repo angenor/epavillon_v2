@@ -54,6 +54,7 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 | Publier un événement de domaine | `010_platform.sql` | `platform.emit_event()` |
 | Différer un travail | `010_platform.sql` | `platform.jobs`, `claim_jobs()`, `fail_job()` |
 | Historique d'une entité | `010_platform.sql` | `platform.entity_history()` |
+| Journal du back-office (pannes, refus, audit global) | `010_platform.sql` | `platform.ops_log`, `purge_ops_log()`, `audit_redact()`, `retry_job()` · permission `identity.platform.journal` (`030_identity.sql`) |
 | Activer / désactiver une fonctionnalité | `010_platform.sql` | `platform.feature_flags`, `is_feature_enabled()` |
 | Pays, langues, thématiques, catégories | `020_reference.sql` | `reference.countries`, `locales`, `taxonomies`, `taxonomy_terms` |
 | Rattacher une entité à des thématiques | `020_reference.sql` | `reference.entity_terms` · `terms_of()` pour **filtrer** (codes), `term_badges()` pour **afficher** (libellé, couleur) |

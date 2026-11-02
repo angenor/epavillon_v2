@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.retry_job($1) AS \"relance!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "relance!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f01b5eb32106c04899f219415b598ef1f9f7c5a78703174865fe37bdfd4c824f"
+}

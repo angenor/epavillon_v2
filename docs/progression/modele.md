@@ -607,3 +607,15 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - **`programme.v_public_schedule`** : colonne `organization_acronym_well_known` en queue, clé `acronym_well_known` dans l'organisation de chaque dossier de `proposals`.
 
 **En production** : `ops/migrations/2026-11-02-sigle-bien-connu.sql`, rejouable, additive, à jouer avant de déployer l'API. Coche d'office OIF, AFD, ADEME, FAO, OCDE, BAD, CILSS, AUC, GGGI (une fiche chacun, lu le 02/11). Syntaxe vérifiée par libpg_query ; la vue remplacée est identique en production à celle du dépôt avant changement, aucune vue n'en dépend. Pas jouée.
+
+## 2026-11-02 : journal du back-office
+
+- **`platform.ops_log`** (nouveau, partitionné par mois, sans FK, partition par défaut) : pannes (5xx), refus retenus (4xx), pages lentes (> 1 s), travaux en échec. `route` est le modèle de route, jamais le chemin reçu ; `detail` (2 Ko) pour une panne seulement. Écrite hors transaction métier, par lots. Amorce : mois courant et trois suivants. Ajoutée à l'indicateur `partitions_manquantes` de `analytics.v_operational_health`.
+- **`platform.purge_ops_log(3)`** : supprime les partitions de plus de trois mois. Propre à `ops_log` : l'audit n'est pas purgé, décision non prise.
+- **`platform.audit_is_sensitive` / `audit_redact`** : l'audit global ne rend jamais la valeur d'un champ de l'identité personnelle (tout `identity` sauf rôles, permissions, attributions) ni d'un champ secret, jeton ou empreinte ; le nom du champ reste.
+- **`platform.retry_job`** : relance d'un travail mort ou en échec, un essai de plus, compteur et dernière erreur gardés.
+- Index `ix_audit_log_request` et `ix_outbox_correlation` : recherche par code de la demande.
+- Permission **`identity.platform.journal`** (portée globale), donnée à `admin` ; `super_admin` par déclencheur.
+- Aucun travail du worker ne préparait les partitions de `platform.audit_log` (seulement `engagement.email_messages`) : le travail `platform.maintain_journals` (worker) prépare désormais celles de `audit_log` et `ops_log` et purge `ops_log`.
+
+**En production** : `ops/migrations/2026-11-02-journal.sql`, rejouable, additive, à jouer avant de déployer l'API et le worker. L'index de l'audit se pose sous verrou d'écriture sur chaque partition (pas de CONCURRENTLY sur une table partitionnée). Syntaxe vérifiée par libpg_query ; la vue remplacée est celle du dépôt (aucune migration ne l'a modifiée), aucune vue n'en dépend. **Jouée le 02/11** (sauvegarde faite).

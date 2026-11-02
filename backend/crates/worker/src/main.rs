@@ -2,6 +2,7 @@
 
 mod consumers;
 mod jobs;
+mod maintenance;
 mod outbox;
 mod registry;
 
@@ -106,7 +107,9 @@ async fn main() {
         // Les travaux Zoom, et c'est ce geste qui fait écouter la file
         // « live ». Sans configuration Zoom, aucun : les travaux attendent.
         // La fenêtre des messages d'incident (file `live_incidents`) toujours.
-        .register_all(live::job_handlers(db.clone(), &config));
+        .register_all(live::job_handlers(db.clone(), &config))
+        // Partitions de l'audit et du journal d'exploitation, purge de ce dernier.
+        .register_all(maintenance::job_handlers(db.clone()));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte
@@ -238,6 +241,10 @@ async fn armer_les_recurrents(db: &Db, config: &Config) {
         // d'une édition, toutes les `interval_seconds`.
         if negotiation::jobs::import::armer(&mut tx, maintenant).await? > 0 {
             armees.push("import des sessions officielles");
+        }
+
+        if maintenance::armer(&mut tx, maintenant).await? {
+            armees.push("partitions et rétention des journaux");
         }
 
         tx.commit().await?;

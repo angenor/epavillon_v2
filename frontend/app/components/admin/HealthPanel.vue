@@ -28,11 +28,22 @@ import type { HealthSeverity, OperationalHealthRow } from '~/types/analytics'
 
 interface Props {
   rows: OperationalHealthRow[]
+  /** Liens vers `/admin/journal` : seulement pour qui détient `identity.platform.journal`. */
+  journalLink?: boolean
 }
 
 const props = defineProps<Props>()
 
 const { t, te } = useI18n()
+const localePath = useLocalePath()
+
+/** Les indicateurs dont l'onglet « Tâches en échec » du journal montre le détail et la relance. */
+const FAILURE_INDICATORS = new Set(['outbox_non_publie', 'outbox_en_echec', 'travaux_file_morte', 'travaux_en_retard', 'travaux_bloques'])
+
+function journalTo(row: OperationalHealthRow): string | null {
+  if (!props.journalLink || !FAILURE_INDICATORS.has(row.code)) return null
+  return localePath({ path: '/admin/journal', query: { onglet: 'taches' } })
+}
 
 /**
  * LE LIBELLÉ D'UN INDICATEUR EST UN TEXTE D'INTERFACE, PAS UNE DONNÉE.
@@ -86,6 +97,14 @@ function detailOf(row: OperationalHealthRow): string | null {
         {{ t('admin.dashboard.health.title') }}
       </h2>
       <p class="text-sm text-text-subtle">{{ t('admin.dashboard.health.subtitle') }}</p>
+      <NuxtLink
+        v-if="props.journalLink"
+        :to="localePath('/admin/journal')"
+        class="inline-flex min-h-(--target-min) items-center gap-1.5 text-sm font-semibold"
+      >
+        {{ t('admin.dashboard.health.openJournal') }}
+        <UiIcon name="arrow-right" size="1rem" />
+      </NuxtLink>
     </div>
 
     <p
@@ -117,6 +136,9 @@ function detailOf(row: OperationalHealthRow): string | null {
           <span v-if="detailOf(row)" class="mt-0.5 block truncate text-sm text-text-muted">
             {{ detailOf(row) }}
           </span>
+          <NuxtLink v-if="journalTo(row)" :to="journalTo(row) ?? undefined" class="inline-flex min-h-(--target-min) items-center text-sm">
+            {{ t('admin.dashboard.health.seeFailures') }}
+          </NuxtLink>
         </span>
 
         <span class="shrink-0 text-right">

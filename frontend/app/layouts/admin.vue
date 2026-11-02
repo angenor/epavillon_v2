@@ -166,6 +166,12 @@ const sections: NavSection[] = [
       { labelKey: 'nav.admin.regie', to: '/admin/regie', icon: 'video' },
       { labelKey: 'nav.admin.incidents', to: '/admin/incidents', icon: 'broadcast' },
       { labelKey: 'nav.admin.mailings', to: '/admin/courriels', icon: 'mail' },
+      {
+        labelKey: 'nav.admin.journal',
+        to: '/admin/journal',
+        icon: 'list',
+        permissions: ['identity.platform.journal'],
+      },
       { labelKey: 'nav.admin.settings', to: '/admin/parametres', icon: 'sliders' },
     ],
   },

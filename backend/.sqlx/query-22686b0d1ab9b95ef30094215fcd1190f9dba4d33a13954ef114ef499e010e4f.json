@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) FILTER (WHERE kind = 'http_error')   AS \"http_error!\",\n                  count(*) FILTER (WHERE kind = 'http_refused') AS \"http_refused!\",\n                  count(*) FILTER (WHERE kind = 'http_slow')    AS \"http_slow!\",\n                  count(*) FILTER (WHERE kind = 'job_failed')   AS \"job_failed!\"\n             FROM platform.ops_log\n            WHERE occurred_at >= $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "http_error!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "http_refused!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "http_slow!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "job_failed!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "22686b0d1ab9b95ef30094215fcd1190f9dba4d33a13954ef114ef499e010e4f"
+}
