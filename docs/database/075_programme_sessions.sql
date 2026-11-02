@@ -837,6 +837,13 @@ COMMENT ON COLUMN programme.registrations.joined_at IS
 -- Validation des réponses obligatoires et respect de la capacité, appliqués en
 -- base : aucun chemin d'écriture ne peut créer une inscription incomplète ni
 -- dépasser silencieusement la jauge.
+--
+-- UNE ACTIVITÉ GARDÉE D'UNE JOURNÉE (§ 4 bis, arbitré le 02/11) suit les règles
+-- de sa journée : ni jauge (le direct est commun à toute la journée), ni
+-- clôture propre, ni formulaire propre (les réponses sont celles de la
+-- journée). Seule une activité annulée refuse une nouvelle ligne ; l'annuler
+-- reste toujours possible, sans quoi une activité annulée bloquerait la
+-- désinscription de toute la journée.
 CREATE OR REPLACE FUNCTION programme.tg_validate_registration()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -847,6 +854,13 @@ DECLARE
     v_taken    integer;
 BEGIN
     SELECT * INTO v_session FROM programme.sessions WHERE id = NEW.session_id;
+
+    IF NEW.track_registration_id IS NOT NULL THEN
+        IF TG_OP = 'INSERT' AND v_session.status = 'cancelled' THEN
+            RAISE EXCEPTION 'Session annulée : inscription impossible.' USING ERRCODE = 'restrict_violation';
+        END IF;
+        RETURN NEW;
+    END IF;
 
     IF v_session.status IN ('cancelled') THEN
         RAISE EXCEPTION 'Session annulée : inscription impossible.' USING ERRCODE = 'restrict_violation';
@@ -1021,9 +1035,14 @@ $$;
 -- à la fois) et la régie, qui marque le début et la fin de chaque activité.
 -- Seule la réunion Zoom passe à la journée (`live.meetings.track_id`, 080).
 --
--- Ni jauge ni liste d'attente à la journée : la seule limite est celle de la
--- réunion Zoom, qui laisse entrer les premiers arrivés. La jauge d'une activité
--- garde son effet sur la ligne de cette activité (déclencheur ci-dessus).
+-- Ni jauge ni liste d'attente : la seule limite est celle de la réunion Zoom,
+-- qui laisse entrer les premiers arrivés. Une activité gardée échappe aussi à la
+-- jauge, à la clôture et au formulaire de son activité (arbitré le 02/11,
+-- `tg_validate_registration`) : elle suit sa journée.
+--
+-- RAPPELS : ceux de plus d'un jour sont ceux de la journée, un par inscription ;
+-- par activité gardée ne partent que ceux de moins d'un jour (110,
+-- `engagement.schedule_session_reminders`).
 -- -----------------------------------------------------------------------------
 
 -- Les natures de fil qui ont un direct de journée. Une fonction plutôt qu'une
@@ -1223,6 +1242,70 @@ CREATE TRIGGER tg_registrations_check_track
 CREATE TRIGGER tg_registrations_events
     AFTER INSERT OR UPDATE OF status, track_registration_id ON programme.registrations
     FOR EACH ROW EXECUTE FUNCTION programme.tg_registrations_emit_events();
+
+-- LA COMPOSITION DE LA JOURNÉE BOUGE APRÈS LES INSCRIPTIONS (arbitré le 02/11).
+-- Une activité ajoutée à une journée l'est d'office, cochée, à chacun de ses
+-- inscrits ; une activité retirée voit leurs lignes rattachées annulées, sans
+-- courriel (l'annulation d'une inscription n'en envoie aucun). En base : le
+-- planificateur, la séance commune et le back-office des journées écrivent
+-- tous programme.session_tracks, aucun n'oublie.
+--
+-- Une ligne ordinaire déjà prise par la personne sur l'activité ajoutée est
+-- rattachée à sa journée plutôt que doublée ; le rattachement réémet son état,
+-- et le module Direct retire sa place Zoom propre. Une séance ou une journée en
+-- cours de suppression (cascade) ne touche à rien : ses lignes partent avec elle.
+CREATE OR REPLACE FUNCTION programme.tg_session_tracks_follow_registrations()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_retire boolean := TG_OP = 'DELETE';
+    v_ajoute boolean := TG_OP = 'INSERT';
+BEGIN
+    IF TG_OP = 'UPDATE' THEN
+        v_retire := NEW.track_id <> OLD.track_id OR NEW.session_id <> OLD.session_id;
+        v_ajoute := v_retire;
+    END IF;
+
+    IF v_retire
+       AND EXISTS (SELECT 1 FROM programme.sessions s WHERE s.id = OLD.session_id) THEN
+        UPDATE programme.registrations r
+           SET status = 'cancelled', waitlist_position = NULL, cancelled_at = now(),
+               cancelled_reason = 'Activité retirée de la journée.'
+          FROM programme.track_registrations tr
+         WHERE tr.id = r.track_registration_id
+           AND tr.track_id = OLD.track_id
+           AND r.session_id = OLD.session_id
+           AND r.status <> 'cancelled';
+    END IF;
+
+    IF v_ajoute THEN
+        INSERT INTO programme.registrations
+               (session_id, person_id, organization_id, answers, locale, source, track_registration_id)
+        SELECT NEW.session_id, tr.person_id, tr.organization_id, tr.answers, tr.locale,
+               tr.source, tr.id
+          FROM programme.track_registrations tr
+          JOIN event.programme_tracks t ON t.id = tr.track_id
+          JOIN programme.sessions s ON s.id = NEW.session_id
+         WHERE tr.track_id = NEW.track_id
+           AND tr.status IN ('registered', 'attended')
+           AND programme.is_day_track_kind(t.kind)
+           AND s.status <> 'cancelled'
+        ON CONFLICT (session_id, person_id) WHERE status <> 'cancelled'
+        DO UPDATE SET track_registration_id = EXCLUDED.track_registration_id,
+                      waitlist_position = NULL,
+                      status = CASE WHEN programme.registrations.status = 'waitlisted'
+                                    THEN 'registered'::programme.registration_status
+                                    ELSE programme.registrations.status END
+                WHERE programme.registrations.track_registration_id IS NULL;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_session_tracks_follow_registrations
+    AFTER INSERT OR UPDATE OF track_id, session_id OR DELETE ON programme.session_tracks
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_session_tracks_follow_registrations();
 
 -- -----------------------------------------------------------------------------
 -- 5. Questions du public

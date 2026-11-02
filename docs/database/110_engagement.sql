@@ -503,7 +503,14 @@ COMMENT ON TABLE engagement.scheduled_reminders IS
 --
 -- Contrat attendu du module programme (aligné sur 060_programme.sql) :
 --   programme.sessions(id, event_id, starts_at)
---   programme.registrations(id, session_id, person_id, status)
+--   programme.registrations(id, session_id, person_id, status, track_registration_id)
+--
+-- ACTIVITÉ GARDÉE D'UNE JOURNÉE (arbitré le 02/11, 075 § 4 bis) : seuls les
+-- décalages de moins d'un jour partent pour elle (1 h, 30 min avec la règle par
+-- défaut). Les rappels de plus d'un jour sont ceux de la JOURNÉE, un par
+-- inscription à la journée, mis en file par le module Engagement
+-- (`engagement.send_day_reminder`) : huit activités gardées ne font pas huit
+-- rappels « J-2 ».
 CREATE OR REPLACE FUNCTION engagement.schedule_session_reminders(p_session_id uuid)
 RETURNS integer
 LANGUAGE plpgsql
@@ -533,7 +540,8 @@ BEGIN
     END IF;
 
     WITH recipients AS (
-        SELECT reg.id AS registration_id, reg.person_id
+        SELECT reg.id AS registration_id, reg.person_id,
+               (reg.track_registration_id IS NOT NULL) AS kept
         FROM programme.registrations reg
         WHERE reg.session_id = p_session_id
           -- Comparaison textuelle volontaire : le module programme peut faire
@@ -552,6 +560,7 @@ BEGIN
         -- Un rappel dont l'heure est déjà passée n'a plus de sens : on ne
         -- réveille personne à 3 h du matin parce qu'un import a pris du retard.
         WHERE v_starts_at - o.offset_before > now()
+          AND (NOT r.kept OR o.offset_before < interval '1 day')
     )
     INSERT INTO engagement.scheduled_reminders (
         rule_id, session_id, person_id, registration_id, channel, offset_before, scheduled_for
