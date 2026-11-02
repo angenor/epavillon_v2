@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>À venir : post-it</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../direction-condensee/style.css">
+<style>
+  /* Trois directions « post-it » pour le panneau « À venir au pavillon » de l'accueil.
+     Le papier prend la couleur de la journée spéciale (donnée de la base) ; hors
+     journée, papier blanc : le jaune dit « en cours » sur tout le site. */
+  body { background: var(--color-surface); }
+  .intro { max-width: 1240px; margin: 0 auto; padding: 40px 24px 8px; }
+  .intro h1 { margin: 0 0 8px; font-family: var(--font-heading); font-size: 2.2rem; text-transform: uppercase; color: var(--color-heading); }
+  .intro p { margin: 0 0 6px; max-width: 72ch; line-height: 1.55; color: var(--color-text-secondary); }
+
+  .direction { max-width: 1240px; margin: 40px auto 0; padding: 0 24px; }
+  .direction > header h2 { margin: 0; font-family: var(--font-heading); font-size: 1.7rem; text-transform: uppercase; color: var(--color-heading); }
+  .direction > header p { margin: 4px 0 0; max-width: 80ch; line-height: 1.5; color: var(--color-text-secondary); }
+  .direction > header ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.5; color: var(--color-text-secondary); }
+  .views { display: grid; grid-template-columns: minmax(0, 1fr) 375px; gap: 24px; margin-top: 18px; align-items: start; }
+  @media (max-width: 1100px) { .views { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Vitrine de la production : photo, voile, citation, rail de vignettes. */
+  .showcase { position: relative; isolation: isolate; min-height: 640px; border-radius: var(--radius-lg); color: #fff; background: var(--ifdd-bleu-900); overflow: hidden; }
+  .showcase > img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+  .showcase::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(29 26 91 / 0.85) 0%, rgb(29 26 91 / 0.55) 50%, rgb(29 26 91 / 0.25) 100%), linear-gradient(0deg, rgb(29 26 91 / 0.9) 0%, transparent 45%); }
+  .showcase-in { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 40px; align-items: end; min-height: inherit; padding: 48px 36px 28px; }
+  .quote blockquote { margin: 0; max-width: 20ch; font-family: var(--font-heading); font-weight: 600; font-size: 2.8rem; line-height: 1.02; }
+  .quote blockquote::before { content: "« "; color: var(--ifdd-cyan-300); }
+  .quote blockquote::after { content: " »"; color: var(--ifdd-cyan-300); }
+  .quote figcaption { margin-top: 16px; font-size: 0.95rem; color: rgb(255 255 255 / 0.85); }
+  .quote figcaption b { display: block; font-family: var(--font-heading); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; }
+  .rail { display: flex; gap: 10px; margin-top: 30px; }
+  .rail span { width: 96px; height: 54px; border-radius: var(--radius); overflow: hidden; opacity: 0.65; border: 2px solid transparent; }
+  .rail span:first-child { opacity: 1; border-color: #fff; }
+  .rail img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Téléphone : sans photo, l'aplat institutionnel. */
+  .phone { width: 375px; border-radius: 24px; border: 1px solid var(--color-border-strong); background: var(--ifdd-bleu-900); color: #fff; padding: 28px 16px 24px; }
+  .phone-label { margin: 0 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+
+  .upcoming-title { margin: 0; font-family: var(--font-heading); font-size: 1.6rem; text-transform: uppercase; color: #fff; }
+  .upcoming-sub { margin: 2px 0 0; font-size: 0.85rem; color: rgb(255 255 255 / 0.75); }
+  .stats { display: flex; gap: 22px; margin: 18px 0 14px; }
+  .stats div { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgb(255 255 255 / 0.75); }
+  .stats b { display: block; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; line-height: 1; color: #fff; }
+  .upcoming .btn { width: 100%; }
+
+  /* Papier : couleur de la journée, ou blanc. */
+  .paper { --paper: #fff; --paper-ink: var(--ifdd-bleu-800); }
+  .paper.j-finance { --paper: var(--ifdd-cyan-100); --paper-ink: var(--ifdd-cyan-800); }
+  .paper.j-jeunesse { --paper: var(--ifdd-vert-100); --paper-ink: var(--ifdd-vert-800); }
+  .paper.j-genre { --paper: var(--ifdd-violet-100); --paper-ink: var(--ifdd-violet-800); }
+
+  .when { font-family: var(--font-heading); text-transform: uppercase; line-height: 1; }
+  .when b { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .when small { font-weight: 600; letter-spacing: 0.05em; }
+  .n-title { display: block; font-family: var(--font-heading); font-weight: 600; line-height: 1.12; color: var(--ifdd-noir); text-decoration: none; }
+  a.n-title:hover { text-decoration: underline; }
+  .n-org { margin: 4px 0 0; font-size: 0.8rem; color: var(--ifdd-gris); }
+  .n-day { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.75rem; font-weight: 600; color: var(--paper-ink); }
+  .n-day::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .tag-live { font-size: 0.72rem; }
+
+  /* ── 1. Le tableau d'affichage ─────────────────────────────── */
+  .board .notes { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 14px; }
+  .board .note { position: relative; width: calc(100% - 28px); padding: 16px 16px 14px; background: var(--paper); border-radius: 2px; box-shadow: 0 1px 1px rgb(0 0 0 / 0.12), 0 12px 18px -12px rgb(0 0 0 / 0.6); transform: rotate(var(--tilt)); transition: transform 160ms ease-out, box-shadow 160ms ease-out; }
+  .board .note:nth-child(1) { --tilt: -1.5deg; }
+  .board .note:nth-child(2) { --tilt: 1.2deg; margin-left: 28px; }
+  .board .note:nth-child(3) { --tilt: -0.7deg; margin-left: 10px; }
+  /* Le ruban adhésif tient la note : du verre, il est posé sur la photo. */
+  .board .note::before { content: ""; position: absolute; top: -9px; left: 50%; width: 76px; height: 20px; transform: translateX(-50%) rotate(-3deg); background: var(--color-glass-raised, rgb(255 255 255 / 0.5)); border: 1px solid rgb(255 255 255 / 0.4); box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); }
+  .board .note:has(.n-title:hover), .board .note:focus-within { transform: rotate(0) translateY(-2px); box-shadow: 0 1px 1px rgb(0 0 0 / 0.12), 0 18px 24px -14px rgb(0 0 0 / 0.65); }
+  .board .note-row { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px; }
+  .board .when b { display: block; font-size: 1.6rem; color: var(--ifdd-noir); }
+  .board .when small { font-size: 0.78rem; color: var(--paper-ink); }
+  .board .n-title { font-size: 1.1rem; }
+  .board .tag-live { position: absolute; top: -10px; right: -8px; transform: rotate(3deg); }
+  .phone .board .note { width: calc(100% - 20px); }
+  .phone .board .note:nth-child(2) { margin-left: 20px; }
+
+  /* ── 2. Le bloc de notes ───────────────────────────────────── */
+  .pad { position: relative; margin-top: 16px; padding-bottom: 14px; }
+  .sheets { position: relative; height: 252px; }
+  .sheet { position: absolute; inset: 0; padding: 22px 22px 18px; background: var(--paper); border-radius: 2px; box-shadow: 0 1px 1px rgb(0 0 0 / 0.12), 0 14px 22px -14px rgb(0 0 0 / 0.6); transition: transform 320ms cubic-bezier(.3,.7,.3,1), opacity 320ms ease-out; }
+  /* La bande collante en haut de la feuille, un peu plus sombre. */
+  .sheet::before { content: ""; position: absolute; inset: 0 0 auto; height: 16px; background: color-mix(in srgb, var(--paper-ink) 9%, transparent); }
+  .sheet[data-pos="1"] { z-index: 2; transform: translate(6px, 7px) rotate(1.6deg); }
+  .sheet[data-pos="2"] { z-index: 1; transform: translate(-4px, 13px) rotate(-1.4deg); }
+  .sheet[data-pos="0"] { z-index: 3; }
+  .sheet[data-pos="1"] > *, .sheet[data-pos="2"] > * { visibility: hidden; }
+  .sheet.peel { z-index: 4; transform: translate(-30px, -50px) rotate(-10deg); opacity: 0; }
+  .sheet .when { display: flex; align-items: baseline; gap: 10px; }
+  .sheet .when b { font-size: 3.2rem; color: var(--ifdd-noir); }
+  .sheet .when small { font-size: 1rem; color: var(--paper-ink); }
+  .sheet .n-title { margin-top: 10px; font-size: 1.45rem; }
+  .sheet .tag-live { position: absolute; top: 26px; right: 20px; }
+  .sheet .meta { position: absolute; left: 22px; right: 22px; bottom: 18px; }
+  .pad-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+  .pad-nav span { font-size: 0.85rem; color: rgb(255 255 255 / 0.8); font-variant-numeric: tabular-nums; }
+  .pad-nav div { display: flex; gap: 8px; }
+  .pad-nav button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: var(--radius); border: 1px solid rgb(255 255 255 / 0.5); background: transparent; color: #fff; cursor: pointer; }
+  .pad-nav button:hover { background: rgb(255 255 255 / 0.12); }
+  .pad-nav button:focus-visible { outline: 2px solid var(--ifdd-cyan-300); outline-offset: 2px; }
+  .pad-nav svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  @media (prefers-reduced-motion: reduce) { .sheet, .board .note { transition: none; } }
+
+  /* ── 3. Les marque-pages ───────────────────────────────────── */
+  .tabs-panel { padding: 22px 22px 22px 22px; border-radius: var(--radius-lg); background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass-strong)); -webkit-backdrop-filter: blur(var(--blur-glass-strong)); box-shadow: var(--shadow-glass); }
+  .phone .tabs-panel { background: var(--ifdd-bleu-800); border-color: rgb(255 255 255 / 0.14); backdrop-filter: none; box-shadow: none; }
+  .tabs-list { list-style: none; margin: 14px 0 0; padding: 0; }
+  .tabs-list li { position: relative; display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-top: 1px solid var(--color-glass-border); }
+  /* Le marque-page dépasse du panneau, collé sur son bord gauche. */
+  .flag { align-self: start; margin-left: -34px; padding: 8px 8px 7px 12px; background: var(--paper); border-radius: 0 3px 3px 0; box-shadow: 0 1px 1px rgb(0 0 0 / 0.15), 0 6px 10px -6px rgb(0 0 0 / 0.5); }
+  .flag.live { --paper: var(--color-live, var(--ifdd-rouge-600)); }
+  .flag b { display: block; font-size: 1.4rem; color: var(--ifdd-noir); }
+  .flag small { font-size: 0.72rem; color: var(--paper-ink); }
+  .flag.live b, .flag.live small { color: #fff; }
+  .tabs-list .n-title { color: #fff; font-size: 1.1rem; }
+  .tabs-list .n-org { color: rgb(255 255 255 / 0.72); }
+  .tabs-list .n-day { color: rgb(255 255 255 / 0.85); }
+  .tabs-list .n-day::before { background: var(--paper); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.4); }
+  .tabs-panel .stats { border-top: 1px solid var(--color-glass-border); padding-top: 14px; margin-top: 0; }
+  .phone .flag { margin-left: -24px; }
+
+  .question { max-width: 1240px; margin: 48px auto 64px; padding: 18px 24px; }
+  .question div { padding: 18px 20px; border-radius: var(--radius); border: 1px solid var(--color-border); border-left: 5px solid var(--ifdd-cyan); background: var(--color-surface-raised); }
+  .question h2 { margin: 0 0 6px; font-family: var(--font-heading); font-size: 1.4rem; text-transform: uppercase; color: var(--color-heading); }
+  .question p { margin: 0 0 6px; max-width: 80ch; line-height: 1.5; color: var(--color-text-secondary); }
+</style>
+</head>
+<body>
+
+<section class="intro">
+  <h1>À venir au pavillon : trois directions post-it</h1>
+  <p>Le panneau de droite de la vitrine, à sa vraie place, sur grand écran (photo dessous) et sur téléphone (aplat bleu nuit). Même contenu que la production : trois activités au plus, les chiffres de l'édition, le lien vers la programmation.</p>
+  <p>La couleur du papier est celle de la journée spéciale de l'activité, réglée au back-office. Hors journée, papier blanc : le jaune des post-it classiques veut dire « en cours » sur le site. Le direct garde son étiquette rouge.</p>
+</section>
+
+<!-- 1 -->
+<section class="direction" data-direction="board">
+  <header>
+    <h2>1. Le tableau d'affichage</h2>
+    <p>Le panneau disparaît : trois notes collées sur la photo par un ruban, légèrement de travers, décalées comme posées à la main. Au survol ou au clavier, la note se redresse.</p>
+    <ul>
+      <li>Le plus « vivant », se lit comme le mur d'entrée d'un pavillon.</li>
+      <li>Prend un peu plus de hauteur que le panneau actuel (le décalage et le ruban).</li>
+    </ul>
+  </header>
+  <div class="views">
+    <div class="showcase"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-32-9.jpg" alt=""><div class="showcase-in"><figure class="quote" style="margin:0"></figure><div class="host"></div></div></div>
+    <div><p class="phone-label">Téléphone, 375 px</p><div class="phone"><div class="host"></div></div></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="direction" data-direction="pad">
+  <header>
+    <h2>2. Le bloc de notes</h2>
+    <p>Un bloc de post-it : la prochaine activité en grand sur la feuille du dessus ; les suivantes dépassent dessous et montrent déjà la couleur de leur journée. Les flèches arrachent la feuille pour passer à la suivante.</p>
+    <ul>
+      <li>Une seule activité lue à la fois, en très grand : l'heure se voit de loin.</li>
+      <li>Les deux suivantes demandent un geste : moins d'information d'un coup d'œil.</li>
+    </ul>
+  </header>
+  <div class="views">
+    <div class="showcase"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-32-9.jpg" alt=""><div class="showcase-in"><figure class="quote" style="margin:0"></figure><div class="host"></div></div></div>
+    <div><p class="phone-label">Téléphone, 375 px</p><div class="phone"><div class="host"></div></div></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="direction" data-direction="tabs">
+  <header>
+    <h2>3. Les marque-pages</h2>
+    <p>Le panneau de verre reste ; chaque heure est écrite sur un marque-page adhésif qui dépasse de son bord gauche, à la couleur de la journée (rouge pour le direct).</p>
+    <ul>
+      <li>La plus proche de l'actuel, même hauteur, aucun changement de lecture.</li>
+      <li>Le clin d'œil post-it est discret : il tient au seul marque-page.</li>
+    </ul>
+  </header>
+  <div class="views">
+    <div class="showcase"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-32-9.jpg" alt=""><div class="showcase-in"><figure class="quote" style="margin:0"></figure><div class="host"></div></div></div>
+    <div><p class="phone-label">Téléphone, 375 px</p><div class="phone"><div class="host"></div></div></div>
+  </div>
+</section>
+
+<section class="question">
+  <div>
+    <h2>À trancher</h2>
+    <p>Une direction (ou un mélange : par exemple le ruban de la 1 sur les feuilles de la 2).</p>
+    <p>Papier hors journée : blanc, comme ici, ou jaune post-it malgré le sens « en cours » du jaune ailleurs sur le site.</p>
+  </div>
+</section>
+
+<script>
+  const SESSIONS = [
+    { time: '10:15', day: 'ven. 13', title: "Du financement climatique à l'action régionale : les solutions du P2RS", org: 'CILSS', journee: null, live: true },
+    { time: '11:30', day: 'ven. 13', title: 'Enjeux de financements pour les régions et les municipalités', org: 'AIRF', journee: { cls: 'j-finance', name: 'Journée finance durable' } },
+    { time: '09:20', day: 'sam. 14', title: 'Les 10 minutes qui inspirent : pitchs des organisations de jeunes', org: 'Green OpenLab', journee: { cls: 'j-jeunesse', name: 'Journée action jeunesse' } },
+  ]
+  const live = '<span class="tag tag-live">En direct</span>'
+  const head = '<h2 class="upcoming-title">À venir au pavillon</h2><p class="upcoming-sub">CdP31, Antalya, heure d\'Antalya</p>'
+  const foot = '<div class="stats"><div><b>48</b>activités</div><div><b>62</b>organisations</div><div><b>31</b>pays</div></div><a class="btn btn-white" href="#">Voir toute la programmation</a>'
+  const day = (s) => (s.journee ? `<span class="n-day">${s.journee.name}</span>` : '')
+  const paper = (s) => `paper ${s.journee ? s.journee.cls : ''}`
+
+  const RENDER = {
+    board: () => `<div class="upcoming board">${head}<ol class="notes">${SESSIONS.map((s) => `
+      <li class="note ${paper(s)}">${s.live ? live : ''}<div class="note-row">
+        <p class="when" style="margin:0"><b>${s.time}</b><small>${s.day}</small></p>
+        <div><a class="n-title" href="#">${s.title}</a><p class="n-org">${s.org}</p>${day(s)}</div>
+      </div></li>`).join('')}</ol>${foot}</div>`,
+
+    pad: () => `<div class="upcoming">${head}<div class="pad"><div class="sheets">${SESSIONS.map((s, i) => `
+      <article class="sheet ${paper(s)}" data-pos="${i}">${s.live ? live : ''}
+        <p class="when" style="margin:0"><b>${s.time}</b><small>${s.day}</small></p>
+        <a class="n-title" href="#">${s.title}</a>
+        <div class="meta"><p class="n-org">${s.org}</p>${day(s)}</div>
+      </article>`).join('')}</div>
+      <div class="pad-nav"><span aria-live="polite">1 sur ${SESSIONS.length}</span><div>
+        <button type="button" data-step="-1" aria-label="Activité précédente"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button type="button" data-step="1" aria-label="Activité suivante"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div></div></div>${foot}</div>`,
+
+    tabs: () => `<div class="upcoming tabs-panel">${head}<ol class="tabs-list">${SESSIONS.map((s) => `
+      <li class="${paper(s)}"><p class="when flag ${s.live ? 'live' : ''}" style="margin:0 0 0 -34px"><b>${s.time}</b><small>${s.day}</small></p>
+        <div><a class="n-title" href="#">${s.title}</a><p class="n-org">${s.org}</p>${s.live ? `<p style="margin:6px 0 0">${live}</p>` : day(s)}</div></li>`).join('')}</ol>${foot}</div>`,
+  }
+
+  const QUOTE = `<blockquote>Au pavillon, nos négociateurs arrivent préparés et repartent avec des alliés.</blockquote>
+    <figcaption><b>Aminata Diallo</b>Négociatrice, Sénégal, CdP30</figcaption>
+    <div class="rail">${['pavillon-cop30-16-9', 'jeunesse-francophone', 'finance-climatique', 'mangroves'].map((f) => `<span><img src="../../../frontend/public/mocks/covers/${f}.jpg" alt=""></span>`).join('')}</div>`
+
+  document.querySelectorAll('.direction').forEach((section) => {
+    section.querySelectorAll('.quote').forEach((q) => { q.innerHTML = QUOTE })
+    section.querySelectorAll('.host').forEach((host) => { host.innerHTML = RENDER[section.dataset.direction]() })
+  })
+
+  /* Le bloc : la feuille du dessus s'arrache vers le haut, puis passe sous la pile. */
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+  document.querySelectorAll('.pad').forEach((pad) => {
+    const sheets = [...pad.querySelectorAll('.sheet')]
+    const label = pad.querySelector('.pad-nav span')
+    let top = 0
+    const place = () => {
+      sheets.forEach((sheet, i) => { sheet.dataset.pos = (i - top + sheets.length) % sheets.length })
+      label.textContent = `${top + 1} sur ${sheets.length}`
+    }
+    pad.querySelectorAll('[data-step]').forEach((button) => button.addEventListener('click', () => {
+      const step = Number(button.dataset.step)
+      const leaving = sheets[top]
+      top = (top + step + sheets.length) % sheets.length
+      if (step > 0 && !reduced) {
+        leaving.classList.add('peel')
+        setTimeout(() => { leaving.classList.remove('peel'); place() }, 320)
+      } else place()
+    }))
+  })
+</script>
+</body>
+</html>
