@@ -4,6 +4,7 @@ import type { RegistrationResult } from '~/types/programme/registration'
 import type { PublicSessionMeeting } from '~/types/live'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { TicketCallToAction } from './TicketAction.vue'
+import type { PublicTrackPage } from '~/types/programme/track-page'
 
 /**
  * La carte de l'activité : l'heure, le compte à rebours, les places quand elles
@@ -13,6 +14,11 @@ import type { TicketCallToAction } from './TicketAction.vue'
  *
  * Dès que ce bouton sort de l'écran, une barre fixée en bas le reprend : on doit
  * pouvoir s'inscrire sans remonter, et sur mobile sans descendre.
+ *
+ * Activité d'une journée spéciale ou de l'atelier (`day`) : on s'inscrit à la
+ * journée, qui se suit par un seul direct. « S'inscrire » ouvre la fenêtre de
+ * la journée, cette activité en avant ; ni jauge ni fenêtre d'inscription
+ * propres ; « Rejoindre » mène à la salle de la journée.
  */
 
 interface Props {
@@ -28,16 +34,25 @@ interface Props {
   roomTo?: string
   /** La journée spéciale dont l'activité fait partie : son nom sous la date, et la bande y mène. */
   specialDay?: { title: string; to: string } | null
+  /** La journée dont l'activité fait partie, et qui se suit d'un seul direct ; nulle sinon. */
+  day?: { page: PublicTrackPage } | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { meeting: null, zoomOpen: false, roomTo: undefined, specialDay: null, day: null })
 const emit = defineEmits<{ started: [] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { dateTime, dayLong, time, timeWithZone, zoneOffsetShort, zoneLabel } = useDateTime()
 const { duration } = useProgrammeSession()
-const { mine, refresh, cancel } = useSessionRegistration(computed(() => props.session.id))
+const { mine, refresh, cancel } = useSessionRegistration(computed(() => (props.day ? '' : props.session.id)))
+const dayRegistration = useDayRegistration(() => props.day?.page.track.id ?? null)
+const { mine: dayMine, dialogOpen: dayDialogOpen, highlight: dayHighlight } = dayRegistration
+const isRegistered = computed(() => (props.day ? dayRegistration.registered.value : mine.value !== null))
+const registrationRequired = computed(() => Boolean(props.day) || props.session.registration_required !== false)
+const dayTarget = computed(() =>
+  props.day ? { page: props.day.page, registration: dayMine.value, highlight: dayHighlight.value } : null,
+)
 const joinTo = computed(() => props.roomTo ?? '#direct')
 
 const dialogOpen = ref(false)
@@ -49,27 +64,27 @@ const isAttendanceShown = false
 
 const capacity = computed(() => props.session.capacity)
 const registered = computed(() => props.session.registered_count)
-const full = computed(() => capacity.value !== null && registered.value >= capacity.value)
+const full = computed(() => !props.day && capacity.value !== null && registered.value >= capacity.value)
 const pct = computed(() => (capacity.value ? Math.min(100, Math.round((100 * registered.value) / capacity.value)) : 0))
 
 const opensAt = computed(() => props.session.registration_opens_at ?? null)
 const closesAt = computed(() => props.session.registration_closes_at ?? null)
-const notOpenYet = computed(() => props.now !== null && opensAt.value !== null && Date.parse(opensAt.value) > props.now)
-const closed = computed(() => props.now !== null && closesAt.value !== null && Date.parse(closesAt.value) <= props.now)
+const notOpenYet = computed(() => !props.day && props.now !== null && opensAt.value !== null && Date.parse(opensAt.value) > props.now)
+const closed = computed(() => !props.day && props.now !== null && closesAt.value !== null && Date.parse(closesAt.value) <= props.now)
 
 type Action = 'registered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'closed' | 'free' | 'watch' | 'join' | 'replay' | 'none'
 
 const action = computed<Action>(() => {
   const state = props.state
   if (props.zoomOpen) {
-    if (props.session.registration_required === false || mine.value) return 'join'
+    if (!registrationRequired.value || isRegistered.value) return 'join'
     if (!notOpenYet.value && !closed.value) return full.value ? (props.session.waitlist_enabled ? 'waitlist' : 'full') : 'register'
   }
   if (state === 'live' || state === 'ongoing') return props.session.is_streamed ? 'watch' : 'none'
   if (state === 'past') return props.session.replay_url ? 'replay' : 'none'
   if (state !== 'upcoming') return 'none'
-  if (mine.value) return 'registered'
-  if (props.session.registration_required === false) return 'free'
+  if (isRegistered.value) return 'registered'
+  if (!registrationRequired.value) return 'free'
   if (notOpenYet.value) return 'notOpen'
   if (closed.value) return 'closed'
   if (full.value) return props.session.waitlist_enabled ? 'waitlist' : 'full'
@@ -79,9 +94,10 @@ const action = computed<Action>(() => {
 const note = computed(() => {
   switch (action.value) {
     case 'registered':
+      if (props.day) return dayNote.value
       return mine.value?.status === 'waitlisted' ? t('activity.ticket.note.waitlisted') : t('activity.ticket.note.registered')
     case 'join':
-      return [joinLead.value, meetingWhen.value].filter(Boolean).join(' ')
+      return props.day ? joinLead.value : [joinLead.value, meetingWhen.value].filter(Boolean).join(' ')
     case 'free':
       return t('activity.ticket.note.free')
     case 'notOpen':
@@ -92,6 +108,7 @@ const note = computed(() => {
       return t('activity.ticket.note.full')
     case 'register':
     case 'waitlist':
+      if (props.day) return t('activity.ticket.day.registerNote', { day: tr(props.day.page.track.title) })
       return closesAt.value ? t('activity.ticket.note.until', { date: dateTime(closesAt.value, props.session.timezone) }) : ''
     case 'watch':
       return t('activity.ticket.note.live')
@@ -100,8 +117,19 @@ const note = computed(() => {
   }
 })
 
-/** Ce qui précède l'horaire : la liste d'attente, ou l'entrée libre. */
+/** « Vous suivez 6 activités sur 8. Celle-ci est dans votre programme. » */
+const dayNote = computed(() => {
+  const value = dayMine.value
+  const page = props.day?.page
+  if (!value || !page) return t('activity.ticket.day.guest')
+  const count = keptIds(value.session_ids, page).length
+  const following = t('activity.ticket.day.following', { count, total: value.activity_count }, count)
+  return `${following} ${t(value.session_ids.includes(props.session.id) ? 'activity.ticket.day.kept' : 'activity.ticket.day.notKept')}`
+})
+
+/** Ce qui précède l'horaire : la liste d'attente, l'entrée libre, ou la journée. */
 const joinLead = computed(() => {
+  if (props.day) return t('activity.ticket.day.joinLead')
   if (props.session.registration_required === false) return t('activity.ticket.note.freeMeeting')
   return mine.value?.status === 'waitlisted' ? t('zoom-room.waitlisted') : ''
 })
@@ -177,6 +205,11 @@ const place = computed(() =>
 
 async function onDone(_result: RegistrationResult): Promise<void> {
   await refresh()
+}
+
+function openRegistration(): void {
+  if (props.day) dayRegistration.openDialog(props.session.id)
+  else dialogOpen.value = true
 }
 
 async function onCancel(): Promise<void> {
@@ -267,16 +300,17 @@ function downloadCalendar(): void {
         >
           <UiStatusBadge state="live" :label="liveSince" size="sm" class="self-start" />
           <p v-if="note" class="text-sm leading-relaxed text-text">{{ note }}</p>
-          <ActivityTicketAction :action="callToAction" :replay-url="props.session.replay_url" :join-to="joinTo" />
+          <ActivityTicketAction :action="callToAction" :replay-url="props.session.replay_url" :join-to="joinTo" :day="Boolean(props.day)" />
         </div>
         <template v-else-if="callToAction">
           <ActivityTicketAction
             :action="callToAction"
             :replay-url="props.session.replay_url"
             :join-to="joinTo"
-            @register="dialogOpen = true"
+            :day="Boolean(props.day)"
+            @register="openRegistration"
           />
-          <UiButton v-if="action === 'join' && mine && props.state === 'upcoming'" variant="link" class="self-center" :loading="cancelling" @click="onCancel">
+          <UiButton v-if="action === 'join' && mine && !props.day && props.state === 'upcoming'" variant="link" class="self-center" :loading="cancelling" @click="onCancel">
             {{ t('activity.ticket.cancel') }}
           </UiButton>
           <p v-if="note" class="text-[0.8125rem] leading-relaxed text-text-muted">{{ note }}</p>
@@ -284,10 +318,13 @@ function downloadCalendar(): void {
         <div v-else-if="action === 'registered'" class="flex flex-col items-start gap-2 rounded-md border border-success-border bg-success-surface p-3">
           <span class="inline-flex items-center gap-1.5 rounded-full bg-success-solid px-2.5 py-1 text-xs font-bold tracking-[0.05em] text-success-contrast uppercase">
             <UiIcon name="check" size="0.875rem" :stroke-width="2.5" />
-            {{ t(mine?.status === 'waitlisted' ? 'activity.ticket.onWaitlist' : 'activity.ticket.registered') }}
+            {{ t(props.day ? 'activity.ticket.day.registered' : mine?.status === 'waitlisted' ? 'activity.ticket.onWaitlist' : 'activity.ticket.registered') }}
           </span>
           <p v-if="note" class="text-sm leading-relaxed text-text">{{ note }}</p>
-          <UiButton variant="link" :loading="cancelling" @click="onCancel">
+          <UiButton v-if="props.day && dayMine" variant="link" @click="dayRegistration.openDialog(props.session.id)">
+            {{ t('activity.ticket.day.edit') }}
+          </UiButton>
+          <UiButton v-else-if="!props.day" variant="link" :loading="cancelling" @click="onCancel">
             {{ t('activity.ticket.cancel') }}
           </UiButton>
         </div>
@@ -320,6 +357,16 @@ function downloadCalendar(): void {
 
     <template #outside>
       <ActivityRegistrationDialog
+        v-if="dayTarget"
+        v-model:open="dayDialogOpen"
+        :day="dayTarget"
+        :timezone="props.session.timezone"
+        :timezone-label="props.edition.city ?? undefined"
+        @day-registered="dayRegistration.registeredWith"
+        @day-updated="dayRegistration.updated"
+      />
+      <ActivityRegistrationDialog
+        v-else
         v-model:open="dialogOpen"
         :session-id="props.session.id"
         :session-title="tr(props.session.title)"
@@ -355,7 +402,8 @@ function downloadCalendar(): void {
                   :action="callToAction"
                   :replay-url="props.session.replay_url"
                   :join-to="joinTo"
-                  @register="dialogOpen = true"
+            :day="Boolean(props.day)"
+                  @register="openRegistration"
                 />
               </div>
             </div>

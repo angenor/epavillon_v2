@@ -121,7 +121,20 @@ pub fn corps_de_creation(
     })
 }
 
+/// La réunion d'une journée (02/11) : Zoom n'envoie pas sa propre
+/// confirmation, notre courriel porte le lien du direct (le site renvoie au lien
+/// personnel dès qu'il est prêt) et celui de la gestion de l'inscription.
+pub fn sans_confirmation_zoom(corps: &mut Value) {
+    if let Some(reglages) = corps.get_mut("settings").and_then(Value::as_object_mut) {
+        reglages.insert(
+            "registrants_confirmation_email".to_owned(),
+            Value::Bool(false),
+        );
+    }
+}
+
 struct AReserver {
+    de_journee: bool,
     external_id: Option<String>,
     topic: Option<String>,
     agenda: Option<String>,
@@ -154,7 +167,8 @@ impl JobHandler for SyncMeeting {
                   AND (sync_status IN ('pending', 'failed')
                        OR (sync_status = 'in_progress' AND updated_at < now() - interval '10 minutes'))
                   AND (sync_due_at IS NULL OR sync_due_at <= now())
-            RETURNING external_id, topic, agenda, scheduled_start_at, duration_minutes,
+            RETURNING (track_id IS NOT NULL) AS "de_journee!",
+                      external_id, topic, agenda, scheduled_start_at, duration_minutes,
                       timezone::text AS "timezone!",
                       (provider_payload ? 'creation_envoyee') AS "creation_envoyee!""#,
             meeting_id
@@ -241,15 +255,17 @@ impl SyncMeeting {
                     Some(a) if !a.trim().is_empty() => format!("{marque}\n\n{a}"),
                     _ => marque,
                 };
-                return client
-                    .creer_reunion(&corps_de_creation(
-                        topic,
-                        Some(&agenda),
-                        r.scheduled_start_at,
-                        r.duration_minutes,
-                        &r.timezone,
-                    ))
-                    .await;
+                let mut corps = corps_de_creation(
+                    topic,
+                    Some(&agenda),
+                    r.scheduled_start_at,
+                    r.duration_minutes,
+                    &r.timezone,
+                );
+                if r.de_journee {
+                    sans_confirmation_zoom(&mut corps);
+                }
+                return client.creer_reunion(&corps).await;
             }
         };
         self.relire(&numero, r, false).await
@@ -298,8 +314,15 @@ impl SyncMeeting {
         let mut correction = serde_json::Map::new();
         // Réunion créée à la main sans inscription, ou à approbation manuelle :
         // sans approbation automatique, pas de lien personnel.
-        if reunion["settings"]["approval_type"].as_i64() != Some(0) {
-            correction.insert("settings".into(), json!({ "approval_type": 0 }));
+        let sans_approbation = reunion["settings"]["approval_type"].as_i64() != Some(0);
+        let confirmation_a_couper = r.de_journee
+            && reunion["settings"]["registrants_confirmation_email"].as_bool() != Some(false);
+        if sans_approbation || confirmation_a_couper {
+            let mut reglages = json!({ "approval_type": 0 });
+            if r.de_journee {
+                reglages["registrants_confirmation_email"] = Value::Bool(false);
+            }
+            correction.insert("settings".into(), reglages);
         }
         if let (Some(debut), Some(duree)) = (
             r.scheduled_start_at.and_then(instant_zoom),

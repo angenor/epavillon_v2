@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.track_registrations\n             (track_id, person_id, organization_id, answers, locale, manage_token_hash)\n         VALUES ($1, $2, $3, $4, $5, $6)\n         ON CONFLICT (track_id, person_id) WHERE status <> 'cancelled' DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.track_registrations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Text",
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6c1385917b9d93a2851fe065d61b5d02623908ccd4dde065c5e4e03a543e5de9"
+}

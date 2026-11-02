@@ -67,6 +67,7 @@ pub use state::LiveState;
 pub fn routes(cfg: &mut ServiceConfig) {
     routes::admin::configurer(cfg);
     routes::meeting::chemins_admin(cfg);
+    routes::meeting::chemins_de_journee(cfg);
 }
 
 /// La lecture publique, sous `/events/{event_id}/incidents`.
@@ -140,5 +141,6 @@ pub fn event_consumers(config: &Config) -> Vec<Arc<dyn EventConsumer>> {
     vec![
         Arc::new(consumers::registrations::RegistrationsConsumer),
         Arc::new(consumers::sessions::SessionsConsumer),
+        Arc::new(consumers::journees::JourneesConsumer),
     ]
 }

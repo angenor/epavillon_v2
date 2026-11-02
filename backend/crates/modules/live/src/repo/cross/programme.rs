@@ -245,6 +245,8 @@ pub struct Inscription {
     pub first_name: String,
     pub last_name: String,
     pub display_name: String,
+    /// Activité gardée d'une inscription à la journée : pas de place Zoom propre.
+    pub track_registration_id: Option<Uuid>,
     pub seance: Seance,
 }
 
@@ -259,7 +261,8 @@ pub async fn inscription(
                   s.id AS session_id, s.event_id, s.title AS "title!: Value",
                   s.starts_at, s.ends_at, s.timezone::text AS "timezone!", s.is_streamed,
                   (s.published_at IS NOT NULL) AS "is_published!",
-                  s.status::text AS "session_status!", s.registration_required
+                  s.status::text AS "session_status!", s.registration_required,
+                  r.track_registration_id
              FROM programme.registrations r
              JOIN programme.sessions s ON s.id = r.session_id
              JOIN identity.people p ON p.id = r.person_id
@@ -277,6 +280,7 @@ pub async fn inscription(
         first_name: l.first_name,
         last_name: l.last_name,
         display_name: l.display_name,
+        track_registration_id: l.track_registration_id,
         seance: Seance {
             id: l.session_id,
             event_id: l.event_id,
@@ -298,6 +302,7 @@ pub async fn inscriptions_actives(conn: &mut PgConnection, session_id: Uuid) -> 
     let ids = sqlx::query_scalar!(
         r#"SELECT id FROM programme.registrations
             WHERE session_id = $1 AND status IN ('registered', 'waitlisted', 'attended')
+              AND track_registration_id IS NULL
             ORDER BY created_at"#,
         session_id
     )
@@ -331,5 +336,168 @@ pub async fn noter_la_presence(conn: &mut PgConnection, registration_id: Uuid) -
     sqlx::query!("SELECT programme.record_join($1)", registration_id)
         .fetch_optional(conn)
         .await?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Journées (02/11) : un seul direct pour la journée, moments compris.
+// ---------------------------------------------------------------------------
+
+/// La journée dont l'activité suit le direct (`programme.day_track_of`).
+pub async fn journee_de_seance(conn: &mut PgConnection, session_id: Uuid) -> Result<Option<Uuid>> {
+    let id = sqlx::query_scalar!(
+        r#"SELECT programme.day_track_of($1) AS "track_id""#,
+        session_id
+    )
+    .fetch_one(conn)
+    .await?;
+    Ok(id)
+}
+
+/// Une journée vue du module Direct. Ses bornes se lisent sur son déroulé
+/// (activités non annulées et moments), comme sur sa page ; à défaut, sur ses
+/// jours annoncés.
+pub struct Journee {
+    pub id: Uuid,
+    pub event_id: Uuid,
+    pub title: Value,
+    pub timezone: String,
+    pub debut: OffsetDateTime,
+    pub fin: OffsetDateTime,
+    pub is_published: bool,
+}
+
+pub async fn journee(conn: &mut PgConnection, track_id: Uuid) -> Result<Option<Journee>> {
+    let ligne = sqlx::query!(
+        r#"WITH bornes AS (
+               SELECT min(x.debut) AS debut, max(x.fin) AS fin
+                 FROM (SELECT s.starts_at AS debut, s.ends_at AS fin
+                         FROM programme.session_tracks st
+                         JOIN programme.sessions s ON s.id = st.session_id
+                        WHERE st.track_id = $1 AND s.status <> 'cancelled'
+                       UNION ALL
+                       SELECT m.starts_at, COALESCE(m.ends_at, m.starts_at + interval '30 minutes')
+                         FROM event.programme_track_moments m
+                        WHERE m.track_id = $1) x
+           )
+           SELECT t.id, t.event_id, t.title AS "title!: Value", e.timezone::text AS "timezone!",
+                  COALESCE(b.debut, (COALESCE(t.starts_on, (e.starts_at AT TIME ZONE e.timezone)::date)::timestamp
+                                     + interval '8 hours') AT TIME ZONE e.timezone) AS "debut!",
+                  COALESCE(b.fin, (COALESCE(t.ends_on, t.starts_on, (e.starts_at AT TIME ZONE e.timezone)::date)::timestamp
+                                   + interval '18 hours') AT TIME ZONE e.timezone) AS "fin!",
+                  (t.published_at IS NOT NULL) AS "is_published!"
+             FROM event.programme_tracks t
+             JOIN event.events e ON e.id = t.event_id
+             CROSS JOIN bornes b
+            WHERE t.id = $1 AND programme.is_day_track_kind(t.kind)"#,
+        track_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne.map(|l| Journee {
+        id: l.id,
+        event_id: l.event_id,
+        title: l.title,
+        timezone: l.timezone,
+        debut: l.debut,
+        fin: l.fin,
+        is_published: l.is_published,
+    }))
+}
+
+/// Une inscription à la journée et la personne : de quoi l'inscrire chez Zoom.
+pub struct InscriptionJournee {
+    pub id: Uuid,
+    pub track_id: Uuid,
+    pub status: String,
+    pub person_id: Uuid,
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub display_name: String,
+}
+
+pub async fn inscription_journee(
+    conn: &mut PgConnection,
+    track_registration_id: Uuid,
+) -> Result<Option<InscriptionJournee>> {
+    let ligne = sqlx::query_as!(
+        InscriptionJournee,
+        r#"SELECT tr.id, tr.track_id, tr.status::text AS "status!", tr.person_id,
+                  p.primary_email::text AS "email!", p.first_name, p.last_name,
+                  p.display_name AS "display_name!"
+             FROM programme.track_registrations tr
+             JOIN identity.people p ON p.id = tr.person_id
+            WHERE tr.id = $1"#,
+        track_registration_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+/// Les inscriptions à la journée qui ont une place.
+pub async fn inscriptions_journee_actives(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+) -> Result<Vec<Uuid>> {
+    let ids = sqlx::query_scalar!(
+        "SELECT id FROM programme.track_registrations
+          WHERE track_id = $1 AND status IN ('registered', 'attended')
+          ORDER BY created_at",
+        track_id
+    )
+    .fetch_all(conn)
+    .await?;
+    Ok(ids)
+}
+
+/// L'inscription active d'une personne à la journée.
+pub async fn inscription_journee_de(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+    person_id: Uuid,
+) -> Result<Option<Uuid>> {
+    let id = sqlx::query_scalar!(
+        "SELECT id FROM programme.track_registrations
+          WHERE track_id = $1 AND person_id = $2 AND status IN ('registered', 'attended')",
+        track_id,
+        person_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(id)
+}
+
+/// L'inscription active du porteur du lien de gestion, pour cette journée.
+pub async fn inscription_journee_par_empreinte(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+    empreinte: &[u8],
+) -> Result<Option<Uuid>> {
+    let id = sqlx::query_scalar!(
+        "SELECT id FROM programme.track_registrations
+          WHERE track_id = $1 AND manage_token_hash = $2 AND status IN ('registered', 'attended')",
+        track_id,
+        empreinte
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(id)
+}
+
+/// Première entrée dans le direct de la journée, écrite une seule fois, comme
+/// `programme.record_join()` pour une activité.
+pub async fn noter_la_presence_journee(
+    conn: &mut PgConnection,
+    track_registration_id: Uuid,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE programme.track_registrations SET joined_at = now()
+          WHERE id = $1 AND joined_at IS NULL",
+        track_registration_id
+    )
+    .execute(conn)
+    .await?;
     Ok(())
 }

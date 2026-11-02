@@ -1,0 +1,35 @@
+{
+  "title": "Mon inscription : {title}",
+  "back": "Voir la journée",
+  "kicker": "Mon inscription à la journée",
+  "when": "{day}, {start} à {end}, {zone}",
+  "loading": "Lecture de votre inscription",
+  "error": "Votre inscription n'a pas pu être lue",
+  "invalid": {
+    "title": "Ce lien n'est plus valable",
+    "description": "Il a pu être remplacé par un courriel plus récent : ouvrez le dernier reçu. Sans courriel, inscrivez-vous de nouveau depuis la page de la journée.",
+    "action": "Voir la journée"
+  },
+  "cancelled": {
+    "title": "Vous êtes désinscrit·e",
+    "description": "Votre inscription à cette journée est annulée : vous ne recevrez ni rappel ni lien du direct.",
+    "action": "S'inscrire de nouveau"
+  },
+  "registered": "Inscrit·e à la journée, {name}",
+  "following": "Vous ne suivez aucune activité sur {total} : le direct reste ouvert toute la journée. | Vous suivez {count} activité sur {total} ; un rappel vous parvient avant. | Vous suivez {count} activités sur {total} ; un rappel vous parvient avant chacune.",
+  "live": {
+    "lead": "La journée a commencé. Le lien est le même de l'ouverture à la clôture.",
+    "action": "Rejoindre le direct de la journée",
+    "before": "Le jour venu, le bouton « Rejoindre le direct de la journée » apparaîtra ici ; le lien du courriel mène au même direct."
+  },
+  "activities": "Vos activités",
+  "none": "Aucune activité gardée : le direct reste ouvert toute la journée, sans rappel.",
+  "edit": "Changer mes activités",
+  "cancel": {
+    "action": "Me désinscrire",
+    "title": "Vous désinscrire de la journée ?",
+    "description": "Vous ne recevrez plus de rappel, et le lien du direct ne vous ouvrira plus la journée.",
+    "keep": "Rester inscrit·e",
+    "confirm": "Me désinscrire"
+  }
+}

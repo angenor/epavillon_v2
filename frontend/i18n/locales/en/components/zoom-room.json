@@ -7,7 +7,9 @@
   },
   "register": {
     "message": "The meeting is reserved for registered participants.",
-    "action": "Register"
+    "action": "Register",
+    "day": "Register for the day",
+    "dayMessage": "The day's live stream is reserved for those registered. One registration covers the whole day."
   },
   "ready": "Join from this page, no Zoom installation needed. If the meeting has not started, Zoom will ask you to wait.",
   "join": "Join the meeting",
@@ -39,5 +41,6 @@
       "close": "Close"
     },
     "app": "Go to Zoom"
-  }
+  },
+  "joinDay": "Join the day's live stream"
 }

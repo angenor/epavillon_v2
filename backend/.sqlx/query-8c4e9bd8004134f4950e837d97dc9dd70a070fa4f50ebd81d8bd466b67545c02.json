@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tr.id FROM programme.track_registrations tr\n          WHERE tr.track_id = programme.day_track_of($1)\n            AND tr.status IN ('registered', 'attended')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.track_registrations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8c4e9bd8004134f4950e837d97dc9dd70a070fa4f50ebd81d8bd466b67545c02"
+}

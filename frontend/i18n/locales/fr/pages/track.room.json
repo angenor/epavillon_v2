@@ -1,0 +1,9 @@
+{
+  "title": "Direct de la journée : {title}",
+  "back": "Retour à la journée",
+  "checking": "Recherche du direct de la journée",
+  "none": {
+    "title": "Pas encore de direct",
+    "description": "Le direct de cette journée n'est pas encore programmé. Il sera le même de l'ouverture à la clôture."
+  }
+}

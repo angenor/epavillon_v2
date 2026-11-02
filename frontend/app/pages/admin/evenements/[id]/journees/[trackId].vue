@@ -126,7 +126,7 @@ useHead(() => ({ title: track.value ? tr(track.value.title) : t('admin.event.tra
 const editionTo = computed(() => localePath(`/admin/evenements/${eventId.value}?onglet=journees-speciales`))
 const venuesTo = computed(() => localePath(`/admin/evenements/${eventId.value}?onglet=lieux`))
 const plannerTo = computed(() => localePath('/admin/programmation'))
-// Page publique `pages/track/[edition]/[track].vue` (chemin français, localisé par i18n).
+// Page publique `pages/track/[edition]/[track]/index.vue` (chemin français, localisé par i18n).
 const publicTo = computed(() =>
   edition.value && track.value?.published_at
     ? localePath(`/programmations/${edition.value.slug}/journees/${track.value.slug}`)

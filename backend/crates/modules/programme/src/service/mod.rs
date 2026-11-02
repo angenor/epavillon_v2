@@ -27,5 +27,6 @@ pub mod resubmit;
 pub mod review;
 pub mod submit;
 pub mod track_page;
+pub mod track_registration;
 pub mod transition;
 pub mod workspace;

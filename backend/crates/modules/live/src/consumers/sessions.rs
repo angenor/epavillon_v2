@@ -7,6 +7,9 @@
 //! naître sa réunion : elle naît quand la séance est créée, programmée
 //! (`scheduled`, ce que pose la publication du programme), en cours ou
 //! déplacée, pourvu qu'elle soit publiée.
+//!
+//! Une activité de JOURNÉE (02/11) n'a pas de réunion propre : son changement
+//! recale seulement la réunion de la journée sur le nouveau déroulé.
 
 use async_trait::async_trait;
 use kernel::error::Result;
@@ -43,6 +46,9 @@ impl EventConsumer for SessionsConsumer {
         let Some(seance) = programme::seance(conn, event.aggregate_id).await? else {
             return Ok(());
         };
+        if let Some(track_id) = programme::journee_de_seance(conn, seance.id).await? {
+            return inscrits::recaler_journee(conn, track_id).await;
+        }
         if seance.status == "cancelled" {
             return crate::jobs::annulation_differee::poser(conn, seance.id).await;
         }

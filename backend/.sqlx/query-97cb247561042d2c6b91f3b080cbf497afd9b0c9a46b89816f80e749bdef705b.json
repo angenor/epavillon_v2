@@ -1,0 +1,146 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH tr AS (\n               SELECT * FROM programme.track_registrations WHERE id = $1\n           ), debut AS (\n               SELECT min(x.d) AS d FROM (\n                   SELECT s.starts_at AS d\n                     FROM programme.session_tracks st\n                     JOIN programme.sessions s ON s.id = st.session_id\n                    WHERE st.track_id = (SELECT track_id FROM tr) AND s.status <> 'cancelled'\n                   UNION ALL\n                   SELECT m.starts_at FROM event.programme_track_moments m\n                    WHERE m.track_id = (SELECT track_id FROM tr)) x\n           )\n           SELECT tr.id, tr.status::text AS \"status!\", tr.person_id, p.first_name,\n                  p.primary_email::text AS \"email!\", tr.locale, t.event_id,\n                  platform.t(t.title, tr.locale) AS \"titre!\",\n                  e.slug::text AS \"event_slug!\", t.slug::text AS \"track_slug!\",\n                  e.timezone::text AS \"timezone!\",\n                  debut.d AS debut,\n                  to_char(debut.d AT TIME ZONE e.timezone,\n                          CASE WHEN tr.locale LIKE 'en%' THEN 'YYYY-MM-DD \"at\" HH24:MI'\n                               ELSE 'DD/MM/YYYY \"à\" HH24\"h\"MI' END) AS debut_local,\n                  (SELECT count(*) FROM programme.registrations r\n                    WHERE r.track_registration_id = tr.id AND r.status <> 'cancelled')\n                      AS \"gardees!\",\n                  (SELECT count(*) FROM programme.session_tracks st\n                     JOIN programme.sessions s ON s.id = st.session_id\n                    WHERE st.track_id = tr.track_id AND s.published_at IS NOT NULL\n                      AND s.status <> 'cancelled') AS \"activites!\"\n             FROM tr\n             JOIN identity.people p ON p.id = tr.person_id\n             JOIN event.programme_tracks t ON t.id = tr.track_id\n             JOIN event.events e ON e.id = t.event_id\n             CROSS JOIN debut",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.track_registrations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.track_registrations",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.track_registrations",
+            "name": "locale"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "event_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "track_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "debut",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "debut_local",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "gardees!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "activites!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false,
+      null,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "97cb247561042d2c6b91f3b080cbf497afd9b0c9a46b89816f80e749bdef705b"
+}

@@ -79,6 +79,26 @@ pub async fn formulaire_applicable<'e>(
     Ok(ligne.map(|l| (l.id, l.allows_anonymous, l.form)))
 }
 
+/// Le formulaire d'une journée (02/11) : celui de l'édition, à défaut celui de
+/// la plateforme, la résolution d'une activité sans formulaire attaché.
+pub async fn formulaire_de_ledition<'e>(
+    executor: impl PgExecutor<'e>,
+    event_id: Uuid,
+) -> Result<Option<(Uuid, bool, serde_json::Value)>> {
+    let ligne = sqlx::query!(
+        r#"SELECT f.id, f.allows_anonymous, to_jsonb(f) AS "form!"
+             FROM programme.registration_forms f
+            WHERE f.is_default AND (f.event_id = $1 OR f.event_id IS NULL)
+            ORDER BY (f.event_id IS NOT NULL) DESC
+            LIMIT 1"#,
+        event_id
+    )
+    .fetch_optional(executor)
+    .await?;
+
+    Ok(ligne.map(|l| (l.id, l.allows_anonymous, l.form)))
+}
+
 /// Les champs **actifs** d'un formulaire, dans l'ordre d'affichage.
 pub async fn champs_actifs<'e>(executor: impl PgExecutor<'e>, form_id: Uuid) -> Result<Vec<Champ>> {
     let lignes = sqlx::query!(

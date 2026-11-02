@@ -140,6 +140,11 @@ pub fn registration_routes(cfg: &mut ServiceConfig) {
 }
 
 /// La programmation publique — **aucune session exigée**.
+/// `/track-registrations` et `/admin/track-registrations`, chemins plats (02/11).
+pub fn track_registration_routes(cfg: &mut ServiceConfig) {
+    routes::track_registrations::configurer(cfg);
+}
+
 pub fn public_schedule_routes(cfg: &mut ServiceConfig) {
     routes::public_schedule::configurer(cfg);
 }

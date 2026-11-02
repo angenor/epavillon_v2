@@ -27,4 +27,5 @@ pub mod sanitize;
 pub mod sessions;
 pub mod slug;
 pub mod track_page;
+pub mod track_registration;
 pub mod transitions;

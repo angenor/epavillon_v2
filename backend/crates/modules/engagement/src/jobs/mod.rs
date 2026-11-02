@@ -17,6 +17,7 @@
 //! Troisième exception (02/11) : les courriels de la régie du jour
 //! (`regie_notice`), enfilés à l'heure dite par le consommateur `engagement.regie`.
 
+pub mod journees;
 pub mod notification_email;
 pub mod partitions;
 pub mod regie_notice;

@@ -55,18 +55,23 @@ type Mocks = typeof import('~/mocks')
  * bandeau le dit. Il est déclaré ICI et non dans chaque fabrique concernée —
  * trois déclarations de la même signature finissent par diverger.
  */
+/** En-têtes propres à un appel : le jeton d'un lien de gestion (`X-Manage-Token`), jamais dans l'adresse. */
+export type ApiHeaders = Record<string, string>
+
 export interface ApiTransport {
-  call: <T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>, query?: Record<string, unknown>) => Promise<T>
+  call: <T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>, query?: Record<string, unknown>, headers?: ApiHeaders) => Promise<T>
   callOrNull: <T>(
     path: string,
     fromMocks: (m: Mocks) => T | null | Promise<T | null>,
     query?: Record<string, unknown>,
+    headers?: ApiHeaders,
   ) => Promise<T | null>
   send: <T>(
     path: string,
     body: object,
     fromMocks: (m: Mocks) => T | Promise<T>,
     method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    headers?: ApiHeaders,
   ) => Promise<T>
   /** Une écriture qui porte un fichier — corps composite, jamais JSON. */
   sendForm: <T>(path: string, form: FormData, fromMocks: (m: Mocks) => T | Promise<T>) => Promise<T>

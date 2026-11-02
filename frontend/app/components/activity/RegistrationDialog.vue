@@ -8,6 +8,8 @@ import type {
 } from '~/types/programme/registration'
 import type { Intent, SelectOption } from '~/types/ui'
 import type { TimeZoneName } from '~/types/shared'
+import type { DayRegistration, DayRegistrationResult } from '~/types/programme/day-registration'
+import type { PublicTrackPage } from '~/types/programme/track-page'
 import { ApiRequestError, apiErrorMessage, incidentReference, isForbiddenError } from '~/utils/api-error'
 import { timeZoneCountryIso2 } from '~/utils/timezone-country'
 import {
@@ -19,25 +21,50 @@ import {
   type SaisieDuFormulaire,
 } from '~/utils/guide-nego/pavillon'
 
+/**
+ * La fenêtre d'inscription : à une activité, ou à une journée (`day`), qui se
+ * suit par un seul direct. Pour une journée, la même saisie (identité de
+ * l'invité, formulaire, consentement) puis ses activités, toutes cochées ;
+ * avec une inscription existante, seulement les activités, enregistrées par PUT.
+ */
+
+export interface DayDialogTarget {
+  page: PublicTrackPage
+  /** Inscription existante : la fenêtre ne change que les activités gardées. */
+  registration?: DayRegistration | null
+  /** Jeton du lien de gestion, pour qui s'est inscrit sans compte. */
+  token?: string | null
+  /** L'activité dont on vient, mise en avant. */
+  highlight?: string | null
+}
+
 interface Props {
-  sessionId: string
-  sessionTitle: string
+  /** La séance ; vide pour une journée. */
+  sessionId?: string
+  sessionTitle?: string
   open: boolean
   /** Fuseau de l'édition, pour dater une ouverture ou une clôture ; à défaut, celui du navigateur. */
   timezone?: TimeZoneName
   timezoneLabel?: string
+  day?: DayDialogTarget | null
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<{ 'update:open': [value: boolean]; done: [result: RegistrationResult] }>()
+const props = withDefaults(defineProps<Props>(), { sessionId: '', sessionTitle: '', timezone: undefined, timezoneLabel: undefined, day: null })
+const emit = defineEmits<{
+  'update:open': [value: boolean]
+  done: [result: RegistrationResult]
+  'day-registered': [result: DayRegistrationResult, asGuest: boolean]
+  'day-updated': [registration: DayRegistration]
+}>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
-const { dateTime, zoneLabel } = useDateTime()
+const { dateTime, dayLong, time, zoneLabel } = useDateTime()
 const api = useApi()
 const auth = useAuthStore()
 const route = useRoute()
 const localePath = useLocalePath()
+const toast = useToast()
 
 const k = (key: string, params: Record<string, unknown> = {}) => t(`registration-dialog.${key}`, params)
 
@@ -57,6 +84,12 @@ const fieldErrors = ref<Record<string, string>>({})
 const submitError = ref<string | null>(null)
 const submitting = ref(false)
 const result = ref<RegistrationResult | null>(null)
+const dayResult = ref<DayRegistrationResult | null>(null)
+const dayAsGuest = ref(false)
+const picks = ref<string[]>([])
+// Figée à l'ouverture : l'inscription obtenue dans la fenêtre ne la fait pas passer en modification.
+const editedRegistration = ref<DayRegistration | null>(null)
+const editing = computed(() => editedRegistration.value !== null)
 
 const formId = useId()
 const CONSENT = '__consent'
@@ -81,13 +114,25 @@ async function load(): Promise<void> {
   phase.value = 'loading'
   loadError.value = null
   loadRequestId.value = null
+  const day = props.day
+  editedRegistration.value = day?.registration ?? null
+  if (day?.registration) {
+    picks.value = keptIds(day.registration.session_ids, day.page)
+    submitError.value = null
+    phase.value = 'form'
+    return
+  }
   try {
-    const [applicable] = await Promise.all([api.registrations.form(props.sessionId), auth.ensureLoaded()])
-    if (!applicable) throw new ApiRequestError({ code: 'NOT_FOUND', message: k('notFound') }, 404)
+    const [applicable] = await Promise.all([
+      day ? api.trackRegistrations.form(day.page.track.id) : api.registrations.form(props.sessionId),
+      auth.ensureLoaded(),
+    ])
+    if (!applicable) throw new ApiRequestError({ code: 'NOT_FOUND', message: k(day ? 'day.notFound' : 'notFound') }, 404)
     form.value = applicable.form
     fields.value = applicable.fields
     if (applicable.fields.some((f) => f.field_type === 'country')) await loadCountries()
     reset()
+    picks.value = day ? pickableIds(day.page) : []
     phase.value = isGuest.value && !applicable.form.allows_anonymous ? 'login' : 'form'
   } catch (error) {
     if (isForbiddenError(error)) {
@@ -133,6 +178,7 @@ function reset(): void {
   fieldErrors.value = {}
   submitError.value = null
   result.value = null
+  dayResult.value = null
 }
 
 watch(
@@ -239,20 +285,54 @@ function validate(): boolean {
   return Object.keys(errors).length === 0
 }
 
+const guestIdentity = () => ({ first_name: guest.first_name.trim(), last_name: guest.last_name.trim(), email: guest.email.trim() })
+
+async function submitDay(day: DayDialogTarget): Promise<void> {
+  const registration = editedRegistration.value
+  if (registration) {
+    const updated = await api.trackRegistrations.updateSessions(registration.id, { session_ids: picks.value }, day.token ?? null)
+    emit('day-updated', updated)
+    toast.success(k('day.saved'))
+    close()
+    return
+  }
+  const asGuest = isGuest.value
+  const outcome = await api.trackRegistrations.register({
+    track_id: day.page.track.id,
+    session_ids: picks.value,
+    answers: answers.value,
+    locale: locale.value,
+    sensitive_data_consent: needsConsent.value ? consent.value : false,
+    guest: asGuest ? guestIdentity() : undefined,
+  })
+  dayResult.value = outcome
+  dayAsGuest.value = asGuest
+  phase.value = 'result'
+  emit('day-registered', outcome, asGuest)
+}
+
 async function submit(): Promise<void> {
   if (submitting.value) return
   submitError.value = null
-  if (!validate()) return
+  if (!editing.value && !validate()) return
 
   submitting.value = true
+  if (props.day) {
+    try {
+      await submitDay(props.day)
+    } catch (error) {
+      showSubmitError(error)
+    } finally {
+      submitting.value = false
+    }
+    return
+  }
   try {
     const outcome = await api.pavillon.inscrire(props.sessionId, {
       answers: answers.value,
       locale: locale.value,
       sensitive_data_consent: needsConsent.value ? consent.value : false,
-      guest: isGuest.value
-        ? { first_name: guest.first_name.trim(), last_name: guest.last_name.trim(), email: guest.email.trim() }
-        : null,
+      guest: isGuest.value ? guestIdentity() : null,
     })
     result.value = outcome
     phase.value = 'result'
@@ -291,7 +371,56 @@ const zone = computed<TimeZoneName>(
 const when = (value: string) =>
   k('dateWithZone', { date: dateTime(value, zone.value), zone: zoneLabel(zone.value, props.timezoneLabel) })
 
-const outcome = computed<{ intent: Intent; title: string; message: string } | null>(() => {
+type Outcome = { intent: Intent; title: string; message: string }
+
+const dayTitle = computed(() => (props.day ? tr(props.day.page.track.title) : ''))
+
+/** « Vendredi 13 novembre, 08:00 à 18:00, heure d'Antalya » */
+const dayWhen = computed(() => {
+  const page = props.day?.page
+  const start = page?.opens_at ?? page?.starts_at
+  if (!page || !start || !page.ends_at) return ''
+  const zoneOfDay = page.edition.timezone
+  const text = k('day.when', {
+    day: dayLong(start, zoneOfDay),
+    start: time(start, zoneOfDay),
+    end: time(page.ends_at, zoneOfDay),
+    zone: zoneLabel(zoneOfDay, page.edition.city ?? undefined),
+  })
+  return text.charAt(0).toLocaleUpperCase(locale.value) + text.slice(1)
+})
+
+const signedAs = computed(() => (auth.person ? `${auth.person.first_name} ${auth.person.last_name}` : ''))
+
+const dayOutcome = computed<Outcome | null>(() => {
+  const r = dayResult.value
+  if (!r) return null
+  const email = guest.email.trim()
+  switch (r.status) {
+    case 'registered': {
+      const count = r.registration.session_ids.length
+      return {
+        intent: 'success',
+        title: k('day.outcome.registered.title'),
+        message: dayAsGuest.value
+          ? k('day.outcome.registered.guest', { email })
+          : t('registration-dialog.day.outcome.registered.account', { count, total: r.registration.activity_count }, count),
+      }
+    }
+    case 'already_registered':
+      return {
+        intent: 'info',
+        title: k('day.outcome.already.title'),
+        message: r.registration ? k('day.outcome.already.account') : k('day.outcome.already.guest', { email }),
+      }
+    case 'closed':
+      return { intent: 'neutral', title: k('day.outcome.closed.title'), message: k('day.outcome.closed.message', { date: when(r.closed_at) }) }
+  }
+  return null
+})
+
+const outcome = computed<Outcome | null>(() => {
+  if (props.day) return dayOutcome.value
   const r = result.value
   if (!r) return null
   const title = props.sessionTitle
@@ -326,9 +455,13 @@ const outcome = computed<{ intent: Intent; title: string; message: string } | nu
 <template>
   <UiModal
     :open="open"
-    :title="k('title')"
-    :description="sessionTitle"
-    :description-lines="2"
+    :title="props.day ? dayTitle : k('title')"
+    :kicker="props.day ? k(editing ? 'day.kickerEdit' : 'day.kicker') : undefined"
+    :description="props.day ? dayWhen : sessionTitle"
+    :description-lines="props.day ? undefined : 2"
+    :tone="props.day ? 'day' : 'plain'"
+    :size="props.day ? 'lg' : 'md'"
+    :fullscreen-mobile="Boolean(props.day)"
     :dismissible="!submitting"
     @update:open="emit('update:open', $event)"
   >
@@ -362,14 +495,21 @@ const outcome = computed<{ intent: Intent; title: string; message: string } | nu
       novalidate
       @submit.prevent="submit"
     >
+      <p v-if="props.day" class="flex gap-2.5 rounded-md bg-surface-sunken p-3 text-sm leading-normal text-text">
+        <UiIcon name="info" size="1.25rem" class="mt-px shrink-0 text-accent" />
+        <span>{{ k(editing ? 'day.introEdit' : 'day.intro') }}</span>
+      </p>
+
+      <template v-if="!editing">
       <p v-if="isGuest" class="max-w-(--measure) text-sm text-text-muted">
         {{ k('guest.intro') }}
         <NuxtLink :to="loginTo" class="font-bold text-text-link underline underline-offset-4">
           {{ k('guest.signIn') }}
         </NuxtLink>
       </p>
-      <p v-else class="max-w-(--measure) text-sm text-text-muted">{{ k('account.intro') }}</p>
+      <p v-else-if="!props.day" class="max-w-(--measure) text-sm text-text-muted">{{ k('account.intro') }}</p>
 
+      <template v-if="!props.day || isGuest">
       <div class="grid gap-4 sm:grid-cols-2">
         <UiInput
           v-model="guest.last_name"
@@ -394,13 +534,14 @@ const outcome = computed<{ intent: Intent; title: string; message: string } | nu
         v-model="guest.email"
         type="email"
         :label="k('guest.email')"
-        :hint="isGuest ? k('guest.emailHint') : undefined"
+        :hint="isGuest ? k(props.day ? 'day.emailHint' : 'guest.emailHint') : undefined"
         autocomplete="email"
         :readonly="!isGuest"
         :error="fieldErrors['guest.email']"
         required
         @update:model-value="clearError('guest.email')"
       />
+      </template>
 
       <template v-for="field in visibleFields" :key="field.code">
         <UiTextarea
@@ -509,9 +650,20 @@ const outcome = computed<{ intent: Intent; title: string; message: string } | nu
           @update:model-value="setEntry(field.code, $event)"
         />
       </template>
+      </template>
+
+      <div v-if="props.day">
+        <p
+          v-if="!editing && (isGuest || visibleFields.length)"
+          class="mb-1 font-condensed text-[1.15rem] font-bold tracking-[0.03em] text-heading uppercase"
+        >
+          {{ k('day.yourActivities') }}
+        </p>
+        <TrackDayPicker v-model="picks" :page="props.day.page" :highlight="props.day.highlight ?? null" />
+      </div>
 
       <UiCheckbox
-        v-if="needsConsent"
+        v-if="needsConsent && !editing"
         v-model="consent"
         :label="k('consent.label')"
         :hint="k('consent.hint')"
@@ -525,8 +677,16 @@ const outcome = computed<{ intent: Intent; title: string; message: string } | nu
 
     <template #footer>
       <template v-if="phase === 'form'">
+        <p v-if="props.day && !editing" class="min-w-0 flex-1 basis-60 text-sm text-text-secondary">
+          <i18n-t v-if="!isGuest && signedAs" keypath="registration-dialog.day.signedAs" tag="span" scope="global">
+            <template #name><b class="text-text">{{ signedAs }}</b></template>
+          </i18n-t>
+          <template v-else>{{ k('day.guestNote') }}</template>
+        </p>
         <UiButton variant="ghost" :disabled="submitting" @click="close">{{ t('common.actions.cancel') }}</UiButton>
-        <UiButton type="submit" :form="formId" :loading="submitting">{{ k('submit') }}</UiButton>
+        <UiButton type="submit" :form="formId" :loading="submitting">
+          {{ props.day ? k(editing ? 'day.save' : 'day.submit') : k('submit') }}
+        </UiButton>
       </template>
       <UiButton v-else variant="secondary" :disabled="submitting" @click="close">{{ t('common.actions.close') }}</UiButton>
     </template>

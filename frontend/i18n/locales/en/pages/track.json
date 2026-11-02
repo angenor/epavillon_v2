@@ -60,7 +60,20 @@
     "hours": "{start} to {end}",
     "zoneOpens": "{zone}, doors open at {time}",
     "byUntil": "{organization}, until {time}",
-    "until": "Until {time}"
+    "until": "Until {time}",
+    "signup": {
+      "lead": "One registration for the whole day, and a single link to follow the live stream, from opening to closing.",
+      "action": "Register for the day",
+      "done": "Registered for the day",
+      "following": "You follow no activity out of {total}. The live link, the same all day, appears here on the day and reaches you by email. | You follow {count} activity out of {total}; a reminder reaches you before it. The live link, the same all day, appears here on the day and reaches you by email. | You follow {count} activities out of {total}; a reminder reaches you before each one. The live link, the same all day, appears here on the day and reaches you by email.",
+      "guestDone": "The live link, the same all day, reaches you by email.",
+      "guestEdit": "Without an account: to change your activities, follow the link in the confirmation email.",
+      "edit": "Change my activities",
+      "cancel": "Unregister",
+      "dayLive": "The day's live stream is open, from opening to closing.",
+      "join": "Join the day's live stream",
+      "guestLive": "Follow the live link you received by email."
+    }
   },
   "overview": {
     "day": "The day in {count} parts",
@@ -79,13 +92,14 @@
       "day": "Running order",
       "other": "Agenda"
     },
-    "zone": "All times: {zone} ({offset}). Each activity has its own page: speakers, live stream and recording.",
+    "zone": "All times: {zone} ({offset}). One live stream for the whole day; each activity keeps its own page: speakers, documents and recording.",
     "until": "to {end}",
     "empty": {
       "title": "Running order to come",
       "description": "The activities of this day will be announced here."
     },
-    "with": "with {list}"
+    "with": "with {list}",
+    "mine": "In my programme"
   },
   "highlight": {
     "mark": "Highlight",

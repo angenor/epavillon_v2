@@ -14,6 +14,10 @@ import type { PublicSessionSpeaker } from '~/types/programme/session'
  * La couleur de la journée (`color_hex`) se décline en rôles sur la racine de
  * la page (`trackDayStyle`) ; l'atelier, sans couleur ni photo, garde le bleu
  * nuit institutionnel.
+ *
+ * Une journée se suit par un seul direct (01/11) : on s'inscrit à la journée,
+ * pas à ses activités ; le billet porte l'inscription et, le jour même, le seul
+ * « Rejoindre », qui mène à la salle de la journée (`room.vue`).
  */
 
 definePageMeta({ layout: 'public' })
@@ -51,6 +55,14 @@ watch(
   { immediate: true },
 )
 const { now, mounted, timezone, phase, countdown, entryState, current } = useTrackDay(page)
+
+const { mine } = useDayRegistration(() => page.value?.track.id ?? null)
+const kept = computed(() => (mine.value ? new Set(mine.value.session_ids) : null))
+const { meeting } = useTrackMeeting(() => (page.value ? { id: page.value.track.id, eventId: page.value.edition.id } : null))
+const meetingJoinable = computed(() => isMeetingJoinable(meeting.value))
+const roomTo = computed(() =>
+  localePath({ name: 'track-edition-track-room', params: { edition: editionSlug.value, track: trackSlug.value }, query: { entrer: '1' } }),
+)
 
 const { data: incidents, refresh: refreshIncidents } = useLazyAsyncData(
   () => `journee-incidents-${page.value?.track.id ?? 'aucune'}`,
@@ -218,6 +230,8 @@ useSeoMeta({
               :current="current"
               :mounted="mounted"
               :day-title="title"
+              :room-to="roomTo"
+              :meeting-joinable="meetingJoinable"
             />
           </div>
 
@@ -243,7 +257,7 @@ useSeoMeta({
             <section v-if="page.agenda.length" id="deroule" class="scroll-mt-28" aria-labelledby="journee-deroule-titre">
               <h2 id="journee-deroule-titre" :class="sectionTitle">{{ t(`track.agenda.title.${subject}`) }}</h2>
               <p class="mt-2.5 max-w-[66ch] text-[0.95rem] text-text-secondary">{{ zoneNote }}</p>
-              <TrackAgenda :page="page" :entry-state="entryState" :edition-image="editionImage" />
+              <TrackAgenda :page="page" :entry-state="entryState" :edition-image="editionImage" :kept="kept" />
             </section>
             <UiEmptyState
               v-else

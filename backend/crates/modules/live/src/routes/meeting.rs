@@ -18,6 +18,19 @@ pub fn chemins_de_seance(cfg: &mut web::ServiceConfig) {
         .route("/{session_id}/meeting/access", web::get().to(acces));
 }
 
+/// La réunion d'une journée (02/11), chemins plats : `/track-meetings`
+/// n'appartient qu'à ce module.
+pub fn chemins_de_journee(cfg: &mut web::ServiceConfig) {
+    cfg.route(
+        "/track-meetings/{track_id}",
+        web::get().to(publique_journee),
+    )
+    .route(
+        "/track-meetings/{track_id}/access",
+        web::get().to(acces_journee),
+    );
+}
+
 pub fn chemins_admin(cfg: &mut web::ServiceConfig) {
     cfg.route(
         "/admin/sessions/{session_id}/meeting",
@@ -212,4 +225,89 @@ pub(crate) async fn lien_animateur(
     Ok(HttpResponse::Ok()
         .insert_header((actix_web::http::header::CACHE_CONTROL, "no-store"))
         .json(lien))
+}
+
+#[utoipa::path(
+    get,
+    description = "`PublicSessionMeeting` : la réunion d'une journée publiée (journée spéciale ou atelier), un seul direct de l'accueil à la clôture. Repères pris sur le déroulé de la journée, indicatifs comme pour une séance. **404** sans réunion. **Aucune garde.**",
+    path = "/track-meetings/{track_id}",
+    tag = "Direct",
+    operation_id = "journee_reunion_publique",
+    params(("track_id" = Uuid, Path, description = "Journée publiée")),
+    responses(
+        (status = 200, description = "PublicSessionMeeting", body = Object),
+        (status = 404, description = "Journée inconnue, non publiée, ou sans réunion", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn publique_journee(
+    state: web::Data<LiveState>,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let reunion =
+        meeting::publique_journee(&state, chemin.into_inner(), OffsetDateTime::now_utc()).await?;
+    Ok(HttpResponse::Ok().json(reunion))
+}
+
+#[utoipa::path(
+    get,
+    description = "`MeetingAccess` : l'entrée dans la réunion d'une journée, pour la personne connectée inscrite à la journée **ou** le porteur du lien reçu par courriel (en-tête `X-Manage-Token`, inscription sans compte). `join_url` est le lien Zoom personnel : la page du lien du courriel y renvoie dès qu'il est prêt. La première entrée est notée sur l'inscription à la journée. Réponse `Cache-Control: no-store`.\n\nRefus : `LIVE_ZOOM_UNAVAILABLE` (503), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, ni inscription ni jeton valable), `LIVE_MEETING_NOT_READY` (409, place pas encore enregistrée chez Zoom : réessayer).",
+    path = "/track-meetings/{track_id}/access",
+    tag = "Direct",
+    operation_id = "journee_reunion_acces",
+    params(
+        ("track_id" = Uuid, Path, description = "Journée publiée"),
+        ("X-Manage-Token" = Option<String>, Header, description = "Jeton du lien reçu par courriel, sans session"),
+    ),
+    responses(
+        (status = 200, description = "MeetingAccess", body = Object),
+        (status = 401, description = "Ni session ni jeton", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "LIVE_MEETING_REGISTRATION_REQUIRED", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Journée inconnue ou non publiée", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "LIVE_MEETING_NOT_READY", body = crate::routes::openapi::ApiErrorBody),
+        (status = 503, description = "LIVE_ZOOM_UNAVAILABLE", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn acces_journee(
+    state: web::Data<LiveState>,
+    requete: HttpRequest,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    use actix_web::HttpMessage;
+    let personne = requete
+        .extensions()
+        .get::<kernel::context::RequestContext>()
+        .and_then(|c| c.actor_id);
+    let (porteur, ctx) = match personne {
+        Some(p) => (
+            meeting::Porteur::Personne(p),
+            crate::routes::contexte_de(&requete, p),
+        ),
+        None => {
+            let jeton = requete
+                .headers()
+                .get("x-manage-token")
+                .and_then(|v| v.to_str().ok())
+                .map(str::trim)
+                .filter(|j| !j.is_empty() && j.len() <= 128)
+                .ok_or_else(kernel::error::ApiError::unauthenticated)?;
+            (
+                meeting::Porteur::Jeton(jeton.to_owned()),
+                kernel::context::RequestContext::new(
+                    kernel::context::RequestContext::generated_request_id(),
+                    crate::routes::locale_de(&requete),
+                ),
+            )
+        }
+    };
+    let acces = meeting::acces_journee(
+        &state,
+        &ctx,
+        chemin.into_inner(),
+        porteur,
+        OffsetDateTime::now_utc(),
+    )
+    .await?;
+    Ok(HttpResponse::Ok()
+        .insert_header(CacheControl(vec![CacheDirective::NoStore]))
+        .json(acces))
 }

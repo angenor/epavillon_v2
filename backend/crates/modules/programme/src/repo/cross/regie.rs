@@ -135,7 +135,9 @@ pub async fn seances_du_jour<'e>(
                         CASE WHEN mm.status = 'started' THEN c.present_count END AS present
                    FROM live.meetings mm
                    LEFT JOIN live.meeting_room_counts c ON c.meeting_id = mm.id
-                  WHERE mm.session_id = s.id AND mm.status NOT IN ('cancelled', 'failed')
+                  -- Une activité de journée : la réunion de la journée (02/11).
+                  WHERE (mm.session_id = s.id OR mm.track_id = programme.day_track_of(s.id))
+                    AND mm.status NOT IN ('cancelled', 'failed')
                   ORDER BY mm.created_at DESC
                   LIMIT 1
              ) m ON true

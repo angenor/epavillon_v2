@@ -93,6 +93,8 @@ import { createMeetingsApi } from './api/meetings'
 import { createRealtimeApi } from './api/realtime'
 import { createProgrammeChangesApi } from './api/programme-changes'
 import { createAssistanceApi } from './api/assistance'
+import { createTrackRegistrationsApi } from './api/track-registrations'
+import type { ApiHeaders } from './api/proposal-review'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
 // erreurs de la couche d'accès : le client HTTP doit pouvoir la lever sur un
@@ -116,9 +118,9 @@ export function useApi() {
    * Un appel de données : sa route d'API et, tant qu'elle n'existe pas, la
    * lecture équivalente dans les mocks.
    */
-  async function call<T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>, query?: Record<string, unknown>): Promise<T> {
+  async function call<T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>, query?: Record<string, unknown>, headers?: ApiHeaders): Promise<T> {
     if (isConfigured.value) {
-      return request<T>(path, { query })
+      return request<T>(path, { query, headers })
     }
     return readMocks(fromMocks, MOCK_LATENCY_MS)
   }
@@ -139,10 +141,11 @@ export function useApi() {
     path: string,
     fromMocks: (m: Mocks) => T | null | Promise<T | null>,
     query?: Record<string, unknown>,
+    headers?: ApiHeaders,
   ): Promise<T | null> {
     if (!isConfigured.value) return readMocks(fromMocks, MOCK_LATENCY_MS)
     try {
-      return await request<T>(path, { query })
+      return await request<T>(path, { query, headers })
     } catch (error) {
       if (error instanceof ApiRequestError && error.code === 'NOT_FOUND') return null
       throw error
@@ -163,6 +166,7 @@ export function useApi() {
     body: object,
     fromMocks: (m: Mocks) => T | Promise<T>,
     method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'POST',
+    headers?: ApiHeaders,
   ): Promise<T> {
     if (isConfigured.value) {
       // `object` et non `Record<string, unknown>` : une INTERFACE n'a pas de
@@ -173,7 +177,7 @@ export function useApi() {
       // coupure de passerelle peut créer deux lieux, déposer deux fois le même
       // dossier, ou rendre un échec sur une réinitialisation qui a abouti. Une
       // lecture se rejoue sans dommage, une écriture non.
-      return request<T>(path, { method, body: body as Record<string, unknown>, retry: 0 })
+      return request<T>(path, { method, body: body as Record<string, unknown>, retry: 0, headers })
     }
     // Une écriture attend plus longtemps qu'une lecture : c'est pendant ce
     // temps-là que le bouton doit se désactiver et afficher son témoin. Sans
@@ -321,6 +325,7 @@ export function useApi() {
     negotiationSessions: createNegotiationSessionsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     negotiationReports: createNegotiationReportsApi({ call, send }),
     negotiationMeetings: createNegotiationMeetingsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
+    trackRegistrations: createTrackRegistrationsApi(deps),
     pavillon: createPavillonApi({ callOrNull, send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     notifications: createNotificationsApi({ call, send }),
     /** Pouls et flux, pour `useRealtime()` seulement : aucune page ne les appelle. */

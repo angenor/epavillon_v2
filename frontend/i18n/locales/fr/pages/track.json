@@ -60,7 +60,20 @@
     "hours": "{start} à {end}",
     "zoneOpens": "{zone}, accueil dès {time}",
     "byUntil": "{organization}, jusqu'à {time}",
-    "until": "Jusqu'à {time}"
+    "until": "Jusqu'à {time}",
+    "signup": {
+      "lead": "Une inscription pour toute la journée, et un seul lien pour suivre le direct, de l'ouverture à la clôture.",
+      "action": "S'inscrire à la journée",
+      "done": "Inscrit·e à la journée",
+      "following": "Vous ne suivez aucune activité sur {total}. Le lien du direct, le même toute la journée, s'affiche ici le jour venu et vous arrive par courriel. | Vous suivez {count} activité sur {total} ; un rappel vous parvient avant. Le lien du direct, le même toute la journée, s'affiche ici le jour venu et vous arrive par courriel. | Vous suivez {count} activités sur {total} ; un rappel vous parvient avant chacune. Le lien du direct, le même toute la journée, s'affiche ici le jour venu et vous arrive par courriel.",
+      "guestDone": "Le lien du direct, le même toute la journée, vous arrive par courriel.",
+      "guestEdit": "Sans compte : pour changer vos activités, suivez le lien du courriel de confirmation.",
+      "edit": "Modifier mes activités",
+      "cancel": "Me désinscrire",
+      "dayLive": "Le direct de la journée est ouvert, de l'ouverture à la clôture.",
+      "join": "Rejoindre le direct de la journée",
+      "guestLive": "Suivez le lien du direct reçu par courriel."
+    }
   },
   "overview": {
     "day": "La journée en {count} temps",
@@ -79,13 +92,14 @@
       "day": "Déroulé",
       "other": "Ordre du jour"
     },
-    "zone": "Toutes les heures : {zone} ({offset}). Chaque activité a sa fiche : intervenants, direct et enregistrement.",
+    "zone": "Toutes les heures : {zone} ({offset}). Un seul direct pour toute la journée ; chaque activité garde sa fiche : intervenants, documents et enregistrement.",
     "until": "à {end}",
     "empty": {
       "title": "Déroulé à venir",
       "description": "Les activités de cette journée seront annoncées ici."
     },
-    "with": "avec {list}"
+    "with": "avec {list}",
+    "mine": "Dans mon programme"
   },
   "highlight": {
     "mark": "Temps fort",

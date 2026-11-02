@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MeetingAccess, PublicSessionMeeting } from '~/types/live'
 import type { PublicScheduleRow } from '~/types/views'
-import type { MeetingRoomStep } from '~/composables/useMeetingRoom'
+import type { MeetingRoomStep, MeetingRoomTarget } from '~/composables/useMeetingRoom'
 import type { AttachedImage } from '~/types/media'
 
 /**
@@ -12,10 +12,17 @@ import type { AttachedImage } from '~/types/media'
  * ouverte dans la page puis agrandie ressortait et rentrait de Zoom).
  * `page` : la salle pleine page (vue client du SDK, celle du logiciel), qui prend
  * tout l'écran et renvoie à `leaveUrl` en sortant.
+ *
+ * `dayTrackId` : la salle d'une journée (journée spéciale, atelier), un seul
+ * direct de l'ouverture à la clôture ; on y entre inscrit à la journée, et
+ * « S'inscrire » ouvre la fenêtre de la journée que la page monte.
  */
 
 interface Props {
-  session: PublicScheduleRow
+  /** L'activité ; absente dans la salle d'une journée. */
+  session?: PublicScheduleRow | null
+  /** La journée dont la salle est celle-ci : l'emporte sur l'activité. */
+  dayTrackId?: string | null
   meeting: PublicSessionMeeting
   mode: 'stage' | 'page'
   /** Salle pleine page, entrée directe comprise, pour `stage`. */
@@ -29,7 +36,7 @@ interface Props {
   cover?: AttachedImage | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { session: null, dayTrackId: null, roomTo: undefined, leaveUrl: undefined, zoneLabel: undefined, cover: null })
 /** Vrai de l'entrée à la sortie : le parent ne démonte pas la salle pendant ce temps. */
 const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
 
@@ -37,9 +44,19 @@ const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const route = useRoute()
 const localePath = useLocalePath()
-const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl, prefetch, join, onRegistered } = useMeetingRoom(
-  () => props.session,
-)
+const target = computed<MeetingRoomTarget>(() => {
+  if (props.dayTrackId) return { kind: 'day', trackId: props.dayTrackId }
+  if (props.session) return { kind: 'session', session: props.session }
+  throw new Error('ActivityZoomRoom : ni activité ni journée')
+})
+const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl, prefetch, join, onRegistered, openDayRegistration } =
+  useMeetingRoom(target)
+const roomKey = computed(() => props.dayTrackId ?? props.session?.id ?? '')
+
+function register(): void {
+  if (props.dayTrackId) openDayRegistration()
+  else dialogOpen.value = true
+}
 
 const dialogOpen = ref(false)
 /** Messages du SDK qui disent que l'image ou le son n'ont pas pu se connecter, dans sa langue. */
@@ -167,8 +184,8 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
         </template>
 
         <template v-else-if="phase === 'register'">
-          <p class="max-w-md text-sm">{{ t('zoom-room.register.message') }}</p>
-          <UiButton variant="signup" size="lg" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
+          <p class="max-w-md text-sm">{{ t(props.dayTrackId ? 'zoom-room.register.dayMessage' : 'zoom-room.register.message') }}</p>
+          <UiButton variant="signup" size="lg" @click="register">{{ t(props.dayTrackId ? 'zoom-room.register.day' : 'zoom-room.register.action') }}</UiButton>
         </template>
 
         <template v-else-if="phase === 'ready'">
@@ -180,7 +197,7 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
             class="inline-flex min-h-12 items-center gap-2.5 rounded-md bg-live px-6 text-base font-bold text-live-contrast"
           >
             <UiIcon name="video" size="1.125rem" />
-            {{ t('zoom-room.join') }}
+            {{ t(props.dayTrackId ? 'zoom-room.joinDay' : 'zoom-room.join') }}
           </a>
           <button
             v-else
@@ -189,7 +206,7 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
             @click="enter"
           >
             <UiIcon name="video" size="1.125rem" />
-            {{ t('zoom-room.join') }}
+            {{ t(props.dayTrackId ? 'zoom-room.joinDay' : 'zoom-room.join') }}
           </button>
         </template>
 
@@ -203,7 +220,9 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
           <p class="max-w-md text-sm" role="alert">{{ error }}</p>
           <div class="flex flex-wrap justify-center gap-2">
             <UiButton v-if="errorStatus === 401" :to="loginTo">{{ t('zoom-room.login.action') }}</UiButton>
-            <UiButton v-else-if="errorStatus === 403 && needsRegistration" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
+            <UiButton v-else-if="errorStatus === 403 && needsRegistration" @click="register">
+              {{ t(props.dayTrackId ? 'zoom-room.register.day' : 'zoom-room.register.action') }}
+            </UiButton>
             <UiButton variant="inverse" icon="refresh" @click="enter">{{ t('zoom-room.retry') }}</UiButton>
           </div>
         </template>
@@ -222,10 +241,11 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
       v-if="props.mode === 'page' && (phase === 'loading' || phase === 'joined')"
       :failure-texts="failureTexts"
       :join-url="joinUrl"
-      :session-id="props.session.id"
+      :session-id="roomKey"
     />
 
     <ActivityRegistrationDialog
+      v-if="props.session && !props.dayTrackId"
       v-model:open="dialogOpen"
       :session-id="props.session.id"
       :session-title="tr(props.session.title)"

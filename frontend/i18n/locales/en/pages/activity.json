@@ -139,6 +139,17 @@
       "watch": "Watch live",
       "join": "Join",
       "replay": "Replay"
+    },
+    "day": {
+      "registerNote": "One registration covers the whole day \"{day}\": a single live stream, from opening to closing.",
+      "registered": "Registered for the day",
+      "following": "You follow no activity of the day out of {total}. | You follow {count} activity of the day out of {total}. | You follow {count} activities of the day out of {total}.",
+      "kept": "This one is in your programme: a reminder reaches you before it.",
+      "notKept": "This one is not in your programme: the live stream still lets you in, without a reminder.",
+      "guest": "The day's live link reaches you by email; its management link lets you change your activities.",
+      "joinLead": "Registered for the day: this live stream covers the whole day, from opening to closing.",
+      "edit": "Change my activities",
+      "join": "Join the day's live stream"
     }
   },
   "gallery": {

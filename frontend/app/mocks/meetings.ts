@@ -14,6 +14,7 @@ import type { PublicScheduleRow } from '~/types/views'
 import { ApiRequestError } from '~/utils/api-error'
 import { programme } from './pavillon'
 import { allSessions } from './sessions'
+import { dayMeetingOfSession } from './day-registrations'
 
 const OPENS_BEFORE_MS = 30 * 60_000
 const CLOSES_AFTER_MS = 4 * 3_600_000
@@ -34,7 +35,9 @@ const numero = (sessionId: string) => `8${sessionId.replace(/\D/g, '').slice(-9)
 
 export function publicSessionMeeting(sessionId: string, at: number = Date.now()): PublicSessionMeeting | null {
   const s = seance(sessionId)
-  if (!s?.is_streamed) return null
+  // Une activité de journée rend la réunion de sa journée.
+  if (!s) return dayMeetingOfSession(sessionId, at)
+  if (!s.is_streamed) return null
   return {
     provider: 'zoom',
     status: statut(s, at),

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.track_registrations SET joined_at = now()\n          WHERE id = $1 AND joined_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dda745729b6cf8b86cf7111022b04bbd9abda079d92e67c211632d700f81c6a3"
+}

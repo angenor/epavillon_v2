@@ -147,6 +147,12 @@ export interface SessionRegisterPayload {
   guest?: RegistrationGuest | null
 }
 
+/** `{ form, fields }` : le formulaire applicable (d'une séance, d'une journée) et ses champs actifs, dans l'ordre. */
+export interface ApplicableRegistrationForm {
+  form: RegistrationForm
+  fields: RegistrationFormField[]
+}
+
 /** `Invite` côté serveur : la personne est créée sans compte, ou retrouvée par son adresse. */
 export interface RegistrationGuest {
   email: string

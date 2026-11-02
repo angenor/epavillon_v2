@@ -1,0 +1,29 @@
+{
+  "title": "Live: {title}",
+  "kicker": "Live stream of the day",
+  "when": "{day}, {start} to {end}, {zone}",
+  "checking": "Preparing your access to the live stream",
+  "waiting": {
+    "title": "The live stream is not ready yet",
+    "description": "Your personal link is being prepared. Keep this page open: it takes you to the live stream as soon as it is ready.",
+    "retry": "Trying again now | Trying again in {seconds} second | Trying again in {seconds} seconds",
+    "now": "Try again now"
+  },
+  "redirecting": "Opening Zoom",
+  "open": "Open the live stream in Zoom",
+  "noLink": "The personal live link is not available. Try again in a moment.",
+  "invalid": {
+    "title": "This link is no longer valid",
+    "description": "It may have been replaced by a more recent email: open the latest one. Otherwise, register from the day's page."
+  },
+  "unregistered": "Registration cancelled",
+  "register": "Register again",
+  "dayCancelled": {
+    "title": "The live stream is cancelled",
+    "description": "This day's live stream will not take place. The day's page explains what changes."
+  },
+  "toDay": "See the day",
+  "error": "The live stream could not open.",
+  "retry": "Try again",
+  "manage": "Manage my registration"
+}

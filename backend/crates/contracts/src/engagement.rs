@@ -29,3 +29,25 @@ pub struct EmailSuppressed {
     /// Valeur de `engagement.suppression_reason`, en texte.
     pub reason: String,
 }
+
+/// Le courriel de confirmation d'une inscription à une journée (02/11).
+///
+/// **Un travail, pas un événement** : sans compte, il porte le jeton en clair du
+/// lien de gestion, que la base ne connaît que haché et que l'outbox ne doit
+/// jamais voir. Mis en file par le module Programmation dans la transaction de
+/// l'inscription ; servi par le module Engagement, qui le déclare secret.
+pub const SEND_DAY_REGISTRATION: &str = "engagement.send_day_registration";
+
+/// La file des courriels, celle que le module Engagement écoute.
+pub const EMAIL_QUEUE: &str = "email";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DayRegistrationEmail {
+    pub track_registration_id: uuid::Uuid,
+    /// Jeton en clair du lien de gestion, sans compte seulement.
+    #[serde(default)]
+    pub token: Option<String>,
+    /// Vrai : l'inscription existait déjà, on renvoie le lien.
+    #[serde(default)]
+    pub resent: bool,
+}

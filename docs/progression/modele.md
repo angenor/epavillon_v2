@@ -574,3 +574,13 @@ Demande du commanditaire (maquettes `docs/maquettes/direction-condensee/journee-
 Aucune inscription ni réunion n'existait sur les activités des journées le 02/11 (lu en production) : rien à reprendre.
 
 **En production** : `ops/migrations/2026-11-02-inscription-journee.sql`, rejouable, additive, avant l'API et le worker de la phase 2. Syntaxe vérifiée par libpg_query (corps PL/pgSQL compris) ; noms, colonnes, contraintes et définitions remplacées relus contre la production. Pas encore jouée (Docker en panne, aucune base locale).
+
+## 02/11/2026, `075_programme_sessions.sql` et `110_engagement.sql` : activités gardées, rappels, composition
+
+Arbitrages du commanditaire sur l'inscription à une journée.
+
+- **`programme.tg_validate_registration()`** : une activité gardée (`track_registration_id` posé) suit sa journée. Ni jauge, ni clôture, ni formulaire propres ; seule une activité annulée refuse une nouvelle ligne, et l'annuler reste toujours possible.
+- **`engagement.schedule_session_reminders()`** : pour une activité gardée, seuls les décalages de moins d'un jour (1 h, 30 min avec la règle par défaut). Ceux d'un jour ou plus sont les rappels de la journée, mis en file par le worker (`engagement.send_day_reminder`, un par inscription et par décalage, clé portant l'heure de début visée).
+- **`programme.tg_session_tracks_follow_registrations`** : une activité ajoutée à une journée l'est d'office aux inscrits de la journée (une inscription ordinaire déjà prise y est rattachée) ; retirée, leurs lignes rattachées sont annulées, sans courriel. Rien en cascade de suppression.
+
+**En production** : `ops/migrations/2026-11-02-inscription-journee-jauge.sql`, rejouable, sans colonne nouvelle, à jouer APRÈS `2026-11-02-inscription-journee.sql` et avant de déployer l'API et le worker. Syntaxe vérifiée par libpg_query ; les deux fonctions remplacées sont identiques en production à celles du dépôt avant changement. Pas jouée (aucune base locale).

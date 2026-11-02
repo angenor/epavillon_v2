@@ -139,6 +139,17 @@
       "watch": "Le direct",
       "join": "Rejoindre",
       "replay": "Revoir"
+    },
+    "day": {
+      "registerNote": "Une inscription vaut pour toute la journée « {day} » : un seul direct, de l'ouverture à la clôture.",
+      "registered": "Inscrit·e à la journée",
+      "following": "Vous ne suivez aucune activité de la journée sur {total}. | Vous suivez {count} activité de la journée sur {total}. | Vous suivez {count} activités de la journée sur {total}.",
+      "kept": "Celle-ci est dans votre programme : un rappel vous parvient avant.",
+      "notKept": "Celle-ci n'est pas dans votre programme : le direct vous l'ouvre quand même, sans rappel.",
+      "guest": "Le lien du direct de la journée vous arrive par courriel ; son lien de gestion permet de changer vos activités.",
+      "joinLead": "Inscrit·e à la journée : ce direct est celui de toute la journée, de l'ouverture à la clôture.",
+      "edit": "Modifier mes activités",
+      "join": "Rejoindre le direct de la journée"
     }
   },
   "gallery": {

@@ -35,9 +35,12 @@ pub async fn publique(
         .await?
         .filter(|s| s.is_published)
         .ok_or_else(ApiError::not_found)?;
-    let reunion = meetings::reunion_publique(&mut tx, session_id)
-        .await?
-        .ok_or_else(ApiError::not_found)?;
+    // Une activité de journée se suit dans la réunion de la journée (02/11).
+    let reunion = match programme::journee_de_seance(&mut tx, session_id).await? {
+        Some(track_id) => meetings::reunion_publique_journee(&mut tx, track_id).await?,
+        None => meetings::reunion_publique(&mut tx, session_id).await?,
+    }
+    .ok_or_else(ApiError::not_found)?;
     tx.commit().await?;
 
     Ok(PublicSessionMeeting {
@@ -75,6 +78,17 @@ pub async fn acces(
     if matches!(seance.status.as_str(), "cancelled" | "postponed") {
         return Err(ApiError::new(ErrorCode::LiveMeetingCancelled));
     }
+    if let Some(track_id) = programme::journee_de_seance(&mut tx, session_id).await? {
+        tx.commit().await?;
+        return acces_journee(
+            state,
+            ctx,
+            track_id,
+            Porteur::Personne(person_id),
+            maintenant,
+        )
+        .await;
+    }
 
     let registration_id = if seance.registration_required {
         Some(
@@ -100,6 +114,80 @@ pub async fn acces(
             entree_libre::place(state, ctx, zoom, &seance, statut.as_deref(), person_id).await?
         }
     };
+    acces_depuis(zoom, place, maintenant)
+}
+
+/// Qui entre dans la réunion d'une journée : la personne connectée, ou le
+/// porteur du lien reçu par courriel (inscription sans compte).
+pub enum Porteur {
+    Personne(Uuid),
+    Jeton(String),
+}
+
+/// La réunion publique d'une journée publiée (`PublicSessionMeeting`), ses
+/// repères pris sur le déroulé de la journée ; 404 sans réunion.
+pub async fn publique_journee(
+    state: &LiveState,
+    track_id: Uuid,
+    maintenant: OffsetDateTime,
+) -> Result<PublicSessionMeeting> {
+    let mut tx = lecture(state.pool()).await?;
+    let journee = programme::journee(&mut tx, track_id)
+        .await?
+        .filter(|j| j.is_published)
+        .ok_or_else(ApiError::not_found)?;
+    let reunion = meetings::reunion_publique_journee(&mut tx, track_id)
+        .await?
+        .ok_or_else(ApiError::not_found)?;
+    tx.commit().await?;
+    Ok(PublicSessionMeeting {
+        closes_at: fermeture(
+            journee.fin,
+            Some(&reunion.status),
+            reunion.actual_end_at,
+            maintenant,
+        ),
+        provider: reunion.provider,
+        status: reunion.status,
+        opens_at: journee.debut - Duration::minutes(OUVERTURE_AVANT_MINUTES),
+        starts_at: journee.debut,
+        ends_at: journee.fin,
+    })
+}
+
+/// L'entrée dans la réunion d'une journée, à toute heure : la personne
+/// inscrite à la journée, ou le porteur de son lien. La première entrée est
+/// notée sur l'inscription à la journée.
+pub async fn acces_journee(
+    state: &LiveState,
+    ctx: &RequestContext,
+    track_id: Uuid,
+    porteur: Porteur,
+    maintenant: OffsetDateTime,
+) -> Result<MeetingAccess> {
+    let zoom = state.zoom()?;
+    let mut tx = state.db().write(ctx).await?;
+    programme::journee(&mut tx, track_id)
+        .await?
+        .filter(|j| j.is_published)
+        .ok_or_else(ApiError::not_found)?;
+    let inscription = match &porteur {
+        Porteur::Personne(p) => programme::inscription_journee_de(&mut tx, track_id, *p).await?,
+        Porteur::Jeton(j) => {
+            programme::inscription_journee_par_empreinte(
+                &mut tx,
+                track_id,
+                &kernel::crypto::token_hash(j),
+            )
+            .await?
+        }
+    }
+    .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingRegistrationRequired))?;
+    let place = meetings::place_journee(&mut tx, inscription).await?;
+    if place.is_some() {
+        programme::noter_la_presence_journee(&mut tx, inscription).await?;
+    }
+    tx.commit().await?;
     acces_depuis(zoom, place, maintenant)
 }
 
@@ -171,9 +259,12 @@ pub async fn lien_animateur(
     autoriser(state, perimetre, session_id).await?;
     let zoom = state.zoom()?;
     let mut conn = state.pool().acquire().await?;
-    let (numero, garde) = meetings::lien_animateur(&mut conn, session_id)
-        .await?
-        .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingNotReady))?;
+    // Une activité de journée : le lien d'animateur de la réunion de la journée.
+    let lien = match programme::journee_de_seance(&mut conn, session_id).await? {
+        Some(track_id) => meetings::lien_animateur_journee(&mut conn, track_id).await?,
+        None => meetings::lien_animateur(&mut conn, session_id).await?,
+    };
+    let (numero, garde) = lien.ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingNotReady))?;
     drop(conn);
     let neuf = match zoom.client.lire_reunion(&numero).await {
         Ok(reunion) => reunion["start_url"].as_str().map(str::to_owned),
@@ -199,9 +290,20 @@ pub async fn lire_admin(
 ) -> Result<AdminSessionMeeting> {
     autoriser(state, perimetre, session_id).await?;
     let mut conn = state.pool().acquire().await?;
-    meetings::tableau(&mut conn, session_id)
+    tableau(&mut conn, session_id)
         .await?
         .ok_or_else(ApiError::not_found)
+}
+
+/// Le tableau de la réunion de la séance, ou de celle de sa journée.
+async fn tableau(
+    conn: &mut sqlx::PgConnection,
+    session_id: Uuid,
+) -> Result<Option<AdminSessionMeeting>> {
+    match programme::journee_de_seance(conn, session_id).await? {
+        Some(track_id) => meetings::tableau_journee(conn, track_id, session_id).await,
+        None => meetings::tableau(conn, session_id).await,
+    }
 }
 
 /// Crée ou rattache la réunion, (re)crée un inscrit Zoom par inscription qui a
@@ -231,8 +333,15 @@ pub async fn reconstruire(
     let seance = programme::seance(&mut tx, session_id)
         .await?
         .ok_or_else(ApiError::not_found)?;
+    let journee = match programme::journee_de_seance(&mut tx, session_id).await? {
+        Some(track_id) => programme::journee(&mut tx, track_id).await?,
+        None => None,
+    };
 
-    let existante = meetings::reunion_active(&mut tx, session_id).await?;
+    let existante = match &journee {
+        Some(j) => meetings::reunion_active_journee(&mut tx, j.id).await?,
+        None => meetings::reunion_active(&mut tx, session_id).await?,
+    };
     if let Some(n) = &external_id {
         let deja = existante.as_ref().and_then(|r| r.external_id.as_deref()) == Some(n.as_str());
         if !deja {
@@ -263,6 +372,19 @@ pub async fn reconstruire(
         }
     }
 
+    if let Some(j) = &journee {
+        let (meeting_id, creee) =
+            inscrits::reconstruire_journee(&mut tx, j, external_id.as_deref()).await?;
+        if !creee {
+            meetings::relancer_reunion(&mut tx, meeting_id).await?;
+        }
+        let tableau = meetings::tableau_journee(&mut tx, j.id, session_id)
+            .await?
+            .ok_or_else(|| ApiError::internal("réunion introuvable après reconstruction"))?;
+        tx.commit().await?;
+        return Ok(tableau);
+    }
+
     let (meeting_id, creee) = match existante {
         Some(r) => {
             if let Some(n) = &external_id {
@@ -287,7 +409,7 @@ pub async fn reconstruire(
         meetings::relancer_reunion(&mut tx, meeting_id).await?;
     }
 
-    let tableau = meetings::tableau(&mut tx, session_id)
+    let tableau = tableau(&mut tx, session_id)
         .await?
         .ok_or_else(|| ApiError::internal("réunion introuvable après reconstruction"))?;
     tx.commit().await?;
@@ -307,11 +429,13 @@ pub async fn envoyer_maintenant(
     state.zoom()?;
 
     let mut tx = state.db().write(ctx).await?;
-    let reunion = meetings::reunion_active(&mut tx, session_id)
-        .await?
-        .ok_or_else(ApiError::not_found)?;
+    let reunion = match programme::journee_de_seance(&mut tx, session_id).await? {
+        Some(track_id) => meetings::reunion_active_journee(&mut tx, track_id).await?,
+        None => meetings::reunion_active(&mut tx, session_id).await?,
+    }
+    .ok_or_else(ApiError::not_found)?;
     meetings::relancer_reunion(&mut tx, reunion.id).await?;
-    let tableau = meetings::tableau(&mut tx, session_id)
+    let tableau = tableau(&mut tx, session_id)
         .await?
         .ok_or_else(|| ApiError::internal("réunion introuvable après l'envoi"))?;
     tx.commit().await?;

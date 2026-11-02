@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (extract(epoch FROM o.decalage) / 60)::bigint AS \"minutes!\"\n             FROM engagement.reminder_rules r\n            CROSS JOIN unnest(r.offsets) AS o(decalage)\n            WHERE r.event_id = $1 AND r.is_active AND 'email' = ANY (r.channels)\n              AND o.decalage >= interval '1 day'\n            ORDER BY 1 DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "minutes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c9928810c8b94d03cccacb1c64c9c4bd091ff44c05b55a7bf33eb9fdeab498da"
+}

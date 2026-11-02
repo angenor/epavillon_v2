@@ -55,5 +55,42 @@
       "title": "Les inscriptions ne sont pas encore ouvertes",
       "message": "Elles ouvriront le {date}. Revenez à ce moment-là."
     }
+  },
+  "day": {
+    "kicker": "S'inscrire à la journée",
+    "kickerEdit": "Modifier mes activités",
+    "when": "{day}, {start} à {end}, {zone}",
+    "notFound": "Cette journée ne prend pas d'inscription.",
+    "intro": "Un seul lien pour toute la journée : ouverture, activités, pauses et clôture. Décochez ce qui ne vous intéresse pas ; vous recevrez un rappel avant chaque activité gardée.",
+    "introEdit": "Le lien du direct reste le même toute la journée. Cochez les activités dont vous voulez le rappel.",
+    "emailHint": "Elle sert à vous confirmer l'inscription, à vous envoyer le lien du direct et les rappels des activités gardées.",
+    "yourActivities": "Vos activités",
+    "count": "Aucune activité sur {total} | {count} activité sur {total} | {count} activités sur {total}",
+    "checkAll": "Tout cocher",
+    "uncheckAll": "Tout décocher",
+    "part": "{label}, {start} à {end}",
+    "included": "Compris dans le direct",
+    "fromActivity": "L'activité que vous consultiez",
+    "signedAs": "Inscription au nom de {name}",
+    "guestNote": "Un courriel confirme l'inscription ; son lien permet de changer vos activités.",
+    "submit": "Confirmer l'inscription",
+    "save": "Enregistrer mes activités",
+    "saved": "Vos activités sont enregistrées",
+    "outcome": {
+      "registered": {
+        "title": "Vous êtes inscrit·e à la journée",
+        "account": "Vous ne suivez aucune activité sur {total} : le direct reste ouvert toute la journée. | Vous suivez {count} activité sur {total}. Le lien du direct, le même toute la journée, s'affichera sur la page le jour venu et vous arrive par courriel. | Vous suivez {count} activités sur {total}. Le lien du direct, le même toute la journée, s'affichera sur la page le jour venu et vous arrive par courriel.",
+        "guest": "Un courriel arrive à {email} avec le lien du direct, le même toute la journée, et un lien pour changer vos activités ou vous désinscrire."
+      },
+      "already": {
+        "title": "Vous étiez déjà inscrit·e",
+        "account": "Votre inscription à la journée était déjà enregistrée. Rien n'a changé : « Modifier mes activités » permet de changer vos choix.",
+        "guest": "Votre inscription était déjà enregistrée. Nous renvoyons à {email} le lien du direct et celui pour changer vos activités."
+      },
+      "closed": {
+        "title": "La journée est passée",
+        "message": "Les inscriptions ont fermé le {date}."
+      }
+    }
   }
 }

@@ -178,3 +178,8 @@ pub struct RegieNotice {
     #[serde(with = "time::serde::rfc3339")]
     pub notify_at: OffsetDateTime,
 }
+
+/// Inscription à une journée (02/11) : `programme.track_registration.created`
+/// puis `.<état>`, émis par `tg_track_registrations_emit_events()`. Comme pour
+/// une activité, le statut de la charge utile décide, pas le nom.
+pub const TRACK_REGISTRATION_PREFIX: &str = "programme.track_registration.";

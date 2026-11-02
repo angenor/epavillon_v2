@@ -7,7 +7,9 @@
   },
   "register": {
     "message": "La réunion est réservée aux personnes inscrites.",
-    "action": "S'inscrire"
+    "action": "S'inscrire",
+    "day": "S'inscrire à la journée",
+    "dayMessage": "Le direct de la journée est réservé à ses inscrits. Une inscription vaut pour toute la journée."
   },
   "ready": "Entrez depuis cette page, sans installer Zoom. Si la réunion n'a pas commencé, Zoom vous fait patienter.",
   "join": "Rejoindre la réunion",
@@ -39,5 +41,6 @@
       "close": "Fermer"
     },
     "app": "Aller dans Zoom"
-  }
+  },
+  "joinDay": "Rejoindre le direct de la journée"
 }

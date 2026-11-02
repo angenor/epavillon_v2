@@ -13,6 +13,9 @@ import type { AttachedImage } from '~/types/media'
  *
  * Chaque activité porte une ancre (`trackActivityAnchor`) : `/programmations`
  * y mène, et l'activité visée s'encadre quelques secondes à l'arrivée.
+ *
+ * Aucun « Rejoindre » par ligne : la journée se suit par un seul direct, que
+ * le billet porte. Les activités gardées par qui s'est inscrit le disent.
  */
 
 interface Props {
@@ -20,9 +23,11 @@ interface Props {
   entryState: (entry: PublicTrackEntry) => SessionDisplayState
   /** La photo de l'édition : la vignette des activités sans couverture. */
   editionImage?: AttachedImage | null
+  /** Activités gardées par la personne inscrite à la journée ; nul : pas inscrite. */
+  kept?: ReadonlySet<string> | null
 }
 
-const props = withDefaults(defineProps<Props>(), { editionImage: null })
+const props = withDefaults(defineProps<Props>(), { editionImage: null, kept: null })
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -100,7 +105,7 @@ function row(entry: PublicTrackEntry, index: number): { key: string; anchor: str
       placeholder: leadAcronym ?? initialsOf(leadName),
       logo: lead?.logo ?? session.organization_logo ?? null,
       points: lines(session.summary ? tr(session.summary) : ''),
-      joinTo: current === 'live' ? `${to}#direct` : null,
+      mine: props.kept?.has(session.id) ? t('track.agenda.mine') : undefined,
       current,
       faded,
       stateLabel,

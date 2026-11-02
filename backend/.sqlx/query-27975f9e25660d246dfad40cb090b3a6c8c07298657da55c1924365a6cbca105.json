@@ -1,0 +1,272 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.proposal_id, s.title AS \"title!: Value\", s.starts_at, s.ends_at,\n                  s.status::text AS \"status!\", (s.published_at IS NOT NULL) AS \"is_published!\",\n                  s.is_streamed,\n                  (s.proposal_id IS NULL AND EXISTS (\n                       SELECT 1 FROM programme.session_proposals sp WHERE sp.session_id = s.id\n                  )) AS \"is_joint!\",\n                  r.name AS \"room_name?: Value\",\n                  COALESCE(media.attached_image('programme', 'sessions', s.id, 'cover'),\n                           media.attached_image('programme', 'proposals', COALESCE(s.proposal_id,\n                               (SELECT sp.proposal_id FROM programme.session_proposals sp\n                                 WHERE sp.session_id = s.id ORDER BY sp.sort_order LIMIT 1)), 'cover'))\n                      AS \"cover?: Value\",\n                  (SELECT count(*) FROM programme.registrations g\n                    WHERE g.session_id = s.id AND g.status IN ('registered', 'attended')) AS \"registrants!\",\n                  pr.is_present AS \"presence?\", pr.noted_at AS \"presence_noted_at?\",\n                  pp.display_name AS \"presence_noted_by?\",\n                  m.status AS \"meeting_status?\", m.sync_status AS \"meeting_sync_status?\",\n                  COALESCE(m.ready, false) AS \"meeting_ready!\",\n                  m.present AS \"meeting_present?\",\n                  s.live_started_at, s.live_ended_at, s.cancelled_at,\n                  s.cancellation_reason_code AS \"reason_code?\",\n                  t.label AS \"reason_label?: Value\",\n                  s.cancellation_note AS \"cancellation_note?\"\n             FROM programme.sessions s\n             JOIN event.events e ON e.id = s.event_id\n             LEFT JOIN event.rooms r ON r.id = s.room_id\n             LEFT JOIN programme.session_presence pr ON pr.session_id = s.id\n             LEFT JOIN identity.people pp ON pp.id = pr.noted_by\n             LEFT JOIN reference.taxonomy_terms t\n                    ON t.taxonomy_code = 'session_cancellation_reason'\n                   AND t.code = s.cancellation_reason_code\n             LEFT JOIN LATERAL (\n                 SELECT mm.status::text AS status, mm.sync_status::text AS sync_status,\n                        (mm.external_id IS NOT NULL AND mm.status IN ('scheduled', 'started')) AS ready,\n                        CASE WHEN mm.status = 'started' THEN c.present_count END AS present\n                   FROM live.meetings mm\n                   LEFT JOIN live.meeting_room_counts c ON c.meeting_id = mm.id\n                  -- Une activité de journée : la réunion de la journée (02/11).\n                  WHERE (mm.session_id = s.id OR mm.track_id = programme.day_track_of(s.id))\n                    AND mm.status NOT IN ('cancelled', 'failed')\n                  ORDER BY mm.created_at DESC\n                  LIMIT 1\n             ) m ON true\n            WHERE s.event_id = $1\n              AND s.published_at IS NOT NULL\n              AND (s.starts_at AT TIME ZONE e.timezone)::date = $2\n            ORDER BY s.starts_at, s.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "proposal_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "proposal_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "is_published!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_streamed",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "is_streamed"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "is_joint!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "room_name?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "cover?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "registrants!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "presence?",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.session_presence",
+            "name": "is_present"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "presence_noted_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.session_presence",
+            "name": "noted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "presence_noted_by?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "meeting_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "meeting_sync_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "meeting_ready!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "meeting_present?",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "live_started_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "live_started_at"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "live_ended_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "live_ended_at"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "cancelled_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "cancelled_at"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "reason_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "cancellation_reason_code"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "reason_label?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "cancellation_note?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "cancellation_note"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      null,
+      false,
+      null,
+      null,
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "27975f9e25660d246dfad40cb090b3a6c8c07298657da55c1924365a6cbca105"
+}

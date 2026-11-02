@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n            SET external_registrant_id = CASE WHEN meeting_id = $2 THEN external_registrant_id END,\n                personal_join_url      = CASE WHEN meeting_id = $2 THEN personal_join_url END,\n                meeting_id = $2, registration_id = $3, track_registration_id = $8,\n                person_id = $4, display_name = $5,\n                email = $6::text::platform.email, request_payload = $7,\n                cancelled_at = NULL, sync_status = 'pending', sync_attempts = 0,\n                last_error = NULL, next_retry_at = now(), synced_at = NULL\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1529f7e2f0688d0fca4193688a3f7d81669133dfb4c243ac44581843c4b1857b"
+}

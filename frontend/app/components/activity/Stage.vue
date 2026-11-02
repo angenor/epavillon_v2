@@ -30,9 +30,11 @@ interface Props {
   parts?: JointPart[]
   /** La photo de l'édition, grande : l'image d'une activité ou d'un dossier sans couverture. */
   editionImage?: AttachedImage | null
+  /** Activité d'une journée : sa salle est celle de la journée, ouverte à qui s'y est inscrit. */
+  dayTrackId?: string | null
 }
 
-const props = withDefaults(defineProps<Props>(), { editionImage: null })
+const props = withDefaults(defineProps<Props>(), { editionImage: null, dayTrackId: null })
 
 const { t, locale } = useI18n()
 
@@ -89,6 +91,7 @@ const replayMinutes = computed(() =>
           class="lg:absolute lg:inset-0"
           mode="stage"
           :session="props.session"
+          :day-track-id="props.dayTrackId"
           :meeting="zoomRoom"
           :room-to="props.roomTo"
           :zone-label="props.zoneLabel"

@@ -22,6 +22,7 @@
  *   programme/review.ts        070_programme_proposals.sql § 5
  *   programme/session.ts       075_programme_sessions.sql § 1, 2, 7
  *   programme/registration.ts  075_programme_sessions.sql § 3, 4, 5
+ *   programme/day-registration.ts  l'inscription à une journée spéciale : un seul direct, les activités gardées
  *   programme/day-plan.ts      070_programme_proposals.sql § 4 bis : le jour J d'une activité retenue
  *   programme/cover-design.ts  070_programme_proposals.sql § 4 ter : l'atelier de l'image de couverture
  *   programme/track-page.ts    la page publique d'un fil, et le placement d'une activité dans ses parties
@@ -76,6 +77,7 @@ export type * from './programme/proposal'
 export type * from './programme/review'
 export type * from './programme/session'
 export type * from './programme/registration'
+export type * from './programme/day-registration'
 export type * from './programme/day-plan'
 export type * from './programme/cover-design'
 export type * from './programme/track-page'

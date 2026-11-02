@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.meeting_participants\n             (meeting_id, registration_id, track_registration_id, person_id, role,\n              display_name, email, request_payload)\n         VALUES ($1, $2, $7, $3, 'attendee', $4, $5::text::platform.email, $6)\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0d2f1f790cea875f6046516fe457daa8c58ee574e717c1ddb5f0c8f6b960d0fb"
+}

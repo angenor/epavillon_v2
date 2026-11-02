@@ -9,6 +9,7 @@ import type {
 import type { MeetingHostLink } from '~/types/admin-regie'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
+import { manageHeaders } from './track-registrations'
 
 export function createMeetingsApi({ call, callOrNull, send }: Pick<ApiTransport, 'call' | 'callOrNull' | 'send'>) {
   return {
@@ -23,6 +24,22 @@ export function createMeetingsApi({ call, callOrNull, send }: Pick<ApiTransport,
      */
     access: (sessionId: Uuid): Promise<MeetingAccess> =>
       call(`/sessions/${sessionId}/meeting/access`, (m) => m.meetingAccess(sessionId)),
+
+    /** Public. La réunion unique d'une journée spéciale ou de l'atelier ; nulle : pas de réunion. */
+    forTrack: (trackId: Uuid): Promise<PublicSessionMeeting | null> =>
+      callOrNull(`/track-meetings/${trackId}`, async () => (await import('~/mocks/day-registrations')).trackMeeting(trackId)),
+
+    /**
+     * L'entrée dans le direct de la journée, par la session ou le jeton du lien de gestion. Refus :
+     * 403 `LIVE_MEETING_REGISTRATION_REQUIRED`, 409 `LIVE_MEETING_NOT_READY` (réessayer), 503 `LIVE_ZOOM_UNAVAILABLE`.
+     */
+    trackAccess: (trackId: Uuid, token: string | null = null): Promise<MeetingAccess> =>
+      call(
+        `/track-meetings/${trackId}/access`,
+        async () => (await import('~/mocks/day-registrations')).trackMeetingAccess(trackId, token),
+        undefined,
+        manageHeaders(token),
+      ),
 
     /** La première présence ; un second appel ne l'écrase pas. */
     recordJoin: (registrationId: Uuid): Promise<RegistrationJoinResult> =>

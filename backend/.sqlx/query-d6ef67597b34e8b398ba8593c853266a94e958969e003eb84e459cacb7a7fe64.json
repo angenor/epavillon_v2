@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT external_id AS \"external_id!\", start_url_encrypted\n             FROM live.meetings\n            WHERE track_id = $1 AND status IN ('scheduled', 'started')\n              AND external_id IS NOT NULL\n            ORDER BY created_at DESC\n            LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "external_id!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "external_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "start_url_encrypted",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "start_url_encrypted"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "d6ef67597b34e8b398ba8593c853266a94e958969e003eb84e459cacb7a7fe64"
+}

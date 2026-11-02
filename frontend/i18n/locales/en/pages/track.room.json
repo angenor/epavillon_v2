@@ -1,0 +1,9 @@
+{
+  "title": "Live stream of the day: {title}",
+  "back": "Back to the day",
+  "checking": "Looking for the day's live stream",
+  "none": {
+    "title": "No live stream yet",
+    "description": "This day's live stream is not scheduled yet. It will be the same from opening to closing."
+  }
+}

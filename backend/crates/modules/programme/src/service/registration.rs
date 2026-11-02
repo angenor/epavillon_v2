@@ -38,7 +38,7 @@ use crate::domain::registration::{
     self, AnnulationRendue, EtatDInscription, Fenetre, IssueDInscription,
 };
 use crate::domain::{answers, sessions as formes};
-use crate::repo::{consents, forms, people, registrations};
+use crate::repo::{consents, forms, people, registrations, track_registrations};
 use crate::state::ProgrammeState;
 
 /// Ce qu'une tentative d'inscription porte — `SessionRegisterPayload`.
@@ -93,6 +93,14 @@ pub async fn sinscrire(
     ip: Option<std::net::IpAddr>,
     payload: SessionRegisterPayload,
 ) -> Result<IssueDInscription> {
+    // Une activité de journée se prend par la journée : un seul direct (02/11).
+    if track_registrations::journee_de_seance(state.pool(), session_id.as_uuid())
+        .await?
+        .is_some()
+    {
+        return Err(ApiError::new(ErrorCode::RegistrationThroughDay));
+    }
+
     let (form_id, admet_anonyme, _) = forms::formulaire_applicable(state.pool(), session_id)
         .await?
         .ok_or_else(ApiError::not_found)?;
@@ -230,7 +238,7 @@ fn issue_de(ligne: serde_json::Value) -> IssueDInscription {
 /// **L'identité vient de champs dédiés**, jamais des réponses (R23), et la
 /// création réutilise la porte bornée de B4 : adresse, prénom, nom, civilité — ni
 /// compte, ni mot de passe, ni rôle.
-async fn identifier(
+pub(crate) async fn identifier(
     conn: &mut PgConnection,
     lecteur: Option<Uuid>,
     admet_anonyme: bool,
@@ -265,7 +273,7 @@ async fn identifier(
 
 /// Le consentement aux réponses sensibles — **refus nommant le champ**, puis
 /// preuve écrite dans la transaction de la donnée qu'elle couvre (R22).
-async fn exiger_le_consentement(
+pub(crate) async fn exiger_le_consentement(
     conn: &mut PgConnection,
     personne: Uuid,
     sensibles: &[&str],

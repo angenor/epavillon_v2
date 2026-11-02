@@ -98,6 +98,17 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             mailer.clone(),
         )),
         Arc::new(jobs::regie_notice::RegieNotice::new(db.clone())),
+        // Inscription à une journée (02/11) : confirmation et rappels de la journée.
+        Arc::new(jobs::journees::SendDayRegistration::new(
+            db.clone(),
+            config,
+            mailer.clone(),
+        )),
+        Arc::new(jobs::journees::SendDayReminder::new(
+            db.clone(),
+            config,
+            mailer.clone(),
+        )),
         // Les envois du back-office et leurs essais, sur la file « email ». Ils
         // lisent les pièces jointes sur le stockage par le noyau, comme
         // `negotiation` lit ses PDF : aucun crate de module n'est appelé.
@@ -129,6 +140,7 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
 pub fn event_consumers(db: Db, _mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn EventConsumer>> {
     vec![
         Arc::new(consumers::reminders::RemindersConsumer),
+        Arc::new(consumers::journees::JourneesConsumer::new(db.clone())),
         Arc::new(consumers::notifications::NotificationsConsumer::new(db)),
         Arc::new(consumers::regie::RegieConsumer),
     ]

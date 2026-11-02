@@ -17,6 +17,7 @@ pub mod regie;
 pub mod registrations;
 pub mod sessions;
 pub mod submission;
+pub mod track_registrations;
 pub mod workspace;
 
 use actix_web::http::header::{ContentType, CACHE_CONTROL, ETAG, IF_NONE_MATCH};

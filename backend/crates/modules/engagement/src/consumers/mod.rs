@@ -5,6 +5,7 @@
 //! **tout** l'historique — c'est-à-dire, ici, remettre en file tous les rappels
 //! jamais programmés.
 
+pub mod journees;
 pub mod notifications;
 pub mod regie;
 pub mod reminders;

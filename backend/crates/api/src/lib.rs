@@ -86,6 +86,7 @@ pub fn build_app(
         portee = portee.configure(programme::comment_routes);
         portee = portee.configure(programme::registration_routes);
         portee = portee.configure(programme::public_schedule_routes);
+        portee = portee.configure(programme::track_registration_routes);
     }
 
     // Les quatre préfixes du module Média n'appartiennent qu'à lui : aucun

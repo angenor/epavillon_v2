@@ -3139,6 +3139,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/track-registrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `DayRegistrationRow[]` : les inscrits d'une journée, avec leur nombre d'activités gardées. `programme.registration.manage` sur l'édition de la journée, dans le périmètre d'administration. */
+        get: operations["journee_liste_nominative"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/tracks": {
         parameters: {
             query?: never;
@@ -7116,6 +7133,146 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/track-meetings/{track_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `PublicSessionMeeting` : la réunion d'une journée publiée (journée spéciale ou atelier), un seul direct de l'accueil à la clôture. Repères pris sur le déroulé de la journée, indicatifs comme pour une séance. **404** sans réunion. **Aucune garde.** */
+        get: operations["journee_reunion_publique"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/track-meetings/{track_id}/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `MeetingAccess` : l'entrée dans la réunion d'une journée, pour la personne connectée inscrite à la journée **ou** le porteur du lien reçu par courriel (en-tête `X-Manage-Token`, inscription sans compte). `join_url` est le lien Zoom personnel : la page du lien du courriel y renvoie dès qu'il est prêt. La première entrée est notée sur l'inscription à la journée. Réponse `Cache-Control: no-store`.
+         *
+         *     Refus : `LIVE_ZOOM_UNAVAILABLE` (503), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, ni inscription ni jeton valable), `LIVE_MEETING_NOT_READY` (409, place pas encore enregistrée chez Zoom : réessayer).
+         */
+        get: operations["journee_reunion_acces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/track-registrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `DayRegisterPayload` → `DayRegistrationResult`. S'inscrire à une journée : un seul direct pour toute la journée, moments compris ; les activités gardées (`session_ids`) servent aux rappels et aux statistiques, elles ne changent rien à l'accès. Trois issues en 200 : inscrit, déjà inscrit, journée passée. **Sans session**, l'inscription n'aboutit que si le formulaire de l'édition admet l'anonyme ; la personne reçoit alors par courriel le lien du direct et un lien pour changer ses activités ou se désinscrire. Déjà inscrite sans compte : rien n'est rendu, le lien repart par courriel. */
+        post: operations["journee_sinscrire"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/track-registrations/form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `{ form, fields }` : le formulaire d'une journée, celui de son édition, à défaut celui de la plateforme. Lecture publique. **404** pour un fil inconnu, non publié, ou qui n'est ni une journée spéciale ni un atelier. */
+        get: operations["journee_formulaire"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/track-registrations/manage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `DayRegistrationManage` : l'inscription du porteur du lien de gestion (en-tête `X-Manage-Token`), avec de quoi nommer la journée. **404** pour un jeton inconnu ou remplacé par un envoi plus récent. Réponse `Cache-Control: private, no-store`. */
+        get: operations["journee_gestion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/track-registrations/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `DayRegistration` : l'inscription vivante de la personne connectée à cette journée. **404** sans inscription. Réponse `Cache-Control: private, no-store`. */
+        get: operations["journee_la_mienne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/track-registrations/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `DayRegistration` : se désinscrire de la journée ; ses activités gardées sont retirées avec elle. Par la personne inscrite ou le porteur du lien de gestion. Rejouable : une inscription déjà annulée est rendue telle quelle. */
+        post: operations["journee_annuler"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/track-registrations/{id}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description `DaySessionsPayload` → `DayRegistration` : la nouvelle liste des activités gardées ; les autres sont retirées, sans courriel. Par la personne inscrite (session) ou le porteur du lien de gestion (`X-Manage-Token`). Refus : `REGISTRATION_LOCKED` (inscription annulée), 422 pour une activité hors de la journée, **404** pour l'inscription d'autrui. */
+        put: operations["journee_modifier"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/webhooks/zoom": {
         parameters: {
             query?: never;
@@ -7202,6 +7359,7 @@ export interface components {
          *     - `REGISTRATION_CONSENT_REQUIRED` (422) — Cette question porte une donnée personnelle sensible : votre accord est nécessaire pour y répondre.
          *     - `REGISTRATION_ACCOUNT_REQUIRED` (401) — L'inscription à cette séance demande un compte. Veuillez vous connecter.
          *     - `REGISTRATION_LOCKED` (422) — Cette inscription ne peut plus être modifiée. Elle ne vous engage plus à rien.
+         *     - `REGISTRATION_THROUGH_DAY` (409) — Cette activité fait partie d'une journée : on s'inscrit à la journée, qui donne accès à tout son direct.
          *     - `JOINT_SESSION_HAS_REGISTRATIONS` (409) — Des personnes sont déjà inscrites à cette séance : la réunir ou la séparer perdrait leurs inscriptions.
          *     - `JOINT_SESSION_INVALID` (422) — Ces dossiers ne peuvent pas être réunis dans une séance commune.
          *     - `MEDIA_QUOTA_EXCEEDED` (422) — L'espace de stockage de cette organisation est atteint.
@@ -7301,7 +7459,7 @@ export interface components {
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "PLATFORM_MAINTENANCE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_MEMBERSHIP_NOT_ACTIVE" | "ORG_PENDING_VALIDATION" | "ORG_MANAGER_APPOINTED_BY_TEAM" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "JOINT_SESSION_HAS_REGISTRATIONS" | "JOINT_SESSION_INVALID" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_TOTAL_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "ENGAGEMENT_MAILING_NOT_DRAFT" | "ENGAGEMENT_MAILING_EMPTY" | "ENGAGEMENT_MAILING_IN_PROGRESS" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "LIVE_ZOOM_UNAVAILABLE" | "LIVE_MEETING_NOT_OPEN" | "LIVE_MEETING_NOT_READY" | "LIVE_MEETING_REGISTRATION_REQUIRED" | "LIVE_MEETING_EXTERNAL_ID_TAKEN" | "LIVE_MEETING_CANCELLED" | "REGIE_LIVE_ALREADY_RUNNING" | "REGIE_SESSION_STATE_CHANGED" | "REGIE_RESUME_EXPIRED" | "REGIE_ACTION_ALREADY_UNDONE" | "REGIE_CANCELLATION_REASON_UNKNOWN" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN" | "NEGOTIATION_REPORT_FORBIDDEN" | "NEGOTIATION_REPORT_DUPLICATE" | "NEGOTIATION_REPORT_INVALID" | "NEGOTIATION_REPORT_UNKNOWN" | "NEGOTIATION_REPORT_ALREADY_DECIDED" | "NEGOTIATION_REPORT_UNDO_EXPIRED" | "NEGOTIATION_MEETING_UNKNOWN" | "NEGOTIATION_MEETING_FORBIDDEN" | "NEGOTIATION_MEETING_FULL" | "NEGOTIATION_MEETING_CLOSED" | "NEGOTIATION_MEETING_UNAVAILABLE" | "NEGOTIATION_MEETING_INVALID";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "PLATFORM_MAINTENANCE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_MEMBERSHIP_NOT_ACTIVE" | "ORG_PENDING_VALIDATION" | "ORG_MANAGER_APPOINTED_BY_TEAM" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "REGISTRATION_THROUGH_DAY" | "JOINT_SESSION_HAS_REGISTRATIONS" | "JOINT_SESSION_INVALID" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_TOTAL_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "ENGAGEMENT_MAILING_NOT_DRAFT" | "ENGAGEMENT_MAILING_EMPTY" | "ENGAGEMENT_MAILING_IN_PROGRESS" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "LIVE_ZOOM_UNAVAILABLE" | "LIVE_MEETING_NOT_OPEN" | "LIVE_MEETING_NOT_READY" | "LIVE_MEETING_REGISTRATION_REQUIRED" | "LIVE_MEETING_EXTERNAL_ID_TAKEN" | "LIVE_MEETING_CANCELLED" | "REGIE_LIVE_ALREADY_RUNNING" | "REGIE_SESSION_STATE_CHANGED" | "REGIE_RESUME_EXPIRED" | "REGIE_ACTION_ALREADY_UNDONE" | "REGIE_CANCELLATION_REASON_UNKNOWN" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN" | "NEGOTIATION_REPORT_FORBIDDEN" | "NEGOTIATION_REPORT_DUPLICATE" | "NEGOTIATION_REPORT_INVALID" | "NEGOTIATION_REPORT_UNKNOWN" | "NEGOTIATION_REPORT_ALREADY_DECIDED" | "NEGOTIATION_REPORT_UNDO_EXPIRED" | "NEGOTIATION_MEETING_UNKNOWN" | "NEGOTIATION_MEETING_FORBIDDEN" | "NEGOTIATION_MEETING_FULL" | "NEGOTIATION_MEETING_CLOSED" | "NEGOTIATION_MEETING_UNAVAILABLE" | "NEGOTIATION_MEETING_INVALID";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -7420,6 +7578,24 @@ export interface components {
         CreateProposalMailingPayload: {
             /** Format: uuid */
             proposal_id: string;
+        };
+        /** @description `DayRegisterPayload`. */
+        DayRegisterPayload: {
+            /** Format: uuid */
+            track_id: string;
+            /** @description Activités gardées ; une activité hors de la journée est refusée. */
+            session_ids?: string[];
+            /** @description Clés = `code` des champs actifs du formulaire de l'édition. */
+            answers?: unknown;
+            locale?: string | null;
+            guest?: null | components["schemas"]["Invite"];
+            sensitive_data_consent?: boolean;
+            /** Format: uuid */
+            organization_id?: string | null;
+        };
+        /** @description `DaySessionsPayload` : la nouvelle liste des activités gardées. */
+        DaySessionsPayload: {
+            session_ids: string[];
         };
         HealthIndicator: {
             code: string;
@@ -17483,6 +17659,56 @@ export interface operations {
             };
         };
     };
+    journee_liste_nominative: {
+        parameters: {
+            query: {
+                /** @description Journée */
+                track_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DayRegistrationRow[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Journée inconnue ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     admin_fil_creer: {
         parameters: {
             query?: never;
@@ -27036,6 +27262,369 @@ export interface operations {
             };
             /** @description Séance inconnue **ou non publiée** — indiscernables */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_reunion_publique: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Journée publiée */
+                track_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicSessionMeeting */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Journée inconnue, non publiée, ou sans réunion */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_reunion_acces: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton du lien reçu par courriel, sans session */
+                "X-Manage-Token"?: string | null;
+            };
+            path: {
+                /** @description Journée publiée */
+                track_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MeetingAccess */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Ni session ni jeton */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description LIVE_MEETING_REGISTRATION_REQUIRED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Journée inconnue ou non publiée */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description LIVE_MEETING_NOT_READY */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description LIVE_ZOOM_UNAVAILABLE */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_sinscrire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DayRegisterPayload"];
+            };
+        };
+        responses: {
+            /** @description DayRegistrationResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description REGISTRATION_ACCOUNT_REQUIRED : le formulaire n'admet pas l'inscription sans compte */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Journée inconnue ou non publiée */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Réponse invalide, consentement manquant, activité hors de la journée */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_formulaire: {
+        parameters: {
+            query: {
+                /** @description Journée */
+                track_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Formulaire et champs actifs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Journée inconnue ou non publiée */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_gestion: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Jeton du lien reçu par courriel */
+                "X-Manage-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DayRegistrationManage */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucun jeton */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Jeton inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_la_mienne: {
+        parameters: {
+            query: {
+                /** @description Journée */
+                track_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DayRegistration */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Pas inscrite */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_annuler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Inscription à la journée */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DayRegistration */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Ni session ni jeton */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Inscription inconnue, ou celle d'autrui */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    journee_modifier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Inscription à la journée */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DaySessionsPayload"];
+            };
+        };
+        responses: {
+            /** @description DayRegistration */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Ni session ni jeton */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Inscription inconnue, ou celle d'autrui */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description REGISTRATION_LOCKED ou activité hors de la journée */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

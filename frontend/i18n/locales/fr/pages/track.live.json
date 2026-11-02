@@ -1,0 +1,29 @@
+{
+  "title": "Direct : {title}",
+  "kicker": "Direct de la journée",
+  "when": "{day}, {start} à {end}, {zone}",
+  "checking": "Préparation de votre accès au direct",
+  "waiting": {
+    "title": "Le direct n'est pas encore prêt",
+    "description": "Votre lien personnel est en cours de préparation. Gardez cette page ouverte : elle vous emmène au direct dès qu'il est prêt.",
+    "retry": "Nouvel essai maintenant | Nouvel essai dans {seconds} seconde | Nouvel essai dans {seconds} secondes",
+    "now": "Réessayer maintenant"
+  },
+  "redirecting": "Ouverture de Zoom",
+  "open": "Ouvrir le direct dans Zoom",
+  "noLink": "Le lien personnel du direct n'est pas disponible. Réessayez dans un instant.",
+  "invalid": {
+    "title": "Ce lien n'est plus valable",
+    "description": "Il a pu être remplacé par un courriel plus récent : ouvrez le dernier reçu. Sinon, inscrivez-vous depuis la page de la journée."
+  },
+  "unregistered": "Inscription annulée",
+  "register": "S'inscrire de nouveau",
+  "dayCancelled": {
+    "title": "Le direct est annulé",
+    "description": "Le direct de cette journée n'aura pas lieu. La page de la journée dit ce qui change."
+  },
+  "toDay": "Voir la journée",
+  "error": "Le direct n'a pas pu s'ouvrir.",
+  "retry": "Réessayer",
+  "manage": "Gérer mon inscription"
+}

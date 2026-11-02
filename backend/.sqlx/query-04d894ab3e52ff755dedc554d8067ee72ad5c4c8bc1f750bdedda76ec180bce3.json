@@ -1,0 +1,101 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT ON (x.sid)\n                  x.sid AS \"session_id!\", m.id, m.status::text AS \"status!\",\n                  m.sync_status::text AS \"sync_status!\", m.last_sync_error, m.actual_start_at,\n                  COALESCE(c.present_count, 0) AS \"present_count!\",\n                  COALESCE(c.joined_count, 0) AS \"joined_count!\",\n                  (SELECT count(*) FROM live.meeting_participants p\n                    WHERE p.meeting_id = m.id AND p.cancelled_at IS NULL\n                      AND p.sync_status = 'synced') AS \"registered_count!\",\n                  (SELECT count(*) FROM live.meeting_participants p\n                    WHERE p.meeting_id = m.id AND p.cancelled_at IS NULL\n                      AND p.sync_status IN ('failed', 'abandoned')) AS \"failure_count!\"\n             FROM unnest($1::uuid[]) AS x(sid)\n             -- Une activité de journée montre la réunion de la journée (02/11).\n             JOIN live.meetings m\n               ON m.session_id = x.sid OR m.track_id = programme.day_track_of(x.sid)\n             LEFT JOIN live.meeting_room_counts c ON c.meeting_id = m.id\n            WHERE m.status <> 'cancelled'\n            ORDER BY x.sid, (m.status <> 'failed') DESC, m.created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "session_id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "sync_status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_sync_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "last_sync_error"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "actual_start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "actual_start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "present_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "joined_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "registered_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "failure_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      null,
+      null,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "04d894ab3e52ff755dedc554d8067ee72ad5c4c8bc1f750bdedda76ec180bce3"
+}

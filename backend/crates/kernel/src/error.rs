@@ -172,6 +172,10 @@ codes! {
         "L'inscription à cette séance demande un compte. Veuillez vous connecter.";
     RegistrationLocked => "REGISTRATION_LOCKED", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette inscription ne peut plus être modifiée. Elle ne vous engage plus à rien.";
+    // Une activité d'une journée spéciale ou de l'atelier (02/11) : on s'inscrit
+    // à la journée, un seul direct pour toute la journée.
+    RegistrationThroughDay => "REGISTRATION_THROUGH_DAY", StatusCode::CONFLICT,
+        "Cette activité fait partie d'une journée : on s'inscrit à la journée, qui donne accès à tout son direct.";
 
     // --- Séances communes (01/11/2026) -----------------------------------------
     // Réunir ou séparer ne refuse jamais un chevauchement non plus : seulement ce

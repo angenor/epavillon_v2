@@ -101,7 +101,7 @@ const organization = computed(() => props.session.organization_acronym ?? props.
     </div>
   </article>
 
-  <!-- Version de la page d'une journée spéciale, inchangée. -->
+  <!-- Version de la page d'une journée spéciale. -->
   <article v-else class="grid items-center gap-5 font-sans md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]" :aria-label="t('programme.lead.label')">
     <div class="relative aspect-video overflow-hidden rounded-lg bg-surface-inverse">
       <UiImage
@@ -144,9 +144,9 @@ const organization = computed(() => props.session.organization_acronym ?? props.
         <b v-if="props.session.organization_acronym" class="font-bold text-text">{{ props.session.organization_acronym }}</b>
         <template v-if="props.session.organization_acronym && props.session.organization_name"> · </template>{{ props.session.organization_name }}<template v-if="country"> · {{ country }}</template>
       </p>
+      <!-- Pas de « Suivre » par activité : la journée se suit par un seul direct, rejoint depuis le billet. -->
       <div class="mt-4 flex flex-wrap gap-2.5">
-        <UiButton :to="`${to}#direct`" icon-trailing="arrow-right">{{ t('programme.lead.watch') }}</UiButton>
-        <UiButton :to="to" variant="secondary">{{ t('programme.lead.open') }}</UiButton>
+        <UiButton :to="to" variant="secondary" icon-trailing="arrow-right">{{ t('programme.lead.open') }}</UiButton>
       </div>
     </div>
   </article>

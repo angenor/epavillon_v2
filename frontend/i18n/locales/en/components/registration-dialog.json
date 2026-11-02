@@ -55,5 +55,42 @@
       "title": "Registration is not open yet",
       "message": "It opens on {date}. Please come back then."
     }
+  },
+  "day": {
+    "kicker": "Register for the day",
+    "kickerEdit": "Change my activities",
+    "when": "{day}, {start} to {end}, {zone}",
+    "notFound": "This day does not take registrations.",
+    "intro": "One link for the whole day: opening, activities, breaks and closing. Untick what does not interest you; you will get a reminder before each activity you keep.",
+    "introEdit": "The live link stays the same all day. Tick the activities you want a reminder for.",
+    "emailHint": "We use it to confirm your registration and to send you the live link and the reminders for the activities you keep.",
+    "yourActivities": "Your activities",
+    "count": "No activity out of {total} | {count} activity out of {total} | {count} activities out of {total}",
+    "checkAll": "Tick all",
+    "uncheckAll": "Untick all",
+    "part": "{label}, {start} to {end}",
+    "included": "Included in the live stream",
+    "fromActivity": "The activity you were viewing",
+    "signedAs": "Registering as {name}",
+    "guestNote": "An email confirms your registration; its link lets you change your activities.",
+    "submit": "Confirm registration",
+    "save": "Save my activities",
+    "saved": "Your activities are saved",
+    "outcome": {
+      "registered": {
+        "title": "You are registered for the day",
+        "account": "You follow no activity out of {total}: the live stream stays open all day. | You follow {count} activity out of {total}. The live link, the same all day, will appear on the page on the day and is on its way by email. | You follow {count} activities out of {total}. The live link, the same all day, will appear on the page on the day and is on its way by email.",
+        "guest": "An email is on its way to {email} with the live link, the same all day, and a link to change your activities or unregister."
+      },
+      "already": {
+        "title": "You were already registered",
+        "account": "Your registration for the day was already recorded. Nothing changed: use \"Change my activities\" to update your choices.",
+        "guest": "Your registration was already recorded. We are sending the live link and the link to change your activities to {email} again."
+      },
+      "closed": {
+        "title": "The day is over",
+        "message": "Registrations closed on {date}."
+      }
+    }
   }
 }

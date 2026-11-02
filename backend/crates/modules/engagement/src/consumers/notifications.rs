@@ -200,6 +200,15 @@ impl NotificationsConsumer {
     /// Le type d'avis visé par un événement : son code, ou l'exception écrite.
     async fn type_vise(&self, event: &OutboxEvent) -> Result<Option<String>> {
         if event.event_type.starts_with("programme.registration.") {
+            // Activité gardée d'une inscription à la journée (02/11) : un seul
+            // avis, celui de la journée, jamais un par activité.
+            if event
+                .payload
+                .get("track_registration_id")
+                .is_some_and(|v| !v.is_null())
+            {
+                return Ok(None);
+            }
             let statut = event
                 .payload
                 .get("status")

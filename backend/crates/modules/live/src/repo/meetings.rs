@@ -201,9 +201,12 @@ pub async fn participant_par_email(
     Ok(ligne)
 }
 
+/// Une place naît d'une inscription à une activité OU à une journée (02/11),
+/// jamais des deux (`ck_meeting_participants_origin`).
 pub struct NouveauParticipant<'a> {
     pub meeting_id: Uuid,
-    pub registration_id: Uuid,
+    pub registration_id: Option<Uuid>,
+    pub track_registration_id: Option<Uuid>,
     pub person_id: Uuid,
     pub display_name: &'a str,
     pub email: &'a str,
@@ -225,15 +228,17 @@ pub async fn inserer_participant(
 ) -> Result<Uuid> {
     let id = sqlx::query_scalar!(
         "INSERT INTO live.meeting_participants
-             (meeting_id, registration_id, person_id, role, display_name, email, request_payload)
-         VALUES ($1, $2, $3, 'attendee', $4, $5::text::platform.email, $6)
+             (meeting_id, registration_id, track_registration_id, person_id, role,
+              display_name, email, request_payload)
+         VALUES ($1, $2, $7, $3, 'attendee', $4, $5::text::platform.email, $6)
          RETURNING id",
         p.meeting_id,
         p.registration_id,
         p.person_id,
         p.display_name,
         p.email,
-        p.charge()
+        p.charge(),
+        p.track_registration_id
     )
     .fetch_one(conn)
     .await?;
@@ -251,7 +256,8 @@ pub async fn reprendre_participant(
         "UPDATE live.meeting_participants
             SET external_registrant_id = CASE WHEN meeting_id = $2 THEN external_registrant_id END,
                 personal_join_url      = CASE WHEN meeting_id = $2 THEN personal_join_url END,
-                meeting_id = $2, registration_id = $3, person_id = $4, display_name = $5,
+                meeting_id = $2, registration_id = $3, track_registration_id = $8,
+                person_id = $4, display_name = $5,
                 email = $6::text::platform.email, request_payload = $7,
                 cancelled_at = NULL, sync_status = 'pending', sync_attempts = 0,
                 last_error = NULL, next_retry_at = now(), synced_at = NULL
@@ -262,7 +268,8 @@ pub async fn reprendre_participant(
         p.person_id,
         p.display_name,
         p.email,
-        p.charge()
+        p.charge(),
+        p.track_registration_id
     )
     .execute(&mut *conn)
     .await?;
@@ -667,6 +674,219 @@ pub async fn place_du_participant(
               AND m.passcode_encrypted IS NOT NULL
               AND m.status IN ('scheduled', 'started', 'ended')"#,
         participant_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+// ---------------------------------------------------------------------------
+// La réunion d'une journée (02/11) : `live.meetings.track_id`, une vivante par
+// journée (`ux_meetings_active_per_track`), une place par inscription à la
+// journée (`meeting_participants.track_registration_id`).
+// ---------------------------------------------------------------------------
+
+pub async fn reunion_active_journee(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+) -> Result<Option<ReunionResume>> {
+    let ligne = sqlx::query_as!(
+        ReunionResume,
+        r#"SELECT id, external_id, sync_status::text AS "sync_status!"
+             FROM live.meetings
+            WHERE track_id = $1 AND status NOT IN ('cancelled', 'failed')"#,
+        track_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+pub struct NouvelleReunionJournee<'a> {
+    pub track_id: Uuid,
+    pub event_id: Uuid,
+    pub topic: &'a str,
+    pub scheduled_start_at: OffsetDateTime,
+    pub duration_minutes: i32,
+    pub timezone: &'a str,
+    pub external_id: Option<&'a str>,
+}
+
+pub async fn creer_reunion_journee(
+    conn: &mut PgConnection,
+    r: &NouvelleReunionJournee<'_>,
+) -> Result<Uuid> {
+    let cree = sqlx::query_scalar!(
+        r#"INSERT INTO live.meetings
+               (track_id, event_id, provider, external_id, topic, scheduled_start_at,
+                duration_minutes, timezone, requires_registration, status, sync_status,
+                created_by)
+           VALUES ($1, $2, 'zoom', $3, $4, $5, $6, $7::text::platform.timezone_name, true,
+                   'draft', 'pending', platform.current_actor_id())
+           ON CONFLICT (track_id) WHERE track_id IS NOT NULL
+                                   AND status NOT IN ('cancelled', 'failed')
+           DO NOTHING
+           RETURNING id"#,
+        r.track_id,
+        r.event_id,
+        r.external_id,
+        r.topic,
+        r.scheduled_start_at,
+        r.duration_minutes,
+        r.timezone
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+
+    match cree {
+        Some(id) => Ok(id),
+        None => reunion_active_journee(conn, r.track_id)
+            .await?
+            .map(|r| r.id)
+            .ok_or_else(|| kernel::error::ApiError::internal("réunion ni créée ni trouvée")),
+    }
+}
+
+pub async fn participant_de_journee(
+    conn: &mut PgConnection,
+    track_registration_id: Uuid,
+) -> Result<Option<ParticipantResume>> {
+    let ligne = sqlx::query_as!(
+        ParticipantResume,
+        "SELECT id, meeting_id, registration_id, cancelled_at
+           FROM live.meeting_participants WHERE track_registration_id = $1",
+        track_registration_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+pub async fn reunion_publique_journee(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+) -> Result<Option<ReunionPublique>> {
+    let ligne = sqlx::query_as!(
+        ReunionPublique,
+        r#"SELECT provider::text AS "provider!", status::text AS "status!", actual_end_at
+             FROM live.meetings
+            WHERE track_id = $1 AND status IN ('scheduled', 'started', 'ended')"#,
+        track_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+/// La place d'une inscription à la journée, prête chez Zoom.
+pub async fn place_journee(
+    conn: &mut PgConnection,
+    track_registration_id: Uuid,
+) -> Result<Option<Place>> {
+    let ligne = sqlx::query_as!(
+        Place,
+        r#"SELECT m.external_id, m.passcode_encrypted,
+                  p.display_name, p.email::text AS "email!",
+                  p.personal_join_url::text AS personal_join_url
+             FROM live.meeting_participants p
+             JOIN live.meetings m ON m.id = p.meeting_id
+            WHERE p.track_registration_id = $1
+              AND p.cancelled_at IS NULL
+              AND p.external_registrant_id IS NOT NULL
+              AND p.personal_join_url IS NOT NULL
+              AND m.external_id IS NOT NULL
+              AND m.passcode_encrypted IS NOT NULL
+              AND m.status IN ('scheduled', 'started', 'ended')"#,
+        track_registration_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+pub async fn lien_animateur_journee(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+) -> Result<Option<(String, Option<Vec<u8>>)>> {
+    let ligne = sqlx::query!(
+        r#"SELECT external_id AS "external_id!", start_url_encrypted
+             FROM live.meetings
+            WHERE track_id = $1 AND status IN ('scheduled', 'started')
+              AND external_id IS NOT NULL
+            ORDER BY created_at DESC
+            LIMIT 1"#,
+        track_id
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+    Ok(ligne.map(|l| (l.external_id, l.start_url_encrypted)))
+}
+
+/// Le déroulé de la journée a bougé : sa réunion prend les nouvelles bornes,
+/// selon les mêmes règles que `recaler_reunion` (quota de Zoom compris).
+pub async fn recaler_reunion_journee(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+    debut: OffsetDateTime,
+    minutes: i32,
+) -> Result<()> {
+    sqlx::query!(
+        "WITH avant AS (
+             SELECT id,
+                    (sync_status = 'in_progress' AND updated_at >= now() - interval '10 minutes')
+                    OR (sync_status = 'failed' AND sync_due_at > now()) AS garde
+               FROM live.meetings
+              WHERE track_id = $1 AND status NOT IN ('cancelled', 'failed')
+                AND (scheduled_start_at IS DISTINCT FROM $2
+                     OR duration_minutes IS DISTINCT FROM $3)
+                FOR UPDATE
+         )
+         UPDATE live.meetings m
+            SET scheduled_start_at = $2, duration_minutes = $3,
+                sync_due_at = CASE
+                    WHEN m.sync_due_at > now() THEN m.sync_due_at
+                    WHEN m.external_id IS NOT NULL THEN now() + interval '5 minutes'
+                END,
+                sync_status = CASE WHEN avant.garde THEN m.sync_status ELSE 'pending' END,
+                last_sync_error = CASE WHEN avant.garde THEN m.last_sync_error END
+           FROM avant
+          WHERE m.id = avant.id",
+        track_id,
+        debut,
+        minutes
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+/// L'écran du back-office pour une activité de journée : la réunion de la
+/// journée, présentée sous la séance demandée.
+pub async fn tableau_journee(
+    conn: &mut PgConnection,
+    track_id: Uuid,
+    session_id: Uuid,
+) -> Result<Option<crate::domain::meeting::AdminSessionMeeting>> {
+    let ligne = sqlx::query_as!(
+        crate::domain::meeting::AdminSessionMeeting,
+        r#"SELECT m.id, $2::uuid AS "session_id!", m.provider::text AS "provider!",
+                  m.external_id, m.status::text AS "status!",
+                  m.sync_status::text AS "sync_status!", m.last_sync_error,
+                  CASE WHEN m.sync_status IN ('pending', 'failed') THEN m.sync_due_at END
+                      AS sync_due_at,
+                  m.join_url::text AS join_url,
+                  count(p.id) FILTER (WHERE p.cancelled_at IS NULL) AS "participants_total!",
+                  count(p.id) FILTER (WHERE p.cancelled_at IS NULL AND p.sync_status = 'synced')
+                      AS "participants_synced!",
+                  count(p.id) FILTER (WHERE p.cancelled_at IS NULL
+                                        AND p.sync_status IN ('failed', 'abandoned'))
+                      AS "participants_failed!"
+             FROM live.meetings m
+             LEFT JOIN live.meeting_participants p ON p.meeting_id = m.id
+            WHERE m.track_id = $1 AND m.status NOT IN ('cancelled', 'failed')
+            GROUP BY m.id"#,
+        track_id,
+        session_id
     )
     .fetch_optional(conn)
     .await?;

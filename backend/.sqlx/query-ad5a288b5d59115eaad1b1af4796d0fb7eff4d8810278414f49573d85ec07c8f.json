@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH avant AS (\n             SELECT id,\n                    (sync_status = 'in_progress' AND updated_at >= now() - interval '10 minutes')\n                    OR (sync_status = 'failed' AND sync_due_at > now()) AS garde\n               FROM live.meetings\n              WHERE track_id = $1 AND status NOT IN ('cancelled', 'failed')\n                AND (scheduled_start_at IS DISTINCT FROM $2\n                     OR duration_minutes IS DISTINCT FROM $3)\n                FOR UPDATE\n         )\n         UPDATE live.meetings m\n            SET scheduled_start_at = $2, duration_minutes = $3,\n                sync_due_at = CASE\n                    WHEN m.sync_due_at > now() THEN m.sync_due_at\n                    WHEN m.external_id IS NOT NULL THEN now() + interval '5 minutes'\n                END,\n                sync_status = CASE WHEN avant.garde THEN m.sync_status ELSE 'pending' END,\n                last_sync_error = CASE WHEN avant.garde THEN m.last_sync_error END\n           FROM avant\n          WHERE m.id = avant.id",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ad5a288b5d59115eaad1b1af4796d0fb7eff4d8810278414f49573d85ec07c8f"
+}

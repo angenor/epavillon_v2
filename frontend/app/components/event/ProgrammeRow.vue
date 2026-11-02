@@ -37,6 +37,8 @@ export interface ProgrammeRowData {
   points?: string[]
   /** Le direct de l'activité, quand elle est en direct. */
   joinTo?: string | null
+  /** « Dans mon programme » : activité gardée par qui s'est inscrit à la journée. */
+  mine?: string
   current: SessionDisplayState
   faded: boolean
   stateLabel: string
@@ -220,6 +222,12 @@ const layout = computed(() =>
           {{ title }}
         </NuxtLink>
       </h4>
+      <p
+        v-if="props.entry.mine"
+        class="mt-1.5 inline-flex items-center gap-1 text-xs font-bold tracking-[0.04em] text-success uppercase"
+      >
+        <UiIcon name="check" size="0.875rem" :stroke-width="2.6" />{{ props.entry.mine }}
+      </p>
       <template v-if="isJoint">
         <p class="mt-2 flex items-center gap-2.5 text-[0.9rem] text-text-secondary" :class="{ 'leading-snug': props.compact }">
           <span class="flex shrink-0">

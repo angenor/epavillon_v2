@@ -13,6 +13,10 @@ import type { PublicSessionStream } from '~/types/live'
  *
  * Le direct, la réunion Zoom, les questions et les autres activités du jour se
  * chargent à part : leur absence ne coûte jamais la page.
+ *
+ * Une activité d'une journée spéciale ou de l'atelier se suit par le direct de
+ * la journée (01/11) : on s'inscrit à la journée, et « Rejoindre » mène à sa
+ * salle. La page de la journée se lit pour sa fenêtre d'inscription.
  */
 
 definePageMeta({ layout: 'public' })
@@ -104,13 +108,24 @@ const zoomOpen = computed(() => {
 })
 const { meeting } = useSessionMeeting(session)
 const zoomShown = computed(() => meeting.value !== null && zoomOpen.value)
-// On n'entre jamais dans la page : « Rejoindre » ouvre la salle pleine page, qui entre sans second clic.
+
+const dayBadge = computed(() => (session.value ? dayTrackOf(session.value.tracks) : null))
+const { data: dayPage } = useLazyAsyncData(
+  () => `activite-journee-${editionSlug.value}-${dayBadge.value?.slug ?? 'aucune'}`,
+  async () => (dayBadge.value ? api.sessions.trackPage(editionSlug.value, dayBadge.value.slug).catch(() => null) : null),
+  { default: () => null, watch: [dayBadge] },
+)
+const day = computed(() => (dayPage.value ? { page: dayPage.value } : null))
+
+// On n'entre jamais dans la page : « Rejoindre » ouvre la salle pleine page, qui entre sans second clic ; celle de la journée pour une activité de journée.
 const roomTo = computed(() =>
-  localePath({
-    name: 'activity-edition-session-room',
-    params: { edition: editionSlug.value, session: sessionSlug.value },
-    query: { entrer: '1' },
-  }),
+  dayBadge.value
+    ? localePath({ name: 'track-edition-track-room', params: { edition: editionSlug.value, track: dayBadge.value.slug }, query: { entrer: '1' } })
+    : localePath({
+        name: 'activity-edition-session-room',
+        params: { edition: editionSlug.value, session: sessionSlug.value },
+        query: { entrer: '1' },
+      }),
 )
 
 onMounted(() => {
@@ -254,6 +269,7 @@ useSeoMeta({
               :zoom-open="zoomShown"
               :room-to="roomTo"
               :special-day="specialDay"
+              :day="day"
               @started="refresh()"
             />
           </div>
@@ -271,6 +287,7 @@ useSeoMeta({
               :zone-label="edition.city ?? undefined"
               :is-recorded="detail.is_recorded"
               :edition-image="editionImage"
+              :day-track-id="dayPage?.track.id ?? null"
             />
 
             <section v-if="summary || hasDescription" aria-labelledby="a-propos-titre">

@@ -18,8 +18,8 @@ pub async fn reunions(
     session_ids: &[Uuid],
 ) -> Result<Vec<(Uuid, LiveDeskMeeting)>> {
     let lignes = sqlx::query!(
-        r#"SELECT DISTINCT ON (m.session_id)
-                  m.session_id AS "session_id!", m.id, m.status::text AS "status!",
+        r#"SELECT DISTINCT ON (x.sid)
+                  x.sid AS "session_id!", m.id, m.status::text AS "status!",
                   m.sync_status::text AS "sync_status!", m.last_sync_error, m.actual_start_at,
                   COALESCE(c.present_count, 0) AS "present_count!",
                   COALESCE(c.joined_count, 0) AS "joined_count!",
@@ -29,10 +29,13 @@ pub async fn reunions(
                   (SELECT count(*) FROM live.meeting_participants p
                     WHERE p.meeting_id = m.id AND p.cancelled_at IS NULL
                       AND p.sync_status IN ('failed', 'abandoned')) AS "failure_count!"
-             FROM live.meetings m
+             FROM unnest($1::uuid[]) AS x(sid)
+             -- Une activité de journée montre la réunion de la journée (02/11).
+             JOIN live.meetings m
+               ON m.session_id = x.sid OR m.track_id = programme.day_track_of(x.sid)
              LEFT JOIN live.meeting_room_counts c ON c.meeting_id = m.id
-            WHERE m.session_id = ANY ($1) AND m.status <> 'cancelled'
-            ORDER BY m.session_id, (m.status <> 'failed') DESC, m.created_at DESC"#,
+            WHERE m.status <> 'cancelled'
+            ORDER BY x.sid, (m.status <> 'failed') DESC, m.created_at DESC"#,
         session_ids
     )
     .fetch_all(&mut *conn)

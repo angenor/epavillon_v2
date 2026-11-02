@@ -49,9 +49,13 @@ interface Props {
   hideCloseButton?: boolean
   /** Plein écran sous 640 px : une fenêtre de rédaction, pas une question. */
   fullscreenMobile?: boolean
+  /** Surtitre au-dessus du titre (« S'inscrire à la journée »). */
+  kicker?: string
+  /** `day` : l'en-tête prend l'aplat de la journée spéciale de la page (`trackDayStyle`). */
+  tone?: 'plain' | 'day'
 }
 
-const props = withDefaults(defineProps<Props>(), { size: 'md', dismissible: true })
+const props = withDefaults(defineProps<Props>(), { size: 'md', dismissible: true, tone: 'plain' })
 const emit = defineEmits<{ 'update:open': [value: boolean]; close: [] }>()
 
 const { t } = useI18n()
@@ -125,14 +129,33 @@ onBeforeUnmount(() => {
     @cancel.prevent="props.dismissible ? close() : undefined"
   >
     <div class="flex max-h-[85vh] flex-col" :class="props.fullscreenMobile && 'max-sm:h-full max-sm:max-h-none'">
-      <header class="flex items-start gap-4 border-b border-border-subtle px-5 py-4">
+      <header
+        class="flex items-start gap-4 px-5 py-4"
+        :class="
+          props.tone === 'day'
+            ? 'bg-[var(--color-day-solid,var(--color-surface-inverse))] text-[var(--color-day-on-solid,var(--color-text-on-inverse))]'
+            : 'border-b border-border-subtle'
+        "
+      >
         <div class="min-w-0 flex-1">
-          <h2 :id="titleId" class="text-xl">{{ props.title }}</h2>
+          <p
+            v-if="props.kicker"
+            class="font-condensed text-[0.95rem] font-semibold tracking-[0.05em] uppercase"
+            :class="props.tone === 'day' ? 'opacity-85' : 'text-text-muted'"
+          >
+            {{ props.kicker }}
+          </p>
+          <h2
+            :id="titleId"
+            :class="props.tone === 'day' ? 'mt-0.5 font-condensed text-[1.7rem] leading-[1.05] font-bold text-inherit' : 'text-xl'"
+          >
+            {{ props.title }}
+          </h2>
           <p
             v-if="props.description"
             :id="descriptionId"
-            class="mt-1 text-sm text-text-muted"
-            :class="props.descriptionLines && CLAMPS[props.descriptionLines]"
+            class="mt-1 text-sm"
+            :class="[props.tone === 'day' ? '' : 'text-text-muted', props.descriptionLines && CLAMPS[props.descriptionLines]]"
             :title="props.descriptionLines ? props.description : undefined"
           >
             {{ props.description }}
@@ -141,7 +164,12 @@ onBeforeUnmount(() => {
         <button
           v-if="props.dismissible && !props.hideCloseButton"
           type="button"
-          class="-mt-1 -mr-1 shrink-0 rounded-md p-2 text-text-subtle transition-colors hover:bg-surface-hover hover:text-text"
+          class="-mt-1 -mr-1 shrink-0 cursor-pointer rounded-md p-2 transition-colors"
+          :class="
+            props.tone === 'day'
+              ? 'grid size-11 place-items-center text-inherit hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)]'
+              : 'text-text-subtle hover:bg-surface-hover hover:text-text'
+          "
           @click="close"
         >
           <span class="sr-only">{{ t('common.actions.close') }}</span>

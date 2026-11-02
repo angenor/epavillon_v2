@@ -1,16 +1,20 @@
 //! D'une inscription plateforme à un inscrit chez Zoom, sans jamais appeler
 //! Zoom : on écrit la ligne, la file fait le reste.
 //!
-//! Partagé par le consommateur d'inscriptions et par la reconstruction du
+//! Partagé par les consommateurs d'inscriptions et par la reconstruction du
 //! back-office, pour qu'un même geste ait un seul chemin.
+//!
+//! Une JOURNÉE (02/11) a une seule réunion : l'inscription à la journée y
+//! prend une place, ses activités gardées n'en prennent aucune, et une activité
+//! de journée n'a jamais de réunion propre.
 
 use kernel::error::Result;
 use serde_json::Value;
 use sqlx::postgres::PgConnection;
 use uuid::Uuid;
 
-use crate::repo::cross::programme::{self, Inscription, Seance};
-use crate::repo::meetings::{self, NouveauParticipant, NouvelleReunion};
+use crate::repo::cross::programme::{self, Inscription, InscriptionJournee, Journee, Seance};
+use crate::repo::meetings::{self, NouveauParticipant, NouvelleReunion, NouvelleReunionJournee};
 
 /// Les statuts qui donnent une place chez Zoom. La liste d'attente en est :
 /// le jour même, Zoom laisse entrer les trois cents premiers arrivés.
@@ -26,32 +30,39 @@ pub async fn synchroniser(conn: &mut PgConnection, registration_id: Uuid) -> Res
         return Ok(());
     };
 
-    if a_une_place(&inscription.status) {
-        let reunion = match meetings::reunion_active(conn, inscription.seance.id).await? {
-            Some(r) => r.id,
-            // Une séance non diffusée n'a de réunion que si le back-office l'a créée.
-            // La réunion naît avec la première inscription : toutes celles déjà
-            // posées sur la séance la rejoignent, pas seulement celle-ci.
-            None if inscription.seance.is_streamed => {
-                let reunion = assurer_reunion(conn, &inscription.seance, None).await?;
-                for id in programme::inscriptions_actives(conn, inscription.seance.id).await? {
-                    if let Some(autre) = programme::inscription(conn, id).await? {
-                        assurer_participant(conn, reunion, &autre).await?;
-                    }
-                }
-                return Ok(());
-            }
-            None => return Ok(()),
-        };
-        assurer_participant(conn, reunion, &inscription).await
-    } else if inscription.status == "cancelled" {
+    // Activité gardée, ou activité d'une journée : la place est celle de la
+    // journée. Une place propre prise avant le rattachement est rendue.
+    let de_journee = inscription.track_registration_id.is_some()
+        || programme::journee_de_seance(conn, inscription.seance.id)
+            .await?
+            .is_some();
+    if de_journee || inscription.status == "cancelled" {
         if let Some(p) = meetings::participant_de_inscription(conn, registration_id).await? {
             meetings::annuler_participant(conn, p.id).await?;
         }
-        Ok(())
-    } else {
-        Ok(())
+        return Ok(());
     }
+
+    if !a_une_place(&inscription.status) {
+        return Ok(());
+    }
+    let reunion = match meetings::reunion_active(conn, inscription.seance.id).await? {
+        Some(r) => r.id,
+        // Une séance non diffusée n'a de réunion que si le back-office l'a créée.
+        // La réunion naît avec la première inscription : toutes celles déjà
+        // posées sur la séance la rejoignent, pas seulement celle-ci.
+        None if inscription.seance.is_streamed => {
+            let reunion = assurer_reunion(conn, &inscription.seance, None).await?;
+            for id in programme::inscriptions_actives(conn, inscription.seance.id).await? {
+                if let Some(autre) = programme::inscription(conn, id).await? {
+                    assurer_participant(conn, reunion, &autre).await?;
+                }
+            }
+            return Ok(());
+        }
+        None => return Ok(()),
+    };
+    assurer_participant(conn, reunion, &inscription).await
 }
 
 pub async fn assurer_reunion(
@@ -82,7 +93,8 @@ async fn assurer_participant(
 ) -> Result<()> {
     let nouveau = NouveauParticipant {
         meeting_id,
-        registration_id: i.registration_id,
+        registration_id: Some(i.registration_id),
+        track_registration_id: None,
         person_id: i.person_id,
         display_name: &i.display_name,
         email: &i.email,
@@ -96,23 +108,35 @@ async fn assurer_participant(
         }
         return meetings::reprendre_participant(conn, p.id, &nouveau).await;
     }
+    reprendre_ou_inserer(conn, meeting_id, &nouveau, Some(i.registration_id)).await
+}
 
-    // L'adresse est unique par réunion : une personne qui s'était désinscrite
-    // retrouve sa ligne, et chez Zoom le même inscrit.
-    if let Some(p) = meetings::participant_par_email(conn, meeting_id, &i.email).await? {
-        if p.cancelled_at.is_none() && p.registration_id == Some(i.registration_id) {
+/// L'adresse est unique par réunion : une personne qui s'était désinscrite
+/// retrouve sa ligne, et chez Zoom le même inscrit.
+async fn reprendre_ou_inserer(
+    conn: &mut PgConnection,
+    meeting_id: Uuid,
+    nouveau: &NouveauParticipant<'_>,
+    registration_id: Option<Uuid>,
+) -> Result<()> {
+    if let Some(p) = meetings::participant_par_email(conn, meeting_id, nouveau.email).await? {
+        let meme = registration_id.is_some() && p.registration_id == registration_id;
+        if p.cancelled_at.is_none() && meme {
             return Ok(());
         }
-        return meetings::reprendre_participant(conn, p.id, &nouveau).await;
+        return meetings::reprendre_participant(conn, p.id, nouveau).await;
     }
-
-    meetings::inserer_participant(conn, &nouveau).await?;
+    meetings::inserer_participant(conn, nouveau).await?;
     Ok(())
 }
 
 /// La durée de la séance en minutes entières, bornée comme `live.meetings`.
 pub fn duree_minutes(seance: &Seance) -> i32 {
-    let minutes = ((seance.ends_at - seance.starts_at).whole_seconds() + 59) / 60;
+    minutes_entre(seance.starts_at, seance.ends_at)
+}
+
+fn minutes_entre(debut: time::OffsetDateTime, fin: time::OffsetDateTime) -> i32 {
+    let minutes = ((fin - debut).whole_seconds() + 59) / 60;
     minutes.clamp(1, 1440) as i32
 }
 
@@ -132,4 +156,129 @@ pub fn intitule(titre: &Value) -> String {
         })
         .unwrap_or("Activité du Pavillon de la Francophonie");
     texte.trim().chars().take(200).collect()
+}
+
+// ---------------------------------------------------------------------------
+// La journée
+// ---------------------------------------------------------------------------
+
+/// La réunion de la journée, de l'accueil à la clôture.
+pub async fn assurer_reunion_journee(
+    conn: &mut PgConnection,
+    journee: &Journee,
+    external_id: Option<&str>,
+) -> Result<Uuid> {
+    let topic = intitule(&journee.title);
+    meetings::creer_reunion_journee(
+        conn,
+        &NouvelleReunionJournee {
+            track_id: journee.id,
+            event_id: journee.event_id,
+            topic: &topic,
+            scheduled_start_at: journee.debut,
+            duration_minutes: minutes_entre(journee.debut, journee.fin),
+            timezone: &journee.timezone,
+            external_id,
+        },
+    )
+    .await
+}
+
+/// Comme `synchroniser`, pour une inscription à la journée : la réunion de la
+/// journée naît avec sa première inscription (le direct est activé d'office).
+pub async fn synchroniser_journee(
+    conn: &mut PgConnection,
+    track_registration_id: Uuid,
+) -> Result<()> {
+    let Some(inscription) = programme::inscription_journee(conn, track_registration_id).await?
+    else {
+        return Ok(());
+    };
+    if !matches!(inscription.status.as_str(), "registered" | "attended") {
+        if let Some(p) = meetings::participant_de_journee(conn, track_registration_id).await? {
+            meetings::annuler_participant(conn, p.id).await?;
+        }
+        return Ok(());
+    }
+    let reunion = match meetings::reunion_active_journee(conn, inscription.track_id).await? {
+        Some(r) => r.id,
+        None => {
+            let Some(journee) = programme::journee(conn, inscription.track_id).await? else {
+                return Ok(());
+            };
+            assurer_reunion_journee(conn, &journee, None).await?
+        }
+    };
+    assurer_participant_journee(conn, reunion, &inscription).await
+}
+
+async fn assurer_participant_journee(
+    conn: &mut PgConnection,
+    meeting_id: Uuid,
+    i: &InscriptionJournee,
+) -> Result<()> {
+    let nouveau = NouveauParticipant {
+        meeting_id,
+        registration_id: None,
+        track_registration_id: Some(i.id),
+        person_id: i.person_id,
+        display_name: &i.display_name,
+        email: &i.email,
+        first_name: &i.first_name,
+        last_name: &i.last_name,
+    };
+    if let Some(p) = meetings::participant_de_journee(conn, i.id).await? {
+        if p.meeting_id == meeting_id && p.cancelled_at.is_none() {
+            return Ok(());
+        }
+        return meetings::reprendre_participant(conn, p.id, &nouveau).await;
+    }
+    reprendre_ou_inserer(conn, meeting_id, &nouveau, None).await
+}
+
+/// Le déroulé a bougé (activité déplacée, ajoutée, annulée) : la réunion de la
+/// journée, si elle existe, prend ses nouvelles bornes.
+pub async fn recaler_journee(conn: &mut PgConnection, track_id: Uuid) -> Result<()> {
+    if meetings::reunion_active_journee(conn, track_id)
+        .await?
+        .is_none()
+    {
+        return Ok(());
+    }
+    let Some(journee) = programme::journee(conn, track_id).await? else {
+        return Ok(());
+    };
+    meetings::recaler_reunion_journee(
+        conn,
+        track_id,
+        journee.debut,
+        minutes_entre(journee.debut, journee.fin),
+    )
+    .await
+}
+
+/// Recrée la réunion de la journée et une place par inscription active.
+pub async fn reconstruire_journee(
+    conn: &mut PgConnection,
+    journee: &Journee,
+    external_id: Option<&str>,
+) -> Result<(Uuid, bool)> {
+    let (meeting_id, creee) = match meetings::reunion_active_journee(conn, journee.id).await? {
+        Some(r) => {
+            if let Some(n) = external_id {
+                if r.external_id.as_deref() != Some(n) {
+                    meetings::rattacher(conn, r.id, n).await?;
+                }
+            }
+            (r.id, false)
+        }
+        None => (
+            assurer_reunion_journee(conn, journee, external_id).await?,
+            true,
+        ),
+    };
+    for id in programme::inscriptions_journee_actives(conn, journee.id).await? {
+        synchroniser_journee(conn, id).await?;
+    }
+    Ok((meeting_id, creee))
 }

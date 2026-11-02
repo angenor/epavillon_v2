@@ -1,0 +1,35 @@
+{
+  "title": "My registration: {title}",
+  "back": "See the day",
+  "kicker": "My registration for the day",
+  "when": "{day}, {start} to {end}, {zone}",
+  "loading": "Reading your registration",
+  "error": "Your registration could not be read",
+  "invalid": {
+    "title": "This link is no longer valid",
+    "description": "It may have been replaced by a more recent email: open the latest one. Without an email, register again from the day's page.",
+    "action": "See the day"
+  },
+  "cancelled": {
+    "title": "You are unregistered",
+    "description": "Your registration for this day is cancelled: you will receive neither reminders nor the live link.",
+    "action": "Register again"
+  },
+  "registered": "Registered for the day, {name}",
+  "following": "You follow no activity out of {total}: the live stream stays open all day. | You follow {count} activity out of {total}; a reminder reaches you before it. | You follow {count} activities out of {total}; a reminder reaches you before each one.",
+  "live": {
+    "lead": "The day has started. The link is the same from opening to closing.",
+    "action": "Join the day's live stream",
+    "before": "On the day, a \"Join the day's live stream\" button will appear here; the link in the email leads to the same stream."
+  },
+  "activities": "Your activities",
+  "none": "No activity kept: the live stream stays open all day, without reminders.",
+  "edit": "Change my activities",
+  "cancel": {
+    "action": "Unregister",
+    "title": "Unregister from the day?",
+    "description": "You will no longer receive reminders, and the live link will no longer open the day for you.",
+    "keep": "Stay registered",
+    "confirm": "Unregister"
+  }
+}

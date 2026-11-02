@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.track_registrations\n            SET status = 'cancelled', cancelled_at = now()\n          WHERE id = $1 AND status <> 'cancelled'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6fec5ce0362df28ebef2866e9be6443a53b573d3c09baccf8dba718ca7d3fcb9"
+}

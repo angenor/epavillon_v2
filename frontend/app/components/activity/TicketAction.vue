@@ -10,14 +10,19 @@ interface Props {
   joinTo?: string
   /** Libellé court : la barre collée en bas n'a pas la largeur du billet. */
   compact?: boolean
+  /** Activité d'une journée : on rejoint le direct de la journée. */
+  day?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), { replayUrl: null, joinTo: undefined, compact: false })
+const props = withDefaults(defineProps<Props>(), { replayUrl: null, joinTo: undefined, compact: false, day: false })
 const emit = defineEmits<{ register: [] }>()
 
 const { t } = useI18n()
 
-const label = (action: TicketCallToAction) => t(props.compact ? `activity.ticket.short.${action}` : `activity.ticket.${action}`)
+const label = (action: TicketCallToAction) => {
+  if (props.day && action === 'join') return t(props.compact ? 'activity.ticket.short.join' : 'activity.ticket.day.join')
+  return t(props.compact ? `activity.ticket.short.${action}` : `activity.ticket.${action}`)
+}
 </script>
 
 <template>

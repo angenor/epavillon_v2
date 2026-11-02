@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.meetings\n               (track_id, event_id, provider, external_id, topic, scheduled_start_at,\n                duration_minutes, timezone, requires_registration, status, sync_status,\n                created_by)\n           VALUES ($1, $2, 'zoom', $3, $4, $5, $6, $7::text::platform.timezone_name, true,\n                   'draft', 'pending', platform.current_actor_id())\n           ON CONFLICT (track_id) WHERE track_id IS NOT NULL\n                                   AND status NOT IN ('cancelled', 'failed')\n           DO NOTHING\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "244d6f28d3c5f9908cfb40cdcfcc3992169e6bba0b2525b994911a71e729ff00"
+}
