@@ -199,9 +199,10 @@ const isEmpty = computed(() => shown.value.length === 0 && upcomingEditions.valu
       </div>
     </dl>
 
+    <!-- Même habit que « S'inscrire » sur une activité : c'est l'action qui mène au programme. -->
     <UiButton
       v-if="props.sessions.length || figures.length"
-      variant="on-inverse"
+      variant="signup"
       block
       class="mt-4"
       :to="programmeTo"
