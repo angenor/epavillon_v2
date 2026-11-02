@@ -2,7 +2,7 @@
 /**
  * NOUVELLE VERSION EN LIGNE (maquette `docs/maquettes/nouvelle-version/`).
  *
- * Deux cas, choisis à la mise en ligne. Ordinaire : une carte en bas de l'écran
+ * Deux cas, choisis à la mise en ligne. Ordinaire : une carte en haut de l'écran, sous la barre (02/11)
  * propose de recharger ; « Plus tard » la range, et la page suivante se charge
  * dans la nouvelle version (plugin `app-version`). Imposé : un voile et un
  * décompte, sans moyen de refuser, pour une correction urgente.
@@ -74,7 +74,7 @@ const progress = computed(() => `${((DELAY_S - left.value) / DELAY_S) * 100}%`)
 
     <div
       v-else-if="stale && !dismissed"
-      class="fixed inset-x-3 bottom-4 z-[90] mx-auto flex max-w-[720px] flex-wrap items-center gap-3.5 rounded-lg border border-l-[5px] border-border border-l-(--ifdd-cyan) bg-surface-raised py-3 pr-3 pl-4 text-text shadow-lg sm:flex-nowrap"
+      class="fixed inset-x-3 top-[calc(var(--nav-height)+0.75rem)] z-[90] mx-auto flex max-w-[720px] flex-wrap items-center gap-3.5 rounded-lg border border-l-[5px] border-border border-l-(--ifdd-cyan) bg-surface-raised py-3 pr-3 pl-4 text-text shadow-lg sm:flex-nowrap"
       role="status"
     >
       <UiIcon name="refresh" size="1.375rem" :stroke-width="2" class="shrink-0 text-accent" aria-hidden="true" />
