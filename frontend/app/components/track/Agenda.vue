@@ -68,7 +68,7 @@ function row(entry: PublicTrackEntry, index: number): { key: string; anchor: str
     return {
       key: `m-${index}`,
       anchor: undefined,
-      highlight: false,
+      highlight: entry.moment.is_highlight,
       data: {
         id: entry.moment.id,
         to: null,

@@ -164,6 +164,7 @@ pub struct MomentDuFil {
     pub ends_at: Option<OffsetDateTime>,
     pub label: Value,
     pub description: Option<Value>,
+    pub is_highlight: bool,
 }
 
 pub async fn moments_du_fil<'e>(
@@ -173,7 +174,7 @@ pub async fn moments_du_fil<'e>(
     let lignes = sqlx::query_as!(
         MomentDuFil,
         r#"SELECT id, part_id, starts_at, ends_at, label AS "label!: Value",
-                  description AS "description: Value"
+                  description AS "description: Value", is_highlight
              FROM event.programme_track_moments
             WHERE track_id = $1
             ORDER BY starts_at, created_at"#,

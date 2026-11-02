@@ -143,6 +143,8 @@
     "edit": "Modifier {moment}",
     "remove": "Retirer {moment}",
     "removeTitle": "Retirer ce moment du déroulé ?",
-    "removeAction": "Retirer le moment"
+    "removeAction": "Retirer le moment",
+    "highlight": "Temps fort de la journée",
+    "highlightHint": "Mis en avant en haut de la page de la journée, comme une activité temps fort."
   }
 }

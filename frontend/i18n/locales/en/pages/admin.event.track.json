@@ -143,6 +143,8 @@
     "edit": "Edit {moment}",
     "remove": "Remove {moment}",
     "removeTitle": "Remove this moment from the agenda?",
-    "removeAction": "Remove moment"
+    "removeAction": "Remove moment",
+    "highlight": "Highlight of the day",
+    "highlightHint": "Featured at the top of the day page, like a highlighted activity."
   }
 }

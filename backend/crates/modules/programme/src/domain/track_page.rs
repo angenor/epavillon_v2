@@ -106,6 +106,8 @@ pub struct PublicTrackMoment {
     pub id: Uuid,
     pub label: Value,
     pub description: Option<Value>,
+    /// Temps fort du fil (le hackathon de la journée jeunesse).
+    pub is_highlight: bool,
 }
 
 /// Le contenu d'une ligne du déroulé.

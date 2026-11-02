@@ -538,7 +538,7 @@ const deroule = (s: Source): PublicTrackEntry[] => {
       starts_at: a(m.jour, m.debut),
       ends_at: m.fin ? a(m.jour, m.fin) : null,
       part_id: m.partie ? partId(s, m.partie) : null,
-      moment: { id: TRACK_PAGE_MOMENT(m.n), label: fr(m.libelle), description: m.points ? fr(m.points.join('\n')) : null },
+      moment: { id: TRACK_PAGE_MOMENT(m.n), label: fr(m.libelle), description: m.points ? fr(m.points.join('\n')) : null, is_highlight: false },
     })),
     ...s.activites.map((x): PublicTrackEntry => ({
       kind: 'activity',
@@ -665,7 +665,7 @@ export const trackPageSettings: Record<string, TrackPageSettings> = Object.fromE
         })),
         moments: p.agenda.flatMap((e) =>
           e.kind === 'moment'
-            ? [{ id: e.moment.id, track_id: s.id, part_id: e.part_id, starts_at: e.starts_at, ends_at: e.ends_at, label: e.moment.label, description: e.moment.description }]
+            ? [{ id: e.moment.id, track_id: s.id, part_id: e.part_id, starts_at: e.starts_at, ends_at: e.ends_at, label: e.moment.label, description: e.moment.description, is_highlight: e.moment.is_highlight }]
             : [],
         ),
         partners: s.partenaires.map((x, i) => ({ ...x, sort_order: i + 1 })),

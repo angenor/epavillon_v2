@@ -86,7 +86,7 @@ pub async fn moments<'e>(
         TrackMoment,
         r#"SELECT id, track_id, part_id, starts_at, ends_at,
                   label AS "label!: serde_json::Value",
-                  description AS "description: serde_json::Value"
+                  description AS "description: serde_json::Value", is_highlight
              FROM event.programme_track_moments
             WHERE track_id = $1
             ORDER BY starts_at, created_at"#,
@@ -256,15 +256,16 @@ pub async fn creer_moment(
 ) -> std::result::Result<Uuid, sqlx::Error> {
     sqlx::query_scalar!(
         r#"INSERT INTO event.programme_track_moments
-               (track_id, part_id, starts_at, ends_at, label, description)
-           VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb)
+               (track_id, part_id, starts_at, ends_at, label, description, is_highlight)
+           VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7)
         RETURNING id"#,
         track.as_uuid(),
         p.part_id,
         p.starts_at,
         p.ends_at,
         p.label,
-        p.description
+        p.description,
+        p.is_highlight
     )
     .fetch_one(&mut *conn)
     .await
@@ -280,7 +281,7 @@ pub async fn modifier_moment(
     let touchees = sqlx::query!(
         r#"UPDATE event.programme_track_moments SET
                part_id = $3, starts_at = $4, ends_at = $5,
-               label = $6::jsonb, description = $7::jsonb
+               label = $6::jsonb, description = $7::jsonb, is_highlight = $8
          WHERE id = $2 AND track_id = $1"#,
         track.as_uuid(),
         moment,
@@ -288,7 +289,8 @@ pub async fn modifier_moment(
         p.starts_at,
         p.ends_at,
         p.label,
-        p.description
+        p.description,
+        p.is_highlight
     )
     .execute(&mut *conn)
     .await?

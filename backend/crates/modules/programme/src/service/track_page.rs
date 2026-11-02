@@ -107,6 +107,7 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
                         id: m.id,
                         label: m.label,
                         description: m.description,
+                        is_highlight: m.is_highlight,
                     },
                 },
             },

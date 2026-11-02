@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, part_id, starts_at, ends_at, label AS \"label!: Value\",\n                  description AS \"description: Value\"\n             FROM event.programme_track_moments\n            WHERE track_id = $1\n            ORDER BY starts_at, created_at",
+  "query": "SELECT id, part_id, starts_at, ends_at, label AS \"label!: Value\",\n                  description AS \"description: Value\", is_highlight\n             FROM event.programme_track_moments\n            WHERE track_id = $1\n            ORDER BY starts_at, created_at",
   "describe": {
     "columns": [
       {
@@ -68,6 +68,17 @@
             "name": "description"
           }
         }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_highlight",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "is_highlight"
+          }
+        }
       }
     ],
     "parameters": {
@@ -81,8 +92,9 @@
       false,
       true,
       false,
-      true
+      true,
+      false
     ]
   },
-  "hash": "04ba136ba4a87bc07def102a071dbb68cda19c6ae656d77077b9af0699f85b26"
+  "hash": "5ada0194f294348ea7882c2738e10e280c7c70f9da70c0538a571e03fd45d74f"
 }

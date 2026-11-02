@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PublicSessionSpeaker } from '~/types/programme/session'
+import type { PublicTrackEntry } from '~/types/programme/track-page'
 
 /**
  * LA PAGE D'UNE JOURNÉE SPÉCIALE, ou de l'atelier préparatoire (un fil
@@ -118,6 +119,14 @@ const activities = computed(() =>
   (page.value?.agenda ?? []).flatMap((entry) => (entry.kind === 'activity' ? [entry.activity] : [])),
 )
 const highlight = computed(() => activities.value.find((activity) => activity.is_highlight && sessionState(activity.session) !== 'cancelled') ?? null)
+/** Un moment temps fort (le hackathon, 02/11) ; une activité temps fort passe devant. */
+const highlightMoment = computed(() =>
+  highlight.value
+    ? null
+    : ((page.value?.agenda ?? []).find(
+        (entry): entry is Extract<PublicTrackEntry, { kind: 'moment' }> => entry.kind === 'moment' && entry.moment.is_highlight,
+      ) ?? null),
+)
 
 const speakers = computed(() => {
   const seen = new Set<string>()
@@ -252,7 +261,13 @@ useSeoMeta({
               </p>
             </section>
 
-            <TrackHighlight v-if="highlight" :activity="highlight" :edition-slug="page.edition.slug" :timezone="timezone" />
+            <TrackHighlight
+              v-if="highlight || highlightMoment"
+              :activity="highlight"
+              :moment="highlightMoment"
+              :edition-slug="page.edition.slug"
+              :timezone="timezone"
+            />
 
             <section v-if="page.agenda.length" id="deroule" class="scroll-mt-28" aria-labelledby="journee-deroule-titre">
               <h2 id="journee-deroule-titre" :class="sectionTitle">{{ t(`track.agenda.title.${subject}`) }}</h2>

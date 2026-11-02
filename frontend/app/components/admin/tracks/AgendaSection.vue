@@ -289,6 +289,14 @@ watch(
                   <p class="font-medium text-text-secondary">{{ tr(row.moment.label) }}</p>
                   <p v-if="row.moment.description" class="text-sm text-text-muted">{{ tr(row.moment.description) }}</p>
                   <UiBadge class="mt-1" size="sm" intent="neutral" :label="t('admin.event.track.agenda.moment')" />
+                  <UiBadge
+                    v-if="row.moment.is_highlight"
+                    class="mt-1 ml-1"
+                    size="sm"
+                    intent="info"
+                    icon="star"
+                    :label="t('admin.event.track.agenda.highlight')"
+                  />
                 </div>
                 <div v-if="props.canManage" class="flex items-center gap-1 sm:col-start-2 lg:col-start-auto">
                   <UiButton

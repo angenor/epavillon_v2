@@ -37,6 +37,7 @@ pub struct TrackMoment {
     pub ends_at: Option<OffsetDateTime>,
     pub label: Value,
     pub description: Option<Value>,
+    pub is_highlight: bool,
 }
 
 /// Un partenaire du fil : `TrackPartner`. Nom, sigle et logo résolus : l'écran
@@ -163,4 +164,7 @@ pub struct TrackMomentPayload {
     pub label: Value,
     #[serde(default)]
     pub description: Option<Value>,
+    /// Temps fort du fil. Absent : faux.
+    #[serde(default)]
+    pub is_highlight: bool,
 }

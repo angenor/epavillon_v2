@@ -121,6 +121,8 @@ export interface PublicTrackMoment {
   id: TrackMomentId
   label: I18nText
   description: I18nText | null
+  /** Temps fort du fil (02/11) : le hackathon de la journée jeunesse n'est pas une activité. */
+  is_highlight: boolean
 }
 
 interface PublicTrackEntryBase {

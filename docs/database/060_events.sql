@@ -536,6 +536,10 @@ CREATE TABLE event.programme_track_moments (
     description platform.i18n_text,
     created_at  timestamptz NOT NULL DEFAULT now(),
     updated_at  timestamptz NOT NULL DEFAULT now(),
+    -- Temps fort du fil (02/11/2026) : le hackathon de la journée jeunesse
+    -- n'est pas une activité. Même rôle que programme.session_tracks.is_highlight.
+    -- Clôt la table : arrivée par ALTER sur une base en service.
+    is_highlight boolean    NOT NULL DEFAULT false,
     CONSTRAINT ck_programme_track_moments_period CHECK (ends_at IS NULL OR ends_at > starts_at),
     -- Retirer une partie remet ses moments hors partie, sans toucher au fil :
     -- SET NULL sur la seule colonne de la partie (PostgreSQL 15 et plus).

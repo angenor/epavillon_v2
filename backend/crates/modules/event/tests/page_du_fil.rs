@@ -73,6 +73,7 @@ fn moment(part_id: Option<Uuid>, heure: &str, libelle: &str) -> TrackMomentPaylo
         ends_at: None,
         label: json!({ "fr": libelle }),
         description: None,
+        is_highlight: false,
     }
 }
 

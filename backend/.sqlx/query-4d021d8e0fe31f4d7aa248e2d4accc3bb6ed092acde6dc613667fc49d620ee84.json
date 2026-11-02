@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO event.programme_track_moments\n               (track_id, part_id, starts_at, ends_at, label, description)\n           VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb)\n        RETURNING id",
+  "query": "INSERT INTO event.programme_track_moments\n               (track_id, part_id, starts_at, ends_at, label, description, is_highlight)\n           VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7)\n        RETURNING id",
   "describe": {
     "columns": [
       {
@@ -22,12 +22,13 @@
         "Timestamptz",
         "Timestamptz",
         "Jsonb",
-        "Jsonb"
+        "Jsonb",
+        "Bool"
       ]
     },
     "nullable": [
       false
     ]
   },
-  "hash": "51c0b344b67e201ab0515f5455283646d5eef9714a819783cc964fdf5585c150"
+  "hash": "4d021d8e0fe31f4d7aa248e2d4accc3bb6ed092acde6dc613667fc49d620ee84"
 }

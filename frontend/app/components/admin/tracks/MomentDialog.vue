@@ -31,6 +31,7 @@ const end = ref('')
 const label = ref<I18nText | null>(null)
 const description = ref<I18nText | null>(null)
 const partId = ref('')
+const highlight = ref(false)
 const tried = ref(false)
 
 const wallClock = (value: string | null): string => (value ? wallClockInZone(value, props.timezone).replace(' ', 'T') : '')
@@ -44,6 +45,7 @@ watch(
     label.value = moment?.label ?? null
     description.value = moment?.description ?? null
     partId.value = moment?.part_id ?? ''
+    highlight.value = moment?.is_highlight ?? false
     tried.value = false
   },
   { immediate: true },
@@ -79,6 +81,7 @@ function submit(): void {
     ends_at: endsAt.value,
     label: label.value,
     description: description.value,
+    is_highlight: highlight.value,
   })
 }
 </script>
@@ -139,6 +142,12 @@ function submit(): void {
         :options="partOptions"
         :label="t('admin.event.track.moments.part')"
         hide-optional
+      />
+
+      <UiCheckbox
+        v-model="highlight"
+        :label="t('admin.event.track.moments.highlight')"
+        :hint="t('admin.event.track.moments.highlightHint')"
       />
     </form>
 

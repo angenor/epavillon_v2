@@ -52,6 +52,7 @@ export interface TrackMoment {
   ends_at: IsoDateTime | null
   label: I18nText
   description: I18nText | null
+  is_highlight: boolean
 }
 
 /** Table `event.programme_track_partners`, résolue. */
@@ -138,4 +139,5 @@ export interface TrackMomentPayload {
   ends_at: IsoDateTime | null
   label: I18nText
   description: I18nText | null
+  is_highlight: boolean
 }
