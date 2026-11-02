@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ActiveIncident } from '~/types/live'
 import type { PublicTrackEntry, PublicTrackPage } from '~/types/programme/track-page'
 import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
 import type { ProgrammeRowData } from '~/components/event/ProgrammeRow.vue'
@@ -25,9 +26,11 @@ interface Props {
   editionImage?: AttachedImage | null
   /** Activités gardées par la personne inscrite à la journée ; nul : pas inscrite. */
   kept?: ReadonlySet<string> | null
+  /** Messages actifs : celui d'une activité se pose sur sa ligne. */
+  incidents?: ActiveIncident[]
 }
 
-const props = withDefaults(defineProps<Props>(), { editionImage: null, kept: null })
+const props = withDefaults(defineProps<Props>(), { editionImage: null, kept: null, incidents: () => [] })
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -106,6 +109,7 @@ function row(entry: PublicTrackEntry, index: number): { key: string; anchor: str
       logo: lead?.logo ?? session.organization_logo ?? null,
       points: lines(session.summary ? tr(session.summary) : ''),
       mine: props.kept?.has(session.id) ? t('track.agenda.mine') : undefined,
+      notice: incidentFor(props.incidents, session),
       current,
       faded,
       stateLabel,

@@ -165,6 +165,7 @@
   },
   "composer": {
     "title": "Nouveau message",
+    "level": "Niveau",
     "template": "Modèle",
     "templates": {
       "delay": "Retard",

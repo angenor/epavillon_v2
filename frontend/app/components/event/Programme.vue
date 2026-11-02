@@ -3,6 +3,7 @@ import type { ProgrammeData, ProgrammeStripDay, ProgrammeView } from '~/types/ev
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { PublicScheduleTrack } from '~/types/programme/track-page'
 import type { IsoDate } from '~/types/shared'
+import type { ActiveIncident } from '~/types/live'
 import type { LocationQueryRaw } from 'vue-router'
 
 /**
@@ -23,9 +24,11 @@ interface Props {
   editions: PublicEditionRow[]
   /** Changements postérieurs à la dernière visite ; zéro à la première. */
   changesSinceVisit?: number
+  /** Messages actifs de l'édition : ceux d'une activité vont sur sa carte. */
+  incidents?: ActiveIncident[]
 }
 
-const props = withDefaults(defineProps<Props>(), { changesSinceVisit: 0 })
+const props = withDefaults(defineProps<Props>(), { changesSinceVisit: 0, incidents: () => [] })
 const emit = defineEmits<{ 'update:edition': [edition: PublicEditionRow]; changes: [] }>()
 
 const { t, locale } = useI18n()
@@ -354,6 +357,7 @@ const views = computed(() => [
         :edition-slug="selectedEdition.slug"
         :edition-past="selectedEdition.temporal_state === 'past'"
         :edition-image="editionImage"
+        :incidents="props.incidents"
         :style="{ '--programme-sticky-top': `${stickyOffset}px` }"
       />
 
@@ -389,6 +393,7 @@ const views = computed(() => [
         />
         <EventProgrammeDayList
           ref="list"
+          :incidents="props.incidents"
           :days="programmeDays"
           :sessions="sortedSchedule"
           :matches="matches"

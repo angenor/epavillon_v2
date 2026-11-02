@@ -213,9 +213,7 @@ useSeoMeta({
     </div>
 
     <template v-else>
-      <div v-if="incidents.length" class="mx-auto max-w-[1280px] px-4 pt-6 pb-4 sm:px-6">
-        <EventIncidentBanners :incidents="incidents" :timezone="timezone" :zone-label="page.edition.city ?? undefined" />
-      </div>
+      <EventIncidentStrip :incidents="incidents" />
       <TrackHero :page="page" :phase="phase" :back-to="programmeTo" :eve="eve" :live="live !== null" />
 
       <div class="mx-auto max-w-[1280px] px-4 pb-22 sm:px-6">
@@ -257,7 +255,7 @@ useSeoMeta({
             <section v-if="page.agenda.length" id="deroule" class="scroll-mt-28" aria-labelledby="journee-deroule-titre">
               <h2 id="journee-deroule-titre" :class="sectionTitle">{{ t(`track.agenda.title.${subject}`) }}</h2>
               <p class="mt-2.5 max-w-[66ch] text-[0.95rem] text-text-secondary">{{ zoneNote }}</p>
-              <TrackAgenda :page="page" :entry-state="entryState" :edition-image="editionImage" :kept="kept" />
+              <TrackAgenda :page="page" :entry-state="entryState" :edition-image="editionImage" :kept="kept" :incidents="incidents" />
             </section>
             <UiEmptyState
               v-else

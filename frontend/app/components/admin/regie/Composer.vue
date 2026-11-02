@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IncidentPayload } from '~/types/admin-incidents'
+import type { IncidentSeverity } from '~/types/live'
 import type { RegieSession } from '~/types/admin-regie'
 import type { TaxonomyTerm } from '~/types/reference'
 import type { EventId, TimeZoneName } from '~/types/shared'
@@ -25,6 +26,14 @@ const dt = useDateTime()
 
 const EVENT_TARGET = 'event'
 const template = ref<RegieTemplateId>('delay')
+const severity = ref<IncidentSeverity>('info')
+/** Les trois niveaux du visiteur ; `critical` reste au back-office des messages. */
+const LEVEL_SEVERITIES: IncidentSeverity[] = ['info', 'warning', 'error']
+const LEVEL_PRESSED: Partial<Record<IncidentSeverity, string>> = {
+  info: 'border-info bg-info-surface font-semibold text-info',
+  warning: 'border-warning bg-warning-surface font-semibold text-warning',
+  error: 'border-danger-solid bg-danger-solid font-semibold text-danger-contrast',
+}
 const target = ref<string>(props.focusId ?? EVENT_TARGET)
 const textFr = ref('')
 const textEn = ref('')
@@ -55,6 +64,10 @@ function templateText(id: RegieTemplateId, locale: 'fr' | 'en'): string {
   return t(`admin.regie.composer.text.${id}.${variant}`, { time }, { locale })
 }
 
+function templateSeverity(id: RegieTemplateId): IncidentSeverity {
+  return REGIE_TEMPLATES.find((entry) => entry.id === id)?.severity ?? 'info'
+}
+
 function refill(): void {
   textFr.value = templateText(template.value, 'fr')
   textEn.value = templateText(template.value, 'en')
@@ -63,6 +76,7 @@ function refill(): void {
 
 function chooseTemplate(id: RegieTemplateId): void {
   template.value = id
+  severity.value = templateSeverity(id)
   refill()
 }
 
@@ -77,6 +91,7 @@ watch(
     if (!command) return
     target.value = command.sessionId && targets.value.some((s) => s.session_id === command.sessionId) ? command.sessionId : (props.focusId ?? EVENT_TARGET)
     template.value = command.template
+    severity.value = templateSeverity(command.template)
     refill()
     if (command.template !== 'delay') nextTick(() => textarea.value?.querySelector('textarea')?.focus())
   },
@@ -112,12 +127,12 @@ function submit(): void {
     session_id: session?.session_id ?? null,
     organization_id: null,
     incident_kind_code: templateKind(chosen, knownKinds.value),
-    severity: chosen.severity,
+    severity: severity.value,
     title: null,
     // L'anglais laissé vide reprend le français : un message publié vaut mieux qu'un refus pendant que la salle attend.
     message: { fr, en: textEn.value.trim() || fr },
     action_url: null,
-    is_dismissible: chosen.severity === 'info',
+    is_dismissible: severity.value === 'info',
     display_from: new Date(props.nowMs).toISOString(),
     display_until: session ? session.ends_at : null,
     publish: true,
@@ -139,6 +154,20 @@ function submit(): void {
         @click="chooseTemplate(entry.id)"
       >
         {{ t(`admin.regie.composer.templates.${entry.id}`) }}
+      </button>
+    </div>
+    <div class="flex flex-wrap items-center gap-1.5" role="group" :aria-label="t('admin.regie.composer.level')">
+      <span class="mr-1 text-sm text-text-secondary">{{ t('admin.regie.composer.level') }}</span>
+      <button
+        v-for="entry in LEVEL_SEVERITIES"
+        :key="entry"
+        type="button"
+        class="min-h-(--target-min) cursor-pointer rounded-md border px-3 text-sm transition-colors duration-(--duration-fast)"
+        :class="severity === entry ? LEVEL_PRESSED[entry] : 'border-border-strong bg-surface-raised text-text hover:bg-surface-hover'"
+        :aria-pressed="severity === entry"
+        @click="severity = entry"
+      >
+        {{ t(`incident-notice.level.${incidentLevel(entry)}`) }}
       </button>
     </div>
     <div ref="textarea">

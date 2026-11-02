@@ -228,13 +228,13 @@ export interface RegieTemplate {
   id: RegieTemplateId
   /** Code de la taxonomie `incident_kind`. */
   kind: string
-  /** Suggérée : jaune pour ce qui demande attention, rouge pour une panne. */
+  /** Niveau proposé, modifiable avant de publier. Un retard est une information : l'activité a lieu (02/11). */
   severity: IncidentSeverity
 }
 
 /** Les modèles du nouveau message, dans l'ordre de la maquette. */
 export const REGIE_TEMPLATES: readonly RegieTemplate[] = [
-  { id: 'delay', kind: 'delay', severity: 'warning' },
+  { id: 'delay', kind: 'delay', severity: 'info' },
   { id: 'overrun', kind: 'overrun', severity: 'warning' },
   { id: 'technical', kind: 'technical_issue', severity: 'error' },
   { id: 'room', kind: 'room_change', severity: 'info' },

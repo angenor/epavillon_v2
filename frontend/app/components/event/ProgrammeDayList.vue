@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
 import type { AttachedImage } from '~/types/media'
+import type { ActiveIncident } from '~/types/live'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 import type { ProgrammeRowData } from './ProgrammeRow.vue'
 import type { PublicScheduleTrack } from '~/types/programme/track-page'
@@ -39,9 +40,11 @@ interface Props {
   editionPast: boolean
   /** La photo de l'édition : la vignette des activités sans couverture. */
   editionImage?: AttachedImage | null
+  /** Messages actifs de l'édition : celui d'une activité se pose sur sa carte. */
+  incidents?: ActiveIncident[]
 }
 
-const props = withDefaults(defineProps<Props>(), { editionImage: null })
+const props = withDefaults(defineProps<Props>(), { editionImage: null, incidents: () => [] })
 const emit = defineEmits<{ reading: [date: IsoDate]; reset: [] }>()
 
 const { t, locale } = useI18n()
@@ -66,6 +69,7 @@ function row(session: PublicScheduleRow, track: PublicScheduleTrack | null = nul
   const page = link(props.editionSlug, session)
   return {
     id: session.id,
+    notice: incidentFor(props.incidents, session),
     // Dans un cadre, la ligne mène au déroulé de la journée, à sa place ; la fiche y garde son lien.
     to: track ? trackTo(track.slug, `#${trackActivityAnchor(session.slug)}`) : page,
     start: time(session.starts_at, props.timezone),

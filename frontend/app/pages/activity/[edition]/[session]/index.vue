@@ -236,9 +236,7 @@ useSeoMeta({
     </div>
 
     <template v-else>
-      <div v-if="incidents.length" class="mx-auto max-w-[1280px] px-4 pt-6 pb-4 sm:px-6">
-        <EventIncidentBanners :incidents="incidents" :timezone="timezone" :zone-label="edition.city ?? undefined" />
-      </div>
+      <EventIncidentStrip :incidents="incidents" />
       <ActivityHero
         :session="session"
         :edition="edition"
@@ -270,6 +268,7 @@ useSeoMeta({
               :room-to="roomTo"
               :special-day="specialDay"
               :day="day"
+              :notice="incidentFor(incidents, session)"
               @started="refresh()"
             />
           </div>

@@ -90,11 +90,12 @@ useHead(() => ({
       />
 
       <ClientOnly v-else>
-        <EventIncidentBanners
-          class="mb-4"
-          :incidents="incidents"
+        <EventIncidentStrip class="mb-4" :incidents="incidents" />
+        <ActivityIncidentNotice
+          v-if="incidentFor(incidents, session)"
+          class="mb-4 rounded-md"
+          :incident="incidentFor(incidents, session)!"
           :timezone="session.timezone"
-          :zone-label="zoneLabel"
         />
         <UiLoadingState v-if="!meetingLoaded" :label="t('activity.room.checking')">
           <UiSkeletonLoader height="20rem" />

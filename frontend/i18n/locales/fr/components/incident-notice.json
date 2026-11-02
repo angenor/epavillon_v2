@@ -1,0 +1,10 @@
+{
+  "level": {
+    "information": "Information",
+    "attention": "Attention",
+    "interruption": "Interruption"
+  },
+  "published": "publié à {time}",
+  "more": "En savoir plus",
+  "dismiss": "Masquer ce message"
+}

@@ -165,6 +165,7 @@
   },
   "composer": {
     "title": "New notice",
+    "level": "Level",
     "template": "Template",
     "templates": {
       "delay": "Delay",

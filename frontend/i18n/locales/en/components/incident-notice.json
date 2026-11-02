@@ -1,0 +1,10 @@
+{
+  "level": {
+    "information": "Information",
+    "attention": "Heads-up",
+    "interruption": "Interruption"
+  },
+  "published": "posted at {time}",
+  "more": "Learn more",
+  "dismiss": "Hide this message"
+}

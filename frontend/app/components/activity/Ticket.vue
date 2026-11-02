@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { RegistrationResult } from '~/types/programme/registration'
-import type { PublicSessionMeeting } from '~/types/live'
+import type { ActiveIncident, PublicSessionMeeting } from '~/types/live'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { TicketCallToAction } from './TicketAction.vue'
 import type { PublicTrackPage } from '~/types/programme/track-page'
@@ -36,9 +36,11 @@ interface Props {
   specialDay?: { title: string; to: string } | null
   /** La journée dont l'activité fait partie, et qui se suit d'un seul direct ; nulle sinon. */
   day?: { page: PublicTrackPage } | null
+  /** Le message de la régie qui vise l'activité : en tête du billet, et sur la barre collée du téléphone. */
+  notice?: ActiveIncident | null
 }
 
-const props = withDefaults(defineProps<Props>(), { meeting: null, zoomOpen: false, roomTo: undefined, specialDay: null, day: null })
+const props = withDefaults(defineProps<Props>(), { meeting: null, zoomOpen: false, roomTo: undefined, specialDay: null, day: null, notice: null })
 const emit = defineEmits<{ started: [] }>()
 
 const { t } = useI18n()
@@ -252,6 +254,7 @@ function downloadCalendar(): void {
         </EventTicketDate>
       </NuxtLink>
       <EventTicketDate v-else :date="props.session.starts_at" :timezone="props.session.timezone" />
+      <ActivityIncidentNotice v-if="props.notice" :incident="props.notice" :timezone="props.session.timezone" />
     </template>
 
     <!-- Le corps défile quand la page borne la hauteur du billet collé ; il couvre le rembourrage du billet. -->
@@ -391,6 +394,7 @@ function downloadCalendar(): void {
               role="region"
               :aria-label="t('activity.ticket.bar')"
             >
+              <ActivityIncidentNotice v-if="props.notice" :incident="props.notice" variant="line" />
               <div class="mx-auto flex max-w-360 items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-12">
                 <div class="min-w-0">
                   <p class="font-condensed text-[1.3rem] leading-tight font-bold whitespace-nowrap text-heading tabular-nums">{{ hours }}</p>

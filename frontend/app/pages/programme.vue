@@ -41,7 +41,8 @@ import type { ProgrammeData } from '~/types/event-programme'
  * Publier un message d'incident ne servait à rien tant qu'aucune page publique
  * ne le montrait. Ici, à l'échelle de l'ÉDITION, par la fonction descendante du
  * modèle ; la page d'une activité, sa salle et celle d'une journée spéciale
- * montrent le leur (31/10). Trois au plus : `EventIncidentBanners`.
+ * montrent le leur (31/10). Depuis le 02/11, celui de toute l'édition dans
+ * `EventIncidentStrip`, celui d'une activité sur sa carte (`ActivityIncidentNotice`).
  *
  * Il se charge À PART du programme, et une panne de sa lecture ne casse pas la
  * page : un bandeau absent se lit comme une édition sans incident, ce qui est le
@@ -129,8 +130,8 @@ useHead(() => ({ title: t('programme.title') }))
       <p class="mt-2 max-w-(--measure) text-text-muted">{{ t('programme.description') }}</p>
     </header>
 
-    <!-- Juste sous le bandeau : ce qui ne se passe pas comme prévu se lit avant le programme. -->
-    <EventIncidentBanners :incidents="incidents ?? []" :timezone="shown?.timezone" :zone-label="shown?.city ?? undefined" />
+    <!-- Juste sous le bandeau, ce qui vaut pour toute l'édition ; le message d'une activité va sur sa carte. -->
+    <EventIncidentStrip :incidents="incidents ?? []" />
 
     <UiLoadingState v-if="status === 'pending'" :label="t('programme.loading')">
       <EventProgrammeSkeleton />
@@ -160,6 +161,7 @@ useHead(() => ({ title: t('programme.title') }))
       :initial="data.programme"
       :editions="data.editions"
       :changes-since-visit="newCount"
+      :incidents="incidents ?? []"
       @update:edition="current = $event"
       @changes="changesOpen = true"
     />

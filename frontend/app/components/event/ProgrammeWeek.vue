@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
 import type { AttachedImage } from '~/types/media'
+import type { ActiveIncident } from '~/types/live'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { PublicScheduleTrack } from '~/types/programme/track-page'
@@ -36,9 +37,11 @@ interface Props {
   editionPast: boolean
   /** La photo de l'édition : la vignette des activités sans couverture. */
   editionImage?: AttachedImage | null
+  /** Messages actifs de l'édition : celui d'une activité se pose sur sa carte. */
+  incidents?: ActiveIncident[]
 }
 
-const props = withDefaults(defineProps<Props>(), { editionImage: null })
+const props = withDefaults(defineProps<Props>(), { editionImage: null, incidents: () => [] })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -87,6 +90,7 @@ function card(session: PublicScheduleRow, weekday: string) {
     logo: session.organization_logo ?? null,
     visited: session.id === props.visitedId,
     inDay: !!special,
+    notice: incidentFor(props.incidents, session),
   }
 }
 
@@ -417,6 +421,7 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
                   <h4 class="wk-title" :class="{ 'line-through': item.current === 'cancelled' }">
                     <NuxtLink :to="item.to" class="wk-link">{{ item.title }}</NuxtLink>
                   </h4>
+                  <ActivityIncidentNotice v-if="item.notice" :incident="item.notice" variant="flag" class="mt-1.5" />
                   <template v-if="item.parts.length">
                     <p class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
                       <span class="flex shrink-0">

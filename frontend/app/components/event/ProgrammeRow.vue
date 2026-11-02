@@ -2,6 +2,7 @@
 import type { AttachedImage } from '~/types/media'
 import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
 import type { JointPart } from '~/composables/useJointSession'
+import type { ActiveIncident } from '~/types/live'
 
 /**
  * Une ligne d'activité, direction condensée : grande heure, vignette, titre,
@@ -44,6 +45,8 @@ export interface ProgrammeRowData {
   stateLabel: string
   /** Séance commune : ses dossiers, dans l'ordre ; vide ou absent pour une séance ordinaire. */
   parts?: JointPart[]
+  /** Le message de la régie qui vise l'activité, en une ligne sous le titre. */
+  notice?: ActiveIncident | null
 }
 
 interface Props {
@@ -222,6 +225,7 @@ const layout = computed(() =>
           {{ title }}
         </NuxtLink>
       </h4>
+      <ActivityIncidentNotice v-if="props.entry.notice" :incident="props.entry.notice" variant="flag" class="mt-1.5" />
       <p
         v-if="props.entry.mine"
         class="mt-1.5 inline-flex items-center gap-1 text-xs font-bold tracking-[0.04em] text-success uppercase"
