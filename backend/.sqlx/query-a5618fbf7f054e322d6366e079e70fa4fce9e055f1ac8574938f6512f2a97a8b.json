@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT NOT EXISTS (\n                           SELECT 1 FROM platform.jobs j\n                             JOIN programme.track_registrations a\n                               ON a.id = ($2::jsonb ->> 'track_registration_id')::uuid\n                             JOIN programme.track_registrations b\n                               ON b.id = (j.payload ->> 'track_registration_id')::uuid\n                            WHERE j.task = 'engagement.send_day_reminder' AND j.status = 'succeeded'\n                              AND j.id <> $1 AND b.track_id = a.track_id\n                              AND j.payload ->> 'offset_minutes' = $2::jsonb ->> 'offset_minutes'\n                              AND j.payload ->> 'starts_at' = $2::jsonb ->> 'starts_at') AS \"premier!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "premier!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a5618fbf7f054e322d6366e079e70fa4fce9e055f1ac8574938f6512f2a97a8b"
+}

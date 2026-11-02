@@ -1702,7 +1702,11 @@ COMMENT ON FUNCTION engagement.mailing_suggested_template IS
 -- limite d'envoi : décision du commanditaire le 28/10.
 INSERT INTO platform.settings (key, value, description) VALUES
     ('engagement.mailing.team_cc', '[]',
-     'Adresses de l''équipe proposées en copie de chaque nouvel envoi, en plus de celle de la personne qui écrit.')
+     'Adresses de l''équipe proposées en copie de chaque nouvel envoi, en plus de celle de la personne qui écrit.'),
+    -- 02/11/2026 : la boîte d'expédition ne se lit pas encore ; l'équipe garde
+    -- trace de ce qui part en copie visible (une réponse à tous lui revient).
+    ('engagement.mail.automatic_cc', '[]',
+     'Adresses en copie visible de chaque courriel automatique, sauf ceux qui portent un lien personnel ou d''inscription (création de compte, mot de passe, invitation, confirmations d''inscription) ; un rappel n''est copié qu''une fois par activité et par délai. Lu par GardedMailer.')
 ON CONFLICT (key) DO NOTHING;
 
 INSERT INTO identity.permissions (code, label, module_code) VALUES

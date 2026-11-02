@@ -36,6 +36,15 @@
 //!
 //! Les deux laissent une trace d'erreur dans les journaux du worker. Ce qui ne
 //! se produit dans aucun des deux cas : un envoi **silencieusement** perdu.
+//!
+//! # La copie à l'équipe (02/11/2026)
+//!
+//! Chaque courriel automatique part en copie visible aux adresses du réglage
+//! `engagement.mail.automatic_cc`, sauf ceux de [`SANS_COPIE`]. Un rappel n'est
+//! copié qu'une fois par activité (ou journée) et par délai : l'équipe reçoit
+//! ce qu'un inscrit reçoit, pas un exemplaire par inscrit. Le travail se
+//! retrouve par `message_id`, qui est son identifiant. Une lecture qui échoue
+//! fait partir le courriel sans copie, jamais le retenir.
 
 use async_trait::async_trait;
 use kernel::context::RequestContext;
@@ -44,6 +53,20 @@ use kernel::mail::{Extras, MailError, Mailer, OutgoingMail};
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
 use uuid::Uuid;
+
+/// Les travaux dont le courriel ne part jamais en copie : il porte un lien
+/// personnel (compte, mot de passe, invitation, direct d'un invité) ou c'est une
+/// confirmation d'inscription. Les envois du back-office ont leurs propres copies.
+const SANS_COPIE: [&str; 8] = [
+    "identity.send_verification_email",
+    "identity.send_existing_account_notice",
+    "identity.send_password_reset_email",
+    "org.membership.invitation_email",
+    "engagement.send_registration",
+    "engagement.send_day_registration",
+    "engagement.send_mailing",
+    "engagement.send_mailing_test",
+];
 
 /// L'expéditeur enveloppé.
 pub struct GardedMailer {
@@ -175,6 +198,86 @@ impl GardedMailer {
         }
     }
 
+    /// Les adresses à mettre en copie de ce courriel, d'après son travail.
+    async fn copie_automatique(&self, mail: &OutgoingMail) -> Vec<String> {
+        let Ok(job_id) = Uuid::parse_str(&mail.message_id) else {
+            return vec![];
+        };
+        match self.lire_la_copie(job_id).await {
+            Ok(adresses) => adresses,
+            Err(e) => {
+                tracing::error!(erreur = %e, "copie automatique illisible : le courriel part sans copie");
+                vec![]
+            }
+        }
+    }
+
+    async fn lire_la_copie(&self, job_id: Uuid) -> Result<Vec<String>, sqlx::Error> {
+        let pool = self.db.pool();
+        let Some(job) = sqlx::query!(
+            "SELECT task, payload FROM platform.jobs WHERE id = $1",
+            job_id
+        )
+        .fetch_optional(pool)
+        .await?
+        else {
+            return Ok(vec![]);
+        };
+        if SANS_COPIE.contains(&job.task.as_str()) {
+            return Ok(vec![]);
+        }
+        let premier = match job.task.as_str() {
+            "engagement.send_reminder" => {
+                let rappel = job
+                    .payload
+                    .get("reminder_id")
+                    .and_then(serde_json::Value::as_str)
+                    .and_then(|s| Uuid::parse_str(s).ok());
+                sqlx::query_scalar!(
+                    r#"SELECT NOT EXISTS (
+                           SELECT 1 FROM engagement.scheduled_reminders r
+                             JOIN engagement.scheduled_reminders o
+                               ON o.session_id = r.session_id AND o.offset_before = r.offset_before
+                              AND o.channel = r.channel AND o.id <> r.id
+                            WHERE r.id = $1 AND o.status = 'sent') AS "premier!""#,
+                    rappel
+                )
+                .fetch_one(pool)
+                .await?
+            }
+            "engagement.send_day_reminder" => {
+                sqlx::query_scalar!(
+                    r#"SELECT NOT EXISTS (
+                           SELECT 1 FROM platform.jobs j
+                             JOIN programme.track_registrations a
+                               ON a.id = ($2::jsonb ->> 'track_registration_id')::uuid
+                             JOIN programme.track_registrations b
+                               ON b.id = (j.payload ->> 'track_registration_id')::uuid
+                            WHERE j.task = 'engagement.send_day_reminder' AND j.status = 'succeeded'
+                              AND j.id <> $1 AND b.track_id = a.track_id
+                              AND j.payload ->> 'offset_minutes' = $2::jsonb ->> 'offset_minutes'
+                              AND j.payload ->> 'starts_at' = $2::jsonb ->> 'starts_at') AS "premier!""#,
+                    job_id,
+                    job.payload
+                )
+                .fetch_one(pool)
+                .await?
+            }
+            _ => true,
+        };
+        if !premier {
+            return Ok(vec![]);
+        }
+        let valeur = sqlx::query_scalar!(
+            "SELECT value FROM platform.settings WHERE key = 'engagement.mail.automatic_cc'"
+        )
+        .fetch_optional(pool)
+        .await?;
+        Ok(valeur
+            .and_then(|v| serde_json::from_value::<Vec<String>>(v).ok())
+            .unwrap_or_default())
+    }
+
     /// Marque la trace « écartée ».
     ///
     /// L'état retenu est `failed` et non `bounced` : le message n'a pas rebondi,
@@ -217,7 +320,14 @@ impl Mailer for GardedMailer {
             return Ok(());
         }
 
-        let resultat = self.interieur.send_with_extras(mail, copies).await;
+        let mut copies = copies.clone();
+        for adresse in self.copie_automatique(mail).await {
+            let deja = |a: &String| a.eq_ignore_ascii_case(&adresse);
+            if !adresse.eq_ignore_ascii_case(&mail.to) && !copies.cc.iter().any(deja) {
+                copies.cc.push(adresse);
+            }
+        }
+        let resultat = self.interieur.send_with_extras(mail, &copies).await;
         let erreur = resultat.as_ref().err().map(|e| e.to_string());
         self.clore_la_trace(trace, erreur.as_deref()).await;
         resultat

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT NOT EXISTS (\n                           SELECT 1 FROM engagement.scheduled_reminders r\n                             JOIN engagement.scheduled_reminders o\n                               ON o.session_id = r.session_id AND o.offset_before = r.offset_before\n                              AND o.channel = r.channel AND o.id <> r.id\n                            WHERE r.id = $1 AND o.status = 'sent') AS \"premier!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "premier!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a25260a9a46d31cdef40ba08119d692d37bea1aa158325b360f14860ae814256"
+}
