@@ -32,6 +32,12 @@ fn exiger_ouverte(seance: &SeanceQuestionnable) -> Result<()> {
     if !seance.allows_questions || seance.status == "cancelled" {
         return Err(fermee());
     }
+    if !seance.commencee {
+        return Err(ApiError::with_message(
+            ErrorCode::Conflict,
+            "Les questions s'ouvrent avec le direct.",
+        ));
+    }
     Ok(())
 }
 

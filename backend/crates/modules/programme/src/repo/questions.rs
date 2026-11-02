@@ -20,6 +20,8 @@ use crate::domain::ids::{QuestionId, SessionId};
 pub struct SeanceQuestionnable {
     pub allows_questions: bool,
     pub status: String,
+    /// En direct, terminée, ou son heure de début passée : les questions s'ouvrent avec le direct.
+    pub commencee: bool,
 }
 
 pub async fn seance_publique<'e>(
@@ -28,7 +30,8 @@ pub async fn seance_publique<'e>(
 ) -> Result<Option<SeanceQuestionnable>> {
     let ligne = sqlx::query_as!(
         SeanceQuestionnable,
-        r#"SELECT s.allows_questions, s.status::text AS "status!"
+        r#"SELECT s.allows_questions, s.status::text AS "status!",
+                  (s.status IN ('live', 'completed') OR s.starts_at <= now()) AS "commencee!"
              FROM programme.sessions s
              JOIN programme.v_public_schedule v ON v.id = s.id
             WHERE s.id = $1"#,

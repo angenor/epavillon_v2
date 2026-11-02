@@ -188,8 +188,9 @@ const specialDay = computed(() => {
 })
 const dayStyle = computed(() => trackDayStyle(specialDay.value?.color ?? null))
 
+// Les questions s'ouvrent avec le direct et restent lisibles après ; avant, rien à quoi répondre.
 const showQuestions = computed(
-  () => Boolean(detail.value?.allows_questions) && state.value !== 'cancelled' && state.value !== 'past',
+  () => Boolean(detail.value?.allows_questions) && (state.value === 'live' || state.value === 'ongoing' || state.value === 'past'),
 )
 
 useHead(() => ({
