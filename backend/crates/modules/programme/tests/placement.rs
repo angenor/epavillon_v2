@@ -128,9 +128,10 @@ async fn une_salle_virtuelle_noccupe_pas_le_stand() {
     assert_eq!(conflits_de(&resultat, "room"), 0);
 }
 
-/// **Une séance sans salle n'occupe rien** : c'est l'état normal d'une activité
-/// retenue mais pas encore installée, et le panneau ne doit pas saturer le
-/// bandeau avant que l'arbitrage ait commencé.
+/// **Une séance à placer est hors du programme** : c'est l'état normal d'une
+/// activité retenue mais pas encore installée, et elle n'entre dans aucun
+/// conflit, ni de lieu, ni de direct, ni d'intervenant ou d'organisation
+/// (arbitrage du 02/11/2026).
 #[tokio::test]
 async fn une_seance_sans_salle_ne_produit_aucun_conflit() {
     let bac = Bac::monter().await;
@@ -155,13 +156,17 @@ async fn une_seance_sans_salle_ne_produit_aucun_conflit() {
         .await
         .unwrap();
 
-    // **Aucun conflit de LIEU** : la séance n'occupe ni le stand ni une salle.
-    // L'avertissement « organisation programmée deux fois » subsiste, et c'est
-    // exact — les deux séances sont portées par la même organisation, qui ne
-    // peut être à deux endroits à la fois. Ce que la règle écarte, c'est le
-    // conflit MATÉRIEL d'une séance qui n'occupe rien.
-    assert_eq!(conflits_de(&resultat, "venue_capacity"), 0);
-    assert_eq!(conflits_de(&resultat, "room"), 0);
+    // Même organisation sur le même créneau : avant le 02/11, l'avertissement
+    // « organisation programmée deux fois » subsistait. Plus rien désormais.
+    assert!(
+        resultat.conflicts.is_empty(),
+        "une séance à placer n'entre dans aucun conflit : {:?}",
+        resultat
+            .conflicts
+            .iter()
+            .map(|c| c.conflict_kind.as_str())
+            .collect::<Vec<_>>()
+    );
 }
 
 /// Deux séances dans la **même** salle physique remontent **une seule fois**,
@@ -238,6 +243,92 @@ async fn retirer_la_salle_renvoie_au_panneau_sans_rien_supprimer() {
         "le créneau est intact"
     );
     assert_eq!(relue.status, "planned", "et rien n'est supprimé");
+}
+
+/// 🔴 **Retirer du calendrier retire aussi du site public** (02/11/2026) : la
+/// séance publiée et diffusée redevient planifiée, non publiée, sans direct. La
+/// replacer ne rallume rien : elle attend la prochaine publication.
+#[tokio::test]
+async fn retirer_une_seance_publiee_la_retire_du_site_et_coupe_son_direct() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let grille = seances::grille(&bac, terrain.edition).await;
+    let id = seance(&bac, &terrain, "Atelier", "atelier").await;
+
+    seances::placer(
+        &bac,
+        terrain.edition,
+        id,
+        Some(grille.salle),
+        "14:00",
+        "15:30",
+    )
+    .await
+    .unwrap();
+    seances::diffuser(&bac, terrain.edition, id, true, None)
+        .await
+        .unwrap();
+    sqlx::query(
+        "UPDATE programme.sessions SET published_at = now(), status = 'scheduled' WHERE id = $1",
+    )
+    .bind(id)
+    .execute(bac.pool())
+    .await
+    .expect("publication de la séance");
+
+    seances::placer(&bac, terrain.edition, id, None, "14:00", "15:30")
+        .await
+        .unwrap();
+
+    let retiree = seances::seance(&bac, id).await;
+    assert_eq!(retiree.published_at, None, "plus publiée");
+    assert_eq!(retiree.status, "planned", "revenue à l'état planifié");
+    assert!(!retiree.is_streamed, "son direct est coupé");
+    assert_eq!(retiree.broadcast_channel_id, None);
+
+    seances::placer(
+        &bac,
+        terrain.edition,
+        id,
+        Some(grille.salle),
+        "14:00",
+        "15:30",
+    )
+    .await
+    .unwrap();
+
+    let replacee = seances::seance(&bac, id).await;
+    assert_eq!(
+        replacee.published_at, None,
+        "publique à la prochaine publication"
+    );
+    assert!(
+        !replacee.is_streamed,
+        "le direct ne se rallume pas d'office"
+    );
+}
+
+/// Une séance à placer **n'est jamais publiée**, quel que soit l'écrivain : la
+/// date posée est effacée et son état reste celui d'avant.
+#[tokio::test]
+async fn une_seance_a_placer_ne_se_publie_pas() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    seances::grille(&bac, terrain.edition).await;
+    let id = seance(&bac, &terrain, "Atelier", "atelier").await;
+
+    sqlx::query(
+        "UPDATE programme.sessions SET published_at = now(), status = 'scheduled' WHERE id = $1",
+    )
+    .bind(id)
+    .execute(bac.pool())
+    .await
+    .expect("tentative de publication");
+
+    let relue = seances::seance(&bac, id).await;
+    assert_eq!(relue.room_id, None);
+    assert_eq!(relue.published_at, None, "la date posée est effacée");
+    assert_eq!(relue.status, "planned", "l'état reste celui d'avant");
 }
 
 /// 🔴 **L'écart n° 113** : une séance déplacée du 12 au 14 novembre est

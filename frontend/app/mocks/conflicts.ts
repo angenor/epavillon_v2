@@ -179,20 +179,6 @@ export function publicationReadiness(eventId: string): PublicationReadinessIssue
       })
     }
 
-    // SANS LIEU : l'état normal d'une activité retenue mais pas encore
-    // installée — celles du panneau « à placer ». Rien ne l'empêche ; c'est la
-    // PUBLICATION qui l'exige, faute de quoi le visiteur cherche une salle qui
-    // n'a pas de nom.
-    if (session.room_id === null && session.location_note === null) {
-      issues.push({
-        severity: 'blocking',
-        issue: 'Séance sans lieu ni précision de lieu',
-        detail: session.title.fr,
-        session_id: session.id,
-        occurs_at: session.starts_at,
-      })
-    }
-
     if (session.is_streamed && session.broadcast_channel_id === null) {
       issues.push({
         severity: 'warning',

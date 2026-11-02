@@ -65,7 +65,7 @@ async fn garder(state: &EventState, perimetre: &Perimeter, event_id: Uuid) -> Re
 /// Ce qui doit être réglé avant de publier.
 #[utoipa::path(
     get,
-    description = "`PublicationReadinessIssue[]` — **lecture seule**, consultable avant toute tentative : l'équipe voit ce qui bloque avant d'essayer, plutôt que de découvrir la liste après un clic. Conflits détectés et manques : séance sans créneau valide, séance sans lieu ni précision de lieu, diffusion sans canal, intervenant absent. **`occurs_at` est un instant, jamais un intervalle mis en forme** — une chaîne figée en base ne peut ni se traduire ni se situer dans le fuseau de l'édition. Seule la gravité `blocking` retient la publication.",
+    description = "`PublicationReadinessIssue[]` — **lecture seule**, consultable avant toute tentative : l'équipe voit ce qui bloque avant d'essayer, plutôt que de découvrir la liste après un clic. Conflits détectés et manques : séance sans créneau valide, diffusion sans canal, intervenant absent. Une séance à placer (ni salle ni précision de lieu) n'y figure pas : la publication la laisse privée. **`occurs_at` est un instant, jamais un intervalle mis en forme** — une chaîne figée en base ne peut ni se traduire ni se situer dans le fuseau de l'édition. Seule la gravité `blocking` retient la publication.",
     path = "/admin/planner/readiness",
     tag = "Planificateur",
     operation_id = "planificateur_controle_de_publication",

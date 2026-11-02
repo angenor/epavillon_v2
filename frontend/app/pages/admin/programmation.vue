@@ -432,7 +432,10 @@ function jointDone(next: PlannerScreen, notice: string): void {
   updateQuery({ seance: null })
 }
 
-/** Retirer du calendrier : la séance retourne au panneau, son créneau reste. */
+/**
+ * Retirer du calendrier : la séance retourne au panneau, son créneau reste. La
+ * base la retire aussi du site public et coupe son direct.
+ */
 async function unplace(session: PlannerSession): Promise<void> {
   await schedule({
     sessionId: session.id,
@@ -463,11 +466,11 @@ const { data: readiness, refresh: refreshReadiness } = await useAsyncData(
 /**
  * CE QUI DEVIENDRAIT PUBLIC — le prédicat de l'API, et pas un autre.
  *
- * Elle publie les séances `planned` ou `scheduled` pas encore publiées, SANS
- * condition de salle. Compter les seules séances placées se trompait deux fois :
- * une séance annulée qui occupe encore une salle gonflait le chiffre sans jamais
- * être publiée, et une séance sans salle mais portant une précision de lieu
- * passait le contrôle en manquant au décompte.
+ * Elle publie les séances `planned` ou `scheduled` pas encore publiées et
+ * placées : une salle OU une précision de lieu. Une séance à placer (ni l'une ni
+ * l'autre) est hors du programme (02/11/2026) et se compte à part. Le statut
+ * compte aussi : une séance annulée qui occupe encore une salle n'est jamais
+ * publiée.
  *
  * Et seulement celles sans dossier ou de dossier accepté : le créneau pressenti
  * d'un dossier en évaluation ou rejeté reste privé, et se compte à part.
@@ -481,8 +484,15 @@ const unpublishedSlots = computed(() =>
 )
 const isWithheld = (session: PlannerSession): boolean =>
   session.proposal_status !== null && session.proposal_status !== 'accepted'
-const readyCount = computed(() => unpublishedSlots.value.filter((s) => !isWithheld(s)).length)
+const isToPlace = (session: PlannerSession): boolean =>
+  session.room_id === null && session.location_note === null
+const readyCount = computed(
+  () => unpublishedSlots.value.filter((s) => !isWithheld(s) && !isToPlace(s)).length,
+)
 const withheldCount = computed(() => unpublishedSlots.value.filter(isWithheld).length)
+const toPlaceCount = computed(
+  () => unpublishedSlots.value.filter((s) => !isWithheld(s) && isToPlace(s)).length,
+)
 
 async function openPublish(): Promise<void> {
   publishResult.value = null
@@ -780,6 +790,7 @@ onBeforeUnmount(() => {
       :zone-label="zoneLabel"
       :ready-count="readyCount"
       :withheld-count="withheldCount"
+      :to-place-count="toPlaceCount"
       :published-at="screen?.programme_published_at ?? null"
       :busy="busy"
       :error="actionError"

@@ -244,6 +244,7 @@ async fn le_programme_public_nomme_un_intervenant_sans_adresse() {
         .unwrap();
     assert_eq!(reposes, 0);
 
+    seances::situer(&bac, id).await;
     sqlx::query!(
         "UPDATE programme.sessions SET published_at = now(), status = 'scheduled' WHERE id = $1",
         id

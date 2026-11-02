@@ -48,8 +48,8 @@ async fn une_edition_a_publier(base: &TestDb) -> (Uuid, Vec<Uuid>) {
     (edition, eligibles)
 }
 
-/// Une séance, avec **une précision de lieu** : sans elle, le contrôle préalable
-/// de B3 la réclamerait et retiendrait toute la publication.
+/// Une séance, avec **une précision de lieu** : sans elle, elle serait à placer,
+/// et la publication la laisserait hors du programme (02/11/2026).
 async fn seance(base: &TestDb, edition: Uuid, rang: i32, etat: &str, publiee: bool) -> Uuid {
     sqlx::query_scalar!(
         r#"INSERT INTO programme.sessions

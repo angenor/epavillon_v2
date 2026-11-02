@@ -47,6 +47,8 @@ pub struct Designation<'a> {
     pub only_unpublished: bool,
     /// Seules les séances sans dossier ou de dossier accepté.
     pub accepted_proposals_only: bool,
+    /// Seules les séances placées : une séance à placer reste hors du programme.
+    pub placed_only: bool,
 }
 
 /// Publier les séances désignées, et rendre leur nombre.
@@ -66,12 +68,14 @@ pub async fn publier_les_seances(
             AND ($5 = false
                  OR s.proposal_id IS NULL
                  OR EXISTS (SELECT 1 FROM programme.proposals p
-                             WHERE p.id = s.proposal_id AND p.status = 'accepted'))",
+                             WHERE p.id = s.proposal_id AND p.status = 'accepted'))
+            AND ($6 = false OR s.room_id IS NOT NULL OR s.location_note IS NOT NULL)",
         designation.event_id,
         designation.published_at,
         designation.statuses,
         designation.only_unpublished,
-        designation.accepted_proposals_only
+        designation.accepted_proposals_only,
+        designation.placed_only
     )
     .execute(conn)
     .await?

@@ -683,6 +683,21 @@ use programme::domain::ids::RegistrationId;
 use programme::domain::registration::{AnnulationRendue, IssueDInscription};
 use programme::service::registration;
 
+/// Une séance à placer (ni salle ni précision de lieu) ne se publie jamais
+/// (02/11/2026). Publier à la main, hors planificateur, une séance née sans
+/// salle lui donne d'abord une précision de lieu.
+pub async fn situer(bac: &Bac, session_id: Uuid) {
+    sqlx::query(
+        r#"UPDATE programme.sessions
+              SET location_note = '{"fr":"Pavillon de la Francophonie"}'::jsonb::platform.i18n_text
+            WHERE id = $1 AND room_id IS NULL AND location_note IS NULL"#,
+    )
+    .bind(session_id)
+    .execute(bac.pool())
+    .await
+    .expect("précision de lieu");
+}
+
 /// Ouvrir une séance aux inscriptions, avec ou sans jauge. Elle est publiée au
 /// passage : une séance non publiée n'en prend aucune. Seule la date bouge,
 /// pas l'état, pour n'émettre aucun événement de séance.
@@ -692,6 +707,7 @@ pub async fn ouvrir_les_inscriptions(
     jauge: Option<i32>,
     liste_dattente: bool,
 ) {
+    situer(bac, session_id).await;
     sqlx::query!(
         "UPDATE programme.sessions
             SET published_at = COALESCE(published_at, now()),

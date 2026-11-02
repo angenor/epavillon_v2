@@ -35,6 +35,8 @@ interface Props {
   readyCount: number
   /** Créneaux de dossiers non acceptés : la publication les laisse privés. */
   withheldCount?: number
+  /** Activités retenues encore à placer : hors du programme, non publiées. */
+  toPlaceCount?: number
   /** Déjà publiée une première fois ? Le libellé du bouton change. */
   publishedAt: string | null
   busy?: boolean
@@ -107,6 +109,9 @@ const warningGroups = computed(() => groupOf(warnings.value))
           : t('admin.planner.publish.readyDetail') }}
         <template v-if="props.withheldCount">
           {{ t('admin.planner.publish.withheld', props.withheldCount) }}
+        </template>
+        <template v-if="props.toPlaceCount">
+          {{ t('admin.planner.publish.toPlace', props.toPlaceCount) }}
         </template>
       </UiAlert>
 

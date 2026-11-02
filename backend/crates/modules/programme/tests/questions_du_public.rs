@@ -29,6 +29,7 @@ async fn seance(bac: &Bac, terrain: &Terrain, titre: &str, slug: &str) -> Uuid {
 }
 
 async fn publier(bac: &Bac, session_id: Uuid) {
+    seances::situer(bac, session_id).await;
     sqlx::query!(
         "UPDATE programme.sessions
             SET published_at = now(), status = 'scheduled',

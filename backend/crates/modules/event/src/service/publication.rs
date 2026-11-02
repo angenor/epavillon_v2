@@ -151,6 +151,7 @@ async fn annoncer(
                 .collect(),
             only_unpublished: true,
             accepted_proposals_only: cross::DOSSIERS_ACCEPTES_SEULEMENT,
+            placed_only: cross::PLACEES_SEULEMENT,
         },
         published_count,
     })

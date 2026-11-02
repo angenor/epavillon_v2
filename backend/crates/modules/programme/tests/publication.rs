@@ -33,6 +33,29 @@ async fn seance(bac: &Bac, terrain: &Terrain, titre: &str, slug: &str) -> Uuid {
         .id
 }
 
+/// Une séance installée en salle virtuelle : une séance à placer n'est jamais
+/// publiée (02/11/2026).
+async fn seance_placee(
+    bac: &Bac,
+    terrain: &Terrain,
+    grille: &seances::Grille,
+    titre: &str,
+    slug: &str,
+) -> Uuid {
+    let id = seance(bac, terrain, titre, slug).await;
+    seances::placer(
+        bac,
+        terrain.edition,
+        id,
+        Some(grille.salle_virtuelle),
+        "14:00",
+        "15:30",
+    )
+    .await
+    .expect("placement");
+    id
+}
+
 /// L'annonce **telle que B3 l'émet** : même type d'événement, même charge utile,
 /// même prédicat. Recomposer autre chose ici ne prouverait rien.
 async fn annoncer(bac: &Bac, event_id: Uuid) -> (Uuid, time::OffsetDateTime) {
@@ -46,6 +69,7 @@ async fn annoncer(bac: &Bac, event_id: Uuid) -> (Uuid, time::OffsetDateTime) {
             statuses: vec!["planned".to_owned(), "scheduled".to_owned()],
             only_unpublished: true,
             accepted_proposals_only: true,
+            placed_only: true,
         },
         published_count: 0,
     })
@@ -133,9 +157,9 @@ fn registre() -> ConsumerRegistry {
 async fn les_seances_designees_recoivent_la_date_de_lannonce() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
-    seances::grille(&bac, terrain.edition).await;
+    let grille = seances::grille(&bac, terrain.edition).await;
 
-    let ici = seance(&bac, &terrain, "Ici", "ici").await;
+    let ici = seance_placee(&bac, &terrain, &grille, "Ici", "ici").await;
 
     // Une édition voisine, avec sa séance : elle ne doit pas bouger.
     let autre = commun::edition_secondaire(&bac).await;
@@ -203,10 +227,17 @@ async fn les_seances_designees_recoivent_la_date_de_lannonce() {
 async fn la_publication_fait_passer_pressenti_a_programme() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
-    seances::grille(&bac, terrain.edition).await;
+    let grille = seances::grille(&bac, terrain.edition).await;
 
-    let pressentie = seance(&bac, &terrain, "Pressentie", "pressentie").await;
-    let deja = seance(&bac, &terrain, "Déjà programmée", "deja-programmee").await;
+    let pressentie = seance_placee(&bac, &terrain, &grille, "Pressentie", "pressentie").await;
+    let deja = seance_placee(
+        &bac,
+        &terrain,
+        &grille,
+        "Déjà programmée",
+        "deja-programmee",
+    )
+    .await;
 
     sqlx::query!(
         "UPDATE programme.sessions SET status = 'scheduled' WHERE id = $1",
@@ -243,8 +274,8 @@ async fn la_publication_fait_passer_pressenti_a_programme() {
 async fn une_annonce_rejouee_est_sans_effet() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
-    seances::grille(&bac, terrain.edition).await;
-    let id = seance(&bac, &terrain, "Atelier", "atelier").await;
+    let grille = seances::grille(&bac, terrain.edition).await;
+    let id = seance_placee(&bac, &terrain, &grille, "Atelier", "atelier").await;
 
     let (annonce, published_at) = annoncer(&bac, terrain.edition).await;
     let registre = registre();
@@ -352,8 +383,8 @@ async fn date_de_publication(bac: &Bac, event_id: Uuid) -> Option<time::OffsetDa
 async fn une_annonce_ancienne_se_relit() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
-    seances::grille(&bac, terrain.edition).await;
-    let id = seance(&bac, &terrain, "Atelier", "atelier").await;
+    let grille = seances::grille(&bac, terrain.edition).await;
+    let id = seance_placee(&bac, &terrain, &grille, "Atelier", "atelier").await;
 
     let published_at = time::OffsetDateTime::now_utc();
     let ancienne = serde_json::json!({
@@ -372,6 +403,7 @@ async fn une_annonce_ancienne_se_relit() {
     let relue: contracts::event::ProgrammePublished =
         serde_json::from_value(ancienne.clone()).expect("l'ancienne forme se relit");
     assert!(!relue.selection.accepted_proposals_only);
+    assert!(!relue.selection.placed_only);
 
     let mut tx = bac
         .db()
@@ -398,4 +430,26 @@ async fn une_annonce_ancienne_se_relit() {
         seances::seance(&bac, id).await.published_at,
         Some(published_at)
     );
+}
+
+/// 🔴 **Une séance à placer n'est pas publiée** (02/11/2026) : elle reste
+/// planifiée, hors du programme, quand la séance placée devient publique.
+#[tokio::test]
+async fn une_seance_a_placer_nest_pas_publiee() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let grille = seances::grille(&bac, terrain.edition).await;
+    let placee = seance_placee(&bac, &terrain, &grille, "Placée", "placee").await;
+    let a_placer = seance(&bac, &terrain, "À placer", "a-placer").await;
+
+    let (annonce, published_at) = annoncer(&bac, terrain.edition).await;
+    relayer(&bac, &registre(), annonce).await;
+
+    assert_eq!(
+        seances::seance(&bac, placee).await.published_at,
+        Some(published_at)
+    );
+    let relue = seances::seance(&bac, a_placer).await;
+    assert_eq!(relue.published_at, None, "hors du programme");
+    assert_eq!(relue.status, "planned");
 }

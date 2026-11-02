@@ -146,7 +146,7 @@ async fn un_canal_etranger_ou_desactive_est_refuse() {
 async fn deux_directs_simultanes_saccrivent_et_remontent_des_deux_cotes() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
-    seances::grille(&bac, terrain.edition).await;
+    let grille_ici = seances::grille(&bac, terrain.edition).await;
 
     // Une seconde édition, complète, avec sa propre séance.
     let autre = commun::edition_secondaire(&bac).await;
@@ -163,7 +163,7 @@ async fn deux_directs_simultanes_saccrivent_et_remontent_des_deux_cotes() {
         "active",
     )
     .await;
-    seances::grille(&bac, autre).await;
+    let grille_ailleurs = seances::grille(&bac, autre).await;
 
     let ici = seance(&bac, &terrain, "Ici", "ici").await;
     let ailleurs = {
@@ -205,8 +205,16 @@ async fn deux_directs_simultanes_saccrivent_et_remontent_des_deux_cotes() {
 
     // Le même créneau, en instants absolus : les deux éditions n'ont pas le
     // même fuseau, c'est donc l'instant qui compte.
+    // Une séance à placer n'entre dans aucun conflit : chacune est d'abord
+    // installée en salle virtuelle, qui n'occupe pas le stand.
     let debut = seances::instant_local(&bac, terrain.edition, "2027-11-12 14:00").await;
-    for (edition, id) in [(terrain.edition, ici), (autre, ailleurs)] {
+    for (edition, id, salle) in [
+        (terrain.edition, ici, grille_ici.salle_virtuelle),
+        (autre, ailleurs, grille_ailleurs.salle_virtuelle),
+    ] {
+        seances::placer(&bac, edition, id, Some(salle), "14:00", "15:30")
+            .await
+            .expect("installation en salle virtuelle");
         sqlx::query!(
             "UPDATE programme.sessions
                 SET starts_at = $2::timestamptz,

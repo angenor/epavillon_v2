@@ -45,6 +45,7 @@ impl EventConsumer for PublicationConsumer {
                 statuses: &annonce.selection.statuses,
                 only_unpublished: annonce.selection.only_unpublished,
                 accepted_proposals_only: annonce.selection.accepted_proposals_only,
+                placed_only: annonce.selection.placed_only,
             },
         )
         .await?;

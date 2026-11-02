@@ -30,6 +30,7 @@ async fn seance_placee(bac: &Bac, terrain: &Terrain, titre: &str, slug: &str) ->
     seances::placer(bac, terrain.edition, id, None, "14:00", "15:00")
         .await
         .unwrap();
+    seances::situer(bac, id).await;
     id
 }
 

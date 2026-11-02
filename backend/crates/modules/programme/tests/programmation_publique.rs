@@ -31,6 +31,7 @@ async fn seance(bac: &Bac, terrain: &Terrain, titre: &str, slug: &str) -> Uuid {
 /// Rendre une séance publique **à la main** : c'est ce qui fait de cette lecture
 /// l'instrument de mesure de la publication (US6), et non l'inverse.
 async fn publier(bac: &Bac, session_id: Uuid) {
+    seances::situer(bac, session_id).await;
     sqlx::query!(
         "UPDATE programme.sessions
             SET published_at = now(), status = 'scheduled'

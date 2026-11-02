@@ -80,12 +80,31 @@ async fn le_decompte_suit_exactement_le_predicat_annonce() {
         .expect("insertion de la séance");
     }
 
+    // À placer : ni salle ni précision de lieu, hors du programme (02/11/2026).
+    sqlx::query(
+        r#"INSERT INTO programme.sessions
+               (event_id, title, slug, format, starts_at, ends_at, timezone, status)
+           VALUES ($1, '{"fr":"Séance"}'::jsonb, 'a-placer'::platform.slug, 'online',
+                   ('2027-11-10 14:00')::timestamp AT TIME ZONE $2,
+                   ('2027-11-10 15:00')::timestamp AT TIME ZONE $2,
+                   $2::text::platform.timezone_name, 'planned')"#,
+    )
+    .bind(editions.cop31)
+    .bind(commun::seed::FUSEAU_COP31)
+    .execute(bac.pool())
+    .await
+    .expect("insertion de la séance à placer");
+
     let publiee = publication::publier(&bac.state, &bac.ctx(), cop31)
         .await
         .expect("publication");
 
     assert_eq!(
         publiee.published_count, 1,
-        "seule la séance planifiée et non publiée est désignée"
+        "seule la séance planifiée, placée et non publiée est désignée"
+    );
+    assert!(
+        publiee.issues.iter().all(|i| i.severity != "blocking"),
+        "une séance à placer ne retient pas la publication"
     );
 }

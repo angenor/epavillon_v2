@@ -844,9 +844,10 @@ impl PointDeControle {
 /// Le contrôle préalable d'une édition — **la fonction du modèle, appelée**.
 ///
 /// Elle réunit les conflits détectés et les manques : séance sans créneau
-/// valide, séance sans lieu ni précision de lieu, diffusion sans canal,
-/// intervenant absent. La réécrire ici ferait une seconde définition de « prêt à
-/// publier », et c'est la seconde qui finit par se tromper.
+/// valide, diffusion sans canal, intervenant absent. Une séance à placer
+/// n'y figure pas : la publication la laisse privée. La réécrire ici ferait une
+/// seconde définition de « prêt à publier », et c'est la seconde qui finit par
+/// se tromper.
 pub async fn controle_de_publication<'e>(
     executor: impl PgExecutor<'e>,
     event_id: EventId,
@@ -886,6 +887,9 @@ pub const STATUTS_A_PUBLIER: [&str; 2] = ["planned", "scheduled"];
 /// de la v1) : il reste privé tant que le dossier n'est pas accepté.
 pub const DOSSIERS_ACCEPTES_SEULEMENT: bool = true;
 
+/// Une séance à placer (ni salle ni précision de lieu) est hors du programme.
+pub const PLACEES_SEULEMENT: bool = true;
+
 pub async fn seances_a_publier<'e>(
     executor: impl PgExecutor<'e>,
     event_id: EventId,
@@ -899,10 +903,12 @@ pub async fn seances_a_publier<'e>(
               AND ($3 = false
                    OR s.proposal_id IS NULL
                    OR EXISTS (SELECT 1 FROM programme.proposals p
-                               WHERE p.id = s.proposal_id AND p.status = 'accepted'))"#,
+                               WHERE p.id = s.proposal_id AND p.status = 'accepted'))
+              AND ($4 = false OR s.room_id IS NOT NULL OR s.location_note IS NOT NULL)"#,
         event_id.as_uuid(),
         &STATUTS_A_PUBLIER.map(str::to_owned),
-        DOSSIERS_ACCEPTES_SEULEMENT
+        DOSSIERS_ACCEPTES_SEULEMENT,
+        PLACEES_SEULEMENT
     )
     .fetch_one(executor)
     .await?;

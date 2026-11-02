@@ -592,3 +592,11 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - Aucun bouton du back-office ne l'offre encore : la transition existe en base seulement.
 
 **En production** : `ops/migrations/2026-11-02-programme-cdp31-non-retenus.sql`, jouée (cinq dossiers CdP31 repassés en évaluation).
+
+## 2026-11-02 : une séance « à placer » est hors du programme
+
+- **`programme.tg_sessions_unplaced`** (nouveau, BEFORE UPDATE OF room_id, location_note, published_at) : une séance pressentie ou programmée qui quitte la grille (ni salle ni précision de lieu) n'est plus publiée, redevient `planned` et perd son direct ; à placer, on ne peut pas la publier. Insertions et autres états non touchés (CdP30 reprise sans salle).
+- **`programme.detect_conflicts`** : les séances à placer n'entrent dans aucune branche. **`programme.publication_readiness`** : elles ne retiennent plus rien, « Séance sans lieu ni précision de lieu » disparaît.
+- Prédicat de publication (`event` et consommateur `programme`) : séances placées seulement, champ `placed_only` du contrat `SessionSelection` (défaut faux pour les anciennes annonces).
+
+**En production** : `ops/migrations/2026-11-02-a-placer-hors-programme.sql`, rejouable, sans donnée touchée, à jouer avant de déployer l'API et le worker. Syntaxe vérifiée par libpg_query ; les deux fonctions remplacées sont identiques en production à celles du dépôt avant changement. Pas jouée.

@@ -110,6 +110,11 @@ pub struct SessionSelection {
     /// 28/10/2026, d'où le défaut faux : elles se relisent comme émises.
     #[serde(default)]
     pub accepted_proposals_only: bool,
+    /// Seules les séances placées (salle ou précision de lieu) : une séance à
+    /// placer est hors du programme (02/11/2026). Défaut faux pour les
+    /// annonces antérieures ; la base refuse de toute façon de la publier.
+    #[serde(default)]
+    pub placed_only: bool,
 }
 
 /// Consommé par **B5**, qui pose la date de publication sur les séances

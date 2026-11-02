@@ -337,6 +337,11 @@ async fn la_publication_annonce_le_predicat_exact() {
         "le consommateur publie CE prédicat et pas un autre"
     );
     assert_eq!(selection["only_unpublished"], serde_json::json!(true));
+    assert_eq!(
+        selection["placed_only"],
+        serde_json::json!(true),
+        "une séance à placer reste hors du programme"
+    );
     assert!(charge.get("published_count").is_some());
 }
 

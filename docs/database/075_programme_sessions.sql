@@ -234,6 +234,50 @@ CREATE TRIGGER tg_sessions_derive
     ON programme.sessions
     FOR EACH ROW EXECUTE FUNCTION programme.tg_sessions_derive_fields();
 
+-- UNE SÉANCE « À PLACER » EST HORS DU PROGRAMME (arbitrage du 02/11/2026).
+-- À placer : ni salle ni précision de lieu, le panneau latéral du
+-- planificateur. « Retirer du calendrier » ne posait que `room_id = NULL` :
+-- la séance restait publiée, visible du public sans lieu, toujours en direct,
+-- et bloquait la republication du programme. Pour une séance pressentie ou
+-- programmée, désormais :
+--   - QUITTER LA GRILLE la retire du site public (`published_at` nul,
+--     `scheduled` redevient `planned`) et coupe son direct. La replacer ne
+--     rallume rien : elle redevient publique à la prochaine publication ;
+--   - À PLACER, ELLE N'EST JAMAIS PUBLIÉE, quel que soit l'écrivain
+--     (publication du programme, script) : la date posée est effacée et son
+--     état reste celui d'avant.
+-- Transitions seulement, à la mise à jour : une insertion garde ce qu'on lui
+-- donne (reprise de la v1 : 61 séances terminées de la CdP30, sans salle, sont
+-- publiées), et les autres états ne bougent pas. Les inscriptions restent ;
+-- une séance non publiée n'en reçoit plus de nouvelle.
+-- Le canal s'efface ici : `tg_sessions_derive` passe avant (ordre alphabétique).
+CREATE OR REPLACE FUNCTION programme.tg_sessions_unplaced()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NEW.room_id IS NOT NULL OR NEW.location_note IS NOT NULL
+       OR NEW.status NOT IN ('planned', 'scheduled') THEN
+        RETURN NEW;
+    END IF;
+
+    IF OLD.room_id IS NOT NULL OR OLD.location_note IS NOT NULL THEN
+        NEW.published_at := NULL;
+        NEW.status := 'planned';
+        NEW.is_streamed := false;
+        NEW.broadcast_channel_id := NULL;
+    ELSIF OLD.published_at IS NULL AND NEW.published_at IS NOT NULL THEN
+        NEW.published_at := NULL;
+        NEW.status := OLD.status;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_sessions_unplaced
+    BEFORE UPDATE OF room_id, location_note, published_at ON programme.sessions
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_sessions_unplaced();
+
 CREATE OR REPLACE FUNCTION programme.tg_sessions_touch_listing()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -1588,8 +1632,14 @@ COMMENT ON VIEW programme.v_public_schedule IS
 -- Corollaire : une séance SANS SALLE n'occupe rien. C'est l'état normal d'une
 -- activité retenue mais pas encore installée — le panneau « à placer » du
 -- planificateur. Ces séances ne doivent pas saturer le bandeau de conflits avant
--- même que l'arbitrage ait commencé ; `publication_readiness()` les réclame de
--- toute façon, au moment qui compte.
+-- même que l'arbitrage ait commencé.
+--
+-- À PLACER, HORS DE TOUT CONFLIT (02/11/2026). La première branche les écartait
+-- déjà ; pas les autres. Une séance retirée du calendrier gardait son créneau et
+-- son direct : « deux diffusions simultanées » avec celle qui avait pris sa
+-- place, et la séance restée sur la grille virait au rouge. Une séance sans
+-- salle ni précision de lieu est hors du programme (`tg_sessions_unplaced`) :
+-- elle n'entre dans aucune branche, intervenants et organisations compris.
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION programme.detect_conflicts(p_event_id uuid)
 RETURNS TABLE (
@@ -1610,6 +1660,7 @@ AS $$
         SELECT s.*, platform.t(s.title) AS label
         FROM programme.sessions s
         WHERE s.status IN ('planned', 'scheduled', 'live')
+          AND (s.room_id IS NOT NULL OR s.location_note IS NOT NULL)
     )
     -- 1. Un seul stand : deux activités du même événement OCCUPANT UNE SALLE
     --    PHYSIQUE en même temps. Voir l'en-tête : une séance en salle virtuelle
@@ -1711,13 +1762,17 @@ AS $$
     -- dossier accepté : le prédicat même de la publication (module event,
     -- `seances_a_publier`), plus ce qui est déjà en ligne. Le planificateur,
     -- lui, garde tous les conflits par `detect_conflicts()`.
+    --
+    -- Une séance à placer (ni salle ni précision de lieu) n'est jamais publiée
+    -- (`tg_sessions_unplaced`, 02/11/2026) : elle ne retient donc rien.
     WITH retenue AS (
         SELECT s.*
         FROM programme.sessions s
         LEFT JOIN programme.proposals p ON p.id = s.proposal_id
-        WHERE s.published_at IS NOT NULL
-           OR s.proposal_id IS NULL
-           OR p.status = 'accepted'
+        WHERE (s.room_id IS NOT NULL OR s.location_note IS NOT NULL)
+          AND (s.published_at IS NOT NULL
+               OR s.proposal_id IS NULL
+               OR p.status = 'accepted')
     )
     SELECT c.severity,
            CASE c.conflict_kind
@@ -1745,25 +1800,9 @@ AS $$
 
     UNION ALL
 
-    -- SANS LIEU, NI MÊME UNE PRÉCISION DE LIEU (ajouté le 18/08 2026, en
-    -- écrivant le planificateur). Une séance retenue vit d'abord sans salle :
-    -- c'est l'état normal tant que l'équipe n'a pas arbitré, et c'est justement
-    -- ce que le panneau « à placer » du planificateur montre. Rien ne l'empêche
-    -- ni ne doit l'empêcher — mais une programmation rendue publique sans dire
-    -- OÙ se tient l'activité envoie le visiteur chercher une salle qui n'a pas
-    -- de nom. `location_note` suffit quand il n'y a pas de salle en base : une
-    -- séance en ligne y porte son mode d'accès, une séance hors pavillon
-    -- l'adresse de son hôte.
-    SELECT 'blocking', 'Séance sans lieu ni précision de lieu',
-           platform.t(s.title), s.id, s.starts_at
-    FROM retenue s
-    WHERE s.event_id = p_event_id
-      AND s.status IN ('planned', 'scheduled')
-      AND s.room_id IS NULL
-      AND s.location_note IS NULL
-
-    UNION ALL
-
+    -- « Séance sans lieu ni précision de lieu », bloquante du 18/08 au
+    -- 02/11/2026, a disparu : c'est la définition même d'une séance à placer,
+    -- que la publication laisse désormais privée au lieu d'être retenue par elle.
     SELECT 'warning', 'Session diffusée sans canal assigné',
            platform.t(s.title), s.id, s.starts_at
     FROM retenue s

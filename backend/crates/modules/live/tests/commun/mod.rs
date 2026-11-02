@@ -255,23 +255,25 @@ pub async fn activite(
     debut: OffsetDateTime,
     fin: OffsetDateTime,
 ) -> Uuid {
-    sqlx::query_scalar!(
+    // Une précision de lieu : une séance à placer ne se publie jamais (02/11/2026).
+    sqlx::query_scalar::<_, Uuid>(
         r#"INSERT INTO programme.sessions
                (event_id, event_day_id, organization_id, title, slug, status,
-                starts_at, ends_at, is_streamed, format, timezone)
+                starts_at, ends_at, is_streamed, format, timezone, location_note)
            VALUES ($1, $2, $3, jsonb_build_object('fr', $4::text, 'en', $4::text),
                    $5::text::platform.slug, 'scheduled', $6, $7, true,
                    'in_person',
-                   (SELECT e.timezone FROM event.events e WHERE e.id = $1))
+                   (SELECT e.timezone FROM event.events e WHERE e.id = $1),
+                   '{"fr":"Pavillon de la Francophonie"}'::jsonb)
         RETURNING id"#,
-        event_id,
-        jour_id,
-        organization_id,
-        titre,
-        slug,
-        debut,
-        fin
     )
+    .bind(event_id)
+    .bind(jour_id)
+    .bind(organization_id)
+    .bind(titre)
+    .bind(slug)
+    .bind(debut)
+    .bind(fin)
     .fetch_one(bac.pool())
     .await
     .expect("insertion de l'activité")
