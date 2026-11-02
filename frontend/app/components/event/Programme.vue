@@ -200,6 +200,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', measure)
 })
 watch(timezone, tick)
+watch(view, () => nextTick(measure))
 
 const stripDays = computed<ProgrammeStripDay[]>(() =>
   programmeDays.value.map((date, index) => {
@@ -262,11 +263,10 @@ const views = computed(() => [
 <template>
   <section class="full-bleed -mb-8 bg-surface text-text sm:-mb-10" aria-labelledby="programmation-titre">
     <div class="mx-auto flex w-full max-w-[1280px] flex-col px-4 pb-14 sm:px-6 lg:pb-18">
-      <!-- Figée sur grand écran dans la liste : le jour à gauche se cale dessous. -->
+      <!-- Figée sur grand écran dans les deux vues : le jour de la liste et les en-têtes du calendrier se calent dessous. -->
       <header
         ref="toolbar"
-        class="z-20 flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border-subtle bg-surface py-3.5"
-        :class="{ 'min-[960px]:sticky min-[960px]:top-(--nav-height)': view === 'list' }"
+        class="z-20 flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border-subtle bg-surface py-3.5 min-[960px]:sticky min-[960px]:top-(--nav-height)"
       >
         <h2 id="programmation-titre" class="heading-condensed text-[1.6rem] text-heading">
           {{ t('programme.board.title') }}
@@ -354,6 +354,7 @@ const views = computed(() => [
         :edition-slug="selectedEdition.slug"
         :edition-past="selectedEdition.temporal_state === 'past'"
         :edition-image="editionImage"
+        :style="{ '--programme-sticky-top': `${stickyOffset}px` }"
       />
 
       <div v-else>

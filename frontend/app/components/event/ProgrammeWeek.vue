@@ -86,7 +86,20 @@ function card(session: PublicScheduleRow, weekday: string) {
     initials: (session.organization_acronym ?? initialsOf(session.organization_name ?? '')).slice(0, 8),
     logo: session.organization_logo ?? null,
     visited: session.id === props.visitedId,
+    inDay: !!special,
   }
+}
+
+// Comme dans la liste, le fond de la journée s'arrête à sa dernière activité : les suivantes reprennent le fond ordinaire.
+function groupsOf(cards: ReturnType<typeof card>[]) {
+  const first = cards.findIndex((item) => item.inDay)
+  if (first < 0) return [{ key: 'all', band: false, cards }]
+  const last = cards.findLastIndex((item) => item.inDay)
+  return [
+    { key: 'before', band: false, cards: cards.slice(0, first) },
+    { key: 'band', band: true, cards: cards.slice(first, last + 1) },
+    { key: 'after', band: false, cards: cards.slice(last + 1) },
+  ].filter((group) => group.cards.length)
 }
 
 const columns = computed(() =>
@@ -134,12 +147,13 @@ const columns = computed(() =>
         weekday,
         past: isPast,
       })),
-      cards: kept.map((session) => card(session, weekday)),
+      groups: groupsOf(kept.map((session) => card(session, weekday))),
+      hasCards: kept.length > 0,
     }
   }),
 )
 
-const shown = computed(() => columns.value.reduce((sum, column) => sum + column.cards.length + column.sides.length, 0))
+const shown = computed(() => columns.value.reduce((sum, column) => sum + column.groups.reduce((n, group) => n + group.cards.length, 0) + column.sides.length, 0))
 const template = computed(() => allDays.value.map((day) => (day === props.restDay ? 'var(--cal-rest)' : 'var(--cal-col)')).join(' '))
 
 const heading = computed(() => {
@@ -337,102 +351,106 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
             <span>{{ t('programme.week.rest.note') }}</span>
           </p>
 
-          <ol v-else-if="column.cards.length || column.sides.length" class="wk-list">
-            <li v-for="side in column.sides" :key="side.slug" class="wk-card group" :class="{ 'is-faded': side.past }">
-              <div class="wk-media wk-media-tile">
-                <UiIcon v-if="side.icon" :name="side.icon" size="2rem" :stroke-width="1.6" />
-              </div>
-              <div class="wk-body">
-                <p v-if="side.start" class="wk-time">
-                  <b>{{ side.start }}</b>
-                  <span><small>{{ side.weekday }}</small>{{ side.until }}</span>
-                </p>
-                <h4 class="wk-title">
-                  <NuxtLink :to="side.to" class="wk-link">{{ side.title }}</NuxtLink>
-                </h4>
-                <p v-if="side.venue" class="mt-2 text-[0.8rem] text-text-muted">{{ side.venue }}</p>
-                <div v-if="side.past" class="wk-foot">
-                  <UiStatusBadge state="past" size="sm" :label="stateLabel('past')" />
+          <div v-else-if="column.hasCards || column.sides.length">
+            <ol v-if="column.sides.length" class="wk-list">
+              <li v-for="side in column.sides" :key="side.slug" class="wk-card group" :class="{ 'is-faded': side.past }">
+                <div class="wk-media wk-media-tile">
+                  <UiIcon v-if="side.icon" :name="side.icon" size="2rem" :stroke-width="1.6" />
                 </div>
-              </div>
-            </li>
+                <div class="wk-body">
+                  <p v-if="side.start" class="wk-time">
+                    <b>{{ side.start }}</b>
+                    <span><small>{{ side.weekday }}</small>{{ side.until }}</span>
+                  </p>
+                  <h4 class="wk-title">
+                    <NuxtLink :to="side.to" class="wk-link">{{ side.title }}</NuxtLink>
+                  </h4>
+                  <p v-if="side.venue" class="mt-2 text-[0.8rem] text-text-muted">{{ side.venue }}</p>
+                  <div v-if="side.past" class="wk-foot">
+                    <UiStatusBadge state="past" size="sm" :label="stateLabel('past')" />
+                  </div>
+                </div>
+              </li>
+            </ol>
 
-            <li
-              v-for="item in column.cards"
-              :key="item.id"
-              class="wk-card group"
-              :class="{ 'is-live': item.current === 'live', 'is-faded': item.faded }"
-            >
-              <div class="wk-media" :class="{ 'wk-media-tile': !item.cover && !item.slides.length }">
-                <UiSlideshow
-                  v-if="item.slides.length"
-                  :slides="item.slides"
-                  :interval="5000"
-                  :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]', { grayscale: item.faded }]"
-                  sizes="(min-width: 960px) 216px, 104px"
-                />
-                <UiImage
-                  v-else-if="item.cover"
-                  :image="item.cover"
-                  ratio="auto"
-                  frame-class="size-full"
-                  class="absolute inset-0 transition duration-200 motion-safe:group-hover:scale-[1.03]"
-                  :class="{ grayscale: item.faded }"
-                  sizes="(min-width: 960px) 216px, 104px"
-                />
-                <ActivityCoverFallback
-                  v-else
-                  :image="props.editionImage"
-                  :label="item.initials"
-                  text-class="text-[1.6rem]"
-                  :faded="item.faded"
-                  :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]']"
-                  sizes="(min-width: 960px) 216px, 104px"
-                >
-                  <span aria-hidden="true">{{ item.initials }}</span>
-                </ActivityCoverFallback>
-              </div>
-              <div class="wk-body">
-                <p class="wk-time">
-                  <b>{{ item.start }}</b>
-                  <span><small>{{ item.weekday }}</small>{{ item.until }}</span>
-                </p>
-                <h4 class="wk-title" :class="{ 'line-through': item.current === 'cancelled' }">
-                  <NuxtLink :to="item.to" class="wk-link">{{ item.title }}</NuxtLink>
-                </h4>
-                <template v-if="item.parts.length">
-                  <p class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
-                    <span class="flex shrink-0">
-                      <OrganizationLogoMark
-                        v-for="(part, index) in item.parts"
-                        :key="part.id"
-                        :name="part.name"
-                        :acronym="part.acronym"
-                        :logo="part.logo"
-                        size="sm"
-                        :class="{ '-ml-3 ring-2 ring-surface-raised': index > 0 }"
-                      />
-                    </span>
-                    <b class="min-w-0 truncate font-bold text-text">{{ item.jointNames }}</b>
-                  </p>
-                  <p class="wk-joint">
-                    <UiIcon name="users" size="1.05em" :stroke-width="2" />{{ t('programme.joint.tag') }}
-                  </p>
-                </template>
-                <p v-else-if="item.organization" class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
-                  <OrganizationLogoMark :name="item.organization" :acronym="item.acronym" :logo="item.logo" size="sm" />
-                  <b class="min-w-0 truncate font-bold text-text">{{ item.shortName }}</b>
-                </p>
-                <div class="wk-foot">
-                  <UiStatusBadge :state="item.current" size="sm" :label="item.stateLabel" />
-                  <span v-if="item.visited" class="text-xs text-accent">{{ t('programme.week.visited') }}</span>
-                  <UiButton v-if="item.current === 'live'" variant="live" :to="item.joinTo" icon="video" class="relative z-10">
-                    {{ t('programme.week.join') }}
-                  </UiButton>
+            <ol v-for="group in column.groups" :key="group.key" class="wk-list" :class="{ 'wk-band': group.band }">
+              <li
+                v-for="item in group.cards"
+                :key="item.id"
+                class="wk-card group"
+                :class="{ 'is-live': item.current === 'live', 'is-faded': item.faded }"
+              >
+                <div class="wk-media" :class="{ 'wk-media-tile': !item.cover && !item.slides.length }">
+                  <UiSlideshow
+                    v-if="item.slides.length"
+                    :slides="item.slides"
+                    :interval="5000"
+                    :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]', { grayscale: item.faded }]"
+                    sizes="(min-width: 960px) 216px, 104px"
+                  />
+                  <UiImage
+                    v-else-if="item.cover"
+                    :image="item.cover"
+                    ratio="auto"
+                    frame-class="size-full"
+                    class="absolute inset-0 transition duration-200 motion-safe:group-hover:scale-[1.03]"
+                    :class="{ grayscale: item.faded }"
+                    sizes="(min-width: 960px) 216px, 104px"
+                  />
+                  <ActivityCoverFallback
+                    v-else
+                    :image="props.editionImage"
+                    :label="item.initials"
+                    text-class="text-[1.6rem]"
+                    :faded="item.faded"
+                    :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]']"
+                    sizes="(min-width: 960px) 216px, 104px"
+                  >
+                    <span aria-hidden="true">{{ item.initials }}</span>
+                  </ActivityCoverFallback>
                 </div>
-              </div>
-            </li>
-          </ol>
+                <div class="wk-body">
+                  <p class="wk-time">
+                    <b>{{ item.start }}</b>
+                    <span><small>{{ item.weekday }}</small>{{ item.until }}</span>
+                  </p>
+                  <h4 class="wk-title" :class="{ 'line-through': item.current === 'cancelled' }">
+                    <NuxtLink :to="item.to" class="wk-link">{{ item.title }}</NuxtLink>
+                  </h4>
+                  <template v-if="item.parts.length">
+                    <p class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
+                      <span class="flex shrink-0">
+                        <OrganizationLogoMark
+                          v-for="(part, index) in item.parts"
+                          :key="part.id"
+                          :name="part.name"
+                          :acronym="part.acronym"
+                          :logo="part.logo"
+                          size="sm"
+                          :class="{ '-ml-3 ring-2 ring-surface-raised': index > 0 }"
+                        />
+                      </span>
+                      <b class="min-w-0 truncate font-bold text-text">{{ item.jointNames }}</b>
+                    </p>
+                    <p class="wk-joint">
+                      <UiIcon name="users" size="1.05em" :stroke-width="2" />{{ t('programme.joint.tag') }}
+                    </p>
+                  </template>
+                  <p v-else-if="item.organization" class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
+                    <OrganizationLogoMark :name="item.organization" :acronym="item.acronym" :logo="item.logo" size="sm" />
+                    <b class="min-w-0 truncate font-bold text-text">{{ item.shortName }}</b>
+                  </p>
+                  <div class="wk-foot">
+                    <UiStatusBadge :state="item.current" size="sm" :label="item.stateLabel" />
+                    <span v-if="item.visited" class="text-xs text-accent">{{ t('programme.week.visited') }}</span>
+                    <UiButton v-if="item.current === 'live'" variant="live" :to="item.joinTo" icon="video" class="relative z-10">
+                      {{ t('programme.week.join') }}
+                    </UiButton>
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </div>
 
           <p v-else class="px-1 py-3.5 text-[13px] text-text-muted">{{ t('programme.week.emptyDay') }}</p>
         </section>
@@ -645,12 +663,13 @@ a.wk-tag:hover {
   background: var(--color-surface-hover);
 }
 
-.cal-body-col.is-tinted {
+.cal-body-col.is-side,
+.wk-band {
   background: var(--cal-day-bg);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
 
-.is-tinted:not(.is-side) .wk-card {
+.wk-band .wk-card {
   border-color: color-mix(in srgb, var(--color-day-line) 30%, transparent);
 }
 
@@ -660,7 +679,7 @@ a.wk-tag:hover {
 }
 
 /* Le fond du corps s'arrête aux marges de la colonne, comme celui de l'en-tête : les bords tombent d'aplomb. */
-.cal-body-col.is-tinted,
+.cal-body-col.is-side,
 .cal-body-col.is-rest {
   background-clip: content-box;
 }
@@ -698,8 +717,18 @@ a.wk-tag:hover {
   padding: 10px 0;
 }
 
-.is-tinted .wk-list {
+.wk-list + .wk-list {
+  padding-top: 0;
+}
+
+.is-side .wk-list,
+.wk-list.wk-band {
   padding-inline: 2px;
+}
+
+.wk-list.wk-band,
+.wk-band + .wk-list {
+  padding-top: 10px;
 }
 
 .wk-card {
@@ -749,7 +778,7 @@ a.wk-tag:hover {
   color: var(--color-text-muted);
 }
 
-.is-tinted .wk-media-tile {
+:is(.is-side, .wk-band) .wk-media-tile {
   background: var(--color-day-surface);
   color: var(--color-day);
 }
@@ -773,7 +802,7 @@ a.wk-tag:hover {
   color: var(--color-heading);
 }
 
-.is-tinted .wk-time b {
+:is(.is-side, .wk-band) .wk-time b {
   color: var(--color-day);
 }
 
@@ -839,7 +868,7 @@ a.wk-tag:hover {
   color: var(--color-accent);
 }
 
-.is-tinted .wk-joint {
+:is(.is-side, .wk-band) .wk-joint {
   color: var(--color-day);
 }
 
