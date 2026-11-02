@@ -122,6 +122,8 @@ commandes.
 | `vhost` · `ssl` | l'infrastructure Apache et le certificat |
 | `reseau` | après un rechargement du pare-feu, si la pile est devenue injoignable |
 
+Journaux (02/11) : Docker garde au plus 5 fichiers de 20 Mo par service (`x-journaux` de `ops/docker-compose.prod.yml`) ; l'API n'écrit une ligne par requête que pour un 5xx ou plus d'une seconde (WARN), et pour un 401, 403 ou 429 (INFO), avec le modèle de route, jamais l'adresse reçue.
+
 **Chaque commande qui touche l'infrastructure mesure `financedurable.francophonie.org`
 avant et après, et s'arrête s'il a bougé.** C'est la contrainte n° 1 de cette
 machine, et elle vaut plus que la rapidité d'un déploiement.

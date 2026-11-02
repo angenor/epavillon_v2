@@ -34,6 +34,15 @@ impl Locales {
         })
     }
 
+    /// Sans base : pour les tests qui n'ont besoin que d'une négociation.
+    #[cfg(feature = "testing")]
+    pub fn fixes(codes: &[&str], default: &str) -> Self {
+        Self {
+            codes: codes.iter().map(|c| (*c).to_owned()).collect(),
+            default: default.to_owned(),
+        }
+    }
+
     pub fn default_code(&self) -> &str {
         &self.default
     }

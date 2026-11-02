@@ -22,6 +22,14 @@
 
 name: epavillon
 
+# Sans plafond, le pilote json-file de Docker garde tout : en pleine COP, le
+# disque se remplit de journaux. 5 fichiers de 20 Mo par service, au plus.
+x-journaux: &journaux
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
 networks:
   interne:
     ipam:
@@ -34,6 +42,7 @@ networks:
 
 services:
   front:
+    logging: *journaux
     build:
       context: ../frontend
       args:
@@ -57,6 +66,7 @@ services:
       - "127.0.0.1:${FRONT_PORT:-3100}:3000"
 
   api:
+    logging: *journaux
     build:
       context: ../backend
     command: ["api"]
@@ -84,6 +94,7 @@ services:
       postgres: {condition: service_healthy}
 
   worker:
+    logging: *journaux
     build:
       context: ../backend
     command: ["worker"]
@@ -100,6 +111,7 @@ services:
       postgres: {condition: service_healthy}
 
   postgres:
+    logging: *journaux
     image: pgvector/pgvector:pg17
     restart: unless-stopped
     networks: [interne]
@@ -117,6 +129,7 @@ services:
       retries: 30
 
   valkey:
+    logging: *journaux
     image: valkey/valkey:8-alpine
     restart: unless-stopped
     networks: [interne]
@@ -125,6 +138,7 @@ services:
       - valkey-data:/data
 
   garage:
+    logging: *journaux
     image: dxflrs/garage:v1.0.1
     restart: unless-stopped
     networks: [interne]
@@ -142,6 +156,7 @@ services:
   # sur l'ORIGINE DU SITE : pas d'entrée DNS à demander à l'OIF, pas de
   # certificat de plus, et une adresse qui suit le domaine du jour.
   media-proxy:
+    logging: *journaux
     image: nginx:1.27-alpine
     restart: unless-stopped
     networks: [interne]
