@@ -75,7 +75,10 @@ INSERT INTO programme.proposal_transitions_allowed
     -- 02/11/2026 : une activité retenue puis retirée du programme avant toute
     -- annonce redevient « en évaluation » ; « annulé » est définitif.
     ('accepted',          'under_review',      'programme.proposal.decide', false, true),
-    ('rejected',          'under_review',      'programme.proposal.decide', false, true)
+    ('rejected',          'under_review',      'programme.proposal.decide', false, true),
+    -- 02/11/2026 : une annulation qui était en fait un refus se requalifie en
+    -- « non retenu », motif exigé. Annulé ne revient jamais au programme.
+    ('cancelled',         'rejected',          'programme.proposal.decide', false, true)
 ON CONFLICT DO NOTHING;
 
 COMMENT ON TABLE programme.proposal_transitions_allowed IS
