@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal de la plateforme</title>
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../journees-speciales/commun/base.css">
+<style>
+  body { background: var(--color-surface); }
+  .page { max-width: 1280px; margin: 0 auto; padding: var(--space-8) var(--space-4) var(--space-16); }
+  .note { max-width: 74ch; margin: 0 0 var(--space-6); padding: var(--space-3) var(--space-4); border-left: 4px solid var(--color-info); background: var(--color-info-surface); font-size: var(--font-size-sm); line-height: 1.55; }
+
+  header.tete { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); }
+  header.tete h1 { font-size: var(--font-size-3xl); }
+  header.tete p { margin: var(--space-1) 0 0; color: var(--color-text-secondary); }
+
+  /* La recherche par code de demande : le geste principal quand quelqu'un signale une erreur. */
+  .code { display: flex; gap: var(--space-2); align-items: stretch; }
+  .code input { width: 330px; max-width: 100%; min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface-raised); font: inherit; font-family: ui-monospace, monospace; font-size: var(--font-size-sm); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 var(--space-4); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface-raised); color: var(--color-text); font: inherit; font-weight: 600; cursor: pointer; }
+  .btn.primaire { border-color: transparent; background: var(--color-accent-solid, #00699a); color: #fff; }
+  .btn.petit { min-height: 36px; padding: 0 var(--space-3); font-size: var(--font-size-sm); }
+
+  /* Les chiffres des dernières 24 heures : chacun ouvre la liste filtrée. */
+  .chiffres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-6); }
+  @media (max-width: 800px) { .chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .chiffre { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-raised); text-decoration: none; color: inherit; }
+  .chiffre b { display: block; font-size: var(--font-size-2xl); font-variant-numeric: tabular-nums; }
+  .chiffre span { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+  .chiffre.rouge b { color: var(--color-danger); }
+  .chiffre.jaune b { color: var(--color-warning); }
+
+  nav.onglets { display: flex; gap: var(--space-1); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-4); overflow-x: auto; }
+  nav.onglets a { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4); border-bottom: 3px solid transparent; color: var(--color-text-secondary); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  nav.onglets a[aria-current] { border-bottom-color: var(--color-accent, #00699a); color: var(--color-text); }
+  nav.onglets i { min-width: 22px; padding: 0 6px; border-radius: var(--radius-full); background: var(--color-danger-surface); color: var(--color-danger); font-style: normal; font-size: var(--font-size-xs); text-align: center; }
+
+  .filtres { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-bottom: var(--space-3); }
+  .filtres select, .filtres input { min-height: 40px; padding: 0 var(--space-3); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface-raised); font: inherit; font-size: var(--font-size-sm); }
+  .filtres input { width: 220px; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; font-size: var(--font-size-sm); }
+  th { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-strong); background: var(--color-surface-sunken); text-align: left; font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); }
+  td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-subtle); vertical-align: top; }
+  tr.cliquable { cursor: pointer; }
+  tr.cliquable:hover td { background: var(--color-surface-hover); }
+  tr[aria-selected="true"] td { background: var(--color-surface-selected); }
+  td.heure { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--color-text-secondary); }
+  td code, .mono { font-family: ui-monospace, monospace; font-size: 0.82rem; }
+  .pastille { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: 700; white-space: nowrap; }
+  .p-panne { background: var(--color-danger-surface); color: var(--color-danger); }
+  .p-refus { background: var(--color-warning-surface); color: var(--color-warning); }
+  .p-lent { background: var(--color-info-surface); color: var(--color-info); }
+  .p-ok { background: var(--color-success-surface); color: var(--color-success); }
+  .muet { color: var(--color-text-muted); }
+  .tableau { overflow-x: auto; }
+
+  /* Le détail d'une ligne : tout ce qui s'est passé pour la même demande. */
+  .mise { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-5); align-items: start; }
+  @media (max-width: 1100px) { .mise { grid-template-columns: minmax(0, 1fr); } }
+  aside.detail { position: sticky; top: var(--space-4); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-raised); }
+  aside.detail h2 { font-size: var(--font-size-lg); margin-bottom: var(--space-1); }
+  aside.detail dl { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px var(--space-3); margin: var(--space-3) 0; font-size: var(--font-size-sm); }
+  aside.detail dt { color: var(--color-text-muted); }
+  aside.detail dd { margin: 0; overflow-wrap: anywhere; }
+  .fil { list-style: none; margin: var(--space-3) 0 0; padding: 0; border-left: 2px solid var(--color-border); }
+  .fil li { position: relative; padding: 0 0 var(--space-3) var(--space-4); font-size: var(--font-size-sm); }
+  .fil li::before { content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-border-strong); }
+  .fil li.erreur::before { background: var(--color-danger); }
+  .fil li b { display: block; }
+  .fil li small { color: var(--color-text-muted); }
+  pre.trace { margin: var(--space-2) 0 0; padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-sunken); font-size: 0.78rem; white-space: pre-wrap; }
+
+  section[data-onglet] { display: none; }
+  section[data-onglet].visible { display: block; }
+  .bas { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+</style>
+</head>
+<body>
+<main class="page">
+  <p class="note">Maquette de la page « Journal » du back-office, réservée à l'équipe centrale. Trois onglets ; cliquer sur une ligne ouvre son détail à droite, avec tout ce qui s'est passé pour la même demande. Les onglets se changent en haut, et l'adresse <code>?onglet=taches</code> ou <code>?onglet=modifications</code> ouvre directement les autres.</p>
+
+  <header class="tete">
+    <div>
+      <h1>Journal de la plateforme</h1>
+      <p>Ce qui a échoué, ce qui a été refusé, ce qui a changé. Conservé trois mois.</p>
+    </div>
+    <form class="code" onsubmit="event.preventDefault(); choisir(document.querySelector('tr[data-id=a1]'))">
+      <input value="01a19c2e-7f31-7b20-9d4a-55e0c1b8a6f2" aria-label="Code de la demande" placeholder="Code affiché à l'écran (ex. 01a19c…)">
+      <button class="btn primaire" type="submit">Retrouver</button>
+    </form>
+  </header>
+
+  <div class="chiffres">
+    <a class="chiffre rouge" href="#"><b>3</b><span>pannes, 24 dernières heures</span></a>
+    <a class="chiffre jaune" href="#"><b>41</b><span>accès refusés</span></a>
+    <a class="chiffre" href="#"><b>12</b><span>pages lentes (plus d'une seconde)</span></a>
+    <a class="chiffre rouge" href="?onglet=taches"><b>2</b><span>tâches en échec à relancer</span></a>
+  </div>
+
+  <nav class="onglets" aria-label="Journal">
+    <a href="?onglet=erreurs" data-cible="erreurs">Erreurs et refus <i>3</i></a>
+    <a href="?onglet=taches" data-cible="taches">Tâches en échec <i>2</i></a>
+    <a href="?onglet=modifications" data-cible="modifications">Modifications</a>
+  </nav>
+
+  <!-- ERREURS ET REFUS -->
+  <section data-onglet="erreurs">
+    <div class="filtres">
+      <select aria-label="Période"><option>24 dernières heures</option><option>7 jours</option><option>30 jours</option></select>
+      <select aria-label="Gravité"><option>Toutes les gravités</option><option>Pannes</option><option>Accès refusés</option><option>Pages lentes</option></select>
+      <select aria-label="Origine"><option>Site et serveur</option><option>Serveur web</option><option>Tâches de fond</option></select>
+      <input placeholder="Personne, page ou code d'erreur" aria-label="Rechercher">
+    </div>
+    <div class="mise">
+      <div class="tableau">
+        <table>
+          <thead><tr><th>Heure</th><th>Gravité</th><th>Page ou action</th><th>Personne</th><th>Ce qui s'est passé</th></tr></thead>
+          <tbody>
+            <tr class="cliquable" data-id="a1" aria-selected="true"><td class="heure">12:34:46</td><td><span class="pastille p-panne">Panne</span></td><td><code>PUT /proposals/{id}/draft</code></td><td>Claire Martin<br><span class="muet">Réseau Climat Sud</span></td><td>Erreur interne : la base a refusé l'écriture.</td></tr>
+            <tr class="cliquable"><td class="heure">12:31:02</td><td><span class="pastille p-refus">Refusé</span></td><td><code>PUT /proposals/{id}/draft</code></td><td>Claire Martin<br><span class="muet">Réseau Climat Sud</span></td><td>Ce texte dépasse la longueur autorisée : 1 200 caractères au maximum.</td></tr>
+            <tr class="cliquable"><td class="heure">11:58:40</td><td><span class="pastille p-lent">Lent</span></td><td><code>GET /schedule</code></td><td class="muet">Visiteur</td><td>3,4 s pour répondre.</td></tr>
+            <tr class="cliquable"><td class="heure">11:20:17</td><td><span class="pastille p-refus">Refusé</span></td><td><code>POST /auth/login</code></td><td class="muet">angenor99@…</td><td>Compte verrouillé 15 minutes après 5 essais.</td></tr>
+            <tr class="cliquable"><td class="heure">10:02:51</td><td><span class="pastille p-refus">Refusé</span></td><td><code>GET /admin/organizations/{id}</code></td><td>Aminata Sow<br><span class="muet">admin CdP30</span></td><td>Hors de son périmètre d'administration.</td></tr>
+            <tr class="cliquable"><td class="heure">03:06:09</td><td><span class="pastille p-panne">Panne</span></td><td><code>POST /auth/refresh</code></td><td>Angenor Test</td><td>Jeton de reconnexion présenté deux fois : sessions coupées.</td></tr>
+          </tbody>
+        </table>
+        <div class="bas"><span>6 lignes sur 56</span><button class="btn petit">Exporter en CSV</button></div>
+      </div>
+
+      <aside class="detail" aria-label="Détail">
+        <span class="pastille p-panne">Panne</span>
+        <h2 style="margin-top:8px">Enregistrement du dossier refusé</h2>
+        <dl>
+          <dt>Quand</dt><dd>lundi 2 novembre, 12:34:46 (heure GMT)</dd>
+          <dt>Personne</dt><dd><a href="#">Claire Martin</a>, Réseau Climat Sud</dd>
+          <dt>Page</dt><dd class="mono">PUT /proposals/{id}/draft</dd>
+          <dt>Réponse</dt><dd>500 en 214 ms</dd>
+          <dt>Code</dt><dd class="mono">01a19c2e-7f31-7b20-9d4a-55e0c1b8a6f2</dd>
+          <dt>Dossier</dt><dd><a href="#">CDP31-00128</a>, financer l'économie circulaire</dd>
+        </dl>
+        <b style="font-size:var(--font-size-sm)">Même demande, dans l'ordre</b>
+        <ol class="fil">
+          <li><b>Demande reçue</b><small>12:34:46.012, navigateur Chrome</small></li>
+          <li><b>Modification du dossier</b><small>contact, présentation détaillée</small></li>
+          <li class="erreur"><b>Écriture refusée par la base</b><small>12:34:46.226</small>
+            <pre class="trace">violates check constraint "ck_proposal_speakers_complete"</pre></li>
+          <li><b>Rien n'a été enregistré</b><small>la transaction est annulée</small></li>
+        </ol>
+      </aside>
+    </div>
+  </section>
+
+  <!-- TÂCHES EN ÉCHEC -->
+  <section data-onglet="taches">
+    <div class="filtres">
+      <select aria-label="État"><option>En échec ou abandonnées</option><option>Toutes</option></select>
+      <select aria-label="Nature"><option>Toutes les natures</option><option>Courriels</option><option>Réunions Zoom</option><option>Rappels</option></select>
+    </div>
+    <div class="tableau">
+      <table>
+        <thead><tr><th>Dernier essai</th><th>Nature</th><th>Pour</th><th>Essais</th><th>Dernière erreur</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="heure">11:42</td><td>Courriel de confirmation</td><td>Inscription à la journée finance<br><span class="muet">c.m…@exemple.org</span></td><td>5 sur 5 <span class="pastille p-panne">Abandonnée</span></td><td>Le relais de courriel ne répond pas (délai dépassé).</td><td><button class="btn petit">Relancer</button></td></tr>
+          <tr><td class="heure">09:15</td><td>Réunion Zoom</td><td>Atelier de fixation des objectifs, 09/11</td><td>3 sur 5 <span class="pastille p-refus">Nouvel essai à 09:45</span></td><td>Zoom : limite de requêtes atteinte (429).</td><td><button class="btn petit">Relancer maintenant</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MODIFICATIONS -->
+  <section data-onglet="modifications">
+    <div class="filtres">
+      <select aria-label="Période"><option>24 dernières heures</option><option>7 jours</option></select>
+      <select aria-label="Objet"><option>Tous les objets</option><option>Dossiers</option><option>Activités</option><option>Organisations</option><option>Personnes</option></select>
+      <select aria-label="Action"><option>Créé, modifié, supprimé</option></select>
+      <input placeholder="Auteur ou objet" aria-label="Rechercher">
+    </div>
+    <div class="tableau">
+      <table>
+        <thead><tr><th>Heure</th><th>Auteur</th><th>Action</th><th>Objet</th><th>Champs changés</th></tr></thead>
+        <tbody>
+          <tr><td class="heure">12:37:35</td><td>Claire Martin</td><td><span class="pastille p-lent">Modifié</span></td><td>Dossier CDP31-00128</td><td>présentation détaillée</td></tr>
+          <tr><td class="heure">12:15:22</td><td>Claire Martin</td><td><span class="pastille p-lent">Modifié</span></td><td>Activité « Financer l'économie circulaire… »</td><td>présentation, objectifs</td></tr>
+          <tr><td class="heure">11:59:23</td><td>Script de l'équipe</td><td><span class="pastille p-lent">Modifié</span></td><td>9 organisations</td><td>sigle bien connu</td></tr>
+          <tr><td class="heure">10:41:08</td><td>Angenor Test</td><td><span class="pastille p-ok">Créé</span></td><td>Message de la régie</td><td>retard, niveau information</td></tr>
+          <tr><td class="heure">10:40:51</td><td>Angenor Test</td><td><span class="pastille p-panne">Supprimé</span></td><td>Inscription à l'atelier OIF</td><td class="muet">ligne entière</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script>
+  const onglet = new URLSearchParams(location.search).get('onglet') || 'erreurs';
+  document.querySelector(`section[data-onglet="${onglet}"]`)?.classList.add('visible');
+  document.querySelector(`nav.onglets a[data-cible="${onglet}"]`)?.setAttribute('aria-current', 'page');
+  function choisir(ligne) {
+    document.querySelectorAll('tr[aria-selected]').forEach((l) => l.removeAttribute('aria-selected'));
+    ligne?.setAttribute('aria-selected', 'true');
+  }
+  document.querySelectorAll('tr.cliquable').forEach((l) => l.addEventListener('click', () => choisir(l)));
+</script>
+</body>
+</html>
