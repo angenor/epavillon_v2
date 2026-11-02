@@ -15,7 +15,7 @@ import type { PublicScheduleRow } from '~/types/views'
 
 interface Props {
   session: PublicScheduleRow
-  /** Destination : la programmation de l'édition concernée. */
+  /** Destination : la page de l'activité, ou sa journée spéciale. */
   to?: string
   /** Ville de l'édition (« Belém ») ; la ville tirée de l'identifiant IANA n'est qu'un repli, sans accent. */
   zoneLabel?: string
@@ -51,7 +51,7 @@ const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, 
 </script>
 
 <template>
-  <article data-bird-perch class="grid grid-cols-[4rem_minmax(0,1fr)] gap-3 py-3">
+  <article data-bird-perch class="relative grid grid-cols-[4rem_minmax(0,1fr)] gap-3 py-3">
     <p class="font-condensed leading-none uppercase">
       <b class="block text-[1.6rem] font-bold tabular-nums">{{ time(props.session.starts_at, props.session.timezone) }}</b>
       <small class="text-[0.78rem] font-semibold tracking-[0.05em] text-text-on-inverse-muted">{{ day }}</small>
@@ -59,7 +59,8 @@ const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, 
 
     <div class="min-w-0">
       <h3 class="font-condensed text-[1.12rem] leading-[1.15] font-semibold text-text-on-inverse">
-        <NuxtLink v-if="props.to" :to="props.to" class="text-text-on-inverse no-underline hover:underline">
+        <!-- Toute la ligne mène à l'activité, pas seulement son titre. -->
+        <NuxtLink v-if="props.to" :to="props.to" class="text-text-on-inverse no-underline after:absolute after:inset-0 hover:underline">
           {{ title }}
         </NuxtLink>
         <template v-else>{{ title }}</template>

@@ -21,13 +21,24 @@ interface Props {
 const props = defineProps<Props>()
 
 const localePath = useLocalePath()
+const { link } = useProgrammeSession()
 
 /** La vue publique n'expose que `event_id` : la correspondance vient des éditions déjà en main. */
 const editionByEvent = computed(() => new Map(props.editions.map((edition) => [edition.id, edition])))
 
+/** Comme dans le programme : la page de l'activité, ou sa journée spéciale à sa place dans le déroulé. */
 function sessionTo(session: PublicScheduleRow): string | undefined {
   const edition = editionByEvent.value.get(session.event_id)
-  return edition ? localePath(`/programmations?edition=${edition.slug}`) : undefined
+  if (!edition) return undefined
+  const special = session.tracks.find((badge) => badge.kind === 'special_day')
+  if (special) {
+    return localePath({
+      name: 'track-edition-track',
+      params: { edition: edition.slug, track: special.slug },
+      hash: `#${trackActivityAnchor(session.slug)}`,
+    })
+  }
+  return link(edition.slug, session)
 }
 
 function sessionEdition(session: PublicScheduleRow): PublicEditionRow | null {
