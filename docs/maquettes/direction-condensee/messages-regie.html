@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messages de la régie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  .page { padding: 40px 0 80px; }
+  .note { max-width: 72ch; margin: 0 0 32px; color: var(--color-text-secondary); line-height: 1.55; }
+  h2.sec { margin: 0 0 6px; font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; text-transform: uppercase; color: var(--ink); }
+  .sub { max-width: 72ch; margin: 0 0 18px; color: var(--color-text-muted); font-size: 0.9rem; line-height: 1.5; }
+  .block { margin-bottom: 56px; }
+
+  /* Trois niveaux, nommés par ce qu'ils changent pour le visiteur. */
+  .lvl-info  { --m-bg: var(--color-info-surface);    --m-line: var(--color-info);    --m-ink: var(--color-info);    --m-border: var(--color-info-border); }
+  .lvl-warn  { --m-bg: var(--color-warning-surface); --m-line: var(--color-warning); --m-ink: var(--color-warning); --m-border: var(--color-warning-border); }
+  .lvl-stop  { --m-bg: var(--color-live);            --m-line: var(--color-live);    --m-ink: #fff;                 --m-border: var(--color-live); }
+
+  .levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  @media (max-width: 900px) { .levels { grid-template-columns: minmax(0, 1fr); } }
+  .level { padding: 18px 20px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); border-top: 4px solid var(--m-line); }
+  .level h3 { margin: 0 0 4px; font-family: var(--font-heading); font-weight: 700; font-size: 1.35rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink); }
+  .level p { margin: 0 0 10px; font-size: 0.88rem; color: var(--color-text-secondary); line-height: 1.45; }
+  .level ul { margin: 0; padding-left: 18px; font-size: 0.88rem; color: var(--color-text); line-height: 1.6; }
+
+  /* Le message lui-même : un filet de couleur, l'étiquette condensée, l'heure, le texte. */
+  .msg { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; padding: 12px 14px; border-radius: var(--radius); background: var(--m-bg); border: 1px solid var(--m-border); border-left: 4px solid var(--m-line); }
+  .msg .icon { grid-row: span 2; width: 22px; height: 22px; margin-top: 1px; color: var(--m-ink); stroke-width: 2.2; }
+  .msg b { font-family: var(--font-heading); font-weight: 700; font-size: 1.02rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--m-ink); }
+  .msg b small { margin-left: 8px; font-family: var(--font-body, Inter, sans-serif); font-weight: 500; font-size: 0.78rem; text-transform: none; letter-spacing: 0; color: var(--color-text-muted); }
+  .msg p { margin: 0; font-size: 0.92rem; line-height: 1.45; color: var(--color-text); }
+  .lvl-stop.msg p, .lvl-stop.msg b small { color: rgb(255 255 255 / 0.9); }
+
+  /* Page d'une activité : bandeau, puis billet collé qui porte le message. */
+  .frame { overflow: hidden; border: 1px solid var(--color-border); border-radius: 12px; background: var(--page); }
+  .hero-act { position: relative; padding: 22px 0 96px; background: var(--ifdd-bleu-900); color: #fff; }
+  .hero-act .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .hero-act h1 { margin: 0; max-width: 28ch; font-family: var(--font-heading); font-size: clamp(1.9rem, 3.6vw, 3rem); font-weight: 600; line-height: 1.04; color: #fff; }
+  .hero-act .meta { margin-top: 12px; font-size: 0.92rem; color: rgb(255 255 255 / 0.8); }
+  .tag-delay { background: var(--color-info-surface); color: var(--color-info); border: 1px solid var(--color-info-border); }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 36px; align-items: start; padding-bottom: 32px; }
+  .main { position: relative; margin-top: -64px; }
+  .media { aspect-ratio: 16 / 9; border-radius: var(--radius-lg); background: var(--ifdd-bleu-700); box-shadow: var(--shadow-xl); }
+  .lorem { margin-top: 24px; display: grid; gap: 10px; }
+  .lorem span { height: 12px; border-radius: 6px; background: var(--color-border-subtle); }
+  .aside { position: relative; margin-top: -64px; }
+  .ticket { overflow: hidden; border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-xl); }
+  .ticket-date { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: var(--day-solid); color: var(--day-on); }
+  .ticket-date b { font-family: var(--font-heading); font-size: 3.2rem; font-weight: 700; line-height: 0.8; }
+  .ticket-date span { font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.04em; }
+  .ticket .msg { margin: 0; border-radius: 0; border-width: 0 0 1px 4px; }
+  .ticket-body { padding: 16px 20px 20px; }
+  .ticket-hours { font-family: var(--font-heading); font-size: 2rem; font-weight: 700; line-height: 1; color: var(--ink); }
+  .ticket-hours s { color: var(--color-text-muted); font-weight: 600; }
+  .ticket-body p { margin: 6px 0 16px; font-size: 0.85rem; color: var(--color-text-secondary); }
+  .cta { display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: center; border: 0; border-radius: var(--radius); background: var(--ifdd-jaune-400); color: var(--ifdd-vert-900); font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.04em; box-shadow: 0 1px 0 var(--ifdd-jaune-700); }
+  .pin-note { margin-top: 10px; font-size: 0.8rem; color: var(--color-text-muted); }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } .aside, .main { margin-top: 0; } .layout { padding-top: 20px; } }
+
+  /* Téléphone : la barre collée du bas porte une ligne du message. */
+  .phone { width: 375px; max-width: 100%; border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; background: var(--page); }
+  .phone .fill { height: 150px; display: grid; place-items: center; color: var(--color-text-muted); font-size: 0.85rem; }
+  .phone .line { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--m-bg); border-top: 3px solid var(--m-line); font-size: 0.85rem; color: var(--color-text); }
+  .phone .line .icon { width: 18px; height: 18px; color: var(--m-ink); stroke-width: 2.2; flex: none; }
+  .phone .line b { font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--m-ink); }
+  .lvl-stop.line { color: #fff; }
+  .phone .bar2 { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: var(--card); }
+  .phone .bar2 b { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--ink); }
+  .phone .bar2 small { display: block; font-size: 0.75rem; color: var(--color-text-muted); }
+  .phone .bar2 .cta { width: auto; min-height: 44px; padding: 0 16px; font-size: 1rem; }
+  .phones { display: flex; flex-wrap: wrap; gap: 24px; }
+
+  /* Carte du programme : une ligne sous l'heure. */
+  .cards { display: flex; flex-wrap: wrap; gap: 20px; }
+  .card { width: 240px; overflow: hidden; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); box-shadow: var(--shadow-sm); }
+  .card .thumb { aspect-ratio: 16 / 9; background: var(--ifdd-bleu-700); }
+  .card .body { padding: 10px 12px 12px; }
+  .card .t { font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; color: var(--ink); }
+  .card h3 { margin: 4px 0 8px; font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; line-height: 1.15; color: var(--ink); }
+  .card .flag { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; color: var(--m-ink); }
+  .card .flag .icon { width: 16px; height: 16px; stroke-width: 2.2; }
+  .lvl-stop.flag { color: var(--color-live); }
+
+  /* Message pour toute l'édition : une bande sous la barre de navigation, collée avec elle. */
+  .strip { display: flex; align-items: center; gap: 12px; padding: 10px 0; background: var(--m-bg); border-bottom: 1px solid var(--m-border); }
+  .strip .wrap { display: flex; align-items: center; gap: 12px; width: 100%; }
+  .strip .icon { width: 20px; height: 20px; color: var(--m-ink); stroke-width: 2.2; flex: none; }
+  .strip b { font-family: var(--font-heading); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--m-ink); white-space: nowrap; }
+  .strip p { margin: 0; font-size: 0.9rem; color: var(--color-text); }
+  .strip button { margin-left: auto; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--color-text-muted); font-size: 1.3rem; cursor: pointer; }
+  .lvl-stop.strip p { color: #fff; }
+
+  /* Régie : la nature choisit le niveau, modifiable. */
+  .composer { max-width: 560px; padding: 18px 20px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border-subtle); }
+  .composer label { display: block; margin: 0 0 6px; font-weight: 600; font-size: 0.88rem; color: var(--ink); }
+  .seg { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .seg span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: var(--radius); border: 1px solid var(--color-border); font-size: 0.88rem; }
+  .seg span[aria-pressed="true"] { border-color: var(--color-info); background: var(--color-info-surface); color: var(--color-info); font-weight: 600; }
+  .seg.levels-seg span[aria-pressed="true"] { border-color: var(--m-line); background: var(--m-bg); color: var(--m-ink); }
+  .composer .hint { margin: -8px 0 16px; font-size: 0.8rem; color: var(--color-text-muted); }
+  .composer .field { padding: 10px 12px; border-radius: var(--radius); border: 1px solid var(--color-border); font-size: 0.9rem; }
+</style>
+</head>
+<body class="day-plain">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="m-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="m-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="m-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></symbol>
+</svg>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale"><a href="#" aria-current="page">Programmations</a><a href="#">Communauté</a></nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<main class="page wrap">
+  <p class="note">Un message de la régie se lit là où l'on regarde déjà : dans le billet de l'activité concernée, qui reste à l'écran quand on fait défiler la page, et sur sa carte dans le programme. Seul un message qui vaut pour toute l'édition prend une bande sous la barre de navigation. Il n'y a plus de bandeau au-dessus de la photo, qu'on ne voit pas une fois la page défilée.</p>
+
+  <section class="block">
+    <h2 class="sec">Trois niveaux, selon ce que ça change</h2>
+    <p class="sub">La nature du message choisit le niveau ; la régie peut le changer. Un retard de dix minutes est une information : l'activité a bien lieu.</p>
+    <div class="levels">
+      <div class="level lvl-info"><h3>Information</h3><p>L'activité a lieu ; un détail change. Fond cyan pâle, se referme.</p>
+        <ul><li>Retard</li><li>Changement d'horaire</li><li>Changement de salle</li><li>Information libre</li></ul></div>
+      <div class="level lvl-warn"><h3>Attention</h3><p>Le visiteur peut être gêné. Fond jaune pâle, ne se referme pas.</p>
+        <ul><li>Débordement sur le créneau suivant</li><li>Problème de connexion</li><li>Absence d'un intervenant</li></ul></div>
+      <div class="level lvl-stop"><h3>Interruption</h3><p>L'activité ne se suit pas. Aplat rouge, ne se referme pas.</p>
+        <ul><li>Direct interrompu (problème technique)</li><li>Annulation</li></ul></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">Page d'une activité, sur grand écran</h2>
+    <p class="sub">Le message s'insère en tête du billet, sous la date. Le billet reste collé en haut de l'écran : un message publié pendant la lecture apparaît sans remonter. Dans le bandeau, une étiquette résume (« Retard, environ 10 min »).</p>
+    <div class="frame">
+      <div class="hero-act"><div class="wrap">
+        <div class="tags"><span class="tag tag-soon">À venir</span><span class="tag tag-delay">Retard, environ 10 min</span></div>
+        <h1>Énergies propres et électrification : comment accélérer en Afrique de l'Ouest</h1>
+        <p class="meta">Stand de la Francophonie, Antalya</p>
+      </div></div>
+      <div class="wrap layout">
+        <div class="main"><div class="media"></div><div class="lorem"><span style="width:92%"></span><span></span><span style="width:78%"></span><span style="width:85%"></span></div></div>
+        <aside class="aside">
+          <div class="ticket">
+            <div class="ticket-date"><b>10</b><span>Mardi<br>novembre 2026</span></div>
+            <div class="msg lvl-info"><svg class="icon"><use href="#m-info"/></svg><b>Information <small>publié à 08:52</small></b><p>L'activité commence avec une dizaine de minutes de retard.</p></div>
+            <div class="ticket-body">
+              <div class="ticket-hours">09:00 à 10:00</div>
+              <p>Heure d'Antalya (UTC+3)</p>
+              <button class="cta" type="button">S'inscrire</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">Sur téléphone</h2>
+    <p class="sub">Le billet n'est pas collé sur téléphone : c'est la barre du bas qui porte une ligne du message. Un toucher ouvre le message entier.</p>
+    <div class="phones">
+      <div class="phone"><div class="fill">Contenu de la page</div>
+        <div class="line lvl-info"><svg class="icon"><use href="#m-info"/></svg><span><b>Information</b> Commence vers 09:10</span></div>
+        <div class="bar2"><div><b>09:00 à 10:00</b><small>mardi 10 novembre, heure d'Antalya</small></div><button class="cta" type="button">S'inscrire</button></div></div>
+      <div class="phone"><div class="fill">Contenu de la page</div>
+        <div class="line lvl-stop"><svg class="icon"><use href="#m-stop"/></svg><span><b>Interruption</b> Le direct reprend dans quelques minutes</span></div>
+        <div class="bar2"><div><b>En direct</b><small>depuis 09:12</small></div><button class="cta" type="button" style="background:var(--color-live);color:#fff;box-shadow:none">Rejoindre</button></div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">Dans le programme</h2>
+    <p class="sub">La carte de l'activité porte une ligne, dans la liste comme dans le calendrier. Aucun bandeau en tête du programme pour une seule activité.</p>
+    <div class="cards">
+      <div class="card"><div class="thumb"></div><div class="body"><span class="t">09:00</span><h3>Énergies propres et électrification</h3><span class="flag lvl-info"><svg class="icon"><use href="#m-info"/></svg>Retard, environ 10 min</span></div></div>
+      <div class="card"><div class="thumb"></div><div class="body"><span class="t">10:15</span><h3>Atelier sur la mobilité humaine</h3><span class="flag lvl-warn"><svg class="icon"><use href="#m-warn"/></svg>Débordement possible</span></div></div>
+      <div class="card"><div class="thumb"></div><div class="body"><span class="t">11:30</span><h3>Gestion durable des déchets</h3><span class="flag lvl-stop"><svg class="icon"><use href="#m-stop"/></svg>Direct interrompu</span></div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">Message pour toute l'édition</h2>
+    <p class="sub">Une bande sous la barre de navigation, collée avec elle : elle reste visible en faisant défiler. Une seule à la fois, la plus importante.</p>
+    <div class="frame">
+      <header class="bar" style="position:static"><div class="wrap bar-in"><a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a></div><div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div></header>
+      <div class="strip lvl-info"><div class="wrap"><svg class="icon"><use href="#m-info"/></svg><b>Information</b><p>Le Stand ouvre à 08:30 ce mercredi, accès par l'entrée B.</p><button type="button" aria-label="Masquer">×</button></div></div>
+      <div style="height:16px"></div>
+      <div class="strip lvl-warn"><div class="wrap"><svg class="icon"><use href="#m-warn"/></svg><b>Attention</b><p>Connexion instable au Stand : le direct peut couper quelques instants.</p></div></div>
+      <div style="height:16px"></div>
+      <div class="strip lvl-stop"><div class="wrap"><svg class="icon"><use href="#m-stop"/></svg><b style="color:#fff">Interruption</b><p>Tous les directs sont suspendus jusqu'à 14:00.</p></div></div>
+      <div style="height:16px"></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="sec">Dans la régie</h2>
+    <p class="sub">Choisir la nature règle le niveau ; on peut le changer avant de publier.</p>
+    <div class="composer lvl-info">
+      <label>Nature</label>
+      <div class="seg"><span aria-pressed="true">Retard</span><span>Débordement</span><span>Problème technique</span><span>Changement de salle</span><span>Information</span></div>
+      <label>Niveau</label>
+      <div class="seg levels-seg"><span aria-pressed="true">Information</span><span>Attention</span><span>Interruption</span></div>
+      <p class="hint">Réglé par la nature « Retard ».</p>
+      <label>Message</label>
+      <div class="field">L'activité commence avec une dizaine de minutes de retard.</div>
+    </div>
+  </section>
+</main>
+<script src="icones.js"></script>
+</body>
+</html>
