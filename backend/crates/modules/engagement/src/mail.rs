@@ -41,8 +41,9 @@
 //!
 //! Chaque courriel automatique part en copie visible aux adresses du réglage
 //! `engagement.mail.automatic_cc`, sauf ceux de [`SANS_COPIE`]. Un rappel n'est
-//! copié qu'une fois par activité (ou journée) et par délai : l'équipe reçoit
-//! ce qu'un inscrit reçoit, pas un exemplaire par inscrit. Le travail se
+//! copié qu'une fois par activité (ou journée) et par délai, un avis groupé
+//! (annulation, maintien, changement de réunion) une fois par lot : l'équipe
+//! reçoit ce qu'un inscrit reçoit, pas un exemplaire par inscrit. Le travail se
 //! retrouve par `message_id`, qui est son identifiant. Une lecture qui échoue
 //! fait partir le courriel sans copie, jamais le retenir.
 
@@ -215,7 +216,7 @@ impl GardedMailer {
     async fn lire_la_copie(&self, job_id: Uuid) -> Result<Vec<String>, sqlx::Error> {
         let pool = self.db.pool();
         let Some(job) = sqlx::query!(
-            "SELECT task, payload FROM platform.jobs WHERE id = $1",
+            "SELECT task, payload, idempotency_key FROM platform.jobs WHERE id = $1",
             job_id
         )
         .fetch_optional(pool)
@@ -262,6 +263,27 @@ impl GardedMailer {
                 )
                 .fetch_one(pool)
                 .await?
+            }
+            // Un lot (annulation, maintien, message du comité, changement de
+            // réunion) : un travail par destinataire, clé `{lot}:{personne}`.
+            "engagement.notification_email" | "negotiation.session_change_email" => {
+                match job.idempotency_key.as_deref().and_then(|c| c.rsplit_once(':')) {
+                    Some((lot, _)) => {
+                        let lot = format!("{lot}:");
+                        sqlx::query_scalar!(
+                            r#"SELECT NOT EXISTS (
+                                   SELECT 1 FROM platform.jobs j
+                                    WHERE j.task = $1 AND j.status = 'succeeded' AND j.id <> $2
+                                      AND left(j.idempotency_key, length($3)) = $3) AS "premier!""#,
+                            job.task,
+                            job_id,
+                            lot
+                        )
+                        .fetch_one(pool)
+                        .await?
+                    }
+                    None => true,
+                }
             }
             _ => true,
         };

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT task, payload FROM platform.jobs WHERE id = $1",
+  "query": "SELECT task, payload, idempotency_key FROM platform.jobs WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -24,6 +24,17 @@
             "name": "payload"
           }
         }
+      },
+      {
+        "ordinal": 2,
+        "name": "idempotency_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "idempotency_key"
+          }
+        }
       }
     ],
     "parameters": {
@@ -33,8 +44,9 @@
     },
     "nullable": [
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "32f2e5b74e3ae0357721c7c8132f059af56d3ec315cbc355fed6e4566575db10"
+  "hash": "78231c1cb10e86bae28ec20df4579f7a94c4414f220e81714489d583de4afd61"
 }
