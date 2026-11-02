@@ -901,6 +901,12 @@ CREATE TRIGGER tg_registrations_validate
 
 -- Événement de domaine : déclenche l'inscription auprès du fournisseur visio,
 -- la confirmation par courriel et la planification des rappels.
+--
+-- Il porte sa journée depuis le 02/11 (`track_registration_id`, § 4 bis) : une
+-- activité gardée d'une inscription à la journée n'a ni place Zoom propre ni
+-- avis de confirmation à elle, et les consommateurs le savent sans relire la
+-- ligne. Rattacher une inscription existante à une journée réémet l'état
+-- courant, pour que le module Direct retire la place Zoom de l'activité.
 CREATE OR REPLACE FUNCTION programme.tg_registrations_emit_events()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -914,16 +920,17 @@ BEGIN
             'session_id', NEW.session_id,
             'person_id', NEW.person_id,
             'status', NEW.status,
-            'locale', NEW.locale
+            'locale', NEW.locale,
+            'track_registration_id', NEW.track_registration_id
         )
     );
     RETURN NULL;
 END;
 $$;
 
-CREATE TRIGGER tg_registrations_events
-    AFTER INSERT OR UPDATE OF status ON programme.registrations
-    FOR EACH ROW EXECUTE FUNCTION programme.tg_registrations_emit_events();
+-- Le déclencheur est posé au § 4 bis, une fois la colonne
+-- `track_registration_id` créée : un déclencheur `UPDATE OF` ne se pose que sur
+-- des colonnes existantes.
 
 -- Premier clic sur « Rejoindre » : écrit une seule fois, jamais écrasé.
 CREATE OR REPLACE FUNCTION programme.record_join(p_registration_id uuid)
@@ -960,6 +967,262 @@ BEGIN
     RETURN v_promoted;
 END;
 $$;
+
+-- -----------------------------------------------------------------------------
+-- 4 bis. Inscription à une JOURNÉE (02/11/2026)
+--
+-- Demande du commanditaire (maquettes docs/maquettes/direction-condensee/
+-- journee-inscription.html et bouton-inscription.html) : une journée spéciale,
+-- et l'atelier préparatoire, se suivent avec UN SEUL LIEN DE DIRECT pour toute
+-- la journée, accueil, pauses et clôture compris. On s'inscrit à la journée,
+-- avec ou sans compte ; la fenêtre d'inscription liste les activités du jour,
+-- toutes cochées, et la personne décoche ce qui ne l'intéresse pas. Les
+-- activités gardées servent aux rappels et aux statistiques ; elles ne changent
+-- RIEN à l'accès au direct, qui est celui de la journée.
+--
+-- QUELLE JOURNÉE, QUELLES ACTIVITÉS. Un fil `special_day` ou `side_programme`
+-- (l'atelier, hors pavillon) a un direct de journée, d'office : aucun réglage,
+-- c'est la nature du fil qui le dit (`programme.is_day_track_kind`). Un fil
+-- `thematic_track` court sur plusieurs jours et ne change rien. Une activité
+-- relève du direct de sa journée dès qu'elle est rattachée à un tel fil
+-- (`programme.day_track_of`), que la journée soit publiée ou non : l'aiguillage
+-- de la réunion ne bascule pas le jour de la publication. L'inscription, elle,
+-- n'ouvre qu'avec la page publique de la journée (vérifié par l'API).
+--
+-- POURQUOI DEUX NIVEAUX PLUTÔT QU'UNE TABLE DE CHOIX. L'inscription à la
+-- journée (`programme.track_registrations`) porte la personne, ses réponses,
+-- le jeton de l'invité et l'accès au direct. Chaque activité gardée reste une
+-- ligne ordinaire de `programme.registrations`, rattachée à la journée par
+-- `track_registration_id`. Ainsi tout ce qui lit les inscriptions par activité
+-- continue de marcher sans être réécrit : rappels (`engagement.
+-- schedule_session_reminders`), compteurs et jauge de la programmation
+-- publique (`registered_count`), liste nominative, statistiques
+-- (`analytics.mv_daily_registrations`), courriels du back-office par activité.
+-- Une table « activités choisies » à côté aurait demandé de doubler chacun de
+-- ces lecteurs, et le premier oublié aurait compté faux sans le dire.
+--
+-- LES RÉPONSES AU FORMULAIRE vivent sur l'inscription à la journée, qui fait
+-- foi ; elles sont recopiées sur chaque activité gardée à l'écriture, pour que
+-- les statistiques par activité (index GIN de `registrations.answers`) restent
+-- des requêtes d'une table. Le formulaire applicable à la journée est celui de
+-- son édition, à défaut celui de la plateforme (même résolution qu'une activité
+-- sans formulaire attaché).
+--
+-- SANS COMPTE, comme pour une activité : la personne est créée dans
+-- identity.people sans compte. Elle reçoit un courriel portant le lien du direct
+-- et un lien pour changer ses activités ou se désinscrire. Ce lien porte un
+-- jeton dont la base ne garde que l'empreinte (`manage_token_hash`, SHA-256) ;
+-- le jeton en clair ne vit que dans le courriel et dans la charge utile du
+-- travail d'envoi, qui le déclare secret (`carries_secret`). Même construction
+-- que tool.survey_invitations et identity.one_time_tokens. Un nouvel envoi du
+-- lien remplace l'empreinte : l'ancien lien cesse de servir.
+--
+-- CE QUI RESTE PAR ACTIVITÉ : l'état « en direct » (règle n° 4, un seul direct
+-- à la fois) et la régie, qui marque le début et la fin de chaque activité.
+-- Seule la réunion Zoom passe à la journée (`live.meetings.track_id`, 080).
+--
+-- Ni jauge ni liste d'attente à la journée : la seule limite est celle de la
+-- réunion Zoom, qui laisse entrer les premiers arrivés. La jauge d'une activité
+-- garde son effet sur la ligne de cette activité (déclencheur ci-dessus).
+-- -----------------------------------------------------------------------------
+
+-- Les natures de fil qui ont un direct de journée. Une fonction plutôt qu'une
+-- liste recopiée : le déclencheur d'inscription et l'aiguillage des séances
+-- doivent dire la même chose.
+CREATE OR REPLACE FUNCTION programme.is_day_track_kind(p_kind event.track_kind)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT p_kind IN ('special_day', 'side_programme');
+$$;
+
+COMMENT ON FUNCTION programme.is_day_track_kind(event.track_kind) IS
+    'Vrai pour une journée spéciale ou un programme parallèle (atelier préparatoire) : un seul direct pour la journée, une inscription à la journée.';
+
+-- La journée dont une activité suit le direct, ou NULL. Une activité n'est
+-- rattachée qu'à une journée en pratique (une date, un créneau) ; si elle l'était
+-- à deux, la première par date puis par rang gagne, de façon stable.
+CREATE OR REPLACE FUNCTION programme.day_track_of(p_session_id uuid)
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT st.track_id
+      FROM programme.session_tracks st
+      JOIN event.programme_tracks t ON t.id = st.track_id
+     WHERE st.session_id = p_session_id
+       AND programme.is_day_track_kind(t.kind)
+     ORDER BY t.starts_on NULLS LAST, t.sort_order, t.id
+     LIMIT 1;
+$$;
+
+COMMENT ON FUNCTION programme.day_track_of(uuid) IS
+    'Journée (fil special_day ou side_programme) dont l''activité suit le direct, publiée ou non ; NULL hors journée. Lue par la programmation et par le module Direct, une seule définition.';
+
+CREATE TABLE programme.track_registrations (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    track_id        uuid        NOT NULL CONSTRAINT xmod_fk_track_registrations_track
+                                REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
+    person_id       uuid        NOT NULL CONSTRAINT xmod_fk_track_registrations_person
+                                REFERENCES identity.people(id) ON DELETE CASCADE,
+    organization_id uuid        CONSTRAINT xmod_fk_track_registrations_organization
+                                REFERENCES org.organizations(id) ON DELETE SET NULL,
+    -- Même machine que l'inscription à une activité, sans la liste d'attente.
+    status          programme.registration_status NOT NULL DEFAULT 'registered',
+    -- Réponses au formulaire de l'édition, clés = registration_form_fields.code.
+    -- Recopiées sur chaque activité gardée (voir l'en-tête).
+    answers         jsonb       NOT NULL DEFAULT '{}'::jsonb,
+    locale          text        NOT NULL DEFAULT 'fr' REFERENCES reference.locales(code),
+    -- Empreinte SHA-256 du jeton du lien de gestion (32 octets), posée pour une
+    -- inscription sans compte. Le jeton en clair n'est jamais stocké.
+    manage_token_hash bytea,
+    -- Premier clic sur « Rejoindre le direct de la journée », écrit une fois.
+    joined_at       timestamptz,
+    source          text        NOT NULL DEFAULT 'web'
+                                CHECK (source IN ('web', 'import', 'admin', 'api', 'partner')),
+    cancelled_at    timestamptz,
+    cancelled_reason text,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    updated_at      timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_track_registrations_status CHECK (status <> 'waitlisted'),
+    CONSTRAINT ck_track_registrations_answers CHECK (jsonb_typeof(answers) = 'object'),
+    CONSTRAINT ck_track_registrations_token
+        CHECK (manage_token_hash IS NULL OR octet_length(manage_token_hash) = 32)
+);
+
+-- Une personne ne s'inscrit qu'une fois à une journée ; une annulation libère.
+CREATE UNIQUE INDEX ux_track_registrations_person_track
+    ON programme.track_registrations (track_id, person_id)
+    WHERE status <> 'cancelled';
+CREATE UNIQUE INDEX ux_track_registrations_manage_token
+    ON programme.track_registrations (manage_token_hash)
+    WHERE manage_token_hash IS NOT NULL;
+CREATE INDEX ix_track_registrations_track  ON programme.track_registrations (track_id, status);
+CREATE INDEX ix_track_registrations_person ON programme.track_registrations (person_id, created_at DESC);
+
+CREATE TRIGGER tg_track_registrations_updated_at
+    BEFORE UPDATE ON programme.track_registrations
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+COMMENT ON TABLE programme.track_registrations IS
+    'Inscription à une journée spéciale ou à l''atelier préparatoire : un seul direct pour la journée. Les activités gardées sont des programme.registrations rattachées par track_registration_id.';
+COMMENT ON COLUMN programme.track_registrations.answers IS
+    'Réponses au formulaire applicable (celui de l''édition, à défaut celui de la plateforme). Font foi ; recopiées sur chaque activité gardée.';
+COMMENT ON COLUMN programme.track_registrations.manage_token_hash IS
+    'Empreinte SHA-256 du jeton du lien « changer mes activités ou me désinscrire » d''une inscription sans compte. Le jeton en clair ne vit que dans le courriel ; un nouvel envoi remplace l''empreinte.';
+COMMENT ON COLUMN programme.track_registrations.joined_at IS
+    'Premier clic sur « Rejoindre le direct de la journée » (écrit une seule fois). Base du taux de participation de la journée.';
+
+-- Seul un fil de journée prend des inscriptions : une inscription à un fil
+-- thématique ne mènerait à aucun direct.
+CREATE OR REPLACE FUNCTION programme.tg_check_track_registration()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM event.programme_tracks t
+         WHERE t.id = NEW.track_id AND programme.is_day_track_kind(t.kind)
+    ) THEN
+        RAISE EXCEPTION 'Inscription impossible : ce fil n''est ni une journée spéciale ni un atelier.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_track_registrations_check
+    BEFORE INSERT OR UPDATE OF track_id ON programme.track_registrations
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_check_track_registration();
+
+-- Événement de domaine : réunion Zoom de la journée et place de l'inscrit
+-- (module Direct), avis de confirmation (Engagement). Le courriel de l'invité,
+-- qui porte le jeton en clair, ne passe pas par l'outbox : l'API le met en
+-- file elle-même, dans sa transaction.
+CREATE OR REPLACE FUNCTION programme.tg_track_registrations_emit_events()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    PERFORM platform.emit_event(
+        'programme', 'track_registration', NEW.id,
+        CASE WHEN TG_OP = 'INSERT' THEN 'programme.track_registration.created'
+             ELSE 'programme.track_registration.' || NEW.status::text END,
+        jsonb_build_object(
+            'track_id', NEW.track_id,
+            'event_id', (SELECT t.event_id FROM event.programme_tracks t WHERE t.id = NEW.track_id),
+            'person_id', NEW.person_id,
+            'status', NEW.status,
+            'locale', NEW.locale
+        )
+    );
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_track_registrations_events
+    AFTER INSERT OR UPDATE OF status ON programme.track_registrations
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_track_registrations_emit_events();
+
+-- Les activités gardées : une inscription par activité, rattachée à la
+-- journée. En queue de table, comme en production. SET NULL : la journée
+-- supprimée, l'inscription à l'activité redevient ordinaire au lieu de
+-- disparaître avec son historique de présence.
+ALTER TABLE programme.registrations
+    ADD COLUMN track_registration_id uuid
+        CONSTRAINT fk_registrations_track_registration
+        REFERENCES programme.track_registrations(id) ON DELETE SET NULL;
+
+CREATE INDEX ix_registrations_track_registration
+    ON programme.registrations (track_registration_id)
+    WHERE track_registration_id IS NOT NULL;
+
+COMMENT ON COLUMN programme.registrations.track_registration_id IS
+    'Inscription à la journée dont cette activité est gardée ; NULL pour une inscription ordinaire. Une telle ligne n''a pas de place Zoom propre : le direct est celui de la journée.';
+
+-- Une activité gardée appartient à la journée et à la personne de son
+-- inscription à la journée. Vérifié à l'écriture seulement : une activité
+-- retirée ensuite de la journée garde sa ligne, l'API la traite.
+CREATE OR REPLACE FUNCTION programme.tg_check_registration_track()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_track  uuid;
+    v_person uuid;
+BEGIN
+    IF NEW.track_registration_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    SELECT tr.track_id, tr.person_id INTO v_track, v_person
+      FROM programme.track_registrations tr WHERE tr.id = NEW.track_registration_id;
+
+    IF v_person IS DISTINCT FROM NEW.person_id THEN
+        RAISE EXCEPTION 'Rattachement impossible : l''inscription à l''activité et l''inscription à la journée ne sont pas celles de la même personne.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM programme.session_tracks st
+         WHERE st.session_id = NEW.session_id AND st.track_id = v_track
+    ) THEN
+        RAISE EXCEPTION 'Rattachement impossible : cette activité ne fait pas partie de la journée.'
+            USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_registrations_check_track
+    BEFORE INSERT OR UPDATE OF track_registration_id, session_id, person_id ON programme.registrations
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_check_registration_track();
+
+CREATE TRIGGER tg_registrations_events
+    AFTER INSERT OR UPDATE OF status, track_registration_id ON programme.registrations
+    FOR EACH ROW EXECUTE FUNCTION programme.tg_registrations_emit_events();
 
 -- -----------------------------------------------------------------------------
 -- 5. Questions du public
@@ -1521,6 +1784,7 @@ COMMENT ON FUNCTION programme.proposal_needs_deadline IS
 INSERT INTO org.organization_references (ref_schema, ref_table, ref_column, strategy, dedupe_on) VALUES
     ('programme', 'sessions',              'organization_id', 'reassign', '{}'),
     ('programme', 'registrations',         'organization_id', 'reassign', '{}'),
+    ('programme', 'track_registrations',   'organization_id', 'reassign', '{}'),
     ('programme', 'session_organizations', 'organization_id', 'reassign', '{session_id}')
 ON CONFLICT DO NOTHING;
 

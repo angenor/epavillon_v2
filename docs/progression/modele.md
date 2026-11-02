@@ -559,3 +559,18 @@ Demande du commanditaire : une organisation pose une question sur la plateforme 
 
 **En production** : `ops/migrations/2026-11-02-assistance.sql`, rejouable, avant l'API. Jouée deux fois en local ; schéma complet rechargé par les tests (base jetable).
 
+
+## 02/11/2026, `075_programme_sessions.sql`, `080_live.sql` et `110_engagement.sql` : l'inscription à une journée
+
+Demande du commanditaire (maquettes `docs/maquettes/direction-condensee/journee-inscription.html` et `bouton-inscription.html`) : une journée spéciale, et l'atelier préparatoire, se suivent avec un seul lien de direct ; on s'inscrit à la journée, avec ou sans compte, et l'on décoche les activités qui n'intéressent pas.
+
+- **`programme.track_registrations`** : l'inscription à la journée (personne, organisation, réponses au formulaire de l'édition, langue, `joined_at` du direct de la journée, `manage_token_hash` du lien de gestion de l'invité, SHA-256 sur 32 octets). Une vivante par personne et par journée (`ux_track_registrations_person_track`) ; ni jauge ni liste d'attente (`ck_track_registrations_status`). Seul un fil `special_day` ou `side_programme` en prend (`tg_track_registrations_check`). Émet `programme.track_registration.created` puis `.<état>`.
+- **`programme.registrations.track_registration_id`** (`ON DELETE SET NULL`) : les activités gardées restent des inscriptions ordinaires, ce qui garde rappels, compteurs, jauge, listes et statistiques par activité sans rien réécrire. `tg_registrations_check_track` : même personne, activité de la journée. L'événement d'inscription porte désormais `track_registration_id` et part aussi quand on rattache une ligne existante.
+- **`programme.day_track_of(séance)`**, **`programme.is_day_track_kind(nature)`** : la journée dont une activité suit le direct, publiée ou non ; une seule définition pour la programmation et le direct.
+- **`live.meetings.track_id`** (`xmod_fk_meetings_track`, exclusif de `session_id` par `ck_meetings_target`, une vivante par journée par `ux_meetings_active_per_track`), montré par `live.meetings_public` ; `live.meeting.started` et `.ended` portent `track_id`. Le démarrage d'une réunion de journée n'allume aucune activité (`session_id` nul) : l'état « en direct » reste à la régie, activité par activité.
+- **`live.meeting_participants.track_registration_id`** (exclusif de `registration_id` par `ck_meeting_participants_origin`, unique) : une place Zoom par inscription à la journée.
+- **Type d'avis `programme.track_registration.confirmed`**.
+
+Aucune inscription ni réunion n'existait sur les activités des journées le 02/11 (lu en production) : rien à reprendre.
+
+**En production** : `ops/migrations/2026-11-02-inscription-journee.sql`, rejouable, additive, avant l'API et le worker de la phase 2. Syntaxe vérifiée par libpg_query (corps PL/pgSQL compris) ; noms, colonnes, contraintes et définitions remplacées relus contre la production. Pas encore jouée (Docker en panne, aucune base locale).

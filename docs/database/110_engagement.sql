@@ -1048,6 +1048,11 @@ INSERT INTO engagement.notification_types (code, module_code, label, default_cha
     -- Message du comité adressé à des personnes nommées, ou réponse dans leur fil (27/10).
     ('programme.comment.addressed',     'programme',   '{"fr":"Message du comité qui vous est adressé","en":"Committee message addressed to you"}', '{in_app,email}', 'normal', '{titre_activite,auteur}'),
     ('programme.registration.confirmed','programme',   '{"fr":"Inscription confirmée","en":"Registration confirmed"}',         '{in_app,email}', 'important', '{prenom,titre_session,date_session,lien_participation}'),
+    -- Inscription à une journée (02/11, 075 § 4 bis) : un avis pour la journée,
+    -- aucun par activité gardée. `lien_gestion` (changer ses activités, se
+    -- désinscrire) n'existe que sans compte ; le courriel qui le porte est mis en
+    -- file par l'API, le jeton en clair n'entrant jamais dans l'outbox.
+    ('programme.track_registration.confirmed','programme', '{"fr":"Inscription à la journée confirmée","en":"Day registration confirmed"}', '{in_app,email}', 'important', '{prenom,titre_journee,date_journee,activites_gardees,lien_direct,lien_gestion}'),
     ('programme.session.reminder',      'programme',   '{"fr":"Rappel de session","en":"Session reminder"}',                    '{email}',        'normal',    '{prenom,titre_session,date_session,delai,lien_participation}'),
     ('programme.session.cancelled',     'programme',   '{"fr":"Session annulée","en":"Session cancelled"}',                     '{in_app,email}', 'critical',  '{titre_session,motif}'),
     ('programme.session.rescheduled',   'programme',   '{"fr":"Session reprogrammée","en":"Session rescheduled"}',              '{in_app,email}', 'critical',  '{titre_session,nouvelle_date}'),

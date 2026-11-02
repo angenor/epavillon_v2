@@ -73,6 +73,22 @@
 --   avant le début prévu n'est annoncée qu'à début − 15 min, si elle tourne
 --   encore (travail `live.announce_meeting_start`). Seule borne horaire du
 --   direct, et elle ne ferme rien : la salle reste joignable à toute heure.
+--
+-- LE DIRECT D'UNE JOURNÉE (décidé le 02/11/2026)
+--
+--   Une journée spéciale, et l'atelier préparatoire, se suivent avec une seule
+--   réunion pour toute la journée, moments compris (075 § 4 bis). La réunion se
+--   rattache alors au fil (`track_id`) et non à une séance : une réunion porte
+--   l'une ou l'autre, jamais les deux. Les activités de la journée
+--   (`programme.day_track_of()`) n'ont plus de réunion propre : leur
+--   « Rejoindre » et le lien d'animateur de la régie mènent à celle de la
+--   journée, et l'inscrit a une seule place Zoom, celle de son inscription à
+--   la journée (`meeting_participants.track_registration_id`).
+--
+--   Le démarrage de la réunion d'une journée n'allume AUCUNE activité : son
+--   annonce porte `session_id` nul, que la Programmation ignore. L'état « en
+--   direct » reste par activité, posé par la régie, et la règle n° 4 (un seul
+--   direct à la fois) s'y applique toujours.
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -194,6 +210,10 @@ CREATE TABLE live.meetings (
     -- Heure à laquelle la synchronisation part chez Zoom (31/10) ; NULL : tout
     -- de suite. Voir le COMMENT ON COLUMN.
     sync_due_at         timestamptz,
+    -- Réunion d'une journée (02/11, voir l'en-tête) : un seul direct pour le
+    -- fil, ses activités n'en ont pas. Exclusive de `session_id`.
+    track_id            uuid        CONSTRAINT xmod_fk_meetings_track
+                                    REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
 
     -- Une réunion autonome doit au moins porter un intitulé lisible.
     CONSTRAINT ck_meetings_context
@@ -202,7 +222,11 @@ CREATE TABLE live.meetings (
     CONSTRAINT ck_meetings_external_shape
         CHECK (status IN ('draft', 'failed', 'cancelled') OR external_id IS NOT NULL),
     CONSTRAINT ck_meetings_period
-        CHECK (actual_end_at IS NULL OR actual_start_at IS NULL OR actual_end_at >= actual_start_at)
+        CHECK (actual_end_at IS NULL OR actual_start_at IS NULL OR actual_end_at >= actual_start_at),
+    -- Une réunion sert une séance OU une journée : les deux à la fois enverraient
+    -- les inscrits d'une activité gardée dans deux salles.
+    CONSTRAINT ck_meetings_target
+        CHECK (session_id IS NULL OR track_id IS NULL)
 );
 
 -- Un identifiant de réunion est unique par fournisseur : deux lignes ne peuvent
@@ -216,6 +240,11 @@ CREATE UNIQUE INDEX ux_meetings_provider_external
 CREATE UNIQUE INDEX ux_meetings_active_per_session
     ON live.meetings (session_id)
     WHERE session_id IS NOT NULL AND status NOT IN ('cancelled', 'failed');
+
+-- Une journée n'a qu'une réunion vivante, pour la même raison.
+CREATE UNIQUE INDEX ux_meetings_active_per_track
+    ON live.meetings (track_id)
+    WHERE track_id IS NOT NULL AND status NOT IN ('cancelled', 'failed');
 
 CREATE INDEX ix_meetings_schedule ON live.meetings (scheduled_start_at DESC) WHERE status IN ('scheduled', 'started');
 CREATE INDEX ix_meetings_event    ON live.meetings (event_id) WHERE event_id IS NOT NULL;
@@ -304,6 +333,8 @@ COMMENT ON COLUMN live.meetings.passcode_encrypted IS
     'Code d''accès, CHIFFRÉ (D3). Le code n''est transmis qu''aux inscrits, avec leur lien personnel.';
 COMMENT ON COLUMN live.meetings.join_url IS
     'Lien de participation générique : donnée publique, diffusable. À distinguer strictement des colonnes chiffrées.';
+COMMENT ON COLUMN live.meetings.track_id IS
+    'Journée (fil special_day ou side_programme) dont c''est l''unique réunion ; ses activités n''en ont pas. Exclusive de session_id (ck_meetings_target).';
 COMMENT ON COLUMN live.meetings.sync_due_at IS
     'Heure à laquelle la synchronisation part chez Zoom ; NULL : tout de suite. Zoom limite à 100 créations ou modifications de réunion par jour et par hôte (remise à zéro à 00:00 UTC). Un déplacement d''une réunion déjà créée la pose à cinq minutes, sans la repousser si elle est déjà dans le futur : déplacer plusieurs fois de suite ne compte qu''une modification. Un refus de quota avec Retry-After la pose à l''heure dite (ligne en failed), sans consommer d''essai. Remise à NULL par une synchronisation réussie, un échec ordinaire, la relance et le bouton « Envoyer à Zoom maintenant » du back-office.';
 
@@ -312,7 +343,8 @@ CREATE VIEW live.meetings_public AS
 SELECT m.id, m.session_id, m.event_id, m.provider, m.topic,
        m.scheduled_start_at, m.duration_minutes, m.timezone,
        m.actual_start_at, m.actual_end_at,
-       m.join_url, m.registration_url, m.requires_registration, m.status
+       m.join_url, m.registration_url, m.requires_registration, m.status,
+       m.track_id
 FROM live.meetings m;
 
 COMMENT ON VIEW live.meetings_public IS
@@ -359,13 +391,15 @@ BEGIN
         RETURN false;
     END IF;
 
+    -- `track_id` (02/11) : la réunion d'une journée, dont `session_id` est nul.
     PERFORM platform.emit_event(
         'live', 'meeting', v_meeting.id, 'live.meeting.started',
         jsonb_build_object(
             'session_id', v_meeting.session_id,
             'event_id',   v_meeting.event_id,
             'occurrence', v_meeting.external_uuid,
-            'started_at', v_meeting.actual_start_at
+            'started_at', v_meeting.actual_start_at,
+            'track_id',   v_meeting.track_id
         )
     );
     RETURN true;
@@ -393,7 +427,8 @@ BEGIN
                 'session_id', NEW.session_id,
                 'event_id',   NEW.event_id,
                 'occurrence', NEW.external_uuid,
-                'ended_at',   NEW.actual_end_at
+                'ended_at',   NEW.actual_end_at,
+                'track_id',   NEW.track_id
             )
         );
     END IF;
@@ -463,15 +498,25 @@ CREATE TABLE live.meeting_participants (
 
     created_at          timestamptz NOT NULL DEFAULT now(),
     updated_at          timestamptz NOT NULL DEFAULT now(),
+    -- Inscription à une journée à l'origine de l'enregistrement (02/11) : une
+    -- place pour toute la journée, ses activités gardées n'en ont pas.
+    -- Exclusive de `registration_id`.
+    track_registration_id uuid      CONSTRAINT xmod_fk_meeting_participants_track_registration
+                                    REFERENCES programme.track_registrations(id) ON DELETE CASCADE,
 
     CONSTRAINT ck_meeting_participants_synced_shape
-        CHECK (sync_status <> 'synced' OR external_registrant_id IS NOT NULL)
+        CHECK (sync_status <> 'synced' OR external_registrant_id IS NOT NULL),
+    CONSTRAINT ck_meeting_participants_origin
+        CHECK (registration_id IS NULL OR track_registration_id IS NULL)
 );
 
 -- Une inscription ne produit qu'un enregistrement fournisseur.
 CREATE UNIQUE INDEX ux_meeting_participants_registration
     ON live.meeting_participants (registration_id)
     WHERE registration_id IS NOT NULL;
+CREATE UNIQUE INDEX ux_meeting_participants_track_registration
+    ON live.meeting_participants (track_registration_id)
+    WHERE track_registration_id IS NOT NULL;
 -- Un email ne peut être enregistré deux fois sur la même réunion : le
 -- fournisseur le refuserait, autant l'empêcher en amont.
 CREATE UNIQUE INDEX ux_meeting_participants_email
@@ -498,6 +543,8 @@ COMMENT ON TABLE live.meeting_participants IS
     'Correspondance inscription plateforme <-> enregistrement chez le fournisseur, avec son état de synchronisation (D2).';
 COMMENT ON COLUMN live.meeting_participants.request_payload IS
     'Charge utile destinée à l''API du fournisseur. Successeur de activity_registrations.fallback_payload : ici, c''est la norme, pas un correctif.';
+COMMENT ON COLUMN live.meeting_participants.track_registration_id IS
+    'Inscription à la journée qui a donné cette place, dans la réunion de la journée. Exclusive de registration_id (ck_meeting_participants_origin).';
 COMMENT ON COLUMN live.meeting_participants.cancelled_at IS
     'Inscription annulée : l''enregistrement est annulé chez le fournisseur. Une réinscription remet la colonne à NULL et reprend la ligne (adresse unique par réunion).';
 COMMENT ON COLUMN live.meeting_participants.joined_at IS
