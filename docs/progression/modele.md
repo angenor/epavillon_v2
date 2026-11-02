@@ -616,6 +616,6 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - **`platform.retry_job`** : relance d'un travail mort ou en échec, un essai de plus, compteur et dernière erreur gardés.
 - Index `ix_audit_log_request` et `ix_outbox_correlation` : recherche par code de la demande.
 - Permission **`identity.platform.journal`** (portée globale), donnée à `admin` ; `super_admin` par déclencheur.
-- Constat : aucun travail du worker ne prépare les partitions de `platform.audit_log` (seulement `engagement.email_messages`) ; seul l'amorçage de `900_seed.sql` en crée deux.
+- Aucun travail du worker ne préparait les partitions de `platform.audit_log` (seulement `engagement.email_messages`) : le travail `platform.maintain_journals` (worker) prépare désormais celles de `audit_log` et `ops_log` et purge `ops_log`.
 
-**En production** : `ops/migrations/2026-11-02-journal.sql`, rejouable, additive, à jouer avant de déployer l'API et le worker. L'index de l'audit se pose sous verrou d'écriture sur chaque partition (pas de CONCURRENTLY sur une table partitionnée). Syntaxe vérifiée par libpg_query ; la vue remplacée est celle du dépôt (aucune migration ne l'a modifiée), aucune vue n'en dépend. Pas jouée.
+**En production** : `ops/migrations/2026-11-02-journal.sql`, rejouable, additive, à jouer avant de déployer l'API et le worker. L'index de l'audit se pose sous verrou d'écriture sur chaque partition (pas de CONCURRENTLY sur une table partitionnée). Syntaxe vérifiée par libpg_query ; la vue remplacée est celle du dépôt (aucune migration ne l'a modifiée), aucune vue n'en dépend. **Jouée le 02/11** (sauvegarde faite).

@@ -1,0 +1,149 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH page AS (\n               SELECT o.id, o.occurred_at, o.source, o.kind, o.level, o.request_id,\n                      o.actor_id, p.display_name AS actor_name, o.method, o.route, o.status,\n                      o.duration_ms, o.error_code, o.task, o.job_id, o.detail,\n                      count(*) OVER () AS total\n                 FROM platform.ops_log o\n                 LEFT JOIN identity.people p ON p.id = o.actor_id\n                WHERE o.occurred_at >= $1\n                  AND ($2::text IS NULL OR o.kind = $2)\n                  AND ($3::text IS NULL OR o.source = $3)\n                  AND ($4::text IS NULL\n                       OR o.request_id = $4\n                       OR o.route ILIKE '%' || $5 || '%'\n                       OR o.error_code ILIKE '%' || $5 || '%'\n                       OR o.task ILIKE '%' || $5 || '%'\n                       OR p.display_name ILIKE '%' || $5 || '%')\n                  AND ($6::text IS NULL OR o.request_id = $6)\n                ORDER BY o.occurred_at DESC, o.id DESC\n                LIMIT $7 OFFSET $8\n           )\n           SELECT page.id AS \"id!\", page.occurred_at AS \"occurred_at!\", page.source AS \"source!\",\n                  page.kind AS \"kind!\", page.level AS \"level!\", page.request_id AS \"request_id?\",\n                  page.actor_id AS \"actor_id?\", page.actor_name AS \"actor_name?\",\n                  g.nom AS \"organization_name?\", page.method AS \"method?\", page.route AS \"route?\",\n                  page.status AS \"status?\", page.duration_ms AS \"duration_ms?\",\n                  page.error_code AS \"error_code?\", page.task AS \"task?\", page.job_id AS \"job_id?\",\n                  page.detail AS \"detail?\", page.total AS \"total!\"\n             FROM page\n             LEFT JOIN LATERAL (\n                  SELECT COALESCE(o.acronym, o.legal_name) AS nom\n                    FROM org.memberships m\n                    JOIN org.organizations o ON o.id = m.organization_id\n                   WHERE m.person_id = page.actor_id AND m.status = 'active'\n                   ORDER BY m.is_primary DESC, m.approved_at NULLS LAST\n                   LIMIT 1\n             ) g ON true\n            ORDER BY page.occurred_at DESC, page.id DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "occurred_at!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "source!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "level!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "request_id?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "actor_id?",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "actor_name?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "organization_name?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "method?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "route?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "status?",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "duration_ms?",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "error_code?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "task?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "job_id?",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "detail?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "total!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "ce1ab40e966c8a264a55b9ecdfa7e6e219d40936c8af4b1407dbdfd80a96bdd4"
+}

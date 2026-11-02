@@ -27,11 +27,12 @@ async fn main() -> std::io::Result<()> {
         });
 
     let adresse = config.api_bind_addr.clone();
-    let etat = AppState::new(db, config).await.unwrap_or_else(|e| {
+    let mut etat = AppState::new(db, config).await.unwrap_or_else(|e| {
         tracing::error!("état de l'application refusé au démarrage : {e}");
         std::process::exit(1);
     });
 
+    etat.ops_log = Some(kernel::ops_log::OpsLog::spawn(etat.db.pool().clone()));
     etat.realtime.ecouter(etat.db.pool());
     annoncer_l_arret(etat.realtime.clone());
 

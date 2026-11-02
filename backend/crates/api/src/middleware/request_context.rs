@@ -4,16 +4,22 @@
 //! pose le contexte dans la requête et dans la portée de tâche — c'est ce qui
 //! permet à une réponse d'erreur de porter le même identifiant —, et le renvoie
 //! dans l'en-tête de réponse.
+//!
+//! En fin de requête, il pose dans `platform.ops_log` ce qui mérite d'être relu
+//! (`classer`), par le canal de [`OpsLog`] : jamais d'attente, jamais d'échec.
 
 use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::http::header::{HeaderName, HeaderValue};
-use actix_web::{Error, HttpMessage};
+use actix_web::{web, Error, HttpMessage};
 use futures_util::future::{ready, LocalBoxFuture, Ready};
 use kernel::context::{RequestContext, REQUEST_ID_HEADER};
+use kernel::error::ApiError;
 use kernel::i18n::Locales;
+use kernel::ops_log::{HttpOutcome, OpsEntry, OpsKind, OpsLevel, OpsLog};
 use std::rc::Rc;
 use std::time::{Duration, Instant};
+use time::OffsetDateTime;
 use tracing::field::Empty;
 use tracing::{Instrument, Level, Span};
 
@@ -30,6 +36,33 @@ fn niveau_de_fin(statut: u16, duree: Duration) -> Option<Level> {
         Some(Level::WARN)
     } else if matches!(statut, 401 | 403 | 429) {
         Some(Level::INFO)
+    } else {
+        None
+    }
+}
+
+/// Ce qui entre dans `platform.ops_log`. Un refus ordinaire (400, 404 d'un
+/// visiteur, 409 ou 422 hors back-office) est le fonctionnement normal du site ;
+/// le retenir noierait les vraies pannes.
+fn classer(
+    statut: u16,
+    duree: Duration,
+    route: &str,
+    connecte: bool,
+) -> Option<(OpsKind, OpsLevel)> {
+    let back_office = route
+        .strip_prefix(crate::PREFIXE)
+        .unwrap_or(route)
+        .starts_with("/admin");
+    if statut >= 500 {
+        Some((OpsKind::HttpError, OpsLevel::Error))
+    } else if matches!(statut, 401 | 403 | 429)
+        || (back_office && matches!(statut, 409 | 422))
+        || (connecte && statut == 404)
+    {
+        Some((OpsKind::HttpRefused, OpsLevel::Info))
+    } else if statut < 400 && duree > REQUETE_LENTE {
+        Some((OpsKind::HttpSlow, OpsLevel::Warn))
     } else {
         None
     }
@@ -137,6 +170,10 @@ where
             duree_ms = Empty,
         );
         let debut = Instant::now();
+        let recu_le = OffsetDateTime::now_utc();
+        let journal = req.app_data::<web::Data<OpsLog>>().cloned();
+        let methode = req.method().as_str().to_owned();
+        let identifiant = request_id.clone();
 
         Box::pin(kernel::context::scope(
             request_id,
@@ -146,7 +183,42 @@ where
                     Ok(res) => res.status(),
                     Err(e) => e.as_response_error().status_code(),
                 };
-                journaliser_fin(statut.as_u16(), debut.elapsed());
+                let duree = debut.elapsed();
+                journaliser_fin(statut.as_u16(), duree);
+                if let Some(journal) = journal {
+                    let acteur = resultat.as_ref().ok().and_then(|res| {
+                        res.request()
+                            .extensions()
+                            .get::<RequestContext>()
+                            .and_then(|ctx| ctx.actor_id)
+                    });
+                    if let Some((kind, level)) =
+                        classer(statut.as_u16(), duree, &route, acteur.is_some())
+                    {
+                        let erreur = match &resultat {
+                            Ok(res) => res
+                                .response()
+                                .error()
+                                .and_then(|e| e.as_error::<ApiError>()),
+                            Err(e) => e.as_error::<ApiError>(),
+                        };
+                        journal.record(OpsEntry::http(
+                            kind,
+                            level,
+                            HttpOutcome {
+                                occurred_at: recu_le,
+                                request_id: &identifiant,
+                                actor_id: acteur,
+                                method: &methode,
+                                route: &route,
+                                status: statut.as_u16(),
+                                duration: duree,
+                                error_code: erreur.map(|e| e.code.as_str()),
+                                detail: erreur.and_then(|e| e.detail.as_deref()),
+                            },
+                        ));
+                    }
+                }
                 let mut res = resultat?;
                 if let Ok(valeur) = HeaderValue::from_str(&entete) {
                     res.headers_mut()
@@ -180,6 +252,35 @@ mod tests {
         assert_eq!(niveau_de_fin(200, LENT), Some(Level::WARN));
         assert_eq!(niveau_de_fin(403, LENT), Some(Level::WARN));
         assert_eq!(niveau_de_fin(200, REQUETE_LENTE), None);
+    }
+
+    #[test]
+    fn classement_du_journal_d_exploitation() {
+        let c = |statut, duree, route, connecte| {
+            classer(statut, duree, route, connecte).map(|(k, _)| k)
+        };
+        assert_eq!(c(500, RAPIDE, "/api/x", false), Some(OpsKind::HttpError));
+        assert_eq!(c(503, LENT, "/api/x", false), Some(OpsKind::HttpError));
+        for statut in [401, 403, 429] {
+            assert_eq!(
+                c(statut, RAPIDE, "/api/x", false),
+                Some(OpsKind::HttpRefused)
+            );
+        }
+        assert_eq!(
+            c(409, RAPIDE, "/api/admin/proposals/{id}", true),
+            Some(OpsKind::HttpRefused)
+        );
+        assert_eq!(
+            c(422, RAPIDE, "/api/admin/x", true),
+            Some(OpsKind::HttpRefused)
+        );
+        assert_eq!(c(409, RAPIDE, "/api/proposals/{id}", true), None);
+        assert_eq!(c(404, RAPIDE, "/api/x", false), None);
+        assert_eq!(c(404, RAPIDE, "/api/x", true), Some(OpsKind::HttpRefused));
+        assert_eq!(c(400, LENT, "/api/x", true), None);
+        assert_eq!(c(200, LENT, "/api/x", false), Some(OpsKind::HttpSlow));
+        assert_eq!(c(200, RAPIDE, "/api/x", true), None);
     }
 
     #[test]

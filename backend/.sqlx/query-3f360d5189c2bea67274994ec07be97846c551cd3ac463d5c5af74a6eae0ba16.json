@@ -1,0 +1,87 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, event_type, aggregate_schema, aggregate_type, aggregate_id, occurred_at,\n                  published_at, available_at, attempts, last_error\n             FROM platform.outbox_events\n            WHERE correlation_id = $1\n            ORDER BY occurred_at, id\n            LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "event_type",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "aggregate_schema",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "aggregate_type",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "aggregate_id",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "occurred_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "available_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "attempts",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "last_error",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "3f360d5189c2bea67274994ec07be97846c551cd3ac463d5c5af74a6eae0ba16"
+}

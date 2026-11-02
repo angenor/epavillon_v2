@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.ensure_month_partition(\n                           'platform', $1,\n                           (date_trunc('month', now()) + make_interval(months => $2::int))::date\n                       ) AS \"nom!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "nom!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2a8d2b4487f1908746ac079efc141a45d1322a8c22d4da2ca01ac9c21711dd39"
+}

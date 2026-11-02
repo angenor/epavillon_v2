@@ -1,0 +1,108 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH page AS (\n               SELECT a.id, a.occurred_at, a.actor_id, a.actor_label, a.request_id,\n                      a.entity_schema, a.entity_table, a.entity_id, a.action,\n                      a.changed_fields, a.old_data, a.new_data,\n                      count(*) OVER () AS total\n                 FROM platform.audit_log a\n                WHERE a.occurred_at >= $1\n                  AND ($2::text IS NULL OR (a.entity_schema = $2 AND a.entity_table = $3))\n                  AND ($4::text IS NULL OR a.action = $4)\n                  AND ($5::text IS NULL\n                       OR a.actor_label ILIKE '%' || $6 || '%'\n                       OR a.entity_id::text = $5)\n                  AND ($7::text IS NULL OR a.request_id = $7)\n                ORDER BY a.occurred_at DESC, a.id DESC\n                LIMIT $8 OFFSET $9\n           )\n           SELECT page.id AS \"id!\", page.occurred_at AS \"occurred_at!\",\n                  page.actor_id AS \"actor_id?\", page.actor_label AS \"actor_label?\",\n                  g.nom AS \"organization_name?\", page.request_id AS \"request_id?\",\n                  page.entity_schema AS \"entity_schema!\", page.entity_table AS \"entity_table!\",\n                  page.entity_id AS \"entity_id?\", page.action AS \"action!\",\n                  COALESCE((\n                      SELECT jsonb_agg(jsonb_build_object(\n                                 'name', f.champ,\n                                 'masked', s.masque,\n                                 'before', CASE WHEN s.masque THEN NULL ELSE\n                                     CASE WHEN jsonb_typeof(page.old_data -> f.champ) = 'string'\n                                               AND length(page.old_data ->> f.champ) > 300\n                                          THEN to_jsonb(left(page.old_data ->> f.champ, 300) || '…')\n                                          ELSE page.old_data -> f.champ END END,\n                                 'after', CASE WHEN s.masque THEN NULL ELSE\n                                     CASE WHEN jsonb_typeof(page.new_data -> f.champ) = 'string'\n                                               AND length(page.new_data ->> f.champ) > 300\n                                          THEN to_jsonb(left(page.new_data ->> f.champ, 300) || '…')\n                                          ELSE page.new_data -> f.champ END END\n                             ) ORDER BY f.champ)\n                        FROM unnest(page.changed_fields) AS f(champ)\n                        CROSS JOIN LATERAL (\n                             SELECT platform.audit_is_sensitive(page.entity_schema, page.entity_table, f.champ) AS masque\n                        ) s\n                       WHERE f.champ NOT IN ('updated_at', 'search_vector')\n                  ), '[]'::jsonb) AS \"fields!\",\n                  page.total AS \"total!\"\n             FROM page\n             LEFT JOIN LATERAL (\n                  SELECT COALESCE(o.acronym, o.legal_name) AS nom\n                    FROM org.memberships m\n                    JOIN org.organizations o ON o.id = m.organization_id\n                   WHERE m.person_id = page.actor_id AND m.status = 'active'\n                   ORDER BY m.is_primary DESC, m.approved_at NULLS LAST\n                   LIMIT 1\n             ) g ON true\n            ORDER BY page.occurred_at DESC, page.id DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "occurred_at!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "actor_id?",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "actor_label?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "organization_name?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "request_id?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "entity_schema!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "entity_table!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "entity_id?",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "action!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "fields!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "total!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "7238a8c13de6ee7ab7990d1d99f9c29ac61259e449cf3f813ad0eca57f6d942e"
+}

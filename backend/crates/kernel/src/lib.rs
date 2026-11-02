@@ -18,6 +18,7 @@ pub mod jobs;
 pub mod legal;
 pub mod mail;
 pub mod net;
+pub mod ops_log;
 pub mod pg_error;
 pub mod realtime;
 pub mod storage;

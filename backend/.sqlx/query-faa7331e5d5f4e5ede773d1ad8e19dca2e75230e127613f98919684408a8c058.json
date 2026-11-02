@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.id, j.queue, j.task, j.status::text AS \"status!\", j.attempts, j.max_attempts,\n                  j.last_error, j.run_at, j.created_at,\n                  (SELECT max(o.occurred_at) FROM platform.ops_log o\n                    WHERE o.kind = 'job_failed' AND o.job_id = j.id) AS last_failed_at\n             FROM platform.jobs j\n            WHERE j.status IN ('failed', 'dead')\n               OR (j.status = 'queued' AND j.attempts > 0 AND j.last_error IS NOT NULL)\n            ORDER BY j.run_at DESC, j.id DESC\n            LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "queue",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "task",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "attempts",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "max_attempts",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "last_error",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "run_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "last_failed_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      true,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "faa7331e5d5f4e5ede773d1ad8e19dca2e75230e127613f98919684408a8c058"
+}

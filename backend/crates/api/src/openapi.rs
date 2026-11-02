@@ -43,6 +43,14 @@ pub struct ApiErrorBody {
         crate::routes::platform::drapeaux,
         crate::routes::platform::maintenance,
         crate::routes::platform::basculer_maintenance,
+        crate::routes::journal::entries::resume,
+        crate::routes::journal::entries::entrees,
+        crate::routes::journal::entries::entrees_csv,
+        crate::routes::journal::entries::demande,
+        crate::routes::journal::changes::modifications,
+        crate::routes::journal::failures::echecs,
+        crate::routes::journal::failures::relancer_travail,
+        crate::routes::journal::failures::relancer_evenement,
         crate::routes::legal::texte,
         crate::realtime::stream::flux,
         crate::realtime::pulse::pouls,
@@ -52,6 +60,7 @@ pub struct ApiErrorBody {
         (name = "Exploitation", description = "Vivacité et santé. `/ready` ne divulgue rien ; `/health` porte des chiffres et se protège comme une donnée."),
         (name = "Référentiel", description = "Pays, langues, vocabulaires administrables. Transverse à tous les modules, sans session : un formulaire d'inscription en a besoin avant qu'un compte existe."),
         (name = "Temps réel", description = "Annonces « tel sujet a changé » : ligne ouverte (SSE) pour les personnes connectées, pouls toutes les 30 s pour le public. Aucune donnée ne transite : la page relit sa route."),
+        (name = "Journal", description = "Journal du back-office : pannes, refus, pages lentes et travaux en échec (`platform.ops_log`, trois mois), audit de toute la plateforme sans valeur sensible, relance. Réservé à `identity.platform.journal` en portée globale."),
         (name = "Plateforme", description = "Les drapeaux de fonctionnalité, résolus pour qui demande — lus par le routage du site à la première navigation — et les textes qui engagent, une source pour le site et pour Guide Négo."),
     )
 )]
