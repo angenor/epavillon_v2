@@ -14,8 +14,8 @@
   .note p:last-child { margin: 0; }
   .lbl { display: block; margin: var(--space-12) 0 var(--space-3); font-size: var(--font-size-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
 
-  .cadre { border: 1px solid var(--color-border); border-radius: var(--radius-xl); background: var(--color-surface-raised); padding: var(--space-6); }
-  @media (max-width: 640px) { .cadre { padding: var(--space-4); } }
+  .bloc { border: 1px solid var(--color-border); border-radius: var(--radius-xl); background: var(--color-surface-raised); padding: var(--space-6); }
+  @media (max-width: 640px) { .bloc { padding: var(--space-4); } }
 
   header.tete { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); }
   header.tete .logo { width: 56px; height: 56px; border-radius: var(--radius-md); border: 1px solid var(--color-border); display: grid; place-items: center; font-weight: 800; color: var(--color-success); background: var(--color-success-surface); }
@@ -98,7 +98,7 @@
   </div>
 
   <small class="lbl">1. Fiche de l'organisation, onglet « Visites »</small>
-  <section class="cadre">
+  <section class="bloc">
     <header class="tete">
       <div class="logo">RSV</div>
       <div>
@@ -202,7 +202,7 @@
   </section>
 
   <small class="lbl">2. Même onglet, quand personne n'est venu</small>
-  <section class="cadre">
+  <section class="bloc">
     <div class="vide">
       <b>Personne de cette organisation n'a ouvert son espace depuis le 3 novembre.</b>
       Les visites sont enregistrées depuis cette date. Dernière connexion d'un membre : jamais.
@@ -211,7 +211,7 @@
 
   <small class="lbl">3. Fiche d'un dossier au back-office : rappel sous le titre</small>
   <div class="duo">
-    <section class="cadre">
+    <section class="bloc">
       <div class="dossier-tete">
         <div>
           <span class="ref">CDP31-00123 · Réseau Sahel Vert</span>
@@ -224,7 +224,7 @@
         <span class="vu">Vu par l'organisation le <b>11/11 à 14 h 35</b> <a class="lien" href="#">Détail</a></span>
       </div>
     </section>
-    <section class="cadre">
+    <section class="bloc">
       <div class="dossier-tete">
         <div>
           <span class="ref">CDP31-00124 · Réseau Sahel Vert</span>
