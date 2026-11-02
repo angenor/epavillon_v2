@@ -156,6 +156,8 @@ export const permissions: Permission[] = [
   { code: 'identity.person.read', label: { fr: 'Consulter les utilisateurs', en: 'Read users' }, module_code: 'identity' },
   { code: 'identity.person.manage', label: { fr: 'Gérer les utilisateurs', en: 'Manage users' }, module_code: 'identity' },
   { code: 'identity.role.assign', label: { fr: 'Attribuer des rôles', en: 'Assign roles' }, module_code: 'identity' },
+  { code: 'identity.platform.maintenance', label: { fr: 'Mettre la plateforme en maintenance', en: 'Put the platform under maintenance' }, module_code: 'identity' },
+  { code: 'identity.platform.journal', label: { fr: "Consulter le journal d'exploitation", en: 'Read the operations log' }, module_code: 'identity' },
   { code: 'org.organization.read', label: { fr: 'Consulter les organisations', en: 'Read organizations' }, module_code: 'org' },
   { code: 'org.organization.manage', label: { fr: 'Gérer les organisations', en: 'Manage organizations' }, module_code: 'org' },
   { code: 'org.organization.merge', label: { fr: 'Fusionner des organisations', en: 'Merge organizations' }, module_code: 'org' },
@@ -192,6 +194,7 @@ const GRANTS: Record<string, PermissionCode[]> = {
     // rôles n'aurait servi qu'au compte technique pivot.
     'identity.role.assign',
     'identity.person.read', 'identity.person.manage',
+    'identity.platform.maintenance', 'identity.platform.journal',
     'org.organization.read', 'org.organization.manage', 'org.organization.merge',
     'event.event.manage', 'event.call.manage',
     'programme.proposal.read_all', 'programme.proposal.decide', 'programme.review.write',

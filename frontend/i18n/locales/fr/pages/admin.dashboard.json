@@ -104,6 +104,8 @@
     "threshold": "seuil {value}",
     "showHealthy": "Voir l'indicateur au vert | Voir l'indicateur au vert | Voir les {count} indicateurs au vert",
     "hideHealthy": "Masquer les indicateurs au vert",
+    "openJournal": "Ouvrir le journal",
+    "seeFailures": "Voir et relancer dans le journal",
     "severity": {
       "critique": "Critique",
       "attention": "Attention",

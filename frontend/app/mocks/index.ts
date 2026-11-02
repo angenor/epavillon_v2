@@ -54,6 +54,8 @@
  *   incidents.ts         sept messages d'incident : les cinq états que
  *                        `live.event_incidents()` distingue, les cinq portées
  *   admin-incidents.ts   ce que l'écran A13 en fait — état, portée, cible
+ *   admin-journal.ts     le journal du back-office : erreurs, modifications,
+ *                        travaux et événements en échec, recalés sur maintenant
  *   negotiation-access.ts  l'admission de Guide Négo : l'état d'accès, les
  *                        issues d'un code et la demande, hors ligne
  *   admin-negotiation.ts   le back-office de l'admission : codes, usages, file
@@ -472,3 +474,13 @@ export {
   regieStartLive,
   regieUndo,
 } from './admin-regie'
+
+export {
+  journalChangePage,
+  journalEntryPage,
+  journalFailures,
+  journalSummary,
+  journalTrace,
+  retryJournalEvent,
+  retryJournalJob,
+} from './admin-journal'

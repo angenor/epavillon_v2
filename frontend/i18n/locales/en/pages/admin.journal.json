@@ -1,0 +1,361 @@
+{
+  "title": "Platform log",
+  "subtitle": "What failed, what was refused, what changed. Kept for {count} months.",
+  "zoneUtc": "universal time (UTC)",
+  "lookup": {
+    "label": "Request code",
+    "placeholder": "Code shown on screen (e.g. 01a19c…)",
+    "submit": "Find"
+  },
+  "forbidden": {
+    "scope": "member of the central team, with access to the platform log",
+    "action": "Back to the dashboard"
+  },
+  "dropped": "No line lost. | {count} line could not be recorded since the API last started: the log is incomplete. | {count} lines could not be recorded since the API last started: the log is incomplete.",
+  "figures": {
+    "label": "Last 24 hours",
+    "http_error": "failures, last 24 hours | failure, last 24 hours | failures, last 24 hours",
+    "http_refused": "refused requests | refused request | refused requests",
+    "http_slow": "slow pages (over one second) | slow page (over one second) | slow pages (over one second)",
+    "failing": "failed tasks to retry | failed task to retry | failed tasks to retry"
+  },
+  "tabs": {
+    "label": "Log",
+    "erreurs": "Errors and refusals",
+    "taches": "Failed tasks",
+    "modifications": "Changes"
+  },
+  "filters": {
+    "label": "Filters"
+  },
+  "period": {
+    "label": "Period",
+    "24h": "Last 24 hours",
+    "7j": "7 days",
+    "30j": "30 days",
+    "90j": "90 days"
+  },
+  "kind": {
+    "http_error": "Failure",
+    "http_refused": "Refused",
+    "http_slow": "Slow",
+    "job_failed": "Task failed"
+  },
+  "kindFilter": {
+    "label": "Severity",
+    "all": "All severities",
+    "http_error": "Failures",
+    "http_refused": "Refused requests",
+    "http_slow": "Slow pages",
+    "job_failed": "Failed tasks"
+  },
+  "kindTitle": {
+    "http_error": "Server failure",
+    "http_refused": "Request refused",
+    "http_slow": "Slow response",
+    "job_failed": "Background task failed"
+  },
+  "source": {
+    "label": "Origin",
+    "all": "All origins",
+    "api": "Web server",
+    "worker": "Background tasks"
+  },
+  "search": {
+    "label": "Search",
+    "entries": "Person, page, error or request code",
+    "changes": "Author or identifier"
+  },
+  "entries": {
+    "caption": "Errors, refusals and slow responses, newest first",
+    "columns": {
+      "kind": "Severity",
+      "route": "Page or action",
+      "actor": "Person",
+      "message": "What happened"
+    },
+    "visitor": "Visitor",
+    "worker": "Background task",
+    "count": "No line | {shown} line out of {total} | {shown} lines out of {total}",
+    "export": "Export as CSV",
+    "exportOffline": "CSV export needs the API to be connected.",
+    "empty": {
+      "title": "Nothing to report",
+      "description": "No failure, refusal or slow response over this period."
+    },
+    "noResults": {
+      "title": "No line matches these filters",
+      "description": "Widen the period, or remove a filter.",
+      "action": "Remove filters"
+    }
+  },
+  "detail": {
+    "label": "Line detail",
+    "close": "Close the detail",
+    "when": "When",
+    "whenValue": "{day}, {time} ({zone})",
+    "person": "Person",
+    "route": "Page",
+    "response": "Response",
+    "responseValue": "{status} in {duration} ms",
+    "errorCode": "Error code",
+    "task": "Task",
+    "seeFailures": "See failed tasks",
+    "requestId": "Request code",
+    "copy": "Copy the request code",
+    "copied": "Request code copied",
+    "copyFailed": "The browser refused to copy: select the code by hand.",
+    "sameRequest": "Same request, in order",
+    "noRequest": "This line has no request code: it comes from a background task, or from a page without a session.",
+    "traceEmpty": "Nothing else carries this request code.",
+    "lookupTitle": "Request found",
+    "lookupEmpty": "No line carries this code. Check it: it may be more than three months old."
+  },
+  "trace": {
+    "change": "{action}: {entity}",
+    "event": "Event: {label}",
+    "published": "relayed at {time}",
+    "pending": "not relayed yet | not relayed yet, {count} attempt | not relayed yet, {count} attempts"
+  },
+  "action": {
+    "insert": "Created",
+    "update": "Updated",
+    "delete": "Deleted"
+  },
+  "changes": {
+    "caption": "Recorded changes, newest first",
+    "columns": {
+      "actor": "Author",
+      "action": "Action",
+      "entity": "Object",
+      "fields": "Changed fields"
+    },
+    "system": "System",
+    "wholeRow": "whole row",
+    "masked": "masked value",
+    "maskedField": "{name} (masked value)",
+    "entityFilter": {
+      "label": "Object",
+      "all": "All objects",
+      "dossiers": "Proposals",
+      "activites": "Activities",
+      "organisations": "Organisations",
+      "personnes": "People"
+    },
+    "actionFilter": {
+      "label": "Action",
+      "all": "Created, updated, deleted"
+    },
+    "empty": {
+      "title": "No change",
+      "description": "Nothing was created, updated or deleted over this period."
+    },
+    "noResults": {
+      "title": "No change matches these filters",
+      "description": "Widen the period, or remove a filter.",
+      "action": "Remove filters"
+    },
+    "detail": {
+      "entityId": "Identifier",
+      "table": "Table",
+      "seeRequest": "See the whole request",
+      "fields": "Fields",
+      "noFields": {
+        "insert": "Creation: the whole row, without field detail.",
+        "update": "No tracked field changed.",
+        "delete": "Deletion: the whole row, without field detail."
+      },
+      "before": "Before",
+      "after": "After",
+      "emptyValue": "empty"
+    }
+  },
+  "failures": {
+    "jobs": {
+      "title": "Background jobs",
+      "empty": "No failed job matches these filters."
+    },
+    "events": {
+      "title": "Events to relay",
+      "subtitle": "What modules signal to each other: until an event is relayed, its effects (emails, updates) do not happen.",
+      "empty": "No failed event matches these filters."
+    },
+    "columns": {
+      "lastAttempt": "Last attempt ({zone})",
+      "occurred": "Emitted ({zone})",
+      "task": "Kind",
+      "attempts": "Attempts",
+      "error": "Last error",
+      "actions": "Action"
+    },
+    "filters": {
+      "stateLabel": "State",
+      "stateAll": "All states",
+      "state": {
+        "dead": "Abandoned",
+        "failed": "Failed",
+        "retrying": "Retry scheduled"
+      },
+      "taskLabel": "Kind",
+      "taskAll": "All kinds"
+    },
+    "state": {
+      "dead": "Abandoned",
+      "failed": "Failed",
+      "retrying": "Retry at {time}"
+    },
+    "attemptsOf": "{attempts} of {max}",
+    "attempts": "no attempt | {count} attempt | {count} attempts",
+    "notLogged": "not recorded",
+    "retry": "Retry",
+    "retryNow": "Retry now",
+    "retried": "Retry requested",
+    "retriedMessage": "“{label}” is back in the queue.",
+    "readOnly": "Retrying requires the right to put the platform under maintenance: you can see failures, but not retry them.",
+    "empty": {
+      "title": "Nothing is waiting",
+      "description": "No failed background job or event."
+    }
+  },
+  "entities": {
+    "programme_proposals": "Proposal",
+    "programme_sessions": "Activity",
+    "programme_registrations": "Registration",
+    "programme_reviews": "Review",
+    "org_organizations": "Organisation",
+    "org_memberships": "Membership",
+    "identity_people": "Person",
+    "identity_accounts": "Account",
+    "identity_role_assignments": "Role assignment",
+    "event_events": "Edition",
+    "live_incidents": "Incident message",
+    "content_highlights": "Showcase slide"
+  },
+  "fields": {
+    "title": "title",
+    "summary": "summary",
+    "detailed_description": "detailed description",
+    "objectives": "objectives",
+    "status": "status",
+    "acronym": "acronym",
+    "name": "name",
+    "first_name": "first name",
+    "last_name": "last name",
+    "job_title": "job title",
+    "phone": "phone",
+    "primary_email": "primary email",
+    "contact_email": "contact email",
+    "password_hash": "password",
+    "starts_at": "start",
+    "ends_at": "end",
+    "room_id": "room"
+  },
+  "tasks": {
+    "analytics_refresh_all": "Dashboard refresh",
+    "engagement_ensure_partitions": "Monthly partition setup",
+    "engagement_notification_email": "Notification email",
+    "engagement_regie_notice": "Control room notice",
+    "engagement_send_day_registration": "Day registration confirmation",
+    "engagement_send_day_reminder": "Day reminder",
+    "engagement_send_mailing": "Group email",
+    "engagement_send_mailing_test": "Group email test",
+    "engagement_send_reminder": "Activity reminder",
+    "event_call_autoclose": "Automatic closing of the call for proposals",
+    "identity_purge_expired_tokens": "Expired token purge",
+    "identity_send_existing_account_notice": "Existing account notice",
+    "identity_send_password_reset_email": "Password reset email",
+    "identity_send_verification_email": "Address verification email",
+    "live_announce_meeting_start": "Meeting start announcement",
+    "live_cancel_meeting": "Zoom meeting cancellation",
+    "live_cancel_meeting_participant": "Zoom participant removal",
+    "live_cancel_session_meeting": "Activity meeting cancellation",
+    "live_incident_window": "Incident message window",
+    "live_process_webhook_event": "Notification received from Zoom",
+    "live_requeue_participants": "Zoom registrations retry",
+    "live_sync_meeting": "Zoom meeting",
+    "live_sync_meeting_participant": "Zoom meeting registration",
+    "media_process_asset": "File processing",
+    "media_purge_assets": "File purge",
+    "media_reconcile_quotas": "File quota recount",
+    "negotiation_access_request_approved_email": "Access granted email (Guide Négo)",
+    "negotiation_access_request_rejected_email": "Access refused email (Guide Négo)",
+    "negotiation_document_extract": "Document reading (Guide Négo)",
+    "negotiation_expert_question_answered_email": "Expert answer email (Guide Négo)",
+    "negotiation_glossary_proposal_published_email": "Term published email (Guide Négo)",
+    "negotiation_import_official_sessions": "Official sessions import",
+    "negotiation_meeting_promotion_email": "Meeting seat freed email",
+    "negotiation_purge_invitation_attempts": "Invitation code attempts purge",
+    "negotiation_report_publish": "Report publication",
+    "negotiation_session_change_email": "Session change email",
+    "negotiation_translate_session_titles": "Session title translation",
+    "org_duplicates_scan": "Organisation duplicate scan",
+    "org_membership_approved_email": "Membership accepted email",
+    "org_membership_invitation_email": "Organisation invitation email",
+    "org_membership_request_email": "Membership request email",
+    "org_scorecard_refresh": "Organisation scorecard refresh",
+    "org_trust_score_recompute": "Trust score recount"
+  },
+  "events": {
+    "engagement_email_suppressed": "Address excluded from sending",
+    "event_call_closed": "Call for proposals closed",
+    "event_call_deadline_extended": "Call deadline extended",
+    "event_call_opened": "Call for proposals opened",
+    "event_edition_created": "Edition created",
+    "event_edition_updated": "Edition updated",
+    "event_programme_published": "Programme published",
+    "identity_account_locked": "Account locked",
+    "identity_account_password_changed": "Password changed",
+    "identity_person_anonymized": "Person anonymised",
+    "identity_person_email_verified": "Address verified",
+    "identity_person_registered": "Account created",
+    "identity_person_status_changed": "Account status changed",
+    "identity_privacy_request_received": "GDPR request received",
+    "identity_role_granted": "Role granted",
+    "identity_role_revoked": "Role revoked",
+    "live_meeting_ended": "Meeting ended",
+    "live_meeting_started": "Meeting started",
+    "media_asset_purged": "File purged",
+    "negotiation_access_request_approved": "Access granted (Guide Négo)",
+    "negotiation_access_request_rejected": "Access refused (Guide Négo)",
+    "negotiation_access_request_submitted": "Access request received (Guide Négo)",
+    "negotiation_francophone_meeting_changed": "Francophonie meeting updated",
+    "negotiation_invitation_code_revoked": "Invitation code revoked",
+    "negotiation_meeting_changed": "Meeting updated (Guide Négo)",
+    "negotiation_meeting_registration_promoted": "Meeting seat freed",
+    "negotiation_network_meeting_published": "Network meeting published",
+    "negotiation_report_decided": "Report decided",
+    "negotiation_report_publish": "Report to publish",
+    "negotiation_report_published": "Report published",
+    "negotiation_space_access_granted": "Negotiation space access granted",
+    "negotiation_space_access_revoked": "Negotiation space access revoked",
+    "org_membership_approved": "Membership accepted",
+    "org_membership_requested": "Membership requested",
+    "org_membership_revoked": "Membership revoked",
+    "org_membership_role_changed": "Organisation role changed",
+    "org_organization_created": "Organisation created",
+    "org_organization_merged": "Organisations merged",
+    "org_organization_unverified": "Organisation unverified",
+    "org_organization_updated": "Organisation updated",
+    "org_organization_verified": "Organisation verified",
+    "programme_comment_addressed": "Comment addressed",
+    "programme_comment_shared": "Comment shared",
+    "programme_coorganization_requested": "Co-organisation requested",
+    "programme_regie_cancellation_notice": "Control room cancellation notice",
+    "programme_regie_restoration_notice": "Control room restoration notice",
+    "programme_registration_attended": "Attendance confirmed",
+    "programme_registration_cancelled": "Registration cancelled",
+    "programme_registration_created": "Registration created",
+    "programme_registration_no_show": "No-show recorded",
+    "programme_registration_registered": "Registration confirmed",
+    "programme_registration_waitlisted": "Registration waitlisted",
+    "programme_review_assigned": "Review assigned",
+    "programme_session_cancelled": "Activity cancelled",
+    "programme_session_completed": "Activity completed",
+    "programme_session_created": "Activity created",
+    "programme_session_live": "Activity live",
+    "programme_session_planned": "Activity planned",
+    "programme_session_postponed": "Activity postponed",
+    "programme_session_rescheduled": "Activity moved",
+    "programme_session_scheduled": "Activity scheduled"
+  }
+}
