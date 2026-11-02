@@ -21,9 +21,8 @@ use crate::domain::ids::{AccountId, PersonId, SessionId};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RevokeReason {
     Rotated,
-    /// La remplaçante d'une rotation dont la réponse s'est perdue : l'ancien
-    /// jeton est revenu dans la fenêtre de tolérance, et une session neuve la
-    /// remplace à son tour. ADR-020.
+    /// Écrit par la reprise d'ADR-020, plus depuis le 02/11/2026 (ADR-024) : les
+    /// lignes qui le portent restent lues, et leur jeton qui revient est un vol.
     ResponseLost,
     Logout,
     LogoutAll,
@@ -140,43 +139,15 @@ pub struct SessionRecord {
     pub device_id: Option<String>,
     pub device_label: Option<String>,
     pub device_platform: Option<String>,
-    /// La remplaçante vivante, depuis la rotation de cette session.
+    /// La dernière session ouverte depuis le jeton de celle-ci.
     pub replaced_by: Option<SessionId>,
 }
 
-impl SessionRecord {
-    pub fn est_vivante(&self) -> bool {
-        self.revoked_at.is_none() && self.expires_at > OffsetDateTime::now_utc()
-    }
-
-    /// Une session révoquée **pour cause de rotation** dont le jeton se présente
-    /// à nouveau : volé, ou copié — **ou une réponse de rotation perdue**, la seule
-    /// explication innocente, que le service examine avant de tout couper
-    /// (ADR-020). Une remplaçante révoquée pour réponse perdue n'a jamais été
-    /// remise au navigateur : son jeton qui revient ne peut être qu'un vol.
-    pub fn est_un_rejeu(&self) -> bool {
-        matches!(
-            self.revoked_reason.as_deref(),
-            Some(motif) if motif == RevokeReason::Rotated.as_db() || motif == RevokeReason::ResponseLost.as_db()
-        )
-    }
-
-    /// Tournée depuis moins que `tolerance` : la réponse de sa rotation a pu se
-    /// perdre au retour. Une tolérance nulle ne laisse rien passer.
-    pub fn tournee_depuis_moins_de(&self, tolerance: std::time::Duration) -> bool {
-        let Some(revoquee) = self.revoked_at else {
-            return false;
-        };
-        !tolerance.is_zero()
-            && OffsetDateTime::now_utc() - revoquee
-                < time::Duration::seconds(tolerance.as_secs() as i64)
-    }
-}
-
 /// Rend la session **même révoquée** : c'est ce qui permet de distinguer un
-/// jeton périmé d'un jeton rejoué.
-pub async fn find_by_refresh_hash(
-    pool: &PgPool,
+/// jeton périmé d'un jeton rejoué. Lue hors transaction, puis relue dans celle
+/// du renouvellement quand un autre onglet vient de la tourner.
+pub async fn find_by_refresh_hash<'e>(
+    executor: impl sqlx::PgExecutor<'e>,
     empreinte: &[u8],
 ) -> Result<Option<SessionRecord>> {
     let ligne = sqlx::query!(
@@ -187,7 +158,7 @@ pub async fn find_by_refresh_hash(
             WHERE refresh_token_hash = $1"#,
         empreinte
     )
-    .fetch_optional(pool)
+    .fetch_optional(executor)
     .await?;
 
     Ok(ligne.map(|l| SessionRecord {
@@ -208,7 +179,7 @@ pub async fn find_by_refresh_hash(
     }))
 }
 
-/// Nomme la remplaçante vivante d'une session tournée.
+/// Nomme la dernière session ouverte depuis le jeton de `remplacee`.
 pub async fn set_replaced_by(
     conn: &mut PgConnection,
     remplacee: SessionId,
@@ -224,26 +195,32 @@ pub async fn set_replaced_by(
     Ok(())
 }
 
-/// Révoque la remplaçante **si elle n'a jamais été renouvelée** et vit encore —
-/// révocation conditionnelle, qui tient lieu de verrou comme celle de la
-/// rotation. Faux : elle a servi, ou elle est close ; le rejeu n'a plus
-/// d'explication innocente.
-pub async fn revoke_unused_replacement(
-    conn: &mut PgConnection,
-    remplacante: SessionId,
-) -> Result<bool> {
-    let touchees = sqlx::query!(
-        "UPDATE identity.sessions
-            SET revoked_at = now(), revoked_reason = $2
-          WHERE id = $1 AND revoked_at IS NULL AND expires_at > now()",
-        remplacante.as_uuid(),
-        RevokeReason::ResponseLost.as_db()
+/// La lignée ouverte depuis une session tournée vit-elle encore ? On suit
+/// `replaced_by` tant que le maillon a été tourné ; le bout est vivant, ou il a
+/// été fermé (déconnexion, mot de passe changé, suspension, vol détecté).
+/// Bornée à 32 maillons : dans la minute de tolérance, on en voit deux ou trois.
+pub async fn lineage_alive(conn: &mut PgConnection, tournee: SessionId) -> Result<bool> {
+    let vivante = sqlx::query_scalar!(
+        r#"WITH RECURSIVE lignee AS (
+               SELECT id, replaced_by, revoked_at, revoked_reason, expires_at, 0 AS rang
+                 FROM identity.sessions
+                WHERE id = $1
+               UNION ALL
+               SELECT s.id, s.replaced_by, s.revoked_at, s.revoked_reason, s.expires_at, l.rang + 1
+                 FROM lignee l
+                 JOIN identity.sessions s ON s.id = l.replaced_by
+                WHERE l.revoked_reason = $2 AND l.rang < 32
+           )
+           SELECT EXISTS (
+               SELECT 1 FROM lignee WHERE revoked_at IS NULL AND expires_at > now()
+           ) AS "vivante!""#,
+        tournee.as_uuid(),
+        RevokeReason::Rotated.as_db()
     )
-    .execute(conn)
-    .await?
-    .rows_affected();
+    .fetch_one(conn)
+    .await?;
 
-    Ok(touchees == 1)
+    Ok(vivante)
 }
 
 /// Session vivante et personne en état de se connecter, en une seule lecture :

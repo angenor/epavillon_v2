@@ -1,6 +1,6 @@
 # ADR-020 — La réponse de rotation perdue n'est pas un vol
 
-**Statut** : accepté — 22/09/2026, tranché par le commanditaire. **Nuance** R3 de [specs/001-socle-identite/research.md](../../../specs/001-socle-identite/research.md#r3--rotation-du-jeton-de-rafraîchissement-et-détection-de-rejeu).
+**Statut** : accepté — 22/09/2026, tranché par le commanditaire. **Nuance** R3 de [specs/001-socle-identite/research.md](../../../specs/001-socle-identite/research.md#r3--rotation-du-jeton-de-rafraîchissement-et-détection-de-rejeu). **Reprise remplacée le 02/11/2026 par [ADR-024](024-plusieurs-onglets-ne-deconnectent-pas.md)** : plusieurs onglets la mettaient en défaut ; la fenêtre et son réglage restent.
 
 ## Contexte
 

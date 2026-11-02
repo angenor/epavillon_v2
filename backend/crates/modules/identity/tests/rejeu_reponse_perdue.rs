@@ -1,10 +1,11 @@
-//! **La réponse de rotation perdue** — ADR-020, qui nuance R3.
+//! **Le jeton tourné qui revient dans la minute** : ADR-024, qui remplace la
+//! reprise d'ADR-020.
 //!
-//! Le serveur a tourné le jeton ; la réponse ne revient pas — réseau saturé,
-//! passage du Wi-Fi à la 4G, téléphone verrouillé au mauvais moment. Le
-//! navigateur représente l'ancien jeton. Dans la minute, et tant que la
-//! remplaçante n'a jamais été renouvelée, la session continue — **une seule
-//! vivante**. Hors de ces bornes, tout est coupé.
+//! Deux onglets qui rafraîchissent ensemble, ou une réponse perdue au retour :
+//! le navigateur représente l'ancien jeton. Dans la minute, une session sœur
+//! s'ouvre et **la première reste vivante**, car rien ne dit quel cookie le
+//! navigateur garde. Hors de la minute, tout est coupé ; une lignée fermée
+//! entre-temps ne se rouvre pas.
 
 mod commun;
 
@@ -31,33 +32,25 @@ async fn reponse_perdue_puis_nouvel_essai_la_session_continue() {
     let personne = semer(&bac, Compte::actif(ADRESSE)).await;
     let ouverte = connexion(&bac, ADRESSE).await;
 
-    // Le serveur tourne ; la réponse — et le nouveau cookie — se perdent.
-    let perdue = neuve(
+    let premiere = neuve(
         renouveler(&bac, &ouverte.refresh_token)
             .await
             .expect("rotation"),
     );
-
-    // Le navigateur représente l'ancien jeton.
-    let reprise = neuve(
+    let soeur = neuve(
         renouveler(&bac, &ouverte.refresh_token)
             .await
-            .expect("une réponse perdue n'est pas un vol"),
+            .expect("dans la minute, ce n'est pas un vol"),
     );
 
     assert_eq!(
-        commun::sessions_vivantes(&bac, personne).await,
-        1,
-        "une seule session vivante"
-    );
-    assert_eq!(
-        commun::acteur_resolu(&bac, &reprise.access_token).await,
+        commun::acteur_resolu(&bac, &soeur.access_token).await,
         Some(personne)
     );
     assert_eq!(
-        commun::acteur_resolu(&bac, &perdue.access_token).await,
-        None,
-        "la remplaçante jamais reçue est révoquée"
+        commun::acteur_resolu(&bac, &premiere.access_token).await,
+        Some(personne),
+        "la première remplaçante reste vivante : c'est peut-être son cookie que le navigateur garde"
     );
 
     let motifs: Vec<Option<String>> = commun::sessions(&bac, personne)
@@ -65,42 +58,65 @@ async fn reponse_perdue_puis_nouvel_essai_la_session_continue() {
         .into_iter()
         .map(|(_, m)| m)
         .collect();
-    assert!(motifs.iter().any(|m| m.as_deref() == Some("response_lost")));
     assert!(!motifs
         .iter()
         .any(|m| m.as_deref() == Some("reuse_detected")));
 
-    // La session reprise se renouvelle ensuite normalement.
-    assert!(matches!(
-        renouveler(&bac, &reprise.refresh_token)
-            .await
-            .expect("renouvellement suivant"),
-        RefreshOutcome::Renewed(_)
-    ));
+    // Les deux se renouvellent ensuite normalement.
+    for jeton in [&premiere.refresh_token, &soeur.refresh_token] {
+        assert!(matches!(
+            renouveler(&bac, jeton)
+                .await
+                .expect("renouvellement suivant"),
+            RefreshOutcome::Renewed(_)
+        ));
+    }
 }
 
-/// Deux réponses perdues de suite : chaque essai reprend, et une seule vit.
+/// Six onglets qui présentent le même jeton à la suite : aucun n'est déconnecté.
 #[tokio::test]
-async fn deux_reponses_perdues_de_suite() {
+async fn six_onglets_dans_la_minute() {
     let bac = Bac::monter().await;
     let personne = semer(&bac, Compte::actif(ADRESSE)).await;
     let ouverte = connexion(&bac, ADRESSE).await;
 
-    renouveler(&bac, &ouverte.refresh_token)
-        .await
-        .expect("rotation");
-    renouveler(&bac, &ouverte.refresh_token)
-        .await
-        .expect("premier essai");
-    let dernier = neuve(
+    for _ in 0..6 {
+        let issue = neuve(
+            renouveler(&bac, &ouverte.refresh_token)
+                .await
+                .expect("onglet"),
+        );
+        assert_eq!(
+            commun::acteur_resolu(&bac, &issue.access_token).await,
+            Some(personne)
+        );
+    }
+}
+
+/// La remplaçante a déjà servi : l'ancien jeton dans la minute reste un onglet
+/// en retard, pas un vol.
+#[tokio::test]
+async fn apres_usage_de_la_remplacante_la_minute_tient() {
+    let bac = Bac::monter().await;
+    let personne = semer(&bac, Compte::actif(ADRESSE)).await;
+    let ouverte = connexion(&bac, ADRESSE).await;
+
+    let remplacante = neuve(
         renouveler(&bac, &ouverte.refresh_token)
             .await
-            .expect("second essai"),
+            .expect("rotation"),
     );
+    renouveler(&bac, &remplacante.refresh_token)
+        .await
+        .expect("la remplaçante sert");
 
-    assert_eq!(commun::sessions_vivantes(&bac, personne).await, 1);
+    let soeur = neuve(
+        renouveler(&bac, &ouverte.refresh_token)
+            .await
+            .expect("dans la minute"),
+    );
     assert_eq!(
-        commun::acteur_resolu(&bac, &dernier.access_token).await,
+        commun::acteur_resolu(&bac, &soeur.access_token).await,
         Some(personne)
     );
 }
@@ -128,34 +144,43 @@ async fn rejeu_apres_la_minute_tout_est_coupe() {
     );
 }
 
-/// La remplaçante a servi : le navigateur l'avait donc reçue, et l'ancien jeton
-/// qui revient ne peut plus être une réponse perdue.
+/// Déconnexion dans un onglet, puis un onglet en retard présente l'ancien jeton
+/// dans la minute : rien ne se rouvre, et l'autre appareil n'est pas coupé.
 #[tokio::test]
-async fn rejeu_apres_usage_de_la_remplacante_tout_est_coupe() {
+async fn une_lignee_fermee_ne_se_rouvre_pas() {
     let bac = Bac::monter().await;
     let personne = semer(&bac, Compte::actif(ADRESSE)).await;
     let ouverte = connexion(&bac, ADRESSE).await;
+    let autre_appareil = connexion(&bac, ADRESSE).await;
 
     let remplacante = neuve(
         renouveler(&bac, &ouverte.refresh_token)
             .await
             .expect("rotation"),
     );
-    renouveler(&bac, &remplacante.refresh_token)
-        .await
-        .expect("la remplaçante sert");
+    session::logout(
+        &bac.state,
+        &bac.ctx(),
+        Some(remplacante.refresh_token.as_str()),
+    )
+    .await
+    .expect("déconnexion");
 
-    let refus = renouveler(&bac, &ouverte.refresh_token)
+    let issue = renouveler(&bac, &ouverte.refresh_token)
         .await
-        .expect_err("la remplaçante a servi");
-    assert_eq!(refus.code, ErrorCode::IdentityRefreshReused);
-    assert_eq!(commun::sessions_vivantes(&bac, personne).await, 0);
+        .expect("une lignée close n'est pas un vol");
+    assert!(matches!(issue, RefreshOutcome::Expired));
+    assert_eq!(commun::sessions_vivantes(&bac, personne).await, 1);
+    assert_eq!(
+        commun::acteur_resolu(&bac, &autre_appareil.access_token).await,
+        Some(personne)
+    );
 }
 
-/// Le jeton d'une remplaçante révoquée pour réponse perdue n'a jamais été remis
-/// au navigateur : s'il se présente, c'est un vol.
+/// Le jeton d'une remplaçante écartée par l'ancienne reprise (ADR-020) n'a
+/// jamais été remis au navigateur : s'il se présente, c'est un vol.
 #[tokio::test]
-async fn le_jeton_dune_remplacante_ecartee_est_un_vol() {
+async fn le_jeton_dune_remplacante_ecartee_reste_un_vol() {
     let bac = Bac::monter().await;
     let personne = semer(&bac, Compte::actif(ADRESSE)).await;
     let ouverte = connexion(&bac, ADRESSE).await;
@@ -165,9 +190,14 @@ async fn le_jeton_dune_remplacante_ecartee_est_un_vol() {
             .await
             .expect("rotation"),
     );
-    renouveler(&bac, &ouverte.refresh_token)
-        .await
-        .expect("reprise");
+    sqlx::query!(
+        "UPDATE identity.sessions SET revoked_at = now(), revoked_reason = 'response_lost'
+          WHERE id = $1",
+        ecartee.session_id.as_uuid()
+    )
+    .execute(bac.base.pool())
+    .await
+    .expect("écartée comme le faisait ADR-020");
 
     let refus = renouveler(&bac, &ecartee.refresh_token)
         .await

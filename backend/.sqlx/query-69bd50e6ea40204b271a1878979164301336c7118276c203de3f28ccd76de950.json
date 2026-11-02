@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH RECURSIVE lignee AS (\n               SELECT id, replaced_by, revoked_at, revoked_reason, expires_at, 0 AS rang\n                 FROM identity.sessions\n                WHERE id = $1\n               UNION ALL\n               SELECT s.id, s.replaced_by, s.revoked_at, s.revoked_reason, s.expires_at, l.rang + 1\n                 FROM lignee l\n                 JOIN identity.sessions s ON s.id = l.replaced_by\n                WHERE l.revoked_reason = $2 AND l.rang < 32\n           )\n           SELECT EXISTS (\n               SELECT 1 FROM lignee WHERE revoked_at IS NULL AND expires_at > now()\n           ) AS \"vivante!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "vivante!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "69bd50e6ea40204b271a1878979164301336c7118276c203de3f28ccd76de950"
+}
