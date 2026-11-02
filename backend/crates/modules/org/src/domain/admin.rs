@@ -228,6 +228,8 @@ pub struct OrganizationDetail {
     pub organization_id: OrganizationId,
     pub legal_name: String,
     pub acronym: Option<String>,
+    /// Le programme public n'affiche que le sigle là où la place manque.
+    pub acronym_well_known: bool,
     pub slug: String,
     pub status: String,
     pub organization_type_code: String,
@@ -339,6 +341,9 @@ pub struct OrganizationProfile {
     pub legal_name: String,
     #[serde(default)]
     pub acronym: Option<String>,
+    /// Absent : inchangé. Sans sigle, retombe à faux.
+    #[serde(default)]
+    pub acronym_well_known: Option<bool>,
     pub organization_type_code: String,
     #[serde(default)]
     pub country_id: Option<Uuid>,

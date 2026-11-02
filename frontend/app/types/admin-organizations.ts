@@ -650,6 +650,8 @@ export interface OrganizationDetail {
   organization_id: OrganizationId
   legal_name: string
   acronym: string | null
+  /** Le programme public n'affiche que le sigle là où la place manque. */
+  acronym_well_known: boolean
   slug: Slug
   status: OrganizationStatus
   organization_type_code: TaxonomyTermCode
@@ -723,6 +725,8 @@ export interface OrganizationProfilePayload {
   organization_id: OrganizationId
   legal_name: string
   acronym: string | null
+  /** Retombe à faux sans sigle. */
+  acronym_well_known: boolean
   organization_type_code: TaxonomyTermCode
   country_id: CountryId | null
   website: Url | null

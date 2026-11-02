@@ -459,7 +459,7 @@ export function setOrganizationProfile(
   if (!current) return { status: 'not_found' }
 
   const { organization_id: _id, ...fields } = payload
-  patchOrganization(payload.organization_id, fields)
+  patchOrganization(payload.organization_id, { ...fields, acronym_well_known: fields.acronym_well_known && fields.acronym !== null })
   recordHistory(payload.organization_id, {
     occurred_at: new Date().toISOString(),
     actor_id: actorId,

@@ -158,6 +158,7 @@ export interface SessionOrganization {
   /** Détail public seulement : `org.organizations.legal_name`, sigle et pays. */
   name?: string
   acronym?: string | null
+  acronym_well_known?: boolean
   country_code?: string | null
   country?: I18nText | null
   /** Détail public : logo de l'organisation. */

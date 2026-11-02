@@ -304,6 +304,7 @@ export function organizationDetail(organizationId: string): OrganizationDetail |
     organization_id: organization.id,
     legal_name: organization.legal_name,
     acronym: organization.acronym,
+    acronym_well_known: organization.acronym_well_known,
     slug: organization.slug,
     status: organization.status,
     organization_type_code: organization.organization_type_code,

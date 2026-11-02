@@ -64,6 +64,7 @@ async fn renommer_garde_l_ancien_nom_et_l_ancien_sigle_cherchables() {
         OrganizationProfile {
             legal_name: "  Observatoire sahélien de l'environnement durable  ".to_owned(),
             acronym: Some("OSEDD".to_owned()),
+            acronym_well_known: None,
             organization_type_code: type_code,
             country_id: pays,
             website: Some("https://osedd.example.org".to_owned()),
@@ -125,6 +126,7 @@ async fn un_homonyme_du_meme_pays_est_nomme_et_un_type_inconnu_refuse() {
         OrganizationProfile {
             legal_name: nom_complete.clone(),
             acronym: None,
+            acronym_well_known: None,
             organization_type_code: type_code.clone(),
             country_id: pays,
             website: None,
@@ -152,6 +154,7 @@ async fn un_homonyme_du_meme_pays_est_nomme_et_un_type_inconnu_refuse() {
         OrganizationProfile {
             legal_name: "Nom libre".to_owned(),
             acronym: None,
+            acronym_well_known: None,
             organization_type_code: "type_qui_n_existe_pas".to_owned(),
             country_id: None,
             website: None,

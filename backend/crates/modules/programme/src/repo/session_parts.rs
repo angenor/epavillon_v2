@@ -274,6 +274,7 @@ pub async fn organisations_publiques_de<'e>(
                       'added_at', so.added_at,
                       'name', o.legal_name,
                       'acronym', o.acronym,
+                      'acronym_well_known', o.acronym_well_known,
                       'country_code', c.iso2,
                       'country', c.name,
                       'logo', media.attached_image('org', 'organizations', o.id, 'logo')) AS "ligne!"

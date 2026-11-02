@@ -5,7 +5,7 @@ import type { SelectOption } from '~/types/ui'
 import type { AssetId, OrganizationId } from '~/types/shared'
 
 /**
- * MODIFIER LA FICHE D'UNE ORGANISATION (31/10) : logo, nom, sigle, type, pays,
+ * MODIFIER LA FICHE D'UNE ORGANISATION (31/10) : logo, nom, sigle (bien connu ou non), type, pays,
  * site. Ouvert depuis la fiche du back-office et depuis la fiche d'un dossier :
  * il charge lui-même ce qu'il montre et rend la fiche recomposée par `saved`.
  *
@@ -38,7 +38,15 @@ const busy = ref(false)
 const error = ref<string | null>(null)
 const conflict = ref<OrganizationRef | null>(null)
 
-const form = reactive({ legal_name: '', acronym: '', organization_type_code: '', country_id: '', website: '' })
+const form = reactive({
+  legal_name: '',
+  acronym: '',
+  acronym_well_known: false,
+  organization_type_code: '',
+  country_id: '',
+  website: '',
+})
+const hasAcronym = computed(() => form.acronym.trim() !== '')
 
 const owner = computed(() => ({ schema: 'org', table: 'organizations', id: props.organizationId }))
 
@@ -72,6 +80,7 @@ async function load(): Promise<void> {
     Object.assign(form, {
       legal_name: fiche.legal_name,
       acronym: fiche.acronym ?? '',
+      acronym_well_known: fiche.acronym_well_known,
       organization_type_code: fiche.organization_type_code,
       country_id: fiche.country_id ?? '',
       website: fiche.website ?? '',
@@ -122,6 +131,7 @@ async function save(): Promise<void> {
         organization_id: props.organizationId,
         legal_name: form.legal_name.trim(),
         acronym: form.acronym.trim() || null,
+        acronym_well_known: hasAcronym.value && form.acronym_well_known,
         organization_type_code: form.organization_type_code,
         country_id: form.country_id || null,
         website: form.website.trim() || null,
@@ -197,6 +207,14 @@ async function save(): Promise<void> {
           :hint="t('admin-organization-profile.websiteHint')"
         />
       </div>
+      <UiCheckbox
+        id="organization-profile-acronym-well-known"
+        :model-value="hasAcronym && form.acronym_well_known"
+        :label="t('admin-organization-profile.acronymWellKnown')"
+        :hint="t(hasAcronym ? 'admin-organization-profile.acronymWellKnownHint' : 'admin-organization-profile.acronymWellKnownNone')"
+        :disabled="!hasAcronym"
+        @update:model-value="form.acronym_well_known = $event"
+      />
       <p class="text-sm text-text-muted">{{ t('admin-organization-profile.formerNames') }}</p>
 
       <UiAlert v-if="conflict" intent="warning" :message="t('admin-organization-profile.nameTaken', { name: conflict.legal_name })" live>

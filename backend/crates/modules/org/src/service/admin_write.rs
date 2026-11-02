@@ -194,7 +194,7 @@ pub async fn set_name_confirmation(
     recomposer(state, perimetre, id).await
 }
 
-/// Corrige la fiche : nom, sigle, type, pays, site (31/10).
+/// Corrige la fiche : nom, sigle et sa notoriété, type, pays, site (31/10).
 ///
 /// La fiche est partagée par tous ses dossiers et ses membres : la corriger ici
 /// la corrige partout. L'ancien nom et l'ancien sigle restent cherchables
@@ -243,6 +243,7 @@ pub async fn set_profile(
         id,
         nom,
         sigle,
+        demande.acronym_well_known,
         &demande.organization_type_code,
         demande.country_id,
         site,

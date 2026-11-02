@@ -4,6 +4,7 @@ import type { PublicTrackEntry, PublicTrackPage } from '~/types/programme/track-
 import type { SessionDisplayState } from '~/components/ui/StatusBadge.vue'
 import type { ProgrammeRowData } from '~/components/event/ProgrammeRow.vue'
 import type { AttachedImage } from '~/types/media'
+import type { SessionOrganization } from '~/types/programme/session'
 
 /**
  * Le déroulé d'un fil (journée spéciale, atelier) : une partie = une étiquette
@@ -50,7 +51,8 @@ const media = computed(() =>
   ),
 )
 
-const label = (entry: { acronym?: string | null; name?: string }) => entry.acronym ?? entry.name ?? ''
+const label = (entry: SessionOrganization) =>
+  organizationShortLabel({ name: entry.name, acronym: entry.acronym, acronymWellKnown: entry.acronym_well_known })
 const list = computed(() => new Intl.ListFormat(locale.value, { type: 'conjunction' }))
 
 // Une précision par ligne : « Mot de l'OIF », « Mot du Secrétariat de la CCNUCC ».

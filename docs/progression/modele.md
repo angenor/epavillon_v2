@@ -600,3 +600,10 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - Prédicat de publication (`event` et consommateur `programme`) : séances placées seulement, champ `placed_only` du contrat `SessionSelection` (défaut faux pour les anciennes annonces).
 
 **En production** : `ops/migrations/2026-11-02-a-placer-hors-programme.sql`, rejouable, sans donnée touchée, à jouer avant de déployer l'API et le worker. Syntaxe vérifiée par libpg_query ; les deux fonctions remplacées sont identiques en production à celles du dépôt avant changement. Pas jouée.
+
+## 2026-11-02 : sigle bien connu
+
+- **`org.organizations.acronym_well_known`** (booléen, faux par défaut) : case « Sigle bien connu » de la fiche, posée par l'équipe au back-office. Cochée, le programme public n'affiche que le sigle là où la place manque (accueil « À venir », cartes du calendrier, parties d'une séance commune, déroulé d'une journée) ; sinon le nom complet, sur une ligne. Sans sigle, l'écriture la remet à faux.
+- **`programme.v_public_schedule`** : colonne `organization_acronym_well_known` en queue, clé `acronym_well_known` dans l'organisation de chaque dossier de `proposals`.
+
+**En production** : `ops/migrations/2026-11-02-sigle-bien-connu.sql`, rejouable, additive, à jouer avant de déployer l'API. Coche d'office OIF, AFD, ADEME, FAO, OCDE, BAD, CILSS, AUC, GGGI (une fiche chacun, lu le 02/11). Syntaxe vérifiée par libpg_query ; la vue remplacée est identique en production à celle du dépôt avant changement, aucune vue n'en dépend. Pas jouée.

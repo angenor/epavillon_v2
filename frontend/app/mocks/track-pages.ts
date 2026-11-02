@@ -81,11 +81,14 @@ const hotel: PublicTrackVenue = {
 
 // --- Organisations ----------------------------------------------------------
 
-interface Org { id: string; name: string; acronym: string | null }
+interface Org { id: string; name: string; acronym: string | null; wellKnown: boolean }
+// Les sigles cochés d'office en production (02/11) le sont ici aussi.
+const SIGLES_CONNUS = new Set(['OIF', 'AFD', 'ADEME', 'FAO', 'OCDE', 'BAD', 'CILSS', 'AUC', 'GGGI'])
 const org = (n: number, name: string, acronym: string | null = null): Org => ({
   id: TRACK_PAGE_ORG(n),
   name,
   acronym,
+  wellKnown: acronym !== null && SIGLES_CONNUS.has(acronym),
 })
 
 const O = {
@@ -148,6 +151,7 @@ const organisationCommune = (o: Org): JointProposalOrganization => ({
   id: o.id,
   name: o.name,
   acronym: o.acronym,
+  acronym_well_known: o.wellKnown,
   country_code: null,
   country: null,
   type_code: null,
@@ -199,6 +203,7 @@ const ligne = (x: Activite, track: { slug: string; title: I18nText; color: strin
     organization_id: porteur?.id ?? null,
     organization_name: porteur?.name ?? null,
     organization_acronym: porteur?.acronym ?? null,
+    organization_acronym_well_known: porteur?.wellKnown ?? false,
     organization_country_code: null,
     organization_country: null,
     is_streamed: x.diffusee ?? true,
@@ -223,6 +228,7 @@ const organisations = (x: Activite): SessionOrganization[] =>
     added_at: '2026-10-20T10:00:00Z',
     name: o.name,
     acronym: o.acronym,
+    acronym_well_known: o.wellKnown,
     country_code: null,
     country: null,
     logo: null,
@@ -256,6 +262,7 @@ const dossiersDetail = (x: Activite): JointProposalDetail[] =>
       added_at: '2026-10-20T10:00:00Z',
       name: o.name,
       acronym: o.acronym,
+      acronym_well_known: o.wellKnown,
       country_code: null,
       country: null,
       logo: null,

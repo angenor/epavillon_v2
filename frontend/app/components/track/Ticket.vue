@@ -125,7 +125,9 @@ const now = computed(() => {
   }
   const session = entry.activity.session
   const lead = entry.activity.organizations[0]
-  const organization = lead?.acronym ?? lead?.name ?? session.organization_acronym ?? session.organization_name ?? ''
+  const organization = lead
+    ? organizationShortLabel({ name: lead.name, acronym: lead.acronym, acronymWellKnown: lead.acronym_well_known })
+    : scheduleOrganizationLabel(session)
   const live = item.state === 'live'
   return {
     live,

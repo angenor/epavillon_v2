@@ -82,7 +82,8 @@ async fn lire<'e>(
                   v.language_codes::text[] AS "language_codes?",
                   v.replay_url, v.replay_duration_seconds,
                   v.organization_logo, v.organization_type_code,
-                  v.proposals AS "proposals!"
+                  v.proposals AS "proposals!",
+                  v.organization_acronym_well_known AS "organization_acronym_well_known!"
              FROM programme.v_public_schedule v
             WHERE ($1::uuid IS NULL OR v.event_id = $1)
               AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))
@@ -139,6 +140,7 @@ async fn lire<'e>(
             organization_logo: l.organization_logo,
             organization_type_code: l.organization_type_code,
             proposals: l.proposals,
+            organization_acronym_well_known: l.organization_acronym_well_known,
         })
         .collect())
 }

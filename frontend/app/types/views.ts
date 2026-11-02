@@ -159,6 +159,8 @@ export interface PublicScheduleRow {
   organization_type_code?: TaxonomyTermCode | null
   /** Séance commune : dossiers réunis dans l'ordre d'affichage ; [] (ou absent dans les jeux d'exemple) pour une séance ordinaire. */
   proposals?: JointProposal[]
+  /** Sigle bien connu du public : là où la place manque, il suffit (`organizationShortLabel`). */
+  organization_acronym_well_known?: boolean
 }
 
 /**
@@ -171,6 +173,8 @@ export interface JointProposalOrganization {
   id: OrganizationId
   name: string
   acronym: string | null
+  /** Absent des jeux d'exemple anciens : vaut faux. */
+  acronym_well_known?: boolean
   country_code: string | null
   country: I18nText | null
   type_code: TaxonomyTermCode | null

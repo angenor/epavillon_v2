@@ -13,7 +13,7 @@ export interface JointPart {
   organizationId: OrganizationId
   name: string
   acronym: string | null
-  /** Le sigle, à défaut le nom. */
+  /** Là où la place manque : `organizationShortLabel`. */
   label: string
   logo: AttachedImage | null
   /** Le pays ne se dit que d'une institution publique nationale, comme pour une séance ordinaire ; vide sinon. */
@@ -39,7 +39,11 @@ export function useJointSession() {
         organizationId: proposal.organization.id,
         name: proposal.organization.name,
         acronym: proposal.organization.acronym,
-        label: proposal.organization.acronym ?? proposal.organization.name,
+        label: organizationShortLabel({
+          name: proposal.organization.name,
+          acronym: proposal.organization.acronym,
+          acronymWellKnown: proposal.organization.acronym_well_known,
+        }),
         logo: proposal.organization.logo,
         nationalCountry:
           proposal.organization.type_code === 'public_national_institution' && proposal.organization.country

@@ -44,7 +44,9 @@ function partLabel(group: (typeof groups.value)[number]): string {
 
 function byLine(activity: PublicTrackActivity): string {
   const [lead] = activity.organizations
-  return lead?.acronym ?? lead?.name ?? activity.session.organization_acronym ?? activity.session.organization_name ?? ''
+  return lead
+    ? organizationShortLabel({ name: lead.name, acronym: lead.acronym, acronymWellKnown: lead.acronym_well_known })
+    : scheduleOrganizationLabel(activity.session)
 }
 
 function toggle(id: string, checked: boolean): void {
@@ -127,7 +129,7 @@ onMounted(() => {
             >
               {{ tr(entry.activity.session.title) }}
             </b>
-            <span v-if="byLine(entry.activity)" class="block text-[0.8rem] text-text-muted">{{ byLine(entry.activity) }}</span>
+            <span v-if="byLine(entry.activity)" class="block truncate text-[0.8rem] text-text-muted">{{ byLine(entry.activity) }}</span>
             <em
               v-if="ended.has(entry.activity.session.id)"
               class="mt-1 inline-block text-[0.72rem] font-bold tracking-[0.04em] text-text-muted uppercase not-italic"

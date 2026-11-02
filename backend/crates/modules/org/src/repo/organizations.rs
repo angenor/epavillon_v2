@@ -137,35 +137,42 @@ pub async fn update_profile(
     id: OrganizationId,
     legal_name: &str,
     acronym: Option<&str>,
+    acronym_well_known: Option<bool>,
     organization_type_code: &str,
     country_id: Option<Uuid>,
     website: Option<&str>,
 ) -> Result<Option<Vec<String>>> {
     let ligne = sqlx::query!(
         r#"WITH avant AS (
-               SELECT legal_name, acronym, organization_type_code, country_id, website::text AS website
+               SELECT legal_name, acronym, acronym_well_known, organization_type_code,
+                      country_id, website::text AS website
                  FROM org.organizations WHERE id = $1 FOR UPDATE
            ), apres AS (
-               UPDATE org.organizations
+               UPDATE org.organizations o
                   SET legal_name = $2, acronym = $3, organization_type_code = $4,
-                      country_id = $5, website = $6::text::platform.url
-                WHERE id = $1
-            RETURNING id
+                      country_id = $5, website = $6::text::platform.url,
+                      acronym_well_known = $3::text IS NOT NULL
+                                           AND COALESCE($7::boolean, o.acronym_well_known)
+                WHERE o.id = $1
+            RETURNING o.acronym_well_known
            )
            SELECT array_remove(ARRAY[
                       CASE WHEN a.legal_name IS DISTINCT FROM $2 THEN 'legal_name' END,
                       CASE WHEN a.acronym IS DISTINCT FROM $3 THEN 'acronym' END,
+                      CASE WHEN a.acronym_well_known IS DISTINCT FROM n.acronym_well_known
+                           THEN 'acronym_well_known' END,
                       CASE WHEN a.organization_type_code IS DISTINCT FROM $4 THEN 'organization_type_code' END,
                       CASE WHEN a.country_id IS DISTINCT FROM $5 THEN 'country_id' END,
                       CASE WHEN a.website IS DISTINCT FROM $6 THEN 'website' END
                   ], NULL) AS "changes!"
-             FROM avant a, apres"#,
+             FROM avant a, apres n"#,
         id.as_uuid(),
         legal_name,
         acronym,
         organization_type_code,
         country_id,
-        website
+        website,
+        acronym_well_known
     )
     .fetch_optional(conn)
     .await?;

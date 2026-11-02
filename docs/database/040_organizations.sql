@@ -60,6 +60,11 @@ CREATE TABLE org.organizations (
     legal_name_normalized text     GENERATED ALWAYS AS (platform.normalize_label(legal_name)) STORED,
     acronym            text        CHECK (acronym IS NULL OR length(btrim(acronym)) BETWEEN 2 AND 32),
     acronym_normalized text        GENERATED ALWAYS AS (platform.normalize_label(acronym)) STORED,
+    -- Le public reconnaît l'organisation à son sigle (OIF, FAO) : là où la
+    -- place manque, le programme public n'affiche que lui. Faux par défaut :
+    -- un sigle inconnu du public (RF-EFH) ne dit rien, le nom complet s'affiche.
+    -- Choix de l'équipe au back-office ; sans effet sans sigle.
+    acronym_well_known boolean     NOT NULL DEFAULT false,
     slug               platform.slug NOT NULL,
 
     organization_type_code text    NOT NULL,   -- reference.taxonomy_terms.code (taxonomie organization_type)
@@ -120,6 +125,9 @@ CREATE TRIGGER tg_organizations_updated_at
 CREATE TRIGGER tg_organizations_audit
     AFTER INSERT OR UPDATE OR DELETE ON org.organizations
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON COLUMN org.organizations.acronym_well_known IS
+    'Sigle bien connu du public : coché, le programme public affiche le sigle seul là où la place manque ; sinon le nom complet. Posé par l''équipe, sans effet sans sigle.';
 
 COMMENT ON COLUMN org.organizations.merged_into_id IS
     'Fiche absorbante. Utiliser org.resolve_organization() pour obtenir la fiche courante en suivant la chaîne.';

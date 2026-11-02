@@ -40,7 +40,7 @@ const { partsOf, namesOf } = useJointSession()
 const organization = computed(() => {
   const parts = partsOf(props.session)
   if (parts.length > 1) return namesOf(parts)
-  return props.session.organization_acronym ?? props.session.organization_name ?? ''
+  return scheduleOrganizationLabel(props.session)
 })
 
 /** « ven. 13 » */
@@ -71,8 +71,10 @@ const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, 
         <template v-else>{{ title }}</template>
       </h3>
       <p v-if="props.editionLabel || organization || zone" class="mt-1 text-[0.8rem] text-text-on-inverse-muted">
-        <span v-if="props.editionLabel" class="font-bold text-text-on-inverse">{{ props.editionLabel }}</span>
-        <template v-if="props.editionLabel && organization">, </template>{{ organization }}
+        <span v-if="props.editionLabel || organization" class="block truncate">
+          <span v-if="props.editionLabel" class="font-bold text-text-on-inverse">{{ props.editionLabel }}</span>
+          <template v-if="props.editionLabel && organization">, </template>{{ organization }}
+        </span>
         <span v-if="zone" class="block">{{ zone }}</span>
       </p>
       <div v-if="isLive(props.session.id) || (props.session.temporal_state === 'ongoing' && props.session.status !== 'completed')" class="mt-1.5">

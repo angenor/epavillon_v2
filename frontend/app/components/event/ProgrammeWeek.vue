@@ -85,7 +85,7 @@ function card(session: PublicScheduleRow, weekday: string) {
     title: tr(session.title),
     organization: session.organization_name ?? session.organization_acronym,
     acronym: session.organization_acronym,
-    shortName: session.organization_acronym ?? session.organization_name ?? '',
+    shortName: scheduleOrganizationLabel(session),
     initials: (session.organization_acronym ?? initialsOf(session.organization_name ?? '')).slice(0, 8),
     logo: session.organization_logo ?? null,
     visited: session.id === props.visitedId,

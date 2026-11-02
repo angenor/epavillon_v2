@@ -1615,7 +1615,7 @@ COMMENT ON COLUMN live.streams.recording_asset_id IS
 -- le même ordre (leurs commentaires y restent), avec deux colonnes en queue.
 -- Toute modification de la vue se reporte dans les deux fichiers — sauf les
 -- colonnes venues APRÈS la rediffusion (logo et type de l'organisation, 30/09 ;
--- dossiers d'une séance commune, 01/11) : elles n'existent qu'ici, car les poser dans 075 les placerait avant
+-- dossiers d'une séance commune, 01/11 ; sigle bien connu, 02/11) : elles n'existent qu'ici, car les poser dans 075 les placerait avant
 -- `replay_url` et l'ordre des colonnes différerait de celui de la production.
 --
 -- UNE SEULE REDIFFUSION PAR SÉANCE (LATERAL … LIMIT 1) : une ligne de la vue est
@@ -1710,6 +1710,7 @@ SELECT
                        'id', po.id,
                        'name', po.legal_name,
                        'acronym', po.acronym,
+                       'acronym_well_known', po.acronym_well_known,
                        'country_code', pc.iso2,
                        'country', pc.name,
                        'type_code', po.organization_type_code,
@@ -1720,7 +1721,8 @@ SELECT
         JOIN org.organizations po     ON po.id = pp.organization_id
         LEFT JOIN reference.countries pc ON pc.id = po.country_id
         WHERE sp.session_id = s.id
-    ), '[]'::jsonb) AS proposals
+    ), '[]'::jsonb) AS proposals,
+    COALESCE(o.acronym_well_known, false) AS organization_acronym_well_known
 FROM programme.sessions s
 LEFT JOIN event.rooms r          ON r.id = s.room_id
 LEFT JOIN org.organizations o    ON o.id = s.organization_id
@@ -1757,4 +1759,6 @@ COMMENT ON COLUMN programme.v_public_schedule.organization_logo IS
 COMMENT ON COLUMN programme.v_public_schedule.organization_type_code IS
     'Type de l''organisation porteuse (code de la taxonomie organization_type) : public_national_institution fait afficher le drapeau de son pays. Nul sans organisation.';
 COMMENT ON COLUMN programme.v_public_schedule.proposals IS
-    'Séance commune : dossiers réunis (titre d''origine, couverture, organisation porteuse avec logo et pays), dans l''ordre d''affichage ; [] pour une séance ordinaire.';
+    'Séance commune : dossiers réunis (titre d''origine, couverture, organisation porteuse avec logo, pays et sigle bien connu), dans l''ordre d''affichage ; [] pour une séance ordinaire.';
+COMMENT ON COLUMN programme.v_public_schedule.organization_acronym_well_known IS
+    'Le sigle de l''organisation porteuse est bien connu du public : là où la place manque, le site n''affiche que lui. Faux sans organisation.';

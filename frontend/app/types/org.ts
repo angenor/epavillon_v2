@@ -40,6 +40,8 @@ export interface Organization {
   acronym: string | null
   /** Colonne générée : forme canonique du sigle. */
   readonly acronym_normalized: string | null
+  /** Sigle bien connu du public : là où la place manque, le programme public n'affiche que lui. */
+  acronym_well_known: boolean
   slug: Slug
   /** Code de la taxonomie `organization_type`. */
   organization_type_code: TaxonomyTermCode

@@ -333,4 +333,6 @@ pub struct PublicScheduleRow {
     pub organization_type_code: Option<String>,
     /// Séance commune : les dossiers réunis (`JointProposal[]`) ; `[]` sinon.
     pub proposals: serde_json::Value,
+    /// Coché par l'équipe : là où la place manque, le sigle seul suffit.
+    pub organization_acronym_well_known: bool,
 }
