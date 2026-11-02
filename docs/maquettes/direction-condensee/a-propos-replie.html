@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>À propos replié</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  .page { padding: 40px 0 80px; }
+  .note { max-width: 72ch; margin: 0 0 32px; color: var(--color-text-secondary); line-height: 1.55; }
+  .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; align-items: start; }
+  @media (max-width: 1000px) { .pair { grid-template-columns: minmax(0, 1fr); } }
+  .pair > div > small.lbl { display: block; margin-bottom: 14px; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
+
+  /* Le bloc « À propos » de la page d'une activité. */
+  .about > h2 { margin: 0 0 18px; font-size: clamp(1.8rem, 3.4vw, 2.3rem); }
+  .about h3 { margin: 26px 0 10px; font-family: var(--font-heading); font-weight: 700; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--day-ink, var(--ink)); }
+  .about h3:first-of-type { margin-top: 0; }
+  .prose { max-width: 68ch; font-size: 1.05rem; line-height: 1.75; color: var(--color-text); }
+  .prose p { margin: 0 0 14px; }
+  .prose ul { margin: 0 0 14px; padding-left: 22px; }
+  .prose li { margin-bottom: 8px; }
+
+  /* Replié : hauteur bornée, le texte se fond dans la page, un bouton dessous. */
+  .fold { position: relative; }
+  .fold.is-closed .prose { max-height: var(--fold, 11.5em); overflow: hidden; }
+  .fold.is-closed::after { content: ""; position: absolute; left: 0; right: 0; bottom: 44px; height: 5.5em; background: linear-gradient(to bottom, transparent, var(--page)); pointer-events: none; }
+  .fold-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: var(--target); margin-top: 4px; padding: 0 2px; border: 0; background: none; color: var(--color-link, var(--ifdd-bleu-700)); font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; }
+  .fold-toggle:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .fold-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms ease; }
+  .fold:not(.is-closed) .fold-toggle svg { transform: rotate(180deg); }
+  .fold.is-short::after, .fold.is-short .fold-toggle { display: none; }
+  .fold.is-short .prose { max-height: none; }
+</style>
+</head>
+<body class="day-plain">
+<main class="page wrap">
+  <p class="note">Les objectifs apparaissent sur la page de l'activité, avant la présentation détaillée. Un texte long est replié : environ six lignes visibles, le bas fondu dans la page, et un bouton « Lire la suite » qui déplie tout ; déplié, le bouton devient « Réduire ». Un texte court s'affiche en entier, sans bouton. Exemple réel : l'activité de Circul'R.</p>
+
+  <div class="pair">
+    <div>
+      <small class="lbl">Replié (à l'ouverture de la page)</small>
+      <section class="about" data-demo="closed"></section>
+    </div>
+    <div>
+      <small class="lbl">Déplié (après « Lire la suite »)</small>
+      <section class="about" data-demo="open"></section>
+    </div>
+  </div>
+
+  <div style="margin-top:56px; max-width: 640px">
+    <small class="lbl" style="display:block;margin-bottom:14px;font-family:var(--font-heading);font-weight:600;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted)">Texte court : rien à replier</small>
+    <section class="about">
+      <h2>À propos</h2>
+      <h3>Objectifs</h3>
+      <div class="fold is-short"><div class="prose"><p>Partager les leçons de la Commune de Sakété sur son premier projet financé par le Fonds pour l'adaptation.</p></div></div>
+      <h3>Présentation</h3>
+      <div class="fold is-short"><div class="prose"><p>Élus et techniciens disent ce qui bloque l'accès des régions aux grands fonds, et ce qui a permis de débloquer : montage du dossier, partenaires, délais réels.</p></div></div>
+    </section>
+  </div>
+</main>
+
+<template id="contenu">
+  <h2>À propos</h2>
+  <h3>Objectifs</h3>
+  <div class="fold"><div class="prose">
+    <p>L'accès aux financements demeure l'un des principaux freins au passage à l'échelle de l'économie circulaire. Or, la transition vers l'économie circulaire constitue une solution robuste de lutte contre le changement climatique, en complément des stratégies de décarbonation.</p>
+    <p>En effet, alors que la transition énergétique occupe le devant de la scène dans les débats sur le climat, la Fondation Ellen MacArthur estime que 45 % des émissions de gaz à effet de serre ne peuvent être résorbées par les seules énergies renouvelables : il faut y remédier en repensant la manière dont nous gérons les matériaux et les produits.</p>
+    <p>Circul'R, pionnier de l'économie circulaire en France, explore la thématique du financement de l'économie circulaire depuis plusieurs années en France et à l'étranger.</p>
+  </div><button class="fold-toggle" type="button"><span>Lire la suite</span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button></div>
+
+  <h3>Présentation</h3>
+  <div class="fold"><div class="prose">
+    <p>De manière plus spécifique, l'événement permettra de mettre en exergue les aspects innovants suivants, sur lesquels Circul'R partagera son expérience en Europe et dans le monde :</p>
+    <ul>
+      <li>Outils financiers innovants (bancaires et non bancaires), adaptés aux spécificités des modèles d'affaires circulaires, et présentation de cas concrets (financement bancaire de dispositifs de réemploi des emballages, financement de projets industriels circulaires en Turquie avec l'AFD et la banque TSKB).</li>
+      <li>Innovation de procédés, à travers l'expérience de la Coalition Finance Circulaire, portée par Circul'R avec cinq grandes banques françaises, dont les recommandations seront rassemblées dans un livre blanc publié en parallèle de la COP31.</li>
+      <li>Mobilisation du levier financier de la REP (responsabilité élargie du producteur) au service des 3R, spécificité française qui mérite d'être partagée.</li>
+    </ul>
+    <p>Ces expériences éprouvées avec ses partenaires bancaires et financiers nous paraissent dignes d'être partagées auprès d'autres parties prenantes de l'OIF et de l'IFDD.</p>
+  </div><button class="fold-toggle" type="button"><span>Lire la suite</span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button></div>
+</template>
+
+<script>
+  const modele = document.getElementById('contenu');
+  document.querySelectorAll('[data-demo]').forEach((section) => {
+    section.appendChild(modele.content.cloneNode(true));
+    const ouvert = section.dataset.demo === 'open';
+    section.querySelectorAll('.fold').forEach((fold) => {
+      fold.classList.toggle('is-closed', !ouvert);
+      const bouton = fold.querySelector('.fold-toggle');
+      const libelle = () => { bouton.querySelector('span').textContent = fold.classList.contains('is-closed') ? 'Lire la suite' : 'Réduire'; };
+      libelle();
+      bouton.setAttribute('aria-expanded', String(ouvert));
+      bouton.addEventListener('click', () => {
+        fold.classList.toggle('is-closed');
+        bouton.setAttribute('aria-expanded', String(!fold.classList.contains('is-closed')));
+        libelle();
+      });
+    });
+  });
+</script>
+<script src="icones.js"></script>
+</body>
+</html>
