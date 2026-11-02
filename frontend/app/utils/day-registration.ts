@@ -23,6 +23,28 @@ export function pickableIds(page: PublicTrackPage): string[] {
   return page.agenda.flatMap((entry) => (entry.kind === 'activity' && isPickable(entry.activity) ? [entry.activity.session.id] : []))
 }
 
+/**
+ * Terminée : direct clos par la régie, ou heure de fin passée hors direct (comme l'API, 02/11).
+ * Elle ne se prend plus ; déjà gardée, elle le reste.
+ */
+export function isActivityEnded(activity: PublicTrackActivity, now: number): boolean {
+  const { status, ends_at: endsAt } = activity.session
+  return status === 'completed' || (status !== 'live' && Date.parse(endsAt) <= now)
+}
+
+/** Les activités gardables déjà terminées. */
+export function endedIds(page: PublicTrackPage, now: number): string[] {
+  return page.agenda.flatMap((entry) =>
+    entry.kind === 'activity' && isPickable(entry.activity) && isActivityEnded(entry.activity, now) ? [entry.activity.session.id] : [],
+  )
+}
+
+/** La sélection d'une nouvelle inscription : tout ce qui reste à venir. */
+export function openIds(page: PublicTrackPage, now: number): string[] {
+  const done = new Set(endedIds(page, now))
+  return pickableIds(page).filter((id) => !done.has(id))
+}
+
 export type DayPickEntry =
   | { kind: 'activity'; startsAt: string; activity: PublicTrackActivity }
   | { kind: 'moment'; startsAt: string; key: string; entry: Extract<PublicTrackEntry, { kind: 'moment' }> }
@@ -49,6 +71,10 @@ export function dayPickGroups(page: PublicTrackPage): DayPickGroup[] {
   }
   return groups
 }
+
+/** Une activité de la journée est en direct : sa réunion existe, ou se crée à l'instant. */
+export const isDayLive = (page: PublicTrackPage): boolean =>
+  page.agenda.some((entry) => entry.kind === 'activity' && entry.activity.session.status === 'live')
 
 /** Les activités gardées encore proposées : une activité annulée depuis ne compte plus. */
 export function keptIds(kept: readonly string[], page: PublicTrackPage): string[] {

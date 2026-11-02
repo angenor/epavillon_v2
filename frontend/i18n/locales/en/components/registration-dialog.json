@@ -91,6 +91,7 @@
         "title": "The day is over",
         "message": "Registrations closed on {date}."
       }
-    }
+    },
+    "ended": "Over"
   }
 }

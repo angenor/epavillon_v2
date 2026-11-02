@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { dayPickGroups, dayTrackOf, keptIds, pickableIds } from '../../app/utils/day-registration.ts'
+import { dayPickGroups, dayTrackOf, endedIds, keptIds, openIds, pickableIds } from '../../app/utils/day-registration.ts'
 import type { PublicTrackEntry, PublicTrackPage } from '../../app/types/programme/track-page.ts'
 import type { ScheduleTrackBadge } from '../../app/types/views.ts'
 
@@ -55,4 +55,22 @@ test('une activité relève de sa journée spéciale avant l’atelier, et d’a
   assert.equal(dayTrackOf([badge('atelier', 'side_programme'), badge('finance', 'special_day')])?.slug, 'finance')
   assert.equal(dayTrackOf([badge('atelier', 'side_programme')])?.slug, 'atelier')
   assert.equal(dayTrackOf([badge('climat', 'thematic_track')]), null)
+})
+
+test('une activité terminée ne se prend plus : close par la régie, ou finie hors direct ; un direct qui déborde reste ouvert', () => {
+  const seance = (id: string, status: string, fin: string) =>
+    ({
+      kind: 'activity',
+      starts_at: at('09:00'),
+      ends_at: at(fin),
+      part_id: null,
+      activity: { session: { id, status, ends_at: at(fin), title: { fr: id } }, organizations: [], speakers: [], is_highlight: false },
+    }) as unknown as PublicTrackEntry
+  const journee = {
+    parts: [],
+    agenda: [seance('close', 'completed', '18:00'), seance('finie', 'scheduled', '10:00'), seance('deborde', 'live', '10:00'), seance('avenir', 'scheduled', '18:00')],
+  } as unknown as PublicTrackPage
+  const midi = Date.parse(at('12:00'))
+  assert.deepEqual(endedIds(journee, midi), ['close', 'finie'])
+  assert.deepEqual(openIds(journee, midi), ['deborde', 'avenir'])
 })

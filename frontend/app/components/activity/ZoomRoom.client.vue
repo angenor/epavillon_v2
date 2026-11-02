@@ -23,7 +23,8 @@ interface Props {
   session?: PublicScheduleRow | null
   /** La journée dont la salle est celle-ci : l'emporte sur l'activité. */
   dayTrackId?: string | null
-  meeting: PublicSessionMeeting
+  /** Nulle pendant un direct dont la réunion se crée encore : l'entrée patiente qu'elle soit prête. */
+  meeting?: PublicSessionMeeting | null
   mode: 'stage' | 'page'
   /** Salle pleine page, entrée directe comprise, pour `stage`. */
   roomTo?: string
@@ -36,7 +37,7 @@ interface Props {
   cover?: AttachedImage | null
 }
 
-const props = withDefaults(defineProps<Props>(), { session: null, dayTrackId: null, roomTo: undefined, leaveUrl: undefined, zoneLabel: undefined, cover: null })
+const props = withDefaults(defineProps<Props>(), { session: null, dayTrackId: null, meeting: null, roomTo: undefined, leaveUrl: undefined, zoneLabel: undefined, cover: null })
 /** Vrai de l'entrée à la sortie : le parent ne démonte pas la salle pendant ce temps. */
 const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
 
@@ -52,6 +53,9 @@ const target = computed<MeetingRoomTarget>(() => {
 const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl, prefetch, join, onRegistered, openDayRegistration } =
   useMeetingRoom(target)
 const roomKey = computed(() => props.dayTrackId ?? props.session?.id ?? '')
+const { state: stateOf } = useProgrammeSession()
+// Activité terminée : plus d'inscription. La salle d'une journée qui continue en prend encore.
+const ended = computed(() => !props.dayTrackId && props.session !== null && stateOf(props.session) === 'past')
 
 function register(): void {
   if (props.dayTrackId) openDayRegistration()
@@ -178,10 +182,23 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
           <UiSpinner size="1rem" />{{ t('zoom-room.checking') }}
         </p>
 
+        <!-- Sans compte, on s'inscrit aussi d'ici : la fenêtre propose l'inscription sans compte quand le formulaire l'admet. -->
+        <template v-else-if="phase === 'login' && needsRegistration && !ended">
+          <p class="max-w-md text-sm">{{ t('zoom-room.login.registerMessage') }}</p>
+          <div class="flex flex-wrap gap-2.5" :class="props.cover ? '' : 'justify-center'">
+            <UiButton variant="signup" size="lg" @click="register">
+              {{ t(props.dayTrackId ? 'zoom-room.register.day' : 'zoom-room.register.action') }}
+            </UiButton>
+            <UiButton :to="loginTo" size="lg" variant="inverse">{{ t('zoom-room.login.action') }}</UiButton>
+          </div>
+        </template>
+
         <template v-else-if="phase === 'login'">
           <p class="max-w-md text-sm">{{ t('zoom-room.login.message') }}</p>
           <UiButton :to="loginTo" size="lg">{{ t('zoom-room.login.action') }}</UiButton>
         </template>
+
+        <p v-else-if="phase === 'register' && ended" class="max-w-md text-sm">{{ t('zoom-room.register.ended') }}</p>
 
         <template v-else-if="phase === 'register'">
           <p class="max-w-md text-sm">{{ t(props.dayTrackId ? 'zoom-room.register.dayMessage' : 'zoom-room.register.message') }}</p>
@@ -220,7 +237,7 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
           <p class="max-w-md text-sm" role="alert">{{ error }}</p>
           <div class="flex flex-wrap justify-center gap-2">
             <UiButton v-if="errorStatus === 401" :to="loginTo">{{ t('zoom-room.login.action') }}</UiButton>
-            <UiButton v-else-if="errorStatus === 403 && needsRegistration" @click="register">
+            <UiButton v-else-if="errorStatus === 403 && needsRegistration && !ended" @click="register">
               {{ t(props.dayTrackId ? 'zoom-room.register.day' : 'zoom-room.register.action') }}
             </UiButton>
             <UiButton variant="inverse" icon="refresh" @click="enter">{{ t('zoom-room.retry') }}</UiButton>

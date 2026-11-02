@@ -74,13 +74,27 @@ const closed = computed(() => !props.day && props.now !== null && closesAt.value
 
 type Action = 'registered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'closed' | 'free' | 'watch' | 'join' | 'replay' | 'none'
 
+/** Un direct terminé ne prend plus personne : ni inscription, ni agenda (02/11). */
+const ended = computed(() => props.state === 'past')
+const dayOver = computed(() => {
+  const endsAt = props.day?.page.ends_at
+  return props.now !== null && Boolean(endsAt) && Date.parse(endsAt ?? '') <= props.now
+})
+const registerOrWait = (): Action => (full.value ? (props.session.waitlist_enabled ? 'waitlist' : 'full') : 'register')
+const calendarShown = computed(() => !ended.value && props.state !== 'cancelled')
+const canRegister = computed(() => registrationRequired.value && !isRegistered.value && !ended.value && !notOpenYet.value && !closed.value)
+
 const action = computed<Action>(() => {
   const state = props.state
   if (props.zoomOpen) {
     if (!registrationRequired.value || isRegistered.value) return 'join'
-    if (!notOpenYet.value && !closed.value) return full.value ? (props.session.waitlist_enabled ? 'waitlist' : 'full') : 'register'
+    if (canRegister.value) return registerOrWait()
   }
-  if (state === 'live' || state === 'ongoing') return props.session.is_streamed ? 'watch' : 'none'
+  if (state === 'live' || state === 'ongoing') {
+    if (!props.session.is_streamed) return 'none'
+    // La salle Zoom peut naître après le début (créée au démarrage) : l'inscription n'attend pas.
+    return canRegister.value ? registerOrWait() : 'watch'
+  }
   if (state === 'past') return props.session.replay_url ? 'replay' : 'none'
   if (state !== 'upcoming') return 'none'
   if (isRegistered.value) return 'registered'
@@ -109,10 +123,12 @@ const note = computed(() => {
     case 'register':
     case 'waitlist':
       if (props.day) return t('activity.ticket.day.registerNote', { day: tr(props.day.page.track.title) })
+      if (isLiveNow.value) return t('activity.ticket.note.liveRegister')
       return closesAt.value ? t('activity.ticket.note.until', { date: dateTime(closesAt.value, props.session.timezone) }) : ''
     case 'watch':
       return t('activity.ticket.note.live')
     default:
+      if (ended.value && props.day && !dayOver.value) return t('activity.ticket.day.endedNote', { day: tr(props.day.page.track.title) })
       return props.state === 'past' && isAttendanceShown ? t('activity.ticket.note.past', { count: registered.value }) : ''
   }
 })
@@ -295,12 +311,18 @@ function downloadCalendar(): void {
       <div v-show="hasAction" ref="actions" class="mt-4 flex flex-col gap-2">
         <!-- Le direct a commencé : l'encart rouge porte l'heure de début et le bouton. -->
         <div
-          v-if="isLiveNow && (callToAction === 'watch' || callToAction === 'join')"
+          v-if="isLiveNow && callToAction && callToAction !== 'replay'"
           class="flex flex-col gap-2.5 rounded-md border border-live-border bg-live-surface p-3"
         >
           <UiStatusBadge state="live" :label="liveSince" size="sm" class="self-start" />
           <p v-if="note" class="text-sm leading-relaxed text-text">{{ note }}</p>
-          <ActivityTicketAction :action="callToAction" :replay-url="props.session.replay_url" :join-to="joinTo" :day="Boolean(props.day)" />
+          <ActivityTicketAction
+            :action="callToAction"
+            :replay-url="props.session.replay_url"
+            :join-to="joinTo"
+            :day="Boolean(props.day)"
+            @register="openRegistration"
+          />
         </div>
         <template v-else-if="callToAction">
           <ActivityTicketAction
@@ -345,8 +367,8 @@ function downloadCalendar(): void {
         </p>
       </div>
 
-      <div class="mt-4 grid grid-cols-2 gap-2.5">
-        <UiButton variant="secondary" icon="calendar" block @click="downloadCalendar">
+      <div class="mt-4 grid gap-2.5" :class="calendarShown ? 'grid-cols-2' : 'grid-cols-1'">
+        <UiButton v-if="calendarShown" variant="secondary" icon="calendar" block @click="downloadCalendar">
           {{ t('activity.ticket.calendar') }}
         </UiButton>
         <UiButton variant="secondary" :icon="shared ? 'check' : 'copy'" block @click="share">

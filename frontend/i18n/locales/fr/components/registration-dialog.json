@@ -91,6 +91,7 @@
         "title": "La journée est passée",
         "message": "Les inscriptions ont fermé le {date}."
       }
-    }
+    },
+    "ended": "Terminée"
   }
 }

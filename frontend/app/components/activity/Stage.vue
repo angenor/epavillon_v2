@@ -23,6 +23,8 @@ interface Props {
   acronym: string | null
   /** La salle Zoom à montrer, décidée par la page ; nulle sinon. On y entre en pleine page (`roomTo`). */
   meeting?: PublicSessionMeeting | null
+  /** La salle tient la scène avant même que sa réunion soit prête (direct démarré, réunion en création). */
+  zoomOpen?: boolean
   roomTo?: string
   zoneLabel?: string
   isRecorded?: boolean
@@ -34,7 +36,7 @@ interface Props {
   dayTrackId?: string | null
 }
 
-const props = withDefaults(defineProps<Props>(), { editionImage: null, dayTrackId: null })
+const props = withDefaults(defineProps<Props>(), { meeting: null, zoomOpen: false, editionImage: null, dayTrackId: null })
 
 const { t, locale } = useI18n()
 
@@ -83,11 +85,13 @@ const replayMinutes = computed(() =>
 </script>
 
 <template>
-  <section v-if="zoomRoom" id="direct" class="min-w-0" aria-labelledby="direct-titre">
+  <section v-if="zoomRoom || props.zoomOpen" id="direct" class="min-w-0" aria-labelledby="direct-titre">
     <h2 id="direct-titre" class="sr-only">{{ t('zoom-room.label') }}</h2>
     <div class="relative min-h-80 overflow-hidden rounded-lg bg-surface-inverse shadow-lg lg:aspect-video lg:min-h-0">
       <ClientOnly>
+        <!-- La journée se lit à part : sa salle remplace celle de l'activité, qui ne change pas de genre une fois montée. -->
         <ActivityZoomRoom
+          :key="props.dayTrackId ?? 'activite'"
           class="lg:absolute lg:inset-0"
           mode="stage"
           :session="props.session"

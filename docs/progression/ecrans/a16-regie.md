@@ -2,7 +2,7 @@
 
 > Extrait de la [progression](../../PROGRESSION.md). Maquette validée : [`docs/maquettes/direction-condensee/regie.html`](../../maquettes/direction-condensee/regie.html).
 
-**État** : ✅ construit le 01/11 (migration datée du 02/11), pas encore en ligne
+**État** : ✅ construit le 01/11 (migration datée du 02/11), en production le 02/11 · réunion créée au démarrage, lien d'animateur en grand 02/11
 
 ---
 
@@ -27,7 +27,16 @@
 7. **Message d'incident publié à part par le site** après l'annulation (portée séance, nature `cancellation`), retiré au rétablissement si la case est cochée : il garde son auteur et sa ligne au journal.
 8. **Nouveau message** : portée séance ou toute la programmation ; la « page du direct » de la maquette n'a pas d'équivalent dans le modèle. Le texte anglais est prérempli par le modèle et repris du français s'il reste vide (l'API exige les deux).
 
+## Retours après l'essai en production (02/11)
+
+1. **Démarrer crée la réunion qui manque.** En production, aucune réunion n'existait (`live.meetings` vide) : toutes les activités demandent une inscription et la réunion ne naissait qu'à la première ; personne ne s'était inscrit. Le consommateur `live.sessions` (`programme.session.live`, ou toute séance relue en `live`) appelle `inscrits::assurer_reunion_du_direct` : réunion de l'activité avec ses inscrits déjà posés, ou réunion de la journée (`reconstruire_journee`), quel que soit `registration_required`. Pas de migration.
+2. **Lien d'animateur en grand.** Encart du direct dans `NowPanel` : « Ouvrir Zoom (animateur) » en grand (nouvel onglet ouvert au clic, avant l'appel, contre les bloqueurs) ; « Création de la réunion Zoom en cours » avec témoin tant qu'elle n'est pas prête ; en échec, « Relancer la création » (`live.meeting.manage`). Démarrer une activité dont la réunion est déjà prête ouvre Zoom du même clic. L'écran relit au signal du poste et, faute de lui (sujet réservé à `live.meeting.manage`), toutes les 5 s tant que le lien manque ; un message annonce son arrivée.
+3. **Direct terminé** : `REGISTRATION_SESSION_ENDED` (409) refuse l'inscription à une séance `completed`, ou passée hors direct (un direct qui déborde reste ouvert). Garder une activité terminée d'une journée ne crée plus d'inscription (`track_registrations::garder`) ; déjà gardée, elle le reste.
+
 ## Reste
+
+- Le direct en cours au moment de la mise en ligne n'aura pas de réunion d'office (son événement est passé) : « Créer la réunion Zoom » dans l'encart du direct.
+- À essayer avec Zoom : création d'une réunion dont l'heure de début est déjà passée (démarrage en retard), lien d'animateur obtenu dans la minute.
 
 - L'avis à l'écran (`in_app`) de l'annulation part toujours tout de suite (consommateur `engagement.notifications` existant) ; seul le courriel attend.
 - Les rappels annulés avec la séance ne sont pas remis quand on la rétablit.

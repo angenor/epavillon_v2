@@ -104,10 +104,11 @@ const zoomOpen = computed(() => {
   const current = session.value
   if (!current?.is_streamed || state.value === 'cancelled' || streams.value.length > 0) return false
   if (state.value === 'past' && current.replay_url) return false
-  return isMeetingJoinable(meeting.value)
+  // En direct, la réunion que le démarrage fait créer arrive en quelques secondes : la salle l'attend.
+  return isMeetingJoinable(meeting.value) || state.value === 'live'
 })
 const { meeting } = useSessionMeeting(session)
-const zoomShown = computed(() => meeting.value !== null && zoomOpen.value)
+const zoomShown = computed(() => zoomOpen.value)
 
 const dayBadge = computed(() => (session.value ? dayTrackOf(session.value.tracks) : null))
 const { data: dayPage } = useLazyAsyncData(
@@ -283,6 +284,7 @@ useSeoMeta({
               :acronym="session.organization_acronym"
               :parts="parts"
               :meeting="zoomShown ? meeting : null"
+              :zoom-open="zoomShown"
               :room-to="roomTo"
               :zone-label="edition.city ?? undefined"
               :is-recorded="detail.is_recorded"

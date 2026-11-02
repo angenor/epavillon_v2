@@ -120,7 +120,8 @@
       "meeting": "The meeting has started: entry is first come, first served, while places last.",
       "meetingStarts": "The meeting starts on {date} at {time}. If it has not started yet, you will wait in the Zoom waiting room.",
       "meetingAfter": "The scheduled time has passed, but the meeting may run over: join to see whether it is still going on.",
-      "freeMeeting": "Free entry, no registration."
+      "freeMeeting": "Free entry, no registration.",
+      "liveRegister": "The live stream has started: register, and the Zoom room opens right after."
     },
     "languages": "Languages",
     "calendar": "Calendar",
@@ -149,7 +150,8 @@
       "guest": "The day's live link reaches you by email; its management link lets you change your activities.",
       "joinLead": "Registered for the day: this live stream covers the whole day, from opening to closing.",
       "edit": "Change my activities",
-      "join": "Join the day's live stream"
+      "join": "Join the day's live stream",
+      "endedNote": "This activity is over. The day \"{day}\" goes on: register from its page."
     }
   },
   "gallery": {

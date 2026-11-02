@@ -3,20 +3,23 @@
   "checking": "Checking your access…",
   "login": {
     "message": "Sign in to enter the meeting.",
-    "action": "Sign in"
+    "action": "Sign in",
+    "registerMessage": "The meeting is reserved for registered participants. Register, or sign in if you already are."
   },
   "register": {
     "message": "The meeting is reserved for registered participants.",
     "action": "Register",
     "day": "Register for the day",
-    "dayMessage": "The day's live stream is reserved for those registered. One registration covers the whole day."
+    "dayMessage": "The day's live stream is reserved for those registered. One registration covers the whole day.",
+    "ended": "This activity is over: registration is closed."
   },
   "ready": "Join from this page, no Zoom installation needed. If the meeting has not started, Zoom will ask you to wait.",
   "join": "Join the meeting",
   "step": {
     "access": "Checking your registration…",
     "sdk": "Loading Zoom…",
-    "joining": "Entering the meeting…"
+    "joining": "Entering the meeting…",
+    "waiting": "Zoom is preparing your place in the meeting…"
   },
   "joined": "You are in the meeting.",
   "waitlisted": "You are on the waiting list: entry is first come, first served, while places last.",

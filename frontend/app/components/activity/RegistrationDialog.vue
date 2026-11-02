@@ -132,7 +132,7 @@ async function load(): Promise<void> {
     fields.value = applicable.fields
     if (applicable.fields.some((f) => f.field_type === 'country')) await loadCountries()
     reset()
-    picks.value = day ? pickableIds(day.page) : []
+    picks.value = day ? openIds(day.page, Date.now()) : []
     phase.value = isGuest.value && !applicable.form.allows_anonymous ? 'login' : 'form'
   } catch (error) {
     if (isForbiddenError(error)) {

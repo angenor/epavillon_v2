@@ -8,9 +8,14 @@ export function useProgrammeSession() {
   const localePath = useLocalePath()
   const { t } = useI18n()
 
-  /** Le direct l'emporte sur l'état temporel, pour la seule séance déclarée (règle 4). */
-  const state = (session: PublicScheduleRow): ProgrammeSessionState =>
-    isLive(session.id) ? 'live' : session.temporal_state
+  /**
+   * Le direct l'emporte sur l'état temporel, pour la seule séance déclarée (règle 4). Un direct
+   * terminé par la régie est passé, même avant l'heure de fin : on ne s'y inscrit plus.
+   */
+  const state = (session: PublicScheduleRow): ProgrammeSessionState => {
+    if (session.status === 'completed' && session.temporal_state !== 'cancelled') return 'past'
+    return isLive(session.id) ? 'live' : session.temporal_state
+  }
 
   /** « Sur place » sur une séance diffusée laisse croire qu'il faut venir : on le tait. */
   const showFormat = (session: PublicScheduleRow): boolean => !(session.is_streamed && session.format === 'in_person')

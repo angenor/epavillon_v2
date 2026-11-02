@@ -10,6 +10,10 @@
 //!
 //! Une activité de JOURNÉE (02/11) n'a pas de réunion propre : son changement
 //! recale seulement la réunion de la journée sur le nouveau déroulé.
+//!
+//! Le passage en direct par la régie (`live`, 02/11) fait naître la réunion qui
+//! manque, celle de l'activité ou de sa journée, même sans aucune inscription :
+//! sans elle, l'animateur n'a pas de lien et le public pas de salle.
 
 use async_trait::async_trait;
 use kernel::error::Result;
@@ -46,6 +50,9 @@ impl EventConsumer for SessionsConsumer {
         let Some(seance) = programme::seance(conn, event.aggregate_id).await? else {
             return Ok(());
         };
+        if seance.status == "live" {
+            inscrits::assurer_reunion_du_direct(conn, &seance).await?;
+        }
         if let Some(track_id) = programme::journee_de_seance(conn, seance.id).await? {
             return inscrits::recaler_journee(conn, track_id).await;
         }

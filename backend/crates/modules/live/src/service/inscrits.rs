@@ -52,17 +52,45 @@ pub async fn synchroniser(conn: &mut PgConnection, registration_id: Uuid) -> Res
         // La réunion naît avec la première inscription : toutes celles déjà
         // posées sur la séance la rejoignent, pas seulement celle-ci.
         None if inscription.seance.is_streamed => {
-            let reunion = assurer_reunion(conn, &inscription.seance, None).await?;
-            for id in programme::inscriptions_actives(conn, inscription.seance.id).await? {
-                if let Some(autre) = programme::inscription(conn, id).await? {
-                    assurer_participant(conn, reunion, &autre).await?;
-                }
-            }
+            naitre_avec_ses_inscrits(conn, &inscription.seance).await?;
             return Ok(());
         }
         None => return Ok(()),
     };
     assurer_participant(conn, reunion, &inscription).await
+}
+
+/// La réunion naît, et toutes les inscriptions déjà posées sur la séance la
+/// rejoignent, pas seulement celle qui l'a fait naître.
+async fn naitre_avec_ses_inscrits(conn: &mut PgConnection, seance: &Seance) -> Result<Uuid> {
+    let reunion = assurer_reunion(conn, seance, None).await?;
+    for id in programme::inscriptions_actives(conn, seance.id).await? {
+        if let Some(autre) = programme::inscription(conn, id).await? {
+            assurer_participant(conn, reunion, &autre).await?;
+        }
+    }
+    Ok(reunion)
+}
+
+/// La régie démarre le direct (02/11) : la réunion doit exister, inscription
+/// requise ou non, sans quoi ni l'animateur ni le public n'ont de salle. Celle
+/// d'une journée naît de même avec les places de ses inscrits.
+pub async fn assurer_reunion_du_direct(conn: &mut PgConnection, seance: &Seance) -> Result<()> {
+    if let Some(track_id) = programme::journee_de_seance(conn, seance.id).await? {
+        if meetings::reunion_active_journee(conn, track_id)
+            .await?
+            .is_none()
+        {
+            if let Some(journee) = programme::journee(conn, track_id).await? {
+                reconstruire_journee(conn, &journee, None).await?;
+            }
+        }
+        return Ok(());
+    }
+    if seance.is_streamed && meetings::reunion_active(conn, seance.id).await?.is_none() {
+        naitre_avec_ses_inscrits(conn, seance).await?;
+    }
+    Ok(())
 }
 
 pub async fn assurer_reunion(

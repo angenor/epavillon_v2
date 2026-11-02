@@ -28,6 +28,10 @@ const groups = computed(() => dayPickGroups(props.page))
 const all = computed(() => pickableIds(props.page))
 const kept = computed(() => new Set(props.modelValue))
 const count = computed(() => all.value.filter((id) => kept.value.has(id)).length)
+// Une activité terminée ne se coche plus ; déjà gardée, elle le reste (l'API fait de même).
+const openedAt = Date.now()
+const ended = computed(() => new Set(endedIds(props.page, openedAt)))
+const openKept = computed(() => all.value.filter((id) => kept.value.has(id) && !ended.value.has(id)).length)
 
 function partLabel(group: (typeof groups.value)[number]): string {
   const part = group.part
@@ -51,7 +55,8 @@ function toggle(id: string, checked: boolean): void {
 }
 
 function toggleAll(): void {
-  emit('update:modelValue', count.value ? [] : [...all.value])
+  const keepEnded = (id: string) => ended.value.has(id) && kept.value.has(id)
+  emit('update:modelValue', all.value.filter((id) => keepEnded(id) || (!openKept.value && !ended.value.has(id))))
 }
 
 const list = useTemplateRef<HTMLElement>('list')
@@ -66,7 +71,7 @@ onMounted(() => {
     <div class="flex items-center justify-between gap-3 text-sm text-text-secondary">
       <span aria-live="polite">{{ t('registration-dialog.day.count', { count, total: all.length }, count) }}</span>
       <button type="button" class="min-h-(--target-min) cursor-pointer font-semibold text-text-link" @click="toggleAll">
-        {{ count ? k('uncheckAll') : k('checkAll') }}
+        {{ openKept ? k('uncheckAll') : k('checkAll') }}
       </button>
     </div>
 
@@ -93,14 +98,19 @@ onMounted(() => {
         </div>
         <label
           v-else
-          class="grid min-h-(--target-min) cursor-pointer grid-cols-[22px_54px_minmax(0,1fr)] items-start gap-x-3 border-t border-border-subtle px-1 py-2.5"
-          :class="entry.activity.session.id === props.highlight ? 'rounded-md bg-(--color-day-surface)' : ''"
+          class="grid min-h-(--target-min) grid-cols-[22px_54px_minmax(0,1fr)] items-start gap-x-3 border-t border-border-subtle px-1 py-2.5"
+          :class="[
+            entry.activity.session.id === props.highlight ? 'rounded-md bg-(--color-day-surface)' : '',
+            ended.has(entry.activity.session.id) ? 'opacity-60' : 'cursor-pointer',
+          ]"
           :data-highlight="entry.activity.session.id === props.highlight ? '' : undefined"
         >
           <input
             type="checkbox"
-            class="mt-0.5 size-5 cursor-pointer accent-[var(--color-day-solid,var(--color-accent))]"
+            class="mt-0.5 size-5 accent-[var(--color-day-solid,var(--color-accent))]"
+            :class="ended.has(entry.activity.session.id) ? '' : 'cursor-pointer'"
             :checked="kept.has(entry.activity.session.id)"
+            :disabled="ended.has(entry.activity.session.id)"
             @change="toggle(entry.activity.session.id, ($event.target as HTMLInputElement).checked)"
           >
           <time
@@ -118,8 +128,14 @@ onMounted(() => {
               {{ tr(entry.activity.session.title) }}
             </b>
             <span v-if="byLine(entry.activity)" class="block text-[0.8rem] text-text-muted">{{ byLine(entry.activity) }}</span>
+            <em
+              v-if="ended.has(entry.activity.session.id)"
+              class="mt-1 inline-block text-[0.72rem] font-bold tracking-[0.04em] text-text-muted uppercase not-italic"
+            >
+              {{ k('ended') }}
+            </em>
             <span
-              v-if="entry.activity.session.id === props.highlight"
+              v-else-if="entry.activity.session.id === props.highlight"
               class="mt-1 inline-block text-[0.72rem] font-bold tracking-[0.04em] text-[var(--color-day,var(--color-accent))] uppercase"
             >
               {{ k('fromActivity') }}

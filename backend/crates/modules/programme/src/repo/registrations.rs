@@ -38,6 +38,7 @@ pub struct SeanceVerrouillee {
     pub id: Uuid,
     pub event_id: Uuid,
     pub status: String,
+    pub ends_at: time::OffsetDateTime,
     pub published: bool,
     pub registration_required: bool,
     pub registration_opens_at: Option<time::OffsetDateTime>,
@@ -56,7 +57,7 @@ pub async fn verrouiller(
     session_id: SessionId,
 ) -> Result<Option<SeanceVerrouillee>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, event_id, status::text AS "status!",
+        r#"SELECT id, event_id, status::text AS "status!", ends_at,
                   published_at IS NOT NULL AS "published!", registration_required,
                   registration_opens_at, registration_closes_at,
                   capacity, waitlist_enabled
@@ -72,6 +73,7 @@ pub async fn verrouiller(
         id: l.id,
         event_id: l.event_id,
         status: l.status,
+        ends_at: l.ends_at,
         published: l.published,
         registration_required: l.registration_required,
         registration_opens_at: l.registration_opens_at,

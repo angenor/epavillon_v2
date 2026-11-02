@@ -176,6 +176,9 @@ codes! {
     // à la journée, un seul direct pour toute la journée.
     RegistrationThroughDay => "REGISTRATION_THROUGH_DAY", StatusCode::CONFLICT,
         "Cette activité fait partie d'une journée : on s'inscrit à la journée, qui donne accès à tout son direct.";
+    // Direct terminé par la régie, ou heure de fin passée hors direct (02/11).
+    RegistrationSessionEnded => "REGISTRATION_SESSION_ENDED", StatusCode::CONFLICT,
+        "Cette activité est terminée : on ne peut plus s'y inscrire.";
 
     // --- Séances communes (01/11/2026) -----------------------------------------
     // Réunir ou séparer ne refuse jamais un chevauchement non plus : seulement ce

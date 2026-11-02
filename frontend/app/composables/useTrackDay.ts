@@ -42,6 +42,7 @@ export function useTrackDay(page: Ref<PublicTrackPage | null>) {
     if (entry.kind === 'moment') return clockState(entry.starts_at, entry.ends_at)
     const session = entry.activity.session
     if (session.temporal_state === 'cancelled' || session.temporal_state === 'postponed') return session.temporal_state
+    if (session.status === 'completed') return 'past'
     if (isLive(session.id)) return 'live'
     return clockState(session.starts_at, session.ends_at)
   }
