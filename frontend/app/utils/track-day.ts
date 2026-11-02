@@ -43,6 +43,22 @@ export function trackDayStyle(colorHex: string | null): Record<string, string> {
 }
 
 /**
+ * Le papier d'un marque-page du panneau « À venir » (accueil) : la couleur de la
+ * journée éclaircie de blanc, l'encre foncée de bleu nuit. Le panneau est un
+ * aplat sombre dans les deux thèmes : le papier ne s'inverse pas. Sans journée,
+ * papier blanc (le jaune dirait « en cours »).
+ */
+export function trackPaperStyle(colorHex: string | null): Record<string, string> {
+  const paper = 'var(--color-surface-inverse-selected)'
+  const ink = 'var(--color-text-on-inverse-selected)'
+  if (!colorHex || !parseColor(colorHex)) return { '--paper': paper, '--paper-ink': ink }
+  return {
+    '--paper': `color-mix(in srgb, ${colorHex} 30%, ${paper})`,
+    '--paper-ink': `color-mix(in srgb, ${colorHex} 45%, ${ink})`,
+  }
+}
+
+/**
  * Le trait d'un pictogramme de fil sur son rond blanc (`TrackIconBadge`) : la
  * couleur du fil foncée de bleu nuit, pour tenir 3:1 sur blanc même sur un vert
  * clair saisi. Le rond ne s'inverse pas en sombre, le trait non plus.

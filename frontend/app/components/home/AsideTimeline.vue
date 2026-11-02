@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
+import type { AsideFastening } from './AsideSession.vue'
 
 /**
  * LES PROCHAINES ACTIVITÉS RETENUES du panneau « À venir », dans l'ordre du
@@ -16,6 +17,7 @@ interface Props {
   editions: PublicEditionRow[]
   /** L'édition commune à toutes les séances, déjà nommée par le panneau. */
   singleEdition: PublicEditionRow | null
+  fastening: AsideFastening
 }
 
 const props = defineProps<Props>()
@@ -49,7 +51,7 @@ function sessionEdition(session: PublicScheduleRow): PublicEditionRow | null {
 <template>
   <ol class="m-0 list-none p-0">
     <li
-      v-for="session in props.sessions"
+      v-for="(session, index) in props.sessions"
       :key="session.id"
       class="border-t border-border-on-inverse lg:border-glass-border"
     >
@@ -59,6 +61,8 @@ function sessionEdition(session: PublicScheduleRow): PublicEditionRow | null {
         :zone-label="sessionEdition(session)?.city ?? undefined"
         :edition-label="props.singleEdition ? null : (sessionEdition(session)?.edition_label ?? sessionEdition(session)?.acronym ?? null)"
         :show-zone="!props.singleEdition"
+        :fastening="props.fastening"
+        :index="index"
       />
     </li>
   </ol>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { EditionStatsRow, PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { EventId, IsoDateTime } from '~/types/shared'
+import type { AsideFastening } from './AsideSession.vue'
 
 /**
  * LE PANNEAU « À VENIR AU PAVILLON », à droite de la vitrine (maquette du 01/11).
@@ -77,6 +78,19 @@ const subtitle = computed(() => {
 
 const statsEdition = computed(() => singleEdition.value ?? props.edition)
 
+/**
+ * Ruban un jour, épingle le lendemain (demande du 02/11). Le jour se compte dans
+ * le fuseau de l'édition, d'après l'horloge de l'API : serveur et navigateur
+ * tombent d'accord.
+ */
+const fastening = computed<AsideFastening>(() => {
+  const timeZone = statsEdition.value?.timezone ?? 'UTC'
+  const ymd = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+    new Date(props.now),
+  )
+  return Math.floor(Date.parse(`${ymd}T00:00:00Z`) / 86_400_000) % 2 === 1 ? 'tape' : 'pin'
+})
+
 /** Zéro ne s'affiche pas : une édition sans programme n'a pas à annoncer « 0 activité ». */
 const figures = computed(() => {
   const edition = statsEdition.value
@@ -132,6 +146,7 @@ const isEmpty = computed(() => shown.value.length === 0 && upcomingEditions.valu
       :sessions="shown"
       :editions="props.editions"
       :single-edition="singleEdition"
+      :fastening="fastening"
     />
 
     <section
