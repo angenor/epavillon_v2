@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intervenants : directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../direction-condensee/style.css">
+<style>
+  /* Trois directions pour les intervenants de la page d'une activité. Mêmes
+     données que la base publie (nom, rôle, fonction, organisation, biographie,
+     portrait facultatif), même couleur de journée, même fenêtre au clic. */
+  [hidden] { display: none !important; }
+  body { background: var(--page); }
+  .intro { max-width: 1240px; margin: 0 auto; padding: 40px 24px 8px; }
+  .intro h1 { margin: 0 0 8px; font-family: var(--font-heading); font-size: 2.2rem; text-transform: uppercase; color: var(--color-heading); }
+  .intro p { margin: 0 0 6px; max-width: 72ch; line-height: 1.55; color: var(--color-text-secondary); }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .controls button { min-height: var(--target); padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); font: 600 0.88rem var(--font-body); color: var(--color-text); cursor: pointer; }
+  .controls button[aria-pressed="true"] { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); color: var(--color-accent); }
+
+  .direction { max-width: 1240px; margin: 48px auto 0; padding: 0 24px; }
+  .direction > header h2 { margin: 0; font-family: var(--font-heading); font-size: 1.7rem; text-transform: uppercase; color: var(--color-heading); }
+  .direction > header p { margin: 4px 0 0; max-width: 80ch; line-height: 1.5; color: var(--color-text-secondary); }
+  .direction > header ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.5; color: var(--color-text-secondary); }
+  .views { display: grid; grid-template-columns: minmax(0, 820px) 375px; gap: 32px; margin-top: 18px; align-items: start; }
+  @media (max-width: 1280px) { .views { grid-template-columns: minmax(0, 1fr); } }
+  .frame { padding: 28px; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg); background: var(--page); }
+  .phone { width: 375px; max-width: 100%; padding: 28px 16px; border: 1px solid var(--color-border-strong); border-radius: 24px; background: var(--page); }
+  .frame-label { margin: 0 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+  h3.sec { margin: 0 0 18px; font-family: var(--font-heading); font-weight: 700; font-size: clamp(1.8rem, 3.4vw, 2.3rem); line-height: 1; text-transform: uppercase; color: var(--ink); }
+  .phone h3.sec { font-size: 1.8rem; }
+
+  .portrait { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; }
+  .initials { display: grid; place-items: center; width: 100%; height: 100%; background: var(--day-tint); font-family: var(--font-heading); font-weight: 700; color: var(--day-ink); }
+  .clamp-2, .clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+  .clamp-2 { -webkit-line-clamp: 2; }
+  .clamp-3 { -webkit-line-clamp: 3; }
+  button.reset { display: block; width: 100%; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+  button.reset:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
+
+  /* ── 1. Le badge d'accréditation ──────────────────────────────
+     Le badge porté au cou dans l'enceinte de la COP : fente du cordon, photo
+     d'identité, nom, et en pied une bande pleine à la couleur de la journée qui
+     dit le rôle, comme la bande de catégorie d'un badge des Nations unies. */
+  .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 16px; margin: 0; padding: 14px 0 0; list-style: none; }
+  .phone .badges { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; }
+  .badge { position: relative; display: flex; flex-direction: column; height: 100%; border: 1px solid var(--color-border-subtle); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-sm); transform-origin: 50% -14px; transition: transform 220ms cubic-bezier(.3,1.6,.5,1), box-shadow 220ms; }
+  /* La fente du cordon : percée dans le badge, on voit la page au travers. */
+  .badge::before { content: ""; position: absolute; top: 9px; left: 50%; width: 40px; height: 7px; transform: translateX(-50%); border-radius: 4px; background: var(--page); box-shadow: inset 0 1px 2px rgb(29 26 91 / 0.25); }
+  /* Le cordon, à peine esquissé au-dessus. */
+  .badge::after { content: ""; position: absolute; top: -14px; left: 50%; width: 2px; height: 26px; transform: translateX(-50%); background: var(--color-border-strong); }
+  .badge-photo { margin: 26px 12px 0; aspect-ratio: 4 / 5; border-radius: 4px; overflow: hidden; }
+  .badge-photo .initials { font-size: 2.6rem; }
+  .badge-id { flex: 1; padding: 12px 12px 14px; }
+  .badge-id b { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; line-height: 1.02; text-transform: uppercase; color: var(--ink); }
+  .badge-id .job { margin-top: 6px; font-size: 0.82rem; line-height: 1.35; color: var(--color-text-secondary); }
+  .badge-id .org { margin-top: 3px; font-size: 0.8rem; line-height: 1.3; font-weight: 600; color: var(--color-text-muted); }
+  .badge-band { padding: 8px 12px; border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px); background: var(--day-solid); font-family: var(--font-heading); font-weight: 700; font-size: 1rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--day-on); }
+  @media (prefers-reduced-motion: no-preference) {
+    button.reset:hover > .badge, button.reset:focus-visible > .badge { transform: rotate(-2.5deg); box-shadow: var(--shadow-md); }
+  }
+  .phone .badge-id b { font-size: 1.12rem; }
+  .phone .badge-photo { margin: 24px 10px 0; }
+  .phone .badge-id { padding: 10px 10px 12px; }
+
+  /* ── 2. Le chevalet nominatif ─────────────────────────────────
+     La table du panel vue de la salle : chacun assis derrière son chevalet,
+     le nom en grand sur le carton. La modération a le carton plein. */
+  .panel { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 30px 0; margin: 0; padding: 0; list-style: none; }
+  .phone .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Les sièges d'un rang s'alignent sur le plateau, quelle que soit la hauteur du carton. */
+  .panel > li, .panel button.reset { display: flex; height: 100%; }
+  .seat { position: relative; display: flex; flex: 1; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 14px; }
+  /* Le plateau de la table, continu d'un siège à l'autre. */
+  .seat::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: var(--color-surface-sunken); border-top: 2px solid var(--color-border-strong); }
+  .seat-photo { position: relative; z-index: 0; width: 104px; height: 104px; margin-bottom: -22px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 4px var(--page); }
+  .seat-photo .initials { font-size: 2rem; background: color-mix(in srgb, var(--day-solid) 18%, var(--card)); }
+  .phone .seat-photo { width: 88px; height: 88px; }
+  .tent { position: relative; z-index: 1; width: calc(100% - 18px); min-height: 104px; padding: 16px 12px 12px; background: var(--card); text-align: center; clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%); box-shadow: inset 0 5px 0 var(--day-solid), inset 0 0 0 1px var(--color-border-subtle); transition: transform 200ms; }
+  .tent b { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.32rem; line-height: 1; text-transform: uppercase; color: var(--ink); }
+  .tent .org { margin-top: 6px; font-size: 0.78rem; line-height: 1.3; font-weight: 600; color: var(--color-text-secondary); }
+  .tent .role { display: block; margin-top: 7px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--day-ink); }
+  .seat.lead .tent { background: var(--day-solid); box-shadow: none; }
+  .seat.lead .tent b, .seat.lead .tent .org, .seat.lead .tent .role { color: var(--day-on); }
+  .phone .tent b { font-size: 1.12rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    button.reset:hover .tent, button.reset:focus-visible .tent { transform: translateY(-4px); }
+  }
+
+  /* ── 3. Le générique ──────────────────────────────────────────
+     La liste d'une revue : regroupée par rôle, le nom porte la ligne, la
+     biographie s'annonce en deux lignes pour qu'on ait envie d'ouvrir. */
+  .credits { margin: 0; }
+  .credits h4 { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 0 0 8px; border-bottom: 2px solid var(--day-solid); font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--day-ink); }
+  .credits h4 small { font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--color-text-muted); }
+  .credits h4 + ul { margin: 0 0 26px; }
+  .credits ul { padding: 0; list-style: none; }
+  .credits li { border-bottom: 1px solid var(--color-border-subtle); }
+  .credit { display: grid; grid-template-columns: 72px minmax(0, 15rem) minmax(0, 1fr); gap: 4px 20px; align-items: start; padding: 16px 12px 16px 0; border-left: 3px solid transparent; transition: background-color 150ms, border-color 150ms, padding 150ms; }
+  .credit-photo { grid-row: span 2; width: 72px; height: 72px; border-radius: var(--radius-sm); overflow: hidden; }
+  .credit-photo .initials { font-size: 1.5rem; }
+  .credit b { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.65rem; line-height: 0.98; color: var(--ink); }
+  .credit .job { margin-top: 6px; font-size: 0.86rem; line-height: 1.35; color: var(--color-text-secondary); }
+  .credit .org { margin-top: 2px; font-size: 0.84rem; line-height: 1.3; font-weight: 600; color: var(--color-text); }
+  .credit .bio { font-size: 0.92rem; line-height: 1.55; color: var(--color-text-secondary); }
+  .credit .more { display: inline-block; margin-top: 6px; font-size: 0.82rem; font-weight: 700; color: var(--day-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  button.reset:hover > .credit, button.reset:focus-visible > .credit { padding-left: 12px; border-left-color: var(--day-solid); background: var(--day-tint); }
+  .phone .credit { grid-template-columns: 56px minmax(0, 1fr); gap: 10px 14px; }
+  .phone .credit-photo { grid-row: auto; width: 56px; height: 56px; }
+  .phone .credit b { font-size: 1.4rem; }
+  .phone .credit .bio-cell { grid-column: 1 / -1; }
+
+  /* Fenêtre de l'intervenant, commune aux trois. */
+  .backdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgb(29 26 91 / 0.55); }
+  .dialog { position: relative; width: min(560px, 100%); max-height: calc(100dvh - 32px); overflow: auto; border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-xl); }
+  .dialog-head { display: flex; gap: 18px; align-items: center; padding: 24px 56px 20px 24px; background: var(--day-tint); border-bottom: 4px solid var(--day-solid); }
+  .dialog-head .ph { flex: none; width: 104px; height: 104px; border-radius: 50%; overflow: hidden; }
+  .dialog-head .initials { font-size: 2rem; }
+  .dialog-head b { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 1.7rem; line-height: 1.02; color: var(--ink); }
+  .dialog-head .role { display: block; margin-top: 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--day-ink); }
+  .close { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: var(--radius); background: transparent; color: var(--ink); cursor: pointer; }
+  .close:hover { background: var(--color-surface-sunken); }
+  .close svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+  .dialog-body { padding: 22px 24px 26px; }
+  .dialog dl { margin: 0; display: grid; gap: 16px; }
+  .dialog dt { font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
+  .dialog dd { margin: 4px 0 0; line-height: 1.55; color: var(--color-text); }
+
+  @media (max-width: 480px) {
+    .frame { padding: 16px; }
+    .credit { grid-template-columns: 56px minmax(0, 1fr); }
+    .credit .bio-cell { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body class="day-finance">
+<header class="intro">
+  <h1>Intervenants : trois directions</h1>
+  <p>La page d'une activité montre aujourd'hui des cartes centrées, portrait rond cerclé de la couleur de la journée. Trois directions plus marquées, tirées de ce qu'on voit à une COP : le badge porté au cou, le chevalet posé sur la table du panel, le générique d'une revue.</p>
+  <p>Mêmes données que la base publie, rien de plus : nom, rôle, fonction, organisation, biographie, portrait quand il existe (deux intervenants ici n'en ont pas). La modération passe en tête. Un clic ouvre la même fenêtre qu'aujourd'hui. Portraits d'exemple.</p>
+  <div class="controls" role="group" aria-label="Réglages de la maquette">
+    <button type="button" data-day="day-finance" aria-pressed="true">Journée Finance (cyan)</button>
+    <button type="button" data-day="day-jeunesse" aria-pressed="false">Journée Jeunesse (vert)</button>
+    <button type="button" data-day="day-plain" aria-pressed="false">Sans journée</button>
+    <button type="button" data-theme-toggle aria-pressed="false">Thème sombre</button>
+  </div>
+</header>
+
+<section class="direction" data-kind="badge">
+  <header>
+    <h2>1. Le badge d'accréditation</h2>
+    <p>Chaque intervenant porte son badge : fente du cordon, photo d'identité, nom en capitales, et en pied une bande pleine à la couleur de la journée qui dit le rôle.</p>
+    <ul>
+      <li>Le plus reconnaissable pour qui a déjà mis les pieds dans une COP.</li>
+      <li>Au survol, le badge pivote sur son cordon.</li>
+      <li>La photo est grande : sans portrait, les initiales occupent un grand carré teinté, plus visible qu'aujourd'hui.</li>
+    </ul>
+  </header>
+  <div class="views">
+    <div><p class="frame-label">Colonne de la page, grand écran</p><div class="frame"><h3 class="sec">Intervenantes et intervenants</h3><div class="host"></div></div></div>
+    <div><p class="frame-label">Téléphone, 375 px</p><div class="phone"><h3 class="sec">Intervenantes et intervenants</h3><div class="host"></div></div></div>
+  </div>
+</section>
+
+<section class="direction" data-kind="tent">
+  <header>
+    <h2>2. Le chevalet nominatif</h2>
+    <p>La table du panel vue de la salle : chacun assis derrière son chevalet, le nom écrit en grand sur le carton, le plateau de la table filant d'un siège à l'autre. La modération a le carton plein.</p>
+    <ul>
+      <li>Dit tout de suite « voici qui sera à la tribune ».</li>
+      <li>Le carton porte le nom, l'organisation et le rôle ; la fonction passe dans la fenêtre (elle est souvent longue).</li>
+      <li>Au survol, le carton se soulève.</li>
+    </ul>
+  </header>
+  <div class="views">
+    <div><p class="frame-label">Colonne de la page, grand écran</p><div class="frame"><h3 class="sec">Intervenantes et intervenants</h3><div class="host"></div></div></div>
+    <div><p class="frame-label">Téléphone, 375 px</p><div class="phone"><h3 class="sec">Intervenantes et intervenants</h3><div class="host"></div></div></div>
+  </div>
+</section>
+
+<section class="direction" data-kind="credits">
+  <header>
+    <h2>3. Le générique</h2>
+    <p>Une liste composée comme une revue : regroupée par rôle, le nom en grand porte la ligne, la biographie s'annonce en deux lignes et invite à ouvrir.</p>
+    <ul>
+      <li>La plus sobre et la plus dense : on lit sans cliquer.</li>
+      <li>Tient le mieux une longue liste (huit, dix intervenants).</li>
+      <li>Moins ludique que les deux autres.</li>
+    </ul>
+  </header>
+  <div class="views">
+    <div><p class="frame-label">Colonne de la page, grand écran</p><div class="frame"><h3 class="sec">Intervenantes et intervenants</h3><div class="host"></div></div></div>
+    <div><p class="frame-label">Téléphone, 375 px</p><div class="phone"><h3 class="sec">Intervenantes et intervenants</h3><div class="host"></div></div></div>
+  </div>
+</section>
+
+<div style="height: 80px"></div>
+
+<div class="backdrop" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="d-nom">
+    <button class="close" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="dialog-head">
+      <span class="ph" id="d-ph"></span>
+      <div><b id="d-nom"></b><span class="role" id="d-role"></span></div>
+    </div>
+    <div class="dialog-body">
+      <dl>
+        <div><dt>Fonction</dt><dd id="d-job"></dd></div>
+        <div><dt>Organisation</dt><dd id="d-org"></dd></div>
+        <div id="d-bio-wrap"><dt>Biographie</dt><dd id="d-bio"></dd></div>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<script>
+{
+  document.documentElement.dataset.theme = 'light';
+  const P = '../../../frontend/public/mocks/showcase/';
+  const SPEAKERS = [
+    { name: 'Aminata Diallo', role: 'moderator', job: 'Secrétaire générale', org: 'Association internationale des Régions francophones (AIRF)', photo: P + 'temoignage-faye-vignette.jpg', bio: "Elle anime depuis 2019 le réseau des régions francophones engagées dans l'adaptation et suit les négociations sur le financement climatique des collectivités." },
+    { name: 'Claire Rousseau-Martin', role: 'keynote', job: "Première adjointe au maire, chargée de l'action municipale pour une ville plus juste et plus verte, de la santé publique, de la santé environnementale, des affaires internationales et de la coopération décentralisée", org: 'Ville de Marseille', photo: P + 'temoignage-genevee-vignette.jpg', bio: "Élue depuis 2020, elle porte la coopération de la ville avec les communes d'Afrique de l'Ouest sur la santé environnementale et l'adaptation des quartiers aux vagues de chaleur." },
+    { name: 'Issa Bado', role: 'speaker', job: 'Spécialiste de programme', org: 'Institut de la Francophonie pour le développement durable (IFDD)', photo: null, bio: '' },
+    { name: 'Mamadou Koivogui', role: 'speaker', job: 'Directeur national de l\'environnement', org: 'Ministère de l\'Environnement, Guinée', photo: P + 'temoignage-koivogui-vignette.jpg', bio: "Point focal de la Guinée pour la Convention-cadre, il coordonne la contribution déterminée au niveau national et le plan national d'adaptation." },
+    { name: 'Jean Houngbo', role: 'speaker', job: 'Maire', org: 'Commune de Sakété, Bénin', photo: null, bio: "Maire depuis 2020, il conduit le programme communal de reboisement et de finance verte porté avec les groupements de femmes de Sakété." },
+  ];
+  const ROLE = { moderator: 'Modération', keynote: 'Discours principal', speaker: 'Intervention', panelist: 'Panel' };
+  const GROUP = { moderator: 'Modération', keynote: 'Discours principal', speaker: 'Interventions', panelist: 'Panel' };
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const initials = (n) => n.split(/[\s-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  const face = (s) => s.photo ? `<img class="portrait" src="${s.photo}" alt="">` : `<span class="initials" aria-hidden="true">${initials(s.name)}</span>`;
+  const open = (i) => `<button type="button" class="reset" data-i="${i}" aria-label="Tout lire sur ${esc(SPEAKERS[i].name)}">`;
+
+  const render = {
+    badge: () => `<ul class="badges">${SPEAKERS.map((s, i) => `<li>${open(i)}<div class="badge">
+      <div class="badge-photo">${face(s)}</div>
+      <div class="badge-id"><b>${esc(s.name)}</b><p class="job clamp-2" style="margin-bottom:0">${esc(s.job)}</p><p class="org clamp-2" style="margin-bottom:0">${esc(s.org)}</p></div>
+      <div class="badge-band">${ROLE[s.role]}</div></div></button></li>`).join('')}</ul>`,
+    tent: () => `<ul class="panel">${SPEAKERS.map((s, i) => `<li>${open(i)}<div class="seat${s.role === 'moderator' ? ' lead' : ''}">
+      <div class="seat-photo">${face(s)}</div>
+      <div class="tent"><b>${esc(s.name)}</b><p class="org clamp-2" style="margin-bottom:0">${esc(s.org)}</p><span class="role">${ROLE[s.role]}</span></div></div></button></li>`).join('')}</ul>`,
+    credits: () => {
+      const groups = [...new Set(SPEAKERS.map((s) => s.role))];
+      return `<div class="credits">${groups.map((g) => {
+        const list = SPEAKERS.map((s, i) => [s, i]).filter(([s]) => s.role === g);
+        return `<h4>${GROUP[g]}${list.length > 1 ? `<small>${list.length}</small>` : ''}</h4><ul>${list.map(([s, i]) => `<li>${open(i)}<div class="credit">
+          <div class="credit-photo">${face(s)}</div>
+          <div><b>${esc(s.name)}</b><p class="job clamp-2" style="margin-bottom:0">${esc(s.job)}</p><p class="org" style="margin-bottom:0">${esc(s.org)}</p></div>
+          <div class="bio-cell">${s.bio ? `<p class="bio clamp-2" style="margin:0">${esc(s.bio)}</p><span class="more">Lire la biographie</span>` : `<span class="more">Fiche complète</span>`}</div>
+        </div></button></li>`).join('')}</ul>`;
+      }).join('')}</div>`;
+    },
+  };
+  document.querySelectorAll('.direction').forEach((d) => d.querySelectorAll('.host').forEach((h) => { h.innerHTML = render[d.dataset.kind](); }));
+
+  const backdrop = document.querySelector('.backdrop');
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button.reset[data-i]');
+    if (b) {
+      const s = SPEAKERS[+b.dataset.i];
+      document.getElementById('d-ph').innerHTML = face(s);
+      document.getElementById('d-nom').textContent = s.name;
+      document.getElementById('d-role').textContent = ROLE[s.role];
+      document.getElementById('d-job').textContent = s.job;
+      document.getElementById('d-org').textContent = s.org;
+      document.getElementById('d-bio').textContent = s.bio;
+      document.getElementById('d-bio-wrap').hidden = !s.bio;
+      backdrop.hidden = false;
+      backdrop.querySelector('.close').focus();
+      return;
+    }
+    if (e.target === backdrop || e.target.closest('.close')) backdrop.hidden = true;
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') backdrop.hidden = true; });
+
+  document.querySelectorAll('[data-day]').forEach((btn) => btn.addEventListener('click', () => {
+    document.body.className = btn.dataset.day;
+    document.querySelectorAll('[data-day]').forEach((o) => o.setAttribute('aria-pressed', String(o === btn)));
+  }));
+  const themeBtn = document.querySelector('[data-theme-toggle]');
+  themeBtn.addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    themeBtn.setAttribute('aria-pressed', String(dark));
+  });
+}
+</script>
+</body>
+</html>
