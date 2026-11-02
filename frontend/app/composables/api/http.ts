@@ -9,7 +9,8 @@
  *     il faut lui repasser le cookie reçu — sans quoi toute page rendue côté
  *     serveur s'affiche déconnectée avant de se corriger à l'hydratation.
  *
- *  2. LA ROTATION DU JETON, une fois, et jamais deux en parallèle. Le jeton
+ *  2. LA ROTATION DU JETON, une fois, et jamais deux en parallèle, ni dans
+ *     l'onglet ni entre onglets (`utils/rotation-entre-onglets.ts`). Le jeton
  *     d'accès dure un quart d'heure, la session douze heures : sans rotation,
  *     quelqu'un qui lit un dossier vingt minutes se ferait éjecter en cliquant.
  *     **Elle n'a lieu que dans le navigateur** — le cookie de rafraîchissement
@@ -35,6 +36,7 @@ import {
   type ApiUnreachableReason,
 } from '~/utils/api-error'
 import { issueDeRotation, type IssueDeRotation } from '~/utils/rotation'
+import { ongletsDuNavigateur, tournerEntreOnglets } from '~/utils/rotation-entre-onglets'
 
 interface Rotation {
   issue: IssueDeRotation
@@ -153,7 +155,7 @@ export function createApiHttp(): ApiHttp {
     // Hors navigateur, rien à tourner — et rien ne dit que la session est finie.
     if (!isConfigured.value) return Promise.resolve({ issue: 'finie', raison: null })
     if (import.meta.server) return Promise.resolve({ issue: 'injoignable', raison: null })
-    pendingRotation ??= rotate().finally(() => {
+    pendingRotation ??= tournerEntreOnglets(rotate, { issue: 'renouvelee', raison: null }, ongletsDuNavigateur()).finally(() => {
       pendingRotation = null
     })
     return pendingRotation

@@ -106,9 +106,9 @@ struct Raw {
     #[serde(with = "humantime_serde", default = "days_90")]
     auth_session_ttl_app: Duration,
     /// Combien de temps l'ancien jeton de rafraîchissement reste présentable
-    /// quand la réponse de sa rotation s'est perdue au retour — réseau saturé,
-    /// passage du Wi-Fi à la 4G. **Zéro rend la règle stricte** de R3 : tout
-    /// rejeu coupe tout. ADR-020 de Guide Négo.
+    /// après sa rotation : onglets qui rafraîchissent ensemble, réponse perdue
+    /// au retour. **Zéro rend la règle stricte** de R3 : tout rejeu coupe tout.
+    /// ADR-024 de Guide Négo.
     #[serde(with = "humantime_serde", default = "seconds_60")]
     auth_refresh_grace: Duration,
 

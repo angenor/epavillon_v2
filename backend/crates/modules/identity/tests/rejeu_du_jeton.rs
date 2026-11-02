@@ -1,9 +1,9 @@
 //! FR-031 : un jeton de rafraîchissement rejoué révoque **toutes** les sessions
 //! de la personne.
 //!
-//! Hors d'une réponse de rotation perdue — la minute qui suit la rotation, tant
-//! que la remplaçante n'a pas servi (ADR-020, `rejeu_reponse_perdue.rs`) —, un
-//! jeton présenté deux fois n'a aucune explication innocente : volé, ou copié.
+//! Passé la minute qui suit la rotation (onglets, réponse perdue : ADR-024,
+//! `rejeu_reponse_perdue.rs`), un jeton présenté deux fois n'a aucune
+//! explication innocente : volé, ou copié.
 //! La seule réponse sûre est de tout couper — y compris les sessions ouvertes sur
 //! d'autres appareils, qui sont précisément celles qu'un vol vise ensuite.
 
@@ -97,15 +97,11 @@ async fn une_session_expiree_nest_pas_un_rejeu() {
     assert!(matches!(issue, RefreshOutcome::Expired));
 }
 
-/// La course : deux renouvellements partis ensemble avec le même jeton.
-///
-/// Le client n'en envoie qu'un à la fois. Ce que le test tient, c'est
-/// l'invariant qui compte quand cette hypothèse est fausse : **jamais deux
-/// sessions vivantes.** Selon l'ordre d'arrivée, le second est pris pour un
-/// rejeu — tout est coupé — ou pour une réponse perdue — la première remplaçante
-/// tombe (ADR-020) ; dans les deux cas, aucune session orpheline ne survit.
+/// La course : deux onglets partagent les cookies et rafraîchissent ensemble
+/// avec le même jeton (incident du 02/11/2026, toutes les sessions coupées).
+/// Les deux réussissent, et aucune ne coupe l'autre (ADR-024).
 #[tokio::test]
-async fn deux_renouvellements_simultanes_nouvrent_quune_session() {
+async fn deux_renouvellements_simultanes_reussissent_tous_deux() {
     let bac = Bac::monter().await;
     let personne = semer(&bac, Compte::actif(ADRESSE)).await;
     let ouverte = connexion(&bac, ADRESSE).await;
@@ -116,17 +112,22 @@ async fn deux_renouvellements_simultanes_nouvrent_quune_session() {
         session::refresh(&bac.state, &ctx, &ouverte.refresh_token, Device::default()),
     );
 
-    let renouvelees = [&un, &deux]
-        .iter()
-        .filter(|issue| matches!(issue, Ok(RefreshOutcome::Renewed(_))))
-        .count();
-    assert!(renouvelees >= 1);
-
-    for refus in [un, deux].into_iter().filter_map(Result::err) {
-        assert_eq!(refus.code, ErrorCode::IdentityRefreshReused);
+    for issue in [un, deux] {
+        let neuve = match issue {
+            Ok(RefreshOutcome::Renewed(neuve)) => neuve,
+            autre => panic!("deux onglets ne se déconnectent pas l'un l'autre : {autre:?}"),
+        };
+        assert_eq!(
+            commun::acteur_resolu(&bac, &neuve.access_token).await,
+            Some(personne)
+        );
     }
-    assert!(
-        commun::sessions_vivantes(&bac, personne).await <= 1,
-        "jamais deux sessions vivantes nées d'un même jeton"
-    );
+    let motifs: Vec<Option<String>> = commun::sessions(&bac, personne)
+        .await
+        .into_iter()
+        .map(|(_, motif)| motif)
+        .collect();
+    assert!(!motifs
+        .iter()
+        .any(|m| m.as_deref() == Some("reuse_detected")));
 }

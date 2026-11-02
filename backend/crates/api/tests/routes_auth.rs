@@ -249,7 +249,7 @@ async fn vieillir_la_rotation(bac: &Bac, secondes: f64) {
 }
 
 /// La réponse de la rotation se perd, le navigateur représente l'ancien jeton
-/// dans la minute : 200, et **de nouveaux cookies** — ADR-020.
+/// dans la minute : 200, et **de nouveaux cookies** (ADR-024).
 #[actix_web::test]
 async fn une_reponse_de_rotation_perdue_se_reprend() {
     let bac = monter().await;

@@ -704,7 +704,7 @@ est la valeur voulue :
 | Réglage | Défaut | Ce qu'il fait |
 |---|---|---|
 | `AUTH_SESSION_TTL_APP` | 90 jours, glissants | Durée d'une session ouverte depuis Guide Négo, sans case à cocher |
-| `AUTH_REFRESH_GRACE` | 60 secondes | Fenêtre où l'ancien jeton de rafraîchissement, représenté après une réponse perdue, n'est pas pris pour un vol |
+| `AUTH_REFRESH_GRACE` | 60 secondes | Fenêtre où l'ancien jeton de rafraîchissement, représenté par un autre onglet ou après une réponse perdue, n'est pas pris pour un vol (ADR-024) |
 
 Ne les écrire que pour s'écarter du défaut. `PRIVACY_POLICY_VERSION` disparaît : encore posée dans
 `.env.prod`, elle est sans effet — la version vient désormais du texte servi par l'API.

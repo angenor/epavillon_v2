@@ -220,7 +220,7 @@ COMMENT ON COLUMN identity.sessions.device_label IS
 COMMENT ON COLUMN identity.sessions.device_platform IS
     'Plateforme déclarée : android, ios, other.';
 COMMENT ON COLUMN identity.sessions.replaced_by IS
-    'La session qui a remplacé celle-ci à sa rotation — la remplaçante VIVANTE, tenue à jour. C''est ce qui distingue une réponse de rotation perdue d''un vol : l''ancien jeton, présenté dans la minute qui suit sa rotation (AUTH_REFRESH_GRACE) et tant que la remplaçante n''a jamais été renouvelée, révoque celle-ci (motif « response_lost ») et en ouvre une neuve, une seule vivante. Hors de ces bornes, tout est coupé (« reuse_detected »). ADR-020 de Guide Négo, qui nuance R3 de specs/001.';
+    'La dernière session ouverte depuis le jeton de celle-ci. Le jeton d''une session tournée, présenté dans la minute qui suit sa rotation (AUTH_REFRESH_GRACE), vient d''un autre onglet (les onglets partagent les cookies) ou d''une réponse perdue : il ouvre une session sœur sans fermer la première, si la lignée suivie par cette colonne vit encore (une lignée fermée par déconnexion, changement de mot de passe ou suspension ne se rouvre pas). Hors de la minute, tout est coupé (« reuse_detected »). Le motif « response_lost » n''est plus écrit depuis le 02/11/2026 ; son jeton qui revient reste un vol. ADR-024 de Guide Négo, qui remplace la reprise d''ADR-020.';
 
 -- Jetons à usage unique : vérification d'email, réinitialisation de mot de
 -- passe, invitation, lien magique d'inscription rapide (cas PACO).
