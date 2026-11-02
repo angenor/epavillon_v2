@@ -34,9 +34,14 @@ const { isLive } = useLiveSession()
 
 const title = computed(() => tr(props.session.title))
 
-const organization = computed(
-  () => props.session.organization_acronym ?? props.session.organization_name ?? '',
-)
+const { partsOf, namesOf } = useJointSession()
+
+/** Une séance commune nomme toutes ses organisations, comme dans le programme. */
+const organization = computed(() => {
+  const parts = partsOf(props.session)
+  if (parts.length > 1) return namesOf(parts)
+  return props.session.organization_acronym ?? props.session.organization_name ?? ''
+})
 
 /** « ven. 13 » */
 const day = computed(() =>
