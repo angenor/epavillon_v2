@@ -28,9 +28,9 @@ export function editionPhoto(edition: Pick<PublicEditionRow, 'cover' | 'banner'>
 }
 
 /**
- * Le logo blanc d'une édition, sur le bandeau sombre de `/programmations`.
- * Fichier livré avec le site, sans emplacement au back-office (arbitrage du
- * 03/11/2026) : une autre édition s'ajoute ici.
+ * Repli du logo sur fond sombre (`logo_inverse`) tant qu'il n'est pas déposé
+ * au back-office : le fichier livré le 03/11/2026 pour la CdP31. À retirer,
+ * avec le fichier, une fois le dépôt fait.
  */
 const LOGOS_ON_DARK: Record<string, string> = {
   'cdp31-antalya-2026': '/logos/editions/cdp31-antalya-2026-blanc.png',

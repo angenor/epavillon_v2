@@ -122,6 +122,7 @@ enumeration_texte! {
         Attachment => "attachment",
         Background => "background",
         CoverSource => "cover_source",
+        LogoInverse => "logo_inverse",
     }
 }
 

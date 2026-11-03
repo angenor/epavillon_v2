@@ -491,6 +491,8 @@ export interface PublicEditionRow
   thumbnail: AttachedImage | null
   /** Logo de la conférence (CdP31…), sans forme imposée : l'API le joint à la vue. */
   logo: AttachedImage | null
+  /** Le même logo en version claire, pour le bandeau sombre de la programmation (03/11/2026). */
+  logo_inverse: AttachedImage | null
 
   temporal_state: EditionTemporalState
 

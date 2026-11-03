@@ -74,6 +74,8 @@ pub struct PublicEdition {
     pub thumbnail: Option<Value>,
     /// Logo de la conférence (CdP31…), sans forme imposée ; nul sans logo.
     pub logo: Option<Value>,
+    /// Le même logo en version claire, pour un fond sombre (03/11/2026).
+    pub logo_inverse: Option<Value>,
 
     /// `upcoming`, `ongoing` ou `past` — **le vocabulaire de la vue**, le même
     /// que `programme.v_public_schedule`. Deux écrans qui parlent du même temps

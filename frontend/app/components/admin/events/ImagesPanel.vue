@@ -9,6 +9,8 @@ import { EDITION_IMAGE_RATIO, EDITION_IMAGE_ROLES } from '~/types/media'
  *
  * Plus son logo (29/10), sans forme imposée : celui de la conférence, que les
  * gabarits de courriel de l'édition reprennent.
+ * Et sa version claire (03/11/2026), aperçue sur fond sombre : le bandeau de
+ * la programmation la pose sur son aplat bleu nuit.
  *
  * ── POURQUOI TROIS FICHIERS ET NON UN SEUL RECADRÉ ──────────────────────────
  *
@@ -96,6 +98,7 @@ function setRole(role: EditionImageRole, assetId: AssetId | null): void {
       :asset-id="props.modelValue[role]"
       :owner="owner"
       :disabled="props.disabled"
+      :preview-tone="role === 'logo_inverse' ? 'inverse' : 'default'"
       @update:asset-id="(next: AssetId | null) => setRole(role, next)"
     />
   </div>

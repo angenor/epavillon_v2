@@ -70,6 +70,8 @@ const props = withDefaults(
     buttonLabel?: string
     buttonIcon?: string
     buttonVariant?: ButtonVariant
+    /** `inverse` : l'aperçu sur fond sombre, pour une image claire (logo blanc). */
+    previewTone?: 'default' | 'inverse'
   }>(),
   {
     rule: null,
@@ -231,13 +233,14 @@ const maxLabel = computed(() =>
         </p>
       </header>
 
-      <UiImage
-        v-if="shown"
-        :image="shown"
-        :ratio="aspectRatio ? String(aspectRatio) : 'auto'"
-        rounded="rounded-md"
-        sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
-      />
+      <div v-if="shown" :class="props.previewTone === 'inverse' ? 'rounded-md bg-surface-inverse p-3' : ''">
+        <UiImage
+          :image="shown"
+          :ratio="aspectRatio ? String(aspectRatio) : 'auto'"
+          rounded="rounded-md"
+          sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
+        />
+      </div>
       <!-- L'EMPLACEMENT VIDE GARDE LA FORME du fichier attendu : c'est ce qui fait
            comprendre « très large » ou « carré » sans avoir à le lire. -->
       <p

@@ -77,6 +77,10 @@
       "logo": {
         "label": "Logo de l'édition",
         "use": "celui de la conférence, repris par les courriels de l'édition"
+      },
+      "logo_inverse": {
+        "label": "Logo sur fond sombre",
+        "use": "sa version claire, posée sur le bandeau sombre de la programmation"
       }
     }
   },

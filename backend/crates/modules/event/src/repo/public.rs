@@ -70,7 +70,8 @@ async fn lire<'e>(executor: impl PgExecutor<'e>, slug: Option<&str>) -> Result<V
                   st.programme_starts_at, st.programme_ends_at,
                   COALESCE(st.country_count, 0)           AS "country_count!",
                   st.programme_updated_at,
-                  media.attached_image('event', 'events', v.id, 'logo') AS logo
+                  media.attached_image('event', 'events', v.id, 'logo') AS logo,
+                  media.attached_image('event', 'events', v.id, 'logo_inverse') AS logo_inverse
              FROM event.v_public_editions v
              JOIN event.events e ON e.id = v.id
              LEFT JOIN programme.v_edition_stats st ON st.event_id = v.id
@@ -117,6 +118,7 @@ async fn lire<'e>(executor: impl PgExecutor<'e>, slug: Option<&str>) -> Result<V
             cover: l.cover,
             thumbnail: l.thumbnail,
             logo: l.logo,
+            logo_inverse: l.logo_inverse,
             temporal_state: l.temporal_state,
             call_id: l.call_id,
             call_status: l.call_status,

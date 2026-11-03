@@ -95,7 +95,11 @@ CREATE TYPE media.attachment_role AS ENUM (
     'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'video', 'thumbnail', 'attachment',
     -- 29/10 : l'image de fond d'un gabarit de courriel (engagement.mail_templates).
     'background',
-    'cover_source'
+    'cover_source',
+    -- 03/11/2026 : le logo d'une édition en version claire, posé sur un fond
+    -- sombre (bandeau de la programmation). Le logo ordinaire reste celui des
+    -- fonds clairs (courriels, tuile blanche).
+    'logo_inverse'
 );
 
 -- -----------------------------------------------------------------------------
@@ -1133,6 +1137,9 @@ INSERT INTO media.attachable_roles
     -- par l'équipe à côté du bandeau. Sans forme imposée, un logo a la sienne.
     -- Les gabarits de courriel de l'édition le lisent par attached_image().
     ('event',       'events',        'logo',      '{"fr":"Logo de l''édition","en":"Edition logo"}', false, '{image/*}',              5242880, NULL),
+    -- Logo sur fond sombre (03/11/2026) : la version claire du même logo, pour
+    -- le bandeau de la programmation. Sans forme imposée, comme le logo.
+    ('event',       'events',        'logo_inverse', '{"fr":"Logo sur fond sombre","en":"Logo for dark backgrounds"}', false, '{image/*}', 5242880, NULL),
     ('programme',   'proposals',     'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL),
     ('programme',   'proposals',     'document',  '{"fr":"Document joint","en":"Attached document"}', true,  '{application/pdf,application/vnd.*}', 26214400, NULL),
     -- Photo de départ de l'atelier de couverture (29/10) : celle que

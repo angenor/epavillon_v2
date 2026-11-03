@@ -78,6 +78,8 @@ export type AttachmentRole =
   | 'background'
   /** Photo de départ de l'atelier de couverture, gardée à part de l'image fabriquée. */
   | 'cover_source'
+  /** Le logo d'une édition en version claire, pour un fond sombre (03/11/2026). */
+  | 'logo_inverse'
 
 // ---------------------------------------------------------------------------
 // Les trois déclinaisons d'une édition
@@ -92,19 +94,20 @@ export type AttachmentRole =
  * forme attendue est déclarée dans `media.attachable_roles` et vérifiée par
  * trigger — l'écran l'annonce, il ne la fait pas respecter.
  */
-export const EDITION_IMAGE_ROLES = ['banner', 'cover', 'thumbnail', 'logo'] as const
+export const EDITION_IMAGE_ROLES = ['banner', 'cover', 'thumbnail', 'logo', 'logo_inverse'] as const
 
 export type EditionImageRole = (typeof EDITION_IMAGE_ROLES)[number]
 
 /**
  * Le rapport largeur ÷ hauteur exigé par la base, pour l'annoncer à l'éditeur.
- * Le logo (29/10) n'en impose aucun : un logo a sa forme.
+ * Les logos (29/10, 03/11) n'en imposent aucun : un logo a sa forme.
  */
 export const EDITION_IMAGE_RATIO: Record<EditionImageRole, string | null> = {
   banner: '32 / 9',
   cover: '16 / 9',
   thumbnail: '1 / 1',
   logo: null,
+  logo_inverse: null,
 }
 
 // ---------------------------------------------------------------------------

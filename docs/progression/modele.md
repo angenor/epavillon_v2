@@ -619,3 +619,9 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - Aucun travail du worker ne préparait les partitions de `platform.audit_log` (seulement `engagement.email_messages`) : le travail `platform.maintain_journals` (worker) prépare désormais celles de `audit_log` et `ops_log` et purge `ops_log`.
 
 **En production** : `ops/migrations/2026-11-02-journal.sql`, rejouable, additive, à jouer avant de déployer l'API et le worker. L'index de l'audit se pose sous verrou d'écriture sur chaque partition (pas de CONCURRENTLY sur une table partitionnée). Syntaxe vérifiée par libpg_query ; la vue remplacée est celle du dépôt (aucune migration ne l'a modifiée), aucune vue n'en dépend. **Jouée le 02/11** (sauvegarde faite).
+
+## 2026-11-03 : logo d'une édition sur fond sombre
+
+- `media.attachment_role` gagne **`logo_inverse`** ; `media.attachable_roles` déclare (`event`, `events`, `logo_inverse`), « Logo sur fond sombre », une image, sans forme imposée. La version claire du logo de l'édition, pour le bandeau bleu nuit de `/programmations` ; le logo ordinaire reste celui des fonds clairs (courriels).
+
+**En production** : `ops/migrations/2026-11-03-logo-sur-fond-sombre.sql`, rejouable, additive (valeur d'ENUM hors transaction, puis la ligne). **Jouée le 03/11** (sauvegarde faite), avant la mise en ligne : le cache SQLx des lectures d'édition en dépend.

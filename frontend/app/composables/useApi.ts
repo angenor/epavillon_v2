@@ -593,6 +593,7 @@ export function useApi() {
           cover: m.attachedImage('event', 'events', eventId, 'cover'),
           thumbnail: m.attachedImage('event', 'events', eventId, 'thumbnail'),
           logo: m.attachedImage('event', 'events', eventId, 'logo'),
+          logo_inverse: m.attachedImage('event', 'events', eventId, 'logo_inverse'),
         })),
       days: (eventId: Uuid) =>
         call(`/events/${eventId}/days`, (m) => m.eventDays.filter((d) => d.event_id === eventId)),

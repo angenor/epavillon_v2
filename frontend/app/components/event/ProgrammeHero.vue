@@ -25,7 +25,13 @@ const { tr } = useI18nText()
 const { dateRange, dateTime, zoneLabel } = useDateTime()
 
 const picture = computed(() => editionPhoto(props.edition))
-const logo = computed(() => editionLogoOnDark(props.edition))
+// L'original : une déclinaison peut être un JPEG, qui perdrait la transparence.
+const logo = computed(() => {
+  const asset = props.edition.logo_inverse
+  if (asset) return { src: asset.url, width: asset.width ?? undefined, height: asset.height ?? undefined }
+  const src = editionLogoOnDark(props.edition)
+  return src ? { src, width: 640, height: 259 } : null
+})
 
 const label = (edition: PublicEditionRow) =>
   edition.acronym ?? edition.edition_label ?? tr(edition.title)
@@ -87,10 +93,10 @@ const choices = computed(() =>
     >
       <img
         v-if="logo"
-        :src="logo"
+        :src="logo.src"
         :alt="t('programme.hero.logoAlt', { edition: label(props.edition) })"
-        width="640"
-        height="259"
+        :width="logo.width"
+        :height="logo.height"
         class="order-first h-12 w-auto self-start sm:order-last sm:h-16 lg:h-22"
       >
       <div class="max-w-3xl">

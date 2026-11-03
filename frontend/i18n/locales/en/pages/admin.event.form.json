@@ -77,6 +77,10 @@
       "logo": {
         "label": "Edition logo",
         "use": "the conference logo, used by the edition's emails"
+      },
+      "logo_inverse": {
+        "label": "Logo for dark backgrounds",
+        "use": "its light version, shown on the dark banner of the programme page"
       }
     }
   },
