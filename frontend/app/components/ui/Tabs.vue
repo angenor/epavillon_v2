@@ -51,6 +51,9 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const slots = useSlots()
+// Résolu ici : appelé dans le gabarit, `resolveComponent` échappe à Nuxt et rend
+// une balise `<nuxtlink>` inerte.
+const NuxtLink = resolveComponent('NuxtLink')
 
 const tabRefs = ref<HTMLElement[]>([])
 
@@ -104,7 +107,7 @@ defineExpose({ tabId })
       class="flex gap-1 overflow-x-auto border-b border-border"
     >
       <component
-        :is="props.to ? resolveComponent('NuxtLink') : 'button'"
+        :is="props.to ? NuxtLink : 'button'"
         v-for="(item, index) in props.items"
         :key="item.value"
         :ref="(element: unknown) => { if (element) tabRefs[index] = (element as { $el?: HTMLElement }).$el ?? element as HTMLElement }"
