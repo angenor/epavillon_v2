@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>En ce moment</title>
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--color-surface); color: var(--color-text); font-family: "Inter", "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.5; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 32px 16px 96px; }
+  .note { max-width: 78ch; margin: 0 0 32px; padding: 12px 16px; border-left: 4px solid var(--color-info); background: var(--color-info-surface); font-size: 14px; line-height: 1.6; }
+  .note p { margin: 0 0 8px; }
+  .note p:last-child { margin: 0; }
+  .lbl { display: block; margin: 48px 0 12px; font-size: 13px; font-weight: 700; color: var(--color-text-muted); }
+
+  header.tete { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; }
+  header.tete h1 { margin: 0; font-size: 1.875rem; font-weight: 600; line-height: 1.2; }
+  header.tete p { margin: 4px 0 0; color: var(--color-text-muted); }
+  header.tete small { font-size: 14px; color: var(--color-text-subtle); }
+
+  /* La carte : un chiffre qui répond à « combien en ce moment », puis où. */
+  .live { margin-top: 24px; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 0; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); overflow: hidden; }
+  @media (max-width: 760px) { .live { grid-template-columns: minmax(0, 1fr); } }
+  .live .chiffre { padding: 20px 24px; border-right: 1px solid var(--color-border-subtle); }
+  @media (max-width: 760px) { .live .chiffre { border-right: 0; border-bottom: 1px solid var(--color-border-subtle); } }
+  .live h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); }
+  .pouls { position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--color-success); }
+  @media (prefers-reduced-motion: no-preference) {
+    .pouls::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--color-success); opacity: 0; animation: onde 2.4s ease-out infinite; }
+    @keyframes onde { 0% { transform: scale(.6); opacity: .7; } 100% { transform: scale(1.6); opacity: 0; } }
+  }
+  .live .n { display: block; margin-top: 10px; font-size: 3.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--color-heading); }
+  .live .n-lib { display: block; margin-top: 4px; font-size: 15px; color: var(--color-text-secondary); }
+  .live .dont { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; font-size: 14px; }
+  .live .dont b { font-variant-numeric: tabular-nums; }
+  .live .maj { display: block; margin-top: 16px; font-size: 12.5px; color: var(--color-text-subtle); }
+
+  .live .ou { padding: 20px 24px; }
+  .live .ou h3 { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); }
+  .barres { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .barres li { display: grid; grid-template-columns: 170px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: 14px; }
+  @media (max-width: 520px) { .barres li { grid-template-columns: 120px minmax(0, 1fr) 36px; } }
+  .barres .piste { display: block; height: 10px; border-radius: 999px; background: var(--color-surface-sunken); overflow: hidden; }
+  .barres .plein { display: block; height: 100%; border-radius: 999px; background: var(--color-accent); }
+  .barres b { text-align: right; font-variant-numeric: tabular-nums; }
+  .barres a { color: var(--color-text-link); }
+
+  .heure { margin-top: 18px; }
+  .heure h3 { display: flex; justify-content: space-between; margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); }
+  .heure h3 span { font-weight: 400; color: var(--color-text-subtle); }
+  .heure svg { display: block; width: 100%; height: 56px; }
+
+  .fantome { margin-top: 32px; padding: 20px 24px; border: 1px dashed var(--color-border); border-radius: 12px; color: var(--color-text-subtle); }
+  .fantome b { display: block; color: var(--color-text-muted); }
+
+  .calme .n { color: var(--color-text-muted); }
+  .indispo { display: flex; gap: 12px; align-items: flex-start; padding: 16px 20px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); color: var(--color-text-secondary); font-size: 14px; }
+  .indispo .pouls { background: var(--color-neutral); margin-top: 6px; }
+  .indispo .pouls::after { display: none; }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="note">
+    <p><b>Où.</b> En tête du tableau de bord, avant « Actions à traiter » : c'est la seule information qui change d'une minute à l'autre.</p>
+    <p><b>Ce que dit le chiffre.</b> Les pages ouvertes et visibles qui se sont manifestées dans la dernière minute (un onglet caché ne compte pas ; deux onglets comptent deux fois). Aucun nom, aucune adresse, aucun historique par personne.</p>
+    <p><b>La courbe de la dernière heure</b> est gardée une heure, puis oubliée ; elle repart de zéro si le serveur redémarre.</p>
+  </div>
+
+  <header class="tete">
+    <div><h1>Tableau de bord</h1><p>CdP31, Antalya</p></div>
+    <small>Chiffres du programme mis à jour le 14/11/2026 à 10:42</small>
+  </header>
+
+  <section class="live" aria-labelledby="live-titre">
+    <div class="chiffre">
+      <h2 id="live-titre"><span class="pouls" aria-hidden="true"></span>En ce moment</h2>
+      <span class="n">412</span>
+      <span class="n-lib">personnes sur la plateforme</span>
+      <div class="dont"><span><b>58</b> connectées à leur compte</span><span><b>354</b> visiteurs</span></div>
+      <span class="maj">Mis à jour il y a 12 s, toutes les 30 s</span>
+    </div>
+    <div class="ou">
+      <h3>Où elles se trouvent</h3>
+      <ul class="barres">
+        <li><span>Direct de la journée</span><span class="piste"><span class="plein" style="width:100%"></span></span><b>187</b></li>
+        <li><span>Programmation</span><span class="piste"><span class="plein" style="width:52%"></span></span><b>97</b></li>
+        <li><span>Pages de journée</span><span class="piste"><span class="plein" style="width:33%"></span></span><b>61</b></li>
+        <li><span>Fiches d'activité</span><span class="piste"><span class="plein" style="width:19%"></span></span><b>36</b></li>
+        <li><span>Espace organisation</span><span class="piste"><span class="plein" style="width:7%"></span></span><b>13</b></li>
+        <li><span>Back-office</span><span class="piste"><span class="plein" style="width:5%"></span></span><b>9</b></li>
+        <li><span>Autres pages</span><span class="piste"><span class="plein" style="width:5%"></span></span><b>9</b></li>
+      </ul>
+      <div class="heure">
+        <h3>Dernière heure <span>pic 431 à 10:20</span></h3>
+        <svg viewBox="0 0 600 56" preserveAspectRatio="none" role="img" aria-label="De 120 à 431 personnes sur la dernière heure">
+          <path d="M0 50 L50 48 L100 44 L150 40 L200 30 L250 14 L300 6 L350 10 L400 12 L450 15 L500 13 L550 11 L600 12" fill="none" stroke="var(--color-accent)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+          <path d="M0 50 L50 48 L100 44 L150 40 L200 30 L250 14 L300 6 L350 10 L400 12 L450 15 L500 13 L550 11 L600 12 L600 56 L0 56 Z" fill="color-mix(in srgb, var(--color-accent) 12%, transparent)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="fantome"><b>Actions à traiter</b>la zone existante, inchangée</div>
+  <div class="fantome"><b>Chiffres clés</b>la zone existante, inchangée</div>
+
+  <span class="lbl">Un soir sans programme : le chiffre est petit, la carte reste la même</span>
+  <section class="live calme" aria-label="En ce moment, exemple calme">
+    <div class="chiffre">
+      <h2><span class="pouls" aria-hidden="true"></span>En ce moment</h2>
+      <span class="n">3</span>
+      <span class="n-lib">personnes sur la plateforme</span>
+      <div class="dont"><span><b>2</b> connectées à leur compte</span><span><b>1</b> visiteur</span></div>
+      <span class="maj">Mis à jour il y a 4 s, toutes les 30 s</span>
+    </div>
+    <div class="ou">
+      <h3>Où elles se trouvent</h3>
+      <ul class="barres">
+        <li><span>Back-office</span><span class="piste"><span class="plein" style="width:100%"></span></span><b>2</b></li>
+        <li><span>Programmation</span><span class="piste"><span class="plein" style="width:50%"></span></span><b>1</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <span class="lbl">Le compteur ne répond pas : la carte le dit, sans afficher de zéro</span>
+  <div class="indispo"><span class="pouls" aria-hidden="true"></span><span><b>En ce moment</b><br>Le compte des personnes présentes est momentanément indisponible. Le reste du tableau de bord n'est pas touché.</span></div>
+</main>
+</body>
+</html>
