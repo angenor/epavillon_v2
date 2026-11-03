@@ -115,11 +115,12 @@ const sections = computed(() =>
       else runs.push({ kind: 'rows', key: item.key, rows: [row(item.session)] })
     }
 
-    const activities = composed.sessions.length + composed.blocks.reduce((sum, block) => sum + block.activities, 0)
+    // Toutes les activités publiées retenues, celles d'un fil et d'un moment comprises : le même compte que le bandeau.
+    const activities = own.filter((session) => props.matches(session)).length
     const special = composed.blocks.find((block) => block.track.kind === 'special_day')?.track ?? null
     const side = composed.blocks.find((block) => block.track.kind !== 'special_day')?.track ?? null
     const eve = side ? eveLabel(day) : ''
-    const count = special ? t('programme.days.special') : eve || t('programme.days.count', { count: activities }, activities)
+    const count = eve || t('programme.days.count', { count: activities }, activities)
     // Le trait au-dessus du numéro : la couleur de la journée spéciale, à défaut celle de l'atelier.
     const marked = special ?? side
     return {

@@ -92,10 +92,18 @@ function card(session: PublicScheduleRow, weekday: string) {
   }
 }
 
-function countLabel(day: ComposedDay): string {
-  if (day.blocks.some((block) => block.track.kind === 'special_day')) return t('programme.tracks.kicker')
-  if (day.blocks.length) return t('programme.tracks.side.kicker')
-  return t('programme.week.count', { count: day.sessions.length }, day.sessions.length)
+/** Le bandeau d'en-tête d'un jour qui porte un fil : son titre (journée) ou « Atelier préparatoire ». */
+function tagOf(day: ComposedDay) {
+  const special = day.blocks.find((block) => block.track.kind === 'special_day')?.track
+  const track = special ?? day.blocks[0]?.track
+  if (!track) return null
+  return {
+    text: special ? tr(special.title) : t('programme.tracks.side.kicker'),
+    icon: trackIcon(track.icon_code),
+    to: trackTo(track.slug),
+    isSide: !special,
+    style: trackDayStyle(track.color_hex),
+  }
 }
 
 const columns = computed(() =>
@@ -105,6 +113,11 @@ const columns = computed(() =>
     const isPast = !props.editionPast && props.today !== null && day < props.today
     const own = props.sessions.filter((session) => dayKeyInZone(session.starts_at, props.timezone) === day)
     const composed = composeDay(day, own, props.tracks, props.timezone, props.matches, props.matchesTrack)
+    const tag = isRest ? null : tagOf(composed)
+    // Toutes les activités publiées retenues, celles d'un fil et d'un moment comprises : le même compte que le bandeau.
+    const activities = own.filter((session) => props.matches(session)).length
+    // Une colonne qui ne porte que des blocs les garde en vue au défilement.
+    const pinned = !isRest && composed.items.length > 0 && composed.items.every((item) => item.kind === 'block')
     return {
       date: day,
       number: format(day, { day: 'numeric' }),
@@ -115,13 +128,15 @@ const columns = computed(() =>
       isRest,
       isAlt: index % 2 === 1,
       weekBreak: breaks.value.has(index),
-      count: isRest ? t('programme.week.rest.closed') : countLabel(composed),
+      count: isRest ? t('programme.week.rest.closed') : t('programme.week.count', { count: activities }, activities),
+      tag,
+      pinned,
       items: composed.items.map((item) =>
         item.kind === 'block'
           ? { kind: 'block' as const, key: item.key, block: item.block, to: trackTo(item.block.track.slug) }
           : { kind: 'session' as const, key: item.key, card: card(item.session, weekday) },
       ),
-      activities: composed.sessions.length + composed.blocks.reduce((sum, block) => sum + block.activities, 0),
+      activities,
     }
   }),
 )
@@ -229,6 +244,39 @@ function measureStuck(): void {
   stuck.value = sentinel.value.getBoundingClientRect().top < top - 1
 }
 
+/**
+ * Le bloc d'une colonne qui n'a rien d'autre (journée, atelier, jour de repos)
+ * suit le défilement sous les en-têtes, jusqu'au bas de sa colonne, comme dans
+ * la v1. Pas de `position: sticky` : dans un défileur horizontal, il ne colle
+ * plus à la page.
+ */
+let pinFrame = 0
+function pin(): void {
+  pinFrame = 0
+  const root = body.value
+  if (!root) return
+  const top = (sticky.value?.getBoundingClientRect().bottom ?? 0) + 12
+  // Une colonne qui a cessé d'être seule (recherche) rend sa carte à sa place.
+  for (const card of root.querySelectorAll<HTMLElement>('.cal-body-col:not([data-pinned]) > [data-shift]')) {
+    delete card.dataset.shift
+    card.style.transform = ''
+  }
+  for (const column of root.querySelectorAll<HTMLElement>('[data-pinned]')) {
+    const card = column.firstElementChild as HTMLElement | null
+    if (!card) continue
+    const shift = Number(card.dataset.shift ?? 0)
+    const natural = card.getBoundingClientRect().top - shift
+    const room = column.getBoundingClientRect().bottom - (natural + card.offsetHeight) - 16
+    const next = Math.round(Math.max(0, Math.min(top - natural, room)))
+    if (next === shift) continue
+    card.dataset.shift = String(next)
+    card.style.transform = next ? `translateY(${next}px)` : ''
+  }
+}
+function schedulePin(): void {
+  if (!pinFrame) pinFrame = requestAnimationFrame(pin)
+}
+
 /** Une molette ou un pavé tactile qui glisse en largeur sur les en-têtes fait défiler les colonnes. */
 function onWheel(event: WheelEvent): void {
   if (!body.value || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
@@ -240,15 +288,22 @@ onMounted(() => {
   show(props.selected)
   measureStuck()
   window.addEventListener('scroll', measureStuck, { passive: true })
+  window.addEventListener('scroll', schedulePin, { passive: true })
   window.addEventListener('resize', bounds)
+  window.addEventListener('resize', schedulePin)
+  schedulePin()
   sticky.value?.addEventListener('wheel', onWheel, { passive: false })
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', measureStuck)
+  window.removeEventListener('scroll', schedulePin)
+  window.removeEventListener('resize', schedulePin)
+  if (pinFrame) cancelAnimationFrame(pinFrame)
   window.removeEventListener('resize', bounds)
   sticky.value?.removeEventListener('wheel', onWheel)
 })
 watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(props.selected)))
+watch(columns, () => nextTick(schedulePin))
 </script>
 
 <template>
@@ -278,9 +333,14 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
             v-for="column in columns"
             :key="column.date"
             class="cal-col cal-head-col"
-            :class="{ 'week-start': column.weekBreak, 'is-alt': column.isAlt, 'is-rest': column.isRest, 'is-past': column.isPast }"
+            :class="{ 'week-start': column.weekBreak, 'is-tinted': column.tag, 'is-side': column.tag?.isSide, 'is-alt': column.isAlt, 'is-rest': column.isRest, 'is-past': column.isPast }"
+            :style="column.tag?.style"
           >
-            <span v-if="column.isRest" class="rule-label wk-tag wk-tag-rest">{{ t('programme.week.rest.label') }}</span>
+            <NuxtLink v-if="column.tag" :to="column.tag.to" class="rule-label wk-tag">
+              <UiIcon v-if="column.tag.icon" :name="column.tag.icon" size="1.05em" :stroke-width="2" />
+              <span class="truncate">{{ column.tag.text }}</span>
+            </NuxtLink>
+            <span v-else-if="column.isRest" class="rule-label wk-tag wk-tag-rest">{{ t('programme.week.rest.label') }}</span>
             <span v-else class="rule-label wk-tag invisible" aria-hidden="true">&nbsp;</span>
             <div class="wk-head">
               <b class="wk-number">{{ column.number }}</b>
@@ -310,7 +370,8 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
           v-for="column in columns"
           :key="column.date"
           class="cal-col cal-body-col"
-          :class="{ 'week-start': column.weekBreak, 'is-alt': column.isAlt, 'is-rest': column.isRest }"
+          :class="{ 'week-start': column.weekBreak, 'is-tinted': column.tag, 'is-alt': column.isAlt, 'is-rest': column.isRest }"
+          :data-pinned="column.pinned || column.isRest ? '' : undefined"
           :aria-label="column.label"
         >
           <p v-if="column.isRest" class="rest-note">
@@ -458,9 +519,18 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
   padding-left: 9px;
 }
 
-/* Un jour sur deux, un gris à peine posé, de l'en-tête au bas de la colonne. */
-.cal-col.is-alt:not(.is-rest) {
+/* Un jour ordinaire sur deux, un gris à peine posé, de l'en-tête au bas de la colonne. */
+.cal-col.is-alt:not(.is-tinted, .is-rest) {
   background: color-mix(in srgb, var(--color-text) 4.5%, transparent);
+}
+
+/* Une journée spéciale se détache plus que l'atelier, qui garde le fond léger. */
+.cal-col.is-tinted:not(.is-side) {
+  --cal-day-bg: color-mix(in srgb, var(--color-day-line) 24%, var(--color-surface-raised));
+}
+
+.cal-col.is-tinted.is-side {
+  --cal-day-bg: var(--color-day-surface);
 }
 
 .cal-head-col {
@@ -481,6 +551,10 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
   --rule-on: var(--color-day-on-solid);
 }
 
+a.wk-tag:hover {
+  text-decoration: underline;
+}
+
 .wk-tag-rest {
   --rule-solid: var(--color-neutral-surface);
   --rule-on: var(--color-neutral);
@@ -497,6 +571,10 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
   padding: 8px 8px 10px;
 }
 
+.is-tinted .wk-head {
+  background: var(--cal-day-bg);
+}
+
 .is-rest .wk-head {
   background: var(--cal-hatch);
 }
@@ -508,6 +586,10 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
   line-height: 0.85;
   font-variant-numeric: tabular-nums;
   color: var(--color-heading);
+}
+
+.is-tinted .wk-number {
+  color: var(--color-day);
 }
 
 .is-past .wk-number,

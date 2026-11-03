@@ -62,8 +62,7 @@
     "showPast": "Show past days",
     "hidePast": "Hide past days",
     "monthCount": "{month}, {count}",
-    "today": "Today",
-    "special": "special day"
+    "today": "Today"
   },
   "week": {
     "live": "Live",

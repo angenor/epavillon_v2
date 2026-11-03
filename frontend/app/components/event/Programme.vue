@@ -203,7 +203,7 @@ onBeforeUnmount(() => {
 watch(timezone, tick)
 watch(view, () => nextTick(measure))
 
-// Mêmes comptes que la liste et le calendrier : les activités d'un bloc comptent, pas celles qu'un moment regroupe.
+// Mêmes comptes que la liste, le calendrier et le bandeau : toutes les activités publiées retenues.
 const stripDays = computed<ProgrammeStripDay[]>(() =>
   programmeDays.value.map((date, index) => {
     const own = data.value.schedule.filter((session) => dayOf(session) === date)
@@ -213,7 +213,7 @@ const stripDays = computed<ProgrammeStripDay[]>(() =>
     const blockColors = day.blocks.flatMap((block) => Array.from({ length: block.activities }, () => block.track.color_hex))
     return {
       date,
-      count: day.sessions.length + day.blocks.reduce((sum, block) => sum + block.activities, 0),
+      count: own.filter(matches).length,
       colors: [...day.sessions.map((session) => session.themes[0]?.color ?? null), ...blockColors],
       dayColor: special?.color_hex ?? null,
       isSide: !special && day.blocks.length > 0,

@@ -62,8 +62,7 @@
     "showPast": "Afficher les journées passées",
     "hidePast": "Masquer les journées passées",
     "monthCount": "{month}, {count}",
-    "today": "Aujourd'hui",
-    "special": "journée spéciale"
+    "today": "Aujourd'hui"
   },
   "week": {
     "live": "En direct",
