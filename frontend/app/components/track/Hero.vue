@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AttachedImage } from '~/types/media'
 import type { PublicTrackPage } from '~/types/programme/track-page'
 import type { TrackDayPhase } from '~/composables/useTrackDay'
 
@@ -17,9 +18,11 @@ interface Props {
   eve: string
   /** Une activité du fil est en direct. */
   live?: boolean
+  /** Logo clair de l'édition, lu dans la liste publique des éditions. */
+  editionLogo?: AttachedImage | null
 }
 
-const props = withDefaults(defineProps<Props>(), { live: false })
+const props = withDefaults(defineProps<Props>(), { live: false, editionLogo: null })
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -67,6 +70,8 @@ const stateLabel = computed(() => t(`track.state.${isDay.value ? 'day' : 'other'
     :back-to="props.backTo"
     :back-label="t('track.back', { edition })"
     :trail="trail"
+    :logo="props.editionLogo"
+    :logo-alt="t('track.editionLogo', { edition })"
     class="max-lg:pb-9"
   >
     <div class="mt-4 flex flex-wrap gap-2">

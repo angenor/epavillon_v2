@@ -8,6 +8,9 @@ import type { AttachedImage } from '~/types/media'
  *
  * Il dit à ses pastilles (`UiBannerPill`) s'il porte une photo : le verre n'est
  * permis que sur un média.
+ *
+ * Le logo clair de l'édition se pose en face du fil d'Ariane (03/11/2026), sur
+ * l'original du fichier : une déclinaison JPEG perdrait la transparence.
  */
 
 interface Props {
@@ -16,9 +19,12 @@ interface Props {
   backLabel: string
   /** Suite du fil d'Ariane, en texte. */
   trail?: string
+  /** Logo clair de l'édition (`logo_inverse`), en haut à droite. */
+  logo?: AttachedImage | null
+  logoAlt?: string
 }
 
-const props = withDefaults(defineProps<Props>(), { image: null, trail: '' })
+const props = withDefaults(defineProps<Props>(), { image: null, trail: '', logo: null, logoAlt: '' })
 
 const { t } = useI18n()
 
@@ -44,16 +50,26 @@ provide(MEDIA_BANNER_ON_MEDIA, computed(() => props.image !== null))
     </template>
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
-      <nav :aria-label="t('nav.breadcrumb.label')" class="flex flex-wrap items-center gap-x-5 text-sm">
-        <NuxtLink
-          :to="props.backTo"
-          class="inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-bold text-text-on-inverse hover:text-text-on-inverse hover:underline"
+      <div class="flex items-start justify-between gap-4">
+        <nav :aria-label="t('nav.breadcrumb.label')" class="flex min-w-0 flex-wrap items-center gap-x-5 text-sm">
+          <NuxtLink
+            :to="props.backTo"
+            class="inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-bold text-text-on-inverse hover:text-text-on-inverse hover:underline"
+          >
+            <UiIcon name="arrow-left" size="1rem" :stroke-width="2" />
+            {{ props.backLabel }}
+          </NuxtLink>
+          <span v-if="props.trail" class="min-w-0 text-text-on-inverse-muted">{{ props.trail }}</span>
+        </nav>
+        <img
+          v-if="props.logo"
+          :src="props.logo.url"
+          :alt="props.logoAlt"
+          :width="props.logo.width ?? undefined"
+          :height="props.logo.height ?? undefined"
+          class="h-10 w-auto shrink-0 sm:h-14 lg:h-16"
         >
-          <UiIcon name="arrow-left" size="1rem" :stroke-width="2" />
-          {{ props.backLabel }}
-        </NuxtLink>
-        <span v-if="props.trail" class="min-w-0 text-text-on-inverse-muted">{{ props.trail }}</span>
-      </nav>
+      </div>
 
       <slot />
     </div>

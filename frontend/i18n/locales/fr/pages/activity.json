@@ -1,4 +1,5 @@
 {
+  "editionLogo": "Logo de la {edition}",
   "back": "Retour au programme",
   "trail": "Programmations / {edition} / {day}",
   "loading": "Chargement de l'activité",

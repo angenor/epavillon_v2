@@ -77,7 +77,15 @@ const nationalCountry = computed(() =>
 
 <template>
   <!-- Bas réduit sur une colonne : rien n'y remonte (le billet et l'image ne débordent qu'à partir de `lg`). -->
-  <UiMediaBanner class="max-lg:pb-9!" :image="image" :back-to="props.backTo" :back-label="t('activity.back')" :trail="props.trail">
+  <UiMediaBanner
+    class="max-lg:pb-9!"
+    :image="image"
+    :back-to="props.backTo"
+    :back-label="t('activity.back')"
+    :trail="props.trail"
+    :logo="props.edition.logo_inverse"
+    :logo-alt="t('activity.editionLogo', { edition: props.edition.acronym ?? tr(props.edition.title) })"
+  >
     <div class="mt-5 flex flex-wrap gap-2">
       <UiBannerPill :tone="props.state === 'live' ? 'live' : 'neutral'" :dot="stateDot[props.state]">
         {{ stateLabel }}

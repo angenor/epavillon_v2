@@ -1,4 +1,5 @@
 {
+  "editionLogo": "{edition} logo",
   "back": "{edition} programme",
   "loading": "Loading the day",
   "eve": "Eve of {edition}",

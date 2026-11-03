@@ -47,7 +47,8 @@ const page = computed(() => data.value ?? null)
 
 // La page du fil ne porte pas la photo de l'édition, repli des activités sans couverture : la liste des éditions, si.
 const { data: editions } = useLazyAsyncData('journee-editions', () => api.events.publicList().catch(() => []), { default: () => [] })
-const editionImage = computed(() => editionPhoto(editions.value.find((edition) => edition.slug === editionSlug.value)))
+const currentEdition = computed(() => editions.value.find((edition) => edition.slug === editionSlug.value))
+const editionImage = computed(() => editionPhoto(currentEdition.value))
 
 const { declareFrom } = useLiveSession()
 watch(
@@ -225,7 +226,14 @@ useSeoMeta({
 
     <template v-else>
       <EventIncidentStrip :incidents="incidents" />
-      <TrackHero :page="page" :phase="phase" :back-to="programmeTo" :eve="eve" :live="live !== null" />
+      <TrackHero
+        :page="page"
+        :phase="phase"
+        :back-to="programmeTo"
+        :eve="eve"
+        :live="live !== null"
+        :edition-logo="currentEdition?.logo_inverse ?? null"
+      />
 
       <div class="mx-auto max-w-[1280px] px-4 pb-22 sm:px-6">
         <!-- Le billet et la carte des temps ne remontent sur le bandeau que sur grand écran : sur
