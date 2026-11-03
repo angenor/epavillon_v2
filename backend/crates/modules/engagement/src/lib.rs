@@ -60,6 +60,7 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::mailings::configurer(cfg);
     routes::mail_templates::configurer(cfg);
     routes::mail_texts::configurer(cfg);
+    routes::programmes::configurer(cfg);
 }
 
 /// Les routes du module qui vivent sous `/sessions`, **sans le préfixe**.

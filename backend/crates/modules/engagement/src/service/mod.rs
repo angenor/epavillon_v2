@@ -15,6 +15,7 @@ pub mod mail_texts;
 pub mod mailing_dossier;
 pub mod mailings;
 pub mod notifications;
+pub mod programmes;
 pub mod rules;
 pub mod schedule;
 pub mod templates;

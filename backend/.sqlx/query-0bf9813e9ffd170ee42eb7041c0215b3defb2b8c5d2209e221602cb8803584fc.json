@@ -1,0 +1,97 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.event_id AS \"event_id!\", t.id AS \"cible!\",\n                  platform.t(t.title, $4::text) AS \"titre!\",\n                  t.slug::text AS \"slug!\", e.slug::text AS \"event_slug!\",\n                  platform.t(e.title, $4::text) AS \"edition!\",\n                  e.timezone::text AS \"timezone!\", e.city AS \"ville?\",\n                  ($3::timestamptz AT TIME ZONE e.timezone) AS \"debut_local!\"\n             FROM event.programme_tracks t\n             JOIN event.events e ON e.id = t.event_id\n            WHERE t.id = coalesce($1::uuid,\n                                  (SELECT tr.track_id FROM programme.track_registrations tr\n                                    WHERE tr.id = $2::uuid))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "cible!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "event_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "edition!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "ville?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "debut_local!",
+        "type_info": "Timestamp",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Timestamptz",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "0bf9813e9ffd170ee42eb7041c0215b3defb2b8c5d2209e221602cb8803584fc"
+}

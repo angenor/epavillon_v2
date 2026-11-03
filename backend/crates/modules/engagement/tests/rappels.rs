@@ -709,18 +709,22 @@ async fn un_type_sans_modele_publie_part_avec_le_texte_de_secours() {
         "les rappels partent malgré l'absence de modèle"
     );
 
+    // Depuis le 04/11, le texte par défaut des courriels programmés, dans
+    // l'habillage des confirmations d'inscription.
     let message = &messages[0];
-    assert!(
-        message.subject.starts_with("Rappel de session"),
-        "le sujet vient du libellé du TYPE, résolu en base : {}",
-        message.subject
+    assert_eq!(
+        message.subject, "Financer l'adaptation commence dans 1 heure",
+        "le sujet vient du texte par défaut"
     );
-    assert!(message.text.contains("Financer l'adaptation"));
     assert!(message.text.contains("dans 1 heure"));
-    assert!(message.text.contains("America/Belem"));
+    assert!(message.text.contains("heure de Belém"));
+    assert!(message.text.contains("/programmations/"));
     assert!(
-        message.html.is_none(),
-        "le secours n'invente pas de mise en forme"
+        message
+            .html
+            .as_deref()
+            .is_some_and(|h| h.contains(">Voir l&#39;activité</a>")),
+        "le bouton mène à la page de l'activité"
     );
 
     // La trace **dit** que personne n'a écrit ce courriel.

@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH activites AS (\n               SELECT sr.session_id AS cible,\n                      round(extract(epoch FROM sr.offset_before) / 60)::int AS decalage,\n                      NULL::timestamptz AS debut,\n                      min(j.run_at) AS depart,\n                      count(*) AS destinataires,\n                      platform.t(s.title, $2::text) AS titre\n                 FROM platform.jobs j\n                 JOIN engagement.scheduled_reminders sr ON sr.job_id = j.id\n                 JOIN programme.sessions s ON s.id = sr.session_id\n                WHERE j.task = 'engagement.send_reminder' AND j.status = 'queued'\n                  AND j.run_at > now()\n                  AND sr.status IN ('pending', 'queued') AND sr.channel = 'email'\n                  AND s.event_id = $1::uuid\n                GROUP BY s.id, sr.session_id, 2\n           ), journees AS (\n               SELECT tr.track_id AS cible,\n                      (j.payload ->> 'offset_minutes')::int AS decalage,\n                      to_timestamp((j.payload ->> 'starts_at')::bigint) AS debut,\n                      min(j.run_at) AS depart,\n                      count(*) AS destinataires,\n                      platform.t(t.title, $2::text) AS titre\n                 FROM platform.jobs j\n                 JOIN programme.track_registrations tr\n                   ON tr.id = (j.payload ->> 'track_registration_id')::uuid\n                 JOIN event.programme_tracks t ON t.id = tr.track_id\n                 JOIN LATERAL (\n                     SELECT min(x.d) AS d FROM (\n                         SELECT s.starts_at AS d\n                           FROM programme.session_tracks st\n                           JOIN programme.sessions s ON s.id = st.session_id\n                          WHERE st.track_id = t.id AND s.status <> 'cancelled'\n                         UNION ALL\n                         SELECT m.starts_at FROM event.programme_track_moments m\n                          WHERE m.track_id = t.id) x\n                 ) actuel ON extract(epoch FROM actuel.d)::bigint = (j.payload ->> 'starts_at')::bigint\n                WHERE j.task = 'engagement.send_day_reminder' AND j.status = 'queued'\n                  AND j.run_at > now()\n                  AND tr.status IN ('registered', 'attended')\n                  AND t.event_id = $1::uuid\n                GROUP BY t.id, tr.track_id, 2, 3\n           ), envois AS (\n               SELECT 'activity'::text AS nature, a.* FROM activites a\n               UNION ALL\n               SELECT 'day'::text, g.* FROM journees g\n           )\n           SELECT e.nature AS \"nature!\", e.cible AS \"cible!\", e.decalage AS \"decalage!\",\n                  e.debut AS \"debut?\", e.depart AS \"depart!\",\n                  e.destinataires AS \"destinataires!\", e.titre AS \"titre!\",\n                  EXISTS (SELECT 1 FROM engagement.scheduled_email_texts x\n                           WHERE x.event_id = $1::uuid AND x.kind = e.nature\n                             AND x.offset_minutes = e.decalage\n                             AND coalesce(x.session_id, x.track_id) = e.cible\n                             AND x.target_starts_at IS NOT DISTINCT FROM e.debut) AS \"propre!\",\n                  EXISTS (SELECT 1 FROM engagement.scheduled_email_texts x\n                           WHERE x.event_id = $1::uuid AND x.kind = e.nature\n                             AND x.session_id IS NULL AND x.track_id IS NULL\n                             AND x.offset_minutes IS NOT DISTINCT FROM\n                                 (CASE WHEN e.nature = 'activity' THEN e.decalage END)) AS \"type_ecrit!\"\n             FROM envois e\n            ORDER BY e.depart, e.titre",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "nature!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "cible!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "decalage!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "debut?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "depart!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "destinataires!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "propre!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "type_ecrit!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "1513b43390d5135dd47ad591a663c7588752f002ecbd639551866ed3347b2c17"
+}

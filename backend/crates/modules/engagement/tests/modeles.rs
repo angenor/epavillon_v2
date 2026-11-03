@@ -285,7 +285,7 @@ async fn publier_sert_le_nouveau_texte_et_republier_rend_lancien() {
     assert!(
         bac.boite.messages()[0]
             .subject
-            .starts_with("Rappel de session"),
+            .ends_with("commence dans 2 jours"),
         "sans révision publiée, le texte de secours part : {}",
         bac.boite.messages()[0].subject
     );

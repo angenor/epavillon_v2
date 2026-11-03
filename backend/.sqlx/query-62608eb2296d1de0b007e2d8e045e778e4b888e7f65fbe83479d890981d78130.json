@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.first_name AS \"first_name!\", p.primary_email::text AS \"email!\",\n                          p.preferred_locale::text AS \"locale!\"\n                     FROM platform.jobs j\n                     JOIN engagement.scheduled_reminders sr ON sr.job_id = j.id\n                     JOIN identity.people p ON p.id = sr.person_id\n                    WHERE j.task = 'engagement.send_reminder' AND j.status = 'queued'\n                      AND j.run_at > now()\n                      AND sr.status IN ('pending', 'queued') AND sr.channel = 'email'\n                      AND sr.session_id = $1::uuid\n                      AND round(extract(epoch FROM sr.offset_before) / 60)::int = $2::int\n                    ORDER BY j.run_at, p.last_name, p.first_name, sr.id\n                    LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "first_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "locale!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "62608eb2296d1de0b007e2d8e045e778e4b888e7f65fbe83479d890981d78130"
+}

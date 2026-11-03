@@ -1273,6 +1273,100 @@ CREATE TRIGGER tg_mail_texts_audit
 COMMENT ON TABLE engagement.mail_texts IS
     'Textes types des courriels du back-office : objet et corps prêts à l''emploi, choisis dans la fenêtre de rédaction ; variables du destinataire et, depuis un dossier, du dossier.';
 
+-- COURRIELS PROGRAMMÉS (04/11/2026, demande du commanditaire, maquette
+-- `docs/maquettes/courriels-a-venir/`). Les rappels déjà en file (travaux
+-- `engagement.send_reminder` et `engagement.send_day_reminder` à venir) se
+-- relisent et se réécrivent depuis l'onglet « Programmés » de Courriels, à deux
+-- niveaux :
+--   · le TEXTE DU TYPE, pour toute l'édition : rappel de journée (2 jours et
+--     1 jour, un seul type : `offset_minutes` nul), ou rappel d'activité à un
+--     décalage donné (un type par décalage) ; `session_id` et `track_id` nuls ;
+--   · le TEXTE D'UN ENVOI : tous les destinataires d'un même rappel pour une
+--     même cible à la même heure. Clé (séance, décalage) pour une activité,
+--     (journée, décalage, début visé) pour une journée : une journée déplacée
+--     donne de nouveaux travaux, et l'ancien texte ne les suit pas.
+-- À l'envoi, le travail lit le texte de l'envoi, puis celui du type, puis le
+-- texte par défaut écrit dans le code. Rien n'est recopié dans les travaux : un
+-- texte enregistré vaut pour tout ce qui n'est pas encore parti, sans rien
+-- déplacer.
+--
+-- POURQUOI PAS `message_templates`. Ces modèles sont communs à toute la
+-- plateforme (aucune édition), gardés par une permission globale, publiés en
+-- deux temps, et un seul type `programme.session.reminder` sert les quatre
+-- décalages : un administrateur d'une seule édition (règle n° 8) ne pourrait
+-- pas y écrire sans toucher aux autres, ni distinguer « 1 heure avant » de
+-- « 2 jours avant ». Un modèle publié reste servi, après ces textes et avant le
+-- texte par défaut, pour les rappels d'activité.
+--
+-- Texte brut, une ligne vide sépare deux paragraphes ; le bouton « Voir
+-- l'activité » ou « Voir la journée » et le lien en clair s'ajoutent seuls
+-- (gabarit des confirmations d'inscription). Variables : {{prenom}},
+-- {{titre_activite}} ou {{titre_journee}}, {{date}}, {{delai}}, {{edition}} ;
+-- une autre est refusée à l'écriture. Une ligne par langue (fr, en) : le
+-- destinataire reçoit la sienne.
+CREATE TABLE engagement.scheduled_email_texts (
+    id               uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    event_id         uuid        NOT NULL CONSTRAINT xmod_fk_scheduled_email_texts_event
+                                 REFERENCES event.events(id) ON DELETE CASCADE,
+    -- 'activity' : rappel d'une activité ; 'day' : rappel d'une journée.
+    -- Codes fixés par le worker, pas un vocabulaire administrable.
+    kind             text        NOT NULL,
+    -- En minutes, pas en intervalle : « 1 day » et « 24 hours » sont le même
+    -- intervalle et deux clés différentes pour qui les compare en texte.
+    offset_minutes   integer,
+    session_id       uuid        CONSTRAINT xmod_fk_scheduled_email_texts_session
+                                 REFERENCES programme.sessions(id) ON DELETE CASCADE,
+    track_id         uuid        CONSTRAINT xmod_fk_scheduled_email_texts_track
+                                 REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
+    -- Début de la journée visé par les travaux de l'envoi (leur charge le porte).
+    target_starts_at timestamptz,
+    locale           text        NOT NULL,
+    subject          text        NOT NULL,
+    body             text        NOT NULL,
+    updated_by       uuid        CONSTRAINT xmod_fk_scheduled_email_texts_author
+                                 REFERENCES identity.people(id) ON DELETE SET NULL,
+    created_at       timestamptz NOT NULL DEFAULT now(),
+    updated_at       timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_scheduled_email_texts_kind CHECK (kind IN ('activity', 'day')),
+    CONSTRAINT ck_scheduled_email_texts_locale CHECK (locale IN ('fr', 'en')),
+    CONSTRAINT ck_scheduled_email_texts_offset CHECK (offset_minutes IS NULL OR offset_minutes > 0),
+    -- Activité : un décalage, jamais de journée. Journée : le type n'a ni
+    -- décalage ni cible ; un envoi a les trois (journée, décalage, début).
+    CONSTRAINT ck_scheduled_email_texts_target CHECK (
+        (kind = 'activity' AND offset_minutes IS NOT NULL
+             AND track_id IS NULL AND target_starts_at IS NULL)
+        OR (kind = 'day' AND session_id IS NULL
+             AND ((track_id IS NULL AND offset_minutes IS NULL AND target_starts_at IS NULL)
+               OR (track_id IS NOT NULL AND offset_minutes IS NOT NULL AND target_starts_at IS NOT NULL)))),
+    -- La borne de l'objet d'un envoi du back-office.
+    CONSTRAINT ck_scheduled_email_texts_subject CHECK (length(btrim(subject)) BETWEEN 1 AND 250),
+    CONSTRAINT ck_scheduled_email_texts_body CHECK (length(btrim(body)) BETWEEN 1 AND 10000),
+    -- Un texte par langue et par clé ; les nuls se comparent (texte du type).
+    CONSTRAINT ux_scheduled_email_texts UNIQUE NULLS NOT DISTINCT
+        (event_id, kind, offset_minutes, session_id, track_id, target_starts_at, locale)
+);
+
+CREATE INDEX ix_scheduled_email_texts_session ON engagement.scheduled_email_texts (session_id)
+    WHERE session_id IS NOT NULL;
+CREATE INDEX ix_scheduled_email_texts_track ON engagement.scheduled_email_texts (track_id)
+    WHERE track_id IS NOT NULL;
+
+CREATE TRIGGER tg_scheduled_email_texts_updated_at
+    BEFORE UPDATE ON engagement.scheduled_email_texts
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+CREATE TRIGGER tg_scheduled_email_texts_audit
+    AFTER INSERT OR UPDATE OR DELETE ON engagement.scheduled_email_texts
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON TABLE engagement.scheduled_email_texts IS
+    'Textes des courriels programmés (rappels d''activité et de journée) : texte d''un type pour l''édition, ou d''un envoi (cible, décalage, début visé), par langue. Lus à l''envoi, avant le texte par défaut du code.';
+COMMENT ON COLUMN engagement.scheduled_email_texts.offset_minutes IS
+    'Décalage avant le début, en minutes. Nul pour le texte du type « rappel de journée », qui couvre tous ses décalages.';
+COMMENT ON COLUMN engagement.scheduled_email_texts.body IS
+    'Texte brut ; une ligne vide sépare deux paragraphes. Les valeurs des variables sont échappées dans le HTML à l''envoi.';
+
 CREATE TABLE engagement.mailings (
     id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     -- RÈGLE MÉTIER N° 8 : un envoi appartient à une édition, et un

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.scheduled_email_texts\n               (event_id, kind, offset_minutes, session_id, track_id, target_starts_at,\n                locale, subject, body, updated_by)\n           VALUES ($1::uuid, $2::text, $3::int, $4::uuid, $5::uuid, $6::timestamptz,\n                   $7::text, $8::text, $9::text, $10::uuid)\n           ON CONFLICT ON CONSTRAINT ux_scheduled_email_texts\n           DO UPDATE SET subject = EXCLUDED.subject, body = EXCLUDED.body,\n                         updated_by = EXCLUDED.updated_by",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int4",
+        "Uuid",
+        "Uuid",
+        "Timestamptz",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a3cc3f5a36fcb1dd3b39fa2a05b8826ada0f8644b04dbf1a7e8b3e53f1115fe7"
+}

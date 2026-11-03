@@ -1,0 +1,49 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.first_name AS \"first_name!\", p.primary_email::text AS \"email!\",\n                          tr.locale AS \"locale!\"\n                     FROM platform.jobs j\n                     JOIN programme.track_registrations tr\n                       ON tr.id = (j.payload ->> 'track_registration_id')::uuid\n                     JOIN identity.people p ON p.id = tr.person_id\n                    WHERE j.task = 'engagement.send_day_reminder' AND j.status = 'queued'\n                      AND j.run_at > now()\n                      AND tr.status IN ('registered', 'attended')\n                      AND tr.track_id = $1::uuid\n                      AND (j.payload ->> 'offset_minutes')::int = $2::int\n                      AND (j.payload ->> 'starts_at')::bigint = $3::bigint\n                    ORDER BY j.run_at, p.last_name, p.first_name, tr.id\n                    LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "first_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "locale!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.track_registrations",
+            "name": "locale"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "7fca83e340fff67f5a1f564e498064202f65b2b418f1d3b5b82d2675a6f2ed14"
+}
