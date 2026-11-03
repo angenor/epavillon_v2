@@ -121,25 +121,25 @@ pub fn verification_email(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail {
 
     let (subject, text) = if en_anglais(ctx.locale) {
         (
-            "Confirm your email address — ePavillon",
+            "Confirm your email address, ePavillon",
             format!(
                 "Hello {prenom},\n\n\
                  Your ePavillon account has been created. Confirm your email address to sign in:\n\n\
                  {url}\n\n\
                  This link is valid for 24 hours. If you did not create this account, ignore this message.\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
             ),
         )
     } else {
         (
-            "Confirmez votre adresse — ePavillon",
+            "Confirmez votre adresse, ePavillon",
             format!(
                 "Bonjour {prenom},\n\n\
                  Votre compte ePavillon a été créé. Confirmez votre adresse pour pouvoir vous connecter :\n\n\
                  {url}\n\n\
                  Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -168,7 +168,7 @@ pub fn existing_account_notice(ctx: &MailContext<'_>) -> OutgoingMail {
                  Sign in: {connexion}\n\
                  Forgot your password? {oubli}\n\n\
                  If this was not you, no action is required.\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -182,7 +182,7 @@ pub fn existing_account_notice(ctx: &MailContext<'_>) -> OutgoingMail {
                  Se connecter : {connexion}\n\
                  Mot de passe oublié ? {oubli}\n\n\
                  Si vous n'êtes pas à l'origine de cette demande, il n'y a rien à faire.\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
             ),
         )
@@ -202,20 +202,20 @@ pub fn password_reset_email(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail 
 
     let (subject, text) = if en_anglais(ctx.locale) {
         (
-            "Reset your password — ePavillon",
+            "Reset your password, ePavillon",
             format!(
                 "Hello {prenom},\n\n\
                  A new password was requested for your ePavillon account. Choose one here:\n\n\
                  {url}\n\n\
                  This link is valid for one hour and can only be used once. \
                  If you did not request it, ignore this message: your password remains unchanged.\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
             ),
         )
     } else {
         (
-            "Réinitialisez votre mot de passe — ePavillon",
+            "Réinitialisez votre mot de passe, ePavillon",
             format!(
                 "Bonjour {prenom},\n\n\
                  Un nouveau mot de passe a été demandé pour votre compte ePavillon. \
@@ -224,7 +224,7 @@ pub fn password_reset_email(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail 
                  Ce lien est valable une heure et ne sert qu'une fois. \
                  Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : \
                  votre mot de passe reste inchangé.\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
             ),
         )

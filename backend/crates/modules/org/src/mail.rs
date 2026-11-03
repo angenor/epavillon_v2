@@ -65,7 +65,7 @@ pub fn invitation(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail {
     let (subject, text) = if en_anglais(ctx.locale) {
         (
             format!(
-                "You are invited to join {} — ePavillon",
+                "You are invited to join {}, ePavillon",
                 ctx.organization_name
             ),
             format!(
@@ -75,7 +75,7 @@ pub fn invitation(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail {
                  {lien}\n\n\
                  This link is valid for seven days and can only be used once. \
                  If you were not expecting this invitation, ignore this message.\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
                 organisation = ctx.organization_name,
             ),
@@ -83,7 +83,7 @@ pub fn invitation(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail {
     } else {
         (
             format!(
-                "Invitation à rejoindre {} — ePavillon",
+                "Invitation à rejoindre {}, ePavillon",
                 ctx.organization_name
             ),
             format!(
@@ -93,7 +93,7 @@ pub fn invitation(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail {
                  {lien}\n\n\
                  Ce lien est valable sept jours et ne sert qu'une fois. \
                  Si vous n'attendiez pas cette invitation, ignorez ce message.\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
                 organisation = ctx.organization_name,
             ),
@@ -117,7 +117,7 @@ pub fn demande_recue(ctx: &MailContext<'_>, demandeur: &str) -> OutgoingMail {
                  {demandeur} has asked to join {organisation} on ePavillon. \
                  Accept or decline from your organization space:\n\n\
                  {espace}\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
                 organisation = ctx.organization_name,
             ),
@@ -130,7 +130,7 @@ pub fn demande_recue(ctx: &MailContext<'_>, demandeur: &str) -> OutgoingMail {
                  {demandeur} demande à rejoindre {organisation} sur ePavillon. \
                  Acceptez ou refusez depuis votre espace organisation :\n\n\
                  {espace}\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
                 organisation = ctx.organization_name,
             ),
@@ -152,7 +152,7 @@ pub fn adhesion_approuvee(ctx: &MailContext<'_>) -> OutgoingMail {
                  Your membership of {organisation} is now active on ePavillon. \
                  Your organization space:\n\n\
                  {espace}\n\n\
-                 The ePavillon team — IFDD",
+                 The ePavillon team, IFDD",
                 prenom = ctx.first_name,
                 organisation = ctx.organization_name,
             ),
@@ -165,7 +165,7 @@ pub fn adhesion_approuvee(ctx: &MailContext<'_>) -> OutgoingMail {
                  Votre adhésion à {organisation} est active sur ePavillon. \
                  Votre espace organisation :\n\n\
                  {espace}\n\n\
-                 L'équipe ePavillon — IFDD",
+                 L'équipe ePavillon, IFDD",
                 prenom = ctx.first_name,
                 organisation = ctx.organization_name,
             ),
