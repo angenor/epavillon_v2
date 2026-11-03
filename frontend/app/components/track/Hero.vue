@@ -93,7 +93,7 @@ const stateLabel = computed(() => t(`track.state.${isDay.value ? 'day' : 'other'
         <b class="text-[1.6rem] font-bold tabular-nums sm:my-0.5 sm:text-[2.6rem]">{{ block.day }}</b>
         <span class="text-sm tracking-[0.06em]">{{ block.month }}</span>
       </p>
-      <h1 class="heading-condensed max-w-[30ch] text-[clamp(2.2rem,4.4vw,3.5rem)] leading-none text-balance text-text-on-inverse">
+      <h1 class="heading-condensed max-w-5xl text-[clamp(2.2rem,4.4vw,3.5rem)] leading-none text-balance text-text-on-inverse">
         {{ title }}
       </h1>
     </div>

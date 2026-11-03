@@ -27,7 +27,7 @@ const { image } = useEditionSummary(() => props.edition)
 const localePath = useLocalePath()
 
 const title = computed(() => tr(props.session.title))
-// Un titre très long garde trois ou quatre lignes au plus.
+// Un titre très long garde deux ou trois lignes au plus sur grand écran.
 const titleSize = computed(() =>
   title.value.length > 90 ? 'text-[clamp(2rem,3.6vw,3rem)]' : 'text-[clamp(2.2rem,4.6vw,3.8rem)]',
 )
@@ -111,7 +111,7 @@ const nationalCountry = computed(() =>
     </div>
 
     <h1
-      class="mt-4 max-w-[30ch] font-condensed leading-[1.02] font-semibold tracking-[0.005em] text-balance text-text-on-inverse"
+      class="mt-4 max-w-5xl font-condensed leading-[1.02] font-semibold tracking-[0.005em] text-balance text-text-on-inverse"
       :class="[titleSize, { 'line-through decoration-2': props.state === 'cancelled' }]"
     >
       {{ title }}
