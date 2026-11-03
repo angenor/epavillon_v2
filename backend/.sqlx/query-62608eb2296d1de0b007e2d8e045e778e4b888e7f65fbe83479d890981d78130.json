@@ -24,7 +24,12 @@
         "ordinal": 2,
         "name": "locale!",
         "type_info": "Text",
-        "origin": "Expression"
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "preferred_locale"
+          }
+        }
       }
     ],
     "parameters": {
@@ -36,7 +41,7 @@
     "nullable": [
       false,
       null,
-      null
+      false
     ]
   },
   "hash": "62608eb2296d1de0b007e2d8e045e778e4b888e7f65fbe83479d890981d78130"
