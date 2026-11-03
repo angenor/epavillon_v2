@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programmation : activités de l'IFDD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../direction-condensee/style.css">
+<style>
+  /* Quatre directions pour mettre en lumière, dans /programmations, les activités
+     portées par l'IFDD. Les couleurs d'état (jaune en cours, rouge direct, violet
+     report…) et la couleur d'une journée spéciale sont déjà prises : la mise en
+     lumière passe par la marque de l'institution, bleu nuit, liseré aux cinq
+     couleurs du logo, logo. Le trait dans la marge gauche reste aux temps forts. */
+  [hidden] { display: none !important; }
+  body { background: var(--page); }
+  .intro { max-width: 1240px; margin: 0 auto; padding: 40px 24px 8px; }
+  .intro h1 { margin: 0 0 8px; font-family: var(--font-heading); font-size: 2.2rem; text-transform: uppercase; color: var(--color-heading); }
+  .intro p { margin: 0 0 6px; max-width: 74ch; line-height: 1.55; color: var(--color-text-secondary); }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .controls button, .chip { min-height: var(--target); padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); font: 600 0.88rem var(--font-body); color: var(--color-text); cursor: pointer; }
+  .controls button[aria-pressed="true"] { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); color: var(--color-accent); }
+
+  .direction { max-width: 1240px; margin: 56px auto 0; padding: 0 24px; }
+  .direction > header h2 { margin: 0; font-family: var(--font-heading); font-size: 1.7rem; text-transform: uppercase; color: var(--color-heading); }
+  .direction > header p { margin: 4px 0 0; max-width: 82ch; line-height: 1.5; color: var(--color-text-secondary); }
+  .direction > header ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.5; color: var(--color-text-secondary); }
+  .frame-label { margin: 18px 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+  .frame { padding: 20px; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg); background: var(--page); }
+  .lists { display: grid; grid-template-columns: minmax(0, 1fr) 375px; gap: 24px; align-items: start; }
+  @media (max-width: 1100px) { .lists { grid-template-columns: minmax(0, 1fr); } }
+  .phone { width: 375px; max-width: 100%; padding: 16px; border: 1px solid var(--color-border-strong); border-radius: 24px; background: var(--page); }
+
+  /* Logo de l'IFDD découpé dans les fichiers accolés de la barre : sans le symbole. */
+  .ifdd-logo { display: block; height: 22px; width: 46px; object-fit: cover; object-position: right center; }
+  .ifdd-logo.inv { object-position: left center; }
+
+  /* ── Calendrier : une colonne par jour ─────────────────────── */
+  .week { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border-radius: var(--radius); }
+  .col { padding: 0 8px 12px; }
+  .col.alt { background: var(--color-surface-sunken); }
+  .col.day-col { background: color-mix(in srgb, var(--ifdd-cyan) 14%, var(--page)); }
+  .col-head { position: relative; display: flex; align-items: baseline; gap: 8px; padding: 26px 6px 10px; border-bottom: 1.5px solid var(--color-heading); margin: 0 -8px 12px; padding-left: 14px; }
+  .col-head b { font-family: var(--font-heading); font-size: 2.4rem; line-height: 0.9; color: var(--color-heading); }
+  .col-head span { font-family: var(--font-heading); font-weight: 700; text-transform: uppercase; color: var(--color-heading); line-height: 1.1; }
+  .col-head small { display: block; font-family: var(--font-body); font-weight: 400; text-transform: none; font-size: 0.78rem; color: var(--color-text-secondary); }
+  .col-head .day-tag { position: absolute; top: 0; left: 0; right: 0; padding: 4px 12px; background: var(--ifdd-cyan-700); font-family: var(--font-heading); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cards { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .card { position: relative; display: block; border: 1px solid var(--color-border-subtle); border-radius: var(--radius); background: var(--card); color: inherit; text-decoration: none; overflow: hidden; transition: border-color 150ms, opacity 200ms; }
+  .card:hover { border-color: var(--color-border-strong); }
+  .cover { position: relative; aspect-ratio: 16 / 9; background: var(--ifdd-bleu-900); }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover .acr, .r-thumb .acr { position: absolute; inset: 0; display: grid; place-items: center; background: rgb(29 26 91 / 0.45); font-family: var(--font-heading); font-weight: 700; font-size: 1.7rem; color: #fff; letter-spacing: 0.02em; }
+  .c-body { padding: 10px 12px 12px; }
+  .when { display: flex; align-items: baseline; gap: 8px; }
+  .when b { font-family: var(--font-heading); font-weight: 700; font-size: 1.75rem; line-height: 1; color: var(--color-heading); font-variant-numeric: tabular-nums; }
+  .when small { font-size: 0.72rem; line-height: 1.15; color: var(--color-text-secondary); }
+  .when small strong { display: block; font-family: var(--font-heading); text-transform: uppercase; color: var(--color-heading); }
+  .card h4 { margin: 8px 0 0; font-family: var(--font-heading); font-weight: 600; font-size: 1.08rem; line-height: 1.15; color: var(--color-heading); }
+  .org { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.82rem; font-weight: 600; color: var(--color-text); min-width: 0; }
+  .org > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border: 1px solid var(--color-border-subtle); border-radius: 6px; background: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 0.6rem; color: var(--ifdd-bleu-900); overflow: hidden; }
+  .tile.wide { width: 56px; }
+  .state { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 2px 8px; border-radius: 4px; background: var(--color-info-surface); font-family: var(--font-heading); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-info); }
+  .state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── Liste : une ligne par activité ────────────────────────── */
+  .list { container-type: inline-size; margin: 0; padding: 0; list-style: none; }
+  .row { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 4px 14px; padding: 16px 0; border-bottom: 1px solid var(--color-border-subtle); color: inherit; text-decoration: none; transition: opacity 200ms; }
+  .row .r-time b { display: block; font-family: var(--font-heading); font-weight: 700; font-size: 2rem; line-height: 1; color: var(--color-heading); }
+  .row .r-time small { font-size: 0.75rem; color: var(--color-text-secondary); }
+  .row .r-thumb { display: none; position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 16 / 9; background: var(--ifdd-bleu-900); }
+  .row .r-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .row .r-thumb .acr { font-size: 1.3rem; }
+  .row h4 { margin: 0; font-family: var(--font-heading); font-weight: 600; font-size: 1.25rem; line-height: 1.12; color: var(--color-heading); }
+  .row .org { margin-top: 6px; }
+  .row .state { margin-top: 8px; }
+  @container (min-width: 640px) {
+    .row { grid-template-columns: 100px 176px minmax(0, 1fr); gap: 0 20px; padding: 18px 0; }
+    .row .r-thumb { display: block; }
+    .row h4 { font-size: 1.4rem; }
+    .row .r-time b { font-size: 2.4rem; }
+  }
+
+  /* ════ 1. L'aplat institutionnel ════════════════════════════
+     Le corps de la carte prend le bleu nuit de la barre de navigation et son
+     liseré aux cinq couleurs du logo : l'activité porte l'habit de l'IFDD. */
+  .stripe { display: flex; height: 4px; }
+  .stripe i { flex: 1; }
+  .stripe i:nth-child(1) { background: var(--color-stripe-1); }
+  .stripe i:nth-child(2) { background: var(--color-stripe-2); }
+  .stripe i:nth-child(3) { background: var(--color-stripe-3); }
+  .stripe i:nth-child(4) { background: var(--color-stripe-4); }
+  .stripe i:nth-child(5) { background: var(--color-stripe-5); }
+  .d1 .is-ifdd.card { border-color: var(--ifdd-bleu-900); background: var(--ifdd-bleu-900); }
+  .d1 .is-ifdd .c-body, .d1 .is-ifdd .when b, .d1 .is-ifdd .when small strong, .d1 .is-ifdd h4, .d1 .is-ifdd .org { color: #fff; }
+  .d1 .is-ifdd .when small { color: var(--ifdd-bleu-200); }
+  .d1 .is-ifdd .tile { border-color: transparent; background: transparent; }
+  .d1 .is-ifdd .state { background: rgb(255 255 255 / 0.1); color: var(--ifdd-cyan-300); }
+  .d1 .is-ifdd .cover .acr { display: none; }
+  .d1 .row.is-ifdd { margin: 0 -12px; padding-left: 12px; padding-right: 12px; border-radius: var(--radius); border-bottom-color: transparent; background: var(--ifdd-bleu-900); }
+  .d1 .row.is-ifdd .r-time b, .d1 .row.is-ifdd h4, .d1 .row.is-ifdd .org { color: #fff; }
+  .d1 .row.is-ifdd .r-time small { color: var(--ifdd-bleu-200); }
+  .d1 .row.is-ifdd .stripe { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+
+  /* ════ 2. Le liseré ═════════════════════════════════════════
+     La carte reste blanche ; le liseré de la barre la coiffe, le cadre fonce,
+     le logo de l'IFDD remplace le sigle. Discret, mais on le repère d'un coup d'œil. */
+  .d2 .is-ifdd.card { border: 1.5px solid var(--color-heading); }
+  .d2 .is-ifdd .cover .acr { display: none; }
+  .d2 .row.is-ifdd .r-thumb { outline: 1.5px solid var(--color-heading); outline-offset: -1px; }
+  .d2 .row.is-ifdd .r-thumb .stripe { position: absolute; left: 0; right: 0; top: 0; }
+  .d2 .row.is-ifdd .tag { display: inline-block; }
+  .tag { display: none; margin-top: 4px; font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary); }
+
+  /* ════ 3. Le cachet ═════════════════════════════════════════
+     Un cachet rond au logo de l'IFDD, posé de biais à cheval sur la photo et le
+     texte, comme le tampon d'un document officiel. */
+  .seal { position: absolute; z-index: 2; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--card), 0 0 0 4.5px var(--ifdd-bleu-900), 0 4px 10px rgb(29 26 91 / 0.25); transform: rotate(-10deg); }
+  .seal::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 1px dashed var(--ifdd-bleu-300); }
+  .seal .ifdd-logo { width: 40px; height: 19px; }
+  .d3 .card .seal { top: calc(56.25% * 0 + 0px); right: 10px; }
+  .d3 .card.is-ifdd .cover .acr, .d3 .row.is-ifdd .r-thumb .acr, .d2 .row.is-ifdd .r-thumb .acr { display: none; }
+  .d3 .row .seal { width: 46px; height: 46px; top: 12px; right: 0; }
+  .d3 .row .seal .ifdd-logo { width: 32px; height: 15px; }
+  @container (min-width: 640px) { .d3 .row .r-thumb { overflow: visible; } .d3 .row .r-thumb .seal { top: -10px; left: -12px; right: auto; } .d3 .row > .seal { display: none; } }
+  @container (max-width: 639px) { .d3 .row .r-thumb .seal { display: none; } .d3 .row.is-ifdd h4 { padding-right: 54px; } }
+
+  /* ════ 4. Le projecteur ═════════════════════════════════════
+     Un bouton de la barre d'outils, « Activités de l'IFDD » : les autres pâlissent
+     sans disparaître, le calendrier garde sa forme. Et, au-dessus, le bandeau
+     des activités de l'IFDD de la semaine. */
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .toolbar .search { flex: 1 1 260px; min-height: var(--target); display: flex; align-items: center; padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); color: var(--color-text-muted); font-size: 0.9rem; }
+  .spot { display: inline-flex; align-items: center; gap: 10px; }
+  .spot .tile { width: 48px; height: 26px; border: 0; background: transparent; }
+  .spot[aria-pressed="true"] { border-color: var(--ifdd-bleu-900); background: var(--ifdd-bleu-900); color: #fff; box-shadow: none; }
+  .spot[aria-pressed="true"] .ifdd-logo { object-position: left center; }
+  .d4.spotlit .card:not(.is-ifdd), .d4.spotlit .row:not(.is-ifdd) { opacity: 0.32; }
+  .d4.spotlit .card:not(.is-ifdd):hover, .d4.spotlit .row:not(.is-ifdd):hover { opacity: 0.8; }
+  .band { margin-bottom: 18px; border-radius: var(--radius); background: var(--ifdd-bleu-900); color: #fff; overflow: hidden; }
+  .band-in { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 24px; align-items: center; padding: 14px 18px; }
+  .band h5 { margin: 0; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; text-transform: uppercase; line-height: 1.05; }
+  .band h5 small { display: block; font-family: var(--font-body); font-weight: 400; text-transform: none; font-size: 0.8rem; color: var(--ifdd-bleu-200); }
+  .band ol { display: flex; gap: 0; margin: 0; padding: 0; list-style: none; overflow-x: auto; }
+  .band li { flex: none; padding: 2px 18px; border-left: 1px solid var(--ifdd-bleu-700); }
+  .band li b { font-family: var(--font-heading); font-size: 1.15rem; }
+  .band li span { display: block; max-width: 22ch; font-size: 0.82rem; line-height: 1.3; color: var(--ifdd-bleu-100); }
+  .phone .band-in { grid-template-columns: minmax(0, 1fr); }
+  .phone .band li:first-child { padding-left: 0; border-left: 0; }
+</style>
+</head>
+<body class="day-plain">
+<header class="intro">
+  <h1>Les activités de l'IFDD dans la programmation</h1>
+  <p>Quatre façons de faire ressortir, dans le calendrier et la liste de la programmation, les activités dont l'IFDD est l'organisation porteuse. Les autres activités ne changent pas.</p>
+  <p>Contrainte : le jaune (en cours), le rouge (direct), le violet (report) et la couleur d'une journée spéciale disent déjà quelque chose. La mise en lumière emprunte donc ce qui appartient à l'IFDD : le bleu nuit et le liseré aux cinq couleurs de la barre du site, et le logo.</p>
+  <div class="controls" role="group" aria-label="Réglages de la maquette">
+    <button type="button" data-theme-toggle aria-pressed="false">Thème sombre</button>
+  </div>
+</header>
+
+<section class="direction d1">
+  <header>
+    <h2>1. L'aplat institutionnel</h2>
+    <p>La carte d'une activité de l'IFDD prend le bleu nuit de la barre du site et son liseré aux cinq couleurs. Dans la liste, toute la ligne passe en bleu nuit.</p>
+    <ul><li>La plus visible : on voit d'un coup d'œil où l'IFDD intervient dans la semaine.</li><li>Garde une cohérence forte avec la barre de navigation.</li><li>Si l'IFDD porte beaucoup d'activités (le 9 novembre ici), le calendrier devient très sombre.</li></ul>
+  </header>
+  <p class="frame-label">Calendrier, grand écran</p><div class="frame host-week"></div>
+  <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
+</section>
+
+<section class="direction d2">
+  <header>
+    <h2>2. Le liseré</h2>
+    <p>La carte reste blanche. Le liseré aux cinq couleurs de la barre la coiffe, son cadre fonce, et le logo de l'IFDD remplace le sigle sur la photo et devant le nom.</p>
+    <ul><li>Le plus discret : la page garde son équilibre même avec beaucoup d'activités de l'IFDD.</li><li>On repère les activités de l'IFDD quand on parcourt la page, sans que ça saute aux yeux.</li></ul>
+  </header>
+  <p class="frame-label">Calendrier, grand écran</p><div class="frame host-week"></div>
+  <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
+</section>
+
+<section class="direction d3">
+  <header>
+    <h2>3. Le cachet</h2>
+    <p>Un cachet rond au logo de l'IFDD, posé de biais sur le coin de la photo, comme le tampon d'un document officiel.</p>
+    <ul><li>Dit « organisé par l'IFDD » sans toucher aux couleurs de la carte.</li><li>Un peu plus de caractère que le liseré, sans assombrir la page.</li><li>Sur téléphone, sans vignette, le cachet se pose dans le coin de la ligne.</li></ul>
+  </header>
+  <p class="frame-label">Calendrier, grand écran</p><div class="frame host-week"></div>
+  <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
+</section>
+
+<section class="direction d4">
+  <header>
+    <h2>4. Le projecteur</h2>
+    <p>Un bandeau en tête de semaine liste les activités de l'IFDD. Un bouton « Activités de l'IFDD », à côté de la recherche, fait pâlir toutes les autres, sans les cacher : le calendrier garde sa forme. Essayez le bouton.</p>
+    <ul><li>Le visiteur choisit de mettre l'IFDD en lumière ; par défaut, la page est neutre.</li><li>Le bandeau sert aussi de résumé : « l'IFDD au pavillon cette semaine ».</li><li>Se combine avec le liseré ou le cachet sur les cartes.</li></ul>
+  </header>
+  <p class="frame-label">Calendrier, grand écran</p><div class="frame"><div class="toolbar"><span class="search">Titre, organisation, sigle…</span><button type="button" class="chip spot" aria-pressed="false"><span class="tile"><img class="ifdd-logo" src="../../../frontend/public/logos/svg/epavillon-ifdd.svg" alt=""></span>Activités de l'IFDD</button></div><div class="host-band"></div><div class="host-week"></div></div>
+  <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame"><div class="host-band"></div><div class="host-list"></div></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone"><div class="toolbar"><button type="button" class="chip spot" aria-pressed="false"><span class="tile"><img class="ifdd-logo" src="../../../frontend/public/logos/svg/epavillon-ifdd.svg" alt=""></span>Activités de l'IFDD</button></div><div class="host-band"></div><div class="host-list"></div></div></div></div>
+</section>
+
+<div style="height: 80px"></div>
+
+<script>
+{
+  document.documentElement.dataset.theme = 'light';
+  const C = '../../../frontend/public/mocks/covers/';
+  const L = '../../../frontend/public/logos/svg/';
+  const DAYS = [
+    { n: 9, name: 'Mardi', alt: false, sessions: [
+      { t: '10:00', until: 'à 11:00', title: 'Ouverture du pavillon de la Francophonie', acr: 'IFDD', org: 'IFDD', ifdd: true, cover: null },
+      { t: '14:00', until: 'à 15:30', title: "Financer l'adaptation côtière en Afrique de l'Ouest", acr: 'ROAC', org: "Réseau ouest-africain pour l'adaptation côtière", cover: 'adaptation-cotiere.jpg' },
+      { t: '17:30', until: 'à 18:00', title: 'Point de presse quotidien', acr: 'IFDD', org: 'IFDD', ifdd: true, cover: null },
+    ] },
+    { n: 11, name: 'Jeudi', alt: true, sessions: [
+      { t: '09:30', until: 'à 11:00', title: "Systèmes d'alerte précoce multirisques au Sahel : ce qui fonctionne", acr: 'OSED', org: 'Observatoire du Sahel', cover: null },
+      { t: '14:00', until: 'à 15:30', title: 'Mini-réseaux solaires : des modèles économiques enfin viables ?', acr: 'OSED', org: 'Observatoire du Sahel', cover: 'pastoralisme-sahel.jpg' },
+    ] },
+    { n: 12, name: 'Vendredi', day: 'Journée finance durable', sessions: [
+      { t: '09:30', until: 'à 11:00', title: 'Pertes et préjudices : opérationnaliser le fonds pour les pays francophones', acr: 'FHRC', org: 'Fonds haïtien pour la résilience climatique', cover: null },
+      { t: '11:30', until: 'à 13:00', title: 'Dialogue des ministres francophones sur la finance climatique', acr: 'IFDD', org: 'IFDD', ifdd: true, cover: 'finance-climatique.jpg' },
+      { t: '14:00', until: 'à 15:30', title: "Marchés carbone de l'article 6 : quelles garanties d'intégrité ?", acr: 'CUDCM', org: 'Chaire universitaire du droit climatique', cover: 'article-six.jpg' },
+    ] },
+  ];
+  const stripe = '<span class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>';
+  const logo = (inv) => `<img class="ifdd-logo${inv ? ' inv' : ''}" src="${L}${inv ? 'ifdd-epavillon-inverse.svg' : 'epavillon-ifdd.svg'}" alt="IFDD">`;
+  const seal = `<span class="seal" title="Organisé par l'IFDD">${logo(false)}</span>`;
+  const cover = (s) => `<img src="${C}${s.cover ?? 'pavillon-cop31-16-9.jpg'}" alt="">${s.cover ? '' : `<span class="acr">${s.acr}</span>`}`;
+
+  const card = (d, s, day) => {
+    const ifdd = s.ifdd;
+    const top = ifdd && d === 'd2' ? stripe : '';
+    const bottom = ifdd && d === 'd1' ? stripe : '';
+    const tile = ifdd && d !== 'd3' && d !== 'd4' ? `<span class="tile wide">${logo(d === 'd1')}</span>` : `<span class="tile">${s.acr}</span>`;
+    return `<li><a href="#" class="card${ifdd ? ' is-ifdd' : ''}" onclick="return false">${top}
+      <div class="cover">${cover(s)}${ifdd && d === 'd3' ? seal : ''}</div>
+      <div class="c-body"><div class="when"><b>${s.t}</b><small><strong>${day.name}</strong>${s.until}</small></div>
+      <h4>${s.title}</h4><div class="org">${tile}<span>${s.org}</span></div><span class="state">À venir</span></div>${bottom}</a></li>`;
+  };
+  const week = (d) => `<div class="week">${DAYS.map((day) => `<div class="col${day.alt ? ' alt' : ''}${day.day ? ' day-col' : ''}">
+    <div class="col-head">${day.day ? `<span class="day-tag">${day.day}</span>` : ''}<b>${day.n}</b><span>${day.name}<small>${day.sessions.length} activités</small></span></div>
+    <ul class="cards">${day.sessions.map((s) => card(d, s, day)).join('')}</ul></div>`).join('')}</div>`;
+
+  const rows = DAYS[0].sessions.concat(DAYS[2].sessions.slice(1, 2));
+  const row = (d, s) => {
+    const ifdd = s.ifdd;
+    const tile = ifdd && (d === 'd1' || d === 'd2') ? `<span class="tile wide">${logo(d === 'd1')}</span>` : `<span class="tile">${s.acr}</span>`;
+    return `<li><a href="#" class="row${ifdd ? ' is-ifdd' : ''}" onclick="return false">
+      <div class="r-time"><b>${s.t}</b><small>${s.until}</small></div>
+      <div class="r-thumb">${cover(s)}${ifdd && d === 'd2' ? stripe : ''}${ifdd && d === 'd3' ? seal : ''}</div>
+      <div><h4>${s.title}</h4><div class="org">${tile}<span>${s.org}</span></div>${ifdd && d === 'd2' ? '<span class="tag">Activité de l\'IFDD</span>' : ''}<span class="state">À venir</span></div>
+      ${ifdd && d === 'd3' ? seal : ''}${ifdd && d === 'd1' ? stripe : ''}</a></li>`;
+  };
+  const list = (d) => `<ul class="list">${rows.map((s) => row(d, s)).join('')}</ul>`;
+
+  const ifddAll = DAYS.flatMap((day) => day.sessions.filter((s) => s.ifdd).map((s) => ({ ...s, day })));
+  const band = `<div class="band">${stripe}<div class="band-in"><h5>L'IFDD au pavillon<small>${ifddAll.length} activités cette semaine</small></h5>
+    <ol>${ifddAll.map((s) => `<li><b>${s.day.name.toLowerCase()} ${s.day.n}, ${s.t}</b><span>${s.title}</span></li>`).join('')}</ol></div></div>`;
+
+  document.querySelectorAll('.direction').forEach((sec) => {
+    const d = [...sec.classList].find((c) => /^d\d$/.test(c));
+    sec.querySelectorAll('.host-week').forEach((h) => { h.innerHTML = week(d); });
+    sec.querySelectorAll('.host-list').forEach((h) => { h.innerHTML = list(d); });
+    sec.querySelectorAll('.host-band').forEach((h) => { h.innerHTML = band; });
+  });
+
+  document.querySelectorAll('.spot').forEach((btn) => btn.addEventListener('click', () => {
+    const sec = btn.closest('.direction');
+    const on = !sec.classList.contains('spotlit');
+    sec.classList.toggle('spotlit', on);
+    sec.querySelectorAll('.spot').forEach((b) => {
+      b.setAttribute('aria-pressed', String(on));
+      b.querySelector('img').src = L + (on ? 'ifdd-epavillon-inverse.svg' : 'epavillon-ifdd.svg');
+    });
+  }));
+  const themeBtn = document.querySelector('[data-theme-toggle]');
+  themeBtn.addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    themeBtn.setAttribute('aria-pressed', String(dark));
+  });
+}
+</script>
+</body>
+</html>
