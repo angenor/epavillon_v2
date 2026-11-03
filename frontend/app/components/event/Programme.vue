@@ -266,10 +266,11 @@ const views = computed(() => [
 <template>
   <section class="full-bleed -mb-8 bg-surface text-text sm:-mb-10" aria-labelledby="programmation-titre">
     <div class="mx-auto flex w-full max-w-[1280px] flex-col px-4 pb-14 sm:px-6 lg:pb-18">
-      <!-- Figée sur grand écran dans les deux vues : le jour de la liste et les en-têtes du calendrier se calent dessous. -->
+      <!-- Figée sur grand écran dans les deux vues : le jour de la liste et les en-têtes du calendrier se calent dessous.
+           L'ombre pleine, rognée en hauteur, prolonge le fond jusqu'aux bords de l'écran : ce qui défile ne paraît plus dans les marges. -->
       <header
         ref="toolbar"
-        class="z-20 flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border-subtle bg-surface py-3.5 min-[960px]:sticky min-[960px]:top-(--nav-height)"
+        class="z-20 flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border-subtle bg-surface py-3.5 [box-shadow:0_0_0_100vmax_var(--color-surface)] [clip-path:inset(0_-100vmax)] min-[960px]:sticky min-[960px]:top-(--nav-height)"
       >
         <h2 id="programmation-titre" class="heading-condensed text-[1.6rem] text-heading">
           {{ t('programme.board.title') }}
