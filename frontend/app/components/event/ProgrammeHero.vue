@@ -28,9 +28,7 @@ const picture = computed(() => editionPhoto(props.edition))
 // L'original : une déclinaison peut être un JPEG, qui perdrait la transparence.
 const logo = computed(() => {
   const asset = props.edition.logo_inverse
-  if (asset) return { src: asset.url, width: asset.width ?? undefined, height: asset.height ?? undefined }
-  const src = editionLogoOnDark(props.edition)
-  return src ? { src, width: 640, height: 259 } : null
+  return asset ? { src: asset.url, width: asset.width ?? undefined, height: asset.height ?? undefined } : null
 })
 
 const label = (edition: PublicEditionRow) =>

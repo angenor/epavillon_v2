@@ -26,16 +26,3 @@ export function defaultProgrammeEdition(
 export function editionPhoto(edition: Pick<PublicEditionRow, 'cover' | 'banner'> | null | undefined): AttachedImage | null {
   return edition ? (edition.cover ?? edition.banner ?? null) : null
 }
-
-/**
- * Repli du logo sur fond sombre (`logo_inverse`) tant qu'il n'est pas déposé
- * au back-office : le fichier livré le 03/11/2026 pour la CdP31. À retirer,
- * avec le fichier, une fois le dépôt fait.
- */
-const LOGOS_ON_DARK: Record<string, string> = {
-  'cdp31-antalya-2026': '/logos/editions/cdp31-antalya-2026-blanc.png',
-}
-
-export function editionLogoOnDark(edition: Pick<PublicEditionRow, 'slug'>): string | null {
-  return LOGOS_ON_DARK[edition.slug] ?? null
-}
