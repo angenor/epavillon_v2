@@ -37,11 +37,14 @@ use kernel::context::RequestContext;
 use kernel::db::Db;
 use kernel::error::{ApiError, Result};
 use kernel::jobs::{ClaimedJob, JobHandler};
-use kernel::mail::Mailer;
+use kernel::mail::{Extras, Mailer};
 use std::sync::Arc;
 use uuid::Uuid;
 
+use crate::domain::courriel_direct;
+use crate::domain::gabarits::images_integrees;
 use crate::domain::reminder::{motifs, NotificationChannel};
+use crate::jobs::send_mailing::apparence;
 use crate::repo::{cross, delivery, reminders, templates};
 use crate::service::compose::{self, RappelACompose};
 
@@ -154,19 +157,37 @@ impl JobHandler for SendReminder {
             return Ok(());
         };
 
+        let habit = apparence(
+            &self.db,
+            seance.event_id,
+            courriel_direct::GABARIT,
+            None,
+            &self.app_public_url,
+        )
+        .await?;
         let compose = compose::rappel(
             self.db.pool(),
             &RappelACompose {
                 message_id: &job.id.to_string(),
                 destinataire: &destinataire,
                 seance: &seance,
+                session_id: rappel.session_id,
                 offset_minutes: rappel.offset_minutes,
                 type_code: &rappel.type_code,
                 template_id: rappel.template_id,
                 app_public_url: &self.app_public_url,
+                visuels: habit.visuels.as_ref(),
             },
         )
         .await?;
+        let extras = Extras {
+            inline_images: if compose.habille {
+                images_integrees(&habit.gabarit, habit.visuels.as_ref())
+            } else {
+                Vec::new()
+            },
+            ..Extras::default()
+        };
 
         // **Avant l'envoi.** Faux : un autre passage l'a déjà pris, et ce
         // travail n'a rien à faire.
@@ -178,7 +199,7 @@ impl JobHandler for SendReminder {
             return Ok(());
         }
 
-        let issue = self.mailer.send(&compose.mail).await;
+        let issue = self.mailer.send_with_extras(&compose.mail, &extras).await;
 
         // **La trace porte le modèle et le numéro de révision réellement
         // servis** (FR-089), qu'ils existent ou non : un `template_id` nul dit

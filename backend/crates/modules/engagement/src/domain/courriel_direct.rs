@@ -1,10 +1,11 @@
-//! Le courriel d'inscription qui mène au direct, journée ou activité (02/11).
+//! Le courriel d'inscription qui mène au direct, journée ou activité (02/11),
+//! et les rappels programmés (04/11) qui en reprennent l'habillage.
 //!
-//! Gabarit « institutionnel + logo de l'édition », un bouton « Rejoindre le
-//! direct » et le même lien en clair pour la messagerie qui n'affiche pas le
-//! bouton. Aucun lien de désinscription : demande du commanditaire. C'est la
-//! plateforme qui envoie le lien, jamais Zoom : on suit le direct sur le site,
-//! par le SDK.
+//! Gabarit « institutionnel + logo de l'édition », un bouton (« Rejoindre le
+//! direct », « Voir la journée »…) et le même lien en clair pour la messagerie
+//! qui n'affiche pas le bouton. Aucun lien de désinscription : demande du
+//! commanditaire. C'est la plateforme qui envoie le lien, jamais Zoom : on suit
+//! le direct sur le site, par le SDK.
 
 use kernel::mail::OutgoingMail;
 
@@ -23,6 +24,32 @@ pub struct CourrielDirect {
     pub apres: Vec<String>,
 }
 
+/// Un paragraphe, déjà échappé pour le HTML et brut pour le texte.
+pub struct Paragraphe {
+    pub html: String,
+    pub texte: String,
+}
+
+impl Paragraphe {
+    pub fn brut(texte: &str) -> Self {
+        Self {
+            html: echapper_html(texte),
+            texte: texte.to_owned(),
+        }
+    }
+}
+
+/// Le courriel avant mise en page : paragraphes, bouton et lien en clair.
+pub struct Assemblage<'a> {
+    pub anglais: bool,
+    pub sujet: &'a str,
+    pub avant: &'a [Paragraphe],
+    pub lien: &'a str,
+    /// Le texte du bouton.
+    pub action: &'a str,
+    pub apres: &'a [Paragraphe],
+}
+
 pub fn composer(
     c: &CourrielDirect,
     visuels: Option<&Visuels>,
@@ -30,9 +57,38 @@ pub fn composer(
     locale: &str,
     message_id: &str,
 ) -> OutgoingMail {
-    let (action, repli, signature) = if c.anglais {
+    let action = if c.anglais {
+        "Join the live stream"
+    } else {
+        "Rejoindre le direct"
+    };
+    let avant: Vec<Paragraphe> = c.avant.iter().map(|p| Paragraphe::brut(p)).collect();
+    let apres: Vec<Paragraphe> = c.apres.iter().map(|p| Paragraphe::brut(p)).collect();
+    assembler(
+        &Assemblage {
+            anglais: c.anglais,
+            sujet: &c.sujet,
+            avant: &avant,
+            lien: &c.lien,
+            action,
+            apres: &apres,
+        },
+        visuels,
+        to,
+        locale,
+        message_id,
+    )
+}
+
+pub fn assembler(
+    a: &Assemblage<'_>,
+    visuels: Option<&Visuels>,
+    to: &str,
+    locale: &str,
+    message_id: &str,
+) -> OutgoingMail {
+    let (repli, signature) = if a.anglais {
         (
-            "Join the live stream",
             "If the button does not work, use the following link:",
             [
                 "The ePavillon team",
@@ -41,7 +97,6 @@ pub fn composer(
         )
     } else {
         (
-            "Rejoindre le direct",
             "Si le bouton ne fonctionne pas, utilisez le lien suivant :",
             [
                 "L'équipe de l'ePavillon",
@@ -49,17 +104,17 @@ pub fn composer(
             ],
         )
     };
-    let paragraphe = |t: &str| format!("<p style=\"margin:0 0 16px\">{}</p>", echapper_html(t));
-    let lien = echapper_html(&c.lien);
+    let paragraphe = |p: &Paragraphe| format!("<p style=\"margin:0 0 16px\">{}</p>", p.html);
+    let lien = echapper_html(a.lien);
 
-    let mut corps: String = c.avant.iter().map(|p| paragraphe(p)).collect();
-    corps.push_str(&bouton(&c.lien, action));
+    let mut corps: String = a.avant.iter().map(paragraphe).collect();
+    corps.push_str(&bouton(a.lien, a.action));
     corps.push_str(&format!(
         "<p style=\"margin:0 0 16px;font-size:13px;color:#565554\">{}<br>\
 <a href=\"{lien}\" style=\"color:#0c6792;word-break:break-all\">{lien}</a></p>",
         echapper_html(repli)
     ));
-    corps.extend(c.apres.iter().map(|p| paragraphe(p)));
+    corps.extend(a.apres.iter().map(paragraphe));
     corps.push_str(&format!(
         "<p style=\"margin:24px 0 0\">{}<br><span style=\"color:#565554\">{}</span></p>",
         echapper_html(signature[0]),
@@ -69,18 +124,23 @@ pub fn composer(
         &corps,
         &MiseEnPage {
             gabarit: GABARIT,
-            sujet: &c.sujet,
+            sujet: a.sujet,
             action: None,
             repondre: None,
             visuels,
         },
     );
 
-    let mut texte = c.avant.join("\n\n");
-    let deux_points = if c.anglais { ":" } else { " :" };
-    texte.push_str(&format!("\n\n{action}{deux_points}\n{}\n\n", c.lien));
-    for p in &c.apres {
-        texte.push_str(p);
+    let mut texte = a
+        .avant
+        .iter()
+        .map(|p| p.texte.as_str())
+        .collect::<Vec<_>>()
+        .join("\n\n");
+    let deux_points = if a.anglais { ":" } else { " :" };
+    texte.push_str(&format!("\n\n{}{deux_points}\n{}\n\n", a.action, a.lien));
+    for p in a.apres {
+        texte.push_str(&p.texte);
         texte.push_str("\n\n");
     }
     texte.push_str(&signature.join("\n"));
@@ -90,7 +150,7 @@ pub fn composer(
         message_id: message_id.to_owned(),
         to: to.to_owned(),
         locale: locale.to_owned(),
-        subject: c.sujet.clone(),
+        subject: a.sujet.to_owned(),
         text: texte,
         html: Some(html),
     }

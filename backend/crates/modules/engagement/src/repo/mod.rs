@@ -13,6 +13,7 @@ pub mod mail_texts;
 pub mod mailings;
 pub mod notifications;
 pub mod preferences;
+pub mod programmes;
 pub mod reminders;
 pub mod rules;
 pub mod suppressions;

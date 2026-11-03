@@ -183,3 +183,40 @@ Non vérifié : rendu Outlook (VML compris) et Microsoft 365 ; la page des gabar
   `AdminMailingsProposalMailings` (prop `proposalId`), à brancher sur la fiche dossier.
 - **Tests** : `engagement/tests/envois_dossier.rs` (cinq), `textes_types.rs` (deux), montage des routes dans
   `api/tests/routes_media_engagement.rs`. Pas de parcours au navigateur.
+
+## 04/11 : courriels programmés, onglet « Programmés »
+
+Maquette validée : `docs/maquettes/courriels-a-venir/`.
+
+- **Onglets** `AdminMailingsSectionTabs` (Envois, Gabarits, Textes, Programmés) sur les quatre pages de Courriels ; les
+  boutons « Gabarits » et « Textes types » de l'historique disparaissent. La pastille de « Programmés » compte les
+  courriels en file de l'édition (même lecture que la page) ; `UiCounter` la plafonne à « 99+ », le nombre exact reste
+  énoncé aux lecteurs d'écran.
+- **Écran** `/admin/courriels/programmes` : prochain départ et décompte à la seconde, calé sur `observed_at` (écart
+  d'horloge mesuré à chaque relevé, relecture cinq secondes après un départ) ; types (rappel de journée, rappel
+  d'activité par décalage) avec nombre de courriels, prochain départ, « Modifier le texte du type » ; un type se
+  déplie en envois (départ, décompte, libellé, destinataires, pastille « texte de cet envoi », « Voir »). Le premier
+  type est déplié.
+- **Panneau d'un envoi** `AdminMailingsScheduledPanel` : portée « Le texte du type (N) » ou « Cet envoi seulement
+  (N) », onglets fr et en, objet et message (texte brut, une ligne vide par paragraphe), variables en puces, aperçu
+  rendu par l'API pour le premier destinataire (iframe, valeurs surlignées), « Enregistrer… », « Revenir au texte du
+  type ». Chaque portée et langue garde son brouillon.
+- **API** `GET /admin/scheduled-mails?event_id=`, `GET /admin/scheduled-mails/batches/{clé}`,
+  `POST …/batches/{clé}/preview`, `PUT` et `DELETE …/batches/{clé}/text`, `PUT /admin/scheduled-mails/types/{clé}/text`.
+  Gardées par `engagement.mailing.send` sur l'édition et le périmètre ; un envoi se garde sur l'édition de sa cible
+  (clé forgée hors périmètre : 404).
+- **Modèle** : `engagement.scheduled_email_texts` (texte du type pour l'édition, ou d'un envoi, par langue), voir
+  [modèle](../modele.md). `message_templates` n'est pas réutilisé : commun à toute la plateforme, permission globale,
+  un seul type pour les quatre décalages.
+- **Envoi** : le travail lit le texte de l'envoi, puis celui du type, puis (activité) un modèle publié, puis le texte
+  par défaut de `domain/programmes.rs`. Rappels d'activité et de journée dans l'habillage des confirmations
+  (`courriel_direct::assembler`), bouton « Voir l'activité » ou « Voir la journée », lien en clair, pages fr ou `/en/`.
+  Le rappel de journée était en texte brut ; l'objet du rappel d'activité par défaut ne porte plus le libellé du type.
+- **Vérifié** : `cargo clippy -p engagement --all-targets`, tests `--lib` (composition, priorité, échappement, liens,
+  langue, clés, regroupement), `npm run typecheck`, `npm run test:site` (`scheduled-mails.test.ts`),
+  `make check-api-contract`. Navigateur sur les données d'exemple : 1440 et 375 px, sombre et clair, enregistrer pour le
+  type, pour l'envoi, revenir au texte du type ; anglais sur l'onglet Textes. Tests d'intégration (`rappels.rs`,
+  `modeles.rs`) ajustés au nouveau texte par défaut, non lancés (pas de base).
+- **Écarts à la maquette** : objet de l'aperçu sans surlignage (corps seulement) ; aucun envoi choisi à l'ouverture
+  (la maquette montre l'état après « Voir ») ; pastille « 99+ » au lieu de 116 ; le compte d'un envoi inclut les
+  destinataires qu'une préférence ou la liste de suppression écartera au départ.

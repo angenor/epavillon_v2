@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM engagement.scheduled_email_texts t\n            WHERE t.event_id = $1::uuid AND t.kind = $2::text AND t.offset_minutes = $3::int\n              AND coalesce(t.session_id, t.track_id) = $4::uuid\n              AND t.target_starts_at IS NOT DISTINCT FROM $5::timestamptz",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int4",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0bb615ed3ebe4e5e12ae78e20e7f35eedd84eb9d4e4327145cab78045aa98e2c"
+}

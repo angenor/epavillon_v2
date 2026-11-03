@@ -9,6 +9,7 @@ pub mod mailings;
 pub mod notifications;
 pub mod openapi;
 pub mod preferences;
+pub mod programmes;
 pub mod rules;
 pub mod sessions;
 pub mod suppressions;

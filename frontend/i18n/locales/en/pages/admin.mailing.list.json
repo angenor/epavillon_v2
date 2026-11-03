@@ -1,7 +1,6 @@
 {
   "title": "Emails",
   "subtitle": "What was written to the participants of this edition, to whom, and what became of each message. The platform's outbox cannot be read: this history replaces it.",
-  "templates": "Templates",
   "new": "Write an email",
   "forbidden": "Email the participants of this edition",
   "empty": {
@@ -40,6 +39,5 @@
     "sent": "The email leaves the history, with its recipients and the status of each message. Messages already sent are not recalled.",
     "failed": "The email leaves the history, with its recipients and the status of each message. Those still waiting will receive nothing; messages already sent are not recalled.",
     "confirm": "Delete permanently"
-  },
-  "texts": "Standard texts"
+  }
 }

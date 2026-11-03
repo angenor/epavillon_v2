@@ -314,6 +314,14 @@ export {
   createProposalMailing,
 } from './admin-mailings'
 export { mailTexts, mailTextById, createMailText, updateMailText, deleteMailText } from './admin-mail-texts'
+export {
+  scheduledMails,
+  scheduledMailBatch,
+  scheduledMailPreview,
+  saveScheduledBatchText,
+  resetScheduledBatchText,
+  saveScheduledTypeText,
+} from './admin-scheduled-mails'
 export { publicSessionStreams } from './streams'
 export { publicSessionMeeting, meetingAccess, registrationJoined, adminSessionMeeting, syncSessionMeeting, pushSessionMeeting } from './meetings'
 

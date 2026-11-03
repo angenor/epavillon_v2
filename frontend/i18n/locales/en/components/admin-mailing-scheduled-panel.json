@@ -1,0 +1,42 @@
+{
+  "region": "Selected send",
+  "context": "Leaves on {when} for {count} recipient. Preview for this person. | Leaves on {when} for {count} recipient. Preview for this person. | Leaves on {when} for {count} recipients. Preview for the first of them.",
+  "close": "Close the send",
+  "gone": "This send is no longer scheduled: it may already have left.",
+  "scope": {
+    "label": "What the change affects",
+    "type": "The text of the type ({count} email) | The text of the type ({count} email) | The text of the type ({count} emails)",
+    "batch": "This send only ({count})"
+  },
+  "typeDefault": "This type follows the default text. Saving it changes all its sends not yet gone.",
+  "typeCustom": "This type has a text written for the edition. Saving it changes all its sends not yet gone.",
+  "typeSpares": "This send has its own text: it will not change.",
+  "batchFollows": "This send follows the text of the type. Saving here changes only this send, for all its recipients.",
+  "batchOwn": "This send has its own text: it keeps it even if the text of the type changes.",
+  "language": {
+    "label": "Email language",
+    "fr": "French",
+    "en": "English"
+  },
+  "subject": "Subject",
+  "body": "Message",
+  "bodyHint": "A blank line separates two paragraphs. Each person receives the language of their registration.",
+  "variables": "Filled in automatically",
+  "button": {
+    "day": "“View the day” button",
+    "activity": "“View the activity” button"
+  },
+  "reset": "Back to the text of the type",
+  "saveBatch": "Save for this send",
+  "saveType": "Save for the type ({count} email) | Save for the type ({count} email) | Save for the type ({count} emails)",
+  "saved": "Text saved. It will go with the emails not yet sent.",
+  "resetDone": "This send follows the text of the type again.",
+  "help": "Nothing leaves earlier: the send keeps its time. A change saved less than a minute before departure may not be taken into account.",
+  "preview": {
+    "title": "What will be sent",
+    "context": "Institutional template with the edition logo, like the confirmations. Filled-in parts highlighted.",
+    "subject": "Subject:",
+    "to": "To:",
+    "toValue": "the registered person | the registered person | one of the {count} registered people"
+  }
+}

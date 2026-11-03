@@ -15,6 +15,7 @@ pub mod mail_text;
 pub mod mailing;
 pub mod notification;
 pub mod offsets;
+pub mod programmes;
 pub mod reminder;
 pub mod render;
 pub mod sanitize;

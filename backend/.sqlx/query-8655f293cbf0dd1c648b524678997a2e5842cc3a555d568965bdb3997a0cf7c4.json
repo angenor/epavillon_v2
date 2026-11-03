@@ -1,0 +1,65 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.locale AS \"locale!\", t.subject AS \"subject!\", t.body AS \"body!\",\n                  (t.session_id IS NOT NULL OR t.track_id IS NOT NULL) AS \"propre!\"\n             FROM engagement.scheduled_email_texts t\n            WHERE t.event_id = $1::uuid AND t.kind = $2::text\n              AND ($3::text IS NULL OR t.locale = $3::text)\n              AND ((t.session_id IS NULL AND t.track_id IS NULL\n                    AND t.offset_minutes IS NOT DISTINCT FROM $4::int)\n                   OR (t.offset_minutes = $5::int\n                       AND coalesce(t.session_id, t.track_id) = $6::uuid\n                       AND t.target_starts_at IS NOT DISTINCT FROM $7::timestamptz))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "locale!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.scheduled_email_texts",
+            "name": "locale"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "subject!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.scheduled_email_texts",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "body!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.scheduled_email_texts",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "propre!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Int4",
+        "Int4",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "8655f293cbf0dd1c648b524678997a2e5842cc3a555d568965bdb3997a0cf7c4"
+}

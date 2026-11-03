@@ -2,7 +2,6 @@
   "title": "Courriels",
   "subtitle": "Ce qui a été écrit aux participants de l'édition, à qui, et ce qu'il est advenu de chaque message. La boîte d'envoi de la plateforme ne se consulte pas : cet historique la remplace.",
   "new": "Écrire un courriel",
-  "templates": "Gabarits",
   "forbidden": "Écrire aux participants de cette édition",
   "empty": {
     "title": "Aucun courriel pour cette édition",
@@ -40,6 +39,5 @@
     "sent": "Le courriel quitte l'historique, avec ses destinataires et l'état de chaque message. Les messages déjà partis ne sont pas rappelés.",
     "failed": "Le courriel quitte l'historique, avec ses destinataires et l'état de chaque message. Ceux qui attendaient ne recevront rien ; les messages déjà partis ne sont pas rappelés.",
     "confirm": "Supprimer définitivement"
-  },
-  "texts": "Textes types"
+  }
 }

@@ -1,0 +1,55 @@
+{
+  "crumb": "Scheduled",
+  "title": "Scheduled emails",
+  "subtitle": "Automatic reminders already scheduled, grouped by type. A send gathers the recipients of one reminder. Times: {zone}.",
+  "next": {
+    "label": "Next departure",
+    "dayType": "Day reminder, {offset} before",
+    "detail": "{title}, {count} recipient, on {when} | {title}, {count} recipient, on {when} | {title}, {count} recipients, on {when}",
+    "timer": "Time left before the next departure",
+    "days": "days",
+    "hours": "hours",
+    "minutes": "minutes",
+    "seconds": "seconds"
+  },
+  "type": {
+    "day": "Day reminder",
+    "dayDescription": "2 days and 1 day before a special day or the workshop",
+    "activity": "Reminder {offset} before an activity",
+    "custom": "Text written for the edition",
+    "count": "{count} email | {count} email | {count} emails",
+    "next": "next",
+    "edit": "Edit the text of the type",
+    "show": "Show the sends: {type}",
+    "hide": "Hide the sends: {type}"
+  },
+  "offset": {
+    "day": "{count} day | {count} day | {count} days",
+    "hour": "{count} hour | {count} hour | {count} hours",
+    "minute": "{count} minute | {count} minute | {count} minutes"
+  },
+  "delay": {
+    "in": "in {delay}",
+    "now": "now",
+    "d": "{n} d",
+    "h": "{n} h",
+    "m": "{n} min",
+    "s": "{n} s"
+  },
+  "batches": {
+    "caption": "Sends: {type}",
+    "departure": "Departure",
+    "batch": "Send",
+    "recipients": "Recipients",
+    "action": "Action",
+    "label": "{title}, {offset} before",
+    "ownText": "text of this send",
+    "view": "View",
+    "viewFor": "View the send: {label}"
+  },
+  "panelLabel": "{title}, reminder {offset} before",
+  "empty": {
+    "title": "No scheduled email",
+    "description": "Activity and day reminders appear here as soon as someone registers. They leave on their own, on time."
+  }
+}

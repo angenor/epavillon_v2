@@ -1,12 +1,16 @@
-//! **Du type au courriel** — modèle publié s'il existe, texte de secours sinon.
+//! **Du type au courriel** : le rappel d'une activité.
 //!
-//! # Un type sans modèle publié part quand même, et le dit
+//! # Quel texte part, dans quel ordre (04/11)
 //!
-//! Rien ne sème de modèle (écart n° 131). Échouer laisserait **tous** les
-//! rappels à terre sur une base neuve ; envoyer sans le dire empêcherait de
-//! découvrir qu'un modèle manque. Le module compose donc un texte de secours
-//! dérivé du libellé du type, et la trace porte `template_id` **nul** — c'est
-//! elle qui dit que personne n'a écrit ce courriel (R27).
+//! 1. le texte propre à l'envoi, écrit dans l'onglet « Programmés » ;
+//! 2. le texte du type pour l'édition, même onglet ;
+//! 3. un modèle publié (`message_templates`) du type, s'il en existe un ;
+//! 4. le texte par défaut, écrit dans le code (`domain::programmes`).
+//!
+//! 1, 2 et 4 partent dans l'habillage des confirmations d'inscription (logo de
+//! l'édition, bouton « Voir l'activité », lien en clair). Un modèle publié garde
+//! son propre HTML. La trace porte `template_id` nul hors du cas 3 : aucun
+//! modèle publié n'a servi (R27).
 //!
 //! # Une variable manquante FAIT ÉCHOUER l'envoi, en la nommant
 //!
@@ -16,37 +20,45 @@
 //!
 //! # Le lien mène à la page de l'activité sur le site
 //!
-//! `/programmations/{édition}/{activité}` (03/11/2026 : l'ancien `/event/…`
-//! rendait 404). Seule la fonction `lien` le connaît.
+//! `/programmations/{édition}/{activité}`, `/en/programmes/…` en anglais
+//! (03/11/2026 : l'ancien `/event/…` rendait 404).
 
 use kernel::error::{ApiError, Result};
 use kernel::mail::OutgoingMail;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use uuid::Uuid;
 
+use crate::domain::gabarits::Visuels;
 use crate::domain::offsets;
+use crate::domain::programmes::{self, langue, CleEnvoi, Nature};
 use crate::domain::render;
 use crate::repo::cross::{DestinataireCourriel, SeancePourRappel};
-use crate::repo::templates;
+use crate::repo::{programmes as programmes_repo, templates};
+use crate::service::programmes::{composer, texte_ecrit, RappelProgramme};
 
 /// Ce qui a servi à composer.
 #[derive(Debug, Clone)]
 pub struct Compose {
     pub mail: OutgoingMail,
     /// Le modèle **et le numéro de révision** réellement servis (FR-089). Nul
-    /// quand le texte de secours a servi : personne n'a écrit ce courriel, et
-    /// la trace le **dit** plutôt que de laisser croire à un modèle (R27).
-    pub template: Option<(uuid::Uuid, i16)>,
+    /// hors d'un modèle publié : la trace le **dit** (R27).
+    pub template: Option<(Uuid, i16)>,
+    /// Vrai : l'habillage des confirmations, dont le logo part en pièce
+    /// intégrée.
+    pub habille: bool,
 }
 
 pub struct RappelACompose<'a> {
     pub message_id: &'a str,
     pub destinataire: &'a DestinataireCourriel,
     pub seance: &'a SeancePourRappel,
+    pub session_id: Uuid,
     pub offset_minutes: i32,
     pub type_code: &'a str,
-    pub template_id: Option<uuid::Uuid>,
+    pub template_id: Option<Uuid>,
     pub app_public_url: &'a str,
+    pub visuels: Option<&'a Visuels>,
 }
 
 fn en_anglais(locale: &str) -> bool {
@@ -54,8 +66,7 @@ fn en_anglais(locale: &str) -> bool {
 }
 
 /// Les cinq variables que `programme.session.reminder` promet dans
-/// `notification_types.expected_variables`. Les nommer ici plutôt que de les
-/// deviner est ce qui rend le refus de rendu exploitable.
+/// `notification_types.expected_variables`, celles d'un modèle publié.
 fn variables(rappel: &RappelACompose<'_>) -> HashMap<String, String> {
     let anglais = en_anglais(&rappel.destinataire.locale);
     HashMap::from([
@@ -69,37 +80,70 @@ fn variables(rappel: &RappelACompose<'_>) -> HashMap<String, String> {
             "delai".to_owned(),
             offsets::libelle_delai(rappel.offset_minutes, anglais),
         ),
-        ("lien_participation".to_owned(), lien(rappel)),
+        (
+            "lien_participation".to_owned(),
+            programmes::lien(
+                rappel.app_public_url,
+                Nature::Activite,
+                &rappel.seance.event_slug,
+                &rappel.seance.slug,
+                anglais,
+            ),
+        ),
     ])
-}
-
-fn lien(rappel: &RappelACompose<'_>) -> String {
-    format!(
-        "{}/programmations/{}/{}",
-        rappel.app_public_url.trim_end_matches('/'),
-        rappel.seance.event_slug,
-        rappel.seance.slug
-    )
 }
 
 /// Compose le rappel dans la langue du destinataire.
 pub async fn rappel(pool: &PgPool, rappel: &RappelACompose<'_>) -> Result<Compose> {
     let locale = &rappel.destinataire.locale;
-    let valeurs = variables(rappel);
-
-    let Some(revision) =
-        templates::revision_servie(pool, rappel.template_id, rappel.type_code).await?
-    else {
-        tracing::info!(
-            type_code = %rappel.type_code,
-            "aucune révision publiée : le rappel part avec le texte de secours"
-        );
-        return Ok(Compose {
-            mail: secours(pool, rappel, &valeurs).await?,
-            template: None,
-        });
+    let cle = CleEnvoi {
+        nature: Nature::Activite,
+        cible: rappel.session_id,
+        offset_minutes: rappel.offset_minutes,
+        debut: None,
     };
+    let ecrit = texte_ecrit(pool, rappel.seance.event_id, &cle, langue(locale)).await?;
 
+    if ecrit.is_none() {
+        if let Some(revision) =
+            templates::revision_servie(pool, rappel.template_id, rappel.type_code).await?
+        {
+            return modele_publie(rappel, &revision);
+        }
+    }
+
+    let Some(cible) = programmes_repo::cible_activite(pool, rappel.session_id, locale).await?
+    else {
+        return Err(ApiError::internal("séance du rappel introuvable"));
+    };
+    let texte =
+        ecrit.unwrap_or_else(|| programmes::texte_par_defaut(Nature::Activite, en_anglais(locale)));
+    let mail = composer(&RappelProgramme {
+        nature: Nature::Activite,
+        cible: &cible,
+        prenom: &rappel.destinataire.first_name,
+        to: &rappel.destinataire.email,
+        locale,
+        offset_minutes: i64::from(rappel.offset_minutes),
+        texte: &texte,
+        site: rappel.app_public_url,
+        visuels: rappel.visuels,
+        message_id: rappel.message_id,
+        surligner: false,
+    })?;
+    Ok(Compose {
+        mail,
+        template: None,
+        habille: true,
+    })
+}
+
+fn modele_publie(
+    rappel: &RappelACompose<'_>,
+    revision: &templates::RevisionServie,
+) -> Result<Compose> {
+    let locale = &rappel.destinataire.locale;
+    let valeurs = variables(rappel);
     let sujet = rendre(&textuel(&revision.subject, locale), &valeurs)?;
     let html = rendre(&textuel(&revision.body_html, locale), &valeurs)?;
     let texte = match revision.body_text.as_ref() {
@@ -119,74 +163,12 @@ pub async fn rappel(pool: &PgPool, rappel: &RappelACompose<'_>) -> Result<Compos
             html: Some(html),
         },
         template: Some((revision.template_id, revision.version)),
-    })
-}
-
-/// **Le texte de secours** — dérivé du libellé du type et des variables.
-///
-/// Il ne cherche pas à ressembler à un modèle : il porte ce que le destinataire
-/// doit savoir, et rien de plus. Son existence est ce qui permet de découvrir
-/// qu'un modèle manque plutôt que de constater qu'aucun rappel n'est parti.
-async fn secours(
-    pool: &PgPool,
-    rappel: &RappelACompose<'_>,
-    valeurs: &HashMap<String, String>,
-) -> Result<OutgoingMail> {
-    let locale = &rappel.destinataire.locale;
-    let anglais = en_anglais(locale);
-
-    let libelle = templates::type_davis(pool, rappel.type_code, locale)
-        .await?
-        .map(|t| t.label)
-        .unwrap_or_else(|| {
-            if anglais {
-                "Session reminder".to_owned()
-            } else {
-                "Rappel de séance".to_owned()
-            }
-        });
-
-    let vide = String::new();
-    let lire = |cle: &str| valeurs.get(cle).unwrap_or(&vide).clone();
-
-    // Le libellé du type est déjà résolu dans la langue du destinataire : le
-    // sujet n'a rien à traduire de plus.
-    let sujet = format!("{libelle} — {}", lire("titre_session"));
-
-    let texte = if anglais {
-        format!(
-            "Hello {},\n\n« {} » starts {} — {}.\n\n{}\n\nePavillon — IFDD",
-            lire("prenom"),
-            lire("titre_session"),
-            lire("delai"),
-            lire("date_session"),
-            lire("lien_participation"),
-        )
-    } else {
-        format!(
-            "Bonjour {},\n\n« {} » commence {} — {}.\n\n{}\n\nePavillon — IFDD",
-            lire("prenom"),
-            lire("titre_session"),
-            lire("delai"),
-            lire("date_session"),
-            lire("lien_participation"),
-        )
-    };
-
-    Ok(OutgoingMail {
-        message_id: rappel.message_id.to_owned(),
-        to: rappel.destinataire.email.clone(),
-        locale: locale.clone(),
-        subject: sujet,
-        text: texte,
-        html: None,
+        habille: false,
     })
 }
 
 /// La chaîne d'un `platform.i18n_text`, repli sur le français comme
-/// `platform.t()`. La résolution se fait ici et non en SQL : le gabarit est déjà
-/// en mémoire, et un aller-retour de plus pour choisir une clé d'objet serait
-/// gratuit.
+/// `platform.t()`.
 fn textuel(valeur: &serde_json::Value, locale: &str) -> String {
     valeur
         .get(locale)
@@ -200,7 +182,7 @@ fn rendre(gabarit: &str, valeurs: &HashMap<String, String>) -> Result<String> {
     render::rendre(gabarit, valeurs).map_err(|e| ApiError::internal(e.to_string()))
 }
 
-/// Le HTML dépouillé de ses balises — un repli texte, pas une conversion.
+/// Le HTML dépouillé de ses balises : un repli texte, pas une conversion.
 fn depouiller(html: &str) -> String {
     let mut sortie = String::with_capacity(html.len());
     let mut dans_une_balise = false;

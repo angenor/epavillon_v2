@@ -31,9 +31,12 @@ use uuid::Uuid;
 
 use crate::domain::courriel_direct::{self, CourrielDirect};
 use crate::domain::gabarits::{images_integrees, Visuels};
+use crate::domain::programmes::{self, CleEnvoi, Nature};
 use crate::jobs::send_mailing::apparence;
 use crate::repo::delivery;
 use crate::repo::journees::{self, JourneePourCourriel};
+use crate::repo::programmes as programmes_repo;
+use crate::service::programmes::{composer, texte_ecrit, RappelProgramme};
 
 pub const SEND_DAY_REMINDER: &str = "engagement.send_day_reminder";
 const TYPE_CONFIRMATION: &str = "programme.track_registration.confirmed";
@@ -153,53 +156,6 @@ pub fn confirmation(
         }
     };
     courriel_direct::composer(&c, visuels, &j.email, &j.locale, message_id)
-}
-
-/// Le rappel de la journée, `minutes` avant son début.
-pub fn rappel(j: &JourneePourCourriel, minutes: i64, app: &str, message_id: &str) -> OutgoingMail {
-    let anglais = j.locale.starts_with("en");
-    let jours = (minutes / 1440).max(1);
-    let lien = page(app, j, None);
-    let quand = j
-        .debut_local
-        .as_deref()
-        .map(|d| format!("{d} ({})", j.timezone))
-        .unwrap_or_default();
-    let (sujet, texte) = if anglais {
-        let delai = if jours == 1 {
-            "tomorrow".to_owned()
-        } else {
-            format!("in {jours} days")
-        };
-        (
-            format!("{} starts {delai}", j.titre),
-            format!(
-                "Hello {},\n\n\"{}\" starts {delai}, on {quand}. Follow the live stream with the link in your confirmation email, or from the page of the day:\n{lien}\n",
-                j.first_name, j.titre
-            ),
-        )
-    } else {
-        let delai = if jours == 1 {
-            "demain".to_owned()
-        } else {
-            format!("dans {jours} jours")
-        };
-        (
-            format!("{} commence {delai}", j.titre),
-            format!(
-                "Bonjour {},\n\n« {} » commence {delai}, le {quand}. Suivez le direct avec le lien de votre courriel de confirmation, ou depuis la page de la journée :\n{lien}\n",
-                j.first_name, j.titre
-            ),
-        )
-    };
-    OutgoingMail {
-        message_id: message_id.to_owned(),
-        to: j.email.clone(),
-        locale: j.locale.clone(),
-        subject: sujet,
-        text: texte,
-        html: None,
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -384,14 +340,58 @@ impl JobHandler for SendDayReminder {
         if !delivery::canal_autorise(pool, j.person_id, TYPE_RAPPEL, "email").await? {
             return Ok(());
         }
-        let mail = rappel(
-            &j,
-            c.offset_minutes,
+        let debut = OffsetDateTime::from_unix_timestamp(c.starts_at)
+            .map_err(|_| ApiError::internal("début de journée illisible"))?;
+        let Some(cible) = programmes_repo::cible_journee(
+            pool,
+            None,
+            Some(j.track_registration_id),
+            debut,
+            &j.locale,
+        )
+        .await?
+        else {
+            return Ok(());
+        };
+        let cle = CleEnvoi {
+            nature: Nature::Journee,
+            cible: cible.cible,
+            offset_minutes: i32::try_from(c.offset_minutes)
+                .map_err(|_| ApiError::internal("décalage de rappel illisible"))?,
+            debut: Some(c.starts_at),
+        };
+        let texte = texte_ecrit(pool, j.event_id, &cle, programmes::langue(&j.locale))
+            .await?
+            .unwrap_or_else(|| {
+                programmes::texte_par_defaut(Nature::Journee, programmes::langue(&j.locale) == "en")
+            });
+        let habit = apparence(
+            &self.db,
+            j.event_id,
+            courriel_direct::GABARIT,
+            None,
             &self.app_public_url,
-            &job.id.to_string(),
-        );
+        )
+        .await?;
+        let mail = composer(&RappelProgramme {
+            nature: Nature::Journee,
+            cible: &cible,
+            prenom: &j.first_name,
+            to: &j.email,
+            locale: &j.locale,
+            offset_minutes: c.offset_minutes,
+            texte: &texte,
+            site: &self.app_public_url,
+            visuels: habit.visuels.as_ref(),
+            message_id: &job.id.to_string(),
+            surligner: false,
+        })?;
+        let extras = Extras {
+            inline_images: images_integrees(&habit.gabarit, habit.visuels.as_ref()),
+            ..Extras::default()
+        };
         self.mailer
-            .send(&mail)
+            .send_with_extras(&mail, &extras)
             .await
             .map_err(|_| ApiError::internal("envoi du rappel de journée refusé par le relais"))
     }
@@ -473,13 +473,5 @@ mod tests {
         assert!(m
             .text
             .contains("https://site.org/programmations/cdp31/journees/finance"));
-    }
-
-    #[test]
-    fn le_rappel_dit_demain_pour_un_jour() {
-        let m = rappel(&journee("fr"), 1440, "https://site.org", "j");
-        assert_eq!(m.subject, "Journée finance durable commence demain");
-        let m = rappel(&journee("en"), 2880, "https://site.org", "j");
-        assert_eq!(m.subject, "Journée finance durable starts in 2 days");
     }
 }

@@ -62,6 +62,12 @@ pub struct ApiErrorBody {
         crate::routes::mail_texts::detail,
         crate::routes::mail_texts::modifier,
         crate::routes::mail_texts::supprimer,
+        crate::routes::programmes::lister,
+        crate::routes::programmes::envoi,
+        crate::routes::programmes::apercu,
+        crate::routes::programmes::ecrire_envoi,
+        crate::routes::programmes::effacer_envoi,
+        crate::routes::programmes::ecrire_type,
     ),
     components(schemas(ApiErrorBody)),
     tags(

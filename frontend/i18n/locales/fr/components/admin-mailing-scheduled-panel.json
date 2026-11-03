@@ -1,0 +1,42 @@
+{
+  "region": "Envoi choisi",
+  "context": "Part le {when} vers {count} destinataire. Aperçu pour cette personne. | Part le {when} vers {count} destinataire. Aperçu pour cette personne. | Part le {when} vers {count} destinataires. Aperçu pour la première d'entre elles.",
+  "close": "Fermer l'envoi",
+  "gone": "Cet envoi n'est plus programmé : il est peut-être déjà parti.",
+  "scope": {
+    "label": "Ce que la modification touche",
+    "type": "Le texte du type ({count} courriel) | Le texte du type ({count} courriel) | Le texte du type ({count} courriels)",
+    "batch": "Cet envoi seulement ({count})"
+  },
+  "typeDefault": "Ce type suit le texte par défaut. L'enregistrer change tous ses envois pas encore partis.",
+  "typeCustom": "Ce type a un texte écrit pour l'édition. L'enregistrer change tous ses envois pas encore partis.",
+  "typeSpares": "Cet envoi a son propre texte : il ne changera pas.",
+  "batchFollows": "Cet envoi suit le texte du type. L'enregistrer ici ne change que lui, pour tous ses destinataires.",
+  "batchOwn": "Cet envoi a son propre texte : il le garde même si le texte du type change.",
+  "language": {
+    "label": "Langue du courriel",
+    "fr": "Français",
+    "en": "Anglais"
+  },
+  "subject": "Objet",
+  "body": "Message",
+  "bodyHint": "Une ligne vide sépare deux paragraphes. Chaque personne reçoit la langue de son inscription.",
+  "variables": "Zones remplies automatiquement",
+  "button": {
+    "day": "bouton « Voir la journée »",
+    "activity": "bouton « Voir l'activité »"
+  },
+  "reset": "Revenir au texte du type",
+  "saveBatch": "Enregistrer pour cet envoi",
+  "saveType": "Enregistrer pour le type ({count} courriel) | Enregistrer pour le type ({count} courriel) | Enregistrer pour le type ({count} courriels)",
+  "saved": "Texte enregistré. Il partira avec les courriels pas encore envoyés.",
+  "resetDone": "Cet envoi suit de nouveau le texte du type.",
+  "help": "Rien ne part plus tôt : l'envoi garde son heure. Une modification enregistrée moins d'une minute avant le départ peut ne pas être prise.",
+  "preview": {
+    "title": "Ce qui partira",
+    "context": "Gabarit institutionnel avec le logo de l'édition, comme les confirmations. Zones remplies surlignées.",
+    "subject": "Objet :",
+    "to": "À :",
+    "toValue": "la personne inscrite | la personne inscrite | une des {count} personnes inscrites"
+  }
+}

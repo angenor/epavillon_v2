@@ -125,6 +125,8 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
         </UiButton>
       </header>
 
+      <AdminMailingsSectionTabs v-if="canSend" class="mt-6" current="texts" />
+
       <UiAlert v-if="createError" class="mt-6" intent="danger" live :message="createError" />
 
       <UiLoadingState v-if="isLoadingAccess" class="mt-8" variant="text" :lines="4" />
