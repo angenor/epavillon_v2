@@ -139,7 +139,7 @@ export function createAdminEventsApi({ call, send, assertEventInScope }: AdminEv
      * n'a alors été écrit. À la création, l'inverse est forcé — l'objet à qui
      * rattacher n'existe pas encore.
      */
-    saveImages: (eventId: Uuid, images: EditionImagePayload, scope: AdministeredEvents): Promise<void> => {
+    saveImages: (eventId: Uuid, images: Partial<EditionImagePayload>, scope: AdministeredEvents): Promise<void> => {
       assertEventInScope(eventId, scope)
       const batch: AttachmentBatch = {
         owner_schema: 'event',

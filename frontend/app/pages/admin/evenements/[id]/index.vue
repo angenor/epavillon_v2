@@ -348,10 +348,18 @@ const editionPayload = computed<EditionFormPayload | null>(() => {
   }
 })
 
-/** Les trois déclinaisons ont-elles bougé ? Sinon, rien à écrire au module Média. */
-function imagesChanged(next: EditionImagePayload): boolean {
+/**
+ * Les seuls rôles qui ont bougé. Renvoyer un rôle inchangé le ferait revérifier :
+ * le bandeau 16:9 repris de la v1 bloquait tout enregistrement (03/11/2026).
+ */
+function changedImages(next: EditionImagePayload): Partial<EditionImagePayload> {
   const attached = detail.value?.images
-  return EDITION_IMAGE_ROLES.some((role) => (attached?.[role]?.asset_id ?? null) !== next[role])
+  return Object.fromEntries(
+    EDITION_IMAGE_ROLES.filter((role) => (attached?.[role]?.asset_id ?? null) !== next[role]).map((role) => [
+      role,
+      next[role],
+    ]),
+  )
 }
 
 const editionDraftKey = computed(() =>
@@ -367,8 +375,9 @@ async function saveEdition(payload: EditionFormPayload, images: EditionImagePayl
     // LES IMAGES D'ABORD, et par le module Média : `event.events` ne les porte
     // pas. En premier parce qu'un fichier qui n'a pas la forme de son rôle est
     // refusé — la fiche n'a alors pas bougé, et on recommence sans rien défaire.
-    if (imagesChanged(images)) {
-      await api.adminEvents.saveImages(eventId.value, images, adminScope.scope)
+    const changed = changedImages(images)
+    if (Object.keys(changed).length > 0) {
+      await api.adminEvents.saveImages(eventId.value, changed, adminScope.scope)
     }
     const result = await api.adminEvents.save(payload, auth.person?.id ?? null, adminScope.scope)
     if (!result.ok) {
