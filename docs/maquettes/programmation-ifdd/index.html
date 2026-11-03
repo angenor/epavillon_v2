@@ -130,7 +130,10 @@
   .d3 .row .r-thumb { overflow: visible; }
   .d3 .row .r-time .oif { position: relative; top: auto; left: auto; margin-top: 10px; width: 26px; height: 26px; }
   .d3 .row .r-time .oif img { filter: none; }
-  /* Dans la liste, sous l'heure à toute largeur (arbitré le 03/11). */
+  /* Calendrier : en face de l'heure, au bout de sa ligne ; liste : sous l'heure, à toute largeur (arbitré le 03/11). */
+  .d3 .card .when { align-items: center; }
+  .d3 .card .when .oif { position: relative; top: auto; left: auto; margin-left: auto; width: 28px; height: 28px; flex: none; }
+  .d3 .card .when .oif img { filter: none; }
   .d3 .row .r-thumb .oif { display: none; }
 
   /* ════ 4. Le projecteur ═════════════════════════════════════
@@ -190,7 +193,7 @@
 <section class="direction d3">
   <header>
     <h2>3. Le cercle de l'OIF</h2>
-    <p>Le cercle aux cinq couleurs de l'OIF, en haut à gauche de la couverture, sans fond. Une onde s'en échappe et s'efface, comme le point du direct.</p>
+    <p>Le cercle aux cinq couleurs de l'OIF, sans fond, en face de l'heure dans le calendrier et sous l'heure dans la liste. Une onde s'en échappe et s'efface, comme le point du direct.</p>
     <ul><li>Ne touche ni aux couleurs de la carte ni au reste de la page.</li><li>Dans la liste, sur grand écran comme sur téléphone, le cercle se pose sous l'heure.</li><li>Il s'arrête quand le visiteur a demandé moins d'animations ; il reste alors visible, fixe.</li></ul>
   </header>
   <p class="frame-label">Calendrier, grand écran</p><div class="frame host-week"></div>
@@ -241,8 +244,8 @@
     const bottom = ifdd && d === 'd1' ? stripe : '';
     const tile = ifdd && d !== 'd3' && d !== 'd4' ? `<span class="tile wide">${logo(d === 'd1')}</span>` : `<span class="tile">${s.acr}</span>`;
     return `<li><a href="#" class="card${ifdd ? ' is-ifdd' : ''}" onclick="return false">${top}
-      <div class="cover">${cover(s)}${ifdd && d === 'd3' ? oif : ''}</div>
-      <div class="c-body"><div class="when"><b>${s.t}</b><small><strong>${day.name}</strong>${s.until}</small></div>
+      <div class="cover">${cover(s)}</div>
+      <div class="c-body"><div class="when"><b>${s.t}</b><small><strong>${day.name}</strong>${s.until}</small>${ifdd && d === 'd3' ? oif : ''}</div>
       <h4>${s.title}</h4><div class="org">${tile}<span>${s.org}</span></div><span class="state">À venir</span></div>${bottom}</a></li>`;
   };
   const week = (d) => `<div class="week">${DAYS.map((day) => `<div class="col${day.alt ? ' alt' : ''}${day.day ? ' day-col' : ''}">
