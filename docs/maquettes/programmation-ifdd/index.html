@@ -115,18 +115,28 @@
   .d2 .row.is-ifdd .tag { display: inline-block; }
   .tag { display: none; margin-top: 4px; font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary); }
 
-  /* ════ 3. Le cachet ═════════════════════════════════════════
-     Un cachet rond au logo de l'IFDD, posé de biais à cheval sur la photo et le
-     texte, comme le tampon d'un document officiel. */
-  .seal { position: absolute; z-index: 2; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--card), 0 0 0 4.5px var(--ifdd-bleu-900), 0 4px 10px rgb(29 26 91 / 0.25); transform: rotate(-10deg); }
-  .seal::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 1px dashed var(--ifdd-bleu-300); }
-  .seal .ifdd-logo { width: 40px; height: 19px; }
-  .d3 .card .seal { top: calc(56.25% * 0 + 0px); right: 10px; }
-  .d3 .card.is-ifdd .cover .acr, .d3 .row.is-ifdd .r-thumb .acr, .d2 .row.is-ifdd .r-thumb .acr { display: none; }
-  .d3 .row .seal { width: 46px; height: 46px; top: 12px; right: 0; }
-  .d3 .row .seal .ifdd-logo { width: 32px; height: 15px; }
-  @container (min-width: 640px) { .d3 .row .r-thumb { overflow: visible; } .d3 .row .r-thumb .seal { top: -10px; left: -12px; right: auto; } .d3 .row > .seal { display: none; } }
-  @container (max-width: 639px) { .d3 .row .r-thumb .seal { display: none; } .d3 .row.is-ifdd h4 { padding-right: 54px; } }
+  /* ════ 3. Le cercle de l'OIF ═══════════════════════════════
+     Le cercle aux cinq couleurs de l'OIF, en haut à gauche de la couverture,
+     sur un disque blanc (la photo peut être de n'importe quelle couleur). Il bat
+     comme le point du direct : pulsation du badge « En direct » (2 s) ou onde du
+     point du billet (1 s). « Moins d'animations » l'arrête, le cercle reste. */
+  .oif { position: absolute; z-index: 2; top: 8px; left: 8px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(29 26 91 / 0.35); }
+  .oif img { position: relative; width: 30px; height: 30px; }
+  .oif::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #fff; opacity: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .anim-pulse .oif img { animation: oif-pulse 2s ease-in-out infinite; }
+    .anim-ping .oif::before { animation: oif-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+  }
+  @keyframes oif-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.82); } }
+  @keyframes oif-ping { 0% { opacity: 0.75; transform: scale(1); } 75%, 100% { opacity: 0; transform: scale(2); } }
+  .d3 .row .r-thumb { overflow: visible; }
+  .d3 .row .r-time .oif { position: relative; top: auto; left: auto; margin-top: 8px; width: 34px; height: 34px; }
+  .d3 .row .r-time .oif img { width: 25px; height: 25px; }
+  @container (min-width: 640px) { .d3 .row .r-time .oif { display: none; } }
+  @container (max-width: 639px) { .d3 .row .r-thumb .oif { display: none; } }
+  .anim-choice { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .anim-choice button { min-height: var(--target); padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); font: 600 0.88rem var(--font-body); color: var(--color-text); cursor: pointer; }
+  .anim-choice button[aria-pressed="true"] { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); color: var(--color-accent); }
 
   /* ════ 4. Le projecteur ═════════════════════════════════════
      Un bouton de la barre d'outils, « Activités de l'IFDD » : les autres pâlissent
@@ -182,11 +192,16 @@
   <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
 </section>
 
-<section class="direction d3">
+<section class="direction d3 anim-pulse">
   <header>
-    <h2>3. Le cachet</h2>
-    <p>Un cachet rond au logo de l'IFDD, posé de biais sur le coin de la photo, comme le tampon d'un document officiel.</p>
-    <ul><li>Dit « organisé par l'IFDD » sans toucher aux couleurs de la carte.</li><li>Un peu plus de caractère que le liseré, sans assombrir la page.</li><li>Sur téléphone, sans vignette, le cachet se pose dans le coin de la ligne.</li></ul>
+    <h2>3. Le cercle de l'OIF</h2>
+    <p>Le cercle aux cinq couleurs de l'OIF, en haut à gauche de la couverture, sur un disque blanc. Il bat comme le point du direct.</p>
+    <ul><li>Ne touche ni aux couleurs de la carte ni au reste de la page.</li><li>Sur téléphone, la liste n'a pas de vignette : le cercle se pose sous l'heure.</li><li>Il s'arrête quand le visiteur a demandé moins d'animations ; il reste alors visible, fixe.</li></ul>
+    <div class="anim-choice" role="group" aria-label="Animation du cercle">
+      <button type="button" data-anim="anim-pulse" aria-pressed="true">Pulsation (badge « En direct »)</button>
+      <button type="button" data-anim="anim-ping" aria-pressed="false">Onde (point du billet)</button>
+      <button type="button" data-anim="" aria-pressed="false">Sans animation</button>
+    </div>
   </header>
   <p class="frame-label">Calendrier, grand écran</p><div class="frame host-week"></div>
   <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
@@ -196,7 +211,7 @@
   <header>
     <h2>4. Le projecteur</h2>
     <p>Un bandeau en tête de semaine liste les activités de l'IFDD. Un bouton « Activités de l'IFDD », à côté de la recherche, fait pâlir toutes les autres, sans les cacher : le calendrier garde sa forme. Essayez le bouton.</p>
-    <ul><li>Le visiteur choisit de mettre l'IFDD en lumière ; par défaut, la page est neutre.</li><li>Le bandeau sert aussi de résumé : « l'IFDD au pavillon cette semaine ».</li><li>Se combine avec le liseré ou le cachet sur les cartes.</li></ul>
+    <ul><li>Le visiteur choisit de mettre l'IFDD en lumière ; par défaut, la page est neutre.</li><li>Le bandeau sert aussi de résumé : « l'IFDD au pavillon cette semaine ».</li><li>Se combine avec le liseré ou le cercle de l'OIF sur les cartes.</li></ul>
   </header>
   <p class="frame-label">Calendrier, grand écran</p><div class="frame"><div class="toolbar"><span class="search">Titre, organisation, sigle…</span><button type="button" class="chip spot" aria-pressed="false"><span class="tile"><img class="ifdd-logo" src="../../../frontend/public/logos/svg/epavillon-ifdd.svg" alt=""></span>Activités de l'IFDD</button></div><div class="host-band"></div><div class="host-week"></div></div>
   <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame"><div class="host-band"></div><div class="host-list"></div></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone"><div class="toolbar"><button type="button" class="chip spot" aria-pressed="false"><span class="tile"><img class="ifdd-logo" src="../../../frontend/public/logos/svg/epavillon-ifdd.svg" alt=""></span>Activités de l'IFDD</button></div><div class="host-band"></div><div class="host-list"></div></div></div></div>
@@ -227,7 +242,7 @@
   ];
   const stripe = '<span class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>';
   const logo = (inv) => `<img class="ifdd-logo${inv ? ' inv' : ''}" src="${L}${inv ? 'ifdd-epavillon-inverse.svg' : 'epavillon-ifdd.svg'}" alt="IFDD">`;
-  const seal = `<span class="seal" title="Organisé par l'IFDD">${logo(false)}</span>`;
+  const oif = `<span class="oif" title="Activité de l'IFDD, organe de la Francophonie"><img src="${L}oif-cercle.svg" alt="Activité de l'IFDD"></span>`;
   const cover = (s) => `<img src="${C}${s.cover ?? 'pavillon-cop31-16-9.jpg'}" alt="">${s.cover ? '' : `<span class="acr">${s.acr}</span>`}`;
 
   const card = (d, s, day) => {
@@ -236,7 +251,7 @@
     const bottom = ifdd && d === 'd1' ? stripe : '';
     const tile = ifdd && d !== 'd3' && d !== 'd4' ? `<span class="tile wide">${logo(d === 'd1')}</span>` : `<span class="tile">${s.acr}</span>`;
     return `<li><a href="#" class="card${ifdd ? ' is-ifdd' : ''}" onclick="return false">${top}
-      <div class="cover">${cover(s)}${ifdd && d === 'd3' ? seal : ''}</div>
+      <div class="cover">${cover(s)}${ifdd && d === 'd3' ? oif : ''}</div>
       <div class="c-body"><div class="when"><b>${s.t}</b><small><strong>${day.name}</strong>${s.until}</small></div>
       <h4>${s.title}</h4><div class="org">${tile}<span>${s.org}</span></div><span class="state">À venir</span></div>${bottom}</a></li>`;
   };
@@ -249,10 +264,10 @@
     const ifdd = s.ifdd;
     const tile = ifdd && (d === 'd1' || d === 'd2') ? `<span class="tile wide">${logo(d === 'd1')}</span>` : `<span class="tile">${s.acr}</span>`;
     return `<li><a href="#" class="row${ifdd ? ' is-ifdd' : ''}" onclick="return false">
-      <div class="r-time"><b>${s.t}</b><small>${s.until}</small></div>
-      <div class="r-thumb">${cover(s)}${ifdd && d === 'd2' ? stripe : ''}${ifdd && d === 'd3' ? seal : ''}</div>
+      <div class="r-time"><b>${s.t}</b><small>${s.until}</small>${ifdd && d === 'd3' ? oif : ''}</div>
+      <div class="r-thumb">${cover(s)}${ifdd && d === 'd2' ? stripe : ''}${ifdd && d === 'd3' ? oif : ''}</div>
       <div><h4>${s.title}</h4><div class="org">${tile}<span>${s.org}</span></div>${ifdd && d === 'd2' ? '<span class="tag">Activité de l\'IFDD</span>' : ''}<span class="state">À venir</span></div>
-      ${ifdd && d === 'd3' ? seal : ''}${ifdd && d === 'd1' ? stripe : ''}</a></li>`;
+      ${ifdd && d === 'd1' ? stripe : ''}</a></li>`;
   };
   const list = (d) => `<ul class="list">${rows.map((s) => row(d, s)).join('')}</ul>`;
 
@@ -275,6 +290,12 @@
       b.setAttribute('aria-pressed', String(on));
       b.querySelector('img').src = L + (on ? 'ifdd-epavillon-inverse.svg' : 'epavillon-ifdd.svg');
     });
+  }));
+  document.querySelectorAll('[data-anim]').forEach((btn) => btn.addEventListener('click', () => {
+    const sec = btn.closest('.direction');
+    sec.classList.remove('anim-pulse', 'anim-ping');
+    if (btn.dataset.anim) sec.classList.add(btn.dataset.anim);
+    sec.querySelectorAll('[data-anim]').forEach((o) => o.setAttribute('aria-pressed', String(o === btn)));
   }));
   const themeBtn = document.querySelector('[data-theme-toggle]');
   themeBtn.addEventListener('click', () => {
