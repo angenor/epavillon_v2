@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PublicSessionSpeaker } from '~/types/programme/session'
-import type { PublicTrackEntry } from '~/types/programme/track-page'
+import type { PublicTrackActivity, PublicTrackEntry } from '~/types/programme/track-page'
 
 /**
  * LA PAGE D'UNE JOURNÉE SPÉCIALE, ou de l'atelier préparatoire (un fil
@@ -129,10 +129,18 @@ const highlightMoment = computed(() =>
       ) ?? null),
 )
 
+/** Dans l'ordre du déroulé, avec les activités qu'un moment regroupe : leurs intervenants et leurs organisations sont de la journée. */
+type Speaking = Pick<PublicTrackActivity, 'speakers' | 'organizations'>
+const speaking = computed(() =>
+  (page.value?.agenda ?? []).flatMap<Speaking>((entry) =>
+    entry.kind === 'activity' ? [entry.activity] : entry.kind === 'moment' ? entry.moment.activities : [],
+  ),
+)
+
 const speakers = computed(() => {
   const seen = new Set<string>()
   const list: PublicSessionSpeaker[] = []
-  for (const activity of activities.value) {
+  for (const activity of speaking.value) {
     for (const speaker of activity.speakers) {
       if (seen.has(speaker.display_name)) continue
       seen.add(speaker.display_name)
@@ -144,7 +152,7 @@ const speakers = computed(() => {
 
 const organizations = computed(() => {
   const seen = new Set<string>()
-  return activities.value
+  return speaking.value
     .flatMap((activity) => activity.organizations)
     .filter((organization) => (seen.has(organization.organization_id) ? false : (seen.add(organization.organization_id), true)))
     .map((organization) => ({

@@ -559,6 +559,8 @@ const deroule = (s: Source): PublicTrackEntry[] => {
             organization_name: x.orgs?.[0]?.name ?? null,
             organization_acronym: x.orgs?.[0]?.acronym ?? null,
             organization_logo: null,
+            speakers: [],
+            organizations: [],
           })),
       },
     })),

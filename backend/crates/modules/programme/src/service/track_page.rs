@@ -123,16 +123,19 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
     for session in lignes {
         match regroupees.get(&session.id) {
             Some(moment) => {
+                let id = session.id;
                 sous_moment
                     .entry(*moment)
                     .or_default()
                     .push(PublicTrackMomentActivity {
-                        session_id: session.id,
+                        session_id: id,
                         starts_at: session.starts_at,
                         ends_at: session.ends_at,
                         organization_name: session.organization_name,
                         organization_acronym: session.organization_acronym,
                         organization_logo: session.organization_logo,
+                        speakers: intervenants.remove(&id).unwrap_or_default(),
+                        organizations: organisations.remove(&id).unwrap_or_default(),
                     })
             }
             None => seances.push(session),

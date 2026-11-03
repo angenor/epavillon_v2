@@ -114,6 +114,11 @@ pub struct PublicTrackMomentActivity {
     pub organization_acronym: Option<String>,
     /// `AttachedImage | null`, comme `PublicScheduleRow.organization_logo`.
     pub organization_logo: Option<Value>,
+    /// `PublicSessionSpeaker[]` : ils parlent pendant la journée, la page les
+    /// compte parmi ses intervenants même quand l'activité est regroupée.
+    pub speakers: Vec<Value>,
+    /// `SessionOrganization[]`, pour la même raison.
+    pub organizations: Vec<Value>,
 }
 
 /// Un moment du déroulé : ce que porte une ligne `kind: "moment"`.

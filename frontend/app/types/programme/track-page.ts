@@ -126,6 +126,9 @@ export interface PublicTrackMomentActivity {
   organization_name: string | null
   organization_acronym: string | null
   organization_logo: AttachedImage | null
+  /** Ils parlent pendant la journée : la page les compte parmi ses intervenants. */
+  speakers: PublicSessionSpeaker[]
+  organizations: SessionOrganization[]
 }
 
 export interface PublicTrackMoment {
