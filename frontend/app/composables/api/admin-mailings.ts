@@ -26,6 +26,14 @@ import type {
   MailText,
   MailTextPayload,
 } from '~/types/admin-mailings'
+import type {
+  ScheduledMailBatch,
+  ScheduledMailPreview,
+  ScheduledMailPreviewPayload,
+  ScheduledMailScreen,
+  ScheduledMailTexts,
+  ScheduledMailTypeTextPayload,
+} from '~/types/admin-scheduled-mails'
 import type { AdministeredEvents } from '~/types/identity'
 import type { EventId, Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
@@ -157,6 +165,54 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
 
       remove: (textId: Uuid): Promise<{ deleted: boolean }> =>
         send(`/admin/mail-texts/${textId}`, {}, (m) => m.deleteMailText(textId), 'DELETE'),
+    },
+
+    /**
+     * COURRIELS PROGRAMMÉS (04/11) : les rappels en file de l'édition, leurs
+     * envois et leurs textes. Un envoi se désigne par sa clé, rendue par la
+     * liste ; `null` : parti, inexistant ou hors droit.
+     */
+    scheduled: {
+      list: (eventId: EventId, scope: AdministeredEvents): Promise<ScheduledMailScreen> => {
+        assertEventInScope(eventId, scope)
+        return call('/admin/scheduled-mails', (m) => m.scheduledMails(eventId), { event_id: eventId })
+      },
+
+      batch: (key: string): Promise<ScheduledMailBatch | null> =>
+        callOrNull(`/admin/scheduled-mails/batches/${encodeURIComponent(key)}`, (m) => m.scheduledMailBatch(key)),
+
+      /** N'écrit rien : rendu par la fonction du travail d'envoi. */
+      preview: (key: string, payload: ScheduledMailPreviewPayload): Promise<ScheduledMailPreview> =>
+        send(
+          `/admin/scheduled-mails/batches/${encodeURIComponent(key)}/preview`,
+          payload,
+          (m) => m.scheduledMailPreview(key, payload),
+          'POST',
+        ),
+
+      saveBatchText: (key: string, texts: ScheduledMailTexts): Promise<ScheduledMailBatch | null> =>
+        send(
+          `/admin/scheduled-mails/batches/${encodeURIComponent(key)}/text`,
+          texts,
+          (m) => m.saveScheduledBatchText(key, texts),
+          'PUT',
+        ),
+
+      resetBatchText: (key: string): Promise<ScheduledMailBatch | null> =>
+        send(
+          `/admin/scheduled-mails/batches/${encodeURIComponent(key)}/text`,
+          {},
+          (m) => m.resetScheduledBatchText(key),
+          'DELETE',
+        ),
+
+      saveTypeText: (typeKey: string, payload: ScheduledMailTypeTextPayload): Promise<ScheduledMailTexts> =>
+        send(
+          `/admin/scheduled-mails/types/${encodeURIComponent(typeKey)}/text`,
+          payload,
+          (m) => m.saveScheduledTypeText(typeKey, payload),
+          'PUT',
+        ),
     },
   }
 }

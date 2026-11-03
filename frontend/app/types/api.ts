@@ -3066,6 +3066,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/scheduled-mails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les courriels programmés d'une édition.
+         * @description `ScheduledMailScreen` : les rappels déjà en file et pas encore partis (rappels de journée, rappels d'activité par décalage), regroupés en types puis en envois. Un envoi réunit les destinataires d'un même rappel pour une même cible à la même heure : (séance, décalage) pour une activité, (journée, décalage, début visé) pour une journée. `observed_at` est l'heure du serveur au relevé : le décompte s'y cale. Les titres sont dans la langue de la requête.
+         *
+         *     Gardé par `engagement.mailing.send` **sur l'édition** et le périmètre d'administration : hors périmètre, l'édition n'existe pas (404) ; dans le périmètre sans la permission, 403.
+         */
+        get: operations["engagement_programmes_lister"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/scheduled-mails/batches/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Le panneau d'un envoi.
+         * @description `ScheduledMailBatch` : l'envoi, le nombre de courriels de son type dans l'édition, le texte du type (écrit, sinon celui par défaut) et le texte propre à l'envoi s'il en a un, en français et en anglais, les variables disponibles et la langue du premier destinataire.
+         *
+         *     La clé est celle que rend la liste (`activity.<séance>.<décalage>`, `day.<journée>.<décalage>.<début>`). Gardé sur l'édition de la cible : hors droit, ou déjà parti, l'envoi n'existe pas (404).
+         */
+        get: operations["engagement_programmes_envoi"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/scheduled-mails/batches/{key}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ce qui partira, avec le texte en cours d'écriture.
+         * @description `ScheduledMailPreviewPayload` → `ScheduledMailPreview` : le courriel rendu pour le premier destinataire de l'envoi, dans la langue demandée, par la fonction même du travail d'envoi (gabarit institutionnel et logo de l'édition, bouton, lien en clair). Les valeurs des variables sont surlignées. **N'écrit rien, n'envoie rien.** Une variable que ce rappel ne fournit pas est refusée en la nommant (422).
+         */
+        post: operations["engagement_programmes_apercu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/scheduled-mails/batches/{key}/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Le texte propre à un envoi.
+         * @description `ScheduledMailTexts` → `ScheduledMailBatch` : l'objet et le message de cet envoi seulement, en français et en anglais. Il vaut pour tous ses destinataires et garde sa version si le texte du type change ensuite. S'applique aux travaux pas encore partis, **sans changer leur heure**.
+         */
+        put: operations["engagement_programmes_texte_envoi"];
+        post?: never;
+        /**
+         * Revenir au texte du type.
+         * @description `ScheduledMailBatch` : efface le texte propre à l'envoi ; ses destinataires recevront le texte du type.
+         */
+        delete: operations["engagement_programmes_texte_envoi_effacer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/scheduled-mails/types/{key}/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Le texte d'un type, pour l'édition.
+         * @description `ScheduledMailTypeTextPayload` → `ScheduledMailTexts` : l'objet et le message d'un type (`day`, ou `activity.<décalage en minutes>`) pour toute l'édition, en français et en anglais. Changent tous les envois de ce type pas encore partis, sauf ceux qui ont leur propre texte ; aucun ne change d'heure.
+         *
+         *     Gardé par `engagement.mailing.send` sur l'édition du corps et le périmètre d'administration.
+         */
+        put: operations["engagement_programmes_texte_type"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/sessions/{session_id}/meeting": {
         parameters: {
             query?: never;
@@ -8056,6 +8166,29 @@ export interface components {
              */
             time_range?: unknown;
             enforce_room_exclusivity?: boolean | null;
+        };
+        /** @description L'aperçu d'un texte en cours d'écriture (`ScheduledMailPreviewPayload`). */
+        ScheduledMailPreviewPayload: {
+            locale: string;
+            subject: string;
+            body: string;
+        };
+        /** @description Un objet et un message (`ScheduledMailText`). */
+        ScheduledMailText: {
+            subject: string;
+            body: string;
+        };
+        /** @description Les deux langues (`ScheduledMailTexts`). */
+        ScheduledMailTexts: {
+            fr: components["schemas"]["ScheduledMailText"];
+            en: components["schemas"]["ScheduledMailText"];
+        };
+        /** @description Le texte d'un type (`ScheduledMailTypeTextPayload`). */
+        ScheduledMailTypeTextPayload: {
+            /** Format: uuid */
+            event_id: string;
+            fr: components["schemas"]["ScheduledMailText"];
+            en: components["schemas"]["ScheduledMailText"];
         };
         /**
          * @description La diffusion et son canal — `SessionBroadcastPayload`.
@@ -17609,6 +17742,345 @@ export interface operations {
             };
             /** @description Salle inexistante **ou hors périmètre** — indiscernables */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_programmes_lister: {
+        parameters: {
+            query: {
+                /** @description L'édition */
+                event_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ScheduledMailScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_programmes_envoi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description La clé de l'envoi */
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ScheduledMailBatch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Envoi inexistant, parti, ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_programmes_apercu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description La clé de l'envoi */
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScheduledMailPreviewPayload"];
+            };
+        };
+        responses: {
+            /** @description ScheduledMailPreview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Envoi inexistant, parti, ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_programmes_texte_envoi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description La clé de l'envoi */
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScheduledMailTexts"];
+            };
+        };
+        responses: {
+            /** @description ScheduledMailBatch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Envoi inexistant, parti, ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_programmes_texte_envoi_effacer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description La clé de l'envoi */
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ScheduledMailBatch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Envoi inexistant, parti, ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_programmes_texte_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description La clé du type */
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScheduledMailTypeTextPayload"];
+            };
+        };
+        responses: {
+            /** @description ScheduledMailTexts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Type inconnu, édition inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description VALIDATION_FAILED */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

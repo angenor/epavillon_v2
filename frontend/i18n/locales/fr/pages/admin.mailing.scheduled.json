@@ -1,0 +1,55 @@
+{
+  "crumb": "Programmés",
+  "title": "Courriels programmés",
+  "subtitle": "Les rappels automatiques déjà programmés, regroupés par type. Un envoi réunit les destinataires d'un même rappel. Heures : {zone}.",
+  "next": {
+    "label": "Prochain départ",
+    "dayType": "Rappel de journée, {offset} avant",
+    "detail": "{title}, {count} destinataire, le {when} | {title}, {count} destinataire, le {when} | {title}, {count} destinataires, le {when}",
+    "timer": "Temps restant avant le prochain départ",
+    "days": "jours",
+    "hours": "heures",
+    "minutes": "minutes",
+    "seconds": "secondes"
+  },
+  "type": {
+    "day": "Rappel de journée",
+    "dayDescription": "2 jours et 1 jour avant une journée spéciale ou l'atelier",
+    "activity": "Rappel {offset} avant une activité",
+    "custom": "Texte écrit pour l'édition",
+    "count": "{count} courriel | {count} courriel | {count} courriels",
+    "next": "prochain",
+    "edit": "Modifier le texte du type",
+    "show": "Voir les envois : {type}",
+    "hide": "Masquer les envois : {type}"
+  },
+  "offset": {
+    "day": "{count} jour | {count} jour | {count} jours",
+    "hour": "{count} heure | {count} heure | {count} heures",
+    "minute": "{count} minute | {count} minute | {count} minutes"
+  },
+  "delay": {
+    "in": "dans {delay}",
+    "now": "maintenant",
+    "d": "{n} j",
+    "h": "{n} h",
+    "m": "{n} min",
+    "s": "{n} s"
+  },
+  "batches": {
+    "caption": "Envois : {type}",
+    "departure": "Départ",
+    "batch": "Envoi",
+    "recipients": "Destinataires",
+    "action": "Action",
+    "label": "{title}, {offset} avant",
+    "ownText": "texte de cet envoi",
+    "view": "Voir",
+    "viewFor": "Voir l'envoi : {label}"
+  },
+  "panelLabel": "{title}, rappel {offset} avant",
+  "empty": {
+    "title": "Aucun courriel programmé",
+    "description": "Les rappels d'activité et de journée apparaissent ici dès qu'une personne s'inscrit. Ils partent seuls, à leur heure."
+  }
+}
