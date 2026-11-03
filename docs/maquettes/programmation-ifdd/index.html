@@ -117,26 +117,21 @@
 
   /* ════ 3. Le cercle de l'OIF ═══════════════════════════════
      Le cercle aux cinq couleurs de l'OIF, en haut à gauche de la couverture,
-     sur un disque blanc (la photo peut être de n'importe quelle couleur). Il bat
-     comme le point du direct : pulsation du badge « En direct » (2 s) ou onde du
-     point du billet (1 s). « Moins d'animations » l'arrête, le cercle reste. */
-  .oif { position: absolute; z-index: 2; top: 8px; left: 8px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(29 26 91 / 0.35); }
-  .oif img { position: relative; width: 30px; height: 30px; }
-  .oif::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #fff; opacity: 0; }
+     sans fond. Une copie s'agrandit et s'efface derrière lui, comme le
+     `animate-ping` de Tailwind (1 s). « Moins d'animations » l'arrête, le cercle
+     reste. Une ombre légère le détache d'une photo claire. */
+  .oif { position: absolute; z-index: 2; top: 10px; left: 10px; display: block; width: 32px; height: 32px; }
+  .oif img { position: relative; display: block; width: 100%; height: 100%; filter: drop-shadow(0 1px 2px rgb(29 26 91 / 0.45)); }
+  .oif img.ping { position: absolute; inset: 0; opacity: 0.75; filter: none; }
   @media (prefers-reduced-motion: no-preference) {
-    .anim-pulse .oif img { animation: oif-pulse 2s ease-in-out infinite; }
-    .anim-ping .oif::before { animation: oif-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+    .oif img.ping { animation: oif-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
   }
-  @keyframes oif-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.82); } }
-  @keyframes oif-ping { 0% { opacity: 0.75; transform: scale(1); } 75%, 100% { opacity: 0; transform: scale(2); } }
+  @keyframes oif-ping { 75%, 100% { opacity: 0; transform: scale(2); } }
   .d3 .row .r-thumb { overflow: visible; }
-  .d3 .row .r-time .oif { position: relative; top: auto; left: auto; margin-top: 8px; width: 34px; height: 34px; }
-  .d3 .row .r-time .oif img { width: 25px; height: 25px; }
+  .d3 .row .r-time .oif { position: relative; top: auto; left: auto; margin-top: 10px; width: 26px; height: 26px; }
+  .d3 .row .r-time .oif img { filter: none; }
   @container (min-width: 640px) { .d3 .row .r-time .oif { display: none; } }
   @container (max-width: 639px) { .d3 .row .r-thumb .oif { display: none; } }
-  .anim-choice { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .anim-choice button { min-height: var(--target); padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--card); font: 600 0.88rem var(--font-body); color: var(--color-text); cursor: pointer; }
-  .anim-choice button[aria-pressed="true"] { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); color: var(--color-accent); }
 
   /* ════ 4. Le projecteur ═════════════════════════════════════
      Un bouton de la barre d'outils, « Activités de l'IFDD » : les autres pâlissent
@@ -192,16 +187,11 @@
   <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
 </section>
 
-<section class="direction d3 anim-pulse">
+<section class="direction d3">
   <header>
     <h2>3. Le cercle de l'OIF</h2>
-    <p>Le cercle aux cinq couleurs de l'OIF, en haut à gauche de la couverture, sur un disque blanc. Il bat comme le point du direct.</p>
+    <p>Le cercle aux cinq couleurs de l'OIF, en haut à gauche de la couverture, sans fond. Une onde s'en échappe et s'efface, comme le point du direct.</p>
     <ul><li>Ne touche ni aux couleurs de la carte ni au reste de la page.</li><li>Sur téléphone, la liste n'a pas de vignette : le cercle se pose sous l'heure.</li><li>Il s'arrête quand le visiteur a demandé moins d'animations ; il reste alors visible, fixe.</li></ul>
-    <div class="anim-choice" role="group" aria-label="Animation du cercle">
-      <button type="button" data-anim="anim-pulse" aria-pressed="true">Pulsation (badge « En direct »)</button>
-      <button type="button" data-anim="anim-ping" aria-pressed="false">Onde (point du billet)</button>
-      <button type="button" data-anim="" aria-pressed="false">Sans animation</button>
-    </div>
   </header>
   <p class="frame-label">Calendrier, grand écran</p><div class="frame host-week"></div>
   <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
@@ -242,7 +232,7 @@
   ];
   const stripe = '<span class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>';
   const logo = (inv) => `<img class="ifdd-logo${inv ? ' inv' : ''}" src="${L}${inv ? 'ifdd-epavillon-inverse.svg' : 'epavillon-ifdd.svg'}" alt="IFDD">`;
-  const oif = `<span class="oif" title="Activité de l'IFDD, organe de la Francophonie"><img src="${L}oif-cercle.svg" alt="Activité de l'IFDD"></span>`;
+  const oif = `<span class="oif" title="Activité de l'IFDD, organe de la Francophonie"><img class="ping" src="${L}oif-cercle.svg" alt=""><img src="${L}oif-cercle.svg" alt="Activité de l'IFDD"></span>`;
   const cover = (s) => `<img src="${C}${s.cover ?? 'pavillon-cop31-16-9.jpg'}" alt="">${s.cover ? '' : `<span class="acr">${s.acr}</span>`}`;
 
   const card = (d, s, day) => {
@@ -290,12 +280,6 @@
       b.setAttribute('aria-pressed', String(on));
       b.querySelector('img').src = L + (on ? 'ifdd-epavillon-inverse.svg' : 'epavillon-ifdd.svg');
     });
-  }));
-  document.querySelectorAll('[data-anim]').forEach((btn) => btn.addEventListener('click', () => {
-    const sec = btn.closest('.direction');
-    sec.classList.remove('anim-pulse', 'anim-ping');
-    if (btn.dataset.anim) sec.classList.add(btn.dataset.anim);
-    sec.querySelectorAll('[data-anim]').forEach((o) => o.setAttribute('aria-pressed', String(o === btn)));
   }));
   const themeBtn = document.querySelector('[data-theme-toggle]');
   themeBtn.addEventListener('click', () => {
