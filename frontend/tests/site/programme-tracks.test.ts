@@ -1,38 +1,78 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { composeFrame, indexTracks, specialOf } from '../../app/utils/programme-tracks.ts'
+import { composeDay, indexTracks, trackOf } from '../../app/utils/programme-tracks.ts'
 import type { PublicScheduleTrack } from '../../app/types/programme/track-page.ts'
 import type { PublicScheduleRow } from '../../app/types/views.ts'
 
 const at = (h: string) => `2026-11-13T${h}:00+03:00`
+const day = '2026-11-13'
 const zone = 'Europe/Istanbul'
-const moment = (h: string, label: string) => ({ starts_at: at(h), ends_at: null, label: { fr: label } })
+const moment = (h: string, label: string, extra: Partial<PublicScheduleTrack['moments'][number]> = {}) => ({
+  starts_at: at(h),
+  ends_at: null,
+  label: { fr: label },
+  is_highlight: false,
+  session_ids: [],
+  ...extra,
+})
 const track = {
   slug: 'journee-finance',
   kind: 'special_day',
   title: { fr: 'Journée finance' },
-  moments: [moment('08:00', 'Accueil'), moment('09:00', 'Ouverture'), moment('12:30', 'Déjeuner'), moment('18:00', 'Clôture')],
+  starts_at: at('08:00'),
+  starts_on: day,
+  parts: [{ id: 'p1', number: 1, label: null, starts_at: at('08:00'), ends_at: at('10:00') }],
+  moments: [
+    moment('08:00', 'Accueil'),
+    moment('09:20', 'Les 10 minutes', { session_ids: ['g1', 'g2'] }),
+    moment('18:00', 'Clôture', { is_highlight: true }),
+  ],
 } as PublicScheduleTrack
-const seance = (id: string, debut: string, fin: string) =>
-  ({ id, starts_at: at(debut), ends_at: at(fin), tracks: [{ slug: 'journee-finance', kind: 'special_day' }] }) as PublicScheduleRow
-const seances = [seance('a', '09:15', '10:00'), seance('b', '10:15', '11:00'), seance('c', '14:00', '15:00')]
+const seance = (id: string, debut: string, fin: string, slug = 'journee-finance', title = id) =>
+  ({
+    id,
+    title: { fr: title },
+    status: 'scheduled',
+    starts_at: at(debut),
+    ends_at: at(fin),
+    tracks: slug ? [{ slug, kind: 'special_day', is_highlight: id === 'b' }] : [],
+  }) as PublicScheduleRow
+const seances = [
+  seance('o', '07:00', '07:45', ''),
+  seance('a', '09:00', '09:20'),
+  seance('g1', '09:20', '09:30'),
+  seance('g2', '09:30', '09:40'),
+  seance('b', '10:15', '11:00'),
+  seance('z', '19:00', '20:00', '', 'Dialogue des bailleurs'),
+]
+const all = () => true
 
-test('les moments consécutifs forment une ligne, à leur place dans l’heure', () => {
-  const frame = composeFrame(track, seances, new Set(['a', 'b', 'c']), '2026-11-13', zone, false, (s) => s.id)
-  assert.ok(frame)
-  const lignes = frame.items.map((item) => (item.kind === 'activity' ? item.row : item.moments.map((m) => m.label.fr).join('+')))
-  assert.deepEqual(lignes, ['Accueil+Ouverture', 'a', 'b', 'Déjeuner', 'c', 'Clôture'])
-  assert.equal(frame.start, at('08:00'), 'la journée part du premier moment')
-  assert.equal(frame.end, at('18:00'))
+test('un bloc par journée, ses activités absorbées, les autres à leur heure', () => {
+  const composed = composeDay(day, seances, indexTracks([track]), zone, all, all)
+  assert.deepEqual(
+    composed.items.map((item) => (item.kind === 'block' ? item.block.track.slug : item.session.id)),
+    ['o', 'journee-finance', 'z'],
+  )
+  const block = composed.blocks[0]!
+  assert.equal(block.activities, 2, 'les activités regroupées sous un moment ne comptent pas')
+  assert.equal(block.moments, 3)
+  assert.equal(block.start, at('08:00'))
+  assert.equal(block.end, at('18:00'))
+  assert.equal(block.highlight?.title.fr, 'b', 'le premier temps fort du jour')
+  assert.equal(composed.total, 3)
 })
 
-test('en recherche, seules les activités retenues, sans moments ; aucune : pas de cadre', () => {
-  const frame = composeFrame(track, seances, new Set(['b']), '2026-11-13', zone, true, (s) => s.id)
-  assert.deepEqual(frame?.items.map((item) => item.kind), ['activity'])
-  assert.equal(composeFrame(track, seances, new Set(), '2026-11-13', zone, true, (s) => s.id), null)
+test('en recherche, le bloc reste l’entrée d’une activité retrouvée ; sinon il se tait', () => {
+  const index = indexTracks([track])
+  const seek = (needle: string) => (s: PublicScheduleRow) => s.title.fr.includes(needle)
+  const none = () => false
+  const found = composeDay(day, seances, index, zone, seek('g2'), none)
+  assert.deepEqual(found.items.map((item) => item.kind), ['block'])
+  const elsewhere = composeDay(day, seances, index, zone, seek('bailleurs'), none)
+  assert.deepEqual(elsewhere.items.map((item) => (item.kind === 'session' ? item.session.id : 'bloc')), ['z'])
 })
 
 test('un fil non publié ne range rien', () => {
-  assert.equal(specialOf(seances[0]!, indexTracks([])), null)
-  assert.equal(specialOf(seances[0]!, indexTracks([track]))?.slug, 'journee-finance')
+  assert.equal(trackOf(seances[1]!, indexTracks([])), null)
+  assert.equal(trackOf(seances[1]!, indexTracks([track]))?.slug, 'journee-finance')
 })

@@ -5,14 +5,14 @@ import type { ActiveIncident } from '~/types/live'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 import type { ProgrammeRowData } from './ProgrammeRow.vue'
 import type { PublicScheduleTrack } from '~/types/programme/track-page'
-import type { DayFrame, ProgrammeTrackIndex } from '~/utils/programme-tracks'
+import type { ProgrammeTrackIndex, TrackBlock } from '~/utils/programme-tracks'
 
 /**
  * Tout le programme en liste, une section par journée : le jour à gauche, figé
- * sur grand écran, les activités à droite (direction condensée, 01/11). Les
- * activités d'une journée spéciale publiée y sont réunies dans son cadre, les
- * autres suivent dessous ; le jour de l'atelier porte son seul encadré.
- * Au défilement, la journée dont la section passe sous ce qui est figé est
+ * sur grand écran, les activités à droite (direction condensée, 01/11). Une
+ * journée spéciale publiée et l'atelier y tiennent chacun en un bloc à leur
+ * couleur (03/11) ; les autres activités du jour restent des lignes, à leur
+ * heure, avant ou après le bloc. Au défilement, la journée dont la section passe sous ce qui est figé est
  * signalée (`reading`) : la page l'allume dans la bande. `scrollToDay` sert le
  * geste inverse.
  */
@@ -21,11 +21,9 @@ interface Props {
   days: IsoDate[]
   sessions: PublicScheduleRow[]
   matches: (session: PublicScheduleRow) => boolean
-  /** Fils publiés : un cadre par journée spéciale, un encadré pour l'atelier. */
+  /** Fils publiés : un bloc par journée spéciale et pour l'atelier. */
   tracks: ProgrammeTrackIndex
   matchesTrack: (track: PublicScheduleTrack) => boolean
-  /** Une recherche est en cours : les cadres taisent leurs moments. */
-  searching: boolean
   /** Jour d'ouverture de l'édition : l'atelier de la veille se dit « la veille ». */
   editionStart: IsoDate
   timezone: TimeZoneName
@@ -60,18 +58,16 @@ const format = (day: IsoDate, options: Intl.DateTimeFormatOptions) =>
 
 
 
-const trackTo = (slug: string, hash?: string) =>
-  localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: slug }, hash })
+const trackTo = (slug: string) => localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: slug } })
 
-function row(session: PublicScheduleRow, track: PublicScheduleTrack | null = null): ProgrammeRowData {
+function row(session: PublicScheduleRow): ProgrammeRowData {
   const current = state(session)
   const faded = current === 'cancelled' || (current === 'past' && !props.editionPast)
   const page = link(props.editionSlug, session)
   return {
     id: session.id,
     notice: incidentFor(props.incidents, session),
-    // Dans un cadre, la ligne mène au déroulé de la journée, à sa place ; la fiche y garde son lien.
-    to: track ? trackTo(track.slug, `#${trackActivityAnchor(session.slug)}`) : page,
+    to: page,
     start: time(session.starts_at, props.timezone),
     until: t('programme.list.untilShort', { end: time(session.ends_at, props.timezone), duration: duration(session) }),
     title: titleParts(tr(session.title)),
@@ -100,61 +96,44 @@ function eveLabel(day: IsoDate): string {
   return t(daysBetween(day, props.editionStart) === 1 ? 'programme.tracks.eve' : 'programme.tracks.before')
 }
 
-/** L'atelier tient en un jour : son état se lit sur la date, sans l'heure. Nul avant l'horloge du navigateur. */
-function sideState(day: IsoDate): 'upcoming' | 'ongoing' | 'past' | null {
-  if (props.today === null) return null
-  if (day < props.today) return 'past'
-  return day === props.today ? 'ongoing' : 'upcoming'
-}
+type Run = { kind: 'block'; key: string; block: TrackBlock; to: string } | { kind: 'rows'; key: string; rows: ProgrammeRowData[] }
 
 const sections = computed(() =>
   visibleDays.value.map((day) => {
     const own = props.sessions.filter((session) => dayKeyInZone(session.starts_at, props.timezone) === day)
-    const kept = new Set(own.filter(props.matches).map((session) => session.id))
+    const composed = composeDay(day, own, props.tracks, props.timezone, props.matches, props.matchesTrack)
 
-    const sides = props.tracks.sides
-      .filter((side) => trackDayOf(side, props.timezone) === day)
-      .filter((side) => props.matchesTrack(side) || own.some((session) => kept.has(session.id) && sideOf(session, props.tracks)?.slug === side.slug))
-      .map((side) => ({ track: side, to: trackTo(side.slug), state: sideState(day) }))
-
-    const bySpecial = new Map<string, PublicScheduleRow[]>()
-    const loose: PublicScheduleRow[] = []
-    for (const session of own) {
-      if (sideOf(session, props.tracks)) continue
-      const special = specialOf(session, props.tracks)
-      if (special) bySpecial.set(special.slug, [...(bySpecial.get(special.slug) ?? []), session])
-      else if (kept.has(session.id)) loose.push(session)
+    // Les lignes qui se suivent forment une liste ; un bloc la coupe.
+    const runs: Run[] = []
+    for (const item of composed.items) {
+      if (item.kind === 'block') {
+        runs.push({ kind: 'block', key: item.key, block: item.block, to: trackTo(item.block.track.slug) })
+        continue
+      }
+      const last = runs.at(-1)
+      if (last?.kind === 'rows') last.rows.push(row(item.session))
+      else runs.push({ kind: 'rows', key: item.key, rows: [row(item.session)] })
     }
-    const frames: { frame: DayFrame<ProgrammeRowData>; to: string }[] = []
-    for (const [slug, sessions] of bySpecial) {
-      const track = props.tracks.specials.get(slug)!
-      const frame = composeFrame(track, sessions, kept, day, props.timezone, props.searching, (session) => row(session, track))
-      if (frame) frames.push({ frame, to: trackTo(slug) })
-    }
-    frames.sort((a, b) => (a.frame.start ?? '').localeCompare(b.frame.start ?? ''))
 
-    const rows = loose.map((session) => row(session))
-    const activities = rows.length + frames.reduce((sum, entry) => sum + entry.frame.items.filter((item) => item.kind === 'activity').length, 0)
-    const eve = sides.length ? eveLabel(day) : ''
-    // Le trait au-dessus du numéro : la couleur de la première journée spéciale, le bleu nuit de l'atelier.
-    const marked = frames[0]?.frame.track ?? sides[0]?.track ?? null
+    const activities = composed.sessions.length + composed.blocks.reduce((sum, block) => sum + block.activities, 0)
+    const special = composed.blocks.find((block) => block.track.kind === 'special_day')?.track ?? null
+    const side = composed.blocks.find((block) => block.track.kind !== 'special_day')?.track ?? null
+    const eve = side ? eveLabel(day) : ''
+    const count = special ? t('programme.days.special') : eve || t('programme.days.count', { count: activities }, activities)
+    // Le trait au-dessus du numéro : la couleur de la journée spéciale, à défaut celle de l'atelier.
+    const marked = special ?? side
     return {
       day,
       number: format(day, { day: 'numeric' }),
       weekday: format(day, { weekday: 'long' }),
       date: format(day, { day: 'numeric', month: 'long', year: 'numeric' }),
-      month: t('programme.days.monthCount', {
-        month: format(day, { month: 'long' }),
-        count: eve || t('programme.days.count', { count: activities }, activities),
-      }),
+      month: t('programme.days.monthCount', { month: format(day, { month: 'long' }), count }),
       style: marked ? trackDayStyle(marked.color_hex) : undefined,
       past: props.today !== null && day < props.today,
       isToday: day === props.today,
-      sides,
-      frames,
-      rows,
-      shown: activities + sides.length,
-      total: own.length + props.tracks.sides.filter((side) => trackDayOf(side, props.timezone) === day).length,
+      runs,
+      shown: composed.items.length,
+      total: composed.total,
     }
   }),
 )
@@ -244,37 +223,21 @@ onBeforeUnmount(() => {
           {{ t('programme.list.emptyFiltered') }}
         </p>
 
-        <EventProgrammeSideDay
-          v-for="side in section.sides"
-          :key="side.track.slug"
-          :track="side.track"
-          :to="side.to"
-          :state="side.state"
-          :timezone="props.timezone"
-        />
-
-        <EventProgrammeDayFrame
-          v-for="entry in section.frames"
-          :key="entry.frame.track.slug"
-          :frame="entry.frame"
-          :to="entry.to"
-          :timezone="props.timezone"
-          :edition-image="props.editionImage"
-        />
-
-        <div v-if="section.rows.length">
-          <p
-            v-if="section.frames.length"
-            class="font-condensed text-[1.05rem] font-semibold tracking-[0.05em] text-text-muted uppercase"
-          >
-            {{ t('programme.tracks.others') }}
-          </p>
-          <ol>
-            <li v-for="entry in section.rows" :key="entry.id" class="border-b border-border-subtle last:border-b-0">
+        <template v-for="run in section.runs" :key="run.key">
+          <EventProgrammeTrackBlock
+            v-if="run.kind === 'block'"
+            :block="run.block"
+            :to="run.to"
+            :timezone="props.timezone"
+            :faded="section.past && !props.editionPast"
+            layout="row"
+          />
+          <ol v-else>
+            <li v-for="entry in run.rows" :key="entry.id" class="border-b border-border-subtle last:border-b-0">
               <EventProgrammeRow :entry="entry" :edition-image="props.editionImage" />
             </li>
           </ol>
-        </div>
+        </template>
       </div>
     </section>
 

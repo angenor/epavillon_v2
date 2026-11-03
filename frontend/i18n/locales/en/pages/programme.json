@@ -62,7 +62,8 @@
     "showPast": "Show past days",
     "hidePast": "Hide past days",
     "monthCount": "{month}, {count}",
-    "today": "Today"
+    "today": "Today",
+    "special": "special day"
   },
   "week": {
     "live": "Live",
@@ -105,22 +106,21 @@
   },
   "tracks": {
     "kicker": "Special day",
-    "kickerHours": "Special day, {start} to {end}",
-    "others": "Same day, outside the special day",
-    "open": "The day's programme",
-    "with": "With",
     "eve": "the day before",
     "before": "before the opening",
     "side": {
-      "kicker": "Preparatory workshop",
+      "kicker": "Preparatory workshop"
+    },
+    "block": {
+      "partFirst": "Part 1",
+      "partNth": "Part {n}",
       "hours": "{start} to {end}",
-      "audience": "mainly for negotiators",
-      "open": "See the workshop",
-      "state": {
-        "upcoming": "Upcoming",
-        "ongoing": "Ongoing",
-        "past": "Ended"
-      }
+      "highlight": "Highlight, {time}",
+      "highlightInline": "Highlight at {time}: {title}.",
+      "activities": "no activities | {count} activity | {count} activities",
+      "moments": "no moments | {count} moment | {count} moments",
+      "open": "See the day",
+      "openSide": "See the workshop"
     }
   },
   "joint": {
