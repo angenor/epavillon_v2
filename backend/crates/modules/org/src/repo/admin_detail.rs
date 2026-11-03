@@ -43,7 +43,8 @@ pub async fn identite(
                   o.trust_score AS "trust_score!", o.created_at AS "created_at!",
                   cr.display_name AS "created_by_name?",
                   o.merged_into_id, o.merged_at,
-                  cible.legal_name AS "merged_into_name?"
+                  cible.legal_name AS "merged_into_name?",
+                  o.hosts_pavilion AS "hosts_pavilion!"
              FROM org.organizations o
              LEFT JOIN reference.taxonomy_terms t
                     ON t.taxonomy_code = 'organization_type' AND t.code = o.organization_type_code
@@ -62,6 +63,7 @@ pub async fn identite(
         legal_name: l.legal_name,
         acronym: l.acronym,
         acronym_well_known: l.acronym_well_known,
+        hosts_pavilion: l.hosts_pavilion,
         slug: l.slug,
         status: l.statut,
         organization_type_code: l.organization_type_code,

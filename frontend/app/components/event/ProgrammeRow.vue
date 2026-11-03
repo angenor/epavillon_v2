@@ -47,6 +47,8 @@ export interface ProgrammeRowData {
   parts?: JointPart[]
   /** Le message de la régie qui vise l'activité, en une ligne sous le titre. */
   notice?: ActiveIncident | null
+  /** Activité de l'organisation hôte (l'IFDD) : le cercle de l'OIF sous l'heure. */
+  host?: boolean
 }
 
 interface Props {
@@ -174,6 +176,7 @@ const layout = computed(() =>
         {{ props.entry.start }}
       </span>
       <span v-if="props.entry.until" class="mt-1.5 block font-text text-[0.82rem] text-text-muted">{{ props.entry.until }}</span>
+      <EventHostMark v-if="props.entry.host" size="1.625rem" class="mt-2.5" />
     </p>
 
     <!-- Sans couverture, la photo de l'édition voilée au sigle ; masquée avec la vignette sur téléphone. -->

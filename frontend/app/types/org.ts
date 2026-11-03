@@ -42,6 +42,8 @@ export interface Organization {
   readonly acronym_normalized: string | null
   /** Sigle bien connu du public : là où la place manque, le programme public n'affiche que lui. */
   acronym_well_known: boolean
+  /** Organisation hôte du pavillon (l'IFDD) : le programme public signale ses activités par le cercle de l'OIF. */
+  hosts_pavilion: boolean
   slug: Slug
   /** Code de la taxonomie `organization_type`. */
   organization_type_code: TaxonomyTermCode

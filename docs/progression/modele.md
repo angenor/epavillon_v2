@@ -625,3 +625,10 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - `media.attachment_role` gagne **`logo_inverse`** ; `media.attachable_roles` déclare (`event`, `events`, `logo_inverse`), « Logo sur fond sombre », une image, sans forme imposée. La version claire du logo de l'édition, pour le bandeau bleu nuit de `/programmations` ; le logo ordinaire reste celui des fonds clairs (courriels).
 
 **En production** : `ops/migrations/2026-11-03-logo-sur-fond-sombre.sql`, rejouable, additive (valeur d'ENUM hors transaction, puis la ligne). **Jouée le 03/11** (sauvegarde faite), avant la mise en ligne : le cache SQLx des lectures d'édition en dépend.
+
+## 2026-11-03 : organisation hôte du pavillon
+
+- **`org.organizations.hosts_pavilion`** (booléen, faux par défaut) : case « Organisation hôte du pavillon » de la fiche, posée par l'équipe au back-office. C'est l'IFDD : le programme public signale ses activités par le cercle de l'OIF (en face de l'heure dans le calendrier, sous l'heure dans la liste ; maquette `docs/maquettes/programmation-ifdd/`). Une case plutôt qu'un nom reconnu dans le code : une fiche renommée ou fusionnée garde son rôle.
+- **`programme.v_public_schedule`** : colonne `organization_hosts_pavilion` en queue (fausse sans organisation).
+
+**En production** : `ops/migrations/2026-11-03-organisation-hote.sql`, rejouable, additive, à jouer avant de déployer l'API. Coche la fiche IFDD (sigle normalisé, non fusionnée) et s'arrête s'il n'en trouve pas exactement une. Syntaxe vérifiée par libpg_query (bloc PL/pgSQL compris) ; la vue remplacée est identique à celle posée par `2026-11-02-sigle-bien-connu.sql`. Cache SQLx des trois requêtes modifiées (fiche d'organisation lue et corrigée, programme public) **écrit à la main** (aucune base locale) : à refaire par `cargo sqlx prepare` après la migration. Pas jouée.

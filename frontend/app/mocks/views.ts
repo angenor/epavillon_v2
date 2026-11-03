@@ -141,6 +141,7 @@ export function publicSchedule(): PublicScheduleRow[] {
         organization_name: organization?.legal_name ?? null,
         organization_acronym: organization?.acronym ?? null,
         organization_acronym_well_known: organization?.acronym_well_known ?? false,
+        organization_hosts_pavilion: organization?.hosts_pavilion ?? false,
         organization_country_code: country?.iso2 ?? null,
         organization_country: country?.name ?? null,
         is_streamed: s.is_streamed,

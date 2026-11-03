@@ -230,6 +230,8 @@ pub struct OrganizationDetail {
     pub acronym: Option<String>,
     /// Le programme public n'affiche que le sigle là où la place manque.
     pub acronym_well_known: bool,
+    /// Hôte du pavillon (l'IFDD) : le programme public signale ses activités.
+    pub hosts_pavilion: bool,
     pub slug: String,
     pub status: String,
     pub organization_type_code: String,
@@ -344,6 +346,9 @@ pub struct OrganizationProfile {
     /// Absent : inchangé. Sans sigle, retombe à faux.
     #[serde(default)]
     pub acronym_well_known: Option<bool>,
+    /// Absent : inchangé.
+    #[serde(default)]
+    pub hosts_pavilion: Option<bool>,
     pub organization_type_code: String,
     #[serde(default)]
     pub country_id: Option<Uuid>,

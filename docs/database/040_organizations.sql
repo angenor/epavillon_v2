@@ -65,6 +65,11 @@ CREATE TABLE org.organizations (
     -- un sigle inconnu du public (RF-EFH) ne dit rien, le nom complet s'affiche.
     -- Choix de l'équipe au back-office ; sans effet sans sigle.
     acronym_well_known boolean     NOT NULL DEFAULT false,
+    -- Organisation hôte du pavillon (03/11) : l'IFDD, qui tient le stand. Le
+    -- programme public signale ses activités par le cercle de l'OIF. Une case
+    -- de la fiche plutôt qu'un nom reconnu dans le code : une fiche renommée ou
+    -- fusionnée garde son rôle. Faux par défaut ; posée par l'équipe.
+    hosts_pavilion     boolean     NOT NULL DEFAULT false,
     slug               platform.slug NOT NULL,
 
     organization_type_code text    NOT NULL,   -- reference.taxonomy_terms.code (taxonomie organization_type)
@@ -128,6 +133,9 @@ CREATE TRIGGER tg_organizations_audit
 
 COMMENT ON COLUMN org.organizations.acronym_well_known IS
     'Sigle bien connu du public : coché, le programme public affiche le sigle seul là où la place manque ; sinon le nom complet. Posé par l''équipe, sans effet sans sigle.';
+
+COMMENT ON COLUMN org.organizations.hosts_pavilion IS
+    'Organisation hôte du pavillon (l''IFDD) : le programme public signale ses activités par le cercle de l''OIF. Posée par l''équipe au back-office, fausse par défaut.';
 
 COMMENT ON COLUMN org.organizations.merged_into_id IS
     'Fiche absorbante. Utiliser org.resolve_organization() pour obtenir la fiche courante en suivant la chaîne.';

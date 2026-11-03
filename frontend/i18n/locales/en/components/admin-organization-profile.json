@@ -12,6 +12,8 @@
   "acronymWellKnown": "Well-known acronym",
   "acronymWellKnownHint": "Checked: the public programme shows only the acronym where space is short. Otherwise, the full name.",
   "acronymWellKnownNone": "Without an acronym, the public programme shows the full name.",
+  "hostsPavilion": "Pavilion host organisation",
+  "hostsPavilionHint": "Checked: the public programme marks its activities with the OIF circle. This is the IFDD.",
   "type": "Type",
   "country": "Country",
   "countryNone": "No country",

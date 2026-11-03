@@ -161,6 +161,8 @@ export interface PublicScheduleRow {
   proposals?: JointProposal[]
   /** Sigle bien connu du public : là où la place manque, il suffit (`organizationShortLabel`). */
   organization_acronym_well_known?: boolean
+  /** L'organisation porteuse est l'hôte du pavillon (l'IFDD) : le cercle de l'OIF signale l'activité. */
+  organization_hosts_pavilion?: boolean
 }
 
 /**

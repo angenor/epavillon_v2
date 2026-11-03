@@ -523,6 +523,7 @@ export function createOrganization(personId: string, payload: CreateOrganization
     acronym: payload.acronym,
     acronym_normalized: payload.acronym ? normalizeLabel(payload.acronym) : null,
     acronym_well_known: false,
+    hosts_pavilion: false,
     slug: normalized.replace(/ /g, '-').slice(0, 160),
     organization_type_code: payload.organization_type_code,
     country_id: payload.country_id,

@@ -335,4 +335,7 @@ pub struct PublicScheduleRow {
     pub proposals: serde_json::Value,
     /// Coché par l'équipe : là où la place manque, le sigle seul suffit.
     pub organization_acronym_well_known: bool,
+    /// L'organisation porteuse est l'hôte du pavillon : le site signale
+    /// l'activité par le cercle de l'OIF.
+    pub organization_hosts_pavilion: bool,
 }

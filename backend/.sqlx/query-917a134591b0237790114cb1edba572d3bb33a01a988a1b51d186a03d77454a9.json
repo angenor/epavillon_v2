@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT o.id AS \"id!\", o.legal_name AS \"legal_name!\", o.acronym,\n                  o.acronym_well_known AS \"acronym_well_known!\", o.slug::text AS \"slug!\",\n                  o.status::text AS \"statut!\", o.organization_type_code AS \"organization_type_code!\",\n                  t.label::jsonb AS \"type_label?\",\n                  o.country_id, c.name::jsonb AS \"country_name?\", o.city,\n                  o.description::jsonb AS \"description?\",\n                  o.website::text AS \"website?\",\n                  o.contact_email::text AS \"contact_email?\",\n                  o.contact_phone,\n                  o.verified_at,\n                  v.display_name AS \"verified_by_name?\",\n                  o.trust_score AS \"trust_score!\", o.created_at AS \"created_at!\",\n                  cr.display_name AS \"created_by_name?\",\n                  o.merged_into_id, o.merged_at,\n                  cible.legal_name AS \"merged_into_name?\"\n             FROM org.organizations o\n             LEFT JOIN reference.taxonomy_terms t\n                    ON t.taxonomy_code = 'organization_type' AND t.code = o.organization_type_code\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN identity.people v  ON v.id = o.verified_by\n             LEFT JOIN identity.people cr ON cr.id = o.created_by\n             LEFT JOIN org.organizations cible ON cible.id = o.merged_into_id\n            WHERE o.id = $1",
+  "query": "SELECT o.id AS \"id!\", o.legal_name AS \"legal_name!\", o.acronym,\n                  o.acronym_well_known AS \"acronym_well_known!\", o.slug::text AS \"slug!\",\n                  o.status::text AS \"statut!\", o.organization_type_code AS \"organization_type_code!\",\n                  t.label::jsonb AS \"type_label?\",\n                  o.country_id, c.name::jsonb AS \"country_name?\", o.city,\n                  o.description::jsonb AS \"description?\",\n                  o.website::text AS \"website?\",\n                  o.contact_email::text AS \"contact_email?\",\n                  o.contact_phone,\n                  o.verified_at,\n                  v.display_name AS \"verified_by_name?\",\n                  o.trust_score AS \"trust_score!\", o.created_at AS \"created_at!\",\n                  cr.display_name AS \"created_by_name?\",\n                  o.merged_into_id, o.merged_at,\n                  cible.legal_name AS \"merged_into_name?\",\n                  o.hosts_pavilion AS \"hosts_pavilion!\"\n             FROM org.organizations o\n             LEFT JOIN reference.taxonomy_terms t\n                    ON t.taxonomy_code = 'organization_type' AND t.code = o.organization_type_code\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN identity.people v  ON v.id = o.verified_by\n             LEFT JOIN identity.people cr ON cr.id = o.created_by\n             LEFT JOIN org.organizations cible ON cible.id = o.merged_into_id\n            WHERE o.id = $1",
   "describe": {
     "columns": [
       {
@@ -220,6 +220,17 @@
             "name": "legal_name"
           }
         }
+      },
+      {
+        "ordinal": 23,
+        "name": "hosts_pavilion!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "hosts_pavilion"
+          }
+        }
       }
     ],
     "parameters": {
@@ -250,8 +261,9 @@
       true,
       true,
       true,
+      true,
       true
     ]
   },
-  "hash": "eefe3027c132b506481897ca10af7b73c901e9b66a623d404a638aeb5ca99b49"
+  "hash": "917a134591b0237790114cb1edba572d3bb33a01a988a1b51d186a03d77454a9"
 }

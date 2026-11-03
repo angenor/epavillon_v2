@@ -12,6 +12,8 @@
   "acronymWellKnown": "Sigle bien connu",
   "acronymWellKnownHint": "Cochée : le programme public n'affiche que le sigle là où la place manque. Sinon, le nom complet.",
   "acronymWellKnownNone": "Sans sigle, le programme public affiche le nom complet.",
+  "hostsPavilion": "Organisation hôte du pavillon",
+  "hostsPavilionHint": "Cochée : le programme public signale ses activités par le cercle de l'OIF. C'est l'IFDD.",
   "type": "Type",
   "country": "Pays",
   "countryNone": "Sans pays",

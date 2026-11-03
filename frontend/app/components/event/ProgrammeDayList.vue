@@ -86,6 +86,7 @@ function row(session: PublicScheduleRow, track: PublicScheduleTrack | null = nul
     faded,
     stateLabel: current === 'live' ? t('programme.list.live') : t(`session-card.state.${current}`),
     parts: partsOf(session),
+    host: session.organization_hosts_pavilion ?? false,
   }
 }
 

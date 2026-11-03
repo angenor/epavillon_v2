@@ -1615,7 +1615,7 @@ COMMENT ON COLUMN live.streams.recording_asset_id IS
 -- le même ordre (leurs commentaires y restent), avec deux colonnes en queue.
 -- Toute modification de la vue se reporte dans les deux fichiers — sauf les
 -- colonnes venues APRÈS la rediffusion (logo et type de l'organisation, 30/09 ;
--- dossiers d'une séance commune, 01/11 ; sigle bien connu, 02/11) : elles n'existent qu'ici, car les poser dans 075 les placerait avant
+-- dossiers d'une séance commune, 01/11 ; sigle bien connu, 02/11 ; organisation hôte, 03/11) : elles n'existent qu'ici, car les poser dans 075 les placerait avant
 -- `replay_url` et l'ordre des colonnes différerait de celui de la production.
 --
 -- UNE SEULE REDIFFUSION PAR SÉANCE (LATERAL … LIMIT 1) : une ligne de la vue est
@@ -1722,7 +1722,8 @@ SELECT
         LEFT JOIN reference.countries pc ON pc.id = po.country_id
         WHERE sp.session_id = s.id
     ), '[]'::jsonb) AS proposals,
-    COALESCE(o.acronym_well_known, false) AS organization_acronym_well_known
+    COALESCE(o.acronym_well_known, false) AS organization_acronym_well_known,
+    COALESCE(o.hosts_pavilion, false)     AS organization_hosts_pavilion
 FROM programme.sessions s
 LEFT JOIN event.rooms r          ON r.id = s.room_id
 LEFT JOIN org.organizations o    ON o.id = s.organization_id
@@ -1762,3 +1763,5 @@ COMMENT ON COLUMN programme.v_public_schedule.proposals IS
     'Séance commune : dossiers réunis (titre d''origine, couverture, organisation porteuse avec logo, pays et sigle bien connu), dans l''ordre d''affichage ; [] pour une séance ordinaire.';
 COMMENT ON COLUMN programme.v_public_schedule.organization_acronym_well_known IS
     'Le sigle de l''organisation porteuse est bien connu du public : là où la place manque, le site n''affiche que lui. Faux sans organisation.';
+COMMENT ON COLUMN programme.v_public_schedule.organization_hosts_pavilion IS
+    'L''organisation porteuse est l''hôte du pavillon (l''IFDD) : le site signale l''activité par le cercle de l''OIF. Faux sans organisation.';

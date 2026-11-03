@@ -5,7 +5,7 @@ import type { SelectOption } from '~/types/ui'
 import type { AssetId, OrganizationId } from '~/types/shared'
 
 /**
- * MODIFIER LA FICHE D'UNE ORGANISATION (31/10) : logo, nom, sigle (bien connu ou non), type, pays,
+ * MODIFIER LA FICHE D'UNE ORGANISATION (31/10) : logo, nom, sigle (bien connu ou non), hôte du pavillon, type, pays,
  * site. Ouvert depuis la fiche du back-office et depuis la fiche d'un dossier :
  * il charge lui-même ce qu'il montre et rend la fiche recomposée par `saved`.
  *
@@ -42,6 +42,7 @@ const form = reactive({
   legal_name: '',
   acronym: '',
   acronym_well_known: false,
+  hosts_pavilion: false,
   organization_type_code: '',
   country_id: '',
   website: '',
@@ -81,6 +82,7 @@ async function load(): Promise<void> {
       legal_name: fiche.legal_name,
       acronym: fiche.acronym ?? '',
       acronym_well_known: fiche.acronym_well_known,
+      hosts_pavilion: fiche.hosts_pavilion,
       organization_type_code: fiche.organization_type_code,
       country_id: fiche.country_id ?? '',
       website: fiche.website ?? '',
@@ -132,6 +134,7 @@ async function save(): Promise<void> {
         legal_name: form.legal_name.trim(),
         acronym: form.acronym.trim() || null,
         acronym_well_known: hasAcronym.value && form.acronym_well_known,
+        hosts_pavilion: form.hosts_pavilion,
         organization_type_code: form.organization_type_code,
         country_id: form.country_id || null,
         website: form.website.trim() || null,
@@ -214,6 +217,12 @@ async function save(): Promise<void> {
         :hint="t(hasAcronym ? 'admin-organization-profile.acronymWellKnownHint' : 'admin-organization-profile.acronymWellKnownNone')"
         :disabled="!hasAcronym"
         @update:model-value="form.acronym_well_known = $event"
+      />
+      <UiCheckbox
+        id="organization-profile-hosts-pavilion"
+        v-model="form.hosts_pavilion"
+        :label="t('admin-organization-profile.hostsPavilion')"
+        :hint="t('admin-organization-profile.hostsPavilionHint')"
       />
       <p class="text-sm text-text-muted">{{ t('admin-organization-profile.formerNames') }}</p>
 

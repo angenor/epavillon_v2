@@ -653,6 +653,8 @@ export interface OrganizationDetail {
   acronym: string | null
   /** Le programme public n'affiche que le sigle là où la place manque. */
   acronym_well_known: boolean
+  /** Organisation hôte du pavillon : ses activités portent le cercle de l'OIF. */
+  hosts_pavilion: boolean
   slug: Slug
   status: OrganizationStatus
   organization_type_code: TaxonomyTermCode
@@ -728,6 +730,8 @@ export interface OrganizationProfilePayload {
   acronym: string | null
   /** Retombe à faux sans sigle. */
   acronym_well_known: boolean
+  /** Absent : inchangé. */
+  hosts_pavilion?: boolean
   organization_type_code: TaxonomyTermCode
   country_id: CountryId | null
   website: Url | null

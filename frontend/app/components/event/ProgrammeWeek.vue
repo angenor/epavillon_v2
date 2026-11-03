@@ -91,6 +91,7 @@ function card(session: PublicScheduleRow, weekday: string) {
     visited: session.id === props.visitedId,
     inDay: !!special,
     notice: incidentFor(props.incidents, session),
+    host: session.organization_hosts_pavilion ?? false,
   }
 }
 
@@ -417,6 +418,7 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
                   <p class="wk-time">
                     <b>{{ item.start }}</b>
                     <span><small>{{ item.weekday }}</small>{{ item.until }}</span>
+                    <EventHostMark v-if="item.host" class="ms-auto self-center" />
                   </p>
                   <h4 class="wk-title" :class="{ 'line-through': item.current === 'cancelled' }">
                     <NuxtLink :to="item.to" class="wk-link">{{ item.title }}</NuxtLink>

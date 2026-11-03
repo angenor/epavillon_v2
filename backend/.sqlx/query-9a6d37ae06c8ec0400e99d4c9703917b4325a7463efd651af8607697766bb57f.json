@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH avant AS (\n               SELECT legal_name, acronym, acronym_well_known, hosts_pavilion,\n                      organization_type_code, country_id, website::text AS website\n                 FROM org.organizations WHERE id = $1 FOR UPDATE\n           ), apres AS (\n               UPDATE org.organizations o\n                  SET legal_name = $2, acronym = $3, organization_type_code = $4,\n                      country_id = $5, website = $6::text::platform.url,\n                      acronym_well_known = $3::text IS NOT NULL\n                                           AND COALESCE($7::boolean, o.acronym_well_known),\n                      hosts_pavilion = COALESCE($8::boolean, o.hosts_pavilion)\n                WHERE o.id = $1\n            RETURNING o.acronym_well_known, o.hosts_pavilion\n           )\n           SELECT array_remove(ARRAY[\n                      CASE WHEN a.legal_name IS DISTINCT FROM $2 THEN 'legal_name' END,\n                      CASE WHEN a.acronym IS DISTINCT FROM $3 THEN 'acronym' END,\n                      CASE WHEN a.acronym_well_known IS DISTINCT FROM n.acronym_well_known\n                           THEN 'acronym_well_known' END,\n                      CASE WHEN a.hosts_pavilion IS DISTINCT FROM n.hosts_pavilion\n                           THEN 'hosts_pavilion' END,\n                      CASE WHEN a.organization_type_code IS DISTINCT FROM $4 THEN 'organization_type_code' END,\n                      CASE WHEN a.country_id IS DISTINCT FROM $5 THEN 'country_id' END,\n                      CASE WHEN a.website IS DISTINCT FROM $6 THEN 'website' END\n                  ], NULL) AS \"changes!\"\n             FROM avant a, apres n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "changes!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Text",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9a6d37ae06c8ec0400e99d4c9703917b4325a7463efd651af8607697766bb57f"
+}

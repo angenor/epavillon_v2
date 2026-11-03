@@ -139,29 +139,33 @@ pub async fn update_profile(
     legal_name: &str,
     acronym: Option<&str>,
     acronym_well_known: Option<bool>,
+    hosts_pavilion: Option<bool>,
     organization_type_code: &str,
     country_id: Option<Uuid>,
     website: Option<&str>,
 ) -> Result<Option<Vec<String>>> {
     let ligne = sqlx::query!(
         r#"WITH avant AS (
-               SELECT legal_name, acronym, acronym_well_known, organization_type_code,
-                      country_id, website::text AS website
+               SELECT legal_name, acronym, acronym_well_known, hosts_pavilion,
+                      organization_type_code, country_id, website::text AS website
                  FROM org.organizations WHERE id = $1 FOR UPDATE
            ), apres AS (
                UPDATE org.organizations o
                   SET legal_name = $2, acronym = $3, organization_type_code = $4,
                       country_id = $5, website = $6::text::platform.url,
                       acronym_well_known = $3::text IS NOT NULL
-                                           AND COALESCE($7::boolean, o.acronym_well_known)
+                                           AND COALESCE($7::boolean, o.acronym_well_known),
+                      hosts_pavilion = COALESCE($8::boolean, o.hosts_pavilion)
                 WHERE o.id = $1
-            RETURNING o.acronym_well_known
+            RETURNING o.acronym_well_known, o.hosts_pavilion
            )
            SELECT array_remove(ARRAY[
                       CASE WHEN a.legal_name IS DISTINCT FROM $2 THEN 'legal_name' END,
                       CASE WHEN a.acronym IS DISTINCT FROM $3 THEN 'acronym' END,
                       CASE WHEN a.acronym_well_known IS DISTINCT FROM n.acronym_well_known
                            THEN 'acronym_well_known' END,
+                      CASE WHEN a.hosts_pavilion IS DISTINCT FROM n.hosts_pavilion
+                           THEN 'hosts_pavilion' END,
                       CASE WHEN a.organization_type_code IS DISTINCT FROM $4 THEN 'organization_type_code' END,
                       CASE WHEN a.country_id IS DISTINCT FROM $5 THEN 'country_id' END,
                       CASE WHEN a.website IS DISTINCT FROM $6 THEN 'website' END
@@ -173,7 +177,8 @@ pub async fn update_profile(
         organization_type_code,
         country_id,
         website,
-        acronym_well_known
+        acronym_well_known,
+        hosts_pavilion
     )
     .fetch_optional(conn)
     .await?;
