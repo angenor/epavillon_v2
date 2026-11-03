@@ -10,6 +10,32 @@
     "title": "Aucune édition sélectionnée",
     "description": "Choisissez une édition en tête de page pour afficher son tableau de bord."
   },
+  "presence": {
+    "title": "En ce moment",
+    "loading": "Chargement du nombre de personnes présentes",
+    "onPlatform": "personne sur la plateforme | personne sur la plateforme | personnes sur la plateforme",
+    "signedIn": "connectée à son compte | connectée à son compte | connectées à leur compte",
+    "visitors": "visiteur | visiteur | visiteurs",
+    "updated": "Mis à jour il y a {seconds} s, toutes les 30 s",
+    "where": "Où elles se trouvent",
+    "nobody": "Personne sur la plateforme en ce moment.",
+    "unavailable": "Le compte des personnes présentes est momentanément indisponible. Le reste du tableau de bord n'est pas touché.",
+    "zones": {
+      "live": "Salles et directs",
+      "programme": "Programmation",
+      "day": "Pages de journée",
+      "activity": "Fiches d'activité",
+      "organization": "Espace organisation",
+      "admin": "Back-office",
+      "negotiation": "Guide Négo",
+      "other": "Autres pages"
+    },
+    "hour": {
+      "title": "Dernière heure",
+      "peak": "pic {count} à {time}",
+      "label": "De {min} à {max} personnes sur la dernière heure"
+    }
+  },
   "actions": {
     "title": "Ce qui demande une action",
     "total": "{count} point à traiter | {count} point à traiter | {count} points à traiter",

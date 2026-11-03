@@ -2788,6 +2788,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `AdminPresence` : onglets visibles qui se sont signalés dans la dernière minute (`total`, dont `signed_in` et `visitors`), par zone (effectif décroissant), une entrée par minute sur la dernière heure (`last_hour`, la dernière en cours) et son pic (`peak`, nul sans personne). Compté en mémoire par cette instance de l'API : la dernière heure repart de zéro à son redémarrage. */
+        get: operations["admin_presence"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/privacy-requests": {
         parameters: {
             query?: never;
@@ -5783,6 +5800,23 @@ export interface paths {
         get: operations["platform_drapeaux"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `PresenceBeat` : `{ tab, zone }`, envoyé par chaque onglet visible toutes les 30 s et à chaque changement de zone. `tab` : 8 à 64 caractères parmi lettres, chiffres, `-` et `_`, tiré au hasard par l'onglet. `zone` : `live`, `programme`, `day`, `activity`, `organization`, `admin`, `negotiation` ou `other` (tout autre code compte comme `other`). Connecté ou visiteur se lit de la session, jamais du corps. Rend `PresenceAck`. Ouvert à tous, sans session ; rien n'est gardé au-delà d'une minute de silence. */
+        post: operations["presence_signaler"];
         delete?: never;
         options?: never;
         head?: never;
@@ -16809,6 +16843,44 @@ export interface operations {
             };
         };
     };
+    admin_presence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminPresence */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `analytics.presence.read` absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     file: {
         parameters: {
             query?: never;
@@ -24052,6 +24124,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    presence_signaler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description PresenceBeat */
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description PresenceAck */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Identifiant d'onglet invalide */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };

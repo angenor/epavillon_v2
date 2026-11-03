@@ -32,13 +32,16 @@ pub const DRAPEAU: &str = "platform.maintenance";
 
 // Les notifications de Zoom ne sont pas une écriture de personne : les refuser
 // pendant la maintenance perdrait les présences, Zoom ne les réémet pas.
-const ECRITURES_OUVERTES: [&str; 6] = [
+// `/presence` n'écrit qu'en mémoire : la laisser passer épargne aussi une
+// lecture des drapeaux par onglet et par demi-minute.
+const ECRITURES_OUVERTES: [&str; 7] = [
     "/auth/login",
     "/auth/logout",
     "/auth/refresh",
     "/auth/password-reset",
     "/auth/password-reset/confirm",
     "/webhooks/zoom",
+    "/presence",
 ];
 
 pub struct MaintenanceGate;

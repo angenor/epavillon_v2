@@ -184,6 +184,8 @@ export const permissions: Permission[] = [
   { code: 'content.highlight.manage', label: { fr: 'Gérer la vitrine et les contenus mis en avant', en: 'Manage the showcase and featured content' }, module_code: 'content' },
   { code: 'tool.survey.manage', label: { fr: 'Gérer les sondages', en: 'Manage surveys' }, module_code: 'tool' },
   { code: 'analytics.dashboard.read', label: { fr: 'Consulter les tableaux de bord', en: 'Read dashboards' }, module_code: 'analytics' },
+  // Aucun rôle ne la reçoit : seul `super_admin`, dérivé du catalogue ci-dessous.
+  { code: 'analytics.presence.read', label: { fr: 'Voir combien de personnes sont sur la plateforme en ce moment', en: 'See how many people are on the platform right now' }, module_code: 'analytics' },
 ]
 
 /** Ce que chaque rôle permet, hors `super_admin` — dérivé juste après. */

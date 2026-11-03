@@ -96,3 +96,9 @@ Connexion en administratrice globale (`a.bakayoko@ifdd.francophonie.org`), édit
 | **Aucun graphique n'est chargé là où il n'y en a pas** | Session de navigateur neuve sur `/evenements/cop31-belem-2027`, requêtes filtrées sur `apexcharts` | Seul le greffon (quelques lignes) part ; ni `vue3-apexcharts` ni `apexcharts` ne sont demandés |
 | **375 px** | Fenêtre à 375 px, `scrollWidth` comparé à `clientWidth` | 375 = 375, aucun défilement horizontal ; les six cartes s'empilent, les axes des graphiques se resserrent sans se chevaucher |
 | **Types et construction** | `npm run typecheck`, `npm run build` | Zéro erreur. Le paquet d'entrée client passe de 994 à 913 ko ; ApexCharts vit dans un fragment de 496 ko chargé à la demande |
+
+## 03/11/2026 : carte « En ce moment »
+
+En tête de page, avant le contrôle de maintenance et « Ce qui demande une action », hors de l'édition choisie : nombre d'onglets visibles, connectés et visiteurs, barres par zone, courbe de la dernière heure et son pic. Réservée à `analytics.presence.read` (super administrateur) : sans elle, ni carte ni état vide. Composant `AdminPresenceCard`, détail dans le [journal du 03/11](../journal/2026-11-03.md).
+
+Écarts à la maquette : « Direct de la journée » devient « Salles et directs » (la zone compte aussi la salle d'une activité) ; le pic porte son fuseau (celui de qui regarde) ; un libellé de zone trop long passe à la ligne à 375 px ; le chiffre ne passe en gris qu'à zéro.

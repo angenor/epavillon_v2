@@ -640,3 +640,9 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - Option A du commanditaire : l'activité regroupée reste publiée (fiche, lien direct, compteurs) ; la page du fil l'énumère sous le moment, l'inscription à la journée ne la propose plus à garder.
 
 **En production** : `ops/migrations/2026-11-03-moment-regroupe.sql`, rejouable, additive, modèle seul, à jouer avant de déployer l'API. Cache SQLx des requêtes touchées écrit à la main (aucune base locale) : à refaire par `cargo sqlx prepare` après la migration. Le rattachement des trois activités de 10 minutes se fait ensuite au back-office. Pas jouée.
+
+## 2026-11-03 : permission de la carte « En ce moment »
+
+- **`analytics.presence.read`** (`030_identity.sql`, portée globale) : lire `GET /admin/presence`, le compte en mémoire des onglets visibles. Donnée à aucun rôle : seul `super_admin` la détient, par le déclencheur `tg_permissions_grant_super_admin` (`AFTER INSERT ON identity.permissions`), qui rattache au rôle toute permission créée. Les personnes `super_admin` l'obtiennent par leur rôle, sans écriture par personne.
+
+**En production** : `ops/migrations/2026-11-03-permission-presence.sql`, rejouable, additive, **à jouer avant de déployer l'API** (sans elle, la route refuse tout le monde). Insère la permission `ON CONFLICT DO NOTHING`, puis le lien `super_admin` au cas où la permission existerait déjà sans lui. Aucune requête SQLx ajoutée. Pas jouée.

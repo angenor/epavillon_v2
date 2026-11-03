@@ -37,6 +37,8 @@ pub struct AppState {
     /// tient pas de connexion de plus.
     pub realtime: Arc<crate::realtime::Hub>,
     pub topics: kernel::realtime::TopicRegistry,
+    /// Onglets visibles en ce moment, en mémoire (`crate::presence`).
+    pub presence: Arc<crate::presence::Presence>,
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre —
     /// schéma et autorité, sans le chemin de base.
     pub allowed_origins: Vec<String>,
@@ -96,6 +98,7 @@ impl AppState {
             negotiation,
             realtime: crate::realtime::Hub::new(),
             topics: crate::realtime::autorisations(),
+            presence: Arc::default(),
             allowed_origins,
             ops_log: None,
         })
