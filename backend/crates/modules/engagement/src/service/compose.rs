@@ -14,11 +14,10 @@
 //! email "Bonjour  ," envoyé à 2 000 personnes »*. Un travail en échec porte son
 //! message et se reprend ; un courriel amputé est parti pour toujours.
 //!
-//! # Le lien mène à un écran du SITE, et cet écran n'existe pas encore
+//! # Le lien mène à la page de l'activité sur le site
 //!
-//! Aucune page de séance ne vit dans le front (écart n° 138) : le lien pointe
-//! donc la page de l'édition, ancrée sur la séance. Le jour où la page existe,
-//! **seule cette fonction change** — c'est la raison d'être de son isolement.
+//! `/programmations/{édition}/{activité}` (03/11/2026 : l'ancien `/event/…`
+//! rendait 404). Seule la fonction `lien` le connaît.
 
 use kernel::error::{ApiError, Result};
 use kernel::mail::OutgoingMail;
@@ -76,7 +75,7 @@ fn variables(rappel: &RappelACompose<'_>) -> HashMap<String, String> {
 
 fn lien(rappel: &RappelACompose<'_>) -> String {
     format!(
-        "{}/event/{}#{}",
+        "{}/programmations/{}/{}",
         rappel.app_public_url.trim_end_matches('/'),
         rappel.seance.event_slug,
         rappel.seance.slug

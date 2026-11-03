@@ -298,10 +298,9 @@ impl NotificationsConsumer {
 /// notification écrite sur une recette et relue en production mènerait ailleurs.
 /// La base le vérifie elle-même — `link_path ~ '^/'`.
 ///
-/// Aucune page de séance n'existe encore dans le front (écart n° 138) : le lien
-/// mène à l'édition, ancré sur la séance.
+/// La page de l'activité (03/11/2026 : l'ancien `/event/…` rendait 404).
 fn lien_vers_ledition(seance: &cross::SeancePourRappel) -> String {
-    format!("/event/{}#{}", seance.event_slug, seance.slug)
+    format!("/programmations/{}/{}", seance.event_slug, seance.slug)
 }
 
 fn uuid_de(event: &OutboxEvent, cle: &str) -> Option<Uuid> {

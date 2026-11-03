@@ -187,7 +187,7 @@ async fn notification(
         recipients: destinataires,
         title,
         body,
-        link_path: format!("/activity/{}/{}", fr.event_slug, fr.slug),
+        link_path: format!("/programmations/{}/{}", fr.event_slug, fr.slug),
         subject: NotificationSubject {
             schema: "programme".to_owned(),
             table: "sessions".to_owned(),
