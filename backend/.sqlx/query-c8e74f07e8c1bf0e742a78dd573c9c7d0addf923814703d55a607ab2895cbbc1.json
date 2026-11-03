@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE programme.session_tracks\n            SET part_id = $3, is_highlight = $4, sort_order = $5\n          WHERE session_id = $1 AND track_id = $2\n      RETURNING session_id, track_id, part_id, is_highlight, sort_order",
+  "query": "UPDATE programme.session_tracks\n            SET part_id = $3, moment_id = $4, is_highlight = $5, sort_order = $6\n          WHERE session_id = $1 AND track_id = $2\n      RETURNING session_id, track_id, part_id, moment_id, is_highlight, sort_order",
   "describe": {
     "columns": [
       {
@@ -38,6 +38,17 @@
       },
       {
         "ordinal": 3,
+        "name": "moment_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "moment_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
         "name": "is_highlight",
         "type_info": "Bool",
         "origin": {
@@ -48,7 +59,7 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "sort_order",
         "type_info": "Int2",
         "origin": {
@@ -64,6 +75,7 @@
         "Uuid",
         "Uuid",
         "Uuid",
+        "Uuid",
         "Bool",
         "Int2"
       ]
@@ -72,9 +84,10 @@
       false,
       false,
       true,
+      true,
       false,
       false
     ]
   },
-  "hash": "20809af0951c143cf47d64c61b4c800d20433768338eb715caacef61e839b545"
+  "hash": "c8e74f07e8c1bf0e742a78dd573c9c7d0addf923814703d55a607ab2895cbbc1"
 }

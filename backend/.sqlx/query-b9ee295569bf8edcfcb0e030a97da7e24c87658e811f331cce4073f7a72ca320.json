@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT s.id AS session_id, s.slug::text AS \"slug!\",\n                  s.title AS \"title!: serde_json::Value\",\n                  s.starts_at, s.ends_at, s.status::text AS \"status!\",\n                  (s.published_at IS NOT NULL) AS \"is_published!\",\n                  st.part_id, st.is_highlight, st.sort_order\n             FROM programme.session_tracks st\n             JOIN programme.sessions s ON s.id = st.session_id\n            WHERE st.track_id = $1\n            ORDER BY s.starts_at, st.sort_order, s.id",
+  "query": "SELECT s.id AS session_id, s.slug::text AS \"slug!\",\n                  s.title AS \"title!: serde_json::Value\",\n                  s.starts_at, s.ends_at, s.status::text AS \"status!\",\n                  (s.published_at IS NOT NULL) AS \"is_published!\",\n                  st.part_id, st.moment_id, st.is_highlight, st.sort_order\n             FROM programme.session_tracks st\n             JOIN programme.sessions s ON s.id = st.session_id\n            WHERE st.track_id = $1\n            ORDER BY s.starts_at, st.sort_order, s.id",
   "describe": {
     "columns": [
       {
@@ -78,6 +78,17 @@
       },
       {
         "ordinal": 8,
+        "name": "moment_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "moment_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
         "name": "is_highlight",
         "type_info": "Bool",
         "origin": {
@@ -88,7 +99,7 @@
         }
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "sort_order",
         "type_info": "Int2",
         "origin": {
@@ -113,9 +124,10 @@
       null,
       null,
       true,
+      true,
       false,
       false
     ]
   },
-  "hash": "9303ed5b37e09e62ead13099b3765abf3f18f08b7b9dec8f316f3de8b645c6cf"
+  "hash": "b9ee295569bf8edcfcb0e030a97da7e24c87658e811f331cce4073f7a72ca320"
 }

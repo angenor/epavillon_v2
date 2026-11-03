@@ -69,12 +69,14 @@ pub async fn journee_de_seance<'e>(
     Ok(id)
 }
 
-/// Les activités qu'on peut garder : publiées, non annulées, de la journée.
+/// Les activités qu'on peut garder : publiées, non annulées, de la journée,
+/// hors celles qu'un moment regroupe (03/11) : la page ne les propose plus.
 pub async fn activites<'e>(executor: impl PgExecutor<'e>, track_id: Uuid) -> Result<Vec<Uuid>> {
     let ids = sqlx::query_scalar!(
         r#"SELECT s.id FROM programme.session_tracks st
              JOIN programme.sessions s ON s.id = st.session_id
             WHERE st.track_id = $1 AND s.published_at IS NOT NULL AND s.status <> 'cancelled'
+              AND st.moment_id IS NULL
             ORDER BY s.starts_at, st.sort_order"#,
         track_id
     )
@@ -259,7 +261,7 @@ pub async fn etat<'e>(
                   (SELECT count(*) FROM programme.session_tracks st
                      JOIN programme.sessions s ON s.id = st.session_id
                     WHERE st.track_id = tr.track_id AND s.published_at IS NOT NULL
-                      AND s.status <> 'cancelled') AS "activity_count!",
+                      AND s.status <> 'cancelled' AND st.moment_id IS NULL) AS "activity_count!",
                   tr.created_at, tr.joined_at
              FROM programme.track_registrations tr
             WHERE tr.id = $1"#,

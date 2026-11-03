@@ -457,6 +457,7 @@ async fn placer_une_activite_dans_une_partie_de_son_fil_et_seulement_la() {
         finance,
         TrackSessionPlacementPayload {
             part_id: Some(partie_finance),
+            moment_id: None,
             is_highlight: true,
             sort_order: 3,
         },
@@ -473,6 +474,7 @@ async fn placer_une_activite_dans_une_partie_de_son_fil_et_seulement_la() {
         finance,
         TrackSessionPlacementPayload {
             part_id: Some(partie_jeunesse),
+            moment_id: None,
             is_highlight: false,
             sort_order: 0,
         },
@@ -488,6 +490,7 @@ async fn placer_une_activite_dans_une_partie_de_son_fil_et_seulement_la() {
         jeunesse,
         TrackSessionPlacementPayload {
             part_id: None,
+            moment_id: None,
             is_highlight: false,
             sort_order: 0,
         },

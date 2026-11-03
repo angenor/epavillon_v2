@@ -1,43 +1,35 @@
-import type { PublicScheduleTrack, PublicScheduleTrackMoment } from '~/types/programme/track-page'
+import type { PublicScheduleTrack, PublicScheduleTrackPart } from '~/types/programme/track-page'
 import type { PublicScheduleRow } from '~/types/views'
-import type { IsoDate, IsoDateTime, TimeZoneName } from '~/types/shared'
+import type { I18nText, IsoDate, IsoDateTime, TimeZoneName } from '~/types/shared'
 import { dayKeyInZone } from './datetime.ts'
 
 /**
- * Les fils publiés dans `/programmations` (direction F, 30/10) : ce que la
- * liste, la semaine et le ruban des jours en tirent, sans DOM.
+ * Les fils publiés dans `/programmations` (journées en un bloc, 03/11) : ce que
+ * la liste, le calendrier et le ruban des jours en tirent, sans DOM.
  *
- * Une activité rattachée à une journée spéciale publiée se range dans son
- * cadre ; une activité de l'atelier préparatoire (`side_programme`) se range
- * sous son encadré, qui n'a pas de déroulé. Un fil absent de la liste (non
- * publié) ne change rien : l'activité reste une ligne ordinaire.
+ * Une journée spéciale publiée et l'atelier préparatoire (`side_programme`)
+ * tiennent chacun en un bloc à leur couleur, qui mène à leur page : leurs
+ * activités n'apparaissent plus une à une, le détail vit sur la page du fil.
+ * Une activité d'aucun fil publié reste une ligne ordinaire, à son heure,
+ * avant ou après le bloc.
  */
 
 export interface ProgrammeTrackIndex {
-  /** Journées spéciales publiées, par slug. */
-  specials: Map<string, PublicScheduleTrack>
-  /** Atelier préparatoire (et tout autre programme parallèle publié). */
-  sides: PublicScheduleTrack[]
+  /** Journées spéciales et atelier publiés, par slug. */
+  tracks: Map<string, PublicScheduleTrack>
 }
 
 export function indexTracks(tracks: PublicScheduleTrack[]): ProgrammeTrackIndex {
-  return {
-    specials: new Map(tracks.filter((track) => track.kind === 'special_day').map((track) => [track.slug, track])),
-    sides: tracks.filter((track) => track.kind === 'side_programme'),
-  }
+  return { tracks: new Map(tracks.map((track) => [track.slug, track])) }
 }
 
-/** La première journée spéciale publiée de l'activité. */
-export function specialOf(session: PublicScheduleRow, index: ProgrammeTrackIndex): PublicScheduleTrack | null {
-  for (const badge of session.tracks) {
-    const track = badge.kind === 'special_day' ? index.specials.get(badge.slug) : undefined
-    if (track) return track
-  }
-  return null
-}
-
-export function sideOf(session: PublicScheduleRow, index: ProgrammeTrackIndex): PublicScheduleTrack | null {
-  return index.sides.find((side) => session.tracks.some((badge) => badge.slug === side.slug)) ?? null
+/** Le fil publié qui absorbe l'activité : une journée spéciale d'abord, à défaut l'atelier. */
+export function trackOf(session: PublicScheduleRow, index: ProgrammeTrackIndex): PublicScheduleTrack | null {
+  const published = session.tracks.flatMap((badge) => {
+    const track = index.tracks.get(badge.slug)
+    return track ? [track] : []
+  })
+  return published.find((track) => track.kind === 'special_day') ?? published[0] ?? null
 }
 
 /** Le jour où se tient un fil : celui de sa première heure, à défaut sa date annoncée. */
@@ -46,62 +38,108 @@ export function trackDayOf(track: PublicScheduleTrack, timezone: TimeZoneName): 
   return track.starts_on
 }
 
-export type FrameItem<Row> =
-  | { kind: 'activity'; session: PublicScheduleRow; row: Row; index: number }
-  | { kind: 'moments'; key: string; moments: PublicScheduleTrackMoment[] }
+export interface TrackBlockHighlight {
+  at: IsoDateTime
+  title: I18nText
+}
 
-export interface DayFrame<Row> {
+/** Un fil un jour donné, tel que son bloc le résume. */
+export interface TrackBlock {
   track: PublicScheduleTrack
   /** Première et dernière heure du fil CE jour-là, moments compris. */
   start: IsoDateTime | null
   end: IsoDateTime | null
-  items: FrameItem<Row>[]
+  /** Ses temps qui tombent ce jour-là. */
+  parts: PublicScheduleTrackPart[]
+  /** Le premier temps fort du jour, activité ou moment. */
+  highlight: TrackBlockHighlight | null
+  /** Activités du jour, hors celles qu'un moment regroupe. */
+  activities: number
+  moments: number
+}
+
+export type ProgrammeDayItem =
+  | { kind: 'block'; key: string; block: TrackBlock }
+  | { kind: 'session'; key: string; session: PublicScheduleRow }
+
+export interface ComposedDay {
+  /** Blocs et activités ordinaires retenus, dans l'ordre de l'heure. */
+  items: ProgrammeDayItem[]
+  blocks: TrackBlock[]
+  /** Activités ordinaires retenues. */
+  sessions: PublicScheduleRow[]
+  /** Ce que le jour montrerait sans recherche : activités ordinaires et blocs. */
+  total: number
+}
+
+const byTime = (a: string, b: string) => Date.parse(a) - Date.parse(b)
+
+function blockOf(track: PublicScheduleTrack, own: PublicScheduleRow[], day: IsoDate, timezone: TimeZoneName): TrackBlock {
+  const onDay = (at: IsoDateTime) => dayKeyInZone(at, timezone) === day
+  const moments = track.moments.filter((moment) => onDay(moment.starts_at))
+  const grouped = new Set(track.moments.flatMap((moment) => moment.session_ids))
+
+  const starts = [...moments.map((m) => m.starts_at), ...own.map((s) => s.starts_at)].sort(byTime)
+  const ends = [...moments.map((m) => m.ends_at ?? m.starts_at), ...own.map((s) => s.ends_at)].sort(byTime)
+  const sameDay = track.starts_at !== null && onDay(track.starts_at)
+
+  const highlights: TrackBlockHighlight[] = [
+    ...own
+      .filter((session) => session.status !== 'cancelled' && session.tracks.some((badge) => badge.slug === track.slug && badge.is_highlight))
+      .map((session) => ({ at: session.starts_at, title: session.title })),
+    ...moments.filter((moment) => moment.is_highlight).map((moment) => ({ at: moment.starts_at, title: moment.label })),
+  ].sort((a, b) => byTime(a.at, b.at))
+
+  return {
+    track,
+    start: starts[0] ?? (sameDay ? track.starts_at : null),
+    end: ends.at(-1) ?? (sameDay ? track.ends_at : null),
+    parts: track.parts.filter((part) => part.starts_at !== null && onDay(part.starts_at)),
+    highlight: highlights[0] ?? null,
+    activities: own.filter((session) => !grouped.has(session.id)).length,
+    moments: moments.length,
+  }
 }
 
 /**
- * Le cadre d'une journée un jour donné : ses activités du jour, et, hors
- * recherche, ses moments, chaque suite de moments sans activité entre eux
- * réunie en une ligne. `own` : toutes les activités du fil ce jour-là ;
- * `kept` : celles que la recherche retient. Nul si aucune n'est retenue.
+ * Le programme d'un jour : un bloc par fil publié qui s'y tient, ses activités
+ * absorbées ; les autres activités retenues par la recherche. Un bloc reste
+ * l'entrée d'une recherche qui retrouve son nom ou l'une de ses activités ;
+ * sinon il se tait. `own` : les activités qui commencent ce jour-là.
  */
-export function composeFrame<Row>(
-  track: PublicScheduleTrack,
-  own: PublicScheduleRow[],
-  kept: Set<string>,
+export function composeDay(
   day: IsoDate,
+  own: PublicScheduleRow[],
+  index: ProgrammeTrackIndex,
   timezone: TimeZoneName,
-  searching: boolean,
-  toRow: (session: PublicScheduleRow) => Row,
-): DayFrame<Row> | null {
-  if (!own.some((session) => kept.has(session.id))) return null
-  const moments = track.moments.filter((moment) => dayKeyInZone(moment.starts_at, timezone) === day)
-
-  // Un moment passe avant une activité de même heure, comme dans le déroulé de la page.
-  const timeline = [
-    ...moments.map((moment) => ({ at: moment.starts_at, rank: 0, moment, session: null })),
-    ...own.map((session) => ({ at: session.starts_at, rank: 1, moment: null, session })),
-  ].sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.rank - b.rank)
-
-  const items: FrameItem<Row>[] = []
-  let index = 0
-  for (const entry of timeline) {
-    if (entry.session) {
-      if (!kept.has(entry.session.id)) continue
-      items.push({ kind: 'activity', session: entry.session, row: toRow(entry.session), index: index++ })
-    } else if (!searching && entry.moment) {
-      const last = items[items.length - 1]
-      if (last?.kind === 'moments') last.moments.push(entry.moment)
-      else items.push({ kind: 'moments', key: `m-${entry.moment.starts_at}`, moments: [entry.moment] })
-    }
+  matches: (session: PublicScheduleRow) => boolean,
+  matchesTrack: (track: PublicScheduleTrack) => boolean,
+): ComposedDay {
+  const byTrack = new Map<string, PublicScheduleRow[]>()
+  const loose: PublicScheduleRow[] = []
+  for (const session of own) {
+    const track = trackOf(session, index)
+    if (track) byTrack.set(track.slug, [...(byTrack.get(track.slug) ?? []), session])
+    else loose.push(session)
+  }
+  for (const track of index.tracks.values()) {
+    if (!byTrack.has(track.slug) && trackDayOf(track, timezone) === day) byTrack.set(track.slug, [])
   }
 
-  const starts = [...moments.map((m) => m.starts_at), ...own.map((s) => s.starts_at)]
-  const ends = [...moments.map((m) => m.ends_at ?? m.starts_at), ...own.map((s) => s.ends_at)]
-  const byTime = (a: string, b: string) => Date.parse(a) - Date.parse(b)
-  return {
-    track,
-    start: starts.sort(byTime)[0] ?? null,
-    end: ends.sort(byTime).at(-1) ?? null,
-    items,
+  const blocks: TrackBlock[] = []
+  for (const [slug, sessions] of byTrack) {
+    const track = index.tracks.get(slug)!
+    if (matchesTrack(track) || sessions.some(matches)) blocks.push(blockOf(track, sessions, day, timezone))
   }
+  const sessions = loose.filter(matches)
+
+  const items: ProgrammeDayItem[] = [
+    ...blocks.map((block): ProgrammeDayItem => ({ kind: 'block', key: `fil-${block.track.slug}`, block })),
+    ...sessions.map((session): ProgrammeDayItem => ({ kind: 'session', key: session.id, session })),
+  ]
+  const at = (item: ProgrammeDayItem) => Date.parse(item.kind === 'block' ? (item.block.start ?? `${day}T00:00:00Z`) : item.session.starts_at)
+  // À heure égale, le bloc d'abord : il ouvre la journée.
+  items.sort((a, b) => at(a) - at(b) || (a.kind === 'block' ? -1 : 0) - (b.kind === 'block' ? -1 : 0))
+
+  return { items, blocks, sessions, total: loose.length + byTrack.size }
 }

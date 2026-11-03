@@ -124,10 +124,10 @@ const dayOf = (session: PublicScheduleRow): IsoDate => dayKeyInZone(session.star
 
 const trackIndex = computed(() => indexTracks(data.value.tracks))
 
-/** Le jour de l'atelier compte, même sans activité : son encadré y vit. */
+/** Le jour d'un fil publié compte, même sans activité (l'atelier) : son bloc y vit. */
 const sideDays = computed(() =>
-  trackIndex.value.sides.flatMap((side) => {
-    const day = trackDayOf(side, timezone.value)
+  [...trackIndex.value.tracks.values()].flatMap((track) => {
+    const day = trackDayOf(track, timezone.value)
     return day ? [day] : []
   }),
 )
@@ -140,9 +140,7 @@ const selectedDay = computed<IsoDate>(() => {
   return day.value && days.includes(day.value) ? day.value : (days[0] ?? dayKeyInZone(selectedEdition.value.starts_at, timezone.value))
 })
 
-const searching = computed(() => foldText(search.value.trim()) !== '')
-
-/** Le nom d'une journée retrouve toutes ses activités : chercher « finance durable » ouvre son cadre entier. */
+/** Le nom d'une journée retrouve toutes ses activités : chercher « finance durable » montre son bloc. */
 function matches(session: PublicScheduleRow): boolean {
   const needle = foldText(search.value.trim())
   if (!needle) return true
@@ -205,19 +203,20 @@ onBeforeUnmount(() => {
 watch(timezone, tick)
 watch(view, () => nextTick(measure))
 
+// Mêmes comptes que la liste et le calendrier : les activités d'un bloc comptent, pas celles qu'un moment regroupe.
 const stripDays = computed<ProgrammeStripDay[]>(() =>
   programmeDays.value.map((date, index) => {
-    const tracks = trackIndex.value
     const own = data.value.schedule.filter((session) => dayOf(session) === date)
-    const kept = own.filter((session) => matches(session) && !sideOf(session, tracks))
+    const day = composeDay(date, own, trackIndex.value, timezone.value, matches, matchesTrack)
     const previous = programmeDays.value[index - 1]
-    const special = own.map((session) => specialOf(session, tracks)).find((track) => track !== null) ?? null
+    const special = day.blocks.find((block) => block.track.kind === 'special_day')?.track ?? null
+    const blockColors = day.blocks.flatMap((block) => Array.from({ length: block.activities }, () => block.track.color_hex))
     return {
       date,
-      count: kept.length,
-      colors: kept.map((session) => session.themes[0]?.color ?? null),
+      count: day.sessions.length + day.blocks.reduce((sum, block) => sum + block.activities, 0),
+      colors: [...day.sessions.map((session) => session.themes[0]?.color ?? null), ...blockColors],
       dayColor: special?.color_hex ?? null,
-      isSide: sideDays.value.includes(date),
+      isSide: !special && day.blocks.length > 0,
       isToday: date === today.value,
       gapBefore: previous ? daysBetween(previous, date) - 1 : 0,
     }
@@ -400,7 +399,6 @@ const views = computed(() => [
           :matches="matches"
           :tracks="trackIndex"
           :matches-track="matchesTrack"
-          :searching="searching"
           :edition-start="dayKeyInZone(selectedEdition.starts_at, timezone)"
           :timezone="timezone"
           :today="today"

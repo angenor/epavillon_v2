@@ -544,7 +544,10 @@ CREATE TABLE event.programme_track_moments (
     -- Retirer une partie remet ses moments hors partie, sans toucher au fil :
     -- SET NULL sur la seule colonne de la partie (PostgreSQL 15 et plus).
     CONSTRAINT fk_programme_track_moments_part FOREIGN KEY (part_id, track_id)
-        REFERENCES event.programme_track_parts (id, track_id) ON DELETE SET NULL (part_id)
+        REFERENCES event.programme_track_parts (id, track_id) ON DELETE SET NULL (part_id),
+    -- Cible de la clé composite (moment_id, track_id) de programme.session_tracks
+    -- (03/11/2026) : une activité ne se range que sous un moment de SON fil.
+    CONSTRAINT ux_programme_track_moments_track UNIQUE (id, track_id)
 );
 
 CREATE INDEX ix_programme_track_moments_track ON event.programme_track_moments (track_id, starts_at);

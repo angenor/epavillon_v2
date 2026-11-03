@@ -100,7 +100,23 @@ pub struct PublicTrackActivity {
     pub organizations: Vec<Value>,
 }
 
-/// Un moment sans activité : ce que porte une ligne `kind: "moment"`.
+/// Une activité regroupée sous un moment : `PublicTrackMomentActivity`. Ni
+/// titre ni lien : le moment nomme seulement qui intervient et quand.
+#[derive(Debug, Clone, Serialize)]
+pub struct PublicTrackMomentActivity {
+    pub session_id: Uuid,
+    #[serde(with = "time::serde::rfc3339")]
+    pub starts_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub ends_at: OffsetDateTime,
+    /// L'organisation porteuse ; nulle pour une activité sans porteuse.
+    pub organization_name: Option<String>,
+    pub organization_acronym: Option<String>,
+    /// `AttachedImage | null`, comme `PublicScheduleRow.organization_logo`.
+    pub organization_logo: Option<Value>,
+}
+
+/// Un moment du déroulé : ce que porte une ligne `kind: "moment"`.
 #[derive(Debug, Clone, Serialize)]
 pub struct PublicTrackMoment {
     pub id: Uuid,
@@ -108,6 +124,9 @@ pub struct PublicTrackMoment {
     pub description: Option<Value>,
     /// Temps fort du fil (le hackathon de la journée jeunesse).
     pub is_highlight: bool,
+    /// Les activités publiées qu'il regroupe (03/11), par heure : « Les 10
+    /// minutes qui inspirent ». Vide pour un accueil ou un déjeuner.
+    pub activities: Vec<PublicTrackMomentActivity>,
 }
 
 /// Le contenu d'une ligne du déroulé.
@@ -151,6 +170,7 @@ pub struct PublicTrackSummary {
     /// Nom du lieu du fil, à défaut celui du pavillon.
     pub venue_name: Option<Value>,
     pub is_off_site: bool,
+    pub subtitle: Option<Value>,
     /// `AttachedImage | null` : la photo du fil (rôle `cover`), celle du
     /// bandeau de sa page ; nulle sans photo (l'atelier).
     pub cover: Option<Value>,
@@ -158,8 +178,8 @@ pub struct PublicTrackSummary {
     pub is_current: bool,
 }
 
-/// Un moment sans activité, tel que `/programmations` l'affiche dans le cadre
-/// d'une journée : `PublicScheduleTrackMoment`.
+/// Un moment du fil, tel que le bloc d'une journée de `/programmations` le
+/// résume : `PublicScheduleTrackMoment`.
 #[derive(Debug, Clone, Serialize)]
 pub struct PublicScheduleTrackMoment {
     #[serde(with = "time::serde::rfc3339")]
@@ -167,16 +187,36 @@ pub struct PublicScheduleTrackMoment {
     #[serde(with = "time::serde::rfc3339::option")]
     pub ends_at: Option<OffsetDateTime>,
     pub label: Value,
+    /// Temps fort du fil.
+    pub is_highlight: bool,
+    /// Les activités publiées qu'il regroupe (03/11) : elles ne se comptent
+    /// plus parmi les activités du bloc.
+    pub session_ids: Vec<Uuid>,
+}
+
+/// Une partie du fil pour le bloc de `/programmations` :
+/// `PublicScheduleTrackPart`. Heures lues sur son contenu, comme sur la page.
+#[derive(Debug, Clone, Serialize)]
+pub struct PublicScheduleTrackPart {
+    pub id: Uuid,
+    /// Rang à partir de 1 : « 1er temps » quand `label` est nul.
+    pub number: i32,
+    pub label: Option<Value>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub starts_at: Option<OffsetDateTime>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub ends_at: Option<OffsetDateTime>,
 }
 
 /// Un fil publié de l'édition pour `/programmations` : `PublicScheduleTrack`,
-/// le résumé (jamais `is_current`), ses moments dans l'ordre de l'heure et
-/// ses partenaires dans leur ordre (« Avec OIF, GIZ »). Les activités, elles,
-/// sont déjà dans la programmation.
+/// le résumé (jamais `is_current`), ses parties, ses moments dans l'ordre de
+/// l'heure et ses partenaires dans leur ordre (« Avec OIF, GIZ »). Les
+/// activités, elles, sont déjà dans la programmation.
 #[derive(Debug, Clone, Serialize)]
 pub struct PublicScheduleTrack {
     #[serde(flatten)]
     pub summary: PublicTrackSummary,
+    pub parts: Vec<PublicScheduleTrackPart>,
     pub moments: Vec<PublicScheduleTrackMoment>,
     pub partners: Vec<PublicTrackPartner>,
 }
@@ -236,6 +276,9 @@ pub struct PublicTrackPage {
 pub struct TrackSessionPlacementPayload {
     #[serde(default)]
     pub part_id: Option<Uuid>,
+    /// Moment de CE fil qui regroupe l'activité ; nul : une ligne du déroulé.
+    #[serde(default)]
+    pub moment_id: Option<Uuid>,
     #[serde(default)]
     pub is_highlight: bool,
     #[serde(default)]
@@ -248,6 +291,7 @@ pub struct TrackSessionPlacement {
     pub session_id: Uuid,
     pub track_id: Uuid,
     pub part_id: Option<Uuid>,
+    pub moment_id: Option<Uuid>,
     pub is_highlight: bool,
     pub sort_order: i16,
 }

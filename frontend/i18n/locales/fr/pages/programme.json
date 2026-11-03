@@ -62,7 +62,8 @@
     "showPast": "Afficher les journées passées",
     "hidePast": "Masquer les journées passées",
     "monthCount": "{month}, {count}",
-    "today": "Aujourd'hui"
+    "today": "Aujourd'hui",
+    "special": "journée spéciale"
   },
   "week": {
     "live": "En direct",
@@ -105,22 +106,21 @@
   },
   "tracks": {
     "kicker": "Journée spéciale",
-    "kickerHours": "Journée spéciale, {start} à {end}",
-    "others": "Le même jour, hors de la journée spéciale",
-    "open": "Programme de la journée",
-    "with": "Avec",
     "eve": "la veille",
     "before": "avant l'ouverture",
     "side": {
-      "kicker": "Atelier préparatoire",
+      "kicker": "Atelier préparatoire"
+    },
+    "block": {
+      "partFirst": "1er temps",
+      "partNth": "{n}e temps",
       "hours": "{start} à {end}",
-      "audience": "réservé principalement aux négociateurs et négociatrices",
-      "open": "Voir l'atelier",
-      "state": {
-        "upcoming": "À venir",
-        "ongoing": "En cours",
-        "past": "Terminé"
-      }
+      "highlight": "Temps fort, {time}",
+      "highlightInline": "Temps fort à {time} : {title}.",
+      "activities": "aucune activité | {count} activité | {count} activités",
+      "moments": "aucun moment | {count} moment | {count} moments",
+      "open": "Voir la journée",
+      "openSide": "Voir l'atelier"
     }
   },
   "joint": {

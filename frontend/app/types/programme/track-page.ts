@@ -117,12 +117,28 @@ export interface PublicTrackActivity {
   organizations: SessionOrganization[]
 }
 
+/** Une activité regroupée sous un moment : qui intervient et quand, sans titre ni lien. */
+export interface PublicTrackMomentActivity {
+  session_id: SessionId
+  starts_at: IsoDateTime
+  ends_at: IsoDateTime
+  /** L'organisation porteuse ; nulle pour une activité sans porteuse. */
+  organization_name: string | null
+  organization_acronym: string | null
+  organization_logo: AttachedImage | null
+}
+
 export interface PublicTrackMoment {
   id: TrackMomentId
   label: I18nText
   description: I18nText | null
   /** Temps fort du fil (02/11) : le hackathon de la journée jeunesse n'est pas une activité. */
   is_highlight: boolean
+  /**
+   * Activités publiées qu'il regroupe (03/11), par heure : « Les 10 minutes qui
+   * inspirent ». Elles ne sont pas des lignes du déroulé ; vide pour un accueil.
+   */
+  activities: PublicTrackMomentActivity[]
 }
 
 interface PublicTrackEntryBase {
@@ -150,6 +166,7 @@ export interface PublicTrackSummary {
   ends_at: IsoDateTime | null
   venue_name: I18nText | null
   is_off_site: boolean
+  subtitle: I18nText | null
   /** Photo du fil, celle du bandeau de sa page ; nulle sans (l'atelier) : l'aplat de sa couleur. */
   cover: AttachedImage | null
   /** La page qu'on lit. */
@@ -181,21 +198,36 @@ export interface PublicTrackPage {
   other_tracks: PublicTrackSummary[]
 }
 
-/** Un moment sans activité, tel que le cadre d'une journée de `/programmations` le montre. */
+/** Un moment du fil, tel que le bloc d'une journée de `/programmations` le résume. */
 export interface PublicScheduleTrackMoment {
   starts_at: IsoDateTime
   /** Nulle pour un moment sans fin (la clôture). */
   ends_at: IsoDateTime | null
   label: I18nText
+  /** Temps fort du fil. */
+  is_highlight: boolean
+  /** Activités publiées qu'il regroupe : elles ne comptent plus parmi celles du bloc. */
+  session_ids: SessionId[]
+}
+
+/** Une partie du fil ; heures lues sur son contenu, nulles si elle est vide. */
+export interface PublicScheduleTrackPart {
+  id: TrackPartId
+  /** Rang à partir de 1 : « 1er temps » quand `label` est nul. */
+  number: number
+  label: I18nText | null
+  starts_at: IsoDateTime | null
+  ends_at: IsoDateTime | null
 }
 
 /**
  * `GET /schedule/tracks?event_id=` : un fil publié de l'édition (`is_current`
- * toujours faux), ses moments dans l'ordre de l'heure et ses partenaires. Ses
- * activités sont dans la programmation (`PublicScheduleRow.tracks`), pas
- * recopiées ici.
+ * toujours faux), ses parties, ses moments dans l'ordre de l'heure et ses
+ * partenaires. Ses activités sont dans la programmation
+ * (`PublicScheduleRow.tracks`), pas recopiées ici.
  */
 export interface PublicScheduleTrack extends PublicTrackSummary {
+  parts: PublicScheduleTrackPart[]
   moments: PublicScheduleTrackMoment[]
   /** « Avec OIF, GIZ… », dans l'ordre du fil. */
   partners: PublicTrackPartner[]
@@ -205,6 +237,8 @@ export interface PublicScheduleTrack extends PublicTrackSummary {
 export interface TrackSessionPlacementPayload {
   /** Partie de CE fil ; nulle : hors partie. */
   part_id: TrackPartId | null
+  /** Moment de CE fil qui regroupe l'activité ; nul : une ligne du déroulé. */
+  moment_id: TrackMomentId | null
   is_highlight: boolean
   sort_order: number
 }
@@ -213,6 +247,7 @@ export interface TrackSessionPlacement {
   session_id: SessionId
   track_id: TrackId
   part_id: TrackPartId | null
+  moment_id: TrackMomentId | null
   is_highlight: boolean
   sort_order: number
 }

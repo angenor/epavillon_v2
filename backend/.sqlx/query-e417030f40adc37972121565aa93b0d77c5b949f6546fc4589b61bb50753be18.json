@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT tr.id, tr.track_id, tr.status::text AS \"status!\",\n                  COALESCE(ARRAY(\n                      SELECT r.session_id FROM programme.registrations r\n                        JOIN programme.sessions s ON s.id = r.session_id\n                       WHERE r.track_registration_id = tr.id AND r.status <> 'cancelled'\n                       ORDER BY s.starts_at), '{}') AS \"session_ids!\",\n                  (SELECT count(*) FROM programme.session_tracks st\n                     JOIN programme.sessions s ON s.id = st.session_id\n                    WHERE st.track_id = tr.track_id AND s.published_at IS NOT NULL\n                      AND s.status <> 'cancelled') AS \"activity_count!\",\n                  tr.created_at, tr.joined_at\n             FROM programme.track_registrations tr\n            WHERE tr.id = $1",
+  "query": "SELECT tr.id, tr.track_id, tr.status::text AS \"status!\",\n                  COALESCE(ARRAY(\n                      SELECT r.session_id FROM programme.registrations r\n                        JOIN programme.sessions s ON s.id = r.session_id\n                       WHERE r.track_registration_id = tr.id AND r.status <> 'cancelled'\n                       ORDER BY s.starts_at), '{}') AS \"session_ids!\",\n                  (SELECT count(*) FROM programme.session_tracks st\n                     JOIN programme.sessions s ON s.id = st.session_id\n                    WHERE st.track_id = tr.track_id AND s.published_at IS NOT NULL\n                      AND s.status <> 'cancelled' AND st.moment_id IS NULL) AS \"activity_count!\",\n                  tr.created_at, tr.joined_at\n             FROM programme.track_registrations tr\n            WHERE tr.id = $1",
   "describe": {
     "columns": [
       {
@@ -81,5 +81,5 @@
       true
     ]
   },
-  "hash": "c763ad56632519208cc69f355966bc2093a562f80952a0131c1562a172708bd5"
+  "hash": "e417030f40adc37972121565aa93b0d77c5b949f6546fc4589b61bb50753be18"
 }

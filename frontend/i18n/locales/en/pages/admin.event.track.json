@@ -110,7 +110,7 @@
   },
   "agenda": {
     "title": "Activities and moments",
-    "intro": "Time zone: {zone}. Activities are attached to the track from the planner; here, you place them in a part and pick the highlights.",
+    "intro": "Time zone: {zone}. Activities are attached to the track from the planner; here, you place them in a part, under a moment that groups them, and pick the highlights.",
     "attach": "Attach activities",
     "noPart": "Outside any part",
     "partEmpty": "Nothing in this part yet.",
@@ -122,7 +122,11 @@
     "empty": {
       "title": "Empty agenda",
       "description": "Attach activities to the track from the planner, or add a moment (welcome, lunch, closing)."
-    }
+    },
+    "noMoment": "Own line in the agenda",
+    "momentOf": "Moment grouping {title}",
+    "groupedUnder": "Under “{moment}”",
+    "groups": "no grouped activities | groups {count} activity | groups {count} activities"
   },
   "moments": {
     "add": "Add a moment",

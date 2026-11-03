@@ -110,7 +110,7 @@
   },
   "agenda": {
     "title": "Activités et moments",
-    "intro": "Fuseau : {zone}. Les activités se rattachent au fil depuis le planificateur ; ici, on les range dans une partie et on choisit les temps forts.",
+    "intro": "Fuseau : {zone}. Les activités se rattachent au fil depuis le planificateur ; ici, on les range dans une partie, sous un moment qui les regroupe, et on choisit les temps forts.",
     "attach": "Rattacher des activités",
     "noPart": "Hors partie",
     "partEmpty": "Rien dans cette partie pour l'instant.",
@@ -122,7 +122,11 @@
     "empty": {
       "title": "Déroulé vide",
       "description": "Rattachez des activités au fil depuis le planificateur, ou ajoutez un moment (accueil, déjeuner, clôture)."
-    }
+    },
+    "noMoment": "Ligne du déroulé",
+    "momentOf": "Moment qui regroupe {title}",
+    "groupedUnder": "Sous « {moment} »",
+    "groups": "aucune activité regroupée | regroupe {count} activité | regroupe {count} activités"
   },
   "moments": {
     "add": "Ajouter un moment",

@@ -12,6 +12,13 @@
 //! moment passe avant une activité de même heure, puis le rang du
 //! rattachement). Les heures de la journée et de chaque partie **se lisent sur
 //! ce déroulé** : aucune n'est saisie, aucune ne peut le contredire.
+//!
+//! # Un moment peut regrouper des activités (03/11)
+//!
+//! Une activité rangée sous un moment de ce fil n'est plus une ligne du
+//! déroulé : le moment l'énumère (heure, organisation porteuse). Elle reste
+//! publiée, sa fiche et son lien direct aussi. Un moment absent (supprimé
+//! entre deux lectures) la rend au déroulé.
 
 use std::collections::HashMap;
 
@@ -25,18 +32,18 @@ use uuid::Uuid;
 
 use crate::domain::ids::{EventId, SessionId};
 use crate::domain::track_page::{
-    PublicScheduleTrack, PublicScheduleTrackMoment, PublicTrackActivity, PublicTrackEdition,
-    PublicTrackEntry, PublicTrackEntryBody, PublicTrackFeature, PublicTrackHeader,
-    PublicTrackMoment, PublicTrackPage, PublicTrackPart, PublicTrackPartner, PublicTrackVenue,
-    TrackSessionPlacement, TrackSessionPlacementPayload,
+    PublicScheduleTrack, PublicScheduleTrackMoment, PublicScheduleTrackPart, PublicTrackActivity,
+    PublicTrackEdition, PublicTrackEntry, PublicTrackEntryBody, PublicTrackFeature,
+    PublicTrackHeader, PublicTrackMoment, PublicTrackMomentActivity, PublicTrackPage,
+    PublicTrackPart, PublicTrackPartner, PublicTrackVenue, TrackSessionPlacement,
+    TrackSessionPlacementPayload,
 };
 use crate::repo::{cross, public_schedule, session_parts, track_page};
 use crate::state::ProgrammeState;
 
-/// Les fils publiés d'une édition et leurs moments, sans page lue : ce que
-/// `/programmations` regroupe en cadres (journée spéciale) ou en encadré
-/// (atelier), avec leurs partenaires. Trois lectures, quel que soit le
-/// nombre de fils.
+/// Les fils publiés d'une édition, leurs parties et leurs moments, sans page
+/// lue : ce que `/programmations` résume en un bloc par fil (03/11), avec
+/// leurs partenaires. Quatre lectures, quel que soit le nombre de fils.
 pub async fn fils_de_ledition(
     pool: &PgPool,
     event_id: EventId,
@@ -54,7 +61,20 @@ pub async fn fils_de_ledition(
                 starts_at: m.starts_at,
                 ends_at: m.ends_at,
                 label: m.label,
+                is_highlight: m.is_highlight,
+                session_ids: m.session_ids,
             });
+    }
+    let mut parties: HashMap<String, Vec<PublicScheduleTrackPart>> = HashMap::new();
+    for p in cross::parties_des_fils_publies(pool, event_id.0).await? {
+        let du_fil = parties.entry(p.track_slug).or_default();
+        du_fil.push(PublicScheduleTrackPart {
+            id: p.id,
+            number: du_fil.len() as i32 + 1,
+            label: p.label,
+            starts_at: p.starts_at,
+            ends_at: p.ends_at,
+        });
     }
     let mut partenaires: HashMap<String, Vec<PublicTrackPartner>> = HashMap::new();
     for p in cross::partenaires_des_fils_publies(pool, event_id.0).await? {
@@ -64,6 +84,7 @@ pub async fn fils_de_ledition(
     Ok(fils
         .into_iter()
         .map(|summary| PublicScheduleTrack {
+            parts: parties.remove(&summary.slug).unwrap_or_default(),
             moments: moments.remove(&summary.slug).unwrap_or_default(),
             partners: partenaires.remove(&summary.slug).unwrap_or_default(),
             summary,
@@ -91,11 +112,39 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
         .iter()
         .map(|r| (r.session_id, (r.part_id, r.is_highlight, r.sort_order)))
         .collect();
+    let regroupees: HashMap<Uuid, Uuid> = rattachements
+        .iter()
+        .filter_map(|r| r.moment_id.map(|m| (r.session_id, m)))
+        .filter(|(_, m)| moments.iter().any(|moment| moment.id == *m))
+        .collect();
+
+    let mut sous_moment: HashMap<Uuid, Vec<PublicTrackMomentActivity>> = HashMap::new();
+    let mut seances = Vec::with_capacity(lignes.len());
+    for session in lignes {
+        match regroupees.get(&session.id) {
+            Some(moment) => {
+                sous_moment
+                    .entry(*moment)
+                    .or_default()
+                    .push(PublicTrackMomentActivity {
+                        session_id: session.id,
+                        starts_at: session.starts_at,
+                        ends_at: session.ends_at,
+                        organization_name: session.organization_name,
+                        organization_acronym: session.organization_acronym,
+                        organization_logo: session.organization_logo,
+                    })
+            }
+            None => seances.push(session),
+        }
+    }
 
     // (début, rang de nature, rang du rattachement) : la clé du tri.
     let mut lignes_du_deroule: Vec<((OffsetDateTime, u8, i16), PublicTrackEntry)> = Vec::new();
 
     for m in moments {
+        let mut activities = sous_moment.remove(&m.id).unwrap_or_default();
+        activities.sort_by_key(|a| (a.starts_at, a.session_id));
         lignes_du_deroule.push((
             (m.starts_at, 0, 0),
             PublicTrackEntry {
@@ -108,13 +157,14 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
                         label: m.label,
                         description: m.description,
                         is_highlight: m.is_highlight,
+                        activities,
                     },
                 },
             },
         ));
     }
 
-    for session in lignes {
+    for session in seances {
         let (part_id, is_highlight, rang) = placement
             .get(&session.id)
             .copied()
@@ -159,8 +209,11 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
         })
         .collect();
 
-    let est_activite =
-        |e: &&PublicTrackEntry| matches!(e.body, PublicTrackEntryBody::Activity { .. });
+    // Un moment qui regroupe des activités ouvre la journée comme elles.
+    let est_activite = |e: &&PublicTrackEntry| match &e.body {
+        PublicTrackEntryBody::Activity { .. } => true,
+        PublicTrackEntryBody::Moment { moment } => !moment.activities.is_empty(),
+    };
     let premiere_activite = agenda
         .iter()
         .filter(est_activite)
@@ -170,7 +223,7 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
     let ends_at = agenda.iter().map(fin).max();
     let opens_at = agenda
         .iter()
-        .filter(|e| matches!(e.body, PublicTrackEntryBody::Moment { .. }))
+        .filter(|e| !est_activite(e))
         .map(|e| e.starts_at)
         .min()
         .filter(|debut| premiere_activite.is_some_and(|a| *debut < a));

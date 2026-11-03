@@ -5,7 +5,7 @@ import type { ActiveIncident } from '~/types/live'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { PublicScheduleTrack } from '~/types/programme/track-page'
-import type { ProgrammeTrackIndex } from '~/utils/programme-tracks'
+import type { ComposedDay, ProgrammeTrackIndex } from '~/utils/programme-tracks'
 
 /**
  * Le calendrier (maquette « direction condensée », semaine.html, validée le
@@ -16,9 +16,9 @@ import type { ProgrammeTrackIndex } from '~/utils/programme-tracks'
  * Aucun ancêtre ne doit donc être en `overflow: hidden`.
  *
  * Un trait épais ouvre chaque semaine. Le premier dimanche de la conférence,
- * sans activité, est un jour de repos hachuré (`restDayOf`). Le jour d'une
- * journée spéciale est teinté de sa couleur, en-tête compris, et ses activités
- * mènent à leur place dans le déroulé de la journée.
+ * sans activité, est un jour de repos hachuré (`restDayOf`). Une journée
+ * spéciale et l'atelier tiennent chacun en un bloc à leur couleur, à la place
+ * de leurs activités (03/11) ; l'en-tête de la colonne dit « Journée spéciale ».
  */
 
 interface Props {
@@ -50,8 +50,7 @@ const { state, link } = useProgrammeSession()
 const { partsOf, slidesOf, namesOf } = useJointSession()
 const localePath = useLocalePath()
 
-const trackTo = (slug: string, hash?: string) =>
-  localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: slug }, hash })
+const trackTo = (slug: string) => localePath({ name: 'track-edition-track', params: { edition: props.editionSlug, track: slug } })
 
 const at = (day: IsoDate) => new Date(`${day}T12:00:00Z`)
 const format = (day: IsoDate, options: Intl.DateTimeFormatOptions) =>
@@ -65,7 +64,6 @@ const breaks = computed(() => weekBreaks(allDays.value))
 
 function card(session: PublicScheduleRow, weekday: string) {
   const current = state(session)
-  const special = specialOf(session, props.tracks)
   const page = link(props.editionSlug, session)
   const parts = partsOf(session)
   return {
@@ -73,7 +71,7 @@ function card(session: PublicScheduleRow, weekday: string) {
     parts,
     slides: parts.length ? slidesOf(parts, session.cover, session.id) : [],
     jointNames: namesOf(parts),
-    to: special ? trackTo(special.slug, `#${trackActivityAnchor(session.slug)}`) : page,
+    to: page,
     joinTo: `${page}#direct`,
     current,
     stateLabel: stateLabel(current),
@@ -89,22 +87,15 @@ function card(session: PublicScheduleRow, weekday: string) {
     initials: (session.organization_acronym ?? initialsOf(session.organization_name ?? '')).slice(0, 8),
     logo: session.organization_logo ?? null,
     visited: session.id === props.visitedId,
-    inDay: !!special,
     notice: incidentFor(props.incidents, session),
     host: session.organization_hosts_pavilion ?? false,
   }
 }
 
-// Comme dans la liste, le fond de la journée s'arrête à sa dernière activité : les suivantes reprennent le fond ordinaire.
-function groupsOf(cards: ReturnType<typeof card>[]) {
-  const first = cards.findIndex((item) => item.inDay)
-  if (first < 0) return [{ key: 'all', band: false, cards }]
-  const last = cards.findLastIndex((item) => item.inDay)
-  return [
-    { key: 'before', band: false, cards: cards.slice(0, first) },
-    { key: 'band', band: true, cards: cards.slice(first, last + 1) },
-    { key: 'after', band: false, cards: cards.slice(last + 1) },
-  ].filter((group) => group.cards.length)
+function countLabel(day: ComposedDay): string {
+  if (day.blocks.some((block) => block.track.kind === 'special_day')) return t('programme.tracks.kicker')
+  if (day.blocks.length) return t('programme.tracks.side.kicker')
+  return t('programme.week.count', { count: day.sessions.length }, day.sessions.length)
 }
 
 const columns = computed(() =>
@@ -112,20 +103,8 @@ const columns = computed(() =>
     const weekday = format(day, { weekday: 'long' })
     const isRest = day === props.restDay
     const isPast = !props.editionPast && props.today !== null && day < props.today
-    const own = props.sessions
-      .filter((session) => dayKeyInZone(session.starts_at, props.timezone) === day)
-      .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at))
-    const kept = own.filter((session) => props.matches(session) && !sideOf(session, props.tracks))
-    const sides = props.tracks.sides
-      .filter((side) => trackDayOf(side, props.timezone) === day)
-      .filter((side) => props.matchesTrack(side) || own.some((session) => props.matches(session) && sideOf(session, props.tracks)?.slug === side.slug))
-    const special = own.map((session) => specialOf(session, props.tracks)).find((track) => track !== null) ?? null
-    const side = sides[0] ?? null
-    const tag = special
-      ? { text: tr(special.title), icon: trackIcon(special.icon_code), to: trackTo(special.slug) }
-      : side
-        ? { text: t('programme.tracks.side.kicker'), icon: trackIcon(side.icon_code), to: trackTo(side.slug) }
-        : null
+    const own = props.sessions.filter((session) => dayKeyInZone(session.starts_at, props.timezone) === day)
+    const composed = composeDay(day, own, props.tracks, props.timezone, props.matches, props.matchesTrack)
     return {
       date: day,
       number: format(day, { day: 'numeric' }),
@@ -134,31 +113,20 @@ const columns = computed(() =>
       isToday: day === props.today,
       isPast,
       isRest,
-      isTinted: !!tag,
-      isSide: !special && !!side,
       isAlt: index % 2 === 1,
       weekBreak: breaks.value.has(index),
-      count: isRest ? t('programme.week.rest.closed') : t('programme.week.count', { count: kept.length + sides.length }, kept.length + sides.length),
-      tag,
-      dayStyle: special ? trackDayStyle(special.color_hex) : side ? trackDayStyle(side.color_hex) : undefined,
-      sides: sides.map((item) => ({
-        slug: item.slug,
-        title: tr(item.title),
-        to: trackTo(item.slug),
-        icon: trackIcon(item.icon_code),
-        start: item.starts_at ? time(item.starts_at, props.timezone) : '',
-        until: item.ends_at ? t('programme.week.until', { end: time(item.ends_at, props.timezone) }) : '',
-        venue: item.venue_name ? tr(item.venue_name) : '',
-        weekday,
-        past: isPast,
-      })),
-      groups: groupsOf(kept.map((session) => card(session, weekday))),
-      hasCards: kept.length > 0,
+      count: isRest ? t('programme.week.rest.closed') : countLabel(composed),
+      items: composed.items.map((item) =>
+        item.kind === 'block'
+          ? { kind: 'block' as const, key: item.key, block: item.block, to: trackTo(item.block.track.slug) }
+          : { kind: 'session' as const, key: item.key, card: card(item.session, weekday) },
+      ),
+      activities: composed.sessions.length + composed.blocks.reduce((sum, block) => sum + block.activities, 0),
     }
   }),
 )
 
-const shown = computed(() => columns.value.reduce((sum, column) => sum + column.groups.reduce((n, group) => n + group.cards.length, 0) + column.sides.length, 0))
+const shown = computed(() => columns.value.reduce((sum, column) => sum + column.activities, 0))
 const template = computed(() => allDays.value.map((day) => (day === props.restDay ? 'var(--cal-rest)' : 'var(--cal-col)')).join(' '))
 
 const heading = computed(() => {
@@ -310,14 +278,9 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
             v-for="column in columns"
             :key="column.date"
             class="cal-col cal-head-col"
-            :class="{ 'week-start': column.weekBreak, 'is-tinted': column.isTinted, 'is-side': column.isSide, 'is-alt': column.isAlt, 'is-rest': column.isRest, 'is-past': column.isPast }"
-            :style="column.dayStyle"
+            :class="{ 'week-start': column.weekBreak, 'is-alt': column.isAlt, 'is-rest': column.isRest, 'is-past': column.isPast }"
           >
-            <NuxtLink v-if="column.tag" :to="column.tag.to" class="rule-label wk-tag">
-              <UiIcon v-if="column.tag.icon" :name="column.tag.icon" size="1.05em" :stroke-width="2" />
-              <span class="truncate">{{ column.tag.text }}</span>
-            </NuxtLink>
-            <span v-else-if="column.isRest" class="rule-label wk-tag wk-tag-rest">{{ t('programme.week.rest.label') }}</span>
+            <span v-if="column.isRest" class="rule-label wk-tag wk-tag-rest">{{ t('programme.week.rest.label') }}</span>
             <span v-else class="rule-label wk-tag invisible" aria-hidden="true">&nbsp;</span>
             <div class="wk-head">
               <b class="wk-number">{{ column.number }}</b>
@@ -347,8 +310,7 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
           v-for="column in columns"
           :key="column.date"
           class="cal-col cal-body-col"
-          :class="{ 'week-start': column.weekBreak, 'is-tinted': column.isTinted, 'is-side': column.isSide, 'is-alt': column.isAlt, 'is-rest': column.isRest }"
-          :style="column.dayStyle"
+          :class="{ 'week-start': column.weekBreak, 'is-alt': column.isAlt, 'is-rest': column.isRest }"
           :aria-label="column.label"
         >
           <p v-if="column.isRest" class="rest-note">
@@ -356,79 +318,60 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
             <span>{{ t('programme.week.rest.note') }}</span>
           </p>
 
-          <div v-else-if="column.hasCards || column.sides.length">
-            <ol v-if="column.sides.length" class="wk-list">
-              <li v-for="side in column.sides" :key="side.slug" class="wk-card group" :class="{ 'is-faded': side.past }">
-                <div class="wk-media wk-media-tile">
-                  <UiIcon v-if="side.icon" :name="side.icon" size="2rem" :stroke-width="1.6" />
-                </div>
-                <div class="wk-body">
-                  <p v-if="side.start" class="wk-time">
-                    <b>{{ side.start }}</b>
-                    <span><small>{{ side.weekday }}</small>{{ side.until }}</span>
-                  </p>
-                  <h4 class="wk-title">
-                    <NuxtLink :to="side.to" class="wk-link">{{ side.title }}</NuxtLink>
-                  </h4>
-                  <p v-if="side.venue" class="mt-2 text-[0.8rem] text-text-muted">{{ side.venue }}</p>
-                  <div v-if="side.past" class="wk-foot">
-                    <UiStatusBadge state="past" size="sm" :label="stateLabel('past')" />
-                  </div>
-                </div>
+          <ol v-else-if="column.items.length" class="wk-list">
+            <template v-for="entry in column.items" :key="entry.key">
+              <li v-if="entry.kind === 'block'">
+                <EventProgrammeTrackBlock :block="entry.block" :to="entry.to" :timezone="props.timezone" :faded="column.isPast" />
               </li>
-            </ol>
-
-            <ol v-for="group in column.groups" :key="group.key" class="wk-list" :class="{ 'wk-band': group.band }">
               <li
-                v-for="item in group.cards"
-                :key="item.id"
+                v-else
                 class="wk-card group"
-                :class="{ 'is-live': item.current === 'live', 'is-faded': item.faded }"
+                :class="{ 'is-live': entry.card.current === 'live', 'is-faded': entry.card.faded }"
               >
-                <div class="wk-media" :class="{ 'wk-media-tile': !item.cover && !item.slides.length }">
+                <div class="wk-media" :class="{ 'wk-media-tile': !entry.card.cover && !entry.card.slides.length }">
                   <UiSlideshow
-                    v-if="item.slides.length"
-                    :slides="item.slides"
+                    v-if="entry.card.slides.length"
+                    :slides="entry.card.slides"
                     :interval="5000"
-                    :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]', { grayscale: item.faded }]"
+                    :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]', { grayscale: entry.card.faded }]"
                     sizes="(min-width: 960px) 216px, 104px"
                   />
                   <UiImage
-                    v-else-if="item.cover"
-                    :image="item.cover"
+                    v-else-if="entry.card.cover"
+                    :image="entry.card.cover"
                     ratio="auto"
                     frame-class="size-full"
                     class="absolute inset-0 transition duration-200 motion-safe:group-hover:scale-[1.03]"
-                    :class="{ grayscale: item.faded }"
+                    :class="{ grayscale: entry.card.faded }"
                     sizes="(min-width: 960px) 216px, 104px"
                   />
                   <ActivityCoverFallback
                     v-else
                     :image="props.editionImage"
-                    :label="item.initials"
+                    :label="entry.card.initials"
                     text-class="text-[1.6rem]"
-                    :faded="item.faded"
+                    :faded="entry.card.faded"
                     :image-class="['transition duration-200 motion-safe:group-hover:scale-[1.03]']"
                     sizes="(min-width: 960px) 216px, 104px"
                   >
-                    <span aria-hidden="true">{{ item.initials }}</span>
+                    <span aria-hidden="true">{{ entry.card.initials }}</span>
                   </ActivityCoverFallback>
                 </div>
                 <div class="wk-body">
                   <p class="wk-time">
-                    <b>{{ item.start }}</b>
-                    <span><small>{{ item.weekday }}</small>{{ item.until }}</span>
-                    <EventHostMark v-if="item.host" class="ms-auto self-center" />
+                    <b>{{ entry.card.start }}</b>
+                    <span><small>{{ entry.card.weekday }}</small>{{ entry.card.until }}</span>
+                    <EventHostMark v-if="entry.card.host" class="ms-auto self-center" />
                   </p>
-                  <h4 class="wk-title" :class="{ 'line-through': item.current === 'cancelled' }">
-                    <NuxtLink :to="item.to" class="wk-link">{{ item.title }}</NuxtLink>
+                  <h4 class="wk-title" :class="{ 'line-through': entry.card.current === 'cancelled' }">
+                    <NuxtLink :to="entry.card.to" class="wk-link">{{ entry.card.title }}</NuxtLink>
                   </h4>
-                  <ActivityIncidentNotice v-if="item.notice" :incident="item.notice" variant="flag" class="mt-1.5" />
-                  <template v-if="item.parts.length">
+                  <ActivityIncidentNotice v-if="entry.card.notice" :incident="entry.card.notice" variant="flag" class="mt-1.5" />
+                  <template v-if="entry.card.parts.length">
                     <p class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
                       <span class="flex shrink-0">
                         <OrganizationLogoMark
-                          v-for="(part, index) in item.parts"
+                          v-for="(part, index) in entry.card.parts"
                           :key="part.id"
                           :name="part.name"
                           :acronym="part.acronym"
@@ -437,27 +380,27 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
                           :class="{ '-ml-3 ring-2 ring-surface-raised': index > 0 }"
                         />
                       </span>
-                      <b class="min-w-0 truncate font-bold text-text">{{ item.jointNames }}</b>
+                      <b class="min-w-0 truncate font-bold text-text">{{ entry.card.jointNames }}</b>
                     </p>
                     <p class="wk-joint">
                       <UiIcon name="users" size="1.05em" :stroke-width="2" />{{ t('programme.joint.tag') }}
                     </p>
                   </template>
-                  <p v-else-if="item.organization" class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
-                    <OrganizationLogoMark :name="item.organization" :acronym="item.acronym" :logo="item.logo" size="sm" />
-                    <b class="min-w-0 truncate font-bold text-text">{{ item.shortName }}</b>
+                  <p v-else-if="entry.card.organization" class="mt-2 flex items-center gap-2.5 text-[0.8rem]">
+                    <OrganizationLogoMark :name="entry.card.organization" :acronym="entry.card.acronym" :logo="entry.card.logo" size="sm" />
+                    <b class="min-w-0 truncate font-bold text-text">{{ entry.card.shortName }}</b>
                   </p>
                   <div class="wk-foot">
-                    <UiStatusBadge :state="item.current" size="sm" :label="item.stateLabel" />
-                    <span v-if="item.visited" class="text-xs text-accent">{{ t('programme.week.visited') }}</span>
-                    <UiButton v-if="item.current === 'live'" variant="live" :to="item.joinTo" icon="video" class="relative z-10">
+                    <UiStatusBadge :state="entry.card.current" size="sm" :label="entry.card.stateLabel" />
+                    <span v-if="entry.card.visited" class="text-xs text-accent">{{ t('programme.week.visited') }}</span>
+                    <UiButton v-if="entry.card.current === 'live'" variant="live" :to="entry.card.joinTo" icon="video" class="relative z-10">
                       {{ t('programme.week.join') }}
                     </UiButton>
                   </div>
                 </div>
               </li>
-            </ol>
-          </div>
+            </template>
+          </ol>
 
           <p v-else class="px-1 py-3.5 text-[13px] text-text-muted">{{ t('programme.week.emptyDay') }}</p>
         </section>
@@ -515,18 +458,9 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
   padding-left: 9px;
 }
 
-/* Un jour ordinaire sur deux, un gris à peine posé, de l'en-tête au bas de la colonne. */
-.cal-col.is-alt:not(.is-tinted, .is-rest) {
+/* Un jour sur deux, un gris à peine posé, de l'en-tête au bas de la colonne. */
+.cal-col.is-alt:not(.is-rest) {
   background: color-mix(in srgb, var(--color-text) 4.5%, transparent);
-}
-
-/* Une journée spéciale se détache plus que l'atelier, qui garde le fond léger. */
-.cal-col.is-tinted:not(.is-side) {
-  --cal-day-bg: color-mix(in srgb, var(--color-day-line) 24%, var(--color-surface-raised));
-}
-
-.cal-col.is-tinted.is-side {
-  --cal-day-bg: var(--color-day-surface);
 }
 
 .cal-head-col {
@@ -547,10 +481,6 @@ watch(() => [props.selected, allDays.value.join()], () => nextTick(() => show(pr
   --rule-on: var(--color-day-on-solid);
 }
 
-a.wk-tag:hover {
-  text-decoration: underline;
-}
-
 .wk-tag-rest {
   --rule-solid: var(--color-neutral-surface);
   --rule-on: var(--color-neutral);
@@ -567,10 +497,6 @@ a.wk-tag:hover {
   padding: 8px 8px 10px;
 }
 
-.is-tinted .wk-head {
-  background: var(--cal-day-bg);
-}
-
 .is-rest .wk-head {
   background: var(--cal-hatch);
 }
@@ -582,10 +508,6 @@ a.wk-tag:hover {
   line-height: 0.85;
   font-variant-numeric: tabular-nums;
   color: var(--color-heading);
-}
-
-.is-tinted .wk-number {
-  color: var(--color-day);
 }
 
 .is-past .wk-number,
@@ -670,23 +592,12 @@ a.wk-tag:hover {
   background: var(--color-surface-hover);
 }
 
-.cal-body-col.is-side,
-.wk-band {
-  background: var(--cal-day-bg);
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-}
-
-.wk-band .wk-card {
-  border-color: color-mix(in srgb, var(--color-day-line) 30%, transparent);
-}
-
 /* Le jour de repos : hachuré sur toute la hauteur, et dit. */
 .cal-body-col.is-rest {
   background: var(--cal-hatch);
 }
 
 /* Le fond du corps s'arrête aux marges de la colonne, comme celui de l'en-tête : les bords tombent d'aplomb. */
-.cal-body-col.is-side,
 .cal-body-col.is-rest {
   background-clip: content-box;
 }
@@ -722,20 +633,6 @@ a.wk-tag:hover {
   flex-direction: column;
   gap: 10px;
   padding: 10px 0;
-}
-
-.wk-list + .wk-list {
-  padding-top: 0;
-}
-
-.is-side .wk-list,
-.wk-list.wk-band {
-  padding-inline: 2px;
-}
-
-.wk-list.wk-band,
-.wk-band + .wk-list {
-  padding-top: 10px;
 }
 
 .wk-card {
@@ -785,11 +682,6 @@ a.wk-tag:hover {
   color: var(--color-text-muted);
 }
 
-:is(.is-side, .wk-band) .wk-media-tile {
-  background: var(--color-day-surface);
-  color: var(--color-day);
-}
-
 .wk-body {
   padding: 10px 12px 12px;
 }
@@ -807,10 +699,6 @@ a.wk-tag:hover {
   line-height: 0.9;
   font-variant-numeric: tabular-nums;
   color: var(--color-heading);
-}
-
-:is(.is-side, .wk-band) .wk-time b {
-  color: var(--color-day);
 }
 
 .is-live .wk-time b {
@@ -873,10 +761,6 @@ a.wk-tag:hover {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-accent);
-}
-
-:is(.is-side, .wk-band) .wk-joint {
-  color: var(--color-day);
 }
 
 .wk-foot {

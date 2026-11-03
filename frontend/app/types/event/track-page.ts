@@ -77,6 +77,8 @@ export interface TrackCompositionEntry {
   status: SessionStatus
   is_published: boolean
   part_id: TrackPartId | null
+  /** Moment du fil qui regroupe l'activité (03/11) ; nul : une ligne du déroulé. */
+  moment_id: TrackMomentId | null
   is_highlight: boolean
   sort_order: number
 }
