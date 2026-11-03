@@ -130,8 +130,8 @@
   .d3 .row .r-thumb { overflow: visible; }
   .d3 .row .r-time .oif { position: relative; top: auto; left: auto; margin-top: 10px; width: 26px; height: 26px; }
   .d3 .row .r-time .oif img { filter: none; }
-  @container (min-width: 640px) { .d3 .row .r-time .oif { display: none; } }
-  @container (max-width: 639px) { .d3 .row .r-thumb .oif { display: none; } }
+  /* Dans la liste, sous l'heure à toute largeur (arbitré le 03/11). */
+  .d3 .row .r-thumb .oif { display: none; }
 
   /* ════ 4. Le projecteur ═════════════════════════════════════
      Un bouton de la barre d'outils, « Activités de l'IFDD » : les autres pâlissent
@@ -191,7 +191,7 @@
   <header>
     <h2>3. Le cercle de l'OIF</h2>
     <p>Le cercle aux cinq couleurs de l'OIF, en haut à gauche de la couverture, sans fond. Une onde s'en échappe et s'efface, comme le point du direct.</p>
-    <ul><li>Ne touche ni aux couleurs de la carte ni au reste de la page.</li><li>Sur téléphone, la liste n'a pas de vignette : le cercle se pose sous l'heure.</li><li>Il s'arrête quand le visiteur a demandé moins d'animations ; il reste alors visible, fixe.</li></ul>
+    <ul><li>Ne touche ni aux couleurs de la carte ni au reste de la page.</li><li>Dans la liste, sur grand écran comme sur téléphone, le cercle se pose sous l'heure.</li><li>Il s'arrête quand le visiteur a demandé moins d'animations ; il reste alors visible, fixe.</li></ul>
   </header>
   <p class="frame-label">Calendrier, grand écran</p><div class="frame host-week"></div>
   <div class="lists"><div><p class="frame-label">Liste, grand écran</p><div class="frame host-list"></div></div><div><p class="frame-label">Liste, téléphone 375 px</p><div class="phone host-list"></div></div></div>
