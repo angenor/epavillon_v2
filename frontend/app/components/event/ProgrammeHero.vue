@@ -25,6 +25,7 @@ const { tr } = useI18nText()
 const { dateRange, dateTime, zoneLabel } = useDateTime()
 
 const picture = computed(() => editionPhoto(props.edition))
+const logo = computed(() => editionLogoOnDark(props.edition))
 
 const label = (edition: PublicEditionRow) =>
   edition.acronym ?? edition.edition_label ?? tr(edition.title)
@@ -81,7 +82,17 @@ const choices = computed(() =>
       <div class="fade-inverse-start absolute inset-y-0 left-0 hidden w-3/5 lg:block" />
     </div>
 
-    <div class="mx-auto w-full max-w-[1280px] px-4 pt-10 pb-9 sm:px-6">
+    <div
+      class="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 pt-10 pb-9 sm:flex-row sm:items-start sm:justify-between sm:px-6"
+    >
+      <img
+        v-if="logo"
+        :src="logo"
+        :alt="t('programme.hero.logoAlt', { edition: label(props.edition) })"
+        width="640"
+        height="259"
+        class="order-first h-12 w-auto self-start sm:order-last sm:h-16 lg:h-22"
+      >
       <div class="max-w-3xl">
         <p class="flex flex-wrap items-center gap-3 text-sm">
           <span

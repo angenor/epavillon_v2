@@ -28,6 +28,7 @@
     "description": "Les programmes des conférences et des cycles de webinaires apparaîtront ici dès leur publication."
   },
   "hero": {
+    "logoAlt": "Logo de la {edition}",
     "overline": "Programmation",
     "titlePavilion": "Programme du Pavillon de la Francophonie à la {edition}",
     "title": "Programme de {edition}",

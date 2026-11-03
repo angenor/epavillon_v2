@@ -26,3 +26,16 @@ export function defaultProgrammeEdition(
 export function editionPhoto(edition: Pick<PublicEditionRow, 'cover' | 'banner'> | null | undefined): AttachedImage | null {
   return edition ? (edition.cover ?? edition.banner ?? null) : null
 }
+
+/**
+ * Le logo blanc d'une édition, sur le bandeau sombre de `/programmations`.
+ * Fichier livré avec le site, sans emplacement au back-office (arbitrage du
+ * 03/11/2026) : une autre édition s'ajoute ici.
+ */
+const LOGOS_ON_DARK: Record<string, string> = {
+  'cdp31-antalya-2026': '/logos/editions/cdp31-antalya-2026-blanc.png',
+}
+
+export function editionLogoOnDark(edition: Pick<PublicEditionRow, 'slug'>): string | null {
+  return LOGOS_ON_DARK[edition.slug] ?? null
+}

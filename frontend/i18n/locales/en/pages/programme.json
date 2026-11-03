@@ -28,6 +28,7 @@
     "description": "Conference and webinar-series programmes will appear here as soon as they are published."
   },
   "hero": {
+    "logoAlt": "{edition} logo",
     "overline": "Programme",
     "titlePavilion": "Programme of the Francophonie Pavilion at {edition}",
     "title": "{edition} programme",
