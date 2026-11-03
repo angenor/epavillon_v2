@@ -643,7 +643,14 @@ INSERT INTO identity.permissions (code, label, module_code) VALUES
     ('negotiation.content.manage',  '{"fr":"Gérer les contenus de négociation","en":"Manage negotiation content"}', 'negotiation'),
     ('engagement.campaign.send',    '{"fr":"Envoyer des campagnes","en":"Send campaigns"}', 'engagement'),
     ('tool.survey.manage',          '{"fr":"Gérer les sondages","en":"Manage surveys"}', 'tool'),
-    ('analytics.dashboard.read',    '{"fr":"Consulter les tableaux de bord","en":"Read dashboards"}', 'analytics')
+    ('analytics.dashboard.read',    '{"fr":"Consulter les tableaux de bord","en":"Read dashboards"}', 'analytics'),
+    -- Voir combien de personnes sont sur la plateforme en ce moment et où
+    -- (03/11/2026) : carte « En ce moment » du tableau de bord, comptée en
+    -- mémoire par l'API, sans table. Réservée au super administrateur à la
+    -- demande du commanditaire : aucun rôle ne la reçoit ici, seul
+    -- super_admin la détient (tg_permissions_grant_super_admin). Testée en
+    -- portée globale : le compte mêle toutes les éditions.
+    ('analytics.presence.read',     '{"fr":"Voir combien de personnes sont sur la plateforme en ce moment","en":"See how many people are on the platform right now"}', 'analytics')
 ON CONFLICT (code) DO NOTHING;
 
 -- Le super administrateur détient toutes les permissions, y compris celles

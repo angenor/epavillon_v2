@@ -10,6 +10,32 @@
     "title": "No edition selected",
     "description": "Choose an edition at the top of the page to display its dashboard."
   },
+  "presence": {
+    "title": "Right now",
+    "loading": "Loading the number of people present",
+    "onPlatform": "people on the platform | person on the platform | people on the platform",
+    "signedIn": "signed in | signed in | signed in",
+    "visitors": "visitors | visitor | visitors",
+    "updated": "Updated {seconds} s ago, every 30 s",
+    "where": "Where they are",
+    "nobody": "Nobody on the platform right now.",
+    "unavailable": "The count of people present is temporarily unavailable. The rest of the dashboard is not affected.",
+    "zones": {
+      "live": "Rooms and live streams",
+      "programme": "Programme",
+      "day": "Day pages",
+      "activity": "Activity pages",
+      "organization": "Organisation space",
+      "admin": "Back office",
+      "negotiation": "Guide Négo",
+      "other": "Other pages"
+    },
+    "hour": {
+      "title": "Last hour",
+      "peak": "peak {count} at {time}",
+      "label": "From {min} to {max} people over the last hour"
+    }
+  },
   "actions": {
     "title": "Needs action",
     "total": "{count} item to handle | {count} item to handle | {count} items to handle",

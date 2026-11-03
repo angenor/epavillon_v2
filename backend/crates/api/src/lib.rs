@@ -8,6 +8,7 @@
 pub mod middleware;
 pub mod modules;
 pub mod openapi;
+pub mod presence;
 pub mod realtime;
 pub mod routes;
 pub mod state;
@@ -57,7 +58,8 @@ pub fn build_app(
         .configure(routes::journal::configurer)
         // Le socle du temps réel ne dépend d'aucun module : `person:` et
         // `edition:…:public` sont servis même quand tout le reste est démonté.
-        .configure(realtime::configurer);
+        .configure(realtime::configurer)
+        .configure(presence::configurer);
 
     // Servie partout sauf en production, où le document décrirait la totalité
     // de la surface d'appel à qui sonde le port.
@@ -260,6 +262,7 @@ pub fn build_app(
         .app_data(web::Data::new(etat.negotiation.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::from(etat.realtime.clone()))
+        .app_data(web::Data::from(etat.presence.clone()))
         .app_data(web::Data::new(etat.topics.clone()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())

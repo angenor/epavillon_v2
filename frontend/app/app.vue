@@ -2,7 +2,8 @@
 /**
  * Racine de l'application.
  *
- * Trois responsabilités, et rien d'autre :
+ * Trois responsabilités, et rien d'autre (plus le signal de présence de
+ * l'onglet, `usePresence()`, qui n'a qu'un lieu où être monté une fois) :
  *  · poser `data-theme` sur `<html>` DÈS LE RENDU SERVEUR — le choix vient d'un
  *    cookie, ce qui évite qu'une page s'affiche en clair avant de basculer en
  *    sombre ; l'attribut est absent en mode « système », laissant la media
@@ -24,6 +25,8 @@ const deferred = useSessionDeferred()
 onMounted(() => {
   deferred.value = false
 })
+
+usePresence()
 
 const layoutName = computed(() => {
   const declared = route.meta.layout

@@ -63,6 +63,7 @@
  *                        résolue, publication et dépublication
  *   analytics.ts         les projections du module Analytique, reconstituées
  *   admin-dashboard.ts   la composition du tableau de bord du back-office (A6)
+ *   admin-presence.ts    la carte « En ce moment » du tableau de bord
  *   permissions.ts       le catalogue des permissions et ce que chaque rôle
  *                        permet — l'autorisation se teste par PERMISSION
  *   proposal-workflow.ts la machine à états des dossiers, en données
@@ -327,6 +328,7 @@ export {
 } from './analytics'
 
 export { adminDashboard } from './admin-dashboard'
+export { adminPresence } from './admin-presence'
 
 export { permissions, rolePermissions, roles, effectivePermissions } from './permissions'
 export { platformModules, moduleByCode, moduleRank } from './platform'

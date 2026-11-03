@@ -18,3 +18,12 @@ pub struct DashboardRead;
 impl PermissionSpec for DashboardRead {
     const CODE: &'static str = "analytics.dashboard.read";
 }
+
+/// Carte « En ce moment » (`GET /admin/presence`, servie par le crate `api`).
+/// Portée globale : le compte mêle toutes les éditions. Aucun rôle ne la reçoit
+/// au semis, seul `super_admin` la détient par son déclencheur.
+pub struct PresenceRead;
+
+impl PermissionSpec for PresenceRead {
+    const CODE: &'static str = "analytics.presence.read";
+}

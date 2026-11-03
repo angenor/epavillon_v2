@@ -12,6 +12,8 @@ import type { EffectivePermission } from '~/types/identity'
  *
  * TROIS ZONES, ET LEUR ORDRE EST LE SUJET :
  *
+ *  0. « EN CE MOMENT », au-dessus, pour les seuls super administrateurs : la
+ *     seule information qui change d'une minute à l'autre.
  *  1. CE QUI DEMANDE UNE ACTION, en tête, le plus visible. Il RESTE LISIBLE
  *     VIDE : un back-office où tout va bien ne doit pas ressembler à un écran
  *     cassé. C'est la contrainte explicite du prompt, et c'est celle qu'on
@@ -80,6 +82,7 @@ const figures = computed(() => dashboard.value?.figures ?? null)
 // Lues par le layout, déjà en cache : le lien vers le journal ne paraît qu'à qui peut l'ouvrir.
 const { data: navPermissions } = useNuxtData<EffectivePermission[]>('admin-nav-permissions')
 const canReadJournal = computed(() => hasPermission(navPermissions.value, 'identity.platform.journal'))
+const canReadPresence = computed(() => hasPermission(navPermissions.value, 'analytics.presence.read'))
 const timezone = computed(() => dashboard.value?.timezone ?? 'UTC')
 
 /**
@@ -137,6 +140,10 @@ function total(points: { cumul: number }[]): number {
           {{ t('admin.dashboard.refreshedAt', { date: dateTime(figures.refreshed_at, timezone) }) }}
         </p>
       </header>
+
+      <!-- Hors de l'édition choisie : le compte vaut pour toute la plateforme, et
+           ne paraît qu'à qui détient `analytics.presence.read`. -->
+      <AdminPresenceCard v-if="canReadPresence" class="mt-6" />
 
       <AdminMaintenanceSwitch />
 

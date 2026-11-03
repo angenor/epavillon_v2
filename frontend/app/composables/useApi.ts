@@ -92,6 +92,7 @@ import { createAdminNegotiationSavoirApi } from './api/admin-negotiation-savoir'
 import { createAuthApi } from './api/auth'
 import { createMeetingsApi } from './api/meetings'
 import { createRealtimeApi } from './api/realtime'
+import { createAdminPresenceApi, createPresenceApi } from './api/presence'
 import { createProgrammeChangesApi } from './api/programme-changes'
 import { createAssistanceApi } from './api/assistance'
 import { createTrackRegistrationsApi } from './api/track-registrations'
@@ -331,6 +332,9 @@ export function useApi() {
     notifications: createNotificationsApi({ call, send }),
     /** Pouls et flux, pour `useRealtime()` seulement : aucune page ne les appelle. */
     realtime: createRealtimeApi(http),
+    /** Signal de présence, pour `usePresence()` seulement. */
+    presence: createPresenceApi(http),
+    adminPresence: createAdminPresenceApi(deps),
 
     guideNegoSavoir: createGuideNegoSavoirApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     home: createHomeApi(deps),
