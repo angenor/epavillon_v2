@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Courriels programmés</title>
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--color-surface); color: var(--color-text); font-family: "Inter", "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.5; }
+  .page { max-width: 1240px; margin: 0 auto; padding: 32px 16px 96px; }
+  .note { max-width: 80ch; margin: 0 0 32px; padding: 12px 16px; border-left: 4px solid var(--color-info); background: var(--color-info-surface); font-size: 14px; line-height: 1.6; }
+  .note p { margin: 0 0 8px; } .note p:last-child { margin: 0; }
+  h1 { margin: 0; font-size: 1.875rem; font-weight: 600; }
+  .sous { margin: 4px 0 0; color: var(--color-text-muted); }
+  nav.onglets { display: flex; gap: 4px; margin: 20px 0 24px; border-bottom: 1px solid var(--color-border); overflow-x: auto; }
+  nav.onglets a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-bottom: 3px solid transparent; color: var(--color-text-secondary); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  nav.onglets a[aria-current] { border-bottom-color: var(--color-accent); color: var(--color-text); }
+  nav.onglets small { padding: 0 7px; border-radius: 999px; background: var(--color-surface-sunken); font-size: 12px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* Le prochain départ : la seule chose qui bouge à la seconde. */
+  .prochain { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px; padding: 20px 24px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); }
+  .prochain .quoi { min-width: 0; }
+  .prochain .quoi span { display: block; font-size: 14px; color: var(--color-text-muted); }
+  .prochain .quoi b { display: block; margin-top: 2px; font-size: 1.15rem; font-weight: 600; }
+  .prochain .quoi em { font-style: normal; color: var(--color-text-secondary); font-size: 14px; }
+  .decompte { display: flex; gap: 10px; }
+  .decompte div { min-width: 64px; padding: 8px 10px; border-radius: 8px; background: var(--color-surface-sunken); text-align: center; }
+  .decompte b { display: block; font-size: 1.9rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--color-heading); }
+  .decompte small { display: block; margin-top: 4px; font-size: 12px; color: var(--color-text-muted); }
+
+  .types { margin-top: 32px; display: grid; gap: 12px; }
+  .type { border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); overflow: hidden; }
+  .type > header { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 12px 24px; padding: 14px 20px; }
+  @media (max-width: 760px) { .type > header { grid-template-columns: minmax(0, 1fr) auto; } .type > header .act { grid-column: 1 / -1; } }
+  .type h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+  .type h2 small { display: block; font-weight: 400; font-size: 13.5px; color: var(--color-text-muted); }
+  .type .compte { font-size: 14px; color: var(--color-text-secondary); text-align: right; }
+  .type .compte b { font-size: 1.1rem; color: var(--color-text); }
+  .type .dans { font-size: 14px; text-align: right; color: var(--color-text-secondary); }
+  .type .dans b { display: block; color: var(--color-text); font-variant-numeric: tabular-nums; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1px solid var(--color-border-strong, var(--color-border)); border-radius: 8px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn.prim { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-text-on-accent, #fff); }
+  .btn.lien { border-color: transparent; background: none; color: var(--color-text-link); padding: 0 6px; }
+
+  .envois { border-top: 1px solid var(--color-border-subtle); }
+  .envois table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .envois th { padding: 8px 20px; text-align: left; font-weight: 600; color: var(--color-text-muted); font-size: 13px; background: var(--color-surface-sunken); }
+  .envois td { padding: 10px 20px; border-top: 1px solid var(--color-border-subtle); vertical-align: top; }
+  .envois tr.choisi td { background: var(--color-info-surface); }
+  .envois .h b { display: block; font-variant-numeric: tabular-nums; }
+  .envois .h small { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .pastille { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--color-warning-surface); color: var(--color-warning); font-size: 12px; font-weight: 600; }
+  @media (max-width: 760px) { .envois .col-dest { display: none; } }
+
+  /* L'aperçu : ce qui partira, tel quel, et les deux façons de le changer. */
+  .apercu { margin-top: 32px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+  @media (max-width: 960px) { .apercu { grid-template-columns: minmax(0, 1fr); } }
+  .panneau { border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); padding: 20px; }
+  .panneau h3 { margin: 0 0 4px; font-size: 1.05rem; font-weight: 600; }
+  .panneau .ctx { margin: 0 0 16px; font-size: 14px; color: var(--color-text-muted); }
+  .portee { display: flex; gap: 4px; padding: 3px; border-radius: 8px; background: var(--color-surface-sunken); margin-bottom: 16px; }
+  .portee button { flex: 1; min-height: 40px; border: 0; border-radius: 6px; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); cursor: pointer; }
+  .portee button[aria-pressed="true"] { background: var(--color-surface-raised); color: var(--color-text); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+  label.champ { display: block; margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+  input.champ, textarea.champ { width: 100%; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: 14px; }
+  textarea.champ { min-height: 190px; line-height: 1.55; resize: vertical; }
+  .vars { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+  .vars span { padding: 2px 8px; border-radius: 6px; background: var(--color-surface-sunken); font-size: 12.5px; color: var(--color-text-secondary); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .aide { margin: 12px 0 0; font-size: 13px; color: var(--color-text-muted); }
+
+  .mail { border: 1px solid var(--color-border); border-radius: 8px; background: #f4f5f7; padding: 16px; }
+  .mail .entete { font-size: 13px; color: #565554; margin-bottom: 10px; }
+  .mail .entete b { color: #231f20; }
+  .mail .corps { background: #fff; border: 1px solid #e3e5ea; color: #231f20; }
+  .mail .bandeau { height: 56px; background: #1d1a5b; display: flex; align-items: center; padding: 0 20px; color: #fff; font-weight: 700; }
+  .mail .lisere { height: 4px; background: linear-gradient(90deg, #00a1e4 0 20%, #8fbf2f 20% 40%, #ffd500 40% 60%, #e63132 60% 80%, #732f85 80%); }
+  .mail .texte { padding: 20px 24px; font-size: 14.5px; line-height: 1.6; }
+  .mail .texte p { margin: 0 0 12px; }
+  .mail .bouton { display: inline-block; padding: 10px 20px; border-radius: 6px; background: #0c6792; color: #fff; font-weight: 700; text-decoration: none; }
+  .mail mark { background: #e0f3fb; color: inherit; padding: 0 2px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="note">
+    <p><b>Où.</b> Un onglet « Programmés » dans Courriels, à côté des envois, gabarits et textes.</p>
+    <p><b>Ce qu'on y voit.</b> Les courriels automatiques déjà programmés, regroupés par type, le prochain départ décompté à la seconde. Un « envoi » réunit tous les destinataires d'un même rappel pour une même activité à la même heure : on n'affiche pas des centaines de lignes une par personne.</p>
+    <p><b>Deux façons de modifier.</b> « Le texte du type » change tous les envois de ce type pas encore partis. « Cet envoi seulement » change ce seul rappel, pour tous ses destinataires ; il garde sa version même si le texte du type change ensuite, et « Revenir au texte du type » l'annule. Les noms, titres, heures et liens restent remplis automatiquement (zones surlignées dans l'aperçu).</p>
+    <p><b>Ce qui n'y figure pas.</b> Les courriels qui partent à l'instant d'un geste (confirmation d'inscription, mot de passe oublié, invitation…) : ils ne sont jamais programmés à l'avance.</p>
+  </div>
+
+  <h1>Courriels</h1>
+  <p class="sous">CdP31, Antalya. Heures d'Antalya (UTC+3).</p>
+  <nav class="onglets" aria-label="Courriels">
+    <a href="#">Envois</a><a href="#">Gabarits</a><a href="#">Textes</a><a href="#" aria-current="page">Programmés <small>116</small></a>
+  </nav>
+
+  <section class="prochain" aria-label="Prochain départ">
+    <div class="quoi">
+      <span>Prochain départ</span>
+      <b>Rappel de journée, 2 jours avant</b>
+      <em>Atelier préparatoire francophone des négociateurs-trices, 4 destinataires, le 06/11 à 09:00</em>
+    </div>
+    <div class="decompte" role="timer" aria-live="off" data-cible="2026-11-06T06:00:00Z">
+      <div><b data-u="j">2</b><small>jours</small></div>
+      <div><b data-u="h">11</b><small>heures</small></div>
+      <div><b data-u="m">58</b><small>minutes</small></div>
+      <div><b data-u="s">12</b><small>secondes</small></div>
+    </div>
+  </section>
+
+  <div class="types">
+    <article class="type">
+      <header>
+        <h2>Rappel de journée<small>2 jours et 1 jour avant une journée spéciale ou l'atelier</small></h2>
+        <span class="compte"><b class="num">12</b> courriels</span>
+        <span class="dans">prochain<b>dans 2 j 11 h 58 min</b></span>
+        <span class="act"><button class="btn" type="button">Modifier le texte du type</button></span>
+      </header>
+      <div class="envois">
+        <table>
+          <thead><tr><th>Départ</th><th>Envoi</th><th class="col-dest">Destinataires</th><th><span class="sr">Action</span></th></tr></thead>
+          <tbody>
+            <tr class="choisi"><td class="h"><b>06/11 09:00</b><small>dans 2 j 11 h 58 min 12 s</small></td><td>Atelier préparatoire, 2 jours avant</td><td class="col-dest num">4</td><td><button class="btn lien" type="button">Voir</button></td></tr>
+            <tr><td class="h"><b>07/11 09:00</b><small>dans 3 j 11 h 58 min 12 s</small></td><td>Atelier préparatoire, 1 jour avant</td><td class="col-dest num">4</td><td><button class="btn lien" type="button">Voir</button></td></tr>
+            <tr><td class="h"><b>11/11 08:00</b><small>dans 7 j 10 h 58 min 12 s</small></td><td>Journée finance durable, 2 jours avant <span class="pastille">texte de cet envoi</span></td><td class="col-dest num">1</td><td><button class="btn lien" type="button">Voir</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="type">
+      <header>
+        <h2>Rappel 2 jours avant une activité</h2>
+        <span class="compte"><b class="num">26</b> courriels</span>
+        <span class="dans">prochain<b>dans 3 j 11 h 58 min</b></span>
+        <span class="act"><button class="btn" type="button">Modifier le texte du type</button></span>
+      </header>
+    </article>
+    <article class="type">
+      <header>
+        <h2>Rappel 1 jour avant une activité</h2>
+        <span class="compte"><b class="num">26</b> courriels</span>
+        <span class="dans">prochain<b>dans 4 j 11 h 58 min</b></span>
+        <span class="act"><button class="btn" type="button">Modifier le texte du type</button></span>
+      </header>
+    </article>
+    <article class="type">
+      <header>
+        <h2>Rappel 1 heure avant une activité</h2>
+        <span class="compte"><b class="num">26</b> courriels</span>
+        <span class="dans">prochain<b>dans 5 j 10 h 58 min</b></span>
+        <span class="act"><button class="btn" type="button">Modifier le texte du type</button></span>
+      </header>
+    </article>
+    <article class="type">
+      <header>
+        <h2>Rappel 30 minutes avant une activité</h2>
+        <span class="compte"><b class="num">26</b> courriels</span>
+        <span class="dans">prochain<b>dans 5 j 11 h 28 min</b></span>
+        <span class="act"><button class="btn" type="button">Modifier le texte du type</button></span>
+      </header>
+    </article>
+  </div>
+
+  <section class="apercu" aria-label="Envoi choisi">
+    <div class="panneau">
+      <h3>Atelier préparatoire, rappel 2 jours avant</h3>
+      <p class="ctx">Part le 06/11 à 09:00 vers 4 destinataires. Aperçu pour la première d'entre elles.</p>
+      <div class="portee" role="group" aria-label="Ce que la modification touche">
+        <button type="button" aria-pressed="false">Le texte du type (12 courriels)</button>
+        <button type="button" aria-pressed="true">Cet envoi seulement (4)</button>
+      </div>
+      <label class="champ" for="objet">Objet</label>
+      <input class="champ" id="objet" value="{{titre_journee}} commence dans 2 jours">
+      <label class="champ" for="corps" style="margin-top:14px">Message</label>
+      <textarea class="champ" id="corps">Bonjour {{prenom}},
+
+« {{titre_journee}} » commence dans 2 jours, le {{date}}.
+Le programme a été mis à jour : un moment d'échange avec les négociateurs en chef s'ajoute à 11:00.
+
+Suivez le direct avec le lien de votre courriel de confirmation, ou depuis la page de la journée.</textarea>
+      <div class="vars" aria-label="Zones remplies automatiquement"><span>{{prenom}}</span><span>{{titre_journee}}</span><span>{{date}}</span><span>bouton « Voir la journée »</span></div>
+      <div class="actions"><button class="btn" type="button">Revenir au texte du type</button><button class="btn prim" type="button">Enregistrer pour cet envoi</button></div>
+      <p class="aide">Rien ne part plus tôt : l'envoi garde son heure. Une modification enregistrée moins d'une minute avant le départ peut ne pas être prise.</p>
+    </div>
+
+    <div class="panneau">
+      <h3>Ce qui partira</h3>
+      <p class="ctx">Gabarit institutionnel avec le logo de l'édition, comme les confirmations.</p>
+      <div class="mail">
+        <div class="entete"><b>Objet :</b> <mark>Atelier préparatoire francophone…</mark> commence dans 2 jours<br><b>À :</b> une des 4 personnes inscrites</div>
+        <div class="corps">
+          <div class="bandeau">ePavillon de la Francophonie</div>
+          <div class="lisere"></div>
+          <div class="texte">
+            <p>Bonjour <mark>Awa</mark>,</p>
+            <p>« <mark>Atelier préparatoire francophone des négociateurs-trices…</mark> » commence dans 2 jours, le <mark>dimanche 8 novembre à 09:00 (heure d'Antalya)</mark>.<br>Le programme a été mis à jour : un moment d'échange avec les négociateurs en chef s'ajoute à 11:00.</p>
+            <p>Suivez le direct avec le lien de votre courriel de confirmation, ou depuis la page de la journée.</p>
+            <p><a class="bouton" href="#">Voir la journée</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+  // Décompte à la seconde, pour la maquette : le vrai écran le recalcule sur l'heure du serveur.
+  const boite = document.querySelector('.decompte');
+  const cible = Date.now() + ((2 * 24 + 11) * 3600 + 58 * 60 + 12) * 1000;
+  function tic() {
+    let r = Math.max(0, Math.floor((cible - Date.now()) / 1000));
+    const j = Math.floor(r / 86400); r -= j * 86400;
+    const h = Math.floor(r / 3600); r -= h * 3600;
+    const m = Math.floor(r / 60); const s = r - m * 60;
+    for (const [u, v] of [['j', j], ['h', h], ['m', m], ['s', s]]) boite.querySelector(`[data-u="${u}"]`).textContent = String(v).padStart(u === 'j' ? 1 : 2, '0');
+  }
+  tic(); setInterval(tic, 1000);
+</script>
+</body>
+</html>
