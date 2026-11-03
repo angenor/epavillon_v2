@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journées en un bloc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<style>
+  :root {
+    --f-titre: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --f-texte: "Inter", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--color-surface); color: var(--color-text); font-family: var(--f-texte); font-size: 15px; line-height: 1.5; }
+  .jb-page { max-width: 1240px; margin: 0 auto; padding: 32px 16px 96px; }
+  .jb-note { max-width: 78ch; margin: 0 0 40px; padding: 12px 16px; border-left: 4px solid var(--color-info); background: var(--color-info-surface); font-size: 14px; line-height: 1.6; }
+  .jb-note p { margin: 0 0 8px; }
+  .jb-note p:last-child { margin: 0; }
+  .jb-etape { margin: 56px 0 16px; font-family: var(--f-titre); font-size: 1.7rem; font-weight: 700; text-transform: uppercase; color: var(--color-heading); }
+  .jb-etape small { display: block; margin-top: 2px; font-family: var(--f-texte); font-size: 14px; font-weight: 400; text-transform: none; color: var(--color-text-muted); }
+
+  /* Couleurs des journées : celles de la base (color_hex). */
+  .j-finance { --d: #8c6d1f; --d-teinte: color-mix(in srgb, #8c6d1f 9%, var(--color-surface-raised)); --d-encre: #6f5617; }
+  .j-jeunesse { --d: #0b6c9e; --d-teinte: color-mix(in srgb, #0b6c9e 8%, var(--color-surface-raised)); --d-encre: #0a5a84; }
+  /* Sur fond sombre, l'encre de la journée s'éclaircit : la couleur de la base reste celle de l'aplat. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .j-finance { --d-encre: #e3c77d; --d-teinte: color-mix(in srgb, #8c6d1f 22%, var(--color-surface-raised)); }
+    :root:not([data-theme="light"]) .j-jeunesse { --d-encre: #8ccdf0; --d-teinte: color-mix(in srgb, #0b6c9e 22%, var(--color-surface-raised)); }
+  }
+  :root[data-theme="dark"] .j-finance { --d-encre: #e3c77d; --d-teinte: color-mix(in srgb, #8c6d1f 22%, var(--color-surface-raised)); }
+  :root[data-theme="dark"] .j-jeunesse { --d-encre: #8ccdf0; --d-teinte: color-mix(in srgb, #0b6c9e 22%, var(--color-surface-raised)); }
+
+  /* ---------- 1. Calendrier ---------- */
+  .jb-cal { display: grid; grid-template-columns: repeat(3, 228px); gap: 0; overflow-x: auto; border-top: 2px solid var(--color-text); }
+  .jb-col { padding: 0 8px 16px; border-left: 1px solid var(--color-border-subtle); }
+  .jb-col:first-child { border-left: 0; }
+  .jb-tete { display: flex; align-items: baseline; gap: 8px; padding: 12px 6px 10px; }
+  .jb-tete b { font-family: var(--f-titre); font-size: 2.1rem; line-height: 1; }
+  .jb-tete span { font-family: var(--f-titre); font-weight: 700; text-transform: uppercase; }
+  .jb-tete small { display: block; font-size: 12px; color: var(--color-text-muted); text-transform: none; font-family: var(--f-texte); font-weight: 400; }
+  .jb-carte { margin-bottom: 10px; border: 1px solid var(--color-border-subtle); border-radius: 8px; background: var(--color-surface-raised); overflow: hidden; }
+  .jb-carte .ph { height: 74px; display: grid; place-items: center; background: linear-gradient(0deg, rgb(29 26 91 / .55), rgb(29 26 91 / .55)), #6d8a9c; color: #fff; font-family: var(--f-titre); font-weight: 700; font-size: 1.4rem; }
+  .jb-carte .co { padding: 10px 12px 12px; }
+  .jb-heure { font-family: var(--f-titre); font-weight: 700; font-size: 1.5rem; line-height: 1; }
+  .jb-heure small { font-family: var(--f-texte); font-weight: 400; font-size: 12px; color: var(--color-text-muted); margin-left: 4px; }
+  .jb-carte h4 { margin: 6px 0 0; font-family: var(--f-titre); font-weight: 600; font-size: 1.05rem; line-height: 1.2; color: var(--color-heading); }
+
+  /* Le bloc d'une journée : la seule carte en couleur de la colonne, qui mène à sa page. */
+  a.jb-bloc { display: block; margin-bottom: 10px; border-radius: 8px; background: var(--d-teinte); border: 1px solid color-mix(in srgb, var(--d) 35%, transparent); color: inherit; text-decoration: none; overflow: hidden; }
+  a.jb-bloc:hover { border-color: var(--d); }
+  a.jb-bloc:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+  .jb-bloc .bandeau { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--d); color: #fff; font-family: var(--f-titre); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: .02em; }
+  .jb-bloc .co { padding: 12px 12px 14px; }
+  .jb-bloc h4 { margin: 8px 0 0; font-family: var(--f-titre); font-weight: 700; font-size: 1.35rem; line-height: 1.1; text-transform: uppercase; color: var(--d-encre); }
+  .jb-bloc .sous { margin: 6px 0 0; font-size: 13px; color: var(--color-text-secondary); }
+  .jb-temps { list-style: none; margin: 12px 0 0; padding: 0 0 0 12px; border-left: 3px solid var(--d); display: grid; gap: 7px; }
+  .jb-temps li { font-size: 13px; line-height: 1.35; }
+  .jb-temps b { display: block; font-weight: 600; }
+  .jb-temps span { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .jb-fort { display: flex; gap: 8px; margin: 12px 0 0; padding: 8px 10px; border-radius: 6px; background: var(--color-surface-raised); font-size: 13px; line-height: 1.35; }
+  .jb-fort svg { flex: none; width: 16px; height: 16px; margin-top: 1px; color: var(--d); }
+  .jb-pied { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; margin-top: 12px; font-size: 12.5px; color: var(--color-text-muted); }
+  .jb-pied strong { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; font-family: var(--f-titre); font-weight: 700; font-size: 1rem; text-transform: uppercase; color: var(--d-encre); }
+
+  /* ---------- 2. Liste ---------- */
+  .jb-liste { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; border-top: 1px solid var(--color-border-subtle); padding-top: 20px; }
+  @media (max-width: 760px) { .jb-liste { grid-template-columns: minmax(0, 1fr); } }
+  .jb-jour b { display: block; font-family: var(--f-titre); font-size: 4rem; line-height: .9; color: var(--color-heading); }
+  .jb-jour span { font-family: var(--f-titre); font-weight: 700; font-size: 1.5rem; text-transform: uppercase; }
+  .jb-jour small { display: block; color: var(--color-text-muted); font-size: 14px; }
+  a.jb-ligne { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 20px; padding: 18px 20px; border-radius: 8px; background: var(--d-teinte); border-left: 6px solid var(--d); color: inherit; text-decoration: none; }
+  @media (max-width: 640px) { a.jb-ligne { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
+  a.jb-ligne:hover h4 { text-decoration: underline; }
+  .jb-ligne .h { font-family: var(--f-titre); font-weight: 700; font-size: 2.2rem; line-height: 1; color: var(--d-encre); }
+  .jb-ligne .h small { display: block; font-family: var(--f-texte); font-weight: 400; font-size: 13px; color: var(--color-text-muted); margin-top: 4px; }
+  .jb-ligne .tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; background: var(--d); color: #fff; font-size: 12.5px; font-weight: 700; }
+  .jb-ligne h4 { margin: 8px 0 0; font-family: var(--f-titre); font-weight: 700; font-size: 1.6rem; line-height: 1.1; text-transform: uppercase; color: var(--d-encre); }
+  .jb-ligne .sous { margin: 4px 0 0; color: var(--color-text-secondary); }
+  .jb-ligne .temps { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 14px 0 0; padding: 0; list-style: none; font-size: 14px; }
+  .jb-ligne .temps b { font-weight: 600; margin-right: 6px; }
+  .jb-ligne .temps span { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .jb-ligne .bas { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 14px; font-size: 13.5px; color: var(--color-text-muted); }
+  .jb-ligne .bas strong { font-family: var(--f-titre); font-weight: 700; font-size: 1.05rem; text-transform: uppercase; color: var(--d-encre); }
+
+  /* ---------- 3. Page de la journée ---------- */
+  .jb-ag { max-width: 820px; }
+  .jb-partie { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid var(--d); }
+  .jb-partie b { padding: 6px 14px; background: var(--d); color: #fff; font-family: var(--f-titre); font-weight: 700; font-size: 1.35rem; text-transform: uppercase; }
+  .jb-partie span { color: var(--color-text-muted); font-size: 14px; }
+  .jb-rang { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 14px 0; border-bottom: 1px dashed var(--color-border-subtle); }
+  .jb-rang > .t { font-family: var(--f-titre); font-weight: 700; font-size: 1.35rem; line-height: 1.1; color: var(--color-heading); }
+  .jb-rang > .t small { display: block; font-family: var(--f-texte); font-weight: 400; font-size: 13px; color: var(--color-text-muted); }
+  .jb-rang p { margin: 2px 0 0; }
+  .jb-rang.act { border-bottom-style: solid; }
+  .jb-rang.act h4 { margin: 0; font-family: var(--f-titre); font-weight: 600; font-size: 1.35rem; line-height: 1.15; color: var(--color-text-link); }
+  .jb-rang.act .t { font-size: 2.2rem; color: var(--d-encre); }
+
+  /* Le moment qui réunit trois organisations : pas de lien, la liste dit qui parle et quand. */
+  .jb-moment h4 { margin: 0; font-family: var(--f-titre); font-weight: 700; font-size: 1.5rem; line-height: 1.1; color: var(--color-heading); }
+  .jb-moment .q { margin: 4px 0 0; font-size: 14px; color: var(--color-text-muted); }
+  .jb-orgs { list-style: none; margin: 12px 0 0; padding: 0; border-left: 3px solid var(--d); }
+  .jb-orgs li { display: grid; grid-template-columns: 52px 44px minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px 0 10px 14px; }
+  .jb-orgs li + li { border-top: 1px solid var(--color-border-subtle); }
+  .jb-orgs .h { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--d-encre); padding-top: 10px; }
+  .jb-orgs .logo { width: 44px; height: 44px; border: 1px solid var(--color-border-subtle); border-radius: 6px; background: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 800; color: #1d1a5b; }
+  .jb-orgs b { display: block; }
+  .jb-orgs .nom { color: var(--color-text-secondary); font-size: 14px; }
+  .jb-orgs .sujet { display: block; margin-top: 2px; font-size: 13.5px; color: var(--color-text-muted); }
+
+  .jb-choix { margin-top: 12px; font-size: 13.5px; color: var(--color-text-muted); max-width: 78ch; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-etoile" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></symbol>
+  <symbol id="i-pousse" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 21v-9m0 0c0-4 3-6 7-6 0 4-3 6-7 6zm0 0C12 8 9.5 6 6 6c0 3.5 2.5 5.5 6 6"/></symbol>
+  <symbol id="i-pieces" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M15 12.5c3 .2 6 1.3 6 3s-2.7 3-6 3-6-1.3-6-3"/></g></symbol>
+  <symbol id="i-fleche" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+</svg>
+
+<main class="jb-page">
+  <h1 class="jb-etape" style="margin-top:0">Journées en un bloc<small>Proposition pour la programmation et la page de la journée. Maquette, rien n'est construit.</small></h1>
+
+  <div class="jb-note">
+    <p><b>Le principe.</b> Une journée spéciale se lit comme une seule chose : dans le programme, elle tient en un bloc à sa couleur, qui mène à sa page. Le détail heure par heure ne vit que sur la page de la journée.</p>
+    <p><b>Les autres activités de la même date</b> (s'il y en a hors de la journée) restent des cartes ordinaires, avant ou après le bloc, à leur heure.</p>
+    <p><b>Les trois interventions de 10 minutes</b> deviennent un moment « Les 10 minutes qui inspirent », qui nomme les trois organisations sans lien vers leurs fiches.</p>
+  </div>
+
+  <!-- 1 -->
+  <h2 class="jb-etape">1. Le calendrier<small>La colonne d'une journée spéciale porte un seul bloc au lieu de ses cartes. Tout le bloc est cliquable.</small></h2>
+  <div class="jb-cal">
+    <section class="jb-col" aria-label="Jeudi 12 novembre">
+      <div class="jb-tete"><b>12</b><span>Jeudi<small>7 activités</small></span></div>
+      <article class="jb-carte"><div class="ph">EF</div><div class="co"><div class="jb-heure">09:00<small>à 10:00</small></div><h4>Gouvernance, financements et territoires : quelles solutions ?</h4></div></article>
+      <article class="jb-carte"><div class="ph">ADEME</div><div class="co"><div class="jb-heure">10:15<small>à 11:15</small></div><h4>Intégrer adaptation et atténuation : vers des plans complets</h4></div></article>
+    </section>
+
+    <section class="jb-col j-finance" aria-label="Vendredi 13 novembre">
+      <div class="jb-tete"><b>13</b><span>Vendredi<small>Journée spéciale</small></span></div>
+      <a class="jb-bloc" href="#">
+        <div class="bandeau"><svg width="16" height="16"><use href="#i-pieces"/></svg>Journée spéciale</div>
+        <div class="co">
+          <div class="jb-heure">08:00<small>à 17:45</small></div>
+          <h4>Journée finance durable en Francophonie</h4>
+          <p class="sous">Opportunités et partenariats pour l'accès à la finance durable</p>
+          <ol class="jb-temps">
+            <li><b>1er temps</b><span>08:00 à 10:00</span></li>
+            <li><b>2e temps</b><span>10:15 à 15:15</span></li>
+            <li><b>3e temps</b><span>15:30 à 17:45</span></li>
+          </ol>
+          <div class="jb-pied"><span>7 activités, 3 moments</span><strong>Voir la journée <svg width="16" height="16"><use href="#i-fleche"/></svg></strong></div>
+        </div>
+      </a>
+    </section>
+
+    <section class="jb-col j-jeunesse" aria-label="Samedi 14 novembre">
+      <div class="jb-tete"><b>14</b><span>Samedi<small>Journée spéciale</small></span></div>
+      <a class="jb-bloc" href="#">
+        <div class="bandeau"><svg width="16" height="16"><use href="#i-pousse"/></svg>Journée spéciale</div>
+        <div class="co">
+          <div class="jb-heure">08:00<small>à 14:00</small></div>
+          <h4>Journée action jeunesse pour le climat</h4>
+          <p class="sous">Innovations et engagement des jeunes pour accélérer l'action climatique</p>
+          <ol class="jb-temps">
+            <li><b>S'inspirer</b><span>08:00 à 10:40</span></li>
+            <li><b>Créer et jouer</b><span>10:40 à 13:00</span></li>
+            <li><b>S'engager</b><span>13:00 à 14:00</span></li>
+          </ol>
+          <p class="jb-fort"><svg><use href="#i-etoile"/></svg><span><b>Temps fort, 10:40</b><br>Hackathon francophone sur l'IA appliquée au climat</span></p>
+          <div class="jb-pied"><span>2 activités, 6 moments</span><strong>Voir la journée <svg width="16" height="16"><use href="#i-fleche"/></svg></strong></div>
+        </div>
+      </a>
+    </section>
+  </div>
+  <p class="jb-choix">Le bandeau de couleur en tête de colonne (aujourd'hui « Journée finance durable en Fr… ») disparaît : le bloc le remplace. Le compte « 8 activités » de l'en-tête devient « Journée spéciale ».</p>
+
+  <!-- 2 -->
+  <h2 class="jb-etape">2. La liste<small>Même règle : une ligne pour la journée, à la place de ses activités.</small></h2>
+  <div class="jb-liste j-jeunesse">
+    <div class="jb-jour"><b>14</b><span>Samedi</span><small>novembre, journée spéciale</small></div>
+    <a class="jb-ligne" href="#">
+      <div class="h">08:00<small>à 14:00, heure d'Antalya</small></div>
+      <div>
+        <span class="tag"><svg width="14" height="14"><use href="#i-pousse"/></svg>Journée spéciale</span>
+        <h4>Journée action jeunesse pour le climat en Francophonie</h4>
+        <p class="sous">Innovations et engagement des jeunes pour accélérer l'action climatique en Francophonie</p>
+        <ul class="temps">
+          <li><b>S'inspirer</b><span>08:00 à 10:40</span></li>
+          <li><b>Créer et jouer</b><span>10:40 à 13:00</span></li>
+          <li><b>S'engager</b><span>13:00 à 14:00</span></li>
+        </ul>
+        <div class="bas"><span>Temps fort à 10:40 : Hackathon francophone sur l'IA. 2 activités, 6 moments.</span><strong>Voir la journée</strong></div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 3 -->
+  <h2 class="jb-etape">3. La page de la journée<small>Les trois interventions de 09:20 à 09:50 deviennent un seul moment, sans lien vers leurs fiches.</small></h2>
+  <div class="jb-ag j-jeunesse">
+    <div class="jb-partie"><b>1 S'inspirer</b><span>08:00 à 10:40</span></div>
+    <div class="jb-rang"><div class="t">08:00</div><p>Arrivée des jeunes et des participant·e·s, animation, à 09:00</p></div>
+    <div class="jb-rang"><div class="t">09:00</div><p>Ouverture officielle, à 09:20</p></div>
+
+    <div class="jb-rang jb-moment">
+      <div class="t">09:20<small>à 09:50, 30 min</small></div>
+      <div>
+        <h4>Les 10 minutes qui inspirent</h4>
+        <p class="q">Trois organisations de jeunes, dix minutes chacune.</p>
+        <ol class="jb-orgs">
+          <li><span class="h">09:20</span><span class="logo">JVE</span><span><b>JVE Centrafrique</b><span class="nom">Jeunes Volontaires pour l'Environnement en Centrafrique</span><span class="sujet">La caravane citoyenne africaine pour la justice climatique en Centrafrique</span></span></li>
+          <li><span class="h">09:30</span><span class="logo">FAEM</span><span><b>Fédération L'Air et Moi</b><span class="nom">FAEM</span><span class="sujet">Les jeunes pour une urgence climatique</span></span></li>
+          <li><span class="h">09:40</span><span class="logo">NRCI</span><span><b>Daki Farm NRCI</b><span class="nom">NRCI</span><span class="sujet">L'intelligence artificielle et le renforcement de capacités des agriculteurs en Afrique</span></span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="jb-rang act"><div class="t">09:50<small>à 10:40, 50 min</small></div><div><h4>Intelligence artificielle et environnement, de la promesse à la mise en œuvre</h4><p style="color:var(--color-text-muted);font-size:14px">IFDD avec Université Côte d'Azur</p></div></div>
+  </div>
+  <p class="jb-choix">La ligne grise sous chaque nom (le sujet de l'intervention) est facultative : on peut ne garder que les organisations.</p>
+</main>
+</body>
+</html>
