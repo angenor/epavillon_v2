@@ -204,25 +204,26 @@ const currentYear = new Date().getFullYear()
 
     <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.label')">
       <template #brand>
-        <!-- La barre est un aplat bleu nuit dans les deux thèmes : le cercle de l'OIF, l'IFDD
+        <!-- La barre est un aplat bleu nuit dans les deux thèmes : l'OIF avec son nom, l'IFDD
              puis le symbole, inversés toujours, et le nom écrit, dont le texte nomme le lien. -->
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
-          <!-- Sous 420 px, l'IFDD s'efface pour laisser la place au nom. -->
+          <!-- Grand écran : l'OIF avec son nom, l'IFDD, le symbole ; téléphone : l'IFDD s'efface pour laisser la place au nom.
+               De 1024 à 1279 px, la capsule des liens couvrirait le nom : lu seulement, il nomme toujours le lien. -->
           <img
-            :src="assetUrl('/logos/svg/oif-ifdd-epavillon-inverse.svg')"
+            :src="assetUrl('/logos/svg/oif-nom-ifdd-epavillon-inverse.svg')"
             alt=""
-            class="h-10 w-auto max-[419px]:hidden"
-            width="179"
+            class="h-10 w-auto max-sm:hidden"
+            width="233"
             height="40"
           >
           <img
-            :src="assetUrl('/logos/svg/oif-epavillon-inverse.svg')"
+            :src="assetUrl('/logos/svg/oif-nom-epavillon-inverse.svg')"
             alt=""
-            class="h-10 w-auto min-[420px]:hidden"
-            width="92"
-            height="40"
+            class="h-9 w-auto sm:hidden"
+            width="132"
+            height="36"
           >
-          <span class="flex flex-col leading-none text-text-on-inverse">
+          <span class="flex flex-col leading-none text-text-on-inverse lg:max-xl:sr-only">
             <span class="font-display text-xl leading-none tracking-tight">
               <span class="font-light">{{ siteName.slice(0, 1) }}</span><span class="font-bold">{{ siteName.slice(1) }}</span>
             </span>
