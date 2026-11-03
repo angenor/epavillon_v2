@@ -204,17 +204,18 @@ const currentYear = new Date().getFullYear()
 
     <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.label')">
       <template #brand>
-        <!-- La barre est un aplat bleu nuit dans les deux thèmes : l'IFDD puis le symbole,
-             inversés toujours, et le nom écrit, dont le texte nomme le lien. -->
+        <!-- La barre est un aplat bleu nuit dans les deux thèmes : le cercle de l'OIF, l'IFDD
+             puis le symbole, inversés toujours, et le nom écrit, dont le texte nomme le lien. -->
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
           <img
-            :src="assetUrl('/logos/svg/ifdd-epavillon-inverse.svg')"
+            :src="assetUrl('/logos/svg/oif-ifdd-epavillon-inverse.svg')"
             alt=""
             class="h-10 w-auto"
-            width="131"
+            width="179"
             height="40"
           >
-          <span class="flex flex-col leading-none text-text-on-inverse">
+          <!-- Sous 420 px, les trois logos prennent la place du nom : lu seulement, il nomme toujours le lien. -->
+          <span class="flex flex-col leading-none text-text-on-inverse max-[419px]:sr-only">
             <span class="font-display text-xl leading-none tracking-tight">
               <span class="font-light">{{ siteName.slice(0, 1) }}</span><span class="font-bold">{{ siteName.slice(1) }}</span>
             </span>
