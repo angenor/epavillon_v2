@@ -592,12 +592,25 @@ CREATE TABLE programme.session_tracks (
     -- composite garantit que la partie est celle de CE fil ; retirer la partie
     -- remet l'activité hors partie sans la détacher du fil.
     part_id    uuid,
+    -- MOMENT QUI REGROUPE (03/11/2026) : « Les 10 minutes qui inspirent »
+    -- réunit trois interventions de dix minutes de la journée jeunesse. Les
+    -- activités restent publiées (fiche, lien direct, compteurs) ; la page du
+    -- fil les énumère sous le moment au lieu de les dérouler une à une, et
+    -- l'inscription à la journée ne les propose plus à garder. Sur le
+    -- rattachement, comme la partie : le moment est celui de CE fil (clé
+    -- composite). Retirer le moment rend l'activité au déroulé. Clôt la table :
+    -- arrivée par ALTER sur une base en service.
+    moment_id  uuid,
     PRIMARY KEY (session_id, track_id),
     CONSTRAINT xmod_fk_session_tracks_part FOREIGN KEY (part_id, track_id)
-        REFERENCES event.programme_track_parts (id, track_id) ON DELETE SET NULL (part_id)
+        REFERENCES event.programme_track_parts (id, track_id) ON DELETE SET NULL (part_id),
+    CONSTRAINT xmod_fk_session_tracks_moment FOREIGN KEY (moment_id, track_id)
+        REFERENCES event.programme_track_moments (id, track_id) ON DELETE SET NULL (moment_id)
 );
 
 CREATE INDEX ix_session_tracks_track ON programme.session_tracks (track_id, sort_order);
+-- Clé étrangère vers les moments : sans index, supprimer un moment parcourt la table.
+CREATE INDEX ix_session_tracks_moment ON programme.session_tracks (moment_id) WHERE moment_id IS NOT NULL;
 
 COMMENT ON TABLE programme.session_tracks IS
     'Composition des journées spéciales et fils thématiques : rattachement explicite décidé par l''IFDD, jamais déduit des dates.';

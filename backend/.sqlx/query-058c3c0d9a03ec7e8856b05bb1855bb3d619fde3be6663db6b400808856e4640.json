@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH contenu AS (\n               SELECT st.part_id, s.starts_at AS debut, s.ends_at AS fin\n                 FROM programme.session_tracks st\n                 JOIN programme.sessions s ON s.id = st.session_id\n                WHERE s.event_id = $1 AND s.published_at IS NOT NULL\n                  AND st.part_id IS NOT NULL AND st.moment_id IS NULL\n               UNION ALL\n               SELECT m.part_id, m.starts_at, COALESCE(m.ends_at, m.starts_at)\n                 FROM event.programme_track_moments m\n                 JOIN event.programme_tracks t ON t.id = m.track_id\n                WHERE t.event_id = $1 AND m.part_id IS NOT NULL\n           )\n           SELECT t.slug::text AS \"track_slug!\", p.id, p.label AS \"label: Value\",\n                  (SELECT min(c.debut) FROM contenu c WHERE c.part_id = p.id) AS starts_at,\n                  (SELECT max(c.fin)   FROM contenu c WHERE c.part_id = p.id) AS ends_at\n             FROM event.programme_track_parts p\n             JOIN event.programme_tracks t ON t.id = p.track_id\n            WHERE t.event_id = $1 AND t.published_at IS NOT NULL\n            ORDER BY t.slug, p.sort_order, p.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "track_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_parts",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "label: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_parts",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "058c3c0d9a03ec7e8856b05bb1855bb3d619fde3be6663db6b400808856e4640"
+}

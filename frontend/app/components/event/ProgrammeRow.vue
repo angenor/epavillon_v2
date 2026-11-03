@@ -10,11 +10,23 @@ import type { ActiveIncident } from '~/types/live'
  * en `compact`, celle du déroulé d'une journée spéciale (`TrackAgenda`).
  *
  * Sans `to`, c'est un moment sans activité (accueil, déjeuner, clôture) :
- * ligne basse, sans lien ni vignette.
+ * ligne basse, sans lien ni vignette. Un moment qui regroupe des activités
+ * (`grouped`, « Les 10 minutes qui inspirent ») prend un titre et énumère qui
+ * intervient et quand, sans lien ni sujet : le commanditaire veut les noms.
  *
  * Séance commune (`parts`) : les couvertures des dossiers se relaient dans la
  * vignette, les logos se chevauchent, les titres d'origine suivent, numérotés.
  */
+
+/** Une activité regroupée sous un moment : heure, logo, organisation. */
+export interface ProgrammeRowGrouped {
+  key: string
+  start: string
+  name: string
+  /** Le sigle sous le nom, s'il ne le répète pas. */
+  acronym: string | null
+  logo: AttachedImage | null
+}
 
 export interface ProgrammeRowData {
   id: string
@@ -49,6 +61,8 @@ export interface ProgrammeRowData {
   notice?: ActiveIncident | null
   /** Activité de l'organisation hôte (l'IFDD) : le cercle de l'OIF sous l'heure. */
   host?: boolean
+  /** Moment qui regroupe des activités : la liste de qui intervient. */
+  grouped?: ProgrammeRowGrouped[]
 }
 
 interface Props {
@@ -84,6 +98,7 @@ const isJoint = computed(() => parts.value.length > 1)
 const slides = computed(() => slidesOf(parts.value, props.entry.cover, props.entry.id))
 
 const isMoment = computed(() => props.entry.to === null)
+const grouped = computed(() => props.entry.grouped ?? [])
 const title = computed(() => props.entry.title.lead + props.entry.title.rest)
 
 const surface = computed(() => {
@@ -144,7 +159,37 @@ const layout = computed(() =>
 
 <template>
   <article
-    v-if="isMoment"
+    v-if="isMoment && grouped.length"
+    class="grid grid-cols-[76px_minmax(0,1fr)] gap-x-3.5 py-4"
+    :class="[layout.moment, surface, { 'opacity-60': props.entry.faded }]"
+  >
+    <p class="font-condensed tabular-nums">
+      <span class="block text-[1.3rem] leading-tight font-bold text-heading">{{ props.entry.start }}</span>
+      <span v-if="props.entry.until" class="mt-1 block font-text text-[0.82rem] text-text-muted">{{ props.entry.until }}</span>
+    </p>
+    <div class="min-w-0">
+      <h4 class="font-condensed text-[1.4rem] leading-[1.1] font-bold text-pretty text-heading">{{ title }}</h4>
+      <TrackAgendaPoints v-if="props.entry.points" :points="props.entry.points" />
+      <ol class="mt-3 border-l-3 border-(--color-day-line)">
+        <li
+          v-for="item in grouped"
+          :key="item.key"
+          class="grid grid-cols-[3rem_auto_minmax(0,1fr)] items-center gap-x-3 border-t border-border-subtle py-2.5 pl-3.5 first:border-t-0"
+        >
+          <span class="font-semibold text-(--color-day) tabular-nums">{{ item.start }}</span>
+          <OrganizationLogoMark :name="item.name" :acronym="item.acronym" :logo="item.logo" />
+          <span class="min-w-0 text-[0.92rem] leading-snug">
+            <b class="block font-bold text-text">{{ item.name }}</b>
+            <span v-if="item.acronym" class="text-text-secondary">{{ item.acronym }}</span>
+          </span>
+        </li>
+      </ol>
+      <TrackHighlightMark v-if="props.highlight" />
+    </div>
+  </article>
+
+  <article
+    v-else-if="isMoment"
     class="grid grid-cols-[76px_minmax(0,1fr)] gap-x-3.5 py-3 text-[0.92rem] text-text-secondary"
     :class="[layout.moment, surface, { 'opacity-60': props.entry.faded }]"
   >

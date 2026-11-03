@@ -178,6 +178,8 @@ interface Activite {
   /** Séance commune : les dossiers réunis dans le créneau, dans l'ordre ; `orgs` porte alors leurs porteurs. */
   dossiers?: Dossier[]
   partie: string | null
+  /** Le moment (`n`) qui la regroupe : elle n'est plus une ligne du déroulé. */
+  regroupe?: number
   tempsFort?: boolean
   diffusee?: boolean
 }
@@ -509,16 +511,17 @@ const jeunesse: Source = {
     { cle: 'agir', label: "S'engager", title: null, summary: 'Compétences vertes et leadership' },
   ],
   activites: [
-    {
-      n: 22, jour: 14, debut: '09:20', fin: '10:20', titre: '« Les 10 minutes qui inspirent » : pitchs des organisations',
-      orgs: [O.greenOpenLab, O.jveRca, O.youthCenter, O.airEtMoi, O.youthVoices, O.dakiFarm], partie: 'inspirer',
-    },
+    { n: 27, jour: 14, debut: '09:20', fin: '09:30', titre: 'La caravane citoyenne africaine pour la justice climatique en Centrafrique', orgs: [O.jveRca], partie: 'inspirer', regroupe: 25 },
+    { n: 28, jour: 14, debut: '09:30', fin: '09:40', titre: 'Les jeunes pour une urgence climatique', orgs: [O.airEtMoi], partie: 'inspirer', regroupe: 25 },
+    { n: 29, jour: 14, debut: '09:40', fin: '09:50', titre: "L'intelligence artificielle et le renforcement de capacités des agriculteurs en Afrique", orgs: [O.dakiFarm], partie: 'inspirer', regroupe: 25 },
+    { n: 22, jour: 14, debut: '09:50', fin: '10:20', titre: 'Intelligence artificielle et environnement, de la promesse à la mise en œuvre', orgs: [O.greenOpenLab], partie: 'inspirer' },
     { n: 23, jour: 14, debut: '10:20', fin: '11:20', titre: "Hackathon francophone sur l'IA appliquée au climat, à la biodiversité et à la finance durable", orgs: [O.greenOpenLab], partie: 'creer', tempsFort: true },
     { n: 26, jour: 14, debut: '13:00', fin: '14:00', titre: 'Des compétences vertes au leadership des jeunes et des femmes pour une transition climatique juste et inclusive', orgs: [O.cegepGaspesie, O.genreClimatSn], partie: 'agir' },
   ],
   moments: [
     { n: 21, jour: 14, debut: '08:00', fin: '09:00', libelle: 'Arrivée des jeunes et des participant-e-s, animation', partie: 'inspirer' },
     { n: 22, jour: 14, debut: '09:00', fin: '09:20', libelle: 'Ouverture officielle', partie: 'inspirer', points: ['OIF', 'Gouvernement du Québec'] },
+    { n: 25, jour: 14, debut: '09:20', fin: '09:50', libelle: 'Les 10 minutes qui inspirent', partie: 'inspirer' },
     { n: 23, jour: 14, debut: '11:20', fin: '12:00', libelle: 'Jeu concours « Info ou Intox Climat » : qui sera le Champion ou la Championne CdP 31 / OIF ?', partie: 'creer' },
     { n: 24, jour: 14, debut: '12:00', fin: '13:00', libelle: 'Les ClimArtistes en scène', partie: 'creer', points: ['Expression artistique'] },
   ],
@@ -530,23 +533,42 @@ const fin = (e: PublicTrackEntry): IsoDateTime => e.ends_at ?? e.starts_at
 const min = (v: IsoDateTime[]): IsoDateTime | null => (v.length ? [...v].sort()[0]! : null)
 const max = (v: IsoDateTime[]): IsoDateTime | null => (v.length ? [...v].sort().at(-1)! : null)
 
+const piste = (s: Source) => ({ slug: s.slug, title: s.title, color: s.color, kind: s.kind })
+
+/** Les activités publiées d'un fil, regroupées ou non : elles sont toutes au programme. */
+const lignesDuFil = (s: Source): PublicScheduleRow[] => s.activites.map((x) => ligne(x, piste(s)))
+
 const deroule = (s: Source): PublicTrackEntry[] => {
-  const piste = { slug: s.slug, title: s.title, color: s.color, kind: s.kind }
   const entrees: PublicTrackEntry[] = [
     ...s.moments.map((m): PublicTrackEntry => ({
       kind: 'moment',
       starts_at: a(m.jour, m.debut),
       ends_at: m.fin ? a(m.jour, m.fin) : null,
       part_id: m.partie ? partId(s, m.partie) : null,
-      moment: { id: TRACK_PAGE_MOMENT(m.n), label: fr(m.libelle), description: m.points ? fr(m.points.join('\n')) : null, is_highlight: false },
+      moment: {
+        id: TRACK_PAGE_MOMENT(m.n),
+        label: fr(m.libelle),
+        description: m.points ? fr(m.points.join('\n')) : null,
+        is_highlight: false,
+        activities: s.activites
+          .filter((x) => x.regroupe === m.n)
+          .map((x) => ({
+            session_id: TRACK_PAGE_SESSION(x.n),
+            starts_at: a(x.jour, x.debut),
+            ends_at: a(x.jour, x.fin),
+            organization_name: x.orgs?.[0]?.name ?? null,
+            organization_acronym: x.orgs?.[0]?.acronym ?? null,
+            organization_logo: null,
+          })),
+      },
     })),
-    ...s.activites.map((x): PublicTrackEntry => ({
+    ...s.activites.filter((x) => x.regroupe === undefined).map((x): PublicTrackEntry => ({
       kind: 'activity',
       starts_at: a(x.jour, x.debut),
       ends_at: a(x.jour, x.fin),
       part_id: x.partie ? partId(s, x.partie) : null,
       activity: {
-        session: ligne(x, piste),
+        session: ligne(x, piste(s)),
         is_highlight: x.tempsFort ?? false,
         speakers: intervenants(x),
         organizations: organisations(x),
@@ -568,6 +590,7 @@ const resume = (s: Source, courant: Source | null): PublicTrackSummary => {
     slug: s.slug,
     kind: s.kind,
     title: s.title,
+    subtitle: s.subtitle,
     color_hex: s.color,
     icon_code: s.icon,
     starts_on: `2026-11-${s.jour}`.replace(/-(\d)$/, '-0$1'),
@@ -583,9 +606,10 @@ const resume = (s: Source, courant: Source | null): PublicTrackSummary => {
 
 const page = (s: Source): PublicTrackPage => {
   const agenda = deroule(s)
-  const activites = agenda.filter((e) => e.kind === 'activity').map((e) => e.starts_at)
+  const commeActivite = (e: PublicTrackEntry) => e.kind === 'activity' || e.moment.activities.length > 0
+  const activites = agenda.filter(commeActivite).map((e) => e.starts_at)
   const debut = min(activites) ?? min(agenda.map((e) => e.starts_at))
-  const premierMoment = min(agenda.filter((e) => e.kind === 'moment').map((e) => e.starts_at))
+  const premierMoment = min(agenda.filter((e) => !commeActivite(e)).map((e) => e.starts_at))
   const parts: PublicTrackPart[] = s.parties.map((p, i) => {
     const contenu = agenda.filter((e) => e.part_id === partId(s, p.cle))
     return {
@@ -669,22 +693,22 @@ export const trackPageSettings: Record<string, TrackPageSettings> = Object.fromE
             : [],
         ),
         partners: s.partenaires.map((x, i) => ({ ...x, sort_order: i + 1 })),
-        sessions: p.agenda.flatMap((e, i) =>
-          e.kind === 'activity'
-            ? [{
-                session_id: e.activity.session.id,
-                slug: e.activity.session.slug,
-                title: e.activity.session.title,
-                starts_at: e.activity.session.starts_at,
-                ends_at: e.activity.session.ends_at,
-                status: e.activity.session.status,
-                is_published: true,
-                part_id: e.part_id,
-                is_highlight: e.activity.is_highlight,
-                sort_order: i,
-              }]
-            : [],
-        ),
+        sessions: s.activites.map((x, i) => {
+          const session = ligne(x, piste(s))
+          return {
+            session_id: session.id,
+            slug: session.slug,
+            title: session.title,
+            starts_at: session.starts_at,
+            ends_at: session.ends_at,
+            status: session.status,
+            is_published: true,
+            part_id: x.partie ? partId(s, x.partie) : null,
+            moment_id: x.regroupe === undefined ? null : TRACK_PAGE_MOMENT(x.regroupe),
+            is_highlight: x.tempsFort ?? false,
+            sort_order: i,
+          }
+        }),
       } satisfies TrackPageSettings,
     ]
   }),
@@ -705,7 +729,7 @@ const HORS_FIL: Activite[] = [
 
 /** `GET /schedule?event_id=` de la CdP31 d'Antalya : les activités des trois fils et celles d'aucun fil. */
 export const trackPagesSchedule: PublicScheduleRow[] = [
-  ...Object.values(trackPages).flatMap((p) => p.agenda.flatMap((e) => (e.kind === 'activity' ? [e.activity.session] : []))),
+  ...SOURCES.flatMap(lignesDuFil),
   ...HORS_FIL.map((x) => ({ ...ligne(x, { slug: '', title: fr(''), color: null, kind: 'special_day' }), tracks: [] })),
 ].sort((g, d) => g.starts_at.localeCompare(d.starts_at))
 
@@ -713,8 +737,15 @@ export const trackPagesSchedule: PublicScheduleRow[] = [
 export const trackPagesScheduleTracks: PublicScheduleTrack[] = SOURCES.map((s) => ({
   ...resume(s, null),
   partners: s.partenaires,
+  parts: trackPages[s.slug]!.parts.map(({ id, number, label, starts_at, ends_at }) => ({ id, number, label, starts_at, ends_at })),
   moments: s.moments
-    .map((m) => ({ starts_at: a(m.jour, m.debut), ends_at: m.fin ? a(m.jour, m.fin) : null, label: fr(m.libelle) }))
+    .map((m) => ({
+      starts_at: a(m.jour, m.debut),
+      ends_at: m.fin ? a(m.jour, m.fin) : null,
+      label: fr(m.libelle),
+      is_highlight: false,
+      session_ids: s.activites.filter((x) => x.regroupe === m.n).map((x) => TRACK_PAGE_SESSION(x.n)),
+    }))
     .sort((g, d) => g.starts_at.localeCompare(d.starts_at)),
 }))
 

@@ -336,7 +336,7 @@ async function place(entry: TrackCompositionEntry, payload: TrackSessionPlacemen
         ...current,
         sessions: current.sessions.map((s) =>
           s.session_id === placed.session_id
-            ? { ...s, part_id: placed.part_id, is_highlight: placed.is_highlight, sort_order: placed.sort_order }
+            ? { ...s, part_id: placed.part_id, moment_id: placed.moment_id, is_highlight: placed.is_highlight, sort_order: placed.sort_order }
             : s,
         ),
       },

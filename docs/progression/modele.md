@@ -632,3 +632,11 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - **`programme.v_public_schedule`** : colonne `organization_hosts_pavilion` en queue (fausse sans organisation).
 
 **En production** : `ops/migrations/2026-11-03-organisation-hote.sql`, rejouable, additive, à jouer avant de déployer l'API. Coche la fiche IFDD (sigle normalisé, non fusionnée) et s'arrête s'il n'en trouve pas exactement une. Syntaxe vérifiée par libpg_query (bloc PL/pgSQL compris) ; la vue remplacée est identique à celle posée par `2026-11-02-sigle-bien-connu.sql`. Cache SQLx des trois requêtes modifiées (fiche d'organisation lue et corrigée, programme public) **écrit à la main** (aucune base locale) : à refaire par `cargo sqlx prepare` après la migration. Pas jouée.
+
+## 2026-11-03 : un moment regroupe des activités de sa journée
+
+- **`programme.session_tracks.moment_id`** (uuid, nullable, en queue de table) : le moment de CE fil qui regroupe l'activité (« Les 10 minutes qui inspirent » de la journée jeunesse). Clé composite `xmod_fk_session_tracks_moment (moment_id, track_id)` vers `event.programme_track_moments (id, track_id)`, `ON DELETE SET NULL (moment_id)` : retirer le moment rend l'activité au déroulé. Index partiel `ix_session_tracks_moment`.
+- **`event.programme_track_moments`** : contrainte `ux_programme_track_moments_track UNIQUE (id, track_id)`, cible de la clé composite (comme les parties).
+- Option A du commanditaire : l'activité regroupée reste publiée (fiche, lien direct, compteurs) ; la page du fil l'énumère sous le moment, l'inscription à la journée ne la propose plus à garder.
+
+**En production** : `ops/migrations/2026-11-03-moment-regroupe.sql`, rejouable, additive, modèle seul, à jouer avant de déployer l'API. Cache SQLx des requêtes touchées écrit à la main (aucune base locale) : à refaire par `cargo sqlx prepare` après la migration. Le rattachement des trois activités de 10 minutes se fait ensuite au back-office. Pas jouée.

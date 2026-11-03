@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT st.session_id, st.part_id, st.is_highlight, st.sort_order\n           FROM programme.session_tracks st\n           JOIN programme.sessions s ON s.id = st.session_id\n          WHERE st.track_id = $1 AND s.published_at IS NOT NULL",
+  "query": "SELECT st.session_id, st.part_id, st.moment_id, st.is_highlight, st.sort_order\n           FROM programme.session_tracks st\n           JOIN programme.sessions s ON s.id = st.session_id\n          WHERE st.track_id = $1 AND s.published_at IS NOT NULL",
   "describe": {
     "columns": [
       {
@@ -27,6 +27,17 @@
       },
       {
         "ordinal": 2,
+        "name": "moment_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_tracks",
+            "name": "moment_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
         "name": "is_highlight",
         "type_info": "Bool",
         "origin": {
@@ -37,7 +48,7 @@
         }
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "sort_order",
         "type_info": "Int2",
         "origin": {
@@ -56,9 +67,10 @@
     "nullable": [
       false,
       true,
+      true,
       false,
       false
     ]
   },
-  "hash": "9f44bdb26b2f0c68b27b12f54b3ad71b4d9e64a84f09647d1d121e24e9d9253b"
+  "hash": "c074cbd92fbd8359cff238cc90ce60d27eaf2541f85508eb827a1431d03d477b"
 }

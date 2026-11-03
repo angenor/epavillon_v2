@@ -4,7 +4,8 @@ import type { PublicTrackSummary } from '~/types/programme/track-page'
 /**
  * Les autres fils publiés de l'édition, en cartes photo voilées : on passe de
  * l'atelier aux journées sans revenir à la programmation. Sans photo
- * (l'atelier), l'aplat de sa couleur, le pictogramme en filigrane.
+ * (l'atelier), l'aplat de sa couleur, le pictogramme en filigrane. Dessous, le
+ * lien vers toute la programmation de l'édition.
  */
 
 interface Props {
@@ -106,5 +107,13 @@ const items = computed(() =>
         </NuxtLink>
       </li>
     </ul>
+    <UiButton
+      class="mt-6"
+      variant="secondary"
+      icon-trailing="arrow-right"
+      :to="localePath(`/programmations?edition=${props.editionSlug}`)"
+    >
+      {{ t('track.others.programme') }}
+    </UiButton>
   </section>
 </template>

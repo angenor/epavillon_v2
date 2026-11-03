@@ -356,6 +356,9 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         ("23503", "xmod_fk_session_tracks_part") => {
             ApiError::new(ValidationFailed).field("part_id")
         }
+        ("23503", "xmod_fk_session_tracks_moment") => {
+            ApiError::new(ValidationFailed).field("moment_id")
+        }
         // Même contrainte pour un groupe supprimé qui porte des étapes et pour
         // une étape posée dans un groupe inconnu ; seul le message les sépare.
         ("23503", "pathway_steps_group_id_fkey") => {

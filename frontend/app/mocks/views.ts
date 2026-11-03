@@ -197,8 +197,10 @@ export function scheduleTracks(eventId: string): PublicScheduleTrack[] {
         ends_at: own.map((row) => row.ends_at).sort().at(-1) ?? null,
         venue_name: null,
         is_off_site: false,
+        subtitle: track.subtitle ?? null,
         cover: null,
         is_current: false,
+        parts: [],
         moments: [],
         partners: [],
       }

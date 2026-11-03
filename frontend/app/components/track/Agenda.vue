@@ -11,7 +11,8 @@ import type { SessionOrganization } from '~/types/programme/session'
  * posée sur un filet à la couleur de la journée (« 1 Partie 1 », ses heures),
  * son intitulé, puis ses lignes (`EventProgrammeRow` en `compact`). Activités
  * et moments sans activité y sont mêlés, dans l'ordre de l'heure ; ce qui
- * n'appartient à aucune partie vient en tête.
+ * n'appartient à aucune partie vient en tête. Un moment qui regroupe des
+ * activités (03/11) les énumère : heure, logo, organisation, sans lien.
  *
  * Chaque activité porte une ancre (`trackActivityAnchor`) : `/programmations`
  * y mène, et l'activité visée s'encadre quelques secondes à l'arrivée.
@@ -65,6 +66,18 @@ function row(entry: PublicTrackEntry, index: number): { key: string; anchor: str
   const stateLabel = current === 'live' ? t('programme.list.live') : t(`session-card.state.${current}`)
   const faded = current === 'past' || current === 'cancelled'
   if (entry.kind === 'moment') {
+    const grouped = entry.moment.activities.map((activity) => {
+      const name = activity.organization_name ?? activity.organization_acronym ?? ''
+      return {
+        key: activity.session_id,
+        start: time(activity.starts_at, timezone.value),
+        name,
+        acronym: activity.organization_acronym && activity.organization_acronym !== name ? activity.organization_acronym : null,
+        logo: activity.organization_logo,
+      }
+    })
+    const start = time(entry.starts_at, timezone.value)
+    const end = entry.ends_at ? time(entry.ends_at, timezone.value) : ''
     return {
       key: `m-${index}`,
       anchor: undefined,
@@ -72,8 +85,13 @@ function row(entry: PublicTrackEntry, index: number): { key: string; anchor: str
       data: {
         id: entry.moment.id,
         to: null,
-        start: time(entry.starts_at, timezone.value),
-        until: entry.ends_at ? t('track.agenda.until', { end: time(entry.ends_at, timezone.value) }) : '',
+        start,
+        until: !end
+          ? ''
+          : grouped.length && entry.ends_at
+            ? t('programme.list.untilShort', { end, duration: duration({ starts_at: entry.starts_at, ends_at: entry.ends_at }) })
+            : t('track.agenda.until', { end }),
+        grouped,
         title: { lead: tr(entry.moment.label), rest: '' },
         acronym: null,
         organization: null,

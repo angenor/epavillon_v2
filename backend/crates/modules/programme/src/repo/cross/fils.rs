@@ -186,12 +186,15 @@ pub async fn moments_du_fil<'e>(
     Ok(lignes)
 }
 
-/// Un moment d'un fil publié de l'édition, désigné par l'adresse du fil.
+/// Un moment d'un fil publié de l'édition, désigné par l'adresse du fil, avec
+/// les activités publiées qu'il regroupe.
 pub struct MomentDeLedition {
     pub track_slug: String,
     pub starts_at: OffsetDateTime,
     pub ends_at: Option<OffsetDateTime>,
     pub label: Value,
+    pub is_highlight: bool,
+    pub session_ids: Vec<Uuid>,
 }
 
 /// Les moments de tous les fils publiés de l'édition, en une lecture.
@@ -201,11 +204,62 @@ pub async fn moments_des_fils_publies<'e>(
 ) -> Result<Vec<MomentDeLedition>> {
     let lignes = sqlx::query_as!(
         MomentDeLedition,
-        r#"SELECT t.slug::text AS "track_slug!", m.starts_at, m.ends_at, m.label AS "label!: Value"
+        r#"SELECT t.slug::text AS "track_slug!", m.starts_at, m.ends_at, m.label AS "label!: Value",
+                  m.is_highlight,
+                  COALESCE((SELECT array_agg(st.session_id ORDER BY s.starts_at, s.id)
+                              FROM programme.session_tracks st
+                              JOIN programme.sessions s ON s.id = st.session_id
+                             WHERE st.moment_id = m.id AND s.published_at IS NOT NULL),
+                           '{}') AS "session_ids!"
              FROM event.programme_track_moments m
              JOIN event.programme_tracks t ON t.id = m.track_id
             WHERE t.event_id = $1 AND t.published_at IS NOT NULL
             ORDER BY m.starts_at, m.created_at"#,
+        event_id
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes)
+}
+
+/// Une partie d'un fil publié de l'édition, ses heures lues sur son contenu
+/// (activités publiées hors moment, moments), nulles si elle est vide.
+pub struct PartieDeLedition {
+    pub track_slug: String,
+    pub id: Uuid,
+    pub label: Option<Value>,
+    pub starts_at: Option<OffsetDateTime>,
+    pub ends_at: Option<OffsetDateTime>,
+}
+
+/// Les parties de tous les fils publiés de l'édition, dans l'ordre de chaque
+/// fil, en une lecture. Mêmes heures que la page du fil.
+pub async fn parties_des_fils_publies<'e>(
+    executor: impl PgExecutor<'e>,
+    event_id: Uuid,
+) -> Result<Vec<PartieDeLedition>> {
+    let lignes = sqlx::query_as!(
+        PartieDeLedition,
+        r#"WITH contenu AS (
+               SELECT st.part_id, s.starts_at AS debut, s.ends_at AS fin
+                 FROM programme.session_tracks st
+                 JOIN programme.sessions s ON s.id = st.session_id
+                WHERE s.event_id = $1 AND s.published_at IS NOT NULL
+                  AND st.part_id IS NOT NULL AND st.moment_id IS NULL
+               UNION ALL
+               SELECT m.part_id, m.starts_at, COALESCE(m.ends_at, m.starts_at)
+                 FROM event.programme_track_moments m
+                 JOIN event.programme_tracks t ON t.id = m.track_id
+                WHERE t.event_id = $1 AND m.part_id IS NOT NULL
+           )
+           SELECT t.slug::text AS "track_slug!", p.id, p.label AS "label: Value",
+                  (SELECT min(c.debut) FROM contenu c WHERE c.part_id = p.id) AS starts_at,
+                  (SELECT max(c.fin)   FROM contenu c WHERE c.part_id = p.id) AS ends_at
+             FROM event.programme_track_parts p
+             JOIN event.programme_tracks t ON t.id = p.track_id
+            WHERE t.event_id = $1 AND t.published_at IS NOT NULL
+            ORDER BY t.slug, p.sort_order, p.created_at"#,
         event_id
     )
     .fetch_all(executor)
@@ -303,7 +357,8 @@ pub async fn fils_publies_de_ledition<'e>(
                 WHERE t.event_id = $1
            )
            SELECT t.id, t.slug::text AS "slug!", t.kind::text AS "kind!",
-                  t.title AS "title!: Value", t.color_hex, t.icon_code, t.starts_on, t.ends_on,
+                  t.title AS "title!: Value", t.subtitle AS "subtitle: Value",
+                  t.color_hex, t.icon_code, t.starts_on, t.ends_on,
                   (SELECT min(b.debut) FROM bornes b WHERE b.track_id = t.id) AS starts_at,
                   (SELECT max(b.fin)   FROM bornes b WHERE b.track_id = t.id) AS ends_at,
                   COALESCE(v.name, (
@@ -330,6 +385,7 @@ pub async fn fils_publies_de_ledition<'e>(
             slug: l.slug,
             kind: l.kind,
             title: l.title,
+            subtitle: l.subtitle,
             color_hex: l.color_hex,
             icon_code: l.icon_code,
             starts_on: l.starts_on,

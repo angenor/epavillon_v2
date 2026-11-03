@@ -71,6 +71,8 @@ pub struct TrackCompositionEntry {
     /// sur la page publique.
     pub is_published: bool,
     pub part_id: Option<Uuid>,
+    /// Moment du fil qui regroupe l'activité (03/11) ; nul : une ligne du déroulé.
+    pub moment_id: Option<Uuid>,
     pub is_highlight: bool,
     pub sort_order: i16,
 }

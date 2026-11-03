@@ -125,7 +125,8 @@
     "done": {
       "day": "Terminée",
       "other": "Terminé"
-    }
+    },
+    "programme": "Voir toute la programmation"
   },
   "hero": {
     "live": "En direct"

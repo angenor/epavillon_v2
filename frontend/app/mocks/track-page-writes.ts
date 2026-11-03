@@ -214,6 +214,7 @@ export function updateTrackMoment(trackId: TrackId, eventId: EventId, momentId: 
 export function removeTrackMoment(trackId: TrackId, eventId: EventId, momentId: Uuid): TrackPageSettings {
   const settings = settingsOf(trackId, eventId)
   settings.moments = settings.moments.filter((m) => m.id !== momentId)
+  for (const s of settings.sessions) if (s.moment_id === momentId) s.moment_id = null
   return copy(settings)
 }
 
@@ -227,6 +228,9 @@ export function placeSessionInTrack(
   if (!settings || !entry) throw new Refus('Cette activité n’est pas rattachée au fil.', 404)
   if (payload.part_id && !settings.parts.some((p) => p.id === payload.part_id)) {
     throw new Refus('Partie refusée : elle appartient à un autre fil.')
+  }
+  if (payload.moment_id && !settings.moments.some((m) => m.id === payload.moment_id)) {
+    throw new Refus('Moment refusé : il appartient à un autre fil.')
   }
   Object.assign(entry, payload)
   return { session_id: sessionId, track_id: trackId, ...payload }

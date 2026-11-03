@@ -13,8 +13,10 @@ import type { SelectOption } from '~/types/ui'
 
 /**
  * Le déroulé de la page : ses parties, les activités du fil rangées dans une
- * partie (temps fort compris) et les moments sans activité. Chaque geste part
- * aussitôt par sa route, qui rend les réglages entiers.
+ * partie (temps fort compris) et les moments sans activité. Une activité peut
+ * aussi se ranger sous un moment qui la regroupe (03/11, « Les 10 minutes qui
+ * inspirent ») : elle reste publiée, la page l'énumère sous le moment. Chaque
+ * geste part aussitôt par sa route, qui rend les réglages entiers.
  *
  * Les activités ne s'ajoutent pas ici : le rattachement au fil reste au
  * planificateur (règle n° 7). Leur ordre est celui de l'horloge, comme sur la
@@ -80,6 +82,23 @@ const rows = computed<Row[]>(() =>
   ].sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at)),
 )
 
+const momentOptions = computed<SelectOption[]>(() => [
+  { value: '', label: t('admin.event.track.agenda.noMoment') },
+  ...[...props.settings.moments]
+    .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at))
+    .map((moment) => ({ value: moment.id, label: `${time(moment.starts_at, props.timezone)}, ${tr(moment.label)}` })),
+])
+
+function groupedUnder(entry: TrackCompositionEntry): string {
+  const moment = props.settings.moments.find((m) => m.id === entry.moment_id)
+  return moment ? tr(moment.label) : ''
+}
+
+/** Les activités qu'un moment regroupe, pour le dire sous lui. */
+function groupedIn(moment: TrackMoment): number {
+  return props.settings.sessions.filter((entry) => entry.moment_id === moment.id).length
+}
+
 const partOf = (row: Row) => (row.kind === 'activity' ? row.entry.part_id : row.moment.part_id)
 
 /** Les parties dans leur ordre, puis ce qui n'en a pas, s'il y en a. */
@@ -113,6 +132,7 @@ function range(row: Row): string {
 function place(entry: TrackCompositionEntry, change: Partial<TrackSessionPlacementPayload>): void {
   emit('place', entry, {
     part_id: entry.part_id,
+    moment_id: entry.moment_id,
     is_highlight: entry.is_highlight,
     sort_order: entry.sort_order,
     ...change,
@@ -259,6 +279,12 @@ watch(
                       intent="warning"
                       :label="t('admin.event.track.agenda.unpublished')"
                     />
+                    <UiBadge
+                      v-if="groupedUnder(row.entry)"
+                      size="sm"
+                      intent="info"
+                      :label="t('admin.event.track.agenda.groupedUnder', { moment: groupedUnder(row.entry) })"
+                    />
                   </div>
                 </div>
                 <div class="flex flex-wrap items-end gap-2 sm:col-start-2 lg:col-start-auto">
@@ -271,6 +297,16 @@ watch(
                     hide-optional
                     :disabled="!props.canPlace || props.busy || parts.length === 0"
                     @update:model-value="(next: string) => place(row.entry, { part_id: next || null })"
+                  />
+                  <UiSelect
+                    class="min-w-48"
+                    :model-value="row.entry.moment_id ?? ''"
+                    :options="momentOptions"
+                    :label="t('admin.event.track.agenda.momentOf', { title: tr(row.entry.title) })"
+                    hide-label
+                    hide-optional
+                    :disabled="!props.canPlace || props.busy || props.settings.moments.length === 0"
+                    @update:model-value="(next: string) => place(row.entry, { moment_id: next || null })"
                   />
                   <UiButton
                     variant="secondary"
@@ -296,6 +332,13 @@ watch(
                     intent="info"
                     icon="star"
                     :label="t('admin.event.track.agenda.highlight')"
+                  />
+                  <UiBadge
+                    v-if="groupedIn(row.moment)"
+                    class="mt-1 ml-1"
+                    size="sm"
+                    intent="neutral"
+                    :label="t('admin.event.track.agenda.groups', { count: groupedIn(row.moment) }, groupedIn(row.moment))"
                   />
                 </div>
                 <div v-if="props.canManage" class="flex items-center gap-1 sm:col-start-2 lg:col-start-auto">

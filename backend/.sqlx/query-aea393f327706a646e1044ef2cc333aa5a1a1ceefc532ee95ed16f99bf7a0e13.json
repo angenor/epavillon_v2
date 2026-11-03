@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT s.id FROM programme.session_tracks st\n             JOIN programme.sessions s ON s.id = st.session_id\n            WHERE st.track_id = $1 AND s.published_at IS NOT NULL AND s.status <> 'cancelled'\n            ORDER BY s.starts_at, st.sort_order",
+  "query": "SELECT s.id FROM programme.session_tracks st\n             JOIN programme.sessions s ON s.id = st.session_id\n            WHERE st.track_id = $1 AND s.published_at IS NOT NULL AND s.status <> 'cancelled'\n              AND st.moment_id IS NULL\n            ORDER BY s.starts_at, st.sort_order",
   "describe": {
     "columns": [
       {
@@ -24,5 +24,5 @@
       false
     ]
   },
-  "hash": "9b07a5975591d664ebca03a21e30d970d786cff79910e6b91e6e7eb0d2634962"
+  "hash": "aea393f327706a646e1044ef2cc333aa5a1a1ceefc532ee95ed16f99bf7a0e13"
 }

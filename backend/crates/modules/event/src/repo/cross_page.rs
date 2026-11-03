@@ -38,7 +38,7 @@ pub async fn partenaires<'e>(
 }
 
 /// La composition d'un fil : chaque activité rattachée, publiée ou non, avec sa
-/// partie, son temps fort et son rang.
+/// partie, le moment qui la regroupe, son temps fort et son rang.
 pub async fn composition<'e>(
     executor: impl PgExecutor<'e>,
     track: TrackId,
@@ -49,7 +49,7 @@ pub async fn composition<'e>(
                   s.title AS "title!: serde_json::Value",
                   s.starts_at, s.ends_at, s.status::text AS "status!",
                   (s.published_at IS NOT NULL) AS "is_published!",
-                  st.part_id, st.is_highlight, st.sort_order
+                  st.part_id, st.moment_id, st.is_highlight, st.sort_order
              FROM programme.session_tracks st
              JOIN programme.sessions s ON s.id = st.session_id
             WHERE st.track_id = $1

@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.slug::text AS \"track_slug!\", m.starts_at, m.ends_at, m.label AS \"label!: Value\",\n                  m.is_highlight,\n                  COALESCE((SELECT array_agg(st.session_id ORDER BY s.starts_at, s.id)\n                              FROM programme.session_tracks st\n                              JOIN programme.sessions s ON s.id = st.session_id\n                             WHERE st.moment_id = m.id AND s.published_at IS NOT NULL),\n                           '{}') AS \"session_ids!\"\n             FROM event.programme_track_moments m\n             JOIN event.programme_tracks t ON t.id = m.track_id\n            WHERE t.event_id = $1 AND t.published_at IS NOT NULL\n            ORDER BY m.starts_at, m.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "track_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "label!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_highlight",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "is_highlight"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "session_ids!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      true,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "fe6422693a1e96dc527e29c877e011c6fb7fdee3130949193adc4a6fb29619f5"
+}

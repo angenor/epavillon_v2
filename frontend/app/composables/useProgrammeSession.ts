@@ -24,7 +24,7 @@ export function useProgrammeSession() {
     localePath({ name: 'activity-edition-session', params: { edition: editionSlug, session: session.slug } })
 
   /** « 1 h 30 », « 45 min ». */
-  function duration(session: PublicScheduleRow): string {
+  function duration(session: Pick<PublicScheduleRow, 'starts_at' | 'ends_at'>): string {
     const parts = durationParts(Math.round((Date.parse(session.ends_at) - Date.parse(session.starts_at)) / 60_000))
     if (!parts) return ''
     if (!parts.hours) return t('programme.list.minutes', { minutes: parts.minutes })
