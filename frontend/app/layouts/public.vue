@@ -207,15 +207,22 @@ const currentYear = new Date().getFullYear()
         <!-- La barre est un aplat bleu nuit dans les deux thèmes : le cercle de l'OIF, l'IFDD
              puis le symbole, inversés toujours, et le nom écrit, dont le texte nomme le lien. -->
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
+          <!-- Sous 420 px, l'IFDD s'efface pour laisser la place au nom. -->
           <img
             :src="assetUrl('/logos/svg/oif-ifdd-epavillon-inverse.svg')"
             alt=""
-            class="h-10 w-auto"
+            class="h-10 w-auto max-[419px]:hidden"
             width="179"
             height="40"
           >
-          <!-- Sous 420 px, les trois logos prennent la place du nom : lu seulement, il nomme toujours le lien. -->
-          <span class="flex flex-col leading-none text-text-on-inverse max-[419px]:sr-only">
+          <img
+            :src="assetUrl('/logos/svg/oif-epavillon-inverse.svg')"
+            alt=""
+            class="h-10 w-auto min-[420px]:hidden"
+            width="92"
+            height="40"
+          >
+          <span class="flex flex-col leading-none text-text-on-inverse">
             <span class="font-display text-xl leading-none tracking-tight">
               <span class="font-light">{{ siteName.slice(0, 1) }}</span><span class="font-bold">{{ siteName.slice(1) }}</span>
             </span>
