@@ -118,6 +118,8 @@ const columns = computed(() =>
     const activities = own.filter((session) => props.matches(session)).length
     // Une colonne qui ne porte que des blocs les garde en vue au défilement.
     const pinned = !isRest && composed.items.length > 0 && composed.items.every((item) => item.kind === 'block')
+    // Le bloc qui ouvre la colonne pend à la barre de l'en-tête, qu'il reste en vue ou non.
+    const hangs = !isRest && composed.items[0]?.kind === 'block'
     return {
       date: day,
       number: format(day, { day: 'numeric' }),
@@ -131,6 +133,7 @@ const columns = computed(() =>
       count: isRest ? t('programme.week.rest.closed') : t('programme.week.count', { count: activities }, activities),
       tag,
       pinned,
+      hangs,
       items: composed.items.map((item) =>
         item.kind === 'block'
           ? { kind: 'block' as const, key: item.key, block: item.block, to: trackTo(item.block.track.slug) }
@@ -255,7 +258,7 @@ function pin(): void {
   pinFrame = 0
   const root = body.value
   if (!root) return
-  const top = (sticky.value?.getBoundingClientRect().bottom ?? 0) + 12
+  const bar = sticky.value?.getBoundingClientRect().bottom ?? 0
   // Une colonne qui a cessé d'être seule (recherche) rend sa carte à sa place.
   for (const card of root.querySelectorAll<HTMLElement>('.cal-body-col:not([data-pinned]) > [data-shift]')) {
     delete card.dataset.shift
@@ -264,6 +267,8 @@ function pin(): void {
   for (const column of root.querySelectorAll<HTMLElement>('[data-pinned]')) {
     const card = column.firstElementChild as HTMLElement | null
     if (!card) continue
+    // Le bloc d'une journée pend à la barre de l'en-tête ; la note du jour de repos garde son retrait.
+    const top = bar + (card.classList.contains('rest-note') ? 12 : 0)
     const shift = Number(card.dataset.shift ?? 0)
     const natural = card.getBoundingClientRect().top - shift
     const room = column.getBoundingClientRect().bottom - (natural + card.offsetHeight) - 16
@@ -372,6 +377,7 @@ watch(columns, () => nextTick(schedulePin))
           class="cal-col cal-body-col"
           :class="{ 'week-start': column.weekBreak, 'is-tinted': column.tag, 'is-alt': column.isAlt, 'is-rest': column.isRest }"
           :data-pinned="column.pinned || column.isRest ? '' : undefined"
+          :data-hangs="column.hangs ? '' : undefined"
           :aria-label="column.label"
         >
           <p v-if="column.isRest" class="rest-note">
@@ -715,6 +721,17 @@ a.wk-tag:hover {
   flex-direction: column;
   gap: 10px;
   padding: 10px 0;
+}
+
+/* Colonne d'une journée ou de l'atelier : sa carte pend à la barre de l'en-tête, qui la nomme déjà. */
+.cal-body-col[data-hangs] .wk-list {
+  padding-top: 0;
+}
+
+.cal-body-col[data-hangs] .wk-list > li:first-child :deep(.tb) {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .wk-card {

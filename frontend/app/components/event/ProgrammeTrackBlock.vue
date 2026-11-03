@@ -64,10 +64,6 @@ const rowNote = computed(() =>
 <template>
   <article class="tb" :class="[`tb-${props.layout}`, { 'is-faded': props.faded }]" :style="style">
     <template v-if="props.layout === 'card'">
-      <p class="tb-band">
-        <UiIcon v-if="icon" :name="icon" size="1.05em" :stroke-width="2" />
-        {{ t(isDay ? 'programme.tracks.kicker' : 'programme.tracks.side.kicker') }}
-      </p>
       <div class="tb-body">
         <p v-if="props.block.start" class="tb-time">
           <b>{{ at(props.block.start) }}</b>
@@ -151,20 +147,6 @@ const rowNote = computed(() =>
 
 .tb.is-faded {
   opacity: 0.72;
-}
-
-.tb-band {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  background: var(--color-day-solid);
-  color: var(--color-day-on-solid);
-  font-family: var(--font-condensed);
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
 .tb-body {
