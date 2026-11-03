@@ -204,11 +204,11 @@ const currentYear = new Date().getFullYear()
 
     <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.label')">
       <template #brand>
-        <!-- La barre est un aplat bleu nuit dans les deux thèmes : le symbole accolé à
-             l'IFDD, inversé toujours, et le nom écrit, dont le texte nomme le lien. -->
+        <!-- La barre est un aplat bleu nuit dans les deux thèmes : l'IFDD puis le symbole,
+             inversés toujours, et le nom écrit, dont le texte nomme le lien. -->
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
           <img
-            :src="assetUrl('/logos/svg/epavillon-ifdd-inverse.svg')"
+            :src="assetUrl('/logos/svg/ifdd-epavillon-inverse.svg')"
             alt=""
             class="h-10 w-auto"
             width="131"
