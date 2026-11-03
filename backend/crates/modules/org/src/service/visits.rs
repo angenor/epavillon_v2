@@ -30,7 +30,13 @@ pub async fn noter(
     }
 
     let mut tx = state.db().write(ctx).await?;
-    visits::noter(&mut tx, personne, visite.organization_id, visite.proposal_id).await?;
+    visits::noter(
+        &mut tx,
+        personne,
+        visite.organization_id,
+        visite.proposal_id,
+    )
+    .await?;
     tx.commit().await
 }
 
@@ -46,8 +52,7 @@ pub async fn lire(
         return Ok(None);
     }
 
-    let fenetre =
-        (jours > 0).then(|| OffsetDateTime::now_utc() - Duration::days(i64::from(jours)));
+    let fenetre = (jours > 0).then(|| OffsetDateTime::now_utc() - Duration::days(i64::from(jours)));
     let organisation = id.as_uuid();
 
     let mut conn = pool.acquire().await?;
