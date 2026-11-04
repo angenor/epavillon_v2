@@ -235,3 +235,24 @@ dl.facts dd.strong { font-weight: 600; color: var(--color-text); }
 .state-switch a { padding: 6px 8px; border-radius: var(--radius-sm); font-family: var(--font-heading); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; text-decoration: none; color: var(--color-text-secondary); }
 .state-switch a[aria-current] { background: var(--color-surface-inverse); color: var(--color-text-on-inverse); }
 @media (max-width: 640px) { .state-switch { position: static; max-width: none; margin: 0 16px 16px; box-shadow: none; } }
+
+/* --- Annulation par l'organisation (04/11) -------------------------------- */
+
+.btn-cancel { width: 100%; margin-top: 8px; color: var(--color-danger); }
+.btn-cancel:hover { color: var(--color-danger); }
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px;
+  background: color-mix(in srgb, var(--color-scrim) 55%, transparent);
+}
+.modal-backdrop[hidden] { display: none; }
+.modal {
+  width: min(100%, 560px); max-height: calc(100dvh - 32px); overflow: auto;
+  padding: 24px; border: 1px solid var(--color-border); border-radius: var(--radius);
+  background: var(--card); color: var(--color-text); box-shadow: var(--shadow-lg, 0 12px 32px rgb(0 0 0 / 0.18));
+}
+.modal h2 { margin: 0; font-family: var(--font-condensed); font-size: 1.6rem; font-weight: 700; text-transform: uppercase; color: var(--color-heading); }
+.modal-sub { margin: 6px 0 0; font-size: 0.9rem; color: var(--color-text-muted); }
+.consequences { margin: 16px 0; padding: 12px 16px 12px 32px; border-left: 4px solid var(--color-danger); background: var(--color-danger-surface); font-size: 0.92rem; display: grid; gap: 6px; }
+.modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+@media (max-width: 480px) { .modal-actions .btn { flex: 1 1 100%; } }
+body[data-state="annulee"] .l-body .btn { display: none; }

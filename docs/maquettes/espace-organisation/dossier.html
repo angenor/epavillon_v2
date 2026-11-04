@@ -192,7 +192,8 @@
   <div class="note-maquette">
     <p><b>Maquette, pas l'écran.</b> Tout ce que la fiche permet aujourd'hui y est : frise, décision, manques, liste d'avancement, couverture, quand et où, rappels, page publique et QR, les cinq rubriques modifiables sur place, point focal, besoins techniques, présentations, publications, historique, et les états (brouillon, en évaluation, non retenu, en modification, pour le compte de l'organisation, chargement, erreur, introuvable).</p>
     <p><b>Ce qui change.</b> Le bandeau reprend celui d'une activité : photo de l'édition voilée, état et format en pastilles, grand titre condensé, lieu et date, organisation porteuse en tuile blanche ; les vues « Mon dossier » et « Historique » s'y posent. Sous le bandeau, deux cartes remontent de 72 px : la <b>frise</b> (à gauche) et le <b>billet « Quand et où »</b> (à droite, heure en grand, salle, jauge, lien public et QR), suivi de la liste d'avancement. Les rubriques ne sont plus des cartes empilées mais des sections séparées de filets, rangées sous trois étiquettes : « Votre dossier », « Le jour J », « Faire connaître votre activité ».</p>
-    <p><b>Réorganisé, à valider.</b> (1) « Votre dossier » vient en premier, avant « Le jour J » et « Faire connaître votre activité » : l'image de couverture et le contenu ne doivent pas être négligés (choix du commanditaire, 04/11). (2) Le calendrier des rappels quitte la carte « Quand et où » pour rejoindre « Le jour J ». (3) Ajout : un bouton « Écrire à l'équipe » dans le billet, qui ouvre l'assistance déjà attachée au dossier. (4) Le nombre d'inscrits (1) n'est pas affiché : décision du 02/11, les organisations ne le voient pas.</p>
+    <p><b>Réorganisé, à valider.</b> (0) Une fois le dossier retenu, « Format et créneau souhaité » n'est plus affiché ni modifiable : le créneau est celui du billet « Quand et où » (choix du commanditaire, 04/11). (1) « Votre dossier » vient en premier, avant « Le jour J » et « Faire connaître votre activité » : l'image de couverture et le contenu ne doivent pas être négligés (choix du commanditaire, 04/11). (2) Le calendrier des rappels quitte la carte « Quand et où » pour rejoindre « Le jour J ». (3) Ajout : un bouton « Écrire à l'équipe » dans le billet, qui ouvre l'assistance déjà attachée au dossier. (4) Le nombre d'inscrits (1) n'est pas affiché : décision du 02/11, les organisations ne le voient pas.</p>
+    <p><b>Annulation par l'organisation (04/11, à valider).</b> Tant que la séance n'a pas commencé, « Annuler l'activité » (sous « Écrire à l'équipe ») ouvre une fenêtre qui dit ce qui va se passer et exige un motif (états « Annulation » et « Annulée » du sélecteur). À la confirmation : l'activité passe « Annulée » sur le programme, les inscrits reçoivent l'avis d'annulation existant, et un courriel part aussitôt à angenor99@gmail.com et issa.bado@francophonie.org, la personne qui annule en copie (répondre écrit à tous). Objet : « Activité annulée par l'organisation : CDP31-00240 ». Corps : titre, date et heure, salle, organisation, qui a annulé et quand, le motif, le lien vers le dossier dans le back-office.</p>
   </div>
 </div>
 
@@ -200,7 +201,7 @@
 <!-- Bandeau                                                                -->
 <!-- ====================================================================== -->
 
-<section class="banner has-photo" data-st="retenu modif agir aprog historique evaluation brouillon non-retenu">
+<section class="banner has-photo" data-st="retenu modif agir aprog historique evaluation brouillon non-retenu annulation annulee">
   <img src="../../../frontend/public/mocks/covers/pavillon-cop31-32-9.jpg" alt="">
   <div class="wrap">
     <div class="banner-top">
@@ -212,19 +213,20 @@
     </div>
 
     <div class="bpills">
-      <span class="bpill" data-st="retenu modif agir aprog historique"><span class="dot dot-ok"></span>Retenu</span>
+      <span class="bpill" data-st="retenu modif agir aprog historique annulation"><span class="dot dot-ok"></span>Retenu</span>
       <span class="bpill" data-st="evaluation"><span class="dot dot-wait"></span>En évaluation</span>
       <span class="bpill" data-st="brouillon"><span class="dot dot-off"></span>Brouillon</span>
       <span class="bpill" data-st="non-retenu"><span class="dot dot-no"></span>Non retenu</span>
+      <span class="bpill" data-st="annulee"><span class="dot dot-off"></span>Annulée</span>
       <span class="bpill"><svg class="icon"><use href="#i-door"/></svg>Sur place</span>
     </div>
 
     <h1>Intelligence artificielle et environnement, de la promesse à la mise en œuvre</h1>
 
     <ul class="bmeta">
-      <li data-st="retenu modif agir historique"><svg class="icon"><use href="#i-pin"/></svg>Stand du Pavillon de la Francophonie, Antalya</li>
-      <li data-st="retenu modif agir historique"><svg class="icon"><use href="#i-calendar"/></svg>Samedi 14 novembre 2026</li>
-      <li data-st-not="retenu modif agir historique"><svg class="icon"><use href="#i-calendar"/></svg>CdP31, Antalya 2026</li>
+      <li data-st="retenu modif agir historique annulation"><svg class="icon"><use href="#i-pin"/></svg>Stand du Pavillon de la Francophonie, Antalya</li>
+      <li data-st="retenu modif agir historique annulation annulee"><svg class="icon"><use href="#i-calendar"/></svg>Samedi 14 novembre 2026</li>
+      <li data-st-not="retenu modif agir historique annulation annulee"><svg class="icon"><use href="#i-calendar"/></svg>CdP31, Antalya 2026</li>
     </ul>
 
     <div class="carrier">
@@ -253,7 +255,7 @@
 <!-- Contenu                                                                -->
 <!-- ====================================================================== -->
 
-<div class="wrap layout" id="layout" data-no-aside="non-retenu chargement erreur introuvable">
+<div class="wrap layout" id="layout" data-no-aside="non-retenu annulee chargement erreur introuvable">
 
   <div class="l-head">
     <div class="panel" data-st="agir" style="padding:0;overflow:hidden">
@@ -264,10 +266,10 @@
     </div>
 
     <!-- La frise d'avancement, et ce qu'elle entraîne. -->
-    <section class="panel" aria-labelledby="frise-title" data-st="retenu modif agir aprog evaluation brouillon non-retenu">
+    <section class="panel" aria-labelledby="frise-title" data-st="retenu modif agir aprog evaluation brouillon non-retenu annulation annulee">
       <div class="panel-head"><h2 id="frise-title">Avancement</h2><p>Dossier CDP31-00240</p></div>
 
-      <ol class="steps" data-st="retenu modif agir">
+      <ol class="steps" data-st="retenu modif agir annulation">
         <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Brouillon</b><small>22 septembre</small></li>
         <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Déposé</b><small>3 octobre</small></li>
         <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>En évaluation</b><small>6 octobre</small></li>
@@ -303,7 +305,21 @@
         <li class="step skip"><span class="mark"></span><b>Programmé</b><small>non concerné</small></li>
       </ol>
 
-      <div class="alert alert-success" data-st="retenu modif agir aprog">
+      <ol class="steps" data-st="annulee">
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Brouillon</b><small>22 septembre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Déposé</b><small>3 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>En évaluation</b><small>6 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Retenu</b><small>27 octobre</small></li>
+        <li class="step no"><span class="mark"><svg class="icon"><use href="#i-minus"/></svg></span><b>Annulée</b><small>4 novembre</small></li>
+      </ol>
+
+      <div class="alert alert-warning" data-st="annulee">
+        <svg class="icon"><use href="#i-info"/></svg>
+        <div><b>Activité annulée</b><p>Annulée le 4 novembre 2026 par Aïssatou Ndiaye. Motif : l'intervenante principale ne peut plus se rendre à Antalya et aucun remplaçant n'a pu être trouvé à temps.</p><p>L'équipe de l'IFDD a été prévenue par courriel, avec Aïssatou Ndiaye en copie. Les personnes inscrites ont reçu l'avis d'annulation.</p></div>
+      </div>
+      <p class="lock" data-st="annulee"><svg class="icon"><use href="#i-lock"/></svg>Ce dossier est clos : une activité annulée ne revient pas au programme. Pour toute question, écrivez à l'équipe de l'IFDD.</p>
+
+      <div class="alert alert-success" data-st="retenu modif agir aprog annulation">
         <svg class="icon"><use href="#i-check-circle"/></svg>
         <div><b>Dossier retenu</b><p>Décision rendue le 27 octobre 2026.</p></div>
       </div>
@@ -320,12 +336,12 @@
     </section>
 
     <!-- Ce qui manque : un lien par manque, vers sa rubrique. -->
-    <div class="gaps" role="status" data-st="retenu modif agir aprog evaluation brouillon">
-      <b><svg class="icon"><use href="#i-warning"/></svg><span data-st="retenu modif agir aprog">Il manque 3 éléments</span><span data-st="evaluation brouillon">Il manque 2 éléments</span></b>
+    <div class="gaps" role="status" data-st="retenu modif agir aprog evaluation brouillon annulation">
+      <b><svg class="icon"><use href="#i-warning"/></svg><span data-st="retenu modif agir aprog annulation">Il manque 3 éléments</span><span data-st="evaluation brouillon">Il manque 2 éléments</span></b>
       <ul>
         <li><a href="#intervenants"><span>La biographie de Moussa Traoré</span><span>Compléter</span></a></li>
         <li><a href="#intervenants"><span>La photo de Léa Fontaine</span><span>Ajouter</span></a></li>
-        <li data-st="retenu modif agir aprog"><a href="#point-focal"><span>Le téléphone du point focal (Aïssatou Ndiaye)</span><span>Compléter</span></a></li>
+        <li data-st="retenu modif agir aprog annulation"><a href="#point-focal"><span>Le téléphone du point focal (Aïssatou Ndiaye)</span><span>Compléter</span></a></li>
       </ul>
     </div>
 
@@ -392,8 +408,8 @@
   </div>
 
   <!-- Billet et liste d'avancement -->
-  <aside class="l-aside" aria-label="Quand et où" data-st="retenu modif agir aprog historique evaluation brouillon">
-    <div class="ticket" id="quand-ou" data-st="retenu modif agir historique">
+  <aside class="l-aside" aria-label="Quand et où" data-st="retenu modif agir aprog historique evaluation brouillon annulation">
+    <div class="ticket" id="quand-ou" data-st="retenu modif agir historique annulation">
       <div class="ticket-date">
         <b>14</b><span>samedi<br>novembre 2026<small>Quand et où</small></span>
         <svg class="icon"><use href="#i-calendar"/></svg>
@@ -419,6 +435,7 @@
         </div>
         <div class="ticket-sep">
           <a class="btn btn-outline" href="#" style="width:100%"><svg class="icon"><use href="#i-chat"/></svg>Écrire à l'équipe</a>
+          <a class="btn btn-link btn-cancel" data-etat="annulation" data-st="retenu modif agir annulation"><svg class="icon"><use href="#i-minus"/></svg>Annuler l'activité</a>
         </div>
       </div>
     </div>
@@ -428,13 +445,14 @@
         <p class="ticket-label">Quand et où</p>
         <p style="margin:0;font-weight:700;color:var(--color-text)">Aucune activité programmée pour l'instant</p>
         <p>Les créneaux sont arrêtés après l'acceptation, quand l'équipe compose le programme. Vous serez prévenu dès qu'une date sera fixée.</p>
+        <a class="btn btn-link btn-cancel" data-etat="annulation"><svg class="icon"><use href="#i-minus"/></svg>Annuler l'activité</a>
       </div>
     </div>
 
-    <nav class="check sticky" aria-label="Votre dossier" data-st="retenu modif agir aprog evaluation brouillon">
+    <nav class="check sticky" aria-label="Votre dossier" data-st="retenu modif agir aprog evaluation brouillon annulation">
       <h2>Votre dossier</h2>
-      <div class="bar-p"><i data-st="retenu modif agir aprog" style="width:70%"></i><i data-st="evaluation brouillon" style="width:75%"></i></div>
-      <p data-st="retenu modif agir aprog">7 éléments sur 10</p>
+      <div class="bar-p"><i data-st="retenu modif agir aprog annulation" style="width:67%"></i><i data-st="evaluation brouillon" style="width:75%"></i></div>
+      <p data-st="retenu modif agir aprog annulation">6 éléments sur 9</p>
       <p data-st="evaluation brouillon">6 éléments sur 8</p>
       <ul>
         <li><a href="#presentation"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Titre et présentation</a></li>
@@ -444,20 +462,20 @@
         <li><a href="#intervenants"><span class="ck todo">!</span>Biographies</a></li>
         <li><a href="#intervenants"><span class="ck todo">!</span>Photos des intervenants</a></li>
         <li><a href="#organisations"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Logo de l'organisation</a></li>
-        <li><a href="#format"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Format et durée</a></li>
-        <li data-st="retenu modif agir aprog"><a href="#point-focal"><span class="ck todo">!</span>Point focal joignable</a></li>
-        <li data-st="retenu modif agir aprog"><a href="#besoins-techniques"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Besoins techniques</a></li>
+        <li data-st="evaluation brouillon"><a href="#format"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Format et durée</a></li>
+        <li data-st="retenu modif agir aprog annulation"><a href="#point-focal"><span class="ck todo">!</span>Point focal joignable</a></li>
+        <li data-st="retenu modif agir aprog annulation"><a href="#besoins-techniques"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Besoins techniques</a></li>
       </ul>
     </nav>
   </aside>
 
-  <div class="l-body" data-st="retenu modif agir aprog evaluation brouillon non-retenu">
+  <div class="l-body" data-st="retenu modif agir aprog evaluation brouillon non-retenu annulation annulee">
 
     <!-- ================================================================== -->
     <section class="block" aria-labelledby="dossier-title">
       <div class="rule">
         <h2 class="rule-label" id="dossier-title"><svg class="icon"><use href="#i-file"/></svg>Votre dossier</h2>
-        <span class="rule-meta" data-st="retenu modif agir aprog">Modifiable rubrique par rubrique</span>
+        <span class="rule-meta" data-st="retenu modif agir aprog annulation">Modifiable rubrique par rubrique</span>
       </div>
 
       <div class="sub" id="couverture">
@@ -478,7 +496,7 @@
       <div class="sub" id="presentation">
         <div class="sub-head">
           <div><h3>Présentation</h3></div>
-          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog annulation"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
         </div>
         <div class="sub-body">
           <dl class="facts">
@@ -493,7 +511,7 @@
       <div class="sub" id="intervenants">
         <div class="sub-head">
           <div><h3>Intervenants, 4</h3><p>Nom, rôle, fonction et biographie de chaque personne qui prend la parole.</p></div>
-          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog annulation"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
         </div>
         <div class="sub-body">
           <ul class="people">
@@ -503,7 +521,7 @@
                 <b>Marie-Claire Ondoa <span>Modératrice</span></b>
                 <p class="job">Spécialiste de programme, IFDD</p>
                 <p class="bio">Spécialiste des politiques climatiques, elle suit pour l'IFDD les négociations sur le transfert de technologies et accompagne les pays francophones dans leurs contributions déterminées au niveau national.</p>
-                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox" checked> Point focal sur place</label>
+                <label class="cb" data-st="retenu modif agir aprog annulation"><input type="checkbox" checked> Point focal sur place</label>
               </div>
               <button class="btn btn-ghost" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-image"/></svg>Changer la photo</button>
             </li>
@@ -513,7 +531,7 @@
                 <b>Moussa Traoré <span>Intervenant</span></b>
                 <p class="job">Chercheur en télédétection, Université des sciences, des techniques et des technologies de Bamako</p>
                 <div class="tags"><span class="tag tag-warning">Biographie manquante</span></div>
-                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox"> Point focal sur place</label>
+                <label class="cb" data-st="retenu modif agir aprog annulation"><input type="checkbox"> Point focal sur place</label>
               </div>
               <button class="btn btn-ghost" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-image"/></svg>Changer la photo</button>
             </li>
@@ -524,7 +542,7 @@
                 <p class="job">Chercheuse en apprentissage automatique, Montréal</p>
                 <p class="bio">Elle conçoit des modèles de prévision de la qualité de l'eau pour des municipalités du Québec et travaille sur la sobriété énergétique des calculs.</p>
                 <div class="tags"><span class="tag tag-warning">Photo manquante</span></div>
-                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox"> Point focal sur place</label>
+                <label class="cb" data-st="retenu modif agir aprog annulation"><input type="checkbox"> Point focal sur place</label>
               </div>
               <button class="btn btn-secondary" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-upload"/></svg>Ajouter une photo</button>
             </li>
@@ -534,7 +552,7 @@
                 <b>Rindra Rakotomalala <span>Intervenant</span></b>
                 <p class="job">Chef du service climat, ministère de l'Environnement et du Développement durable, Madagascar</p>
                 <p class="bio">Il pilote le système national d'alerte précoce aux crues, qui croise relevés de terrain et prévisions par apprentissage automatique.</p>
-                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox"> Point focal sur place</label>
+                <label class="cb" data-st="retenu modif agir aprog annulation"><input type="checkbox"> Point focal sur place</label>
               </div>
               <button class="btn btn-ghost" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-image"/></svg>Changer la photo</button>
             </li>
@@ -545,7 +563,7 @@
       <div class="sub" id="organisations">
         <div class="sub-head">
           <div><h3>Organisations</h3></div>
-          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog annulation"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
         </div>
         <div class="sub-body">
           <ul class="orgs">
@@ -559,7 +577,7 @@
       <div class="sub" id="thematiques">
         <div class="sub-head">
           <div><h3>Thématiques et langues</h3></div>
-          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog annulation"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
         </div>
         <div class="sub-body">
           <dl class="facts cols-2">
@@ -570,10 +588,10 @@
         </div>
       </div>
 
-      <div class="sub" id="format">
+      <div class="sub" id="format" data-st="evaluation brouillon non-retenu">
         <div class="sub-head">
           <div><h3>Format et créneau souhaité</h3><p>Le créneau définitif est fixé par l'IFDD.</p></div>
-          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog annulation"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
         </div>
         <div class="sub-body">
           <dl class="facts cols-3">
@@ -586,7 +604,7 @@
     </section>
 
     <!-- ================================================================== -->
-    <section class="block" aria-labelledby="jourj-title" data-st="retenu modif agir aprog">
+    <section class="block" aria-labelledby="jourj-title" data-st="retenu modif agir aprog annulation">
       <div class="rule ok">
         <h2 class="rule-label" id="jourj-title"><svg class="icon"><use href="#i-calendar"/></svg>Le jour J</h2>
         <span class="rule-meta">Votre activité est retenue : préparez-la avec l'équipe de l'IFDD</span>
@@ -674,7 +692,7 @@
     </section>
 
     <!-- ================================================================== -->
-    <section class="block" aria-labelledby="promo-title" data-st="retenu modif agir aprog">
+    <section class="block" aria-labelledby="promo-title" data-st="retenu modif agir aprog annulation">
       <div class="rule ok">
         <h2 class="rule-label" id="promo-title"><svg class="icon"><use href="#i-megaphone"/></svg>Faire connaître votre activité</h2>
       </div>
@@ -700,6 +718,28 @@
   <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
 </footer>
 
+<div class="modal-backdrop" data-st="annulation">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="annul-title">
+    <h2 id="annul-title">Annuler votre activité</h2>
+    <p class="modal-sub">Intelligence artificielle et environnement, de la promesse à la mise en œuvre. Samedi 14 novembre 2026, 09:50 à 10:40, heure d'Antalya (UTC+3).</p>
+    <ul class="consequences">
+      <li>L'activité quitte le programme : sa page publique indique «&nbsp;Annulée&nbsp;».</li>
+      <li>Les personnes inscrites reçoivent aussitôt un courriel d'annulation.</li>
+      <li>L'équipe de l'IFDD est prévenue aussitôt par courriel, avec vous en copie.</li>
+      <li><b>L'annulation est définitive</b> : l'activité ne pourra pas revenir au programme.</li>
+    </ul>
+    <div class="fld">
+      <label for="motif">Motif de l'annulation (obligatoire)</label>
+      <textarea id="motif" rows="4" required>L'intervenante principale ne peut plus se rendre à Antalya et aucun remplaçant n'a pu être trouvé à temps.</textarea>
+      <span class="hint">Transmis à l'équipe de l'IFDD et gardé dans l'historique du dossier, jamais publié.</span>
+    </div>
+    <div class="modal-actions">
+      <a class="btn btn-secondary" data-etat="retenu">Garder l'activité</a>
+      <a class="btn btn-danger" data-etat="annulee">Annuler l'activité</a>
+    </div>
+  </div>
+</div>
+
 <nav class="state-switch" aria-label="État de la maquette" data-default="retenu">
   <a data-etat="retenu">Retenu</a>
   <a data-etat="modif">En modification</a>
@@ -708,6 +748,8 @@
   <a data-etat="evaluation">En évaluation</a>
   <a data-etat="brouillon">Brouillon</a>
   <a data-etat="non-retenu">Non retenu</a>
+  <a data-etat="annulation">Annulation</a>
+  <a data-etat="annulee">Annulée</a>
   <a data-etat="agir">Pour le compte</a>
   <a data-etat="chargement">Chargement</a>
   <a data-etat="erreur">Erreur</a>
