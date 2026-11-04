@@ -58,3 +58,9 @@ test('une activité retenue réclame le téléphone du point focal et ses besoin
   const keys = proposalFileChecklist(facts).filter((item) => !item.done).map((item) => item.key)
   assert.deepEqual(keys, ['focal', 'needs'])
 })
+
+test('un dossier retenu ne demande plus son format : le créneau est celui de l’IFDD', () => {
+  const base = { draft: draft([speaker('Mariam', '<p>Directrice</p>', true)]), hasCover: true, hasLogo: true }
+  assert.ok(proposalFileChecklist(base).some((item) => item.key === 'format'))
+  assert.ok(!proposalFileChecklist({ ...base, retained: true }).some((item) => item.key === 'format'))
+})

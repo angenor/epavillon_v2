@@ -74,6 +74,16 @@ export interface ProposalTransition {
   occurred_at: IsoDateTime
 }
 
+/**
+ * `POST /proposals/{id}/cancel` : l'organisation annule son activité retenue
+ * (04/11), tant qu'aucune séance n'a commencé. Le motif est obligatoire, gardé
+ * dans l'historique et transmis à l'équipe, jamais publié. Réponse : la
+ * `ProposalTransition` écrite.
+ */
+export interface CancelProposalPayload {
+  reason: string
+}
+
 // ---------------------------------------------------------------------------
 // Propositions
 // ---------------------------------------------------------------------------

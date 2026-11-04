@@ -1,7 +1,7 @@
 import type { EventEdition } from '~/types/event/edition'
 import type { AttachedImage } from '~/types/media'
 import type { ProposalStatus } from '~/types/programme/proposal'
-import type { ProposalTracking, WorkspaceAction, WorkspaceOverview } from '~/types/organization-workspace'
+import type { ProposalTracking, TrackedSession, WorkspaceAction, WorkspaceOverview } from '~/types/organization-workspace'
 import { foldText } from './fold-text.ts'
 import { isEditionOver } from './proposal-edit.ts'
 
@@ -186,4 +186,26 @@ export function matchesProposalQuery(tracking: ProposalTracking, query: string):
   if (!wanted) return true
   const titles = Object.values(tracking.proposal.title ?? {}).filter((value): value is string => typeof value === 'string')
   return foldText([...titles, tracking.proposal.reference_code].join(' ')).includes(wanted)
+}
+
+/**
+ * La prochaine activité programmée (04/11), tirée des dossiers déjà chargés :
+ * parmi les dossiers retenus, la séance non annulée et pas encore finie qui
+ * commence le plus tôt. Aucune donnée nouvelle, aucun appel de plus.
+ */
+export interface NextWorkspaceActivity {
+  tracking: ProposalTracking
+  session: TrackedSession
+}
+
+export function nextWorkspaceActivity(trackings: ProposalTracking[], at: number = Date.now()): NextWorkspaceActivity | null {
+  let next: NextWorkspaceActivity | null = null
+  for (const tracking of trackings) {
+    if (tracking.proposal.status !== 'accepted') continue
+    for (const session of tracking.sessions) {
+      if (session.session.status === 'cancelled' || Date.parse(session.session.ends_at) <= at) continue
+      if (!next || session.session.starts_at < next.session.session.starts_at) next = { tracking, session }
+    }
+  }
+  return next
 }

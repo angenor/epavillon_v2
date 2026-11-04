@@ -50,7 +50,13 @@ import type {
   ProposalFacet,
   ProposalListScreen,
 } from '~/types/admin-proposals'
-import type { MarkCommentsReadPayload, ProposalCommentView, ProposalDocument } from '~/types/programme/proposal'
+import type {
+  CancelProposalPayload,
+  MarkCommentsReadPayload,
+  ProposalCommentView,
+  ProposalDocument,
+  ProposalTransition,
+} from '~/types/programme/proposal'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -188,6 +194,15 @@ export function createProposalsApi({ call, callOrNull, send, assertEventInScope 
     send(`/proposals/${id}/social-posts`, payload, (m) => m.addProposalSocialPost(id, payload)),
   removeSocialPost: (id: Uuid, postId: Uuid): Promise<ProposalDayPlan> =>
     send(`/proposals/${id}/social-posts/${postId}`, {}, (m) => m.removeProposalSocialPost(id, postId), 'DELETE'),
+
+  /**
+   * L'ORGANISATION ANNULE SON ACTIVITÉ RETENUE (04/11), tant qu'aucune séance
+   * n'a commencé. L'API la retire du programme, prévient les inscrits et
+   * l'équipe de l'IFDD (la personne en copie). La personne ne sert qu'aux
+   * données simulées, qui n'ont pas de session.
+   */
+  cancel: (personId: Uuid, id: Uuid, payload: CancelProposalPayload): Promise<ProposalTransition> =>
+    send(`/proposals/${id}/cancel`, payload, (m) => m.cancelProposalByOrganization(id, personId, payload)),
 
   /**
    * L'ATELIER DE L'IMAGE DE COUVERTURE : les choix enregistrés (nuls tant que
