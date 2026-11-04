@@ -35,10 +35,9 @@ const { zoneLabel, zoneOffsetShort } = useDateTime()
 const editionSlug = computed(() => String(route.params.edition))
 const trackSlug = computed(() => String(route.params.track))
 
-const { data, status, error, refresh } = await useAsyncData(
+const { data, status, error, refresh } = await useRevisitedData(
   () => `journee-${editionSlug.value}-${trackSlug.value}`,
   () => api.sessions.trackPage(editionSlug.value, trackSlug.value),
-  { lazy: true },
 )
 
 if (import.meta.server && status.value === 'success' && !data.value) setResponseStatus(useRequestEvent()!, 404)

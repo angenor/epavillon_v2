@@ -46,6 +46,8 @@ const selectedId = ref(props.edition.id)
 const selectedEdition = computed(() => editionById.value.get(selectedId.value) ?? props.edition)
 
 const loaded = reactive(new Map<string, ProgrammeData>([[props.edition.id, props.initial]]))
+// Retour sur la page : la dernière lecture s'affiche, puis la page la relit et la passe ici.
+watch(() => props.initial, (next) => loaded.set(props.edition.id, next))
 const loading = ref(false)
 const failed = ref(false)
 const data = computed<ProgrammeData>(() => loaded.get(selectedId.value) ?? { schedule: [], days: [], rooms: [], tracks: [] })

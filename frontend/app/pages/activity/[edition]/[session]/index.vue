@@ -56,7 +56,7 @@ const stageCover = computed(() => session.value?.cover ?? parts.value.find((part
 /** Une activité ou un dossier sans couverture prend la photo de l'édition, voilée au sigle. */
 const editionImage = computed(() => editionPhoto(edition.value))
 
-const { data: schedule, refresh: refreshSchedule } = useLazyAsyncData(
+const { data: schedule, refresh: refreshSchedule } = useRevisitedData(
   () => `activite-programme-${edition.value?.id ?? 'aucune'}`,
   async () => (edition.value ? api.sessions.schedule(edition.value.id).catch(() => []) : []),
   { default: () => [], watch: [edition] },
@@ -111,7 +111,7 @@ const { meeting } = useSessionMeeting(session)
 const zoomShown = computed(() => zoomOpen.value)
 
 const dayBadge = computed(() => (session.value ? dayTrackOf(session.value.tracks) : null))
-const { data: dayPage } = useLazyAsyncData(
+const { data: dayPage } = useRevisitedData(
   () => `activite-journee-${editionSlug.value}-${dayBadge.value?.slug ?? 'aucune'}`,
   async () => (dayBadge.value ? api.sessions.trackPage(editionSlug.value, dayBadge.value.slug).catch(() => null) : null),
   { default: () => null, watch: [dayBadge] },

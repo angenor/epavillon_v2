@@ -54,9 +54,7 @@ const router = useRouter()
 const { t } = useI18n()
 const localePath = useLocalePath()
 
-const { data, status, error, refresh } = await useAsyncData('home-screen', () => api.home.screen(), {
-  lazy: true,
-})
+const { data, status, error, refresh } = await useRevisitedData('home-screen', () => api.home.screen())
 
 /**
  * Le direct et le programme public des éditions montrées (prochaines séances,

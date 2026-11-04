@@ -63,8 +63,8 @@ const { tr } = useI18nText()
 
 const slug = computed(() => String(route.params.slug ?? ''))
 
-const { data, status, error, refresh } = await useAsyncData(
-  'event-public-page',
+const { data, status, error, refresh } = await useRevisitedData(
+  () => `event-public-page-${slug.value}`,
   async () => {
     const edition = await api.events.bySlug(slug.value)
     if (!edition) return null
@@ -108,7 +108,6 @@ const { data, status, error, refresh } = await useAsyncData(
       ).size,
     }
   },
-  { watch: [slug], lazy: true },
 )
 
 /** Nombre d'activités par journée spéciale : dit ce que le fil contient vraiment. */

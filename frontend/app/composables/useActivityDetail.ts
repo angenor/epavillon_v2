@@ -9,7 +9,7 @@ export function useActivityDetail() {
   const editionSlug = computed(() => String(route.params.edition))
   const sessionSlug = computed(() => String(route.params.session))
 
-  return useAsyncData(
+  return useRevisitedData(
     () => `activite-${editionSlug.value}-${sessionSlug.value}`,
     async () => {
       const edition = (await api.events.publicList()).find((entry) => entry.slug === editionSlug.value)
@@ -17,6 +17,5 @@ export function useActivityDetail() {
       const detail = await api.pavillon.activite(edition.id, sessionSlug.value)
       return detail ? { edition, detail } : null
     },
-    { lazy: true },
   )
 }

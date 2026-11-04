@@ -56,7 +56,7 @@ const route = useRoute()
 const api = useApi()
 const { t } = useI18n()
 
-const { data, status, error, refresh } = await useAsyncData('programme-page', async () => {
+const { data, status, error, refresh } = await useRevisitedData('programme-page', async () => {
   const editions = await api.events.publicList()
   if (!editions.length) return null
 
@@ -75,7 +75,9 @@ const { data, status, error, refresh } = await useAsyncData('programme-page', as
   ])
 
   return { editions, edition, programme: { schedule, days, rooms, tracks } satisfies ProgrammeData }
-}, { lazy: true })
+}, {
+  reusable: (kept) => typeof route.query.edition !== 'string' || kept?.edition.slug === route.query.edition,
+})
 
 const current = ref<PublicEditionRow | null>(null)
 const shown = computed(() => current.value ?? data.value?.edition ?? null)
