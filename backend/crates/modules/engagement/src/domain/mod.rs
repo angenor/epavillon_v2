@@ -6,6 +6,7 @@
 //! [`reminder`], dont la consolidation d'état est le miroir Rust de la règle
 //! écrite en SQL.
 
+pub mod annulation;
 pub mod courriel_direct;
 pub mod dossier;
 pub mod gabarits;

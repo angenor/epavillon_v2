@@ -43,6 +43,7 @@
 use kernel::context::RequestContext;
 use kernel::error::{ApiError, Result};
 use kernel::pg_error;
+use sqlx::postgres::PgConnection;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -80,56 +81,9 @@ pub async fn tenter(
     let motif = motif.map(str::trim).filter(|m| !m.is_empty());
     let mut tx = state.db().write(ctx).await?;
 
-    let issue = sqlx::query!(
-        r#"UPDATE programme.proposals
-              SET status = $2::text::programme.proposal_status,
-                  decision_reason = $3
-            WHERE id = $1 AND deleted_at IS NULL
-        RETURNING id"#,
-        dossier.as_uuid(),
-        vers.as_str(),
-        motif
-    )
-    .fetch_one(&mut *tx)
-    .await;
-
-    match issue {
-        Ok(_) => {
-            // 🔴 L'UNIQUE HAMEÇON DE LA NAISSANCE DES SÉANCES (B5, R3).
-            //
-            // Il n'y en a qu'un parce que **les deux chemins d'acceptation
-            // passent ici** : la décision individuelle (`routes/admin_desk.rs`)
-            // appelle `tenter`, et l'action groupée l'appelle aussi, dossier par
-            // dossier. Le troisième chemin d'écriture d'état — la reprise v1 de
-            // `service/backfill.rs` — **n'écrit pas `status`** : il journalise
-            // sans réveiller le déclencheur, et ne doit surtout pas créer de
-            // séances, les activités de la v1 étant importées par le fichier de
-            // migration.
-            //
-            // **Dans la transaction**, et c'est le point : un dossier retenu A
-            // ses séances, ou n'est pas retenu.
-            if vers == ProposalStatus::Accepted {
-                crate::service::birth::faire_naitre(&mut tx, dossier.as_uuid()).await?;
-            }
-
-            // Le créneau pressenti d'un dossier qui sort de la course se libère
-            // ici, sinon la prochaine publication le rendrait public ou il
-            // encombrerait le planificateur. Une séance déjà publiée ne bouge pas.
-            if vers.sort_de_la_course() {
-                crate::repo::sessions::liberer_les_creneaux(&mut tx, dossier.as_uuid()).await?;
-            }
-
-            // Un dossier retenu puis annulé : ce qui est déjà au programme
-            // public passe « annulée » avec le motif du dossier, facultatif
-            // depuis le 28/10 : sans lui, la séance s'annule quand même.
-            if vers == ProposalStatus::Cancelled {
-                crate::repo::sessions::annuler_les_seances_publiees(
-                    &mut tx,
-                    dossier.as_uuid(),
-                    motif,
-                )
-                .await?;
-            }
+    match ecrire_letat(&mut tx, dossier, vers, motif).await {
+        Ok(()) => {
+            appliquer_les_effets(&mut tx, dossier, vers, motif).await?;
 
             // La ligne de journal est écrite par le déclencheur, DANS cette
             // transaction : elle se lit donc avant de valider, sur la même
@@ -149,8 +103,77 @@ pub async fn tenter(
     }
 }
 
+/// L'écriture de l'état et du motif, que le garde arbitre. Partagée avec
+/// l'annulation par l'organisation (`service/annulation.rs`).
+pub(crate) async fn ecrire_letat(
+    conn: &mut PgConnection,
+    dossier: ProposalId,
+    vers: ProposalStatus,
+    motif: Option<&str>,
+) -> std::result::Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"UPDATE programme.proposals
+              SET status = $2::text::programme.proposal_status,
+                  decision_reason = $3
+            WHERE id = $1 AND deleted_at IS NULL
+        RETURNING id"#,
+        dossier.as_uuid(),
+        vers.as_str(),
+        motif
+    )
+    .fetch_one(conn)
+    .await
+    .map(|_| ())
+}
+
+/// Ce qu'une transition appliquée entraîne, dans sa transaction.
+///
+/// `motif_public` est celui que portent les séances annulées, lu par la page
+/// publique : le motif du dossier quand l'équipe annule, aucun quand
+/// l'organisation annule, son motif restant privé (04/11/2026).
+pub(crate) async fn appliquer_les_effets(
+    conn: &mut PgConnection,
+    dossier: ProposalId,
+    vers: ProposalStatus,
+    motif_public: Option<&str>,
+) -> Result<()> {
+    // 🔴 L'UNIQUE HAMEÇON DE LA NAISSANCE DES SÉANCES (B5, R3).
+    //
+    // Il n'y en a qu'un parce que **les deux chemins d'acceptation
+    // passent ici** : la décision individuelle (`routes/admin_desk.rs`)
+    // appelle `tenter`, et l'action groupée l'appelle aussi, dossier par
+    // dossier. Le troisième chemin d'écriture d'état (la reprise v1 de
+    // `service/backfill.rs`) **n'écrit pas `status`** : il journalise
+    // sans réveiller le déclencheur, et ne doit surtout pas créer de
+    // séances, les activités de la v1 étant importées par le fichier de
+    // migration.
+    //
+    // **Dans la transaction**, et c'est le point : un dossier retenu A
+    // ses séances, ou n'est pas retenu.
+    if vers == ProposalStatus::Accepted {
+        crate::service::birth::faire_naitre(conn, dossier.as_uuid()).await?;
+    }
+
+    // Le créneau pressenti d'un dossier qui sort de la course se libère
+    // ici, sinon la prochaine publication le rendrait public ou il
+    // encombrerait le planificateur. Une séance déjà publiée ne bouge pas.
+    if vers.sort_de_la_course() {
+        crate::repo::sessions::liberer_les_creneaux(conn, dossier.as_uuid()).await?;
+    }
+
+    // Un dossier retenu puis annulé : ce qui est déjà au programme
+    // public passe « annulée » avec le motif public, facultatif depuis
+    // le 28/10 : sans lui, la séance s'annule quand même.
+    if vers == ProposalStatus::Cancelled {
+        crate::repo::sessions::annuler_les_seances_publiees(conn, dossier.as_uuid(), motif_public)
+            .await?;
+    }
+
+    Ok(())
+}
+
 /// Traduire le refus du garde, **par le code d'erreur et jamais par le texte**.
-fn traduire(erreur: &sqlx::Error) -> Result<Issue> {
+pub(crate) fn traduire(erreur: &sqlx::Error) -> Result<Issue> {
     match pg_error::sqlstate(erreur).as_deref() {
         Some("23001") => Ok(Issue::TransitionInterdite(
             pg_error::restrict_violation_message(erreur)

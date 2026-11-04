@@ -35,7 +35,7 @@ CREATE TYPE programme.proposal_status AS ENUM (
     'accepted',          -- retenu : donnera lieu à une ou plusieurs sessions
     'rejected',          -- non retenu
     'withdrawn',         -- retiré par l'organisation
-    'cancelled'          -- annulé par l'IFDD après acceptation
+    'cancelled'          -- annulé après acceptation, par l'IFDD ou par l'organisation (04/11/2026)
 );
 
 -- Transitions autorisées, en données plutôt qu'en code : ajouter un état ou
@@ -47,6 +47,15 @@ CREATE TYPE programme.proposal_status AS ENUM (
 -- commanditaire) : l'écran rappelle qu'il manque, sans bloquer. Une demande de
 -- corrections en exige toujours un : sans lui, l'organisation ne saurait pas
 -- quoi corriger.
+--
+-- L'ORGANISATION ANNULE ELLE-MÊME SON ACTIVITÉ RETENUE (04/11/2026, demande du
+-- commanditaire) : `accepted -> cancelled` est ouverte au porteur. Son motif
+-- est OBLIGATOIRE, celui de l'équipe reste facultatif. Une ligne ne porte
+-- qu'une exigence de motif et le garde ne sait pas qui agit (il ne lit ni la
+-- permission ni l'adhésion) : le motif du porteur est donc exigé par le service
+-- de sa route (`POST /proposals/{id}/cancel`), qui exige aussi qu'aucune séance
+-- n'ait commencé. Ce motif reste privé : il vit dans `decision_reason` et le
+-- journal, jamais dans `sessions.cancelled_reason`, que la page publique lit.
 CREATE TABLE programme.proposal_transitions_allowed (
     from_status         programme.proposal_status NOT NULL,
     to_status           programme.proposal_status NOT NULL,
@@ -71,7 +80,8 @@ INSERT INTO programme.proposal_transitions_allowed
     ('changes_requested', 'submitted',         'programme.proposal.submit', true,  false),
     ('changes_requested', 'withdrawn',         NULL,                        true,  false),
     ('changes_requested', 'rejected',          'programme.proposal.decide', false, false),
-    ('accepted',          'cancelled',         'programme.proposal.decide', false, false),
+    -- Ouverte au porteur le 04/11/2026 (voir plus haut).
+    ('accepted',          'cancelled',         'programme.proposal.decide', true,  false),
     -- 02/11/2026 : une activité retenue puis retirée du programme avant toute
     -- annonce redevient « en évaluation » ; « annulé » est définitif.
     ('accepted',          'under_review',      'programme.proposal.decide', false, true),

@@ -18,7 +18,10 @@
 //! (`regie_notice`), enfilés à l'heure dite par le consommateur `engagement.regie`.
 //! Quatrième (02/11) : la confirmation d'une inscription à une activité
 //! (`inscription`), enfilée par le consommateur des avis à sa création.
+//! Cinquième (04/11) : l'avis à l'équipe d'une activité annulée par son
+//! organisation (`annulation`), enfilé par le consommateur des avis.
 
+pub mod annulation;
 pub mod inscription;
 pub mod journees;
 pub mod notification_email;

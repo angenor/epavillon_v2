@@ -6,6 +6,7 @@
 //! base ; ici, chacune se prouve seule — et `tests/domaine.rs` les éprouve sans
 //! ouvrir une connexion.
 
+pub mod annulation;
 pub mod answers;
 pub mod birth;
 pub mod blind;

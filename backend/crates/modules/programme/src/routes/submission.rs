@@ -56,7 +56,46 @@ pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
         .route("/{id}", web::delete().to(abandonner))
         .route("/{id}/draft", web::get().to(rouvrir))
         .route("/{id}/submit", web::post().to(deposer))
-        .route("/{id}/resubmit", web::post().to(renvoyer));
+        .route("/{id}/resubmit", web::post().to(renvoyer))
+        .route("/{id}/cancel", web::post().to(annuler));
+}
+
+/// L'organisation annule son activité retenue (04/11/2026).
+#[utoipa::path(
+    post,
+    description = "`CancelProposalPayload` → `ProposalTransition`. L'organisation annule elle-même son activité **retenue**, tant qu'aucune de ses séances n'a commencé (début passé, en direct ou terminée). **Le motif est obligatoire** pour elle, facultatif pour l'équipe. Mêmes effets qu'une annulation par l'équipe : créneaux pressentis libérés, séances publiées annulées (les inscrits sont prévenus par l'avis habituel), **mais sans motif public** : celui de l'organisation reste dans le dossier et son journal. L'équipe reçoit aussitôt un courriel (`programme.proposal.cancelled_by_organization`). Même garde que les autres gestes de l'organisation : adhésion active à l'organisation porteuse, ou demande en attente pour ses propres dossiers.",
+    path = "/proposals/{id}/cancel",
+    tag = "Dépôt",
+    operation_id = "depot_annuler_par_lorganisation",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    request_body = Object,
+    responses(
+        (status = 200, description = "ProposalTransition", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Permission de soumettre absente", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant **ou hors de vos organisations** : indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "Dossier non retenu, ou une séance a déjà commencé (CONFLICT)", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Motif absent (VALIDATION_FAILED, champ `reason`)", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn annuler(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    droit: RequiresAnyScope<ProposalSubmit>,
+    chemin: web::Path<Uuid>,
+    corps: web::Json<crate::service::annulation::CancelProposalPayload>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, droit.person_id);
+    let ligne = crate::service::annulation::annuler_par_lorganisation(
+        &state,
+        &ctx,
+        droit.person_id,
+        ProposalId(chemin.into_inner()),
+        &corps.reason,
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(ligne))
 }
 
 /// Rouvrir un dossier tel qu'il a été saisi.

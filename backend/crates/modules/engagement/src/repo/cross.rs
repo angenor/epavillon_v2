@@ -24,6 +24,7 @@
 //! | `media.attached_image()` | la bannière et le logo de l'édition d'un courriel (29/10) |
 //! | `programme.proposals`, `programme.sessions`, `event.rooms` | le dossier d'un courriel écrit depuis sa fiche : titre, déposant et contact, séance retenue et sa salle (01/11) |
 //! | `programme.control_room_actions`, `programme.sessions` | l'annulation décidée en régie tient-elle encore au moment d'écrire aux inscrits (02/11) ; lue sous verrou partagé, jamais écrite |
+//! | `programme.proposals`, `programme.proposal_transitions`, `programme.sessions`, `org.organizations`, `identity.people` | l'activité qu'une organisation vient d'annuler : titre, créneau, salle, qui, quand et pourquoi, pour écrire à l'équipe (04/11) |
 //!
 //! Rien d'autre.
 
@@ -515,6 +516,90 @@ pub async fn dossier_pour_courriel(
             deposant: l.deposant,
             contact: l.contact,
             seance,
+        }
+    }))
+}
+
+/// L'activité qu'une organisation vient d'annuler, lue sur la ligne de journal
+/// de l'annulation (auteur, motif, instant). Le créneau est celui de sa première
+/// séance, annulée ou non (les créneaux pressentis non publiés sont supprimés
+/// par l'annulation), à défaut le créneau souhaité du dossier.
+pub async fn annulation_par_lorganisation(
+    pool: &PgPool,
+    proposal_id: Uuid,
+    transition_id: Uuid,
+) -> Result<Option<crate::domain::annulation::AnnulationParLorganisation>> {
+    let ligne = sqlx::query!(
+        r#"SELECT p.id, p.event_id, p.reference_code,
+                  platform.t(p.title, 'fr') AS "titre!",
+                  o.legal_name, o.acronym, e.city,
+                  e.timezone::text AS "edition_timezone!",
+                  t.reason,
+                  to_char(t.occurred_at AT TIME ZONE e.timezone, 'DD/MM/YYYY "à" HH24:MI') AS "annulee_le!",
+                  per.display_name AS auteur, per.primary_email::text AS auteur_email,
+                  s.debut AS "debut?", s.fin AS "fin?", s.timezone AS "timezone?", s.salle,
+                  (p.preferred_start_at AT TIME ZONE e.timezone) AS souhaite_debut,
+                  (p.preferred_end_at AT TIME ZONE e.timezone) AS souhaite_fin
+             FROM programme.proposals p
+             JOIN programme.proposal_transitions t ON t.id = $2 AND t.proposal_id = p.id
+             JOIN event.events e ON e.id = p.event_id
+             JOIN org.organizations o ON o.id = p.organization_id
+             LEFT JOIN identity.people per ON per.id = t.actor_id
+             LEFT JOIN LATERAL (
+                 SELECT (x.starts_at AT TIME ZONE x.timezone) AS debut,
+                        (x.ends_at AT TIME ZONE x.timezone) AS fin,
+                        x.timezone::text AS timezone,
+                        (SELECT platform.t(r.name, 'fr') FROM event.rooms r WHERE r.id = x.room_id) AS salle
+                   FROM programme.sessions x
+                  WHERE x.proposal_id = p.id
+                  ORDER BY x.sequence_number, x.starts_at
+                  LIMIT 1
+             ) s ON true
+            WHERE p.id = $1"#,
+        proposal_id,
+        transition_id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(ligne.map(|l| {
+        use crate::domain::annulation::{AnnulationParLorganisation, Creneau};
+        use crate::domain::dossier::SeanceRetenue;
+
+        let creneau = match (l.debut, l.fin, l.timezone) {
+            (Some(debut), Some(fin), Some(timezone)) => Creneau::Seance(SeanceRetenue {
+                debut,
+                fin,
+                timezone,
+                ville: l.city.clone(),
+                salle: l.salle,
+            }),
+            _ => match (l.souhaite_debut, l.souhaite_fin) {
+                (Some(debut), Some(fin)) => Creneau::Souhaite(SeanceRetenue {
+                    debut,
+                    fin,
+                    timezone: l.edition_timezone.clone(),
+                    ville: l.city.clone(),
+                    salle: None,
+                }),
+                _ => Creneau::Aucun,
+            },
+        };
+        AnnulationParLorganisation {
+            proposal_id: l.id,
+            event_id: l.event_id,
+            reference_code: l.reference_code,
+            titre: l.titre,
+            organisation: match l.acronym.filter(|a| !a.trim().is_empty()) {
+                Some(sigle) => format!("{} ({sigle})", l.legal_name),
+                None => l.legal_name,
+            },
+            auteur: l.auteur,
+            auteur_email: l.auteur_email,
+            annulee_le: l.annulee_le,
+            fuseau: crate::domain::dossier::nom_du_fuseau(l.city.as_deref(), &l.edition_timezone),
+            motif: l.reason,
+            creneau,
         }
     }))
 }

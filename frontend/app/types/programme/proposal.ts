@@ -74,6 +74,15 @@ export interface ProposalTransition {
   occurred_at: IsoDateTime
 }
 
+/**
+ * Corps de `POST /proposals/{id}/cancel` (04/11/2026) : l'organisation annule
+ * son activité retenue. Motif obligatoire pour elle ; il reste privé (dossier
+ * et journal), jamais affiché sur la page publique.
+ */
+export interface CancelProposalPayload {
+  reason: string
+}
+
 // ---------------------------------------------------------------------------
 // Propositions
 // ---------------------------------------------------------------------------
