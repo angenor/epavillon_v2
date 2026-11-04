@@ -65,9 +65,13 @@ const rowNote = computed(() =>
   <article class="tb" :class="[`tb-${props.layout}`, { 'is-faded': props.faded }]" :style="style">
     <template v-if="props.layout === 'card'">
       <div class="tb-body">
-        <p v-if="props.block.start" class="tb-time">
-          <b>{{ at(props.block.start) }}</b>
-          <span v-if="props.block.end">{{ t('programme.week.until', { end: at(props.block.end) }) }}</span>
+        <!-- Journées et atelier sont portés par l'IFDD : le cercle de l'hôte, comme ses activités (04/11). -->
+        <p class="tb-time">
+          <template v-if="props.block.start">
+            <b>{{ at(props.block.start) }}</b>
+            <span v-if="props.block.end">{{ t('programme.week.until', { end: at(props.block.end) }) }}</span>
+          </template>
+          <EventHostMark class="ms-auto self-center" />
         </p>
         <h4 class="tb-title">
           <NuxtLink :to="props.to" class="tb-link">{{ tr(track.title) }}</NuxtLink>
@@ -97,6 +101,7 @@ const rowNote = computed(() =>
       <p class="tb-time tb-time-row">
         <b>{{ props.block.start ? at(props.block.start) : '' }}</b>
         <span v-if="props.block.end">{{ t('programme.week.until', { end: at(props.block.end) }) }}</span>
+        <EventHostMark size="1.625rem" class="tb-host" />
       </p>
       <div class="min-w-0">
         <p class="tb-tag">
@@ -308,6 +313,19 @@ const rowNote = computed(() =>
 
 .tb-time-row span {
   font-size: 0.82rem;
+}
+
+.tb-host {
+  margin-inline-start: auto;
+  align-self: center;
+}
+
+@media (min-width: 640px) {
+  .tb-host {
+    margin-inline-start: 0;
+    margin-top: 6px;
+    align-self: flex-start;
+  }
 }
 
 .tb-tag {
