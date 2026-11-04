@@ -204,6 +204,14 @@ pub(crate) async fn decider(
     )
     .await?;
 
+    // Le périmètre ne suffit pas : un évaluateur en a un (04/11/2026). Chaque
+    // règle nomme la permission de sa décision, et le déclencheur ne la lit pas.
+    let offertes =
+        crate::repo::transitions::offertes(state.pool(), dossier, perimetre.person_id).await?;
+    if crate::domain::transitions::motif_exige(&offertes, corps.to_status).is_none() {
+        return Ok(HttpResponse::Ok().json(DecisionResult::TransitionNotAllowed));
+    }
+
     let issue = transition::tenter(
         &state,
         &ctx,
