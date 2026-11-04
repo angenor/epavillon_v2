@@ -22,7 +22,7 @@
 //! changement d'état ne figure donc dans ce fichier : **son absence est la
 //! décision**, pas un oubli.
 //!
-//! # Les trois que le service émet
+//! # Ceux que le service émet
 //!
 //! Ils décrivent des faits que la base n'annonce pas, et chacun a son
 //! consommateur identifié en B6. Un événement **par dossier** dans une action
@@ -44,6 +44,31 @@ pub const COMMENT_SHARED: &str = "programme.comment.shared";
 /// ou personnes ajoutées au fil. Charge `WithNotification`, courriel compris.
 pub const COMMENT_ADDRESSED: &str = "programme.comment.addressed";
 pub const REVIEW_ASSIGNED: &str = "programme.review.assigned";
+
+/// L'organisation a annulé elle-même son activité retenue (04/11/2026).
+///
+/// **Ce n'est pas un doublon de `programme.proposal.cancelled`**, que le
+/// déclencheur émet pour toute annulation : celui-ci dit QUI a annulé, ce que
+/// le déclencheur ne sait pas. Émis par le service de la route de
+/// l'organisation, dans la transaction de la transition. `engagement` y répond
+/// par un courriel à l'équipe ; l'annulation par l'équipe n'en émet pas.
+pub const PROPOSAL_CANCELLED_BY_ORGANIZATION: &str = "programme.proposal.cancelled_by_organization";
+
+/// Le travail (module `engagement`) qui écrit à l'équipe.
+pub const OWNER_CANCELLATION_TASK: &str = "engagement.send_owner_cancellation";
+
+/// La charge de [`PROPOSAL_CANCELLED_BY_ORGANIZATION`]. Ni motif ni adresse :
+/// l'outbox est durable et relue, le courriel les lit dans le journal du
+/// dossier, par `transition_id`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProposalCancelledByOrganization {
+    pub proposal_id: Uuid,
+    pub reference_code: String,
+    pub event_id: Uuid,
+    pub organization_id: Uuid,
+    /// La ligne de `programme.proposal_transitions` de l'annulation.
+    pub transition_id: Uuid,
+}
 
 /// Une co-organisation annoncée **engage un tiers** : le front dit déjà
 /// « sera invitée à confirmer sa participation ». B6 enverra la demande.

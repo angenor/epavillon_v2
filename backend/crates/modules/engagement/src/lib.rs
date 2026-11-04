@@ -116,6 +116,12 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             config,
             mailer.clone(),
         )),
+        // Activité annulée par son organisation (04/11) : l'avis à l'équipe.
+        Arc::new(jobs::annulation::SendOwnerCancellation::new(
+            db.clone(),
+            config,
+            mailer.clone(),
+        )),
         // Les envois du back-office et leurs essais, sur la file « email ». Ils
         // lisent les pièces jointes sur le stockage par le noyau, comme
         // `negotiation` lit ses PDF : aucun crate de module n'est appelé.

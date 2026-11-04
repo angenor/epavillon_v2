@@ -58,7 +58,9 @@ use uuid::Uuid;
 /// Les travaux dont le courriel ne part jamais en copie : il porte un lien
 /// personnel (compte, mot de passe, invitation, direct d'un invité) ou c'est une
 /// confirmation d'inscription. Les envois du back-office ont leurs propres copies.
-const SANS_COPIE: [&str; 8] = [
+/// L'avis d'annulation par une organisation est écrit À l'équipe : la copier
+/// lui ferait recevoir deux fois le même message.
+const SANS_COPIE: [&str; 9] = [
     "identity.send_verification_email",
     "identity.send_existing_account_notice",
     "identity.send_password_reset_email",
@@ -67,6 +69,7 @@ const SANS_COPIE: [&str; 8] = [
     "engagement.send_day_registration",
     "engagement.send_mailing",
     "engagement.send_mailing_test",
+    contracts::programme::OWNER_CANCELLATION_TASK,
 ];
 
 /// L'expéditeur enveloppé.
@@ -290,14 +293,7 @@ impl GardedMailer {
         if !premier {
             return Ok(vec![]);
         }
-        let valeur = sqlx::query_scalar!(
-            "SELECT value FROM platform.settings WHERE key = 'engagement.mail.automatic_cc'"
-        )
-        .fetch_optional(pool)
-        .await?;
-        Ok(valeur
-            .and_then(|v| serde_json::from_value::<Vec<String>>(v).ok())
-            .unwrap_or_default())
+        adresses_de_lequipe(pool).await
     }
 
     /// Marque la trace « écartée ».
@@ -354,6 +350,20 @@ impl Mailer for GardedMailer {
         self.clore_la_trace(trace, erreur.as_deref()).await;
         resultat
     }
+}
+
+/// Les adresses de l'équipe : le réglage `engagement.mail.automatic_cc`. La
+/// copie automatique les lit, et le courriel d'annulation par une organisation
+/// leur écrit (04/11/2026).
+pub async fn adresses_de_lequipe(pool: &sqlx::PgPool) -> Result<Vec<String>, sqlx::Error> {
+    let valeur = sqlx::query_scalar!(
+        "SELECT value FROM platform.settings WHERE key = 'engagement.mail.automatic_cc'"
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(valeur
+        .and_then(|v| serde_json::from_value::<Vec<String>>(v).ok())
+        .unwrap_or_default())
 }
 
 /// SHA-256 de l'adresse en minuscules, en hexadécimal.

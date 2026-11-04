@@ -1,0 +1,183 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id, p.event_id, p.reference_code,\n                  platform.t(p.title, 'fr') AS \"titre!\",\n                  o.legal_name, o.acronym, e.city,\n                  e.timezone::text AS \"edition_timezone!\",\n                  t.reason,\n                  to_char(t.occurred_at AT TIME ZONE e.timezone, 'DD/MM/YYYY \"à\" HH24:MI') AS \"annulee_le!\",\n                  per.display_name AS auteur, per.primary_email::text AS auteur_email,\n                  s.debut AS \"debut?\", s.fin AS \"fin?\", s.timezone AS \"timezone?\", s.salle,\n                  (p.preferred_start_at AT TIME ZONE e.timezone) AS souhaite_debut,\n                  (p.preferred_end_at AT TIME ZONE e.timezone) AS souhaite_fin\n             FROM programme.proposals p\n             JOIN programme.proposal_transitions t ON t.id = $2 AND t.proposal_id = p.id\n             JOIN event.events e ON e.id = p.event_id\n             JOIN org.organizations o ON o.id = p.organization_id\n             LEFT JOIN identity.people per ON per.id = t.actor_id\n             LEFT JOIN LATERAL (\n                 SELECT (x.starts_at AT TIME ZONE x.timezone) AS debut,\n                        (x.ends_at AT TIME ZONE x.timezone) AS fin,\n                        x.timezone::text AS timezone,\n                        (SELECT platform.t(r.name, 'fr') FROM event.rooms r WHERE r.id = x.room_id) AS salle\n                   FROM programme.sessions x\n                  WHERE x.proposal_id = p.id\n                  ORDER BY x.sequence_number, x.starts_at\n                  LIMIT 1\n             ) s ON true\n            WHERE p.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "reference_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "edition_timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_transitions",
+            "name": "reason"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "annulee_le!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "auteur",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "auteur_email",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "debut?",
+        "type_info": "Timestamp",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "fin?",
+        "type_info": "Timestamp",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "timezone?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "salle",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "souhaite_debut",
+        "type_info": "Timestamp",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "souhaite_fin",
+        "type_info": "Timestamp",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false,
+      true,
+      true,
+      null,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "cb432fb74238c477ef420fd29d37fe7d7047775ea06da30e418e119255bf3493"
+}

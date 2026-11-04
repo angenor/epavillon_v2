@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.status::text AS \"status!\", p.reference_code, p.event_id, p.organization_id,\n                  EXISTS (\n                      SELECT 1 FROM programme.sessions s\n                       WHERE (s.proposal_id = p.id\n                              OR s.id IN (SELECT sp.session_id FROM programme.session_proposals sp\n                                           WHERE sp.proposal_id = p.id))\n                         AND (s.status IN ('live', 'completed')\n                              OR (s.status IN ('planned', 'scheduled') AND s.starts_at <= now()))\n                  ) AS \"commencee!\"\n             FROM programme.proposals p\n            WHERE p.id = $1 AND p.deleted_at IS NULL\n              FOR UPDATE OF p",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "reference_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "commencee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "9fa7ba28b21fd007906f44e0215eb57d48d8e4330d9e00cc0154749d551f6adc"
+}

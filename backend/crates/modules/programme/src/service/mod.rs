@@ -1,5 +1,6 @@
 //! Les règles du module. Un fichier par geste.
 
+pub mod annulation;
 pub mod assistance;
 pub mod backfill;
 pub mod birth;

@@ -6253,6 +6253,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposals/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * L'organisation annule son activité retenue (04/11/2026).
+         * @description `CancelProposalPayload` → `ProposalTransition`. L'organisation annule elle-même son activité **retenue**, tant qu'aucune de ses séances n'a commencé (début passé, en direct ou terminée). **Le motif est obligatoire** pour elle, facultatif pour l'équipe. Mêmes effets qu'une annulation par l'équipe : créneaux pressentis libérés, séances publiées annulées (les inscrits sont prévenus par l'avis habituel), **mais sans motif public** : celui de l'organisation reste dans le dossier et son journal. L'équipe reçoit aussitôt un courriel (`programme.proposal.cancelled_by_organization`). Même garde que les autres gestes de l'organisation : adhésion active à l'organisation porteuse, ou demande en attente pour ses propres dossiers.
+         */
+        post: operations["depot_annuler_par_lorganisation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposals/{id}/cancellation-impact": {
         parameters: {
             query?: never;
@@ -25560,6 +25580,78 @@ export interface operations {
             };
             /** @description Dossier inexistant **ou hors d'accès** — indiscernables */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_annuler_par_lorganisation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description ProposalTransition */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission de soumettre absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors de vos organisations** : indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier non retenu, ou une séance a déjà commencé (CONFLICT) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Motif absent (VALIDATION_FAILED, champ `reason`) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

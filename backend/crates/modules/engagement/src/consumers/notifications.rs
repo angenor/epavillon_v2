@@ -81,6 +81,11 @@ impl EventConsumer for NotificationsConsumer {
         if event.event_type == "programme.registration.created" {
             crate::jobs::inscription::poser(conn, event).await?;
         }
+        // Émis par la seule route de l'organisation : aucun avis à l'écran, un
+        // courriel à l'équipe (04/11).
+        if event.event_type == contracts::programme::PROPOSAL_CANCELLED_BY_ORGANIZATION {
+            return crate::jobs::annulation::poser(conn, event).await;
+        }
         if event.payload.get("notification").is_some() {
             return self.generique(conn, event).await;
         }
