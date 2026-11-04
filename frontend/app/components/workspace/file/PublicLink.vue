@@ -64,8 +64,19 @@ function download(): void {
 </script>
 
 <template>
-  <div class="flex shrink-0 items-center gap-3">
-    <div class="flex flex-col items-end">
+  <div class="flex items-center gap-4">
+    <a
+      :href="props.url"
+      target="_blank"
+      rel="noopener"
+      class="block size-24 shrink-0 rounded-md border border-border bg-surface-inverse-selected p-1.5 text-text-on-inverse-selected"
+      :aria-label="t('organization.workspace.proposal.publicLink.open')"
+    >
+      <svg :viewBox="`0 0 ${size} ${size}`" class="size-full" shape-rendering="crispEdges" aria-hidden="true">
+        <rect v-for="cell in cells" :key="`${cell.x}-${cell.y}`" :x="cell.x" :y="cell.y" width="1" height="1" fill="currentColor" />
+      </svg>
+    </a>
+    <div class="flex min-w-0 flex-col items-start">
       <UiButton variant="link" :icon="copied ? 'check' : 'copy'" @click="copy">
         {{ t(copied ? 'organization.workspace.proposal.publicLink.copied' : 'organization.workspace.proposal.publicLink.copy') }}
       </UiButton>
@@ -73,16 +84,5 @@ function download(): void {
         {{ t('organization.workspace.proposal.publicLink.download') }}
       </UiButton>
     </div>
-    <a
-      :href="props.url"
-      target="_blank"
-      rel="noopener"
-      class="block size-24 rounded-md border border-border bg-surface-inverse-selected p-1.5 text-text-on-inverse-selected"
-      :aria-label="t('organization.workspace.proposal.publicLink.open')"
-    >
-      <svg :viewBox="`0 0 ${size} ${size}`" class="size-full" shape-rendering="crispEdges" aria-hidden="true">
-        <rect v-for="cell in cells" :key="`${cell.x}-${cell.y}`" :x="cell.x" :y="cell.y" width="1" height="1" fill="currentColor" />
-      </svg>
-    </a>
   </div>
 </template>

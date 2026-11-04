@@ -43,17 +43,14 @@ function onUploaded(asset: UploadedAsset): void {
 </script>
 
 <template>
-  <section
+  <WorkspaceFileSection
     id="presentations"
-    aria-labelledby="presentations-title"
-    class="scroll-mt-24 rounded-lg border border-border bg-surface-raised p-5 sm:p-6"
+    :title="t('organization.workspace.proposal.presentations.title')"
+    :description="t('organization.workspace.proposal.presentations.description')"
+    :can-edit="false"
+    :editing="false"
   >
-    <h2 id="presentations-title" class="text-xl font-semibold text-heading">
-      {{ t('organization.workspace.proposal.presentations.title') }}
-    </h2>
-    <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.proposal.presentations.description') }}</p>
-
-    <ul v-if="presentations.length > 0" class="mt-4 flex flex-col gap-2">
+    <ul v-if="presentations.length > 0" class="flex flex-col gap-2">
       <li
         v-for="entry in presentations"
         :key="entry.document.id"
@@ -78,7 +75,7 @@ function onUploaded(asset: UploadedAsset): void {
         </UiButton>
       </li>
     </ul>
-    <p v-else class="mt-4 text-text-muted">{{ t('organization.workspace.proposal.presentations.empty') }}</p>
+    <p v-else class="text-text-muted">{{ t('organization.workspace.proposal.presentations.empty') }}</p>
 
     <MediaFileField
       v-if="props.canEdit"
@@ -92,5 +89,5 @@ function onUploaded(asset: UploadedAsset): void {
       @uploaded="onUploaded"
     />
     <UiAlert v-if="props.error" class="mt-3" intent="danger" :message="props.error" live />
-  </section>
+  </WorkspaceFileSection>
 </template>

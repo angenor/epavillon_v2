@@ -15,8 +15,9 @@ import type { AttachedImage } from '~/types/media'
 
 interface Props {
   image?: AttachedImage | null
-  backTo: string
-  backLabel: string
+  /** Sans lien de retour, pas de fil d'Ariane (accueil d'un espace). */
+  backTo?: string
+  backLabel?: string
   /** Suite du fil d'Ariane, en texte. */
   trail?: string
   /** Logo clair de l'édition (`logo_inverse`), en haut à droite. */
@@ -24,7 +25,7 @@ interface Props {
   logoAlt?: string
 }
 
-const props = withDefaults(defineProps<Props>(), { image: null, trail: '', logo: null, logoAlt: '' })
+const props = withDefaults(defineProps<Props>(), { image: null, backTo: '', backLabel: '', trail: '', logo: null, logoAlt: '' })
 
 const { t } = useI18n()
 
@@ -50,8 +51,8 @@ provide(MEDIA_BANNER_ON_MEDIA, computed(() => props.image !== null))
     </template>
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
-      <div class="flex items-start justify-between gap-4">
-        <nav :aria-label="t('nav.breadcrumb.label')" class="flex min-w-0 flex-wrap items-center gap-x-5 text-sm">
+      <div v-if="props.backTo || props.logo" class="flex items-start justify-between gap-4">
+        <nav v-if="props.backTo" :aria-label="t('nav.breadcrumb.label')" class="flex min-w-0 flex-wrap items-center gap-x-5 text-sm">
           <NuxtLink
             :to="props.backTo"
             class="inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-bold text-text-on-inverse hover:text-text-on-inverse hover:underline"
@@ -67,7 +68,7 @@ provide(MEDIA_BANNER_ON_MEDIA, computed(() => props.image !== null))
           :alt="props.logoAlt"
           :width="props.logo.width ?? undefined"
           :height="props.logo.height ?? undefined"
-          class="h-10 w-auto shrink-0 sm:h-14 lg:h-16"
+          class="ml-auto h-10 w-auto shrink-0 sm:h-14 lg:h-16"
         >
       </div>
 

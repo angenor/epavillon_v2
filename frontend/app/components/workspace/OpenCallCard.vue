@@ -3,29 +3,23 @@ import type { CallForProposals } from '~/types/event/call'
 import type { EventEdition } from '~/types/event/edition'
 
 /**
- * L'APPEL EN COURS, MIS EN AVANT — c'est ce que le prompt demande de montrer à
- * qui n'a encore rien déposé.
+ * L'APPEL EN COURS, en billet à côté de « À faire » (04/11) : le rebours en
+ * grand, l'échéance, et le geste. C'est aussi la seule chose utile de l'état
+ * vide : qui n'a rien déposé a besoin de savoir où déposer et jusqu'à quand.
  *
- * C'EST LA SEULE CHOSE UTILE À AFFICHER DANS L'ÉTAT VIDE. Une organisation qui
- * arrive dans son espace sans dossier n'a pas besoin qu'on lui explique ce
- * qu'elle ne voit pas : elle a besoin de savoir où déposer et jusqu'à quand.
- *
- * L'ÉCHÉANCE AFFICHÉE EST L'ÉCHÉANCE EFFECTIVE — `event.effective_deadline()` :
- * la prolongation si elle existe, la clôture sinon. Afficher `closes_at` quand
- * un appel a été prolongé ferait renoncer des gens qui avaient encore le temps.
- *
- * LE REBOURS SE TAIT QUAND IL N'A PLUS DE SENS. Passé l'échéance, l'encart ne
- * compte plus à rebours : il annonce qu'aucun appel n'est ouvert.
+ * L'échéance est l'échéance EFFECTIVE (`event.effective_deadline()`) : la
+ * prolongation si elle existe. Passé l'échéance, le billet ne compte plus et
+ * annonce qu'aucun appel n'est ouvert.
  */
 
 interface Props {
   call: CallForProposals | null
   edition: EventEdition | null
-  /** `bar` : une ligne en tête d'onglet, et rien quand l'appel est fermé. */
-  variant?: 'card' | 'bar'
+  /** Rien quand l'appel est fermé : dans l'onglet d'une édition, un billet vide n'apprend rien. */
+  hideWhenClosed?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), { variant: 'card' })
+const props = withDefaults(defineProps<Props>(), { hideWhenClosed: false })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -42,58 +36,33 @@ const isOpen = computed(() => props.call !== null && !(countdown.value?.expired 
 </script>
 
 <template>
-  <div
-    v-if="props.variant === 'bar'"
-    v-show="isOpen"
-    class="flex flex-col gap-3 rounded-lg border border-border bg-surface-raised px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-  >
-    <p class="text-sm text-text-secondary">
-      <strong class="text-text">{{ t('organization.workspace.openCall.eyebrow') }}</strong>
-      · {{ t('organization.workspace.openCall.deadline', { date: date(deadline, timezone) }) }}
-      <template v-if="countdown">
-        ·
-        {{
-          countdown.days > 0
-            ? t('organization.workspace.openCall.remaining', countdown.days)
-            : t('organization.workspace.openCall.lastDay')
-        }}
-      </template>
-    </p>
-    <UiButton variant="primary" class="shrink-0" :to="localePath('/deposer-une-proposition')" icon="plus">
-      {{ t('organization.workspace.openCall.action') }}
-    </UiButton>
-  </div>
-
-  <UiCard v-else-if="isOpen && props.call" class="border-accent-border bg-accent-surface">
-    <p class="text-xs font-bold tracking-wide text-accent uppercase">
+  <UiTicket v-if="isOpen && props.call" :label="t('organization.workspace.openCall.eyebrow')">
+    <p class="font-condensed text-[1.05rem] font-bold tracking-[0.05em] text-text-secondary uppercase">
       {{ t('organization.workspace.openCall.eyebrow') }}
     </p>
-
-    <h3 class="mt-2 text-lg leading-snug font-semibold text-heading">
+    <p class="mt-1.5 font-semibold text-text">
       {{ props.edition ? tr(props.edition.title) : tr(props.call.title) }}
-    </h3>
+    </p>
 
-    <p class="mt-2 text-sm text-text-secondary">
+    <p v-if="countdown && countdown.days > 0" class="mt-3.5 flex items-baseline gap-3">
+      <b class="font-condensed text-[4rem] leading-[0.8] font-bold text-accent tabular-nums">{{ countdown.days }}</b>
+      <span class="font-condensed text-[1.15rem] leading-[1.1] font-bold tracking-[0.04em] whitespace-pre-line text-heading uppercase">
+        {{ t('organization.workspace.openCall.daysLeft', countdown.days) }}
+      </span>
+    </p>
+    <p v-else-if="countdown" class="mt-3.5 font-condensed text-[1.6rem] leading-tight font-bold text-accent uppercase">
+      {{ t('organization.workspace.openCall.lastDay') }}
+    </p>
+
+    <p class="mt-3 text-sm text-text-secondary">
       {{ t('organization.workspace.openCall.deadline', { date: date(deadline, timezone) }) }}
     </p>
 
-    <p v-if="countdown" class="mt-1 text-sm font-semibold text-accent">
-      {{
-        countdown.days > 0
-          ? t('organization.workspace.openCall.remaining', countdown.days)
-          : t('organization.workspace.openCall.lastDay')
-      }}
-    </p>
-
-    <div class="mt-4 flex flex-wrap items-center gap-3">
-      <UiButton variant="primary" :to="localePath('/deposer-une-proposition')" icon="plus">
+    <div class="mt-4 grid gap-1">
+      <UiButton variant="primary" block :to="localePath('/deposer-une-proposition')" icon="plus">
         {{ t('organization.workspace.openCall.action') }}
       </UiButton>
-      <UiButton
-        v-if="props.edition"
-        variant="link"
-        :to="localePath(`/evenements/${props.edition.slug}`)"
-      >
+      <UiButton v-if="props.edition" variant="link" :to="localePath(`/evenements/${props.edition.slug}`)">
         {{
           props.call.uses_scoring_grid
             ? t('organization.workspace.openCall.criteria')
@@ -101,12 +70,10 @@ const isOpen = computed(() => props.call !== null && !(countdown.value?.expired 
         }}
       </UiButton>
     </div>
-  </UiCard>
+  </UiTicket>
 
-  <UiCard v-else sunken>
-    <h3 class="font-semibold text-text">{{ t('organization.workspace.openCall.closed.title') }}</h3>
-    <p class="mt-1 max-w-(--measure) text-sm text-text-muted">
-      {{ t('organization.workspace.openCall.closed.description') }}
-    </p>
-  </UiCard>
+  <UiTicket v-else-if="!props.hideWhenClosed" :label="t('organization.workspace.openCall.closed.title')" bar-class="bg-border">
+    <p class="font-bold text-text">{{ t('organization.workspace.openCall.closed.title') }}</p>
+    <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.openCall.closed.description') }}</p>
+  </UiTicket>
 </template>

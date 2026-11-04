@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { InviteMemberPayload, WorkspaceMember } from '~/types/organization-workspace'
 import type { Membership } from '~/types/org'
-import type { SelectOption } from '~/types/ui'
+import type { Intent, SelectOption } from '~/types/ui'
 import type { PersonId } from '~/types/shared'
 
 /**
@@ -26,17 +26,19 @@ import type { PersonId } from '~/types/shared'
 interface Props {
   members: WorkspaceMember[]
   organizationName: string
-  /** Personne connectée — pour marquer sa propre ligne. */
+  /** Personne connectée, pour marquer sa propre ligne. */
   viewerId: PersonId
-  /** Le rôle du lecteur ouvre — ou non — l'invitation et la modération. */
+  /** Le rôle du lecteur ouvre (ou non) l'invitation et la modération. */
   isManager: boolean
   /** Fiche pas encore validée par l'équipe : le référent est provisoire, il
    *  n'invite ni n'accepte personne (31/10). L'API le refuse aussi. */
   pendingValidation?: boolean
   busy?: boolean
+  /** Résultat de la dernière invitation ou décision, affiché sous le formulaire. */
+  message?: { intent: Intent; text: string } | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { pendingValidation: false, busy: false, message: null })
 const emit = defineEmits<{
   invite: [payload: Omit<InviteMemberPayload, 'organization_id'>]
   /** Décision sur une DEMANDE d'adhésion. Une invitation ne s'approuve pas. */
@@ -90,9 +92,9 @@ const jobTitle = ref('')
 const emailError = ref('')
 
 /**
- * Une seule vérification côté écran, et c'est la forme de l'adresse : le reste
- * — adresse déjà membre, invitation déjà en vol — est une RÉPONSE de l'API, pas
- * une devinette du formulaire.
+ * Une seule vérification côté écran, la forme de l'adresse : le reste (adresse
+ * déjà membre, invitation déjà en vol) est une RÉPONSE de l'API, pas une
+ * devinette du formulaire.
  */
 function submit(): void {
   const value = email.value.trim()
@@ -119,55 +121,52 @@ function nameOf(entry: WorkspaceMember): string {
 
 <template>
   <section id="membres" aria-labelledby="workspace-members-title" class="scroll-mt-24">
-    <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 id="workspace-members-title" class="text-xl font-semibold">
-        {{ t('organization.workspace.members.title') }}
-      </h2>
-      <p class="text-sm text-text-subtle">
-        {{ t('organization.workspace.members.count', active.length) }}
-      </p>
-    </div>
-    <p class="max-w-(--measure) text-sm text-text-muted">
+    <WorkspaceRule heading-id="workspace-members-title" :label="t('organization.workspace.members.title')" :count="active.length" />
+    <p class="mt-3.5 max-w-(--measure) text-[0.92rem] text-text-muted">
       {{ t('organization.workspace.members.description', { organization: props.organizationName }) }}
     </p>
 
-    <ul class="mt-4 flex flex-col divide-y divide-border-subtle rounded-lg border border-border bg-surface-raised">
+    <ul class="mt-5 border-t border-border-subtle">
       <li
         v-for="entry in [...active, ...pending]"
         :key="entry.membership.id"
-        class="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
+        class="grid grid-cols-[44px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 border-b border-border-subtle py-3.5 md:grid-cols-[48px_minmax(0,1fr)_auto_auto]"
       >
-        <span class="min-w-0 flex-1">
-          <span class="flex flex-wrap items-baseline gap-x-2">
-            <span class="font-semibold text-text">{{ nameOf(entry) }}</span>
-            <span
-              v-if="entry.person.id === props.viewerId"
-              class="text-xs font-semibold tracking-wide text-accent uppercase"
-            >
-              {{ t('organization.workspace.members.status.you') }}
-            </span>
+        <span
+          aria-hidden="true"
+          class="grid size-11 place-items-center rounded-full border border-border font-condensed text-[1.1rem] font-bold text-text-secondary md:size-12"
+          :class="entry.membership.status === 'pending' ? 'border-dashed' : 'bg-surface-sunken'"
+        >
+          {{ initialsOf(nameOf(entry)) }}
+        </span>
+        <span class="min-w-0">
+          <span class="font-bold text-text">{{ nameOf(entry) }}</span>
+          <span
+            v-if="entry.person.id === props.viewerId"
+            class="ml-2 text-[0.72rem] font-bold tracking-[0.05em] text-accent uppercase"
+          >
+            {{ t('organization.workspace.members.status.you') }}
           </span>
-          <span v-if="entry.membership.job_title" class="mt-0.5 block text-sm text-text-muted">
+          <span v-if="entry.membership.job_title" class="block text-[0.85rem] text-text-muted">
             {{ entry.membership.job_title }}
           </span>
-          <!-- La DIRECTION de l'attente, écrite en toutes lettres. « En
-               attente » seul laisserait deviner qui doit bouger. -->
-          <span v-if="entry.membership.status === 'pending'" class="mt-0.5 block text-sm text-text-subtle">
+          <!-- La DIRECTION de l'attente, écrite en toutes lettres : « En attente »
+               seul laisserait deviner qui doit bouger. -->
+          <span v-if="entry.membership.status === 'pending'" class="block text-[0.85rem] text-text-subtle">
             {{ pendingLabel(entry) }}
           </span>
         </span>
 
         <UiBadge
+          class="col-start-2 justify-self-start md:col-start-3"
           :intent="entry.membership.role === 'manager' ? 'info' : 'neutral'"
           :label="roleLabel(entry.membership.role)"
-          size="sm"
         />
 
-        <span v-if="entry.membership.status === 'pending'" class="flex flex-wrap gap-2">
-          <template v-if="canModerate && !entry.is_invitation">
+        <span class="col-start-2 flex flex-wrap gap-2 md:col-start-4">
+          <template v-if="entry.membership.status === 'pending' && canModerate && !entry.is_invitation">
             <UiButton
               variant="secondary"
-              size="sm"
               icon="check"
               :disabled="props.busy"
               @click="emit('decide', entry.membership.id, true)"
@@ -176,7 +175,6 @@ function nameOf(entry: WorkspaceMember): string {
             </UiButton>
             <UiButton
               variant="ghost"
-              size="sm"
               :disabled="props.busy"
               @click="emit('decide', entry.membership.id, false)"
             >
@@ -184,9 +182,8 @@ function nameOf(entry: WorkspaceMember): string {
             </UiButton>
           </template>
           <UiButton
-            v-else-if="canModerate && entry.is_invitation"
+            v-else-if="entry.membership.status === 'pending' && canModerate && entry.is_invitation"
             variant="ghost"
-            size="sm"
             icon="mail"
             :disabled="props.busy"
           >
@@ -196,23 +193,30 @@ function nameOf(entry: WorkspaceMember): string {
       </li>
     </ul>
 
+    <UiAlert v-if="props.message" class="mt-6" :intent="props.message.intent" :message="props.message.text" live />
+
     <!-- L'invitation. Réservée au référent, et le dire quand on ne l'est pas. -->
     <UiAlert
       v-if="props.isManager && props.pendingValidation"
-      class="mt-5"
+      class="mt-6"
       :title="t('organization.workspace.members.pendingValidation.title')"
       :message="t('organization.workspace.members.pendingValidation.message')"
     />
-    <UiCard v-else-if="props.isManager" class="mt-5" :title="t('organization.workspace.members.invite.title')">
-      <p class="max-w-(--measure) text-sm text-text-muted">
+    <div v-else-if="props.isManager" class="mt-7 rounded-lg border border-border bg-surface-raised p-5">
+      <h3 class="font-condensed text-[1.45rem] leading-tight font-semibold text-heading">
+        {{ t('organization.workspace.members.invite.title') }}
+      </h3>
+      <p class="mt-1 max-w-[64ch] text-sm text-text-muted">
         {{ t('organization.workspace.members.invite.description') }}
       </p>
 
-      <form class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start" @submit.prevent="submit()">
+      <form
+        class="mt-4.5 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_200px_auto]"
+        @submit.prevent="submit()"
+      >
         <UiInput
           id="invite-email"
           v-model="email"
-          class="flex-1"
           type="email"
           autocomplete="email"
           :label="t('organization.workspace.members.invite.email')"
@@ -220,33 +224,28 @@ function nameOf(entry: WorkspaceMember): string {
           :error="emailError"
           required
         />
-
         <UiInput
           id="invite-job-title"
           v-model="jobTitle"
-          class="flex-1"
           :label="t('organization.workspace.members.invite.jobTitle')"
           :placeholder="t('organization.workspace.members.invite.jobTitlePlaceholder')"
         />
-
         <UiSelect
           id="invite-role"
           v-model="role"
-          class="sm:w-52"
           :label="t('organization.workspace.members.invite.role')"
           :options="roleOptions"
           hide-optional
         />
-
-        <UiButton type="submit" variant="primary" class="sm:mt-7" :loading="props.busy">
+        <UiButton type="submit" variant="primary" class="max-lg:w-full lg:mt-7" :loading="props.busy">
           {{ t('organization.workspace.members.invite.submit') }}
         </UiButton>
       </form>
-    </UiCard>
+    </div>
 
     <UiAlert
       v-else-if="!hasManager"
-      class="mt-4"
+      class="mt-6"
       :title="t('organization.workspace.members.noManager.title')"
       :message="t('organization.workspace.members.noManager.message')"
     />

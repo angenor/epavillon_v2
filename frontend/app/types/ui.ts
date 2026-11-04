@@ -35,7 +35,7 @@ export type Intent = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
  * les jetons `--color-glass-*` ; elle existe ici pour qu'aucun écran n'écrive
  * son propre bouton translucide.
  */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link' | 'glass' | 'inverse' | 'institutional' | 'on-inverse' | 'live' | 'signup'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-link' | 'link' | 'glass' | 'inverse' | 'institutional' | 'on-inverse' | 'live' | 'signup'
 
 /** Trois tailles suffisent : `sm` est la version compacte des barres d'outils. */
 export type Size = 'sm' | 'md' | 'lg'
@@ -141,6 +141,8 @@ export interface TabItem {
   label: string
   /** Compteur affiché à droite du libellé (« Propositions 40 »). */
   count?: number
+  /** Pictogramme avant le libellé (nom de `UiIcon`). */
+  icon?: string
   disabled?: boolean
 }
 

@@ -1,9 +1,22 @@
 {
   "title": "My organization",
   "subtitle": "Track your submissions and activities.",
+  "kicker": "Organizations' space",
+  "aside": "Coming up",
   "organizationPicker": {
-    "label": "Organization",
-    "hint": "You belong to several organizations: choose the one whose submissions you are tracking."
+    "label": "Organization"
+  },
+  "next": {
+    "label": "Your next activity",
+    "hours": "{start} to {end}",
+    "zone": "{zone} ({offset})",
+    "online": "Online",
+    "open": "Open the submission"
+  },
+  "reports": {
+    "label": "Reports",
+    "count": "report expected | report expected | reports expected",
+    "description": "Every activity held in {edition} has its report. | One activity held in {edition} has no report yet. | {count} activities held in {edition} have no report yet."
   },
   "membershipPending": {
     "title": "Your request is awaiting a contact person",
@@ -17,7 +30,7 @@
       "description": "No submission for this edition is waiting for your reply."
     },
     "count": "No pending action | One pending action | {count} pending actions",
-    "dueOn": "Before {date}",
+    "before": "before",
     "kind": {
       "changes_requested": {
         "label": "Changes requested",
@@ -62,6 +75,7 @@
       "rejected": "Not selected",
       "withdrawn": "Withdrawn",
       "cancelled": "Cancelled",
+      "activityCancelled": "Cancelled",
       "scheduled": "Scheduled"
     },
     "empty": {
@@ -76,7 +90,7 @@
       "draftClosed": "Never submitted",
       "review": "Committee decision pending",
       "report": "Your turn: report expected | Your turn: report expected | Your turn: {count} reports expected",
-      "session": "{date}, {time}",
+      "sessionWhen": "{day}, {zone}",
       "held": "Activity held",
       "scheduling": "Scheduling in progress"
     }
@@ -84,7 +98,7 @@
   "openCall": {
     "eyebrow": "Open call for proposals",
     "deadline": "Deadline: {date}",
-    "remaining": "{count} day left | {count} day left | {count} days left",
+    "daysLeft": "day left\nto submit | day left\nto submit | days left\nto submit",
     "lastDay": "Last day to submit",
     "action": "Submit a proposal",
     "criteria": "Read the review criteria",
@@ -95,7 +109,7 @@
     }
   },
   "members": {
-    "title": "Organization members",
+    "title": "Members",
     "description": "The people who can submit and track proposals on behalf of {organization}.",
     "count": "No member | One member | {count} members",
     "role": {

@@ -1,6 +1,37 @@
 {
   "breadcrumb": "My organization",
   "title": "Submission {code}",
+  "hero": {
+    "trail": "{edition} / Submission {code}",
+    "ledBy": "Led by",
+    "editionLogo": "Logo: {edition}"
+  },
+  "cancel": {
+    "action": "Cancel the activity",
+    "title": "Cancel your activity",
+    "when": "{day}, {hours}",
+    "unscheduled": "Activity not scheduled yet",
+    "consequences": {
+      "programme": "The activity leaves the programme: its public page shows “Cancelled”.",
+      "attendees": "Registered people immediately receive a cancellation email.",
+      "team": "The IFDD team is notified immediately by email, with you in copy.",
+      "final": "The cancellation is final",
+      "finalDetail": ": the activity cannot return to the programme."
+    },
+    "reason": "Reason for cancelling (required)",
+    "reasonHint": "Sent to the IFDD team and kept in the submission history, never published.",
+    "keep": "Keep the activity",
+    "confirm": "Cancel the activity",
+    "done": {
+      "title": "Activity cancelled",
+      "byOn": "Cancelled on {date} by {actor}.",
+      "on": "Cancelled on {date}.",
+      "reason": "Reason: {reason}",
+      "mails": "The IFDD team was notified by email, with {actor} in copy. Registered people received the cancellation notice.",
+      "mailsAnonymous": "The IFDD team was notified by email. Registered people received the cancellation notice.",
+      "closed": "This submission is closed: a cancelled activity does not return to the programme. For any question, write to the IFDD team."
+    }
+  },
   "notFound": {
     "title": "Submission not found",
     "description": "This submission does not exist, or it does not belong to the organization you are tracking.",
@@ -13,6 +44,7 @@
   },
   "tracking": {
     "timelineLabel": "Submission progress",
+    "progress": "Progress",
     "summary": "Submission summary",
     "edition": "Edition",
     "format": "Format",
@@ -64,11 +96,16 @@
     "online": "Online",
     "registered": "No attendee | 1 attendee | {count} attendees",
     "waitlisted": "Nobody on the waiting list | 1 person on the waiting list | {count} people on the waiting list",
+    "hours": "{start} to {end}",
+    "zone": "{zone} ({offset})",
+    "publicPage": "Public page",
+    "writeTeam": "Write to the team",
     "capacity": "Capacity: {count} seats",
     "attendance": "{count} people attended",
     "reportMissing": "The report for this activity has not been submitted yet.",
     "reminders": {
       "title": "Reminder schedule",
+      "titleOf": "Reminder schedule, {session}",
       "description": "Four reminders go out before the activity, and they are cumulative: every attendee receives all four. Times are given in {zone}.",
       "offset": {
         "days": "{count} day before | {count} day before | {count} days before",
@@ -189,6 +226,8 @@
     "preparing": "Your new image is being prepared: it will show everywhere in a few seconds."
   },
   "sections": {
+    "dossier": "Your submission",
+    "dossierMeta": "Editable section by section",
     "presentation": "Presentation",
     "speakers": "Speakers | Speakers · 1 | Speakers · {count}",
     "speakersHint": "Name, role, position and biography of each person who speaks.",
@@ -209,7 +248,8 @@
     "country": "Country"
   },
   "dayPlan": {
-    "prepare": "Your activity is accepted · prepare the day",
+    "title": "The big day",
+    "meta": "Your activity is accepted: prepare it with the IFDD team",
     "promote": "Promote your activity"
   },
   "focal": {

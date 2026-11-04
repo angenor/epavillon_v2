@@ -60,7 +60,7 @@ async function attachPhoto(speakerId: string, assetId: AssetId | null): Promise<
     <li
       v-for="speaker in props.speakers"
       :key="speaker.key"
-      class="flex flex-col gap-3 border-t border-border-subtle py-4 first:border-t-0 first:pt-0 sm:flex-row sm:items-start sm:gap-4"
+      class="flex flex-col gap-3 border-t border-border-subtle py-4.5 first:border-t-0 first:pt-0 sm:flex-row sm:items-start sm:gap-4.5"
     >
       <UiImage
         v-if="speaker.photo_image"
@@ -80,9 +80,9 @@ async function attachPhoto(speakerId: string, assetId: AssetId | null): Promise<
       </span>
 
       <div class="min-w-0 flex-1">
-        <p class="font-semibold text-heading">
+        <p class="font-condensed text-[1.3rem] leading-[1.1] font-bold text-heading">
           {{ speakerName(speaker) }}
-          <span class="font-normal text-text-muted">· {{ t(`proposal.form.step-speakers.roles.${speaker.role}.label`) }}</span>
+          <span class="ml-1 font-sans text-[0.85rem] font-medium text-text-muted">{{ t(`proposal.form.step-speakers.roles.${speaker.role}.label`) }}</span>
         </p>
         <p v-if="speaker.job_title || speaker.organization_name" class="mt-0.5 text-sm text-text-muted">
           {{ [speaker.job_title, speaker.organization_name].filter(Boolean).join(', ') }}

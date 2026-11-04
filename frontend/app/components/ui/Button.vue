@@ -188,6 +188,12 @@ const VARIANTS: Record<ButtonVariant, string> = {
   link:
     'border-transparent bg-transparent px-0! text-text-link underline-offset-4 ' +
     'hover:underline hover:text-text-link-hover active:text-text-link-hover',
+
+  // Le geste destructeur discret, sous l'action principale : un lien rouge qui
+  // ouvre une confirmation (annuler une activité, 04/11). Jamais l'acte lui-même.
+  'danger-link':
+    'border-transparent bg-transparent px-0! text-danger underline-offset-4 ' +
+    'hover:underline hover:text-danger active:text-danger',
 }
 
 /**

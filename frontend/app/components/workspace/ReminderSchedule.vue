@@ -25,13 +25,17 @@ import type { TimeZoneName } from '~/types/shared'
 
 interface Props {
   reminders: ReminderSlot[]
-  /** Fuseau de l'édition — jamais celui du navigateur. */
+  /** Fuseau de l'édition, jamais celui du navigateur. */
   timezone: TimeZoneName
   /** Nom du fuseau tel qu'il s'annonce (« heure de Belém »). */
   zoneLabel?: string
+  /** Ancre de la rubrique dans « Le jour J » (04/11). */
+  sectionId?: string
+  /** Plusieurs séances : la date de celle-ci, ajoutée au titre. */
+  sessionLabel?: string
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { zoneLabel: undefined, sectionId: 'rappels', sessionLabel: '' })
 
 const { t } = useI18n()
 const { dateTime, zoneOf } = useDateTime()
@@ -62,27 +66,30 @@ function stateOf(slot: ReminderSlot): 'sent' | 'pending' | 'skipped' {
 </script>
 
 <template>
-  <section class="rounded-lg border border-border-subtle bg-surface-sunken p-4">
-    <h4 class="text-sm font-semibold text-text">
-      {{ t('organization.workspace.proposal.sessions.reminders.title') }}
-    </h4>
-    <p class="mt-1 max-w-(--measure) text-sm text-text-muted">
-      {{ t('organization.workspace.proposal.sessions.reminders.description', { zone: zoneOf(zone) }) }}
-    </p>
-
-    <p v-if="props.reminders.length === 0" class="mt-3 text-sm text-text-subtle">
+  <WorkspaceFileSection
+    :id="props.sectionId"
+    :title="
+      props.sessionLabel
+        ? t('organization.workspace.proposal.sessions.reminders.titleOf', { session: props.sessionLabel })
+        : t('organization.workspace.proposal.sessions.reminders.title')
+    "
+    :description="t('organization.workspace.proposal.sessions.reminders.description', { zone: zoneOf(zone) })"
+    :can-edit="false"
+    :editing="false"
+  >
+    <p v-if="props.reminders.length === 0" class="text-sm text-text-subtle">
       {{ t('organization.workspace.proposal.sessions.reminders.noRecipients') }}
     </p>
 
-    <ul v-else class="mt-3 flex flex-col divide-y divide-border-subtle">
+    <ul v-else class="flex flex-col divide-y divide-border-subtle">
       <li
         v-for="slot in props.reminders"
         :key="`${slot.offset_before}-${slot.channel}`"
-        class="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5"
+        class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5 py-3 text-[0.9rem] first:pt-0 sm:grid-cols-[150px_auto_minmax(0,1fr)_auto]"
       >
         <!-- Le décalage en tête, largeur fixe : la colonne se parcourt d'un
              regard, du plus lointain au plus proche. -->
-        <span class="w-32 shrink-0 text-sm font-semibold text-text">{{ offsetLabel(slot.offset_before) }}</span>
+        <span class="font-bold text-text">{{ offsetLabel(slot.offset_before) }}</span>
 
         <UiBadge
           :intent="stateOf(slot) === 'sent' ? 'success' : stateOf(slot) === 'skipped' ? 'neutral' : 'info'"
@@ -91,14 +98,14 @@ function stateOf(slot: ReminderSlot): 'sent' | 'pending' | 'skipped' {
           size="sm"
         />
 
-        <time :datetime="slot.scheduled_for" class="text-sm tabular-nums text-text-secondary">
+        <time :datetime="slot.scheduled_for" class="tabular-nums text-text-secondary">
           {{ dateTime(slot.scheduled_for, props.timezone) }}
         </time>
 
-        <span class="text-sm text-text-muted">
+        <span class="text-text-muted">
           {{ t(`organization.workspace.proposal.sessions.reminders.channel.${slot.channel}`) }}
         </span>
       </li>
     </ul>
-  </section>
+  </WorkspaceFileSection>
 </template>
