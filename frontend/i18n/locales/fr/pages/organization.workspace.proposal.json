@@ -27,8 +27,8 @@
       "byOn": "Annulée le {date} par {actor}.",
       "on": "Annulée le {date}.",
       "reason": "Motif : {reason}",
-      "mails": "L'équipe de l'IFDD a été prévenue par courriel, avec {actor} en copie. Les personnes inscrites ont reçu l'avis d'annulation.",
-      "mailsAnonymous": "L'équipe de l'IFDD a été prévenue par courriel. Les personnes inscrites ont reçu l'avis d'annulation.",
+      "mailsYou": "L'équipe de l'IFDD a été prévenue par courriel, avec vous en copie. Les personnes inscrites ont reçu l'avis d'annulation.",
+      "mailsRegistrants": "Les personnes inscrites ont reçu l'avis d'annulation.",
       "closed": "Ce dossier est clos : une activité annulée ne revient pas au programme. Pour toute question, écrivez à l'équipe de l'IFDD."
     }
   },

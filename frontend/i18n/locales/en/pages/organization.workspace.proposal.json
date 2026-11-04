@@ -27,8 +27,8 @@
       "byOn": "Cancelled on {date} by {actor}.",
       "on": "Cancelled on {date}.",
       "reason": "Reason: {reason}",
-      "mails": "The IFDD team was notified by email, with {actor} in copy. Registered people received the cancellation notice.",
-      "mailsAnonymous": "The IFDD team was notified by email. Registered people received the cancellation notice.",
+      "mailsYou": "The IFDD team was notified by email, with you in copy. Registered people received the cancellation notice.",
+      "mailsRegistrants": "Registered people received the cancellation notice.",
       "closed": "This submission is closed: a cancelled activity does not return to the programme. For any question, write to the IFDD team."
     }
   },

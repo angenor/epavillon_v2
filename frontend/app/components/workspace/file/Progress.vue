@@ -32,6 +32,9 @@ const { t } = useI18n()
 const { date } = useDateTime()
 
 const cancelledBy = computed(() => props.cancellation?.actorLabel ?? props.cancelledByFallback)
+// Le site ne sait pas si l'organisation ou l'IFDD a annulé : seule la personne qui a annulé lit que l'équipe a été prévenue.
+const auth = useAuthStore()
+const cancelledByViewer = computed(() => Boolean(props.cancellation?.actorId) && props.cancellation?.actorId === auth.person?.id)
 </script>
 
 <template>
@@ -63,9 +66,9 @@ const cancelledBy = computed(() => props.cancellation?.actorLabel ?? props.cance
         </p>
         <p v-if="props.cancellation.afterAcceptance" class="mt-1">
           {{
-            cancelledBy
-              ? t('organization.workspace.proposal.cancel.done.mails', { actor: cancelledBy })
-              : t('organization.workspace.proposal.cancel.done.mailsAnonymous')
+            cancelledByViewer
+              ? t('organization.workspace.proposal.cancel.done.mailsYou')
+              : t('organization.workspace.proposal.cancel.done.mailsRegistrants')
           }}
         </p>
       </UiAlert>
