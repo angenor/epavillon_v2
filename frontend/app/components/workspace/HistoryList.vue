@@ -27,15 +27,25 @@ import type { I18nText, TimeZoneName } from '~/types/shared'
 
 interface Props {
   entries: ProposalHistoryEntry[]
-  /** Fuseau d'affichage — celui de l'édition, comme partout ailleurs. */
+  /** Fuseau d'affichage, celui de l'édition, comme partout ailleurs. */
   timezone: TimeZoneName
+  /**
+   * Direction condensée (espace organisation, 04/11) : la date en grand à
+   * gauche, l'heure dessous ; le titre vient de la carte qui l'entoure.
+   */
+  condensed?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { condensed: false })
 
 const { t, te } = useI18n()
 const { tr } = useI18nText()
-const { dateTime } = useDateTime()
+const { dateTime, time, intlLocale } = useDateTime()
+
+/** « 2 nov. » : la date en grand de la version condensée. */
+function shortDate(value: string): string {
+  return new Intl.DateTimeFormat(intlLocale.value, { day: 'numeric', month: 'short', timeZone: props.timezone }).format(new Date(value))
+}
 
 /** Un champ traduit, ou son nom technique à défaut. */
 function fieldLabel(field: string): string {
@@ -122,24 +132,36 @@ function plainText(value: unknown): string {
 </script>
 
 <template>
-  <section aria-labelledby="workspace-history-title">
-    <h2 id="workspace-history-title" class="text-xl font-semibold">
+  <section :aria-labelledby="props.condensed ? undefined : 'workspace-history-title'">
+    <h2 v-if="!props.condensed" id="workspace-history-title" class="text-xl font-semibold">
       {{ t('organization.workspace.proposal.history.title') }}
     </h2>
-    <p class="mt-1 max-w-(--measure) text-sm text-text-muted">
+    <p class="max-w-(--measure) text-sm text-text-muted" :class="props.condensed ? 'mb-4.5' : 'mt-1'">
       {{ t('organization.workspace.proposal.history.description') }}
     </p>
 
     <UiEmptyState
       v-if="props.entries.length === 0"
-      class="mt-6"
+      :class="props.condensed ? '' : 'mt-6'"
       icon="clock"
       :title="t('organization.workspace.proposal.history.empty.title')"
       :description="t('organization.workspace.proposal.history.empty.description')"
     />
 
-    <ol v-else class="mt-6 flex flex-col divide-y divide-border-subtle">
-      <li v-for="(entry, index) in props.entries" :key="`${entry.occurred_at}-${entry.field ?? 'insert'}-${index}`" class="py-4">
+    <ol v-else class="flex flex-col divide-y divide-border-subtle" :class="props.condensed ? '' : 'mt-6'">
+      <li
+        v-for="(entry, index) in props.entries"
+        :key="`${entry.occurred_at}-${entry.field ?? 'insert'}-${index}`"
+        :class="props.condensed ? 'grid grid-cols-[72px_minmax(0,1fr)] gap-x-3.5 py-4.5 first:pt-1 sm:grid-cols-[112px_minmax(0,1fr)] sm:gap-x-5.5' : 'py-4'"
+      >
+        <!-- La date en grand : la colonne qu'on parcourt pour retrouver un moment. -->
+        <p v-if="props.condensed" class="font-condensed leading-none">
+          <time :datetime="entry.occurred_at">
+            <b class="block text-[1.4rem] font-bold text-heading uppercase sm:text-[1.9rem]">{{ shortDate(entry.occurred_at) }}</b>
+            <span class="mt-1 block font-sans text-[0.82rem] text-text-muted tabular-nums">{{ time(entry.occurred_at, props.timezone) }}</span>
+          </time>
+        </p>
+        <div class="min-w-0">
         <p class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span class="font-semibold text-text">
             {{
@@ -148,7 +170,7 @@ function plainText(value: unknown): string {
                 : t('organization.workspace.proposal.history.changed', { field: fieldLabel(entry.field) })
             }}
           </span>
-          <time :datetime="entry.occurred_at" class="text-sm tabular-nums text-text-subtle">
+          <time v-if="!props.condensed" :datetime="entry.occurred_at" class="text-sm tabular-nums text-text-subtle">
             {{ dateTime(entry.occurred_at, props.timezone) }}
           </time>
           <span class="text-sm text-text-subtle">
@@ -162,7 +184,7 @@ function plainText(value: unknown): string {
 
         <!-- Avant / après, l'un sous l'autre plutôt que côte à côte : sur un
              téléphone, deux colonnes de texte long deviennent deux colonnes de
-             deux mots. L'ancienne valeur est barrée — la comparaison se fait à
+             deux mots. L'ancienne valeur est barrée : la comparaison se fait à
              l'œil, sans lire les étiquettes. -->
         <dl v-if="entry.field !== null" class="mt-2 flex flex-col gap-1.5 text-sm">
           <div class="flex flex-wrap gap-x-2">
@@ -178,6 +200,7 @@ function plainText(value: unknown): string {
             </dd>
           </div>
         </dl>
+        </div>
       </li>
     </ol>
   </section>

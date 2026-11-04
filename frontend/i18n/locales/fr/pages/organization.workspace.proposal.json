@@ -1,6 +1,37 @@
 {
   "breadcrumb": "Mon organisation",
   "title": "Dossier {code}",
+  "hero": {
+    "trail": "{edition} / Dossier {code}",
+    "ledBy": "Porté par",
+    "editionLogo": "Logo : {edition}"
+  },
+  "cancel": {
+    "action": "Annuler l'activité",
+    "title": "Annuler votre activité",
+    "when": "{day}, {hours}",
+    "unscheduled": "Activité pas encore programmée",
+    "consequences": {
+      "programme": "L'activité quitte le programme : sa page publique indique « Annulée ».",
+      "attendees": "Les personnes inscrites reçoivent aussitôt un courriel d'annulation.",
+      "team": "L'équipe de l'IFDD est prévenue aussitôt par courriel, avec vous en copie.",
+      "final": "L'annulation est définitive",
+      "finalDetail": ": l'activité ne pourra pas revenir au programme."
+    },
+    "reason": "Motif de l'annulation (obligatoire)",
+    "reasonHint": "Transmis à l'équipe de l'IFDD et gardé dans l'historique du dossier, jamais publié.",
+    "keep": "Garder l'activité",
+    "confirm": "Annuler l'activité",
+    "done": {
+      "title": "Activité annulée",
+      "byOn": "Annulée le {date} par {actor}.",
+      "on": "Annulée le {date}.",
+      "reason": "Motif : {reason}",
+      "mails": "L'équipe de l'IFDD a été prévenue par courriel, avec {actor} en copie. Les personnes inscrites ont reçu l'avis d'annulation.",
+      "mailsAnonymous": "L'équipe de l'IFDD a été prévenue par courriel. Les personnes inscrites ont reçu l'avis d'annulation.",
+      "closed": "Ce dossier est clos : une activité annulée ne revient pas au programme. Pour toute question, écrivez à l'équipe de l'IFDD."
+    }
+  },
   "notFound": {
     "title": "Dossier introuvable",
     "description": "Ce dossier n'existe pas, ou il n'appartient pas à l'organisation dont vous suivez les activités.",
@@ -13,6 +44,7 @@
   },
   "tracking": {
     "timelineLabel": "Avancement du dossier",
+    "progress": "Avancement",
     "summary": "Résumé du dossier",
     "edition": "Édition",
     "format": "Format",
@@ -64,11 +96,16 @@
     "online": "En ligne",
     "registered": "Aucun inscrit | 1 inscrit | {count} inscrits",
     "waitlisted": "Aucune personne en liste d'attente | 1 personne en liste d'attente | {count} personnes en liste d'attente",
+    "hours": "{start} à {end}",
+    "zone": "{zone} ({offset})",
+    "publicPage": "Page publique",
+    "writeTeam": "Écrire à l'équipe",
     "capacity": "Jauge : {count} places",
     "attendance": "{count} personnes présentes",
     "reportMissing": "Le compte rendu de cette activité n'a pas encore été déposé.",
     "reminders": {
       "title": "Calendrier des rappels",
+      "titleOf": "Calendrier des rappels, {session}",
       "description": "Quatre rappels partent avant l'activité, et ils sont cumulés : chaque inscrit les reçoit tous les quatre. Les heures sont données à l'{zone}.",
       "offset": {
         "days": "{count} jour avant | {count} jour avant | {count} jours avant",
@@ -189,6 +226,8 @@
     "preparing": "Votre nouvelle image est en préparation : elle s'affichera partout dans quelques secondes."
   },
   "sections": {
+    "dossier": "Votre dossier",
+    "dossierMeta": "Modifiable rubrique par rubrique",
     "presentation": "Présentation",
     "speakers": "Intervenants | Intervenants · 1 | Intervenants · {count}",
     "speakersHint": "Nom, rôle, fonction et biographie de chaque personne qui prend la parole.",
@@ -209,7 +248,8 @@
     "country": "Pays"
   },
   "dayPlan": {
-    "prepare": "Votre activité est retenue · préparer le jour J",
+    "title": "Le jour J",
+    "meta": "Votre activité est retenue : préparez-la avec l'équipe de l'IFDD",
     "promote": "Faire connaître votre activité"
   },
   "focal": {

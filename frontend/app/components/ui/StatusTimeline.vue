@@ -66,6 +66,11 @@ interface Props {
    * continue donc de s'appliquer.
    */
   hideDetails?: boolean
+  /**
+   * Direction condensée (espace organisation, 04/11) : libellés en capitales
+   * condensées, dates au jour. Le détail de l'étape se lit ailleurs sur la page.
+   */
+  condensed?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { orientation: 'vertical' })
@@ -116,6 +121,22 @@ const STATE_LABELS: Record<StepState, string> = {
   skipped: 'status-timeline.state.skipped',
 }
 
+const LABEL_TONES: Record<StepState, string> = {
+  done: 'text-text',
+  current: 'font-semibold text-text',
+  upcoming: 'text-text-subtle',
+  skipped: 'text-text-subtle line-through',
+  error: 'font-semibold text-danger',
+  refused: 'font-semibold text-danger',
+}
+
+/** Une seule classe par propriété : deux couleurs concurrentes se départagent au hasard de la feuille. */
+function labelClasses(state: StepState): string {
+  if (!props.condensed) return `text-sm leading-snug ${LABEL_TONES[state]}`
+  const tone = state === 'done' || state === 'current' ? 'text-heading' : LABEL_TONES[state].replace('font-semibold ', '')
+  return `font-condensed text-[1.15rem] leading-[1.05] font-bold tracking-[0.03em] uppercase ${tone}`
+}
+
 function stateLabel(state: StepState): string {
   return t(STATE_LABELS[state])
 }
@@ -124,7 +145,7 @@ function dateOf(step: TimelineStep): string {
   if (!step.at || !props.timezone) return ''
   // Une étape datée au jour n'affiche pas d'heure : celle qu'on lirait serait
   // le produit d'une conversion de fuseau, pas une saisie.
-  return step.dateOnly ? date(step.at, props.timezone) : dateTime(step.at, props.timezone)
+  return step.dateOnly || props.condensed ? date(step.at, props.timezone) : dateTime(step.at, props.timezone)
 }
 
 /**
@@ -209,16 +230,9 @@ if (import.meta.dev) {
           <span v-else class="size-2 rounded-full bg-current" aria-hidden="true" />
         </span>
 
-        <div class="min-w-0 flex-1 pb-1">
+        <div class="min-w-0 flex-1 pb-1" :class="props.condensed && props.orientation === 'horizontal' ? 'sm:pt-2.5 sm:pr-3' : ''">
           <p
-            class="text-sm leading-snug"
-            :class="[
-              stateOf(step, index) === 'current' ? 'font-semibold text-text' : 'text-text',
-              stateOf(step, index) === 'upcoming' ? 'text-text-subtle' : '',
-              stateOf(step, index) === 'skipped' ? 'text-text-subtle line-through' : '',
-              stateOf(step, index) === 'error' ? 'font-semibold text-danger' : '',
-              stateOf(step, index) === 'refused' ? 'font-semibold text-danger' : '',
-            ]"
+            :class="labelClasses(stateOf(step, index))"
           >
             {{ step.label }}
             <span class="sr-only"> — {{ stateLabel(stateOf(step, index)) }}</span>

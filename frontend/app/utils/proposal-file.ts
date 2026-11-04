@@ -16,6 +16,8 @@ export interface ProposalFileFacts {
   hasLogo: boolean
   /** Activité retenue seulement : ce que le jour J demande en plus. */
   dayPlan?: ProposalDayPlan | null
+  /** Retenu ou annulé : le créneau est celui de l'IFDD, « Format et durée » sort de la liste (04/11). */
+  retained?: boolean
 }
 
 export type ProposalFileGap =
@@ -88,7 +90,7 @@ export function proposalFileChecklist(facts: ProposalFileFacts): ProposalFileChe
     item('bios', draft.speakers.length > 0 && draft.speakers.every(hasBio), 'intervenants'),
     item('photos', draft.speakers.length > 0 && draft.speakers.every(hasPhoto), 'intervenants'),
     item('logo', facts.hasLogo, 'logo', true),
-    item('format', draft.format !== null && draft.duration_minutes !== null, 'format'),
+    ...(facts.retained ? [] : [item('format', draft.format !== null && draft.duration_minutes !== null, 'format')]),
     ...(facts.dayPlan
       ? [
           item('focal', facts.dayPlan.focal_points.some((point) => point.phone.trim().length > 0), 'point-focal'),

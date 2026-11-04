@@ -46,9 +46,42 @@ interface Props {
   panelId?: (item: TabItem) => string
   /** L'onglet actif prend aussi un fond teinté : onglets riches (vignette, seconde ligne) où le filet seul se perd. */
   filled?: boolean
+  /**
+   * `banner` : onglets posés sur `UiMediaBanner` (direction condensée), en
+   * cartes qui passent à la ligne. Verre sur une photo, nuance de l'aplat sans
+   * photo ; l'actif prend la tuile claire. Le panneau vit sous le bandeau
+   * (`panelId`).
+   */
+  tone?: 'line' | 'banner'
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { to: undefined, panelId: undefined, tone: 'line' })
+const onMedia = inject(MEDIA_BANNER_ON_MEDIA, computed(() => false))
+
+function tabClasses(item: TabItem): string[] {
+  const selected = item.value === props.modelValue
+  if (props.tone === 'banner') {
+    return [
+      'inline-flex min-h-(--target-min) cursor-pointer items-center gap-3 rounded-lg border text-left text-text-on-inverse no-underline transition-colors duration-(--duration-fast) hover:text-text-on-inverse',
+      // Onglet riche (vignette, seconde ligne) : une ligne entière sur téléphone ; simple : côte à côte.
+      slots.tab ? 'py-2.5 pr-4.5 pl-2.5 max-sm:basis-full' : 'px-5 max-sm:flex-1 max-sm:justify-center',
+      selected
+        ? 'border-transparent bg-surface-inverse-selected text-text-on-inverse-selected shadow-glass hover:text-text-on-inverse-selected'
+        : onMedia.value
+          ? 'border-glass-border bg-glass-raised backdrop-blur-glass hover:border-glass-border-strong hover:bg-glass-hover'
+          : 'border-border-on-inverse bg-surface-inverse-raised hover:border-glass-border-strong',
+    ]
+  }
+  return [
+    '-mb-px inline-flex min-h-(--target-min) shrink-0 items-center gap-2 border-b-(length:--border-thick) px-4 text-sm font-semibold whitespace-nowrap no-underline transition-colors duration-(--duration-fast)',
+    selected
+      ? ['border-accent text-accent', props.filled ? 'rounded-t-md bg-accent-surface' : ''].join(' ')
+      : 'border-transparent text-text-secondary hover:border-border-strong hover:text-text',
+    // L'onglet indisponible s'estompe et refuse le curseur : la couleur
+    // seule ne dit pas qu'un volet n'est pas encore ouvert.
+    item.disabled ? 'cursor-not-allowed opacity-45 hover:border-transparent hover:text-text-secondary' : 'cursor-pointer',
+  ]
+}
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const slots = useSlots()
 // Résolu ici : appelé dans le gabarit, `resolveComponent` échappe à Nuxt et rend
@@ -104,7 +137,7 @@ defineExpose({ tabId })
     <div
       role="tablist"
       :aria-label="props.label"
-      class="flex gap-1 overflow-x-auto border-b border-border"
+      :class="props.tone === 'banner' ? 'flex flex-wrap gap-2.5' : 'flex gap-1 overflow-x-auto border-b border-border'"
     >
       <component
         :is="props.to ? NuxtLink : 'button'"
@@ -119,17 +152,7 @@ defineExpose({ tabId })
         :aria-controls="controls(item)"
         :aria-disabled="item.disabled ? 'true' : undefined"
         :tabindex="item.value === props.modelValue ? 0 : -1"
-        class="-mb-px inline-flex min-h-(--target-min) shrink-0 items-center gap-2 border-b-(length:--border-thick) px-4 text-sm font-semibold whitespace-nowrap no-underline transition-colors duration-(--duration-fast)"
-        :class="[
-          item.value === props.modelValue
-            ? ['border-accent text-accent', props.filled ? 'rounded-t-md bg-accent-surface' : '']
-            : 'border-transparent text-text-secondary hover:border-border-strong hover:text-text',
-          // L'onglet indisponible s'estompe et refuse le curseur : la couleur
-          // seule ne dit pas qu'un volet n'est pas encore ouvert.
-          item.disabled
-            ? 'cursor-not-allowed opacity-45 hover:border-transparent hover:text-text-secondary'
-            : '',
-        ]"
+        :class="tabClasses(item)"
         @click="select(item)"
         @keydown.right.prevent="move(index, 1)"
         @keydown.left.prevent="move(index, -1)"
@@ -138,7 +161,10 @@ defineExpose({ tabId })
       >
         <!-- Créneau `tab` : un onglet plus riche (vignette, seconde ligne) garde le motif ARIA. -->
         <slot name="tab" :item="item" :selected="item.value === props.modelValue">
-          {{ item.label }}
+          <UiIcon v-if="item.icon" :name="item.icon" size="1.05rem" :stroke-width="2" />
+          <span :class="props.tone === 'banner' ? 'font-condensed text-[1.1rem] font-semibold tracking-[0.05em] uppercase' : ''">
+            {{ item.label }}
+          </span>
           <!-- Pastille autonome, jamais un simple nombre collé au libellé : c'est
                elle qui rend le volume lisible d'un coup d'œil dans une barre de
                cinq onglets. Dimensions du guide (22 px), dérivées du pas de 4 px. -->

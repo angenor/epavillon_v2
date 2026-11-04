@@ -101,20 +101,18 @@ function labelOf(gap: ProposalFileGap): string {
       <UiAlert v-if="logoError" class="mt-3" intent="danger" :message="logoError" live />
     </div>
 
-    <div v-if="props.gaps.length > 0" role="status" class="rounded-lg border border-warning-border bg-warning-surface p-4 sm:p-5">
-      <p class="font-semibold text-warning">
+    <div v-if="props.gaps.length > 0" role="status" class="rounded-lg border border-warning-border bg-warning-surface px-4 pt-4 pb-1.5 sm:px-5">
+      <p class="flex items-center gap-2.5 font-condensed text-[1.35rem] font-bold tracking-[0.02em] text-warning uppercase">
+        <UiIcon name="warning" size="1.15rem" :stroke-width="2" />
         {{ t('organization.workspace.proposal.gaps.title', props.gaps.length) }}
       </p>
       <ul class="mt-2 flex flex-col">
         <li v-for="gap in props.gaps" :key="gap.kind" class="border-t border-warning-border/40 first:border-t-0">
           <a
             :href="ANCHORS[gap.kind]"
-            class="flex min-h-(--target-min) items-center justify-between gap-4 text-sm text-text no-underline hover:text-accent"
+            class="group flex min-h-(--target-min) items-center justify-between gap-4 text-[0.92rem] text-text no-underline hover:text-text"
           >
-            <span class="flex items-center gap-2.5">
-              <UiIcon name="warning" class="attention-blink shrink-0 text-warning" size="1rem" />
-              {{ labelOf(gap) }}
-            </span>
+            <span class="group-hover:underline">{{ labelOf(gap) }}</span>
             <span class="shrink-0 font-semibold text-accent">{{ t(`organization.workspace.proposal.gaps.cta.${gap.kind}`) }}</span>
           </a>
         </li>

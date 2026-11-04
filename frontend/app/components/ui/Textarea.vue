@@ -29,6 +29,8 @@ interface Props extends FieldProps {
   maxRows?: number
   /** Attributs ARIA posés sur la zone elle-même, pour une liste de suggestions (mentions « @ »). */
   controlAttrs?: Record<string, string | boolean | undefined>
+  /** Pas de mention « facultatif » : le libellé dit déjà l'obligation, par exemple. */
+  hideOptional?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { rows: 4, maxRows: 16 })
@@ -111,6 +113,7 @@ watch(() => props.modelValue, () => nextTick(grow))
     :disabled="props.disabled"
     :readonly="props.readonly"
     :hide-label="props.hideLabel"
+    :hide-optional="props.hideOptional"
     :counter="counter"
     :counter-exceeded="exceeded"
   >

@@ -75,9 +75,10 @@ export interface ProposalTransition {
 }
 
 /**
- * Corps de `POST /proposals/{id}/cancel` (04/11/2026) : l'organisation annule
- * son activité retenue. Motif obligatoire pour elle ; il reste privé (dossier
- * et journal), jamais affiché sur la page publique.
+ * `POST /proposals/{id}/cancel` : l'organisation annule son activité retenue
+ * (04/11), tant qu'aucune séance n'a commencé. Le motif est obligatoire, gardé
+ * dans l'historique et transmis à l'équipe, jamais publié. Réponse : la
+ * `ProposalTransition` écrite.
  */
 export interface CancelProposalPayload {
   reason: string

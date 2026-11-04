@@ -37,6 +37,8 @@ export interface ProposalTimelineLabels {
   rejected: string
   withdrawn: string
   cancelled: string
+  /** L'activité retenue puis annulée : « Annulée », c'est elle qui l'est. */
+  activityCancelled: string
   scheduled: string
 }
 
@@ -110,7 +112,10 @@ export function buildProposalTimeline(
   // acceptés dont le journal ne remonte pas jusque-là. Seuls un retrait ou une
   // annulation peuvent l'avoir contournée.
   const reviewAt = firstArrivalAt('under_review')
-  const wasDecided = proposal.status === 'accepted' || proposal.status === 'rejected'
+  // Annulée par l'organisation après avoir été retenue (04/11) : la frise garde
+  // « Retenu » et se termine sur « Annulée ».
+  const acceptedBeforeCancel = proposal.status === 'cancelled' ? lastArrival('accepted') : null
+  const wasDecided = proposal.status === 'accepted' || proposal.status === 'rejected' || acceptedBeforeCancel !== null
   steps.push({
     value: 'under_review',
     label: labels.under_review,
@@ -140,6 +145,15 @@ export function buildProposalTimeline(
 
   // 5. Décision. Un refus porte TOUJOURS son motif : le guide en fait une règle,
   //    et le trigger l'exige (`requires_reason`).
+  if (acceptedBeforeCancel) {
+    const cancelled = lastArrival('cancelled')
+    steps.push(
+      { value: 'decision', label: labels.accepted, at: acceptedBeforeCancel.occurred_at, state: 'done' },
+      { value: 'cancelled', label: labels.activityCancelled, at: cancelled?.occurred_at ?? null, state: 'refused', detail: cancelled?.reason ?? null },
+    )
+    return steps
+  }
+
   const decisionTransition = isFinal ? lastArrival(proposal.status) : null
   const decisionDetail = proposal.decision_reason ?? decisionTransition?.reason ?? null
   steps.push({

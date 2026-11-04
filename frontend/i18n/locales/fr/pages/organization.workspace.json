@@ -1,9 +1,22 @@
 {
   "title": "Mon organisation",
   "subtitle": "Le suivi de vos dossiers et de vos activités.",
+  "kicker": "Espace des organisations",
+  "aside": "Ce qui vient",
   "organizationPicker": {
-    "label": "Organisation",
-    "hint": "Vous appartenez à plusieurs organisations : choisissez celle dont vous suivez les dossiers."
+    "label": "Organisation"
+  },
+  "next": {
+    "label": "Votre prochaine activité",
+    "hours": "{start} à {end}",
+    "zone": "{zone} ({offset})",
+    "online": "En ligne",
+    "open": "Ouvrir le dossier"
+  },
+  "reports": {
+    "label": "Comptes rendus",
+    "count": "compte rendu attendu | compte rendu attendu | comptes rendus attendus",
+    "description": "Toutes les activités tenues à {edition} ont leur compte rendu. | Une activité tenue à {edition} n'a pas encore de compte rendu. | {count} activités tenues à {edition} n'ont pas encore de compte rendu."
   },
   "membershipPending": {
     "title": "Votre demande attend un référent",
@@ -17,7 +30,7 @@
       "description": "Aucun dossier de cette édition n’attend de réponse de votre part."
     },
     "count": "Aucune action en attente | Une action en attente | {count} actions en attente",
-    "dueOn": "Avant le {date}",
+    "before": "avant le",
     "kind": {
       "changes_requested": {
         "label": "Corrections demandées",
@@ -62,6 +75,7 @@
       "rejected": "Non retenu",
       "withdrawn": "Retiré",
       "cancelled": "Annulé",
+      "activityCancelled": "Annulée",
       "scheduled": "Programmé"
     },
     "empty": {
@@ -76,7 +90,7 @@
       "draftClosed": "Jamais déposé",
       "review": "Décision du comité attendue",
       "report": "À vous : compte rendu attendu | À vous : compte rendu attendu | À vous : {count} comptes rendus attendus",
-      "session": "{date}, {time}",
+      "sessionWhen": "{day}, {zone}",
       "held": "Activité tenue",
       "scheduling": "Programmation en cours"
     }
@@ -84,7 +98,7 @@
   "openCall": {
     "eyebrow": "Appel à propositions en cours",
     "deadline": "Échéance : {date}",
-    "remaining": "Il reste {count} jour | Il reste {count} jour | Il reste {count} jours",
+    "daysLeft": "jour\npour déposer | jour\npour déposer | jours\npour déposer",
     "lastDay": "Dernier jour pour déposer",
     "action": "Déposer une proposition",
     "criteria": "Consulter les critères d'évaluation",
@@ -95,7 +109,7 @@
     }
   },
   "members": {
-    "title": "Membres de l'organisation",
+    "title": "Membres",
     "description": "Les personnes qui peuvent déposer et suivre des dossiers au nom de {organization}.",
     "count": "Aucun membre | Un membre | {count} membres",
     "role": {

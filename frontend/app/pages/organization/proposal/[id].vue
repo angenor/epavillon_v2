@@ -1,31 +1,34 @@
 <script setup lang="ts">
 import type { ProposalFile } from '~/types/organization-workspace'
-import type { ProposalOrganization, ProposalStatus } from '~/types/programme/proposal'
+import type { ProposalOrganization } from '~/types/programme/proposal'
 import type { Organization } from '~/types/org'
 import type { AttachableRoleRule } from '~/types/media'
-import type { Intent, SelectOption, TabItem } from '~/types/ui'
+import type { SelectOption } from '~/types/ui'
 import type { AssetId, Uuid } from '~/types/shared'
 import type { ProposalFileSection } from '~/composables/useProposalFileEditor'
 import type { FocalPointInput, ProposalDayPlan, SaveTechnicalNeedsPayload } from '~/types/programme/day-plan'
 
 /**
- * LA FICHE D'UN DOSSIER — `/mon-organisation/dossiers/:id`,
+ * LA FICHE D'UN DOSSIER : `/mon-organisation/dossiers/:id`,
  * `/en/my-organization/submissions/:id`.
  *
- * TOUT SE MODIFIE SUR PLACE (29/10, direction 1 arbitrée avec le commanditaire) :
- * la frise d'abord, puis ce qui manque, l'image de couverture, et une carte par
- * rubrique avec son bouton « Modifier ». Plus de détour par le formulaire de
- * dépôt, sauf pour un brouillon qui n'est pas encore parti.
+ * DIRECTION CONDENSÉE (04/11, maquette `docs/maquettes/espace-organisation/dossier.html`).
+ * Le bandeau reprend celui d'une activité. Deux cartes remontent dessus : la
+ * frise (et ce qu'elle entraîne) à gauche, le billet « Quand et où » à droite,
+ * suivi de la liste d'avancement. Les rubriques sont des sections séparées de
+ * filets, dans cet ordre arrêté par le commanditaire : « Votre dossier »
+ * (couverture en premier), « Le jour J », « Faire connaître votre activité ».
  *
- * TROIS ONGLETS, ET NON QUATRE. « Activités programmées » est rentré dans le
- * dossier (carte « Quand et où ») : pour l'organisation, c'est la même activité
- * à un autre moment de sa vie, et deux onglets l'obligeaient à deviner où
- * chercher l'heure de son passage. `?vue=sessions` (liens déjà envoyés,
- * actions de l'espace) ouvre le dossier sur cette carte.
+ * TOUT SE MODIFIE SUR PLACE (29/10) ; un brouillon passe par le formulaire.
+ * Retenu (ou annulé), « Format et créneau souhaité » disparaît : le créneau est
+ * celui du billet (04/11).
+ *
+ * L'ORGANISATION PEUT ANNULER son activité retenue tant qu'aucune séance n'a
+ * commencé (04/11) : motif obligatoire, puis le dossier se relit, annulé.
  *
  * CE QUE L'ORGANISATION NE VOIT PAS, ET QUI N'EST PAS UN OUBLI : aucune note,
- * aucun rang, aucun nom de membre du comité, aucune liste d'inscrits. Le filtre
- * est appliqué à la source (`useApi().workspace.proposalFile`).
+ * aucun rang, aucun nom de membre du comité, aucune liste d'inscrits, aucun
+ * nombre d'inscrits. Le filtre est appliqué à la source.
  */
 
 definePageMeta({
@@ -41,7 +44,7 @@ defineI18nRoute({
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
-const { date, dateTime } = useDateTime()
+const { date, dateTime, intlLocale, timeRangeFull, zoneLabel, zoneOffsetShort } = useDateTime()
 const localePath = useLocalePath()
 const route = useRoute()
 const router = useRouter()
@@ -49,6 +52,8 @@ const api = useApi()
 const auth = useAuthStore()
 const memberships = useMembershipStore()
 const requestUrl = useRequestURL()
+
+const dayStyle = trackDayStyle(null)
 
 const proposalId = computed(() => String(route.params.id ?? ''))
 useSpaceVisit(() => (proposalId.value ? { proposal_id: proposalId.value } : null))
@@ -83,8 +88,19 @@ const editor = useProposalFileEditor(proposalId, async () => {
   await refresh()
 })
 
+const loading = computed(() => status.value === 'pending' && file.value?.tracking.proposal.id !== proposalId.value)
+
+// La photo et le logo clair de l'édition, pour le bandeau.
+const editionId = computed(() => file.value?.tracking.edition.id ?? null)
+const { data: editionImages } = useAsyncData(
+  () => `proposal-file-edition-images-${editionId.value ?? 'none'}`,
+  () => (editionId.value ? api.events.images(editionId.value) : Promise.resolve(null)),
+  { lazy: true, server: false, watch: [editionId] },
+)
+
 // ---------------------------------------------------------------------------
-// Onglets
+// Vues : « Mon dossier », « Historique ». `?vue=sessions` (liens déjà envoyés)
+// ouvre le dossier sur le billet « Quand et où ».
 // ---------------------------------------------------------------------------
 
 const activeTab = computed<string>(() => {
@@ -97,12 +113,6 @@ function selectTab(value: string): void {
   router.replace({ query: { ...route.query, vue: value } })
 }
 
-const tabs = computed<TabItem[]>(() => [
-  { value: 'tracking', label: t('organization.workspace.proposal.tabs.tracking') },
-  { value: 'history', label: t('organization.workspace.proposal.tabs.history') },
-])
-
-// L'ancien onglet des activités mène désormais à la carte « Quand et où ».
 onMounted(async () => {
   if (route.query.vue !== 'sessions') return
   await until(() => Boolean(file.value))
@@ -122,7 +132,7 @@ async function until(ready: () => boolean): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Frise, droits de modification
+// Frise, décision, annulation, droits de modification
 // ---------------------------------------------------------------------------
 
 const steps = computed(() =>
@@ -137,25 +147,27 @@ const steps = computed(() =>
         rejected: t('organization.workspace.proposals.timeline.rejected'),
         withdrawn: t('organization.workspace.proposals.timeline.withdrawn'),
         cancelled: t('organization.workspace.proposals.timeline.cancelled'),
+        activityCancelled: t('organization.workspace.proposals.timeline.activityCancelled'),
         scheduled: t('organization.workspace.proposals.timeline.scheduled'),
       })
     : [],
 )
 
-const STATUS_TONES: Record<ProposalStatus, Intent> = {
-  draft: 'neutral',
-  submitted: 'info',
-  under_review: 'info',
-  changes_requested: 'warning',
-  accepted: 'success',
-  rejected: 'danger',
-  withdrawn: 'neutral',
-  cancelled: 'danger',
-}
-
 const timezone = computed(() => file.value?.tracking.edition.timezone ?? 'UTC')
+
+/** « Heure d'Antalya (UTC+3) » : l'historique se lit à l'heure de l'édition. */
+const zoneOfEdition = computed(() => {
+  const label = t('organization.workspace.proposal.sessions.zone', {
+    zone: zoneLabel(timezone.value, file.value?.tracking.edition.city ?? undefined),
+    offset: zoneOffsetShort(timezone.value),
+  })
+  return label.charAt(0).toLocaleUpperCase(locale.value) + label.slice(1)
+})
 const proposalStatus = computed(() => file.value?.tracking.proposal.status ?? 'draft')
 const isDraft = computed(() => proposalStatus.value === 'draft')
+const isAccepted = computed(() => proposalStatus.value === 'accepted')
+/** Retenu, ou annulé : le créneau est celui de l'IFDD, la demande de format n'a plus d'objet. */
+const retained = computed(() => isAccepted.value || proposalStatus.value === 'cancelled')
 
 const editBlockedReason = computed(() =>
   file.value ? organizationEditBlockedReason(file.value.tracking.proposal, file.value.tracking.edition) : 'file_closed',
@@ -183,8 +195,64 @@ const decisionMessage = computed(() => {
       : '',
   ]
     .filter(Boolean)
-    .join(' · ')
+    .join('. ')
 })
+
+const cancellation = computed(() =>
+  file.value?.tracking.proposal.status === 'cancelled'
+    ? proposalCancellation(file.value.tracking.transitions, file.value.history)
+    : null,
+)
+
+/** Qui a annulé, quand l'historique ne le nomme pas : un auteur du fil, ou soi-même. */
+const cancelledByFallback = computed(() => {
+  const actorId = cancellation.value?.actorId
+  if (!actorId) return ''
+  const participant = file.value?.participants.find((person) => person.id === actorId)
+  if (participant) return participant.display_name
+  return actorId === auth.person?.id ? `${auth.person.first_name} ${auth.person.last_name}`.trim() : ''
+})
+
+// ---------------------------------------------------------------------------
+// Annulation par l'organisation (04/11)
+// ---------------------------------------------------------------------------
+
+const canCancel = computed(() => (file.value ? canOrganizationCancel(file.value.tracking) : false))
+const cancelOpen = ref(false)
+const cancelling = ref(false)
+const cancelError = ref<string | null>(null)
+
+/** Le rappel du créneau dans la fenêtre, fuseau compris. */
+const cancelWhen = computed(() => {
+  const first = file.value?.tracking.sessions[0]
+  if (!first) return ''
+  const day = formatDate(first.session.starts_at, { locale: intlLocale.value, timeZone: timezone.value, dateStyle: 'full' })
+  const hours = timeRangeFull(first.session.starts_at, first.session.ends_at, timezone.value, file.value?.tracking.edition.city ?? undefined)
+  const label = t('organization.workspace.proposal.cancel.when', { day, hours })
+  return label.charAt(0).toLocaleUpperCase(locale.value) + label.slice(1)
+})
+
+function openCancel(): void {
+  cancelError.value = null
+  cancelOpen.value = true
+}
+
+async function confirmCancel(reason: string): Promise<void> {
+  const person = auth.person
+  if (!person) return
+  cancelling.value = true
+  cancelError.value = null
+  try {
+    await api.proposals.cancel(person.id, proposalId.value, { reason })
+    cancelOpen.value = false
+    await refresh()
+    if (import.meta.client) window.scrollTo({ top: 0, behavior: 'smooth' })
+  } catch (thrown) {
+    cancelError.value = apiErrorMessage(thrown, (key) => t(key))
+  } finally {
+    cancelling.value = false
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Images : couverture, photos, logo
@@ -208,55 +276,6 @@ const { data: mediaRules } = useAsyncData(
   { lazy: true, server: false },
 )
 
-const coverError = ref<string | null>(null)
-
-async function attachCover(assetId: AssetId | null): Promise<void> {
-  if (!assetId || !file.value) return
-  coverError.value = null
-  try {
-    await api.media.attach({
-      owner_schema: 'programme',
-      owner_table: 'proposals',
-      owner_id: file.value.tracking.proposal.id,
-      assignments: [{ role: 'cover', asset_id: assetId }],
-    })
-    await Promise.all([refresh(), rereadPreparingCover()])
-  } catch (thrown) {
-    coverError.value = apiErrorMessage(thrown, (key) => t(key))
-  }
-}
-
-// Une couverture qui vient d'être déposée n'est servie qu'une fois ses formats
-// préparés, quelques secondes plus tard : on montre l'original en attendant,
-// on le dit, et la page bascule seule sur la version finale (01/11).
-const { data: preparingCover, refresh: rereadPreparingCover } = useAsyncData(
-  () => `proposal-file-cover-preparing-${proposalId.value}`,
-  async () => {
-    const [latest] = await api.media.attached({ schema: 'programme', table: 'proposals', id: proposalId.value }, 'cover')
-    return latest && ['uploaded', 'scanning', 'processing'].includes(latest.status) ? latest : null
-  },
-  { lazy: true, server: false, watch: [proposalId], getCachedData: () => undefined },
-)
-const preparingPreviewFailed = ref(false)
-let preparingTimer: ReturnType<typeof setTimeout> | null = null
-watch(preparingCover, (pending, previous) => {
-  if (preparingTimer) clearTimeout(preparingTimer)
-  if (pending) preparingTimer = setTimeout(() => rereadPreparingCover(), 3000)
-  else if (previous) refresh()
-})
-onBeforeUnmount(() => {
-  if (preparingTimer) clearTimeout(preparingTimer)
-})
-
-/** L'atelier a-t-il déjà servi ? « Modifier » le rouvre là où on l'a laissé. */
-const { data: coverStudio } = useAsyncData(
-  () => `proposal-file-cover-studio-${proposalId.value}`,
-  () => api.proposals.coverStudio(proposalId.value),
-  { lazy: true, server: false, watch: [proposalId] },
-)
-
-const studioTo = computed(() => localePath(`/mon-organisation/dossiers/${proposalId.value}/couverture`))
-
 async function refreshAll(): Promise<void> {
   await Promise.all([refresh(), editor.refresh()])
 }
@@ -268,7 +287,7 @@ const leadOrganization = computed(() =>
 const canSetLogo = computed(() => leadOrganization.value?.membership.role === 'manager')
 
 // ---------------------------------------------------------------------------
-// Ce qui manque
+// Ce qui manque, liste d'avancement
 // ---------------------------------------------------------------------------
 
 const facts = computed(() =>
@@ -278,6 +297,7 @@ const facts = computed(() =>
         hasCover: file.value.tracking.cover !== null,
         hasLogo: file.value.organization_logo !== null,
         dayPlan: dayPlan.value,
+        retained: retained.value,
       }
     : null,
 )
@@ -296,8 +316,6 @@ const checklist = computed(() => (facts.value && isFileOpen.value ? proposalFile
 // Le jour J : activité retenue seulement
 // ---------------------------------------------------------------------------
 
-const isAccepted = computed(() => proposalStatus.value === 'accepted')
-
 const { data: dayPlan } = useAsyncData<ProposalDayPlan | null>(
   () => `proposal-day-plan-${proposalId.value}`,
   () => (isAccepted.value ? api.proposals.dayPlan(proposalId.value) : Promise.resolve(null)),
@@ -311,10 +329,11 @@ const canPrepare = computed(() => {
 })
 const canPromote = computed(() => isAccepted.value)
 
-const daySaving = ref<'focal' | 'needs' | 'social' | 'presentations' | null>(null)
-const dayError = ref<{ part: 'focal' | 'needs' | 'social' | 'presentations'; message: string } | null>(null)
+type DayPart = 'focal' | 'needs' | 'social' | 'presentations'
+const daySaving = ref<DayPart | null>(null)
+const dayError = ref<{ part: DayPart; message: string } | null>(null)
 
-async function dayWrite(part: NonNullable<typeof daySaving.value>, write: () => Promise<ProposalDayPlan | void>): Promise<void> {
+async function dayWrite(part: DayPart, write: () => Promise<ProposalDayPlan | void>): Promise<void> {
   daySaving.value = part
   dayError.value = null
   try {
@@ -327,7 +346,7 @@ async function dayWrite(part: NonNullable<typeof daySaving.value>, write: () => 
   }
 }
 
-const errorOf = (part: NonNullable<typeof daySaving.value>) => (dayError.value?.part === part ? dayError.value.message : null)
+const errorOf = (part: DayPart) => (dayError.value?.part === part ? dayError.value.message : null)
 
 const focalInputs = computed<FocalPointInput[]>(() =>
   (dayPlan.value?.focal_points ?? []).map(({ speaker_id, person_id, full_name, phone, whatsapp }) => ({
@@ -443,6 +462,15 @@ const leadName = computed(() => {
   return lead ? (lead.acronym ?? lead.legal_name) : null
 })
 
+/** Le nom complet de la porteuse, pour le bandeau. */
+const organizationName = computed(
+  () =>
+    leadOrganization.value?.organization.legal_name ??
+    associated.value.find((entry) => entry.link.role === 'lead')?.organization?.legal_name ??
+    leadName.value ??
+    '',
+)
+
 function termLabels(codes: string[], kind: 'themes' | 'categories'): string {
   const terms = references.value?.[kind] ?? []
   return codes.map((code) => {
@@ -476,6 +504,11 @@ const associated = computed<{ link: ProposalOrganization; organization: Organiza
   () => associatedData.value ?? [],
 )
 
+const leadLogo = computed(() => {
+  const asset = file.value?.organization_logo
+  return asset ? (asset.sources.thumb?.url ?? asset.url) : null
+})
+
 function sectionProps(section: ProposalFileSection) {
   return {
     canEdit: canEditSections.value,
@@ -488,8 +521,17 @@ function sectionProps(section: ProposalFileSection) {
 }
 
 // ---------------------------------------------------------------------------
+// Colonne de droite : le billet d'un dossier retenu, la liste d'avancement
+// ---------------------------------------------------------------------------
+
+const showTicket = computed(() => isAccepted.value)
+const showChecklist = computed(() => activeTab.value === 'tracking' && checklist.value.length > 0)
+const hasAside = computed(() => showTicket.value || showChecklist.value)
+
+// ---------------------------------------------------------------------------
 // Les échanges vivent dans l'assistance de chaque écran (02/11) : la page lui
 // dit quel dossier elle montre, et suit l'état qu'une correction résolue change.
+// « Écrire à l'équipe » l'ouvre (04/11).
 // ---------------------------------------------------------------------------
 
 const assistance = useAssistance()
@@ -499,6 +541,10 @@ onMounted(() => {
 })
 watch(assistance.revision, () => refresh())
 
+function writeTeam(): void {
+  assistance.open.value = true
+}
+
 // L'état du dossier change sous les yeux : la saisie en cours vit à part (`editor`).
 useRealtime(
   () => [`proposal:${proposalId.value}:status`],
@@ -507,424 +553,407 @@ useRealtime(
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-    <UiBreadcrumb
-      :items="[
-        { label: t('organization.workspace.proposal.breadcrumb'), to: localePath('/mon-organisation') },
-        { label: file?.tracking.proposal.reference_code ?? '' },
-      ]"
-    />
-
-    <UiLoadingState v-if="status === 'pending' && file?.tracking.proposal.id !== proposalId" class="mt-10" variant="card" :lines="5" />
-
-    <UiErrorState v-else-if="error" class="mt-10" :retry-label="t('common.actions.retry')" @retry="refresh()" />
-
-    <UiEmptyState
-      v-else-if="!file"
-      class="mt-10"
-      icon="document"
-      :title="t('organization.workspace.proposal.notFound.title')"
-      :description="t('organization.workspace.proposal.notFound.description')"
-      :action-to="localePath('/mon-organisation')"
-      :action-label="t('organization.workspace.proposal.notFound.action')"
-    />
+  <div data-direction="condensee" :style="dayStyle" class="full-bleed -mt-8 -mb-8 min-h-[75vh] bg-surface font-sans text-text sm:-mt-10 sm:-mb-10">
+    <!-- Chargement, erreur, introuvable : le bandeau garde son lien de retour. -->
+    <template v-if="loading || error || !file">
+      <UiMediaBanner class="max-lg:pb-9!" :back-to="localePath('/mon-organisation')" :back-label="t('organization.workspace.proposal.breadcrumb')">
+        <div v-if="loading" class="mt-5 flex flex-col gap-2.5" aria-hidden="true">
+          <span class="h-12 max-w-160 animate-pulse rounded-md bg-surface-inverse-raised motion-reduce:animate-none" />
+          <span class="h-12 max-w-105 animate-pulse rounded-md bg-surface-inverse-raised motion-reduce:animate-none" />
+        </div>
+      </UiMediaBanner>
+      <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
+        <div class="relative z-1 pt-6 lg:-mt-18 lg:pt-0">
+          <WorkspacePanel v-if="loading" :aria-busy="true">
+            <UiLoadingState variant="card" :lines="5" />
+          </WorkspacePanel>
+          <WorkspacePanel v-else-if="error">
+            <UiErrorState :retry-label="t('common.actions.retry')" @retry="refresh()" />
+          </WorkspacePanel>
+          <WorkspacePanel v-else>
+            <UiEmptyState
+              icon="document"
+              :title="t('organization.workspace.proposal.notFound.title')"
+              :description="t('organization.workspace.proposal.notFound.description')"
+              :action-to="localePath('/mon-organisation')"
+              :action-label="t('organization.workspace.proposal.notFound.action')"
+            />
+          </WorkspacePanel>
+        </div>
+      </div>
+    </template>
 
     <template v-else>
-      <UiAlert
-        v-if="file.acting_for_organization"
-        class="mt-6"
-        intent="warning"
-        :title="t('organization.workspace.proposal.acting.title', { organization: leadName ?? '' })"
-        :message="t('organization.workspace.proposal.acting.description')"
+      <WorkspaceFileHero
+        :file="file"
+        :image="editionImages?.cover ?? editionImages?.banner ?? null"
+        :edition-logo="editionImages?.logo_inverse ?? null"
+        :organization-name="organizationName"
+        :organization-acronym="leadOrganization?.organization.acronym ?? associated.find((entry) => entry.link.role === 'lead')?.organization?.acronym ?? null"
+        :activity-cancelled="cancellation?.afterAcceptance ?? false"
+        :view="activeTab"
+        panel-id="dossier-vue"
+        @update:view="selectTab"
       />
 
-      <header class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex min-w-0 flex-col gap-3">
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <p class="font-mono text-sm tracking-wide text-text-subtle">{{ file.tracking.proposal.reference_code }}</p>
-            <UiBadge
-              :intent="STATUS_TONES[file.tracking.proposal.status]"
-              :label="t(`organization.workspace.proposals.timeline.${file.tracking.proposal.status}`)"
-              solid
-            />
-          </div>
-          <h1 class="text-3xl leading-tight font-semibold text-balance">{{ tr(file.tracking.proposal.title) }}</h1>
-          <p class="text-text-muted">{{ tr(file.tracking.edition.title) }}</p>
-        </div>
-        <WorkspaceFilePublicLink v-if="publicUrl" :url="publicUrl" :file-name="file.tracking.proposal.reference_code" />
-      </header>
-
-      <UiTabs
-        class="mt-8"
-        :items="tabs"
-        :model-value="activeTab"
-        :label="t('organization.workspace.proposal.tabs.label')"
-        @update:model-value="selectTab"
-      >
-        <!-- MON DOSSIER -->
-        <div v-if="activeTab === 'tracking'" class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
-          <div class="flex min-w-0 flex-col gap-6">
-            <section
-              :aria-label="t('organization.workspace.proposal.tracking.timelineLabel')"
-              class="rounded-lg border border-border bg-surface-raised p-5"
-            >
-              <UiStatusTimeline
-                :steps="steps"
-                orientation="horizontal"
-                hide-details
-                :timezone="timezone"
-                :label="t('organization.workspace.proposal.tracking.timelineLabel')"
+      <!-- Les marges négatives n'existent qu'à partir de `lg` : sur une colonne, rien ne remonte. -->
+      <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
+        <div
+          id="dossier-vue"
+          class="grid grid-cols-1 gap-6 pt-6 lg:gap-x-10 lg:gap-y-0 lg:pt-0"
+          :class="hasAside ? 'lg:grid-cols-[minmax(0,1fr)_360px]' : ''"
+        >
+          <div class="relative z-1 flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-1 lg:-mt-18">
+            <div v-if="file.acting_for_organization" class="overflow-hidden rounded-lg shadow-lg">
+              <UiAlert
+                intent="warning"
+                :title="t('organization.workspace.proposal.acting.title', { organization: leadName ?? '' })"
+                :message="t('organization.workspace.proposal.acting.description')"
               />
-            </section>
-
-            <UiAlert
-              v-if="file.tracking.proposal.decided_at"
-              :intent="file.tracking.proposal.status === 'accepted' ? 'success' : 'warning'"
-              :title="t(`organization.workspace.proposal.tracking.decision.${file.tracking.proposal.status}`)"
-              :message="decisionMessage"
-            />
-
-            <div
-              v-if="isDraft && editBlockedReason === null"
-              class="flex flex-col gap-3 rounded-lg border border-border bg-surface-raised p-5 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <p class="text-text-secondary">{{ t('organization.workspace.proposal.draftNotice') }}</p>
-              <UiButton variant="primary" class="shrink-0" :to="draftTo" icon="edit">
-                {{ t('organization.workspace.proposal.tracking.editDraft') }}
-              </UiButton>
             </div>
 
-            <p v-else-if="editBlockedReason" class="flex items-start gap-2 text-sm text-text-muted">
-              <UiIcon name="lock" size="1.05rem" class="mt-0.5 shrink-0 text-text-subtle" />
-              {{ t(`organization.workspace.proposal.tracking.editBlocked.${editBlockedReason}`) }}
-            </p>
-
-            <WorkspaceFileGaps
-              v-if="facts && isFileOpen"
-              :gaps="gaps"
-              :has-logo="facts.hasLogo"
-              :organization-id="file.tracking.proposal.organization_id"
-              :organization-name="leadOrganization?.organization.legal_name ?? leadName ?? ''"
-              :can-set-logo="canSetLogo"
-              :logo-rule="mediaRules?.logo ?? null"
-              @logo-set="refresh()"
-            />
-
-            <!-- IMAGE DE COUVERTURE -->
-            <section
-              id="couverture"
-              aria-labelledby="couverture-title"
-              class="scroll-mt-24 overflow-hidden rounded-lg border border-border bg-surface-raised"
-            >
-              <div v-if="preparingCover && !preparingPreviewFailed" class="relative">
-                <img
-                  :src="preparingCover.url"
-                  :alt="tr(file.tracking.proposal.title)"
-                  class="aspect-video w-full object-cover"
-                  @error="preparingPreviewFailed = true"
-                />
-                <p
-                  role="status"
-                  class="absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-md bg-surface-raised px-3 py-2 text-sm font-medium text-text shadow-sm"
-                >
-                  <UiSpinner size="1rem" />
-                  {{ t('organization.workspace.proposal.cover.preparing') }}
-                </p>
-              </div>
-              <UiImage
-                v-else-if="file.tracking.cover"
-                :image="file.tracking.cover"
-                ratio="16 / 9"
-                sizes="(min-width: 1024px) 800px, 100vw"
-                loading="eager"
+            <template v-if="activeTab === 'tracking'">
+              <WorkspaceFileProgress
+                :steps="steps"
+                :timezone="timezone"
+                :reference-code="file.tracking.proposal.reference_code"
+                :status="file.tracking.proposal.status"
+                :decided-at="file.tracking.proposal.decided_at"
+                :decision-message="decisionMessage"
+                :cancellation="cancellation"
+                :cancelled-by-fallback="cancelledByFallback"
+                :is-draft="isDraft"
+                :edit-blocked-reason="editBlockedReason"
+                :draft-to="draftTo"
               />
-              <div v-else class="grid aspect-video place-items-center bg-surface-sunken text-text-subtle">
-                <UiIcon name="image" size="2.5rem" />
-              </div>
-              <div class="p-5">
-                <h2 id="couverture-title" class="text-lg font-semibold text-heading">
-                  {{ t('organization.workspace.proposal.cover.title') }}
-                </h2>
-                <p class="mt-1 text-sm text-text-muted">{{ t('organization.workspace.proposal.cover.description') }}</p>
-                <div v-if="canEditMedia" class="mt-4 flex flex-wrap gap-3">
-                  <MediaImageField
-                    role="cover"
-                    :asset-id="null"
-                    :label="t('organization.workspace.proposal.cover.title')"
-                    :alt-fallback="tr(file.tracking.proposal.title)"
-                    :button-label="t('organization.workspace.proposal.cover.change')"
-                    :rule="mediaRules?.cover ?? null"
-                    :owner="{ schema: 'programme', table: 'proposals', id: file.tracking.proposal.id }"
-                    @update:asset-id="attachCover"
-                  />
-                  <UiButton v-if="coverStudio?.design" variant="secondary" icon="edit" :to="studioTo">
-                    {{ t('organization.workspace.proposal.cover.edit') }}
-                  </UiButton>
-                  <UiButton variant="primary" :to="`${studioTo}?nouveau=1`">
-                    {{ t('organization.workspace.proposal.cover.create') }}
-                  </UiButton>
-                </div>
-                <UiAlert v-if="coverError" class="mt-3" intent="danger" :message="coverError" live />
-              </div>
-            </section>
 
-            <!-- QUAND ET OÙ : remonte sous la couverture dès que l'activité est programmée -->
-            <WorkspaceSessionPanel
-              v-if="file.tracking.sessions.length > 0"
-              id="quand-ou"
-              class="scroll-mt-24 rounded-lg border border-border bg-surface-raised p-5 sm:p-6"
-              :sessions="file.tracking.sessions"
-              :timezone="timezone"
-              :edition-over="isEditionOver(file.tracking.edition)"
-            />
-
-            <UiLoadingState v-if="!editor.saved.value" variant="card" :lines="4" />
-
-            <template v-else>
-              <!-- PRÉSENTATION -->
-              <WorkspaceFileSection
-                id="presentation"
-                :title="t('organization.workspace.proposal.sections.presentation')"
-                v-bind="sectionProps('presentation')"
-                @edit="editor.edit('presentation')"
-                @save="editor.save()"
-                @cancel="editor.cancel()"
-              >
-                <dl class="flex flex-col gap-4">
-                  <div>
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.title') }}</dt>
-                    <dd class="mt-1 font-medium text-text">{{ editor.saved.value.title }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.objectives') }}</dt>
-                    <dd class="mt-1 text-text-secondary">{{ plainTextOf(editor.saved.value.objectives) }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.detailedPresentation') }}</dt>
-                    <dd class="mt-1 line-clamp-6 text-text-secondary">{{ plainTextOf(editor.saved.value.detailed_presentation) }}</dd>
-                  </div>
-                  <div v-if="plainTextOf(editor.saved.value.expected_outcomes).trim()">
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.expectedOutcomes') }}</dt>
-                    <dd class="mt-1 text-text-secondary">{{ plainTextOf(editor.saved.value.expected_outcomes) }}</dd>
-                  </div>
-                </dl>
-                <template #edit>
-                  <ProposalStepPresentation v-if="editor.working.value" v-model="editor.working.value" :issues="editor.shownIssues.value" />
-                </template>
-              </WorkspaceFileSection>
-
-              <!-- INTERVENANTS -->
-              <WorkspaceFileSection
-                id="intervenants"
-                :title="t('organization.workspace.proposal.sections.speakers', editor.saved.value.speakers.length)"
-                :description="t('organization.workspace.proposal.sections.speakersHint')"
-                v-bind="sectionProps('speakers')"
-                @edit="editor.edit('speakers')"
-                @save="editor.save()"
-                @cancel="editor.cancel()"
-              >
-                <WorkspaceFileSpeakers
-                  :speakers="editor.saved.value.speakers"
-                  :can-set-photo="canEditMedia"
-                  :photo-rule="mediaRules?.avatar ?? null"
-                  :focal-speaker-ids="dayPlan && canPrepare ? focalSpeakerIds : null"
-                  :focal-busy="daySaving === 'focal'"
-                  @photo-set="refreshAll()"
-                  @toggle-focal="toggleFocal"
-                />
-                <template #edit>
-                  <ProposalStepSpeakers
-                    v-if="editor.working.value && references?.call"
-                    v-model="editor.working.value"
-                    :call="references.call"
-                    :issues="editor.shownIssues.value"
-                  />
-                </template>
-              </WorkspaceFileSection>
-
-              <!-- LE JOUR J -->
-              <template v-if="dayPlan">
-                <p class="-mb-2 text-sm font-bold tracking-wide text-success uppercase">
-                  {{ t('organization.workspace.proposal.dayPlan.prepare') }}
-                </p>
-                <WorkspaceFileFocalPoints
-                  :points="dayPlan.focal_points"
-                  :can-edit="canPrepare"
-                  :saving="daySaving === 'focal'"
-                  :error="errorOf('focal')"
-                  @save="saveFocal"
-                />
-                <WorkspaceFileTechnicalNeeds
-                  :needs="dayPlan.technical_needs"
-                  :deadline="dayPlan.needs_deadline"
-                  :timezone="timezone"
-                  :can-edit="canPrepare"
-                  :saving="daySaving === 'needs'"
-                  :error="errorOf('needs')"
-                  @save="saveNeeds"
-                />
-                <WorkspaceFilePresentations
-                  :proposal-id="file.tracking.proposal.id"
-                  :documents="editor.data.value?.documents ?? []"
-                  :can-edit="canPromote"
-                  :busy="daySaving === 'presentations'"
-                  :error="errorOf('presentations')"
-                  @add="addPresentation"
-                  @remove="removePresentation"
-                />
-                <p class="-mb-2 text-sm font-bold tracking-wide text-success uppercase">
-                  {{ t('organization.workspace.proposal.dayPlan.promote') }}
-                </p>
-                <WorkspaceFileSocialPosts
-                  :posts="dayPlan.social_posts"
-                  :can-edit="canPromote"
-                  :busy="daySaving === 'social'"
-                  :error="errorOf('social')"
-                  @add="addPost"
-                  @remove="removePost"
-                />
-              </template>
-
-              <!-- ORGANISATIONS -->
-              <WorkspaceFileSection
-                id="organisations"
-                :title="t('organization.workspace.proposal.sections.organizations')"
-                v-bind="sectionProps('organizations')"
-                @edit="editor.edit('organizations')"
-                @save="editor.save()"
-                @cancel="editor.cancel()"
-              >
-                <ul class="flex flex-col divide-y divide-border-subtle">
-                  <li
-                    v-for="entry in associated"
-                    :key="entry.link.organization_id"
-                    class="flex flex-wrap items-center gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
-                  >
-                    <span class="min-w-0 flex-1 font-medium text-text">
-                      {{ entry.organization?.legal_name ?? entry.link.organization_id }}
-                    </span>
-                    <UiBadge :label="t(`organization.workspace.proposal.tracking.role.${entry.link.role}`)" size="sm" />
-                    <UiBadge
-                      v-if="entry.link.role === 'lead' && !facts?.hasLogo"
-                      intent="danger"
-                      :label="t('organization.workspace.proposal.sections.noLogo')"
-                      size="sm"
-                    />
-                    <span v-if="!entry.link.confirmed_at" class="text-sm text-warning">
-                      {{ t('organization.workspace.proposal.tracking.unconfirmed') }}
-                    </span>
-                  </li>
-                </ul>
-                <template #edit>
-                  <ProposalStepOrganizations
-                    v-if="editor.working.value"
-                    v-model="editor.working.value"
-                    :lead-candidates="leadCandidates"
-                    :issues="editor.shownIssues.value"
-                    :country-name-of="countryNameOf"
-                  />
-                </template>
-              </WorkspaceFileSection>
-
-              <!-- THÉMATIQUES ET LANGUES -->
-              <WorkspaceFileSection
-                id="thematiques"
-                :title="t('organization.workspace.proposal.sections.classification')"
-                v-bind="sectionProps('classification')"
-                @edit="editor.edit('classification')"
-                @save="editor.save()"
-                @cancel="editor.cancel()"
-              >
-                <dl class="grid gap-x-8 gap-y-4 sm:grid-cols-2">
-                  <div>
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.themes') }}</dt>
-                    <dd class="mt-1 text-text-secondary">{{ termLabels(editor.saved.value.theme_codes, 'themes') }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.categories') }}</dt>
-                    <dd class="mt-1 text-text-secondary">{{ termLabels(editor.saved.value.category_codes, 'categories') }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.languages') }}</dt>
-                    <dd class="mt-1 text-text-secondary">{{ localeLabels(editor.saved.value.language_codes) }}</dd>
-                  </div>
-                  <div v-if="editor.saved.value.country_id">
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.fields.country') }}</dt>
-                    <dd class="mt-1 text-text-secondary">{{ countryNameOf(editor.saved.value.country_id) }}</dd>
-                  </div>
-                </dl>
-                <template #edit>
-                  <ProposalStepClassification
-                    v-if="editor.working.value && references?.call"
-                    v-model="editor.working.value"
-                    :call="references.call"
-                    :themes="references.themes"
-                    :categories="references.categories"
-                    :locales="references.locales"
-                    :country-options="countryOptions"
-                    :issues="editor.shownIssues.value"
-                  />
-                </template>
-              </WorkspaceFileSection>
-
-              <!-- FORMAT ET CRÉNEAU SOUHAITÉ -->
-              <WorkspaceFileSection
-                id="format"
-                :title="t('organization.workspace.proposal.sections.schedule')"
-                :description="t('organization.workspace.proposal.sections.scheduleHint')"
-                v-bind="sectionProps('schedule')"
-                @edit="editor.edit('schedule')"
-                @save="editor.save()"
-                @cancel="editor.cancel()"
-              >
-                <dl class="grid gap-x-8 gap-y-4 sm:grid-cols-3">
-                  <div v-if="editor.saved.value.format">
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.tracking.format') }}</dt>
-                    <dd class="mt-1 text-text-secondary">
-                      {{ t(`organization.workspace.proposal.tracking.formatValue.${editor.saved.value.format}`) }}
-                    </dd>
-                  </div>
-                  <div v-if="editor.saved.value.duration_minutes">
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.tracking.duration') }}</dt>
-                    <dd class="mt-1 text-text-secondary">
-                      {{ t('organization.workspace.proposal.tracking.durationValue', { count: editor.saved.value.duration_minutes }) }}
-                    </dd>
-                  </div>
-                  <div v-if="file.tracking.proposal.preferred_start_at">
-                    <dt class="text-sm text-text-subtle">{{ t('organization.workspace.proposal.tracking.preferredSlot') }}</dt>
-                    <dd class="mt-1 text-text-secondary">{{ dateTime(file.tracking.proposal.preferred_start_at, timezone) }}</dd>
-                  </div>
-                </dl>
-                <template #edit>
-                  <ProposalStepSchedule
-                    v-if="editor.working.value && references?.call && references.edition"
-                    v-model="editor.working.value"
-                    :call="references.call"
-                    :edition="references.edition"
-                    :issues="editor.shownIssues.value"
-                  />
-                </template>
-              </WorkspaceFileSection>
+              <WorkspaceFileGaps
+                v-if="facts && isFileOpen"
+                :gaps="gaps"
+                :has-logo="facts.hasLogo"
+                :organization-id="file.tracking.proposal.organization_id"
+                :organization-name="leadOrganization?.organization.legal_name ?? leadName ?? ''"
+                :can-set-logo="canSetLogo"
+                :logo-rule="mediaRules?.logo ?? null"
+                @logo-set="refresh()"
+              />
             </template>
 
-            <!-- Retenu mais pas encore programmé : la carte dit ce qui va venir. -->
-            <WorkspaceSessionPanel
-              v-if="file.tracking.sessions.length === 0 && file.tracking.proposal.status === 'accepted'"
-              id="quand-ou"
-              class="scroll-mt-24 rounded-lg border border-border bg-surface-raised p-5 sm:p-6"
-              :sessions="file.tracking.sessions"
-              :timezone="timezone"
-              :edition-over="isEditionOver(file.tracking.edition)"
-            />
+            <WorkspacePanel
+              v-else
+              heading-id="workspace-history-title"
+              :title="t('organization.workspace.proposal.history.title')"
+              :meta="zoneOfEdition"
+            >
+              <WorkspaceHistoryList :entries="file.history" :timezone="timezone" condensed />
+            </WorkspacePanel>
           </div>
 
-          <WorkspaceFileChecklist v-if="checklist.length > 0" :items="checklist" />
+          <aside
+            v-if="hasAside"
+            class="relative z-1 flex min-w-0 flex-col gap-5 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:-mt-18 lg:self-stretch"
+            :aria-label="t('organization.workspace.proposal.sessions.title')"
+          >
+            <WorkspaceSessionPanel
+              v-if="showTicket"
+              :sessions="file.tracking.sessions"
+              :timezone="timezone"
+              :city="file.tracking.edition.city"
+              :public-url="publicUrl"
+              :file-name="file.tracking.proposal.reference_code"
+              :can-cancel="canCancel"
+              @write-team="writeTeam"
+              @cancel="openCancel"
+            />
+            <WorkspaceFileChecklist v-if="showChecklist" :items="checklist" :raised="!showTicket" />
+          </aside>
+
+          <div v-if="activeTab === 'tracking'" class="min-w-0 lg:col-start-1 lg:row-start-2">
+            <!-- VOTRE DOSSIER : en premier, couverture en tête (04/11). -->
+            <section class="mt-12 lg:mt-16" aria-labelledby="dossier-title">
+              <WorkspaceRule
+                heading-id="dossier-title"
+                icon="document"
+                :label="t('organization.workspace.proposal.sections.dossier')"
+                :meta="canEditSections ? t('organization.workspace.proposal.sections.dossierMeta') : ''"
+              />
+
+              <WorkspaceFileCover
+                :proposal-id="file.tracking.proposal.id"
+                :title="tr(file.tracking.proposal.title)"
+                :cover="file.tracking.cover"
+                :can-edit="canEditMedia"
+                :rule="mediaRules?.cover ?? null"
+                @changed="refresh()"
+              />
+
+              <UiLoadingState v-if="!editor.saved.value" variant="card" :lines="4" />
+
+              <template v-else>
+                <WorkspaceFileSection
+                  id="presentation"
+                  :title="t('organization.workspace.proposal.sections.presentation')"
+                  v-bind="sectionProps('presentation')"
+                  @edit="editor.edit('presentation')"
+                  @save="editor.save()"
+                  @cancel="editor.cancel()"
+                >
+                  <dl class="grid gap-4.5">
+                    <div>
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.title') }}</dt>
+                      <dd class="mt-1 font-semibold text-text">{{ editor.saved.value.title }}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.objectives') }}</dt>
+                      <dd class="mt-1 text-text-secondary">{{ plainTextOf(editor.saved.value.objectives) }}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.detailedPresentation') }}</dt>
+                      <dd class="mt-1 line-clamp-6 text-text-secondary">{{ plainTextOf(editor.saved.value.detailed_presentation) }}</dd>
+                    </div>
+                    <div v-if="plainTextOf(editor.saved.value.expected_outcomes).trim()">
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.expectedOutcomes') }}</dt>
+                      <dd class="mt-1 text-text-secondary">{{ plainTextOf(editor.saved.value.expected_outcomes) }}</dd>
+                    </div>
+                  </dl>
+                  <template #edit>
+                    <ProposalStepPresentation v-if="editor.working.value" v-model="editor.working.value" :issues="editor.shownIssues.value" />
+                  </template>
+                </WorkspaceFileSection>
+
+                <WorkspaceFileSection
+                  id="intervenants"
+                  :title="t('organization.workspace.proposal.sections.speakers', editor.saved.value.speakers.length)"
+                  :description="t('organization.workspace.proposal.sections.speakersHint')"
+                  v-bind="sectionProps('speakers')"
+                  @edit="editor.edit('speakers')"
+                  @save="editor.save()"
+                  @cancel="editor.cancel()"
+                >
+                  <WorkspaceFileSpeakers
+                    :speakers="editor.saved.value.speakers"
+                    :can-set-photo="canEditMedia"
+                    :photo-rule="mediaRules?.avatar ?? null"
+                    :focal-speaker-ids="dayPlan && canPrepare ? focalSpeakerIds : null"
+                    :focal-busy="daySaving === 'focal'"
+                    @photo-set="refreshAll()"
+                    @toggle-focal="toggleFocal"
+                  />
+                  <template #edit>
+                    <ProposalStepSpeakers
+                      v-if="editor.working.value && references?.call"
+                      v-model="editor.working.value"
+                      :call="references.call"
+                      :issues="editor.shownIssues.value"
+                    />
+                  </template>
+                </WorkspaceFileSection>
+
+                <WorkspaceFileSection
+                  id="organisations"
+                  :title="t('organization.workspace.proposal.sections.organizations')"
+                  v-bind="sectionProps('organizations')"
+                  @edit="editor.edit('organizations')"
+                  @save="editor.save()"
+                  @cancel="editor.cancel()"
+                >
+                  <ul class="flex flex-col">
+                    <li
+                      v-for="entry in associated"
+                      :key="entry.link.organization_id"
+                      class="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 border-t border-border-subtle py-3 first:border-t-0 first:pt-0"
+                    >
+                      <span
+                        class="grid h-10 w-14 shrink-0 place-items-center rounded-sm border border-border-subtle bg-surface-inverse-selected p-0.75 font-condensed text-[0.8rem] font-bold text-text-on-inverse-selected"
+                        aria-hidden="true"
+                      >
+                        <img v-if="entry.link.role === 'lead' && leadLogo" :src="leadLogo" alt="" class="max-h-full max-w-full object-contain">
+                        <template v-else>{{ entry.organization?.acronym ?? initialsOf(entry.organization?.legal_name ?? '') }}</template>
+                      </span>
+                      <span class="min-w-0 flex-[1_1_220px] font-semibold text-text">
+                        {{ entry.organization?.legal_name ?? entry.link.organization_id }}
+                      </span>
+                      <UiBadge
+                        :intent="entry.link.role === 'lead' ? 'info' : 'neutral'"
+                        :label="t(`organization.workspace.proposal.tracking.role.${entry.link.role}`)"
+                      />
+                      <UiBadge
+                        v-if="entry.link.role === 'lead' && !facts?.hasLogo"
+                        intent="danger"
+                        :label="t('organization.workspace.proposal.sections.noLogo')"
+                      />
+                      <span v-if="!entry.link.confirmed_at" class="text-[0.85rem] font-semibold text-warning">
+                        {{ t('organization.workspace.proposal.tracking.unconfirmed') }}
+                      </span>
+                    </li>
+                  </ul>
+                  <template #edit>
+                    <ProposalStepOrganizations
+                      v-if="editor.working.value"
+                      v-model="editor.working.value"
+                      :lead-candidates="leadCandidates"
+                      :issues="editor.shownIssues.value"
+                      :country-name-of="countryNameOf"
+                    />
+                  </template>
+                </WorkspaceFileSection>
+
+                <WorkspaceFileSection
+                  id="thematiques"
+                  :title="t('organization.workspace.proposal.sections.classification')"
+                  v-bind="sectionProps('classification')"
+                  @edit="editor.edit('classification')"
+                  @save="editor.save()"
+                  @cancel="editor.cancel()"
+                >
+                  <dl class="grid gap-x-8 gap-y-4.5 sm:grid-cols-2">
+                    <div>
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.themes') }}</dt>
+                      <dd class="mt-1 text-text-secondary">{{ termLabels(editor.saved.value.theme_codes, 'themes') }}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.categories') }}</dt>
+                      <dd class="mt-1 text-text-secondary">{{ termLabels(editor.saved.value.category_codes, 'categories') }}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.languages') }}</dt>
+                      <dd class="mt-1 text-text-secondary">{{ localeLabels(editor.saved.value.language_codes) }}</dd>
+                    </div>
+                    <div v-if="editor.saved.value.country_id">
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.fields.country') }}</dt>
+                      <dd class="mt-1 text-text-secondary">{{ countryNameOf(editor.saved.value.country_id) }}</dd>
+                    </div>
+                  </dl>
+                  <template #edit>
+                    <ProposalStepClassification
+                      v-if="editor.working.value && references?.call"
+                      v-model="editor.working.value"
+                      :call="references.call"
+                      :themes="references.themes"
+                      :categories="references.categories"
+                      :locales="references.locales"
+                      :country-options="countryOptions"
+                      :issues="editor.shownIssues.value"
+                    />
+                  </template>
+                </WorkspaceFileSection>
+
+                <!-- Retenu ou annulé : le créneau est celui du billet, la demande n'a plus d'objet (04/11). -->
+                <WorkspaceFileSection
+                  v-if="!retained"
+                  id="format"
+                  :title="t('organization.workspace.proposal.sections.schedule')"
+                  :description="t('organization.workspace.proposal.sections.scheduleHint')"
+                  v-bind="sectionProps('schedule')"
+                  @edit="editor.edit('schedule')"
+                  @save="editor.save()"
+                  @cancel="editor.cancel()"
+                >
+                  <dl class="grid gap-x-8 gap-y-4.5 sm:grid-cols-3">
+                    <div v-if="editor.saved.value.format">
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.tracking.format') }}</dt>
+                      <dd class="mt-1 text-text-secondary">
+                        {{ t(`organization.workspace.proposal.tracking.formatValue.${editor.saved.value.format}`) }}
+                      </dd>
+                    </div>
+                    <div v-if="editor.saved.value.duration_minutes">
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.tracking.duration') }}</dt>
+                      <dd class="mt-1 text-text-secondary">
+                        {{ t('organization.workspace.proposal.tracking.durationValue', { count: editor.saved.value.duration_minutes }) }}
+                      </dd>
+                    </div>
+                    <div v-if="file.tracking.proposal.preferred_start_at">
+                      <dt class="text-[0.82rem] text-text-subtle">{{ t('organization.workspace.proposal.tracking.preferredSlot') }}</dt>
+                      <dd class="mt-1 text-text-secondary">{{ dateTime(file.tracking.proposal.preferred_start_at, timezone) }}</dd>
+                    </div>
+                  </dl>
+                  <template #edit>
+                    <ProposalStepSchedule
+                      v-if="editor.working.value && references?.call && references.edition"
+                      v-model="editor.working.value"
+                      :call="references.call"
+                      :edition="references.edition"
+                      :issues="editor.shownIssues.value"
+                    />
+                  </template>
+                </WorkspaceFileSection>
+              </template>
+            </section>
+
+            <!-- LE JOUR J : activité retenue seulement. -->
+            <section v-if="dayPlan" class="mt-12 lg:mt-16" aria-labelledby="jourj-title">
+              <WorkspaceRule
+                heading-id="jourj-title"
+                tone="success"
+                icon="calendar"
+                :label="t('organization.workspace.proposal.dayPlan.title')"
+                :meta="t('organization.workspace.proposal.dayPlan.meta')"
+              />
+              <WorkspaceFileFocalPoints
+                :points="dayPlan.focal_points"
+                :can-edit="canPrepare"
+                :saving="daySaving === 'focal'"
+                :error="errorOf('focal')"
+                @save="saveFocal"
+              />
+              <WorkspaceFileTechnicalNeeds
+                :needs="dayPlan.technical_needs"
+                :deadline="dayPlan.needs_deadline"
+                :timezone="timezone"
+                :can-edit="canPrepare"
+                :saving="daySaving === 'needs'"
+                :error="errorOf('needs')"
+                @save="saveNeeds"
+              />
+              <WorkspaceFilePresentations
+                :proposal-id="file.tracking.proposal.id"
+                :documents="editor.data.value?.documents ?? []"
+                :can-edit="canPromote"
+                :busy="daySaving === 'presentations'"
+                :error="errorOf('presentations')"
+                @add="addPresentation"
+                @remove="removePresentation"
+              />
+              <WorkspaceReminderSchedule
+                v-for="(tracked, index) in file.tracking.sessions"
+                :key="tracked.session.id"
+                :section-id="index === 0 ? 'rappels' : `rappels-${index + 1}`"
+                :session-label="file.tracking.sessions.length > 1 ? date(tracked.session.starts_at, timezone) : ''"
+                :reminders="tracked.reminders"
+                :timezone="tracked.session.timezone"
+                :zone-label="file.tracking.edition.city ?? undefined"
+              />
+            </section>
+
+            <!-- FAIRE CONNAÎTRE VOTRE ACTIVITÉ -->
+            <section v-if="dayPlan" class="mt-12 lg:mt-16" aria-labelledby="promo-title">
+              <WorkspaceRule
+                heading-id="promo-title"
+                tone="success"
+                icon="broadcast"
+                :label="t('organization.workspace.proposal.dayPlan.promote')"
+              />
+              <WorkspaceFileSocialPosts
+                :posts="dayPlan.social_posts"
+                :can-edit="canPromote"
+                :busy="daySaving === 'social'"
+                :error="errorOf('social')"
+                @add="addPost"
+                @remove="removePost"
+              />
+            </section>
+          </div>
         </div>
+      </div>
 
-        <!-- HISTORIQUE -->
-        <WorkspaceHistoryList v-else :entries="file.history" :timezone="timezone" />
-      </UiTabs>
-
+      <WorkspaceFileCancelDialog
+        v-model:open="cancelOpen"
+        :title="tr(file.tracking.proposal.title)"
+        :when="cancelWhen"
+        :busy="cancelling"
+        :error="cancelError"
+        @confirm="confirmCancel"
+      />
     </template>
   </div>
 </template>

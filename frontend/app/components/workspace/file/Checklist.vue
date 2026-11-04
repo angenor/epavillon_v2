@@ -10,9 +10,11 @@ import type { ProposalFileChecklistItem } from '~/utils/proposal-file'
 
 interface Props {
   items: ProposalFileChecklistItem[]
+  /** Seule dans la colonne, elle remonte sur le bandeau : ombre plutôt que filet. */
+  raised?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { raised: false })
 
 const { t } = useI18n()
 
@@ -21,12 +23,13 @@ const ratio = computed(() => (props.items.length === 0 ? 0 : Math.round((done.va
 </script>
 
 <template>
-  <aside
+  <nav
     :aria-label="t('organization.workspace.proposal.checklist.title')"
-    class="hidden rounded-lg border border-border bg-surface-raised p-5 lg:sticky lg:top-24 lg:block"
+    class="hidden rounded-lg bg-surface-raised px-5.5 py-5 lg:sticky lg:top-[calc(var(--nav-height)+1.5rem)] lg:block"
+    :class="props.raised ? 'shadow-lg' : 'border border-border'"
   >
-    <p class="font-semibold text-heading">{{ t('organization.workspace.proposal.checklist.title') }}</p>
-    <div class="mt-3 h-2 overflow-hidden rounded-full bg-surface-sunken" aria-hidden="true">
+    <p class="heading-condensed text-[1.35rem] text-heading">{{ t('organization.workspace.proposal.checklist.title') }}</p>
+    <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-sunken" aria-hidden="true">
       <div class="h-full rounded-full bg-success" :style="{ width: `${ratio}%` }" />
     </div>
     <p class="mt-1.5 text-sm text-text-muted">
@@ -59,5 +62,5 @@ const ratio = computed(() => (props.items.length === 0 ? 0 : Math.round((done.va
         </a>
       </li>
     </ul>
-  </aside>
+  </nav>
 </template>

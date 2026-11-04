@@ -212,6 +212,8 @@ export {
 
 export { proposalCoverStudio, saveProposalCoverDesign } from './proposals/cover-design'
 
+export { cancelProposalByOrganization } from './proposals/cancellation'
+
 export {
   editableProposal,
   editedProposal,

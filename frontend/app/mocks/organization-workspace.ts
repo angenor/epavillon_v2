@@ -67,6 +67,7 @@ import {
 } from './organization-search'
 import { allProposals, proposalComments, proposalOrganizations, proposalTransitions } from './proposals'
 import { proposalHistory } from './proposals/history'
+import { sessionCancellation } from './proposals/cancellation'
 import { effectivePermissions } from './permissions'
 import { editedProposal } from './proposal-edit'
 import { allSessions } from './sessions'
@@ -211,14 +212,15 @@ function trackingOf(proposalId: string, personId: string, at: number): ProposalT
   // dossier écrit à la main : un titre corrigé doit s'afficher là où on vient
   // de le corriger, sinon la modification paraît perdue.
   const changes = editedProposal(proposalId)
-  const proposal = changes ? { ...stored, ...changes } : stored
+  const cancellation = sessionCancellation(proposalId)
+  const proposal = { ...stored, ...changes, ...(cancellation ? { status: 'cancelled' as const } : {}) }
   const edition = events.find((e) => e.id === proposal.event_id)
   if (!edition) return null
 
   return {
     proposal,
     edition,
-    transitions: proposalTransitions
+    transitions: [...proposalTransitions, ...(cancellation ? [cancellation.transition] : [])]
       .filter((transition) => transition.proposal_id === proposalId)
       .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at)),
     open_change_requests: openChangeRequests(proposalId),
@@ -438,6 +440,7 @@ export function proposalFile(
     )
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
 
+  const cancellationHistory = sessionCancellation(proposalId)?.history ?? null
   const authorIds = new Set(comments.map((comment) => comment.author_id))
   const participants = people.filter((person) => authorIds.has(person.id)).map(displayed)
 
@@ -446,7 +449,7 @@ export function proposalFile(
     organization_logo: attachedImage('org', 'organizations', tracking.proposal.organization_id, 'logo'),
     comments,
     participants,
-    history: proposalHistory(proposalId),
+    history: [...(cancellationHistory ? [cancellationHistory] : []), ...proposalHistory(proposalId)],
     acting_for_organization: acting,
   }
 }
