@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon organisation : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../direction-condensee/style.css">
+<link rel="stylesheet" href="espace.css">
+<style>
+  .identity { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px; }
+  .identity .carrier { align-items: center; gap: 20px; }
+  .identity .tile { min-width: 88px; height: 88px; }
+  .identity .tile img { max-height: 70px; max-width: 170px; }
+  .identity h1 { margin-top: 4px; max-width: 26ch; font-size: clamp(2rem, 4vw, 3.1rem); font-weight: 600; line-height: 1.02; letter-spacing: 0.005em; text-transform: none; text-wrap: balance; }
+  @media (max-width: 640px) {
+    .identity .tile { min-width: 64px; height: 64px; }
+    .identity .tile img { max-height: 48px; max-width: 110px; }
+    .identity .carrier { align-items: flex-start; gap: 14px; }
+    .identity h1 { font-size: 1.85rem; }
+  }
+
+  /* À faire : la ligne se lit d'un trait, l'échéance se parcourt à la verticale. */
+  .acts { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .act {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 4px 16px;
+    min-height: var(--target); padding: 14px 16px; border: 1px solid var(--color-border); border-left-width: 4px; border-radius: var(--radius);
+    color: inherit; text-decoration: none;
+  }
+  .act:hover { border-color: var(--color-border-strong); }
+  .act.warn { border-left-color: var(--color-warning); background: color-mix(in srgb, var(--color-warning-surface) 45%, transparent); }
+  .act.info { border-left-color: var(--color-info); background: color-mix(in srgb, var(--color-info-surface) 45%, transparent); }
+  .act > .icon { align-self: start; margin-top: 3px; font-size: 1.15rem; }
+  .act.warn > .icon { color: var(--color-warning); }
+  .act.info > .icon { color: var(--color-info); }
+  .act-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+  .act-label b { font-weight: 700; color: var(--color-text); }
+  .act-label span { font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--color-text-subtle); }
+  .act-subject { display: block; margin-top: 2px; font-size: 0.92rem; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .act-detail { display: block; margin-top: 2px; font-size: 0.85rem; color: var(--color-text-muted); }
+  .act-detail.strong { font-weight: 700; color: var(--color-warning); }
+  .act-due { min-width: 84px; text-align: right; font-family: var(--font-heading); line-height: 1; }
+  .act-due small { display: block; font-family: var(--font-body); font-size: 0.72rem; color: var(--color-text-muted); }
+  .act-due b { font-size: 1.55rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .act > .icon:last-child { color: var(--color-text-subtle); }
+  @media (max-width: 640px) {
+    .act { grid-template-columns: auto minmax(0, 1fr) auto; padding: 12px; }
+    .act-due { grid-column: 2; grid-row: 2; text-align: left; display: flex; align-items: baseline; gap: 6px; }
+    .act-due b { font-size: 1.2rem; }
+    .act > .icon:last-child { grid-column: 3; grid-row: 1; }
+    .act-subject { white-space: normal; }
+  }
+  .calm { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: var(--radius); background: var(--color-surface-sunken); }
+  .calm .icon { margin-top: 2px; color: var(--color-success); font-size: 1.25rem; }
+  .calm b { color: var(--color-text); }
+  .calm p { margin: 2px 0 0; font-size: 0.875rem; color: var(--color-text-muted); }
+
+  .reports { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+  .reports .big { display: flex; align-items: baseline; gap: 12px; }
+  .reports .big b { font-family: var(--font-heading); font-size: 3.4rem; font-weight: 700; line-height: 0.85; color: var(--ink); }
+  .reports .big span { font-weight: 600; color: var(--color-text); }
+  .reports p { margin: 4px 0 0; font-size: 0.875rem; color: var(--color-text-muted); }
+
+  /* Appel ouvert : le rebours en grand. */
+  .call-count { display: flex; align-items: baseline; gap: 12px; }
+  .call-count b { font-family: var(--font-heading); font-size: 4rem; font-weight: 700; line-height: 0.8; color: var(--color-accent); }
+  .call-count span { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink); }
+  .ticket .cta { display: grid; gap: 4px; margin-top: 16px; }
+  .ticket .cta .btn { width: 100%; }
+  .next-title { margin: 10px 0 0 !important; font-family: var(--font-heading); font-size: 1.3rem !important; font-weight: 600; line-height: 1.12; color: var(--ink) !important; }
+
+  /* Barre d'outils de la liste. */
+  .tools { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 240px); justify-content: end; gap: 12px 16px; margin-top: 20px; }
+  @media (max-width: 640px) { .tools { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Un dossier, une ligne. */
+  .drows { margin: 8px 0 0; padding: 0; list-style: none; }
+  .drow { display: grid; grid-template-columns: 152px minmax(0, 1fr) 236px auto; align-items: center; gap: 22px; padding: 20px 0; border-bottom: 1px solid var(--color-border-subtle); }
+  .drow:last-child { border-bottom: 0; }
+  .d-thumb { aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: var(--color-surface-sunken); }
+  .d-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .d-thumb.empty { display: grid; place-items: center; color: var(--color-text-subtle); font-size: 1.4rem; border: 1px dashed var(--color-border); }
+  .d-title { margin: 0; font-family: var(--font-heading); font-size: 1.45rem; font-weight: 600; line-height: 1.12; letter-spacing: 0.005em; text-transform: none; color: var(--ink); text-wrap: pretty; }
+  .d-title a { text-decoration: none; }
+  .d-title a:hover { color: var(--color-accent); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .d-ref { margin: 6px 0 0; font-size: 0.8rem; font-variant-numeric: tabular-nums; color: var(--color-text-subtle); }
+  .d-unread { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85rem; font-weight: 700; color: var(--color-accent); }
+  .d-state { display: grid; justify-items: start; gap: 8px; }
+  .d-next { margin: 0; font-size: 0.875rem; line-height: 1.4; color: var(--color-text-muted); }
+  .d-next.mine { font-weight: 700; color: var(--color-text); }
+  .d-next.when { display: flex; align-items: baseline; gap: 8px; color: var(--color-text-secondary); }
+  .d-next.when b { font-family: var(--font-heading); font-size: 1.9rem; font-weight: 700; line-height: 0.9; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .drow.is-closed .d-thumb img { filter: grayscale(1); opacity: 0.75; }
+  @media (max-width: 960px) {
+    .drow { grid-template-columns: 96px minmax(0, 1fr); gap: 12px 16px; align-items: start; }
+    .d-state { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+    .drow > .btn { grid-column: 1 / -1; width: 100%; }
+    .d-title { font-size: 1.25rem; }
+  }
+
+  .in-tab { margin: 24px 0 0; font-size: 0.85rem; font-weight: 700; color: var(--color-text-secondary); }
+  .none { margin: 0; padding: 18px 0; font-size: 0.92rem; color: var(--color-text-muted); }
+  .elsewhere { margin-top: 32px; }
+
+  /* Membres. */
+  .mrows { margin: 20px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--color-border-subtle); }
+  .mrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto auto; align-items: center; gap: 8px 16px; padding: 14px 0; border-bottom: 1px solid var(--color-border-subtle); }
+  .avatar { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--color-surface-sunken); border: 1px solid var(--color-border); font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: var(--color-text-secondary); }
+  .mrow.is-pending .avatar { border-style: dashed; background: transparent; }
+  .m-name { font-weight: 700; color: var(--color-text); }
+  .m-you { margin-left: 8px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-accent); }
+  .m-sub { display: block; font-size: 0.85rem; color: var(--color-text-muted); }
+  .m-wait { display: block; font-size: 0.85rem; color: var(--color-text-subtle); }
+  .m-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  @media (max-width: 760px) {
+    .mrow { grid-template-columns: 44px minmax(0, 1fr); }
+    .mrow .tag, .m-actions { grid-column: 2; justify-self: start; }
+    .avatar { width: 44px; height: 44px; }
+  }
+  .invite { margin-top: 28px; }
+  .invite h3 { font-size: 1.45rem; font-weight: 600; text-transform: none; letter-spacing: 0.005em; }
+  .invite > p { margin: 4px 0 0; max-width: 64ch; font-size: 0.875rem; color: var(--color-text-muted); }
+  .invite form { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 200px auto; align-items: end; gap: 16px; margin-top: 18px; }
+  @media (max-width: 960px) { .invite form { grid-template-columns: minmax(0, 1fr); } .invite form .btn { width: 100%; } }
+  .manager-only { margin: 16px 0 0; font-size: 0.875rem; color: var(--color-text-subtle); }
+</style>
+</head>
+<body class="day-plain">
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale">
+      <a href="../direction-condensee/programmation.html">Programmations</a>
+      <a href="#">Communauté</a>
+      <a href="#" aria-current="page">Mon organisation</a>
+    </nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<div class="note-wrap">
+  <div class="note-maquette">
+    <p><b>Maquette, pas l'écran.</b> Même périmètre qu'aujourd'hui (À faire, une édition par onglet, recherche dans toutes les éditions, filtre d'état, membres, invitation, appel ouvert, quatre états), autre présentation.</p>
+    <p><b>Ce qui change.</b> L'en-tête devient le bandeau de la direction condensée : photo de l'édition ouverte voilée, logo de l'organisation en tuile blanche, et les <b>onglets d'édition posés sur la photo</b> (changer d'édition change la photo). « À faire » est la carte qui remonte de 72 px sur le bandeau ; l'échéance de chaque action est en gros chiffres condensés, colonne qu'on parcourt à la verticale. « Mes dossiers » et « Membres » prennent l'étiquette posée sur un filet ; une séance programmée se lit à son heure, en grand.</p>
+    <p><b>Ajouts, à valider.</b> (1) Le billet « Votre prochaine activité » à droite de « À faire », tiré de la liste (aucune donnée nouvelle). (2) La pastille « En évaluation » passe du cyan au jaune, comme demandé pour la refonte : à trancher, car « Corrections demandées » est déjà jaune. Les autres états de la page se voient avec le sélecteur en bas à gauche.</p>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- Bandeau : photo de l'édition ouverte, ou aplat sans photo               -->
+<!-- ====================================================================== -->
+
+<section class="banner has-photo" data-st="dossiers recherche appel attente">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop31-32-9.jpg" alt="">
+  <div class="wrap">
+    <div class="identity">
+      <div class="carrier">
+        <span class="tile"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span>
+        <div>
+          <small>Mon organisation</small>
+          <h1>Institut de la Francophonie pour le développement durable</h1>
+        </div>
+      </div>
+      <!-- Seulement à qui appartient à plusieurs organisations. -->
+      <label class="picker">Organisation
+        <select>
+          <option>Institut de la Francophonie pour le développement durable (IFDD)</option>
+          <option>Réseau des jeunes francophones pour le climat (RJFC)</option>
+        </select>
+      </label>
+    </div>
+
+    <nav class="btabs" role="tablist" aria-label="Éditions">
+      <a class="btab" role="tab" aria-selected="true" data-etat="dossiers">
+        <span class="btab-thumb"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-1-1.jpg" alt=""></span>
+        <span>
+          <span class="btab-name">CdP31 <small>Antalya</small> <span class="counter" aria-label="2 nouveautés">2</span></span>
+          <span class="btab-meta">à venir, 6 dossiers, 3 choses à faire, 1 message non lu</span>
+        </span>
+      </a>
+      <a class="btab" role="tab" aria-selected="false" data-etat="cdp30">
+        <span class="btab-thumb"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-1-1.jpg" alt=""></span>
+        <span>
+          <span class="btab-name">CdP30 <small>Belém</small></span>
+          <span class="btab-meta">terminée, 3 dossiers, 1 compte rendu attendu</span>
+        </span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<section class="banner has-photo" data-st="cdp30">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop30-32-9.jpg" alt="">
+  <div class="wrap">
+    <div class="identity">
+      <div class="carrier">
+        <span class="tile"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span>
+        <div>
+          <small>Mon organisation</small>
+          <h1>Institut de la Francophonie pour le développement durable</h1>
+        </div>
+      </div>
+      <label class="picker">Organisation
+        <select>
+          <option>Institut de la Francophonie pour le développement durable (IFDD)</option>
+          <option>Réseau des jeunes francophones pour le climat (RJFC)</option>
+        </select>
+      </label>
+    </div>
+    <nav class="btabs" role="tablist" aria-label="Éditions">
+      <a class="btab" role="tab" aria-selected="false" data-etat="dossiers">
+        <span class="btab-thumb"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-1-1.jpg" alt=""></span>
+        <span>
+          <span class="btab-name">CdP31 <small>Antalya</small> <span class="counter" aria-label="2 nouveautés">2</span></span>
+          <span class="btab-meta">à venir, 6 dossiers, 3 choses à faire, 1 message non lu</span>
+        </span>
+      </a>
+      <a class="btab" role="tab" aria-selected="true" data-etat="cdp30">
+        <span class="btab-thumb"><img src="../../../frontend/public/mocks/covers/pavillon-cop30-1-1.jpg" alt=""></span>
+        <span>
+          <span class="btab-name">CdP30 <small>Belém</small></span>
+          <span class="btab-meta">terminée, 3 dossiers, 1 compte rendu attendu</span>
+        </span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- Aucun dossier : pas d'onglet, pas de photo d'édition. -->
+<section class="banner" data-st="vide">
+  <div class="wrap">
+    <div class="identity">
+      <div class="carrier">
+        <span class="tile">RJFC</span>
+        <div>
+          <small>Mon organisation</small>
+          <h1>Réseau des jeunes francophones pour le climat</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chargement, erreur, accès refusé : le titre de la page seul. -->
+<section class="banner" data-st="chargement erreur refuse">
+  <div class="wrap">
+    <div class="identity">
+      <div class="carrier">
+        <span class="tile skel" data-st="chargement" aria-hidden="true" style="background:var(--color-surface-inverse-raised)"></span>
+        <div>
+          <small>Espace des organisations</small>
+          <h1>Mon organisation</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- Contenu                                                                -->
+<!-- ====================================================================== -->
+
+<div class="wrap layout wide-body" id="layout" data-no-aside="cdp30 chargement erreur refuse">
+
+  <div class="l-head">
+    <!-- Adhésion en attente : on dépose et on suit ses propres dossiers. -->
+    <div class="panel" data-st="attente" style="padding:0;overflow:hidden">
+      <div class="alert alert-info" style="border:0;border-radius:0">
+        <svg class="icon"><use href="#i-info"/></svg>
+        <div><b>Votre demande attend un référent</b><p>Vous pouvez déjà déposer et suivre vos propres dossiers. Ceux de vos collègues de Institut de la Francophonie pour le développement durable s'afficheront quand un référent aura accepté votre demande.</p></div>
+      </div>
+    </div>
+
+    <section class="panel" aria-labelledby="todo-title" data-st="dossiers recherche appel attente">
+      <div class="panel-head">
+        <h2 id="todo-title">À faire</h2>
+        <p data-st-not="appel">3 actions en attente</p>
+        <p data-st="appel">4 actions en attente</p>
+      </div>
+      <ul class="acts">
+        <li data-st="appel">
+          <a class="act warn" href="dossier.html?etat=brouillon">
+            <svg class="icon"><use href="#i-edit"/></svg>
+            <span>
+              <span class="act-label"><b>Brouillon non déposé</b><span>CDP31-00298</span></span>
+              <span class="act-subject">Atlas des savoirs autochtones sur l'eau</span>
+              <span class="act-detail">Ce dossier n'est pas encore parti.</span>
+            </span>
+            <span class="act-due"><small>avant le</small><b>30 sept.</b></span>
+            <svg class="icon"><use href="#i-right"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="act warn" href="#">
+            <svg class="icon"><use href="#i-warning"/></svg>
+            <span>
+              <span class="act-label"><b>Corrections demandées</b><span>CDP31-00263</span></span>
+              <span class="act-subject">Mesurer l'adaptation : des indicateurs pour les plans nationaux</span>
+              <span class="act-detail strong">2 points à traiter</span>
+            </span>
+            <span class="act-due"><small>avant le</small><b>8 nov.</b></span>
+            <svg class="icon"><use href="#i-right"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="act info" href="#">
+            <svg class="icon"><use href="#i-building"/></svg>
+            <span>
+              <span class="act-label"><b>Co-organisation à confirmer</b><span>CDP31-00211</span></span>
+              <span class="act-subject">Océans et petits États insulaires francophones</span>
+              <span class="act-detail">Une organisation vous a associée à son dossier et attend votre accord.</span>
+            </span>
+            <span></span>
+            <svg class="icon"><use href="#i-right"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="act info" href="#membres">
+            <svg class="icon"><use href="#i-users"/></svg>
+            <span>
+              <span class="act-label"><b>Demande de rattachement</b></span>
+              <span class="act-subject">Kodjo Mensah</span>
+              <span class="act-detail">Cette personne demande à rejoindre votre organisation.</span>
+            </span>
+            <span></span>
+            <svg class="icon"><use href="#i-right"/></svg>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Édition terminée : un nombre et un geste, pas la liste des comptes rendus. -->
+    <section class="panel" data-st="cdp30" aria-label="Comptes rendus">
+      <div class="reports">
+        <div>
+          <div class="big"><b>1</b><span>compte rendu attendu</span></div>
+          <p>Une activité tenue à Belém n'a pas encore de compte rendu.</p>
+        </div>
+        <a class="btn btn-outline" href="#mes-dossiers">Voir les activités concernées</a>
+      </div>
+    </section>
+
+    <!-- Aucun dossier : l'état vide met l'appel en avant, et rien d'autre. -->
+    <div class="state" data-st="vide" style="max-width:none">
+      <svg class="icon"><use href="#i-file"/></svg>
+      <h2>Vous n'avez déposé aucun dossier</h2>
+      <p>Vos propositions apparaîtront ici dès la première frappe : un dossier commencé s'enregistre tout seul et porte son numéro avant même d'être envoyé.</p>
+    </div>
+
+    <div class="panel" data-st="chargement" aria-busy="true" aria-label="Chargement">
+      <div class="skel" style="height:28px;width:160px"></div>
+      <div class="skel" style="height:64px;margin-top:20px"></div>
+      <div class="skel" style="height:64px;margin-top:10px"></div>
+      <div class="skel" style="height:64px;margin-top:10px;width:70%"></div>
+    </div>
+
+    <div class="state is-error" data-st="erreur" role="alert">
+      <svg class="icon"><use href="#i-warning"/></svg>
+      <h2>Une erreur est survenue</h2>
+      <p>Le contenu n'a pas pu être chargé. Réessayez dans un instant.</p>
+      <button class="btn btn-primary" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Réessayer</button>
+    </div>
+
+    <div class="state" data-st="refuse">
+      <svg class="icon"><use href="#i-lock"/></svg>
+      <h2>Accès refusé</h2>
+      <p>Votre compte ne dispose pas des droits nécessaires pour consulter cette page.</p>
+      <a class="btn btn-primary" href="#">Voir mes rattachements</a>
+    </div>
+  </div>
+
+  <aside class="l-aside" aria-label="Ce qui vient" data-st="dossiers recherche attente appel vide">
+    <!-- AJOUT : la prochaine activité programmée, tirée de la liste. -->
+    <div class="ticket" data-st="dossiers recherche attente">
+      <div class="ticket-date">
+        <b>14</b><span>samedi<br>novembre 2026<small>Votre prochaine activité</small></span>
+        <svg class="icon"><use href="#i-calendar"/></svg>
+      </div>
+      <div class="ticket-body">
+        <div class="hours">09:50 à 10:40 <span>50 min</span></div>
+        <p>Heure d'Antalya (UTC+3)</p>
+        <p class="next-title">Intelligence artificielle et environnement, de la promesse à la mise en œuvre</p>
+        <p><svg class="icon" style="vertical-align:-2px"><use href="#i-pin"/></svg> Stand du Pavillon de la Francophonie</p>
+        <div class="cta"><a class="btn btn-outline" data-page="dossier.html">Ouvrir le dossier</a></div>
+      </div>
+    </div>
+
+    <!-- L'appel ouvert : n'apparaît que dans l'onglet de son édition, et avant l'échéance. -->
+    <div class="ticket" data-st="appel vide">
+      <div class="ticket-body">
+        <p class="ticket-label">Appel à propositions en cours</p>
+        <p style="margin:0 0 14px;font-weight:600;color:var(--color-text)">CdP31, Antalya 2026</p>
+        <div class="call-count"><b>12</b><span>jours<br>pour déposer</span></div>
+        <p style="margin-top:12px">Échéance : 30 septembre 2026</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#"><svg class="icon"><use href="#i-plus"/></svg>Déposer une proposition</a>
+          <a class="btn btn-link" href="#">Consulter les critères d'évaluation</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="l-body" data-st="dossiers recherche appel attente cdp30 vide">
+
+    <!-- ================================================================== -->
+    <section class="block" id="mes-dossiers" aria-labelledby="dossiers-title" data-st-not="vide">
+      <div class="rule">
+        <h2 class="rule-label" id="dossiers-title">Mes dossiers <span class="count" data-st-not="cdp30">6</span><span class="count" data-st="cdp30">3</span></h2>
+        <span class="rule-meta" data-st-not="cdp30">CdP31, Antalya, du 9 au 20 novembre 2026</span>
+        <span class="rule-meta" data-st="cdp30">CdP30, Belém, du 10 au 21 novembre 2025</span>
+      </div>
+
+      <div class="tools">
+        <div class="fld search">
+          <label for="q">Rechercher dans toutes les éditions</label>
+          <svg class="icon"><use href="#i-search"/></svg>
+          <input id="q" type="search" placeholder="Titre ou numéro de dossier" data-search-value>
+        </div>
+        <div class="fld">
+          <label for="f">État</label>
+          <select id="f">
+            <option>Tous les états</option>
+            <option>À vous d'agir</option>
+            <option>En évaluation</option>
+            <option>Retenus</option>
+            <option>Non retenus, retirés ou annulés</option>
+            <option>Compte rendu attendu</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CdP31 ---------------------------------------------------------- -->
+      <ul class="drows" data-st="dossiers appel attente">
+        <li class="drow">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/cycle-paco-16-9.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a data-page="dossier.html">Intelligence artificielle et environnement, de la promesse à la mise en œuvre</a></h3>
+            <p class="d-ref">Dossier CDP31-00240</p>
+            <span class="d-unread"><svg class="icon"><use href="#i-chat"/></svg>1 message non lu</span>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-success">Retenu</span>
+            <p class="d-next when"><b>09:50</b><span>samedi 14 novembre, heure d'Antalya</span></p>
+          </div>
+          <a class="btn btn-outline" data-page="dossier.html">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+        <li class="drow">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/article-six.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a href="#">Marchés du carbone et article 6 : où en sont les pays francophones ?</a></h3>
+            <p class="d-ref">Dossier CDP31-00187</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-success">Retenu</span>
+            <p class="d-next when"><b>11:30</b><span>lundi 16 novembre, heure d'Antalya</span></p>
+          </div>
+          <a class="btn btn-outline" href="#">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+        <li class="drow">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/adaptation-cotiere.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a href="#">Mesurer l'adaptation : des indicateurs pour les plans nationaux</a></h3>
+            <p class="d-ref">Dossier CDP31-00263</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-warning">Corrections demandées</span>
+            <p class="d-next mine">À vous : 2 points à traiter</p>
+          </div>
+          <a class="btn btn-outline" href="#">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+        <li class="drow">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/finance-climatique.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a data-page="dossier.html?etat=evaluation">Femmes et transition énergétique en Afrique de l'Ouest</a></h3>
+            <p class="d-ref">Dossier CDP31-00271</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-warning">En évaluation</span>
+            <p class="d-next">Décision du comité attendue</p>
+          </div>
+          <a class="btn btn-outline" data-page="dossier.html?etat=evaluation">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+        <li class="drow is-closed">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a data-page="dossier.html?etat=non-retenu">Villes durables francophones : retours d'expérience</a></h3>
+            <p class="d-ref">Dossier CDP31-00152</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-danger">Non retenu</span>
+          </div>
+          <a class="btn btn-outline" data-page="dossier.html?etat=non-retenu">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+        <li class="drow">
+          <div class="d-thumb empty"><svg class="icon"><use href="#i-file"/></svg></div>
+          <div>
+            <h3 class="d-title"><a data-page="dossier.html?etat=brouillon">Atlas des savoirs autochtones sur l'eau</a></h3>
+            <p class="d-ref">Dossier CDP31-00298</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-neutral">Brouillon</span>
+            <p class="d-next" data-st-not="appel">Jamais déposé</p>
+            <p class="d-next mine" data-st="appel">À vous : déposer avant la clôture</p>
+          </div>
+          <a class="btn btn-outline" data-page="dossier.html?etat=brouillon">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+      </ul>
+
+      <!-- CdP30 ---------------------------------------------------------- -->
+      <ul class="drows" data-st="cdp30">
+        <li class="drow">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/finance-climatique.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a href="#">Finance climatique pour les pays les moins avancés</a></h3>
+            <p class="d-ref">Dossier CDP30-00088</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-success">Retenu</span>
+            <p class="d-next mine">À vous : compte rendu attendu</p>
+          </div>
+          <a class="btn btn-outline" href="#">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+        <li class="drow">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a href="#">La jeunesse francophone dans les négociations climat</a></h3>
+            <p class="d-ref">Dossier CDP30-00102</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-success">Retenu</span>
+            <p class="d-next">Activité tenue</p>
+          </div>
+          <a class="btn btn-outline" href="#">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+        <li class="drow is-closed">
+          <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/mangroves.jpg" alt=""></div>
+          <div>
+            <h3 class="d-title"><a href="#">Restaurer les mangroves du golfe de Guinée</a></h3>
+            <p class="d-ref">Dossier CDP30-00131</p>
+          </div>
+          <div class="d-state">
+            <span class="tag tag-danger">Non retenu</span>
+          </div>
+          <a class="btn btn-outline" href="#">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+        </li>
+      </ul>
+
+      <!-- Recherche : l'onglet d'abord, puis ce qu'elle trouve ailleurs, sous le nom de son édition. -->
+      <div data-st="recherche">
+        <p class="in-tab">Dans CdP31</p>
+        <ul class="drows">
+          <li class="drow is-closed">
+            <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/pastoralisme-sahel.jpg" alt=""></div>
+            <div>
+              <h3 class="d-title"><a href="#">Villes durables francophones : retours d'expérience</a></h3>
+              <p class="d-ref">Dossier CDP31-00152</p>
+            </div>
+            <div class="d-state"><span class="tag tag-danger">Non retenu</span></div>
+            <a class="btn btn-outline" href="#">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+          </li>
+        </ul>
+        <div class="elsewhere">
+          <div class="rule">
+            <span class="rule-label">CdP30, Belém</span>
+            <span class="rule-meta">autre édition</span>
+          </div>
+          <ul class="drows">
+            <li class="drow">
+              <div class="d-thumb"><img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt=""></div>
+              <div>
+                <h3 class="d-title"><a href="#">La jeunesse francophone dans les négociations climat</a></h3>
+                <p class="d-ref">Dossier CDP30-00102</p>
+              </div>
+              <div class="d-state">
+                <span class="tag tag-success">Retenu</span>
+                <p class="d-next">Activité tenue</p>
+              </div>
+              <a class="btn btn-outline" href="#">Accéder <svg class="icon"><use href="#i-arrow"/></svg></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="block" id="membres" aria-labelledby="membres-title">
+      <div class="rule">
+        <h2 class="rule-label" id="membres-title">Membres <span class="count" data-st-not="vide">3</span><span class="count" data-st="vide">1</span></h2>
+      </div>
+      <p class="lede-s" style="margin-top:14px" data-st-not="vide">Les personnes qui peuvent déposer et suivre des dossiers au nom de Institut de la Francophonie pour le développement durable.</p>
+      <p class="lede-s" style="margin-top:14px" data-st="vide">Les personnes qui peuvent déposer et suivre des dossiers au nom de Réseau des jeunes francophones pour le climat.</p>
+
+      <ul class="mrows" data-st-not="vide">
+        <li class="mrow">
+          <span class="avatar" aria-hidden="true">AN</span>
+          <span><span class="m-name">Aïssatou Ndiaye</span><span class="m-you" data-st-not="attente">Vous</span><span class="m-sub">Spécialiste de programme, changements climatiques</span></span>
+          <span class="tag tag-info">Référent</span>
+          <span></span>
+        </li>
+        <li class="mrow">
+          <span class="avatar" aria-hidden="true">JN</span>
+          <span><span class="m-name">Jean-Pierre Ndoumbé</span><span class="m-sub">Responsable des systèmes d'information</span></span>
+          <span class="tag tag-neutral">Membre</span>
+          <span></span>
+        </li>
+        <li class="mrow">
+          <span class="avatar" aria-hidden="true">CO</span>
+          <span><span class="m-name">Clarisse Ouédraogo</span><span class="m-sub">Chargée de communication</span></span>
+          <span class="tag tag-neutral">Contributeur</span>
+          <span></span>
+        </li>
+        <li class="mrow is-pending">
+          <span class="avatar" aria-hidden="true">KM</span>
+          <span><span class="m-name">Kodjo Mensah</span><span class="m-sub">Assistant de recherche</span><span class="m-wait">Demande reçue le 2 novembre 2026</span></span>
+          <span class="tag tag-neutral">Membre</span>
+          <span class="m-actions" data-st-not="attente">
+            <button class="btn btn-secondary btn-sm" type="button" style="min-height:var(--target)"><svg class="icon"><use href="#i-check"/></svg>Accepter</button>
+            <button class="btn btn-ghost btn-sm" type="button" style="min-height:var(--target)">Refuser</button>
+          </span>
+        </li>
+        <li class="mrow is-pending">
+          <span class="avatar" aria-hidden="true">HT</span>
+          <span><span class="m-name">Hélène Tremblay</span><span class="m-sub">Conseillère en communication</span><span class="m-wait">Invitation envoyée le 30 octobre 2026</span></span>
+          <span class="tag tag-neutral">Membre</span>
+          <span class="m-actions" data-st-not="attente">
+            <button class="btn btn-ghost btn-sm" type="button" style="min-height:var(--target)"><svg class="icon"><use href="#i-mail"/></svg>Relancer l'invitation</button>
+          </span>
+        </li>
+      </ul>
+
+      <ul class="mrows" data-st="vide">
+        <li class="mrow">
+          <span class="avatar" aria-hidden="true">YB</span>
+          <span><span class="m-name">Yacouba Bamba</span><span class="m-you">Vous</span><span class="m-sub">Coordinateur</span></span>
+          <span class="tag tag-info">Référent provisoire</span>
+          <span></span>
+        </li>
+      </ul>
+
+      <!-- Référent : il invite. Fiche en attente de validation : il ne peut pas encore. Membre : on le lui dit. -->
+      <div class="box invite" data-st="dossiers recherche appel cdp30">
+        <h3>Inviter une personne</h3>
+        <p>L'invitation part par courriel. La personne rejoint l'organisation quand elle l'accepte : vous n'avez rien d'autre à faire.</p>
+        <form onsubmit="return false">
+          <div class="fld"><label for="ie">Adresse électronique</label><input id="ie" type="email" placeholder="prenom.nom@organisation.org"></div>
+          <div class="fld"><label for="ij">Fonction</label><input id="ij" placeholder="Chargée de projet, directeur…"></div>
+          <div class="fld"><label for="ir">Rôle dans l'organisation</label><select id="ir"><option>Membre</option><option>Contributeur</option></select></div>
+          <button class="btn btn-primary" type="submit">Envoyer l'invitation</button>
+        </form>
+      </div>
+      <div class="alert alert-info" style="margin-top:24px" data-st="vide">
+        <svg class="icon"><use href="#i-info"/></svg>
+        <div><b>Votre fiche attend sa validation par l'équipe de l'ePavillon</b><p>Vous pouvez déjà déposer vos dossiers. Inviter un membre et accepter une demande seront possibles une fois la fiche validée.</p></div>
+      </div>
+      <p class="manager-only" data-st="attente">Seul un référent peut inviter un membre ou accepter une demande.</p>
+    </section>
+  </div>
+</div>
+
+<footer class="ws-foot">
+  <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
+</footer>
+
+<nav class="state-switch" aria-label="État de la maquette" data-default="dossiers">
+  <a data-etat="dossiers">CdP31</a>
+  <a data-etat="cdp30">CdP30 terminée</a>
+  <a data-etat="recherche">Recherche</a>
+  <a data-etat="appel">Appel ouvert</a>
+  <a data-etat="attente">Adhésion en attente</a>
+  <a data-etat="vide">Aucun dossier</a>
+  <a data-etat="chargement">Chargement</a>
+  <a data-etat="erreur">Erreur</a>
+  <a data-etat="refuse">Accès refusé</a>
+</nav>
+
+<script src="../direction-condensee/icones.js"></script>
+<script src="espace.js"></script>
+<script>
+  const state = document.body.dataset.state
+  const layout = document.getElementById('layout')
+  layout.classList.toggle('no-aside', layout.dataset.noAside.split(' ').includes(state))
+  if (state === 'recherche') document.querySelector('[data-search-value]').value = 'francophon'
+</script>
+</body>
+</html>

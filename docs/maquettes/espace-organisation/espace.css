@@ -1,0 +1,237 @@
+/* Espace organisation, direction condensée : complète ../direction-condensee/style.css.
+   Bandeau sur la photo de l'édition (voile --color-scrim à 50 % et fondu du haut,
+   comme UiMediaBanner), cartes qui remontent de 72 px, sections séparées de filets. */
+
+[hidden] { display: none !important; }
+
+.note-maquette {
+  max-width: 82ch; margin: 24px auto 0; padding: 12px 16px; border-left: 4px solid var(--color-info);
+  background: var(--color-info-surface); font-size: 0.875rem; line-height: 1.6; color: var(--color-text);
+}
+.note-maquette p { margin: 0 0 6px; }
+.note-maquette p:last-child { margin: 0; }
+.note-wrap { padding: 0 32px 24px; }
+@media (max-width: 640px) { .note-wrap { padding: 0 16px 16px; } }
+
+/* --- Bandeau ------------------------------------------------------------- */
+
+.banner { position: relative; isolation: isolate; overflow: hidden; padding: 24px 0 120px; background: var(--color-surface-inverse); color: var(--color-text-on-inverse); --color-focus: var(--color-accent-on-inverse); }
+.banner > img { position: absolute; inset: 0; z-index: -3; width: 100%; height: 100%; object-fit: cover; }
+.banner.has-photo::before { content: ""; position: absolute; inset: 0; z-index: -2; background: color-mix(in srgb, var(--color-scrim) 50%, transparent); }
+.banner.has-photo::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background-image: linear-gradient(to bottom,
+    color-mix(in srgb, var(--color-scrim) 90%, transparent) 0%,
+    color-mix(in srgb, var(--color-scrim) 60%, transparent) 55%,
+    color-mix(in srgb, var(--color-scrim) 30%, transparent) 100%);
+}
+.banner h1 { color: var(--color-text-on-inverse); }
+.banner-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 0 20px; min-width: 0; font-size: 0.875rem; }
+.crumbs a { display: inline-flex; align-items: center; gap: 8px; min-height: var(--target); font-weight: 700; font-size: 0.9375rem; text-decoration: none; color: var(--color-text-on-inverse); }
+.crumbs a:hover { text-decoration: underline; }
+.crumbs span { color: var(--color-text-on-inverse-muted); }
+.ed-logo { flex: none; font-family: var(--font-heading); font-weight: 700; font-size: 1.5rem; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; text-align: right; }
+.ed-logo small { display: block; font-family: var(--font-body); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; text-transform: none; color: var(--color-text-on-inverse-muted); }
+
+/* Pastille posée sur le bandeau (UiBannerPill) : verre sur la photo, nuance de l'aplat sans photo. */
+.bpills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.bpill { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid var(--color-border-on-inverse); border-radius: 999px; background: var(--color-surface-inverse-raised); font-size: 0.875rem; font-weight: 700; color: var(--color-text-on-inverse); white-space: nowrap; }
+.has-photo .bpill { border-color: var(--color-glass-border); background: var(--color-glass-raised); backdrop-filter: blur(var(--blur-glass)); }
+.bpill .icon { font-size: 0.95rem; }
+.dot { width: 8px; height: 8px; flex: none; border-radius: 50%; }
+.dot-ok { background: var(--color-success-solid); }
+.dot-wait { background: var(--color-warning-on-inverse); }
+.dot-no { background: var(--color-danger-solid); }
+.dot-off { background: var(--color-text-on-inverse-muted); }
+.dot-info { background: var(--color-accent-on-inverse); }
+
+/* Logo d'organisation en tuile blanche. */
+.carrier { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.tile { display: grid; place-items: center; flex: none; min-width: 64px; height: 64px; padding: 6px 10px; border-radius: var(--radius); background: var(--color-surface-inverse-selected); box-shadow: var(--shadow-glass); font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.02em; color: var(--color-text-on-inverse-selected); }
+.tile img { max-height: 52px; max-width: 150px; object-fit: contain; }
+.carrier small { display: block; font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-text-on-inverse-muted); }
+.carrier b { display: block; font-size: 1.02rem; line-height: 1.35; }
+
+.bmeta { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 18px 0 0; padding: 0; list-style: none; font-size: 0.95rem; }
+.bmeta li { display: inline-flex; align-items: center; gap: 8px; }
+.bmeta .icon { color: var(--color-accent-on-inverse); }
+
+/* Onglets posés sur le bandeau : une édition, ou une vue du dossier. */
+.btabs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.btab {
+  display: flex; align-items: center; gap: 14px; min-height: var(--target); padding: 10px 18px 10px 10px;
+  border: 1px solid var(--color-border-on-inverse); border-radius: var(--radius); background: var(--color-surface-inverse-raised);
+  color: var(--color-text-on-inverse); text-decoration: none;
+}
+.has-photo .btab { border-color: var(--color-glass-border); background: var(--color-glass-raised); backdrop-filter: blur(var(--blur-glass)); }
+.btab:hover { border-color: var(--color-glass-border-strong); background: var(--color-glass-hover); }
+.btab[aria-selected="true"] { border-color: transparent; background: var(--color-surface-inverse-selected); color: var(--color-text-on-inverse-selected); box-shadow: var(--shadow-glass); }
+.btab-thumb { flex: none; width: 48px; height: 48px; border-radius: var(--radius-sm); overflow: hidden; }
+.btab-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.btab-name { display: flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; line-height: 1; letter-spacing: 0.02em; text-transform: uppercase; }
+.btab-name small { font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.8; }
+.btab-meta { display: block; margin-top: 4px; font-size: 0.8rem; opacity: 0.85; }
+.counter { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--color-accent-solid); color: var(--color-accent-contrast); font-family: var(--font-body); font-size: 0.75rem; font-weight: 700; letter-spacing: 0; }
+.btab.simple { padding: 0 20px; font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* Sélecteur d'organisation, sur le bandeau. */
+.picker { display: grid; gap: 4px; width: 300px; max-width: 100%; font-size: 0.8rem; color: var(--color-text-on-inverse-muted); }
+.picker select { width: 100%; text-overflow: ellipsis; min-height: var(--target); padding: 0 12px; border: 1px solid var(--color-glass-border-strong); border-radius: var(--radius); background: var(--color-glass-raised); backdrop-filter: blur(var(--blur-glass)); color: var(--color-text-on-inverse); font: inherit; font-size: 0.9rem; font-weight: 600; }
+.picker select option { color: var(--color-text); background: var(--color-surface-raised); }
+
+@media (max-width: 1000px) {
+  .banner { padding-bottom: 36px; }
+}
+@media (max-width: 640px) {
+  .btab { flex: 1 1 100%; }
+  .btab.simple { flex: 1 1 0; justify-content: center; padding: 0 12px; }
+  .tile { min-width: 56px; height: 56px; }
+}
+
+/* --- Mise en page : deux colonnes qui remontent sur le bandeau ------------ */
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-areas: "head aside" "body aside"; gap: 0 40px; align-items: start; padding-bottom: 96px; }
+.l-head { grid-area: head; margin-top: -72px; position: relative; z-index: 1; min-width: 0; }
+.l-body { grid-area: body; min-width: 0; }
+.l-aside { grid-area: aside; align-self: stretch; align-content: start; margin-top: -72px; position: relative; z-index: 1; display: grid; gap: 20px; }
+/* Le billet défile ; ce qui le suit reste en vue sous la barre de navigation. */
+.l-aside > .sticky { position: sticky; top: 96px; }
+.layout.no-aside { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+/* La liste prend toute la largeur : seul l'en-tête partage la ligne avec le billet. */
+.layout.wide-body { grid-template-areas: "head aside" "body body"; }
+.layout.wide-body .l-aside { align-self: start; }
+@media (max-width: 1000px) {
+  .layout, .layout.wide-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "aside" "body"; gap: 24px 0; padding-top: 24px; }
+  .l-head, .l-aside { margin-top: 0; }
+  .l-aside { align-self: start; }
+  .l-aside > .sticky { position: static; }
+}
+
+/* Carte qui remonte : la seule surface élevée de la page. */
+.panel { padding: 24px; border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-xl); }
+.panel + .panel { margin-top: 20px; }
+@media (max-width: 640px) { .panel { padding: 18px 16px; } }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 16px; }
+.panel-head h2 { font-size: 2rem; }
+.panel-head p { margin: 0; font-size: 0.875rem; color: var(--color-text-muted); }
+
+/* Encart à plat (bordure fine, pas d'ombre). */
+.box { padding: 20px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--card); }
+
+/* --- Sections : titre condensé, filet, beaucoup de blanc ----------------- */
+
+.block { margin-top: 64px; }
+.block-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.block-head h2 { font-size: clamp(1.8rem, 3.4vw, 2.3rem); }
+.block-head p { margin: 6px 0 0; max-width: 64ch; font-size: 0.92rem; color: var(--color-text-muted); }
+.sub { margin-top: 0; padding: 28px 0; border-top: 1px solid var(--color-border-subtle); }
+.sub:first-of-type { border-top: 0; }
+.sub-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; }
+.sub-head h3 { font-size: 1.45rem; text-transform: none; font-weight: 600; letter-spacing: 0.005em; }
+.sub-head p { margin: 4px 0 0; max-width: 62ch; font-size: 0.875rem; color: var(--color-text-muted); }
+.sub-body { margin-top: 16px; }
+.sub.is-editing { margin: 8px -20px; padding: 24px 20px; border: 2px solid var(--color-accent-solid); border-radius: var(--radius-lg); background: var(--card); }
+.sub.is-editing + .sub { border-top: 0; }
+@media (max-width: 640px) { .block { margin-top: 48px; } .sub.is-editing { margin: 8px -8px; padding: 20px 12px; } }
+
+/* La signature : étiquette posée sur un filet, ici sans couleur de journée. */
+.rule { --day-solid: var(--color-surface-inverse); --day-on: var(--color-text-on-inverse); }
+:root[data-theme="dark"] .rule { --day-solid: var(--color-surface-inverse-raised); }
+.rule-label .count { font-family: var(--font-body); font-size: 0.85rem; font-weight: 700; letter-spacing: 0; opacity: 0.85; }
+.rule.ok, :root[data-theme="dark"] .rule.ok { --day-solid: var(--color-success-solid); --day-on: var(--color-success-contrast); }
+.rule + .lede-s { margin-top: 12px; }
+.lede-s { margin: 0; max-width: 64ch; font-size: 0.92rem; color: var(--color-text-muted); }
+
+dl.facts { display: grid; gap: 18px 32px; margin: 0; }
+dl.facts.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+dl.facts.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+dl.facts dt { font-size: 0.82rem; color: var(--color-text-subtle); }
+dl.facts dd { margin: 4px 0 0; color: var(--color-text-secondary); }
+dl.facts dd.strong { font-weight: 600; color: var(--color-text); }
+@media (max-width: 640px) { dl.facts.cols-2, dl.facts.cols-3 { grid-template-columns: minmax(0, 1fr); } }
+
+/* --- Pastilles d'état (contenu) ----------------------------------------- */
+
+.tag-success { background: var(--color-success-surface); color: var(--color-success); border: 1px solid var(--color-success-border); }
+.tag-warning { background: var(--color-warning-surface); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+.tag-danger { background: var(--color-danger-surface); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
+.tag-info { background: var(--color-info-surface); color: var(--color-info); border: 1px solid var(--color-info-border); }
+.tag-neutral { background: var(--color-neutral-surface); color: var(--color-neutral); border: 1px solid var(--color-neutral-border); }
+
+/* --- Boutons complémentaires --------------------------------------------- */
+
+.btn-secondary { background: var(--card); border: 1px solid var(--color-border-strong); color: var(--color-text); }
+.btn-secondary:hover { border-color: var(--color-accent-solid); color: var(--color-accent); }
+.btn-danger { background: var(--color-danger-solid); color: var(--color-danger-contrast); }
+.btn-link { min-height: var(--target); padding: 0 4px; background: none; border: 0; color: var(--color-accent); font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.btn-link:hover { text-decoration: underline; box-shadow: none; transform: none; }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* --- Champs ------------------------------------------------------------- */
+
+.fld { display: grid; gap: 6px; min-width: 0; }
+.fld label, .fld .lbl { font-size: 0.85rem; font-weight: 600; color: var(--color-text); }
+.fld input, .fld select, .fld textarea {
+  width: 100%; min-height: var(--target); padding: 0 12px; border: 1px solid var(--color-border-strong); border-radius: var(--radius);
+  background: var(--card); color: var(--color-text); font: inherit; font-size: 0.95rem;
+}
+.fld textarea { padding: 10px 12px; resize: vertical; }
+.fld input:focus, .fld select:focus, .fld textarea:focus { outline: none; border-color: transparent; box-shadow: 0 0 0 2px var(--color-accent-solid); }
+.fld .hint { font-size: 0.8rem; color: var(--color-text-muted); }
+.search { position: relative; }
+.search .icon { position: absolute; left: 14px; bottom: 14px; color: var(--color-text-muted); }
+.search input { padding-left: 42px; }
+
+/* --- Alertes ------------------------------------------------------------ */
+
+.alert { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border: 1px solid; border-left-width: 4px; border-radius: var(--radius); font-size: 0.92rem; }
+.alert .icon { flex: none; margin-top: 2px; font-size: 1.15rem; }
+.alert b { display: block; color: var(--color-text); }
+.alert p { margin: 2px 0 0; color: var(--color-text-secondary); }
+.alert-info { border-color: var(--color-info-border); border-left-color: var(--color-info); background: var(--color-info-surface); }
+.alert-info .icon { color: var(--color-info); }
+.alert-success { border-color: var(--color-success-border); border-left-color: var(--color-success); background: var(--color-success-surface); }
+.alert-success .icon { color: var(--color-success); }
+.alert-warning { border-color: var(--color-warning-border); border-left-color: var(--color-warning); background: var(--color-warning-surface); }
+.alert-warning .icon { color: var(--color-warning); }
+.alert-danger { border-color: var(--color-danger-border); border-left-color: var(--color-danger); background: var(--color-danger-surface); }
+.alert-danger .icon { color: var(--color-danger); }
+
+/* --- États de page : chargement, erreur, refus, vide --------------------- */
+
+.state { display: grid; justify-items: start; gap: 10px; max-width: 640px; padding: 40px 32px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--card); }
+.state .icon { font-size: 2rem; color: var(--color-text-subtle); }
+.state h2 { font-size: 1.9rem; }
+.state p { margin: 0; max-width: 56ch; color: var(--color-text-muted); }
+.l-head > .state { max-width: none; border: 0; box-shadow: var(--shadow-xl); }
+.state.is-error .icon { color: var(--color-danger); }
+.skel { border-radius: var(--radius); background: var(--color-surface-sunken); animation: skel 1.4s ease-in-out infinite; }
+@keyframes skel { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+
+/* --- Ticket : la date en grand ------------------------------------------- */
+
+.ticket { border-radius: var(--radius-lg); overflow: hidden; background: var(--card); box-shadow: var(--shadow-xl); }
+.ticket-date { display: flex; align-items: center; gap: 16px; padding: 16px 24px; background: var(--color-surface-inverse); color: var(--color-text-on-inverse); }
+:root[data-theme="dark"] .ticket-date { background: var(--color-surface-inverse-raised); }
+.ticket-date b { font-family: var(--font-heading); font-size: 3.8rem; font-weight: 700; line-height: 0.8; }
+.ticket-date span { font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; }
+.ticket-date span small { display: block; font-size: 0.9rem; opacity: 0.8; }
+.ticket-date .icon { margin-left: auto; font-size: 1.8rem; stroke-width: 1.6; color: var(--color-accent-on-inverse); }
+.ticket-body { padding: 18px 24px 22px; }
+.ticket-label { margin: 0 0 6px; font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-text-secondary); }
+.hours { font-family: var(--font-heading); font-size: 2.4rem; font-weight: 700; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.hours span { font-size: 1.1rem; font-weight: 600; color: var(--color-text-secondary); }
+.ticket-body p { margin: 6px 0 0; font-size: 0.88rem; color: var(--color-text-secondary); }
+.ticket-sep { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--color-border-subtle); }
+@media (max-width: 640px) { .ticket-body { padding: 16px; } .ticket-date { padding: 14px 16px; } }
+
+.ws-foot { padding: 32px 0; background: var(--color-surface-inverse); color: var(--color-text-on-inverse-muted); font-size: 0.88rem; }
+.ws-foot b { font-family: var(--font-heading); font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-on-inverse); }
+
+/* Bascule d'état de la maquette (hors dessin). */
+.state-switch { position: fixed; left: 16px; bottom: 16px; z-index: 50; display: flex; flex-wrap: wrap; gap: 4px; max-width: min(760px, calc(100vw - 150px)); padding: 4px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-md); border: 1px solid var(--color-border-subtle); }
+.state-switch a { padding: 6px 8px; border-radius: var(--radius-sm); font-family: var(--font-heading); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; text-decoration: none; color: var(--color-text-secondary); }
+.state-switch a[aria-current] { background: var(--color-surface-inverse); color: var(--color-text-on-inverse); }
+@media (max-width: 640px) { .state-switch { position: static; max-width: none; margin: 0 16px 16px; box-shadow: none; } }

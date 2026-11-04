@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dossier CDP31-00240 : direction condensée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../direction-condensee/style.css">
+<link rel="stylesheet" href="espace.css">
+<style>
+  .banner h1 { max-width: 21em; margin-top: 16px; font-size: clamp(2rem, 4.2vw, 3.5rem); font-weight: 600; line-height: 1.02; letter-spacing: 0.005em; text-transform: none; text-wrap: balance; }
+  .banner .carrier { margin-top: 22px; }
+  @media (max-width: 640px) { .banner h1 { font-size: 1.85rem; } }
+
+  /* La frise : cinq jalons, la date sous chacun. */
+  .steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 4px 0 0; padding: 0; list-style: none; }
+  .step { position: relative; padding-right: 12px; }
+  .step::before { content: ""; position: absolute; top: 15px; left: 32px; right: 0; height: 2px; background: var(--color-border); }
+  .step:last-child::before { display: none; }
+  .step.done::before { background: var(--color-success-solid); }
+  .mark { position: relative; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--color-border-strong); background: var(--card); color: var(--color-text-subtle); font-size: 0.95rem; }
+  .step.done .mark { border-color: var(--color-success-solid); background: var(--color-success-solid); color: var(--color-success-contrast); }
+  .step.current .mark { border-color: var(--color-accent-solid); box-shadow: 0 0 0 4px var(--color-accent-surface); color: var(--color-accent); }
+  .step.current .mark::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--color-accent-solid); }
+  .step.wait .mark { border-color: var(--color-warning); box-shadow: 0 0 0 4px var(--color-warning-surface); }
+  .step.wait .mark::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--color-warning); }
+  .step.no .mark { border-color: var(--color-danger-solid); background: var(--color-danger-solid); color: var(--color-danger-contrast); }
+  .step.skip .mark { border-style: dashed; }
+  .step b { display: block; margin-top: 10px; font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; line-height: 1.05; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink); }
+  .step.upcoming b, .step.skip b { color: var(--color-text-subtle); }
+  .step.skip b { text-decoration: line-through; }
+  .step small { display: block; margin-top: 2px; font-size: 0.8rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) {
+    .steps { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .step { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 14px; padding: 0 0 14px; }
+    .step::before { top: 32px; bottom: 0; left: 15px; right: auto; width: 2px; height: auto; }
+    .step .mark { grid-row: 1 / span 2; }
+    .step b { margin-top: 6px; }
+  }
+  .panel .alert, .panel .lock, .panel .draft { margin-top: 20px; }
+  .lock { display: flex; gap: 8px; align-items: flex-start; margin: 0; font-size: 0.9rem; color: var(--color-text-muted); }
+  .lock .icon { margin-top: 3px; color: var(--color-text-subtle); }
+  .draft { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 16px; border-radius: var(--radius); background: var(--color-surface-sunken); }
+  .draft p { margin: 0; max-width: 52ch; color: var(--color-text-secondary); }
+
+  /* Ce qui manque. */
+  .gaps { margin-top: 20px; padding: 16px 20px 6px; border: 1px solid var(--color-warning-border); border-radius: var(--radius-lg); background: var(--color-warning-surface); }
+  .gaps > b { display: flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--color-warning); }
+  .gaps ul { margin: 8px 0 0; padding: 0; list-style: none; }
+  .gaps li + li { border-top: 1px solid color-mix(in srgb, var(--color-warning-border) 50%, transparent); }
+  .gaps a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: var(--target); font-size: 0.92rem; color: var(--color-text); text-decoration: none; }
+  .gaps a span:last-child { flex: none; font-weight: 700; color: var(--color-accent); }
+  .gaps a:hover span:first-child { text-decoration: underline; }
+
+  /* Billet : quand et où, page publique. */
+  .room { display: grid; gap: 4px; margin-top: 14px; font-size: 0.9rem; }
+  .room span { display: flex; gap: 8px; align-items: center; color: var(--color-text-secondary); }
+  .room .icon { color: var(--color-text-subtle); }
+  .public { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 4px 16px; align-items: center; }
+  .qr { display: block; width: 96px; height: 96px; padding: 6px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: #fff; color: var(--ifdd-bleu-900); }
+  .qr svg { width: 100%; height: 100%; }
+  .public .links { display: grid; justify-items: start; }
+  .public .btn-link { display: inline-flex; gap: 8px; align-items: center; }
+
+  /* Votre dossier : liste d'avancement. */
+  .check { padding: 20px 22px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--color-border); }
+  .l-aside > .check:first-child, .l-aside > [hidden] + [hidden] + .check { border: 0; box-shadow: var(--shadow-xl); }
+  .check h2 { font-size: 1.35rem; letter-spacing: 0.04em; }
+  .bar-p { height: 6px; margin-top: 12px; border-radius: 3px; background: var(--color-surface-sunken); overflow: hidden; }
+  .bar-p i { display: block; height: 100%; border-radius: 3px; background: var(--color-success-solid); }
+  .check > p { margin: 6px 0 4px; font-size: 0.85rem; color: var(--color-text-muted); }
+  .check ul { margin: 0; padding: 0; list-style: none; }
+  .check a { display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 0.9rem; color: var(--color-text); text-decoration: none; }
+  .check a:hover { color: var(--color-accent); }
+  .ck { display: grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; font-size: 0.72rem; font-weight: 700; }
+  .ck.ok { background: var(--color-success-surface); color: var(--color-success); }
+  .ck.todo { border: 1px solid var(--color-warning-border); background: var(--color-warning-surface); color: var(--color-warning); }
+  @media (max-width: 1000px) { .check { display: none; } }
+
+  /* Couverture. */
+  .cover { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .cover-img { aspect-ratio: 16 / 9; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface-sunken); }
+  .cover-img img { width: 100%; height: 100%; object-fit: cover; }
+  .cover p { margin: 4px 0 0; font-size: 0.9rem; color: var(--color-text-muted); }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  @media (max-width: 760px) { .cover { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Intervenants. */
+  .people { margin: 0; padding: 0; list-style: none; }
+  .person { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 8px 18px; padding: 18px 0; border-top: 1px solid var(--color-border-subtle); }
+  .person:first-child { border-top: 0; padding-top: 0; }
+  .face { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--color-accent-surface); border: 2px solid var(--color-accent-border); font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; color: var(--color-accent); }
+  .face.missing { border: 2px dashed var(--color-warning-border); background: var(--color-warning-surface); color: var(--color-warning); }
+  .person b { font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; line-height: 1.1; color: var(--ink); }
+  .person b span { font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); }
+  .person .job { margin: 2px 0 0; font-size: 0.85rem; color: var(--color-text-muted); }
+  .person .bio { margin: 8px 0 0; max-width: 68ch; font-size: 0.9rem; color: var(--color-text-secondary); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .person .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .cb { display: inline-flex; align-items: center; gap: 10px; min-height: var(--target); margin-top: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+  .cb input { width: 20px; height: 20px; accent-color: var(--color-accent-solid); }
+  @media (max-width: 640px) {
+    .person { grid-template-columns: 52px minmax(0, 1fr); }
+    .face { width: 52px; height: 52px; font-size: 1.1rem; }
+    .person > .btn { grid-column: 2; justify-self: start; }
+  }
+
+  /* Points focaux. */
+  .focal { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px 20px; padding: 16px; border-radius: var(--radius); background: var(--color-info-surface); }
+  .focal + .focal { margin-top: 10px; }
+  .focal small { display: block; font-size: 0.8rem; color: var(--color-text-subtle); }
+  .focal strong { display: block; color: var(--color-text); }
+  .focal .miss { font-weight: 700; color: var(--color-warning); }
+  @media (max-width: 640px) { .focal { grid-template-columns: minmax(0, 1fr); } }
+
+  .needs { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--color-text-secondary); }
+  .needs li { display: flex; gap: 10px; align-items: flex-start; }
+  .needs .icon { margin-top: 4px; color: var(--color-success); }
+  .needs strong { color: var(--color-text); }
+  .toggles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .toggle { display: grid; gap: 6px; align-content: start; min-height: 112px; padding: 16px; border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--card); text-align: left; font: inherit; color: inherit; cursor: pointer; }
+  .toggle[aria-pressed="true"] { border-color: var(--color-accent-solid); background: var(--color-info-surface); }
+  .toggle span { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; color: var(--ink); }
+  .toggle i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 4px; border: 2px solid var(--color-border-strong); font-style: normal; }
+  .toggle[aria-pressed="true"] i { border-color: var(--color-accent-solid); background: var(--color-accent-solid); color: var(--color-accent-contrast); }
+  .toggle small { font-size: 0.85rem; color: var(--color-text-muted); }
+  .edit-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-border-subtle); }
+  @media (max-width: 760px) { .toggles { grid-template-columns: minmax(0, 1fr); } .toggle { min-height: 0; } }
+
+  .files { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .files li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: var(--radius); }
+  .files li > .icon { font-size: 1.4rem; color: var(--color-text-subtle); }
+  .files li > div { flex: 1 1 200px; min-width: 0; }
+  .files a { font-weight: 600; color: var(--color-text-link); overflow-wrap: anywhere; }
+  .files small { display: block; font-size: 0.82rem; color: var(--color-text-muted); }
+
+  /* Rappels : le décalage en tête, l'heure en chiffres. */
+  .reminders { margin: 0; padding: 0; list-style: none; }
+  .reminders li { display: grid; grid-template-columns: 150px auto minmax(0, 1fr) auto; align-items: center; gap: 6px 16px; padding: 12px 0; border-top: 1px solid var(--color-border-subtle); font-size: 0.9rem; }
+  .reminders li:first-child { border-top: 0; }
+  .reminders b { font-weight: 700; color: var(--color-text); }
+  .reminders time { font-variant-numeric: tabular-nums; color: var(--color-text-secondary); }
+  .reminders span:last-child { color: var(--color-text-muted); }
+  @media (max-width: 640px) { .reminders li { grid-template-columns: minmax(0, 1fr) auto; } }
+
+  .orgs { margin: 0; padding: 0; list-style: none; }
+  .orgs li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 12px 0; border-top: 1px solid var(--color-border-subtle); }
+  .orgs li:first-child { border-top: 0; padding-top: 0; }
+  .orgs .logo { display: grid; place-items: center; width: 56px; height: 40px; padding: 3px; border-radius: var(--radius-sm); border: 1px solid var(--color-border-subtle); background: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 0.8rem; color: var(--ifdd-bleu-900); }
+  .orgs .logo img { max-width: 100%; max-height: 100%; }
+  .orgs .name { flex: 1 1 220px; font-weight: 600; color: var(--color-text); }
+  .orgs .wait { font-size: 0.85rem; font-weight: 600; color: var(--color-warning); }
+
+  .posts { margin: 0 0 16px; padding: 0; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .posts li { display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 12px; border: 1px solid var(--color-border); border-radius: var(--radius); }
+  .posts a { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.88rem; color: var(--color-text-link); }
+  .post-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+  @media (max-width: 640px) { .post-form { grid-template-columns: minmax(0, 1fr); } .post-form .btn { width: 100%; } }
+
+  /* Historique : la date en grand, avant et après l'un sous l'autre. */
+  .hist { margin: 0; padding: 0; list-style: none; }
+  .hist li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 6px 22px; padding: 18px 0; border-top: 1px solid var(--color-border-subtle); }
+  .hist li:first-child { border-top: 0; padding-top: 4px; }
+  .hist .when { font-family: var(--font-heading); line-height: 1; }
+  .hist .when b { display: block; font-size: 1.9rem; font-weight: 700; color: var(--ink); text-transform: uppercase; }
+  .hist .when span { display: block; margin-top: 4px; font-family: var(--font-body); font-size: 0.82rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .hist .what { font-weight: 700; color: var(--color-text); }
+  .hist .who { margin-left: 8px; font-size: 0.85rem; color: var(--color-text-subtle); }
+  .hist dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; margin: 8px 0 0; font-size: 0.9rem; }
+  .hist dt { color: var(--color-text-subtle); }
+  .hist dd { margin: 0; color: var(--color-text-secondary); }
+  .hist dd.old { color: var(--color-text-muted); text-decoration: line-through; }
+  @media (max-width: 640px) { .hist li { grid-template-columns: 72px minmax(0, 1fr); gap: 4px 14px; } .hist .when b { font-size: 1.4rem; } }
+</style>
+</head>
+<body class="day-plain">
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="bar-logo" href="#"><img src="../../../frontend/public/logos/svg/epavillon-symbole-inverse.svg" alt=""> ePavillon</a>
+    <nav class="bar-links" aria-label="Navigation principale">
+      <a href="../direction-condensee/programmation.html">Programmations</a>
+      <a href="#">Communauté</a>
+      <a data-page="index.html" aria-current="page">Mon organisation</a>
+    </nav>
+  </div>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</header>
+
+<div class="note-wrap">
+  <div class="note-maquette">
+    <p><b>Maquette, pas l'écran.</b> Tout ce que la fiche permet aujourd'hui y est : frise, décision, manques, liste d'avancement, couverture, quand et où, rappels, page publique et QR, les cinq rubriques modifiables sur place, point focal, besoins techniques, présentations, publications, historique, et les états (brouillon, en évaluation, non retenu, en modification, pour le compte de l'organisation, chargement, erreur, introuvable).</p>
+    <p><b>Ce qui change.</b> Le bandeau reprend celui d'une activité : photo de l'édition voilée, état et format en pastilles, grand titre condensé, lieu et date, organisation porteuse en tuile blanche ; les vues « Mon dossier » et « Historique » s'y posent. Sous le bandeau, deux cartes remontent de 72 px : la <b>frise</b> (à gauche) et le <b>billet « Quand et où »</b> (à droite, heure en grand, salle, jauge, lien public et QR), suivi de la liste d'avancement. Les rubriques ne sont plus des cartes empilées mais des sections séparées de filets, rangées sous trois étiquettes : « Le jour J », « Faire connaître votre activité », « Votre dossier ».</p>
+    <p><b>Réorganisé, à valider.</b> (1) Une activité retenue montre « Le jour J » avant le contenu du dossier : à dix jours de la séance, c'est ce qui se prépare ; les intervenants restent dans « Votre dossier ». (2) Le calendrier des rappels quitte la carte « Quand et où » pour rejoindre « Le jour J ». (3) Ajout : un bouton « Écrire à l'équipe » dans le billet, qui ouvre l'assistance déjà attachée au dossier. (4) Le nombre d'inscrits (1) n'est pas affiché : décision du 02/11, les organisations ne le voient pas.</p>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- Bandeau                                                                -->
+<!-- ====================================================================== -->
+
+<section class="banner has-photo" data-st="retenu modif agir aprog historique evaluation brouillon non-retenu">
+  <img src="../../../frontend/public/mocks/covers/pavillon-cop31-32-9.jpg" alt="">
+  <div class="wrap">
+    <div class="banner-top">
+      <nav class="crumbs" aria-label="Fil d'Ariane">
+        <a data-page="index.html"><svg class="icon"><use href="#i-back"/></svg>Mon organisation</a>
+        <span>CdP31 / Dossier CDP31-00240</span>
+      </nav>
+      <span class="ed-logo">CdP31<small>Antalya 2026</small></span>
+    </div>
+
+    <div class="bpills">
+      <span class="bpill" data-st="retenu modif agir aprog historique"><span class="dot dot-ok"></span>Retenu</span>
+      <span class="bpill" data-st="evaluation"><span class="dot dot-wait"></span>En évaluation</span>
+      <span class="bpill" data-st="brouillon"><span class="dot dot-off"></span>Brouillon</span>
+      <span class="bpill" data-st="non-retenu"><span class="dot dot-no"></span>Non retenu</span>
+      <span class="bpill"><svg class="icon"><use href="#i-door"/></svg>Sur place</span>
+    </div>
+
+    <h1>Intelligence artificielle et environnement, de la promesse à la mise en œuvre</h1>
+
+    <ul class="bmeta">
+      <li data-st="retenu modif agir historique"><svg class="icon"><use href="#i-pin"/></svg>Stand du Pavillon de la Francophonie, Antalya</li>
+      <li data-st="retenu modif agir historique"><svg class="icon"><use href="#i-calendar"/></svg>Samedi 14 novembre 2026</li>
+      <li data-st-not="retenu modif agir historique"><svg class="icon"><use href="#i-calendar"/></svg>CdP31, Antalya 2026</li>
+    </ul>
+
+    <div class="carrier">
+      <span class="tile"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span>
+      <div><small>Porté par</small><b>Institut de la Francophonie pour le développement durable</b></div>
+    </div>
+
+    <nav class="btabs" role="tablist" aria-label="Vues du dossier">
+      <a class="btab simple" role="tab" data-etat="retenu" data-tab="dossier"><svg class="icon"><use href="#i-file"/></svg>Mon dossier</a>
+      <a class="btab simple" role="tab" data-etat="historique" data-tab="historique"><svg class="icon"><use href="#i-history"/></svg>Historique</a>
+    </nav>
+  </div>
+</section>
+
+<section class="banner" data-st="chargement erreur introuvable">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Fil d'Ariane">
+      <a data-page="index.html"><svg class="icon"><use href="#i-back"/></svg>Mon organisation</a>
+    </nav>
+    <div class="skel" data-st="chargement" style="height:48px;max-width:640px;margin-top:20px;background:var(--color-surface-inverse-raised)"></div>
+    <div class="skel" data-st="chargement" style="height:48px;max-width:420px;margin-top:10px;background:var(--color-surface-inverse-raised)"></div>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- Contenu                                                                -->
+<!-- ====================================================================== -->
+
+<div class="wrap layout" id="layout" data-no-aside="non-retenu chargement erreur introuvable">
+
+  <div class="l-head">
+    <div class="panel" data-st="agir" style="padding:0;overflow:hidden">
+      <div class="alert alert-warning" style="border:0;border-radius:0">
+        <svg class="icon"><use href="#i-warning"/></svg>
+        <div><b>Vous agissez pour IFDD</b><p>Vous voyez l'espace de ce dossier comme l'organisation. Chaque modification est enregistrée à votre nom dans son historique. Les échanges se lisent dans la fiche du back-office.</p></div>
+      </div>
+    </div>
+
+    <!-- La frise d'avancement, et ce qu'elle entraîne. -->
+    <section class="panel" aria-labelledby="frise-title" data-st="retenu modif agir aprog evaluation brouillon non-retenu">
+      <div class="panel-head"><h2 id="frise-title">Avancement</h2><p>Dossier CDP31-00240</p></div>
+
+      <ol class="steps" data-st="retenu modif agir">
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Brouillon</b><small>22 septembre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Déposé</b><small>3 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>En évaluation</b><small>6 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Retenu</b><small>27 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Programmé</b><small>30 octobre</small></li>
+      </ol>
+      <ol class="steps" data-st="aprog">
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Brouillon</b><small>22 septembre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Déposé</b><small>3 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>En évaluation</b><small>6 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Retenu</b><small>27 octobre</small></li>
+        <li class="step upcoming"><span class="mark"></span><b>Programmé</b><small>à venir</small></li>
+      </ol>
+      <ol class="steps" data-st="evaluation">
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Brouillon</b><small>22 septembre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Déposé</b><small>3 octobre</small></li>
+        <li class="step wait"><span class="mark"></span><b>En évaluation</b><small>depuis le 6 octobre</small></li>
+        <li class="step upcoming"><span class="mark"></span><b>Décision</b><small>à venir</small></li>
+        <li class="step upcoming"><span class="mark"></span><b>Programmé</b><small>à venir</small></li>
+      </ol>
+      <ol class="steps" data-st="brouillon">
+        <li class="step current"><span class="mark"></span><b>Brouillon</b><small>22 septembre</small></li>
+        <li class="step upcoming"><span class="mark"></span><b>Déposé</b><small>à venir</small></li>
+        <li class="step upcoming"><span class="mark"></span><b>En évaluation</b><small>à venir</small></li>
+        <li class="step upcoming"><span class="mark"></span><b>Décision</b><small>à venir</small></li>
+        <li class="step upcoming"><span class="mark"></span><b>Programmé</b><small>à venir</small></li>
+      </ol>
+      <ol class="steps" data-st="non-retenu">
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Brouillon</b><small>22 septembre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>Déposé</b><small>3 octobre</small></li>
+        <li class="step done"><span class="mark"><svg class="icon"><use href="#i-check"/></svg></span><b>En évaluation</b><small>6 octobre</small></li>
+        <li class="step no"><span class="mark"><svg class="icon"><use href="#i-minus"/></svg></span><b>Non retenu</b><small>27 octobre</small></li>
+        <li class="step skip"><span class="mark"></span><b>Programmé</b><small>non concerné</small></li>
+      </ol>
+
+      <div class="alert alert-success" data-st="retenu modif agir aprog">
+        <svg class="icon"><use href="#i-check-circle"/></svg>
+        <div><b>Dossier retenu</b><p>Décision rendue le 27 octobre 2026.</p></div>
+      </div>
+      <div class="alert alert-warning" data-st="non-retenu">
+        <svg class="icon"><use href="#i-info"/></svg>
+        <div><b>Dossier non retenu</b><p>Décision rendue le 27 octobre 2026. Motif communiqué : le comité a reçu trois propositions proches sur le numérique et le climat ; il a retenu celle qui associait le plus de pays du Sud.</p></div>
+      </div>
+      <p class="lock" data-st="evaluation"><svg class="icon"><use href="#i-lock"/></svg>Le comité évalue votre dossier : il redeviendra modifiable s'il vous demande des corrections.</p>
+      <p class="lock" data-st="non-retenu"><svg class="icon"><use href="#i-lock"/></svg>Ce dossier est clos. Pour proposer à nouveau cette activité, déposez un nouveau dossier.</p>
+      <div class="draft" data-st="brouillon">
+        <p>Ce dossier est un brouillon : terminez-le dans le formulaire de dépôt pour l'envoyer.</p>
+        <a class="btn btn-primary" href="#"><svg class="icon"><use href="#i-edit"/></svg>Reprendre la rédaction</a>
+      </div>
+    </section>
+
+    <!-- Ce qui manque : un lien par manque, vers sa rubrique. -->
+    <div class="gaps" role="status" data-st="retenu modif agir aprog evaluation brouillon">
+      <b><svg class="icon"><use href="#i-warning"/></svg><span data-st="retenu modif agir aprog">Il manque 3 éléments</span><span data-st="evaluation brouillon">Il manque 2 éléments</span></b>
+      <ul>
+        <li><a href="#intervenants"><span>La biographie de Moussa Traoré</span><span>Compléter</span></a></li>
+        <li><a href="#intervenants"><span>La photo de Léa Fontaine</span><span>Ajouter</span></a></li>
+        <li data-st="retenu modif agir aprog"><a href="#point-focal"><span>Le téléphone du point focal (Aïssatou Ndiaye)</span><span>Compléter</span></a></li>
+      </ul>
+    </div>
+
+    <!-- Historique -->
+    <section class="panel" aria-labelledby="hist-title" data-st="historique">
+      <div class="panel-head"><h2 id="hist-title">Historique des modifications</h2><p>Heures d'Antalya (UTC+3)</p></div>
+      <p class="lede-s" style="margin-bottom:18px">Toutes les modifications du dossier, champ par champ, avec leur auteur et leur date. Les notes du comité et les valeurs recalculées n'y figurent pas.</p>
+      <ol class="hist">
+        <li>
+          <p class="when" style="margin:0"><b>2 nov.</b><span>14:12</span></p>
+          <div><span class="what">Champ modifié : Résumé</span><span class="who">par Aïssatou Ndiaye</span>
+            <dl><dt>Avant</dt><dd class="old">Une table ronde sur l'usage de l'IA pour le suivi des forêts.</dd><dt>Après</dt><dd>Chercheurs et décideurs montrent comment l'intelligence artificielle sert déjà le suivi des forêts, des sols et de l'eau, et ce qu'il faut pour passer du projet pilote à la politique publique.</dd></dl>
+          </div>
+        </li>
+        <li>
+          <p class="when" style="margin:0"><b>30 oct.</b><span>16:05</span></p>
+          <div><span class="what">Champ modifié : Personne à contacter</span><span class="who">par Aïssatou Ndiaye</span>
+            <dl><dt>Avant</dt><dd class="old">Jean-Pierre Ndoumbé</dd><dt>Après</dt><dd>Aïssatou Ndiaye</dd></dl>
+          </div>
+        </li>
+        <li>
+          <p class="when" style="margin:0"><b>27 oct.</b><span>10:31</span></p>
+          <div><span class="what">Champ modifié : État du dossier</span><span class="who">par l'équipe de l'ePavillon</span>
+            <dl><dt>Avant</dt><dd class="old">En évaluation</dd><dt>Après</dt><dd>Retenu</dd></dl>
+          </div>
+        </li>
+        <li>
+          <p class="when" style="margin:0"><b>6 oct.</b><span>09:02</span></p>
+          <div><span class="what">Champ modifié : État du dossier</span><span class="who">par l'équipe de l'ePavillon</span>
+            <dl><dt>Avant</dt><dd class="old">Déposé</dd><dt>Après</dt><dd>En évaluation</dd></dl>
+          </div>
+        </li>
+        <li>
+          <p class="when" style="margin:0"><b>3 oct.</b><span>18:47</span></p>
+          <div><span class="what">Champ modifié : État du dossier</span><span class="who">par Aïssatou Ndiaye</span>
+            <dl><dt>Avant</dt><dd class="old">Brouillon</dd><dt>Après</dt><dd>Déposé</dd></dl>
+          </div>
+        </li>
+        <li>
+          <p class="when" style="margin:0"><b>22 sept.</b><span>11:20</span></p>
+          <div><span class="what">Dossier créé</span><span class="who">par Aïssatou Ndiaye</span></div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- États de page -->
+    <div class="panel" data-st="chargement" aria-busy="true" aria-label="Chargement">
+      <div class="skel" style="height:28px;width:180px"></div>
+      <div class="skel" style="height:56px;margin-top:20px"></div>
+      <div class="skel" style="height:20px;margin-top:16px;width:60%"></div>
+    </div>
+    <div class="state is-error" data-st="erreur" role="alert">
+      <svg class="icon"><use href="#i-warning"/></svg>
+      <h2>Une erreur est survenue</h2>
+      <p>Le contenu n'a pas pu être chargé. Réessayez dans un instant.</p>
+      <button class="btn btn-primary" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Réessayer</button>
+    </div>
+    <div class="state" data-st="introuvable">
+      <svg class="icon"><use href="#i-file"/></svg>
+      <h2>Dossier introuvable</h2>
+      <p>Ce dossier n'existe pas, ou il n'appartient pas à l'organisation dont vous suivez les activités.</p>
+      <a class="btn btn-primary" data-page="index.html">Revenir à mes dossiers</a>
+    </div>
+  </div>
+
+  <!-- Billet et liste d'avancement -->
+  <aside class="l-aside" aria-label="Quand et où" data-st="retenu modif agir aprog historique evaluation brouillon">
+    <div class="ticket" id="quand-ou" data-st="retenu modif agir historique">
+      <div class="ticket-date">
+        <b>14</b><span>samedi<br>novembre 2026<small>Quand et où</small></span>
+        <svg class="icon"><use href="#i-calendar"/></svg>
+      </div>
+      <div class="ticket-body">
+        <div class="hours">09:50 à 10:40 <span>50 min</span></div>
+        <p>Heure d'Antalya (UTC+3)</p>
+        <div class="room">
+          <span><svg class="icon"><use href="#i-pin"/></svg>Stand du Pavillon de la Francophonie</span>
+          <span><svg class="icon"><use href="#i-users"/></svg>Jauge : 40 places</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--color-text-muted)">Le créneau et la salle sont fixés par l'IFDD.</p>
+
+        <div class="ticket-sep">
+          <p class="ticket-label">Page publique</p>
+          <div class="public">
+            <a class="qr" href="#" aria-label="Ouvrir la page publique de l'activité"><svg id="qr" viewBox="0 0 25 25" shape-rendering="crispEdges" aria-hidden="true"></svg></a>
+            <div class="links">
+              <button class="btn btn-link" type="button"><svg class="icon"><use href="#i-copy"/></svg>Copier le lien</button>
+              <button class="btn btn-link" type="button"><svg class="icon"><use href="#i-download"/></svg>Télécharger le QR</button>
+            </div>
+          </div>
+        </div>
+        <div class="ticket-sep">
+          <a class="btn btn-outline" href="#" style="width:100%"><svg class="icon"><use href="#i-chat"/></svg>Écrire à l'équipe</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticket" id="quand-ou-vide" data-st="aprog">
+      <div class="ticket-body">
+        <p class="ticket-label">Quand et où</p>
+        <p style="margin:0;font-weight:700;color:var(--color-text)">Aucune activité programmée pour l'instant</p>
+        <p>Les créneaux sont arrêtés après l'acceptation, quand l'équipe compose le programme. Vous serez prévenu dès qu'une date sera fixée.</p>
+      </div>
+    </div>
+
+    <nav class="check sticky" aria-label="Votre dossier" data-st="retenu modif agir aprog evaluation brouillon">
+      <h2>Votre dossier</h2>
+      <div class="bar-p"><i data-st="retenu modif agir aprog" style="width:70%"></i><i data-st="evaluation brouillon" style="width:75%"></i></div>
+      <p data-st="retenu modif agir aprog">7 éléments sur 10</p>
+      <p data-st="evaluation brouillon">6 éléments sur 8</p>
+      <ul>
+        <li><a href="#presentation"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Titre et présentation</a></li>
+        <li><a href="#couverture"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Image de couverture</a></li>
+        <li><a href="#organisations"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Organisations</a></li>
+        <li><a href="#intervenants"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Intervenants</a></li>
+        <li><a href="#intervenants"><span class="ck todo">!</span>Biographies</a></li>
+        <li><a href="#intervenants"><span class="ck todo">!</span>Photos des intervenants</a></li>
+        <li><a href="#organisations"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Logo de l'organisation</a></li>
+        <li><a href="#format"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Format et durée</a></li>
+        <li data-st="retenu modif agir aprog"><a href="#point-focal"><span class="ck todo">!</span>Point focal joignable</a></li>
+        <li data-st="retenu modif agir aprog"><a href="#besoins-techniques"><span class="ck ok"><svg class="icon"><use href="#i-check"/></svg></span>Besoins techniques</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="l-body" data-st="retenu modif agir aprog evaluation brouillon non-retenu">
+
+    <!-- ================================================================== -->
+    <section class="block" aria-labelledby="jourj-title" data-st="retenu modif agir aprog">
+      <div class="rule ok">
+        <h2 class="rule-label" id="jourj-title"><svg class="icon"><use href="#i-calendar"/></svg>Le jour J</h2>
+        <span class="rule-meta">Votre activité est retenue : préparez-la avec l'équipe de l'IFDD</span>
+      </div>
+
+      <div class="sub" id="point-focal">
+        <div class="sub-head">
+          <div><h3>Point focal sur place</h3><p>La personne que l'équipe de l'IFDD appelle le jour J : retard, salle, matériel. Au moins une.</p></div>
+          <button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+        </div>
+        <div class="sub-body">
+          <div class="focal">
+            <div><strong>Aïssatou Ndiaye</strong><small>A déposé le dossier</small></div>
+            <div><small>Téléphone</small><span class="miss">Téléphone à renseigner</span></div>
+            <div><small>WhatsApp</small><strong>·</strong></div>
+          </div>
+          <div class="focal">
+            <div><strong>Marie-Claire Ondoa</strong><small>Intervenant</small></div>
+            <div><small>Téléphone</small><strong>+237 6 77 41 28 09</strong></div>
+            <div><small>WhatsApp</small><strong>+237 6 77 41 28 09</strong></div>
+          </div>
+          <p class="lede-s" style="margin-top:12px">Par défaut, la personne qui a déposé le dossier, intervenante ou non. Cochez « Point focal sur place » sur un intervenant pour l'ajouter ici, ou ajoutez un collègue.</p>
+        </div>
+      </div>
+
+      <div class="sub" id="besoins-techniques" data-st-not="modif">
+        <div class="sub-head">
+          <div><h3>Besoins techniques</h3><p>À signaler avant le 7 novembre 2026 : l'équipe technique s'organise à l'avance.</p></div>
+          <a class="btn btn-secondary" data-etat="modif"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
+        </div>
+        <div class="sub-body">
+          <ul class="needs">
+            <li><svg class="icon"><use href="#i-check"/></svg><span><strong>Vidéo à projeter</strong></span></li>
+            <li><svg class="icon"><use href="#i-check"/></svg><span><strong>Intervention à distance</strong>, Léa Fontaine, depuis Montréal (Canada)</span></li>
+            <li><svg class="icon" style="color:var(--color-text-subtle)"><use href="#i-info"/></svg><span>Deux micros sans fil pour l'échange avec la salle.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- En modification : la rubrique s'encadre, les autres restent ouvrables. -->
+      <div class="sub is-editing" data-st="modif">
+        <div class="sub-head">
+          <div><h3>Besoins techniques</h3><p>À signaler avant le 7 novembre 2026 : l'équipe technique s'organise à l'avance.</p></div>
+        </div>
+        <div class="sub-body">
+          <div class="toggles">
+            <button class="toggle" type="button" aria-pressed="true"><span>Vidéo à projeter <i><svg class="icon"><use href="#i-check"/></svg></i></span><small>Un film ou une séquence avec du son.</small></button>
+            <button class="toggle" type="button" aria-pressed="true"><span>Intervention à distance <i><svg class="icon"><use href="#i-check"/></svg></i></span><small>Une personne parle depuis un autre pays.</small></button>
+            <button class="toggle" type="button" aria-pressed="false"><span>Accessibilité <i></i></span><small>Langue des signes, sous-titres, accès en fauteuil.</small></button>
+          </div>
+          <div class="fld" style="margin-top:16px"><label for="rd">Qui intervient à distance, et depuis quel pays ?</label><input id="rd" value="Léa Fontaine, depuis Montréal (Canada)"></div>
+          <div class="fld" style="margin-top:16px"><label for="ot">Autre chose à savoir (facultatif)</label><textarea id="ot" rows="2">Deux micros sans fil pour l'échange avec la salle.</textarea></div>
+          <div class="edit-foot">
+            <a class="btn btn-secondary" data-etat="retenu">Annuler</a>
+            <a class="btn btn-primary" data-etat="retenu">Enregistrer</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub" id="presentations">
+        <div class="sub-head">
+          <div><h3>Présentations</h3><p>Les supports projetés pendant l'activité. PowerPoint ou PDF.</p></div>
+        </div>
+        <div class="sub-body">
+          <ul class="files">
+            <li><svg class="icon"><use href="#i-file"/></svg><div><a href="#">Cartographier les forêts du Sahel par satellite</a><small>4,2 Mo</small></div><button class="btn btn-ghost" type="button"><svg class="icon"><use href="#i-trash"/></svg>Retirer</button></li>
+          </ul>
+          <div class="btns"><button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-upload"/></svg>Ajouter une présentation</button></div>
+        </div>
+      </div>
+
+      <div class="sub" id="rappels" data-st-not="aprog">
+        <div class="sub-head">
+          <div><h3>Calendrier des rappels</h3><p>Quatre rappels partent avant l'activité, et ils sont cumulés : chaque inscrit les reçoit tous les quatre. Les heures sont données à l'heure d'Antalya (UTC+3).</p></div>
+        </div>
+        <div class="sub-body">
+          <ul class="reminders">
+            <li><b>7 jours avant</b><span class="tag tag-info">À venir</span><time>7 novembre 2026, 09:50</time><span>Courriel</span></li>
+            <li><b>1 jour avant</b><span class="tag tag-info">À venir</span><time>13 novembre 2026, 09:50</time><span>Courriel</span></li>
+            <li><b>1 heure avant</b><span class="tag tag-info">À venir</span><time>14 novembre 2026, 08:50</time><span>Notification</span></li>
+            <li><b>10 minutes avant</b><span class="tag tag-info">À venir</span><time>14 novembre 2026, 09:40</time><span>Notification</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="block" aria-labelledby="promo-title" data-st="retenu modif agir aprog">
+      <div class="rule ok">
+        <h2 class="rule-label" id="promo-title"><svg class="icon"><use href="#i-megaphone"/></svg>Faire connaître votre activité</h2>
+      </div>
+      <div class="sub" id="publications">
+        <div class="sub-head">
+          <div><h3>Vos publications sur les réseaux sociaux</h3><p>Collez le lien de chaque publication sur votre activité : l'IFDD la relaie.</p></div>
+        </div>
+        <div class="sub-body">
+          <ul class="posts">
+            <li><span class="tag tag-neutral">LinkedIn</span><a href="#">https://www.linkedin.com/posts/ifdd-ia-environnement-cop31-antalya</a><button class="btn btn-ghost" type="button" aria-label="Retirer la publication"><svg class="icon"><use href="#i-trash"/></svg>Retirer</button></li>
+          </ul>
+          <form class="post-form" onsubmit="return false">
+            <div class="fld"><label for="pu">Lien d'une publication</label><input id="pu" type="url" placeholder="https://www.linkedin.com/posts/…"></div>
+            <button class="btn btn-secondary" type="submit"><svg class="icon"><use href="#i-plus"/></svg>Ajouter</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="block" aria-labelledby="dossier-title">
+      <div class="rule">
+        <h2 class="rule-label" id="dossier-title"><svg class="icon"><use href="#i-file"/></svg>Votre dossier</h2>
+        <span class="rule-meta" data-st="retenu modif agir aprog">Modifiable rubrique par rubrique</span>
+      </div>
+
+      <div class="sub" id="couverture">
+        <div class="cover">
+          <div class="cover-img"><img src="../../../frontend/public/mocks/covers/cycle-paco-16-9.jpg" alt="Intelligence artificielle et environnement, de la promesse à la mise en œuvre"></div>
+          <div>
+            <h3 style="font-size:1.45rem;font-weight:600;text-transform:none;letter-spacing:0.005em">Image de couverture</h3>
+            <p>Elle illustre votre activité sur la plateforme et sert d'aperçu quand on partage le lien.</p>
+            <div class="btns" data-st-not="non-retenu">
+              <button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-upload"/></svg>Changer l'image</button>
+              <button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+              <button class="btn btn-primary" type="button">Créer ou choisir un modèle</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub" id="presentation">
+        <div class="sub-head">
+          <div><h3>Présentation</h3></div>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+        </div>
+        <div class="sub-body">
+          <dl class="facts">
+            <div><dt>Titre</dt><dd class="strong">Intelligence artificielle et environnement, de la promesse à la mise en œuvre</dd></div>
+            <div><dt>Objectifs</dt><dd>Montrer des usages éprouvés de l'intelligence artificielle pour le suivi des forêts, des sols et de l'eau dans l'espace francophone ; dire ce qui manque pour qu'ils deviennent des outils de politique publique.</dd></div>
+            <div><dt>Présentation détaillée</dt><dd>Les promesses de l'intelligence artificielle pour l'environnement sont nombreuses ; les projets qui durent le sont moins. Une chercheuse, un chercheur et deux responsables publics confrontent leurs expériences : cartographie des forêts sahéliennes par satellite, prévision des crues à Madagascar, suivi de la qualité de l'eau au Québec. Ils disent ce qui a coûté, ce qui a marché, et ce qu'il faut de données, de compétences et de financements pour changer d'échelle.</dd></div>
+            <div><dt>Résultats attendus</dt><dd>Une liste courte de conditions de passage à l'échelle, reprise dans la note de l'IFDD sur le numérique et le climat.</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="sub" id="intervenants">
+        <div class="sub-head">
+          <div><h3>Intervenants, 4</h3><p>Nom, rôle, fonction et biographie de chaque personne qui prend la parole.</p></div>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+        </div>
+        <div class="sub-body">
+          <ul class="people">
+            <li class="person">
+              <span class="face" aria-hidden="true">MO</span>
+              <div>
+                <b>Marie-Claire Ondoa <span>Modératrice</span></b>
+                <p class="job">Spécialiste de programme, IFDD</p>
+                <p class="bio">Spécialiste des politiques climatiques, elle suit pour l'IFDD les négociations sur le transfert de technologies et accompagne les pays francophones dans leurs contributions déterminées au niveau national.</p>
+                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox" checked> Point focal sur place</label>
+              </div>
+              <button class="btn btn-ghost" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-image"/></svg>Changer la photo</button>
+            </li>
+            <li class="person">
+              <span class="face" aria-hidden="true">MT</span>
+              <div>
+                <b>Moussa Traoré <span>Intervenant</span></b>
+                <p class="job">Chercheur en télédétection, Université des sciences, des techniques et des technologies de Bamako</p>
+                <div class="tags"><span class="tag tag-warning">Biographie manquante</span></div>
+                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox"> Point focal sur place</label>
+              </div>
+              <button class="btn btn-ghost" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-image"/></svg>Changer la photo</button>
+            </li>
+            <li class="person">
+              <span class="face missing" aria-hidden="true">LF</span>
+              <div>
+                <b>Léa Fontaine <span>Intervenante</span></b>
+                <p class="job">Chercheuse en apprentissage automatique, Montréal</p>
+                <p class="bio">Elle conçoit des modèles de prévision de la qualité de l'eau pour des municipalités du Québec et travaille sur la sobriété énergétique des calculs.</p>
+                <div class="tags"><span class="tag tag-warning">Photo manquante</span></div>
+                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox"> Point focal sur place</label>
+              </div>
+              <button class="btn btn-secondary" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-upload"/></svg>Ajouter une photo</button>
+            </li>
+            <li class="person">
+              <span class="face" aria-hidden="true">RR</span>
+              <div>
+                <b>Rindra Rakotomalala <span>Intervenant</span></b>
+                <p class="job">Chef du service climat, ministère de l'Environnement et du Développement durable, Madagascar</p>
+                <p class="bio">Il pilote le système national d'alerte précoce aux crues, qui croise relevés de terrain et prévisions par apprentissage automatique.</p>
+                <label class="cb" data-st="retenu modif agir aprog"><input type="checkbox"> Point focal sur place</label>
+              </div>
+              <button class="btn btn-ghost" type="button" data-st-not="non-retenu"><svg class="icon"><use href="#i-image"/></svg>Changer la photo</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sub" id="organisations">
+        <div class="sub-head">
+          <div><h3>Organisations</h3></div>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+        </div>
+        <div class="sub-body">
+          <ul class="orgs">
+            <li><span class="logo"><img src="../../../frontend/public/logos/svg/oif-ifdd-gris.svg" alt=""></span><span class="name">Institut de la Francophonie pour le développement durable</span><span class="tag tag-info">Porteur principal</span></li>
+            <li><span class="logo">USTTB</span><span class="name">Université des sciences, des techniques et des technologies de Bamako</span><span class="tag tag-neutral">Co-organisateur</span></li>
+            <li><span class="logo">RFNC</span><span class="name">Réseau francophone numérique et climat</span><span class="tag tag-neutral">Partenaire</span><span class="wait">N'a pas encore confirmé</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sub" id="thematiques">
+        <div class="sub-head">
+          <div><h3>Thématiques et langues</h3></div>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+        </div>
+        <div class="sub-body">
+          <dl class="facts cols-2">
+            <div><dt>Thématiques</dt><dd>Numérique et climat, Atténuation</dd></div>
+            <div><dt>Catégories</dt><dd>Table ronde</dd></div>
+            <div><dt>Langues</dt><dd>Français</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="sub" id="format">
+        <div class="sub-head">
+          <div><h3>Format et créneau souhaité</h3><p>Le créneau définitif est fixé par l'IFDD.</p></div>
+          <button class="btn btn-secondary" type="button" data-st="retenu modif agir aprog"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+        </div>
+        <div class="sub-body">
+          <dl class="facts cols-3">
+            <div><dt>Format</dt><dd>Sur place</dd></div>
+            <div><dt>Durée demandée</dt><dd>50 minutes</dd></div>
+            <div><dt>Créneau souhaité</dt><dd>Samedi 14 novembre 2026, 09:30, heure d'Antalya (UTC+3)</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<footer class="ws-foot">
+  <div class="wrap"><b>ePavillon</b> &nbsp; Institut de la Francophonie pour le développement durable</div>
+</footer>
+
+<nav class="state-switch" aria-label="État de la maquette" data-default="retenu">
+  <a data-etat="retenu">Retenu</a>
+  <a data-etat="modif">En modification</a>
+  <a data-etat="historique">Historique</a>
+  <a data-etat="aprog">Retenu, sans créneau</a>
+  <a data-etat="evaluation">En évaluation</a>
+  <a data-etat="brouillon">Brouillon</a>
+  <a data-etat="non-retenu">Non retenu</a>
+  <a data-etat="agir">Pour le compte</a>
+  <a data-etat="chargement">Chargement</a>
+  <a data-etat="erreur">Erreur</a>
+  <a data-etat="introuvable">Introuvable</a>
+</nav>
+
+<script src="../direction-condensee/icones.js"></script>
+<script src="espace.js"></script>
+<script>
+  const state = document.body.dataset.state
+  const layout = document.getElementById('layout')
+  layout.classList.toggle('no-aside', layout.dataset.noAside.split(' ').includes(state))
+  document.querySelectorAll('[data-tab]').forEach((tab) => {
+    tab.setAttribute('aria-selected', String((tab.dataset.tab === 'historique') === (state === 'historique')))
+  })
+
+  // QR de démonstration : trois repères et un motif pseudo-aléatoire stable.
+  const qr = document.getElementById('qr')
+  let seed = 240
+  const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280)
+  const finder = (x, y) => `<path d="M${x} ${y}h7v7h-7z M${x + 1} ${y + 1}v5h5v-5z" fill-rule="evenodd" fill="currentColor"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3" fill="currentColor"/>`
+  let cells = finder(0, 0) + finder(18, 0) + finder(0, 18)
+  for (let y = 0; y < 25; y++) for (let x = 0; x < 25; x++) {
+    const inFinder = (x < 8 && y < 8) || (x > 16 && y < 8) || (x < 8 && y > 16)
+    if (!inFinder && rnd() > 0.52) cells += `<rect x="${x}" y="${y}" width="1" height="1" fill="currentColor"/>`
+  }
+  qr.innerHTML = cells
+</script>
+</body>
+</html>
