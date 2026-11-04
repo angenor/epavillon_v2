@@ -191,8 +191,8 @@
 <div class="note-wrap">
   <div class="note-maquette">
     <p><b>Maquette, pas l'écran.</b> Tout ce que la fiche permet aujourd'hui y est : frise, décision, manques, liste d'avancement, couverture, quand et où, rappels, page publique et QR, les cinq rubriques modifiables sur place, point focal, besoins techniques, présentations, publications, historique, et les états (brouillon, en évaluation, non retenu, en modification, pour le compte de l'organisation, chargement, erreur, introuvable).</p>
-    <p><b>Ce qui change.</b> Le bandeau reprend celui d'une activité : photo de l'édition voilée, état et format en pastilles, grand titre condensé, lieu et date, organisation porteuse en tuile blanche ; les vues « Mon dossier » et « Historique » s'y posent. Sous le bandeau, deux cartes remontent de 72 px : la <b>frise</b> (à gauche) et le <b>billet « Quand et où »</b> (à droite, heure en grand, salle, jauge, lien public et QR), suivi de la liste d'avancement. Les rubriques ne sont plus des cartes empilées mais des sections séparées de filets, rangées sous trois étiquettes : « Le jour J », « Faire connaître votre activité », « Votre dossier ».</p>
-    <p><b>Réorganisé, à valider.</b> (1) Une activité retenue montre « Le jour J » avant le contenu du dossier : à dix jours de la séance, c'est ce qui se prépare ; les intervenants restent dans « Votre dossier ». (2) Le calendrier des rappels quitte la carte « Quand et où » pour rejoindre « Le jour J ». (3) Ajout : un bouton « Écrire à l'équipe » dans le billet, qui ouvre l'assistance déjà attachée au dossier. (4) Le nombre d'inscrits (1) n'est pas affiché : décision du 02/11, les organisations ne le voient pas.</p>
+    <p><b>Ce qui change.</b> Le bandeau reprend celui d'une activité : photo de l'édition voilée, état et format en pastilles, grand titre condensé, lieu et date, organisation porteuse en tuile blanche ; les vues « Mon dossier » et « Historique » s'y posent. Sous le bandeau, deux cartes remontent de 72 px : la <b>frise</b> (à gauche) et le <b>billet « Quand et où »</b> (à droite, heure en grand, salle, jauge, lien public et QR), suivi de la liste d'avancement. Les rubriques ne sont plus des cartes empilées mais des sections séparées de filets, rangées sous trois étiquettes : « Votre dossier », « Le jour J », « Faire connaître votre activité ».</p>
+    <p><b>Réorganisé, à valider.</b> (1) « Votre dossier » vient en premier, avant « Le jour J » et « Faire connaître votre activité » : l'image de couverture et le contenu ne doivent pas être négligés (choix du commanditaire, 04/11). (2) Le calendrier des rappels quitte la carte « Quand et où » pour rejoindre « Le jour J ». (3) Ajout : un bouton « Écrire à l'équipe » dans le billet, qui ouvre l'assistance déjà attachée au dossier. (4) Le nombre d'inscrits (1) n'est pas affiché : décision du 02/11, les organisations ne le voient pas.</p>
   </div>
 </div>
 
@@ -454,115 +454,6 @@
   <div class="l-body" data-st="retenu modif agir aprog evaluation brouillon non-retenu">
 
     <!-- ================================================================== -->
-    <section class="block" aria-labelledby="jourj-title" data-st="retenu modif agir aprog">
-      <div class="rule ok">
-        <h2 class="rule-label" id="jourj-title"><svg class="icon"><use href="#i-calendar"/></svg>Le jour J</h2>
-        <span class="rule-meta">Votre activité est retenue : préparez-la avec l'équipe de l'IFDD</span>
-      </div>
-
-      <div class="sub" id="point-focal">
-        <div class="sub-head">
-          <div><h3>Point focal sur place</h3><p>La personne que l'équipe de l'IFDD appelle le jour J : retard, salle, matériel. Au moins une.</p></div>
-          <button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
-        </div>
-        <div class="sub-body">
-          <div class="focal">
-            <div><strong>Aïssatou Ndiaye</strong><small>A déposé le dossier</small></div>
-            <div><small>Téléphone</small><span class="miss">Téléphone à renseigner</span></div>
-            <div><small>WhatsApp</small><strong>·</strong></div>
-          </div>
-          <div class="focal">
-            <div><strong>Marie-Claire Ondoa</strong><small>Intervenant</small></div>
-            <div><small>Téléphone</small><strong>+237 6 77 41 28 09</strong></div>
-            <div><small>WhatsApp</small><strong>+237 6 77 41 28 09</strong></div>
-          </div>
-          <p class="lede-s" style="margin-top:12px">Par défaut, la personne qui a déposé le dossier, intervenante ou non. Cochez « Point focal sur place » sur un intervenant pour l'ajouter ici, ou ajoutez un collègue.</p>
-        </div>
-      </div>
-
-      <div class="sub" id="besoins-techniques" data-st-not="modif">
-        <div class="sub-head">
-          <div><h3>Besoins techniques</h3><p>À signaler avant le 7 novembre 2026 : l'équipe technique s'organise à l'avance.</p></div>
-          <a class="btn btn-secondary" data-etat="modif"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
-        </div>
-        <div class="sub-body">
-          <ul class="needs">
-            <li><svg class="icon"><use href="#i-check"/></svg><span><strong>Vidéo à projeter</strong></span></li>
-            <li><svg class="icon"><use href="#i-check"/></svg><span><strong>Intervention à distance</strong>, Léa Fontaine, depuis Montréal (Canada)</span></li>
-            <li><svg class="icon" style="color:var(--color-text-subtle)"><use href="#i-info"/></svg><span>Deux micros sans fil pour l'échange avec la salle.</span></li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- En modification : la rubrique s'encadre, les autres restent ouvrables. -->
-      <div class="sub is-editing" data-st="modif">
-        <div class="sub-head">
-          <div><h3>Besoins techniques</h3><p>À signaler avant le 7 novembre 2026 : l'équipe technique s'organise à l'avance.</p></div>
-        </div>
-        <div class="sub-body">
-          <div class="toggles">
-            <button class="toggle" type="button" aria-pressed="true"><span>Vidéo à projeter <i><svg class="icon"><use href="#i-check"/></svg></i></span><small>Un film ou une séquence avec du son.</small></button>
-            <button class="toggle" type="button" aria-pressed="true"><span>Intervention à distance <i><svg class="icon"><use href="#i-check"/></svg></i></span><small>Une personne parle depuis un autre pays.</small></button>
-            <button class="toggle" type="button" aria-pressed="false"><span>Accessibilité <i></i></span><small>Langue des signes, sous-titres, accès en fauteuil.</small></button>
-          </div>
-          <div class="fld" style="margin-top:16px"><label for="rd">Qui intervient à distance, et depuis quel pays ?</label><input id="rd" value="Léa Fontaine, depuis Montréal (Canada)"></div>
-          <div class="fld" style="margin-top:16px"><label for="ot">Autre chose à savoir (facultatif)</label><textarea id="ot" rows="2">Deux micros sans fil pour l'échange avec la salle.</textarea></div>
-          <div class="edit-foot">
-            <a class="btn btn-secondary" data-etat="retenu">Annuler</a>
-            <a class="btn btn-primary" data-etat="retenu">Enregistrer</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="sub" id="presentations">
-        <div class="sub-head">
-          <div><h3>Présentations</h3><p>Les supports projetés pendant l'activité. PowerPoint ou PDF.</p></div>
-        </div>
-        <div class="sub-body">
-          <ul class="files">
-            <li><svg class="icon"><use href="#i-file"/></svg><div><a href="#">Cartographier les forêts du Sahel par satellite</a><small>4,2 Mo</small></div><button class="btn btn-ghost" type="button"><svg class="icon"><use href="#i-trash"/></svg>Retirer</button></li>
-          </ul>
-          <div class="btns"><button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-upload"/></svg>Ajouter une présentation</button></div>
-        </div>
-      </div>
-
-      <div class="sub" id="rappels" data-st-not="aprog">
-        <div class="sub-head">
-          <div><h3>Calendrier des rappels</h3><p>Quatre rappels partent avant l'activité, et ils sont cumulés : chaque inscrit les reçoit tous les quatre. Les heures sont données à l'heure d'Antalya (UTC+3).</p></div>
-        </div>
-        <div class="sub-body">
-          <ul class="reminders">
-            <li><b>7 jours avant</b><span class="tag tag-info">À venir</span><time>7 novembre 2026, 09:50</time><span>Courriel</span></li>
-            <li><b>1 jour avant</b><span class="tag tag-info">À venir</span><time>13 novembre 2026, 09:50</time><span>Courriel</span></li>
-            <li><b>1 heure avant</b><span class="tag tag-info">À venir</span><time>14 novembre 2026, 08:50</time><span>Notification</span></li>
-            <li><b>10 minutes avant</b><span class="tag tag-info">À venir</span><time>14 novembre 2026, 09:40</time><span>Notification</span></li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================================================================== -->
-    <section class="block" aria-labelledby="promo-title" data-st="retenu modif agir aprog">
-      <div class="rule ok">
-        <h2 class="rule-label" id="promo-title"><svg class="icon"><use href="#i-megaphone"/></svg>Faire connaître votre activité</h2>
-      </div>
-      <div class="sub" id="publications">
-        <div class="sub-head">
-          <div><h3>Vos publications sur les réseaux sociaux</h3><p>Collez le lien de chaque publication sur votre activité : l'IFDD la relaie.</p></div>
-        </div>
-        <div class="sub-body">
-          <ul class="posts">
-            <li><span class="tag tag-neutral">LinkedIn</span><a href="#">https://www.linkedin.com/posts/ifdd-ia-environnement-cop31-antalya</a><button class="btn btn-ghost" type="button" aria-label="Retirer la publication"><svg class="icon"><use href="#i-trash"/></svg>Retirer</button></li>
-          </ul>
-          <form class="post-form" onsubmit="return false">
-            <div class="fld"><label for="pu">Lien d'une publication</label><input id="pu" type="url" placeholder="https://www.linkedin.com/posts/…"></div>
-            <button class="btn btn-secondary" type="submit"><svg class="icon"><use href="#i-plus"/></svg>Ajouter</button>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================================================================== -->
     <section class="block" aria-labelledby="dossier-title">
       <div class="rule">
         <h2 class="rule-label" id="dossier-title"><svg class="icon"><use href="#i-file"/></svg>Votre dossier</h2>
@@ -690,6 +581,115 @@
             <div><dt>Durée demandée</dt><dd>50 minutes</dd></div>
             <div><dt>Créneau souhaité</dt><dd>Samedi 14 novembre 2026, 09:30, heure d'Antalya (UTC+3)</dd></div>
           </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="block" aria-labelledby="jourj-title" data-st="retenu modif agir aprog">
+      <div class="rule ok">
+        <h2 class="rule-label" id="jourj-title"><svg class="icon"><use href="#i-calendar"/></svg>Le jour J</h2>
+        <span class="rule-meta">Votre activité est retenue : préparez-la avec l'équipe de l'IFDD</span>
+      </div>
+
+      <div class="sub" id="point-focal">
+        <div class="sub-head">
+          <div><h3>Point focal sur place</h3><p>La personne que l'équipe de l'IFDD appelle le jour J : retard, salle, matériel. Au moins une.</p></div>
+          <button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-edit"/></svg>Modifier</button>
+        </div>
+        <div class="sub-body">
+          <div class="focal">
+            <div><strong>Aïssatou Ndiaye</strong><small>A déposé le dossier</small></div>
+            <div><small>Téléphone</small><span class="miss">Téléphone à renseigner</span></div>
+            <div><small>WhatsApp</small><strong>·</strong></div>
+          </div>
+          <div class="focal">
+            <div><strong>Marie-Claire Ondoa</strong><small>Intervenant</small></div>
+            <div><small>Téléphone</small><strong>+237 6 77 41 28 09</strong></div>
+            <div><small>WhatsApp</small><strong>+237 6 77 41 28 09</strong></div>
+          </div>
+          <p class="lede-s" style="margin-top:12px">Par défaut, la personne qui a déposé le dossier, intervenante ou non. Cochez « Point focal sur place » sur un intervenant pour l'ajouter ici, ou ajoutez un collègue.</p>
+        </div>
+      </div>
+
+      <div class="sub" id="besoins-techniques" data-st-not="modif">
+        <div class="sub-head">
+          <div><h3>Besoins techniques</h3><p>À signaler avant le 7 novembre 2026 : l'équipe technique s'organise à l'avance.</p></div>
+          <a class="btn btn-secondary" data-etat="modif"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
+        </div>
+        <div class="sub-body">
+          <ul class="needs">
+            <li><svg class="icon"><use href="#i-check"/></svg><span><strong>Vidéo à projeter</strong></span></li>
+            <li><svg class="icon"><use href="#i-check"/></svg><span><strong>Intervention à distance</strong>, Léa Fontaine, depuis Montréal (Canada)</span></li>
+            <li><svg class="icon" style="color:var(--color-text-subtle)"><use href="#i-info"/></svg><span>Deux micros sans fil pour l'échange avec la salle.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- En modification : la rubrique s'encadre, les autres restent ouvrables. -->
+      <div class="sub is-editing" data-st="modif">
+        <div class="sub-head">
+          <div><h3>Besoins techniques</h3><p>À signaler avant le 7 novembre 2026 : l'équipe technique s'organise à l'avance.</p></div>
+        </div>
+        <div class="sub-body">
+          <div class="toggles">
+            <button class="toggle" type="button" aria-pressed="true"><span>Vidéo à projeter <i><svg class="icon"><use href="#i-check"/></svg></i></span><small>Un film ou une séquence avec du son.</small></button>
+            <button class="toggle" type="button" aria-pressed="true"><span>Intervention à distance <i><svg class="icon"><use href="#i-check"/></svg></i></span><small>Une personne parle depuis un autre pays.</small></button>
+            <button class="toggle" type="button" aria-pressed="false"><span>Accessibilité <i></i></span><small>Langue des signes, sous-titres, accès en fauteuil.</small></button>
+          </div>
+          <div class="fld" style="margin-top:16px"><label for="rd">Qui intervient à distance, et depuis quel pays ?</label><input id="rd" value="Léa Fontaine, depuis Montréal (Canada)"></div>
+          <div class="fld" style="margin-top:16px"><label for="ot">Autre chose à savoir (facultatif)</label><textarea id="ot" rows="2">Deux micros sans fil pour l'échange avec la salle.</textarea></div>
+          <div class="edit-foot">
+            <a class="btn btn-secondary" data-etat="retenu">Annuler</a>
+            <a class="btn btn-primary" data-etat="retenu">Enregistrer</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub" id="presentations">
+        <div class="sub-head">
+          <div><h3>Présentations</h3><p>Les supports projetés pendant l'activité. PowerPoint ou PDF.</p></div>
+        </div>
+        <div class="sub-body">
+          <ul class="files">
+            <li><svg class="icon"><use href="#i-file"/></svg><div><a href="#">Cartographier les forêts du Sahel par satellite</a><small>4,2 Mo</small></div><button class="btn btn-ghost" type="button"><svg class="icon"><use href="#i-trash"/></svg>Retirer</button></li>
+          </ul>
+          <div class="btns"><button class="btn btn-secondary" type="button"><svg class="icon"><use href="#i-upload"/></svg>Ajouter une présentation</button></div>
+        </div>
+      </div>
+
+      <div class="sub" id="rappels" data-st-not="aprog">
+        <div class="sub-head">
+          <div><h3>Calendrier des rappels</h3><p>Quatre rappels partent avant l'activité, et ils sont cumulés : chaque inscrit les reçoit tous les quatre. Les heures sont données à l'heure d'Antalya (UTC+3).</p></div>
+        </div>
+        <div class="sub-body">
+          <ul class="reminders">
+            <li><b>7 jours avant</b><span class="tag tag-info">À venir</span><time>7 novembre 2026, 09:50</time><span>Courriel</span></li>
+            <li><b>1 jour avant</b><span class="tag tag-info">À venir</span><time>13 novembre 2026, 09:50</time><span>Courriel</span></li>
+            <li><b>1 heure avant</b><span class="tag tag-info">À venir</span><time>14 novembre 2026, 08:50</time><span>Notification</span></li>
+            <li><b>10 minutes avant</b><span class="tag tag-info">À venir</span><time>14 novembre 2026, 09:40</time><span>Notification</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="block" aria-labelledby="promo-title" data-st="retenu modif agir aprog">
+      <div class="rule ok">
+        <h2 class="rule-label" id="promo-title"><svg class="icon"><use href="#i-megaphone"/></svg>Faire connaître votre activité</h2>
+      </div>
+      <div class="sub" id="publications">
+        <div class="sub-head">
+          <div><h3>Vos publications sur les réseaux sociaux</h3><p>Collez le lien de chaque publication sur votre activité : l'IFDD la relaie.</p></div>
+        </div>
+        <div class="sub-body">
+          <ul class="posts">
+            <li><span class="tag tag-neutral">LinkedIn</span><a href="#">https://www.linkedin.com/posts/ifdd-ia-environnement-cop31-antalya</a><button class="btn btn-ghost" type="button" aria-label="Retirer la publication"><svg class="icon"><use href="#i-trash"/></svg>Retirer</button></li>
+          </ul>
+          <form class="post-form" onsubmit="return false">
+            <div class="fld"><label for="pu">Lien d'une publication</label><input id="pu" type="url" placeholder="https://www.linkedin.com/posts/…"></div>
+            <button class="btn btn-secondary" type="submit"><svg class="icon"><use href="#i-plus"/></svg>Ajouter</button>
+          </form>
         </div>
       </div>
     </section>
