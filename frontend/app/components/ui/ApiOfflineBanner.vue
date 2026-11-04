@@ -14,15 +14,57 @@
  * IL DISPARAÎT TOUT SEUL. Le bouton force un essai, mais le premier appel qui
  * aboutit — une navigation, un chargement — suffit à le retirer.
  *
+ * IL N'ACCUSE PAS LA PLATEFORME À TORT (04/11). Sans aucune réponse HTTP, c'est
+ * presque toujours la connexion de la personne : le site et l'API partagent
+ * l'adresse, et une API tombée répond encore par un 502 de la passerelle. Le
+ * titre le dit, et la page se relit seule au retour de la connexion (signal
+ * `online` du navigateur, sonde toutes les 15 s), sans recharger : un
+ * formulaire en cours garde sa saisie.
+ *
  * À NE PAS CONFONDRE AVEC `UiIncidentBanner`, qui porte un message publié par
  * l'équipe depuis le back-office. Celui-ci n'est publié par personne : il est
  * constaté.
  */
-const { reachable, reason } = useApiStatus()
+const { reachable, reason, reportOutage, reportRecovery } = useApiStatus()
 const { client, isConfigured } = useApi()
 const { t } = useI18n()
 
 const enCours = ref(false)
+const titre = computed(() =>
+  reason.value === 'network' || reason.value === 'timeout' ? t(`api.offline.titles.${reason.value}`) : t('api.offline.title'),
+)
+
+async function reprendreEnSilence(): Promise<void> {
+  if (reachable.value || enCours.value) return
+  try {
+    await client('/ready')
+  } catch {
+    return
+  }
+  reportRecovery()
+  await refreshNuxtData()
+}
+
+const perdue = () => reportOutage('network')
+let sonde: ReturnType<typeof setInterval> | null = null
+watch(
+  reachable,
+  (ok) => {
+    if (import.meta.server) return
+    if (sonde) clearInterval(sonde)
+    sonde = ok ? null : setInterval(reprendreEnSilence, 15_000)
+  },
+  { immediate: true },
+)
+onMounted(() => {
+  window.addEventListener('online', reprendreEnSilence)
+  window.addEventListener('offline', perdue)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('online', reprendreEnSilence)
+  window.removeEventListener('offline', perdue)
+  if (sonde) clearInterval(sonde)
+})
 
 /**
  * Une sonde, pas un rechargement de page. `/ready` ne divulgue rien et ne
@@ -54,7 +96,7 @@ async function reessayer(): Promise<void> {
       <UiIcon name="warning" class="hidden shrink-0 sm:block" aria-hidden="true" />
 
       <div class="min-w-0 flex-1">
-        <p class="font-medium">{{ t('api.offline.title') }}</p>
+        <p class="font-medium">{{ titre }}</p>
         <p class="text-sm text-text-secondary">
           {{ reason ? t(`api.unreachable.${reason}`) : t('api.offline.description') }}
         </p>

@@ -63,6 +63,10 @@
     "offline": {
       "title": "Connexion perdue",
       "description": "Vérifiez votre connexion, puis réessayez."
+    },
+    "waitingConnection": {
+      "title": "En attente de la connexion",
+      "description": "La page s'affichera dès le retour de votre connexion."
     }
   },
   "labels": {

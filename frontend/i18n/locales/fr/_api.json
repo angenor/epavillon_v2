@@ -1,7 +1,7 @@
 {
   "unreachable": {
-    "network": "La plateforme est momentanément injoignable. Vérifiez votre connexion, puis réessayez.",
-    "timeout": "La plateforme met trop de temps à répondre. Réessayez dans un instant.",
+    "network": "Votre connexion Internet semble coupée ou trop lente. La page se mettra à jour dès son retour.",
+    "timeout": "La réponse tarde à arriver. Votre connexion est peut-être lente, nouvel essai dans un instant.",
     "gateway": "La plateforme est momentanément indisponible. L'équipe technique en est informée.",
     "malformed": "La plateforme a renvoyé une réponse inattendue. Réessayez dans un instant."
   },
@@ -9,7 +9,11 @@
     "title": "Liaison interrompue avec la plateforme",
     "description": "Les données affichées peuvent dater. Les enregistrements n'aboutiront pas tant que la liaison n'est pas rétablie.",
     "retry": "Réessayer maintenant",
-    "checking": "Nouvelle tentative en cours…"
+    "checking": "Nouvelle tentative en cours…",
+    "titles": {
+      "network": "Connexion perdue",
+      "timeout": "Connexion lente"
+    }
   },
   "session": {
     "expired": "Votre session a expiré. Reconnectez-vous pour continuer.",
