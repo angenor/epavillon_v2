@@ -285,6 +285,18 @@ function actionsFor(
       })
     }
 
+    if (proposal.status === 'accepted' && tracking.cover === null && Date.parse(tracking.edition.ends_at) > at) {
+      actions.push({
+        kind: 'cover_missing',
+        proposal_id: proposal.id,
+        reference_code: proposal.reference_code,
+        subject: proposal.title.fr,
+        count: 1,
+        due_at: null,
+        target: `${target}#couverture`,
+      })
+    }
+
     // Séance TENUE et sans compte rendu : `sessions.report_submitted_at` est nul
     // alors que la séance est terminée. C'est la dernière chose que l'IFDD
     // attend d'une organisation, et la plus facile à oublier une fois la COP

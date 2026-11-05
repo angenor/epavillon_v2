@@ -12,6 +12,7 @@ export const WORKSPACE_ACTION_PRESENTATION: Record<
 > = {
   changes_requested: { icon: 'warning', tone: 'warning' },
   draft_before_deadline: { icon: 'edit', tone: 'warning' },
+  cover_missing: { icon: 'image', tone: 'warning' },
   coorganization_to_confirm: { icon: 'building', tone: 'info' },
   membership_request: { icon: 'users', tone: 'info' },
   session_report_missing: { icon: 'document', tone: 'info' },

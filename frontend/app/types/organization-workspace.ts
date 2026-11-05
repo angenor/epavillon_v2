@@ -181,6 +181,7 @@ export type WorkspaceActionKind =
   | 'coorganization_to_confirm'
   | 'membership_request'
   | 'session_report_missing'
+  | 'cover_missing'
 
 /** Une ligne du bloc « ce qui attend une action de ma part ». */
 export interface WorkspaceAction {

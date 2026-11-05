@@ -52,6 +52,11 @@
         "label": "Report expected",
         "detail": "This activity has taken place and has no report yet.",
         "cta": "Write the report"
+      },
+      "cover_missing": {
+        "label": "Cover image to add",
+        "detail": "Without it, your activity has no visual on its page or when its link is shared.",
+        "cta": "Add the image"
       }
     },
     "more": "Show the other action | Show the {count} other actions",

@@ -193,7 +193,12 @@ pub async fn espace(
 
     // Sa propre demande ne lui est pas une « demande à traiter ».
     let membres_a_traiter: &[LigneDAdhesion] = if a_elle_seule { &[] } else { &membres };
-    let mut actions = actions_en_attente(&proposals_suivis, membres_a_traiter, open_call.as_ref());
+    let mut actions = actions_en_attente(
+        &proposals_suivis,
+        membres_a_traiter,
+        open_call.as_ref(),
+        OffsetDateTime::now_utc(),
+    );
     actions.extend(comptes_rendus_manquants(state, &proposals_suivis).await?);
 
     let organization_logo = sqlx::query_scalar!(
@@ -504,13 +509,14 @@ async fn comptes_rendus_manquants(
 
 /// Ce qui attend une action **de l'organisation**.
 ///
-/// Quatre natures sur cinq se calculent sans requête, sur ce que le suivi porte
-/// déjà. La cinquième — « compte rendu de séance manquant » — demande une
-/// lecture et vit juste au-dessus.
+/// Toutes se calculent sans requête, sur ce que le suivi porte déjà, sauf
+/// « compte rendu de séance manquant », qui demande une lecture et vit juste
+/// au-dessus.
 fn actions_en_attente(
     dossiers: &[SuiviDeDossier],
     membres: &[LigneDAdhesion],
     appel_ouvert: Option<&FicheAppel>,
+    maintenant: OffsetDateTime,
 ) -> Vec<ActionEnAttente> {
     let mut actions = Vec::new();
 
@@ -548,12 +554,29 @@ fn actions_en_attente(
                     kind: "draft_before_deadline".to_owned(),
                     proposal_id: Some(suivi.proposal.id),
                     reference_code: Some(suivi.proposal.reference_code.clone()),
-                    subject: titre,
+                    subject: titre.clone(),
                     count: 1,
                     due_at: echeance,
                     target: format!("/deposer-une-proposition?dossier={}", suivi.proposal.id),
                 });
             }
+        }
+
+        // Sans image, l'activité paraît sans visuel sur sa page et dans les
+        // partages (05/11). Une fois l'édition finie, plus personne ne la cherche.
+        if suivi.proposal.status == "accepted"
+            && suivi.cover.is_none()
+            && suivi.edition.ends_at > maintenant
+        {
+            actions.push(ActionEnAttente {
+                kind: "cover_missing".to_owned(),
+                proposal_id: Some(suivi.proposal.id),
+                reference_code: Some(suivi.proposal.reference_code.clone()),
+                subject: titre.clone(),
+                count: 1,
+                due_at: None,
+                target: format!("/mon-organisation/dossiers/{}#couverture", suivi.proposal.id),
+            });
         }
     }
 

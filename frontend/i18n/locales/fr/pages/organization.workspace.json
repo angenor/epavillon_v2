@@ -52,6 +52,11 @@
         "label": "Compte rendu attendu",
         "detail": "Cette activité s'est tenue et n'a pas encore de compte rendu.",
         "cta": "Rédiger le compte rendu"
+      },
+      "cover_missing": {
+        "label": "Image de couverture à ajouter",
+        "detail": "Sans elle, votre activité paraît sans visuel sur sa page et quand on partage son lien.",
+        "cta": "Ajouter l'image"
       }
     },
     "more": "Voir l'autre action | Voir les {count} autres actions",
