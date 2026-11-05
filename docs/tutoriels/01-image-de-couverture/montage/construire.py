@@ -19,7 +19,7 @@ CYAN = "#00a1e4"
 CYAN_CLAIR = "#71c6fa"
 
 # Début de chaque voix dans le film (s). 0,5 s entre deux scènes.
-VOIX = {"s1": 7.76, "s2": 10.0, "s3": 9.12, "s4": 24.64, "s5": 12.08, "s6": 23.44, "s7": 8.32}
+VOIX = {"s1": 7.76, "s2": 10.64, "s3": 9.12, "s4": 24.64, "s5": 12.08, "s6": 23.44, "s7": 8.32}
 DEBUT = {}
 t = 2.4
 for s, d in VOIX.items():
@@ -206,14 +206,20 @@ def scene_s1():
 
 def scene_s2():
     s = Scene("s2", DEBUT["s3"] - DEBUT["s2"])
-    p = s.plan("a1-espace", 0, s.duree, fondu=0.4)
-    entete = {"x": 205, "y": 142, "w": 470, "h": 128}
-    s.cerne("a1-espace", entete, 1.1, 2.9)
+    accueil = s.plan("m0-accueil", 0, 3.4, fondu=0.4)
+    mon_espace = boite("m0-accueil", "menu")
+    s.zoom(accueil, "m0-accueil", 0.35, 1.7, mon_espace, duree=0.9)
+    s.cerne("m0-accueil", mon_espace, 1.3, 3.1, marge=5)
+    s.curseur("m0-accueil", mon_espace, 1.35, duree=0.75)
+    s.clic("m0-accueil", mon_espace, 2.6)
+    p = s.plan("a1-espace", 3.0, s.duree, fondu=0.4)
+    s.cacher_curseur(3.0)
     action, titre = boite("a1-espace", "action"), boite("a1-espace", "afaire")
-    s.zoom(p, "a1-espace", 3.05, 1.35, union(action, titre, {"x": 104, "y": 416, "w": 832, "h": 300}), duree=1.0)
-    s.cerne("a1-espace", action, 4.55, 9.9)
-    s.curseur("a1-espace", (action["x"] + action["w"] - 60, action["y"] + 50), 7.1, duree=0.9)
-    s.clic("a1-espace", (action["x"] + action["w"] - 60, action["y"] + 50), 8.2)
+    s.zoom(p, "a1-espace", 3.6, 1.35, union(action, titre, {"x": 104, "y": 416, "w": 832, "h": 300}), duree=1.0)
+    s.cerne("a1-espace", action, 5.4, s.duree - 0.2)
+    pointe = (action["x"] + action["w"] - 60, action["y"] + 50)
+    s.curseur("a1-espace", pointe, 7.9, duree=0.9, depart=(W / 2 + 120, H / 2 + 160))
+    s.clic("a1-espace", pointe, 9.0)
     return s
 
 
@@ -337,7 +343,7 @@ def scene_s7():
     s = Scene("s7", FIN - DEBUT["s7"])
     p = s.plan("photo-public-bas", 0, s.duree, fondu=0.45)
     s.zoom(p, "photo-public-bas", 0.2, 1.08, {"x": 105, "y": 135, "w": 810, "h": 457}, duree=2.4)
-    etapes = [("Mon organisation", 3.1), ("Votre dossier", 5.0), ("Image de couverture", 6.6)]
+    etapes = [("Mon espace", 3.1), ("Votre dossier", 5.0), ("Image de couverture", 6.6)]
     morceaux, js = [], []
     for i, (texte, t0) in enumerate(etapes):
         eid = f"s7-etape{i}"
@@ -383,9 +389,9 @@ def ecrire_intro():
 SOUS_TITRES = [
     ("s1", 0.1, 3.49, "L'image de couverture illustre votre activité sur la plateforme."),
     ("s1", 3.94, 7.76, "C'est aussi elle qui s'affiche quand quelqu'un partage le lien de votre activité."),
-    ("s2", 0.1, 2.70, "Pour l'ajouter, ouvrez « Mon organisation »."),
-    ("s2", 3.20, 6.53, "Tant que l'image manque, la carte « À faire » vous le rappelle."),
-    ("s2", 7.05, 10.0, "Cliquez sur « Image de couverture à ajouter »."),
+    ("s2", 0.1, 3.61, "Pour l'ajouter, cliquez sur « Mon espace », en haut à droite."),
+    ("s2", 4.17, 7.33, "Tant que l'image manque, la carte « À faire » vous le rappelle."),
+    ("s2", 7.82, 10.41, "Cliquez sur « Image de couverture à ajouter »."),
     ("s3", 0.1, 3.74, "Vous arrivez dans votre dossier, à la rubrique « Image de couverture »."),
     ("s3", 4.26, 8.89, "Deux façons de faire : partir d'un modèle, ou déposer votre propre image."),
     ("s4", 0.1, 4.33, "Commençons par les modèles. Cliquez sur « Créer ou choisir un modèle »."),

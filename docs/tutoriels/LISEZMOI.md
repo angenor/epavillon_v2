@@ -4,7 +4,7 @@ Une vidéo courte par geste de l'espace organisation, filmée sur le vrai site a
 
 | Vidéo | Dossier | État |
 |-------|---------|------|
-| Ajouter l'image de couverture | [01-image-de-couverture/](01-image-de-couverture/) | montée le 05/11/2026, 1 min 44 |
+| Ajouter l'image de couverture | [01-image-de-couverture/](01-image-de-couverture/) | montée le 05/11/2026, 1 min 45 |
 
 ## Fabriquer une vidéo
 

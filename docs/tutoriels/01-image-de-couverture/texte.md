@@ -9,12 +9,12 @@ Voix : ElevenLabs Eleven v4, voix George, par OpenRouter ; un fichier par scène
 | Scène | Ce qu'on voit | Mise en valeur |
 |-------|---------------|----------------|
 | 1. Pourquoi | L'image de couverture sur la page publique d'une activité, puis un lien partagé avec son aperçu | Titre « Ajouter l'image de couverture » |
-| 2. Où | « Mon organisation », la carte « À faire », la ligne « Image de couverture à ajouter » | Zoom sur la ligne |
+| 2. Où | L'accueil, clic sur « Mon espace » (barre de navigation), la carte « À faire », la ligne « Image de couverture à ajouter » | Cadre sur « Mon espace », zoom sur la ligne |
 | 3. Deux façons | Le dossier, rubrique « Image de couverture », ses deux boutons | Étiquettes « Façon 1 : un modèle » et « Façon 2 : votre image » |
 | 4. Façon 1, le modèle | Clic sur « Créer ou choisir un modèle », atelier, onglet « Modèles », trois modèles essayés, une couleur, « Sur l'image » | Zoom sur la liste des modèles puis sur l'aperçu |
 | 5. Façon 1, enregistrer | Onglet « Textes » survolé, « Enregistrer la couverture », message « Image de couverture enregistrée », retour au dossier | Zoom sur le bouton vert |
 | 6. Façon 2, votre image | « Déposer une image », choix du fichier, recadrage au format 16:9, description, « Téléverser », message de préparation | Cadre de recadrage mis en valeur |
-| 7. Fin | La page publique avec la nouvelle image | Rappel : « Mon organisation → votre dossier → Image de couverture » |
+| 7. Fin | La page publique avec la nouvelle image | Rappel : « Mon espace », votre dossier, « Image de couverture » |
 
 ## Texte de la voix off
 
@@ -22,7 +22,7 @@ Voix : ElevenLabs Eleven v4, voix George, par OpenRouter ; un fichier par scène
 L'image de couverture illustre votre activité sur la plateforme. C'est aussi elle qui s'affiche quand quelqu'un partage le lien de votre activité.
 
 **Scène 2** (14 s)
-Pour l'ajouter, ouvrez « Mon organisation ». Tant que l'image manque, la carte « À faire » vous le rappelle. Cliquez sur « Image de couverture à ajouter ».
+Pour l'ajouter, cliquez sur « Mon espace », en haut à droite. Tant que l'image manque, la carte « À faire » vous le rappelle. Cliquez sur « Image de couverture à ajouter ».
 
 **Scène 3** (12 s)
 Vous arrivez dans votre dossier, à la rubrique « Image de couverture ». Deux façons de faire : partir d'un modèle, ou déposer votre propre image.
