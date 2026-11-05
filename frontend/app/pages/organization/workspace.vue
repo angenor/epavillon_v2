@@ -206,6 +206,18 @@ const next = computed(() => (activeTab.value && !activeTab.value.over ? nextWork
 const callInTab = computed(() => Boolean(shown.value?.call_edition && shown.value.call_edition.id === activeTab.value?.edition.id))
 const isEmpty = computed(() => Boolean(shown.value) && tabs.value.length === 0)
 const hasAside = computed(() => Boolean(shown.value) && (isEmpty.value || next.value !== null || callInTab.value))
+// La liste des dossiers suit « À faire » dans la colonne de gauche, sans attendre la droite (04/11) ; posée sur
+// la page, elle ne remonte pas sur le bandeau : la colonne ne monte que si elle s'ouvre sur une carte.
+const raised = computed(
+  () =>
+    loading.value ||
+    Boolean(error.value) ||
+    !shown.value ||
+    shown.value.membership.status === 'pending' ||
+    isEmpty.value ||
+    Boolean(activeTab.value?.over) ||
+    (activeTab.value?.actions.length ?? 0) > 0,
+)
 
 const logo = computed(() => {
   const asset = shown.value?.organization_logo
@@ -287,7 +299,7 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
     <!-- Les marges négatives n'existent qu'à partir de `lg` : sur une colonne, rien ne remonte. -->
     <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
       <div class="grid grid-cols-1 gap-6 pt-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-x-10 lg:gap-y-0 lg:pt-0">
-        <div class="relative z-1 flex min-w-0 flex-col gap-5 lg:-mt-18" :class="hasAside ? '' : 'lg:col-span-2'">
+        <div class="relative z-1 flex min-w-0 flex-col gap-5" :class="[raised ? 'lg:-mt-18' : 'lg:pt-10', hasAside ? '' : 'lg:col-span-2']">
           <WorkspacePanel v-if="loading" :aria-busy="true">
             <UiLoadingState variant="card" :lines="4" />
           </WorkspacePanel>
@@ -340,25 +352,18 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
               </div>
             </WorkspacePanel>
 
-            <WorkspaceActionList v-else-if="activeTab" :actions="activeTab.actions" :timezone="activeTab.edition.timezone" />
+            <WorkspaceActionList
+              v-else-if="activeTab && activeTab.actions.length > 0"
+              :actions="activeTab.actions"
+              :timezone="activeTab.edition.timezone"
+            />
           </template>
-        </div>
 
-        <aside v-if="hasAside && shown" class="relative z-1 flex min-w-0 flex-col gap-5 lg:-mt-18" :aria-label="t('organization.workspace.aside')">
-          <WorkspaceOpenCallCard
-            v-if="isEmpty || callInTab"
-            :call="shown.open_call"
-            :edition="shown.call_edition"
-            :hide-when-closed="!isEmpty"
-          />
-          <WorkspaceNextActivity v-if="next" :activity="next" />
-        </aside>
-
-        <div v-if="shown" class="min-w-0 lg:col-span-2">
           <section
-            v-if="activeTab"
+            v-if="shown && activeTab"
             id="mes-dossiers"
-            class="mt-12 scroll-mt-24 lg:mt-16"
+            class="scroll-mt-24"
+            :class="raised ? 'mt-4 lg:mt-6' : ''"
             aria-labelledby="workspace-proposals-title"
           >
             <WorkspaceRule
@@ -418,9 +423,22 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
               </ul>
             </div>
           </section>
+        </div>
+
+        <aside v-if="hasAside && shown" class="relative z-1 flex min-w-0 flex-col gap-5 lg:-mt-18" :aria-label="t('organization.workspace.aside')">
+          <WorkspaceOpenCallCard
+            v-if="isEmpty || callInTab"
+            :call="shown.open_call"
+            :edition="shown.call_edition"
+            :hide-when-closed="!isEmpty"
+          />
+          <WorkspaceNextActivity v-if="next" :activity="next" />
+        </aside>
+
+        <div v-if="shown" class="min-w-0 lg:col-span-2">
 
           <WorkspaceMembersPanel
-            class="mt-12 lg:mt-16"
+            class="mt-4 lg:mt-6"
             :members="shown.members"
             :organization-name="shown.organization.legal_name"
             :viewer-id="auth.person?.id ?? ''"

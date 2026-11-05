@@ -25,10 +25,6 @@
   },
   "actions": {
     "title": "À faire",
-    "empty": {
-      "title": "Rien ne vous attend",
-      "description": "Aucun dossier de cette édition n’attend de réponse de votre part."
-    },
     "count": "Aucune action en attente | Une action en attente | {count} actions en attente",
     "before": "avant le",
     "kind": {
@@ -57,7 +53,9 @@
         "detail": "Cette activité s'est tenue et n'a pas encore de compte rendu.",
         "cta": "Rédiger le compte rendu"
       }
-    }
+    },
+    "more": "Voir l'autre action | Voir les {count} autres actions",
+    "less": "Réduire"
   },
   "proposals": {
     "title": "Mes dossiers",

@@ -25,10 +25,6 @@
   },
   "actions": {
     "title": "To do",
-    "empty": {
-      "title": "Nothing is waiting for you",
-      "description": "No submission for this edition is waiting for your reply."
-    },
     "count": "No pending action | One pending action | {count} pending actions",
     "before": "before",
     "kind": {
@@ -57,7 +53,9 @@
         "detail": "This activity has taken place and has no report yet.",
         "cta": "Write the report"
       }
-    }
+    },
+    "more": "Show the other action | Show the {count} other actions",
+    "less": "Show less"
   },
   "proposals": {
     "title": "My submissions",

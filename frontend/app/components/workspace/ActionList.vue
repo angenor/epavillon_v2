@@ -7,9 +7,9 @@ import type { TimeZoneName } from '~/types/shared'
  * bandeau (04/11), et celle qui justifie qu'on revienne sur la page.
  *
  * Rien que l'organisation ne puisse traiter : ce qu'attend le comité n'y figure
- * pas. Vide, elle reste lisible : « Rien ne vous attend » est une réponse, pas
- * une panne. Le nombre est dans la ligne (« 2 points à traiter »), et
- * l'échéance en gros chiffres condensés, colonne qu'on parcourt à la verticale.
+ * pas. Vide, la page ne la montre pas : « Rien ne vous attend » faisait croire
+ * qu'il n'y avait plus rien à compléter, couverture comprise (04/11). Trois
+ * actions au plus d'emblée, pour que la liste des dossiers reste en vue.
  */
 
 interface Props {
@@ -38,6 +38,11 @@ const ICON_TONES: Record<'warning' | 'info', string> = {
 
 const detailOf = (action: WorkspaceAction): string => workspaceActionDetail(action, t)
 
+const SHOWN = 3
+const expanded = ref(false)
+const visible = computed(() => (expanded.value ? props.actions : props.actions.slice(0, SHOWN)))
+const hidden = computed(() => props.actions.length - SHOWN)
+
 /** « 8 nov. » : le jour et le mois suffisent à une échéance de la saison en cours. */
 function shortDate(value: string): string {
   return new Intl.DateTimeFormat(intlLocale.value, { day: 'numeric', month: 'short', timeZone: props.timezone }).format(new Date(value))
@@ -50,18 +55,8 @@ function shortDate(value: string): string {
     :title="t('organization.workspace.actions.title')"
     :meta="t('organization.workspace.actions.count', props.actions.length)"
   >
-    <div v-if="props.actions.length === 0" class="flex items-start gap-3 rounded-md bg-surface-sunken p-4">
-      <UiIcon name="check-circle" class="mt-0.5 shrink-0 text-success" size="1.25rem" />
-      <div>
-        <p class="font-bold text-text">{{ t('organization.workspace.actions.empty.title') }}</p>
-        <p class="mt-0.5 max-w-(--measure) text-sm text-text-muted">
-          {{ t('organization.workspace.actions.empty.description') }}
-        </p>
-      </div>
-    </div>
-
-    <ul v-else class="flex flex-col gap-2">
-      <li v-for="(action, index) in props.actions" :key="`${action.kind}-${action.proposal_id ?? index}`">
+    <ul class="flex flex-col gap-2">
+      <li v-for="(action, index) in visible" :key="`${action.kind}-${action.proposal_id ?? index}`">
         <NuxtLink
           :to="localePath(action.target)"
           class="grid min-h-(--target-min) grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-md border border-l-4 border-border p-3 text-text no-underline transition-colors duration-(--duration-fast) hover:border-border-strong hover:text-text sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] sm:px-4 sm:py-3.5"
@@ -102,5 +97,8 @@ function shortDate(value: string): string {
         </NuxtLink>
       </li>
     </ul>
+    <UiButton v-if="hidden > 0" class="mt-2" variant="ghost" size="sm" :icon="expanded ? 'chevron-up' : 'chevron-down'" @click="expanded = !expanded">
+      {{ expanded ? t('organization.workspace.actions.less') : t('organization.workspace.actions.more', hidden) }}
+    </UiButton>
   </WorkspacePanel>
 </template>
