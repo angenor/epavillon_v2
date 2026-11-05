@@ -1140,7 +1140,9 @@ INSERT INTO media.attachable_roles
     -- Logo sur fond sombre (03/11/2026) : la version claire du même logo, pour
     -- le bandeau de la programmation. Sans forme imposée, comme le logo.
     ('event',       'events',        'logo_inverse', '{"fr":"Logo sur fond sombre","en":"Logo for dark backgrounds"}', false, '{image/*}', 5242880, NULL),
-    ('programme',   'proposals',     'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL),
+    -- Couverture d'une activité en 16:9 (05/11/2026) : tous les écrans l'affichent
+    -- ainsi ; libre, une image verticale était rognée sans que le déposant le voie.
+    ('programme',   'proposals',     'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, 1.7778),
     ('programme',   'proposals',     'document',  '{"fr":"Document joint","en":"Attached document"}', true,  '{application/pdf,application/vnd.*}', 26214400, NULL),
     -- Photo de départ de l'atelier de couverture (29/10) : celle que
     -- l'organisation a choisie, gardée à part de l'image fabriquée (`cover`)

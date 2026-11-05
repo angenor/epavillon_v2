@@ -72,6 +72,18 @@ export const attachableRoles: AttachableRoleRule[] = [
   },
   {
     owner_schema: 'programme',
+    owner_table: 'proposals',
+    role: 'cover',
+    label: { fr: 'Image de couverture', en: 'Cover image' },
+    is_multiple: false,
+    allowed_mime_prefixes: ['image/*'],
+    max_byte_size: 10 * MIO,
+    expected_aspect_ratio: '1.7778',
+    aspect_ratio_tolerance: '0.02',
+    is_active: true,
+  },
+  {
+    owner_schema: 'programme',
     owner_table: 'sessions',
     role: 'gallery',
     label: { fr: "Galerie de l'activité", en: 'Activity gallery' },

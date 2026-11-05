@@ -113,11 +113,14 @@ function selectTab(value: string): void {
   router.replace({ query: { ...route.query, vue: value } })
 }
 
+// Le défilement du routeur passe avant le chargement du dossier : l'ancre
+// (« À faire » vise #couverture) n'existe pas encore à ce moment-là.
 onMounted(async () => {
-  if (route.query.vue !== 'sessions') return
+  const anchor = route.query.vue === 'sessions' ? 'quand-ou' : route.hash === '#couverture' ? 'couverture' : null
+  if (!anchor) return
   await until(() => Boolean(file.value))
   await nextTick()
-  document.getElementById('quand-ou')?.scrollIntoView({ behavior: 'smooth' })
+  document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth' })
 })
 
 async function until(ready: () => boolean): Promise<void> {

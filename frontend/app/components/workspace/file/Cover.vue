@@ -122,6 +122,7 @@ const studioTo = computed(() => localePath(`/mon-organisation/dossiers/${props.p
           :alt-fallback="props.title"
           :button-label="t(props.cover ? 'organization.workspace.proposal.cover.change' : 'organization.workspace.proposal.cover.add')"
           button-icon="upload"
+          shape-label="16:9"
           button-variant="secondary"
           :rule="props.rule"
           :owner="{ schema: 'programme', table: 'proposals', id: props.proposalId }"
