@@ -120,7 +120,7 @@ const studioTo = computed(() => localePath(`/mon-organisation/dossiers/${props.p
           :asset-id="null"
           :label="t('organization.workspace.proposal.cover.title')"
           :alt-fallback="props.title"
-          :button-label="t('organization.workspace.proposal.cover.change')"
+          :button-label="t(props.cover ? 'organization.workspace.proposal.cover.change' : 'organization.workspace.proposal.cover.add')"
           button-icon="upload"
           button-variant="secondary"
           :rule="props.rule"

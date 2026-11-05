@@ -221,6 +221,7 @@
     "title": "Cover image",
     "description": "It illustrates your activity on the platform and is the preview when the link is shared.",
     "change": "Change the image",
+    "add": "Upload an image",
     "edit": "Edit",
     "create": "Create or choose a template",
     "preparing": "Your new image is being prepared: it will show everywhere in a few seconds."
