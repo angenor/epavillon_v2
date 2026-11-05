@@ -660,4 +660,4 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 
 - **`event.programme_track_links`** (`060_events.sql` § 4 ter, après les partenaires) : libellé `platform.i18n_text` obligatoire, adresse (`ck_programme_track_links_url`, même forme que `feature_link_url` : `https://…` ou chemin du site, 2048 au plus), rang. Un lien n'est pas un fichier : ni `media.attachments`, ni poids, ni type. Signal du programme public par `tg_programme_track_links_public_signal`, comme parties, moments et partenaires.
 
-**En production** : `ops/migrations/2026-11-05-liens-documents-fil.sql`, rejouable, additive, modèle seul, **à jouer avant de déployer l'API**. Pas jouée.
+**En production** : `ops/migrations/2026-11-05-liens-documents-fil.sql`, rejouable, additive, modèle seul, **à jouer avant de déployer l'API**. Jouée le 05/11 après sauvegarde (`epavillon-20261105-222036.sql.gz`), accord du commanditaire.
