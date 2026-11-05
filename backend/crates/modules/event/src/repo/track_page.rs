@@ -13,8 +13,8 @@ use uuid::Uuid;
 
 use crate::domain::ids::TrackId;
 use crate::domain::track_page::{
-    TrackMoment, TrackMomentPayload, TrackPagePayload, TrackPart, TrackPartPayload,
-    TrackPartnerPayload,
+    TrackLink, TrackLinkPayload, TrackMoment, TrackMomentPayload, TrackPagePayload, TrackPart,
+    TrackPartPayload, TrackPartnerPayload,
 };
 
 /// Les colonnes de la page portées par le fil lui-même.
@@ -96,6 +96,55 @@ pub async fn moments<'e>(
     .await?;
 
     Ok(lignes)
+}
+
+/// Les liens de téléchargement d'un fil, dans leur ordre.
+pub async fn liens<'e>(executor: impl PgExecutor<'e>, track: TrackId) -> Result<Vec<TrackLink>> {
+    let lignes = sqlx::query_as!(
+        TrackLink,
+        r#"SELECT id, label AS "label!: serde_json::Value", url, sort_order
+             FROM event.programme_track_links
+            WHERE track_id = $1
+            ORDER BY sort_order, created_at"#,
+        track.as_uuid()
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes)
+}
+
+/// **Remplacer** les liens : la liste envoyée est la liste voulue, dans son
+/// ordre. Rien ne les désigne, on peut donc tout réécrire.
+pub async fn remplacer_liens(
+    conn: &mut PgConnection,
+    track: TrackId,
+    liens: &[TrackLinkPayload],
+) -> std::result::Result<(), sqlx::Error> {
+    let libelles = serde_json::Value::Array(liens.iter().map(|l| l.label.clone()).collect());
+    let adresses: Vec<String> = liens.iter().map(|l| l.url.clone()).collect();
+
+    sqlx::query!(
+        "DELETE FROM event.programme_track_links WHERE track_id = $1",
+        track.as_uuid()
+    )
+    .execute(&mut *conn)
+    .await?;
+
+    sqlx::query!(
+        "INSERT INTO event.programme_track_links (track_id, label, url, sort_order)
+         SELECT $1, l.label::platform.i18n_text, a.url, a.rang - 1
+           FROM unnest($3::text[]) WITH ORDINALITY AS a(url, rang)
+           JOIN jsonb_array_elements($2::jsonb) WITH ORDINALITY AS l(label, rang)
+             ON l.rang = a.rang",
+        track.as_uuid(),
+        libelles,
+        &adresses
+    )
+    .execute(&mut *conn)
+    .await?;
+
+    Ok(())
 }
 
 /// Écrire les colonnes de la page : écriture **totale**.

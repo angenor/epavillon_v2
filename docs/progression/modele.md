@@ -655,3 +655,9 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - `message_templates` n'est pas réutilisé : commun à toute la plateforme et gardé par une permission globale (un administrateur d'une seule édition n'y écrit pas, règle n° 8), un seul type `programme.session.reminder` pour les quatre décalages, publication en deux temps.
 
 **En production** : `ops/migrations/2026-11-04-courriels-programmes.sql`, rejouable, additive, modèle seul, **à jouer avant de déployer l'API et le worker** (les rappels lisent la table). Cache SQLx des huit requêtes de `engagement/src/repo/programmes.rs` écrit à la main (aucune base locale) : à refaire par `cargo sqlx prepare` après la migration. Pas jouée.
+
+## 2026-11-05 : liens de téléchargement d'un fil
+
+- **`event.programme_track_links`** (`060_events.sql` § 4 ter, après les partenaires) : libellé `platform.i18n_text` obligatoire, adresse (`ck_programme_track_links_url`, même forme que `feature_link_url` : `https://…` ou chemin du site, 2048 au plus), rang. Un lien n'est pas un fichier : ni `media.attachments`, ni poids, ni type. Signal du programme public par `tg_programme_track_links_public_signal`, comme parties, moments et partenaires.
+
+**En production** : `ops/migrations/2026-11-05-liens-documents-fil.sql`, rejouable, additive, modèle seul, **à jouer avant de déployer l'API**. Pas jouée.

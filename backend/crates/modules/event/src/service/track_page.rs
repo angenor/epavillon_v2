@@ -47,6 +47,7 @@ pub async fn lire(pool: &PgPool, track: TrackId) -> Result<TrackPageSettings> {
         parts: track_page::parties(pool, track).await?,
         moments: track_page::moments(pool, track).await?,
         partners: cross_page::partenaires(pool, track).await?,
+        links: track_page::liens(pool, track).await?,
         sessions: cross_page::composition(pool, track).await?,
     })
 }
@@ -64,6 +65,16 @@ pub async fn enregistrer(
         return Err(ApiError::validation(
             "Chaque public cible doit avoir son libellé en français.",
             "target_audiences",
+        ));
+    }
+
+    for lien in &mut payload.links {
+        lien.url = lien.url.trim().to_owned();
+    }
+    if payload.links.iter().any(|l| !a_son_francais(&l.label)) {
+        return Err(ApiError::validation(
+            "Chaque lien doit avoir son libellé en français : une adresse nue ne dit pas où elle mène.",
+            "links",
         ));
     }
 
@@ -92,6 +103,9 @@ pub async fn enregistrer(
         Err(e) => return Err(pg_error::translate(&e)),
     }
     track_page::remplacer_partenaires(&mut tx, track, &payload.partners)
+        .await
+        .map_err(|e| pg_error::translate(&e))?;
+    track_page::remplacer_liens(&mut tx, track, &payload.links)
         .await
         .map_err(|e| pg_error::translate(&e))?;
 

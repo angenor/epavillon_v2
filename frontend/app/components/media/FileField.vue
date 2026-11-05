@@ -185,6 +185,7 @@ function retirer(): void {
       >
         {{ t('file-field.actions.remove') }}
       </UiButton>
+      <slot name="actions" />
     </div>
 
     <UiAlert v-if="echec" intent="danger" live compact :message="echec" />

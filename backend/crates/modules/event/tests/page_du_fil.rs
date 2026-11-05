@@ -9,7 +9,7 @@ mod commun;
 use commun::{perimetres, seed, Bac};
 use event::domain::ids::TrackId;
 use event::domain::track_page::{
-    TrackMomentPayload, TrackPagePayload, TrackPartPayload, TrackPartnerPayload,
+    TrackLinkPayload, TrackMomentPayload, TrackPagePayload, TrackPartPayload, TrackPartnerPayload,
 };
 use event::service::{edition_dans_le_perimetre, track_page, Cible};
 use kernel::error::ErrorCode;
@@ -54,6 +54,14 @@ fn page_vide() -> TrackPagePayload {
         feature_link_label: None,
         feature_link_url: None,
         partners: Vec::new(),
+        links: Vec::new(),
+    }
+}
+
+fn lien(libelle: &str, adresse: &str) -> TrackLinkPayload {
+    TrackLinkPayload {
+        label: json!({ "fr": libelle }),
+        url: adresse.to_owned(),
     }
 }
 
@@ -116,10 +124,30 @@ async fn la_page_secrit_et_se_relit_entiere_partenaires_remplaces() {
             role_code: "partner".to_owned(),
         },
     ];
+    page.links = vec![
+        lien(
+            "Résumé pour les décideurs",
+            " https://www.francophonie.org/resume ",
+        ),
+        lien(
+            "Guide des négociations",
+            "https://www.francophonie.org/guide",
+        ),
+    ];
 
     let reglages = track_page::enregistrer(&bac.state, &bac.ctx(), fil, page)
         .await
         .expect("enregistrement");
+
+    let liens: Vec<&str> = reglages.links.iter().map(|l| l.url.as_str()).collect();
+    assert_eq!(
+        liens,
+        vec![
+            "https://www.francophonie.org/resume",
+            "https://www.francophonie.org/guide"
+        ],
+        "ordre envoyé, adresses sans blancs"
+    );
 
     assert_eq!(reglages.venue_id, Some(lieu));
     assert_eq!(reglages.target_audiences.len(), 2);
@@ -149,6 +177,7 @@ async fn la_page_secrit_et_se_relit_entiere_partenaires_remplaces() {
         "écriture totale : le lieu revient au pavillon"
     );
     assert_eq!(reglages.partners.len(), 1, "la liste est remplacée");
+    assert!(reglages.links.is_empty(), "les liens aussi");
     assert_eq!(reglages.partners[0].role_code, "partner");
 }
 
@@ -186,6 +215,20 @@ async fn un_lieu_dune_autre_edition_un_role_inconnu_un_lien_sans_libelle_sont_re
         .await
         .expect_err("lien sans libellé");
     assert_eq!(refus.field.as_deref(), Some("feature_link_url"));
+
+    let mut page = page_vide();
+    page.links = vec![lien(" ", "https://www.francophonie.org/guide")];
+    let refus = track_page::enregistrer(&bac.state, &bac.ctx(), fil, page)
+        .await
+        .expect_err("lien de téléchargement sans libellé");
+    assert_eq!(refus.field.as_deref(), Some("links"));
+
+    let mut page = page_vide();
+    page.links = vec![lien("Guide", "www.francophonie.org/guide")];
+    let refus = track_page::enregistrer(&bac.state, &bac.ctx(), fil, page)
+        .await
+        .expect_err("adresse sans protocole");
+    assert_eq!(refus.field.as_deref(), Some("links"));
 }
 
 #[tokio::test]

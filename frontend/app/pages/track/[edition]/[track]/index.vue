@@ -262,7 +262,7 @@ useSeoMeta({
           <div class="flex min-w-0 flex-col gap-14 lg:col-start-1 lg:row-start-1">
             <TrackOverview :page="page" :live="live" :edition-image="editionImage" />
 
-            <TrackFeature v-if="page.feature" :feature="page.feature" :documents="page.documents" />
+            <TrackFeature v-if="page.feature" :feature="page.feature" :documents="page.documents" :links="page.links" />
 
             <section v-if="hasTiles && paragraphs.length" aria-labelledby="journee-presentation-titre">
               <h2 id="journee-presentation-titre" :class="sectionTitle">{{ t(`track.about.${subject}`) }}</h2>
@@ -329,7 +329,7 @@ useSeoMeta({
               </ul>
             </section>
 
-            <TrackFeature v-if="!page.feature" :feature="null" :documents="page.documents" />
+            <TrackFeature v-if="!page.feature" :feature="null" :documents="page.documents" :links="page.links" />
 
             <TrackOthers
               :tracks="page.other_tracks"

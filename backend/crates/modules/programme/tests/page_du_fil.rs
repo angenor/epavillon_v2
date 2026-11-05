@@ -212,9 +212,26 @@ async fn un_fil_publie_se_lit_en_une_reponse_deroule_fusionne_et_trie() {
     .await
     .unwrap();
 
+    sqlx::query(
+        "INSERT INTO event.programme_track_links (track_id, label, url, sort_order)
+         VALUES ($1, '{\"fr\":\"Guide\"}', 'https://www.francophonie.org/guide', 1),
+                ($1, '{\"fr\":\"Résumé\"}', 'https://www.francophonie.org/resume', 0)",
+    )
+    .bind(finance)
+    .execute(bac.pool())
+    .await
+    .unwrap();
+
     let page = track_page::page(bac.pool(), SLUG_COP31, "journee-finance")
         .await
         .expect("page publiée");
+
+    let liens: Vec<&str> = page
+        .links
+        .iter()
+        .filter_map(|l| l["label"]["fr"].as_str())
+        .collect();
+    assert_eq!(liens, ["Résumé", "Guide"], "les liens dans leur ordre");
 
     let deroule: Vec<&str> = page.agenda.iter().map(genre).collect();
     assert_eq!(

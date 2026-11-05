@@ -67,6 +67,20 @@ export interface TrackPartner {
   sort_order: number
 }
 
+/** Table `event.programme_track_links` : une page de téléchargement, affichée après les PDF. */
+export interface TrackLink {
+  id: Uuid
+  label: I18nText
+  /** Adresse absolue, ou chemin du site. */
+  url: string
+  sort_order: number
+}
+
+export interface TrackLinkPayload {
+  label: I18nText
+  url: string
+}
+
 /** Une activité rattachée au fil (`programme.session_tracks`), publiée ou non. */
 export interface TrackCompositionEntry {
   session_id: SessionId
@@ -101,6 +115,7 @@ export interface TrackPageSettings {
   parts: TrackPart[]
   moments: TrackMoment[]
   partners: TrackPartner[]
+  links: TrackLink[]
   sessions: TrackCompositionEntry[]
 }
 
@@ -112,7 +127,7 @@ export interface TrackPartnerPayload {
 
 /**
  * `PUT /admin/tracks/{id}/page` : écriture TOTALE de ces champs et
- * REMPLACEMENT des partenaires (l'ordre envoyé est l'ordre affiché).
+ * REMPLACEMENT des partenaires et des liens (l'ordre envoyé est l'ordre affiché).
  */
 export interface TrackPagePayload {
   venue_id: VenueId | null
@@ -126,6 +141,8 @@ export interface TrackPagePayload {
   feature_link_label: I18nText | null
   feature_link_url: string | null
   partners: TrackPartnerPayload[]
+  /** Remplacés comme les partenaires : l'ordre envoyé est l'ordre affiché. */
+  links: TrackLinkPayload[]
 }
 
 export interface TrackPartPayload {

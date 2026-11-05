@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import type { AttachedDocument } from '~/types/media'
-import type { PublicTrackFeature } from '~/types/programme/track-page'
+import type { PublicTrackFeature, PublicTrackLink } from '~/types/programme/track-page'
 
 /**
  * L'encart mis en avant (le Guide des négociations pour l'atelier) et les
- * documents à télécharger. Sans encart, les documents viennent seuls.
+ * documents à télécharger, puis les liens vers une page de téléchargement
+ * (nouvel onglet, nom du site en regard). Sans encart, ils viennent seuls.
  */
 
 interface Props {
   feature: PublicTrackFeature | null
   documents: AttachedDocument[]
+  links: PublicTrackLink[]
 }
 
 const props = defineProps<Props>()
@@ -38,6 +40,22 @@ const files = computed(() =>
     label: document.caption ? tr(document.caption) : (document.filename ?? t('track.documents.untitled')),
     size: size(document.bytes),
   })),
+)
+
+/** Un chemin du site reste dans l'onglet et ne nomme pas de site. */
+const pages = computed(() =>
+  props.links.map((link) => {
+    const internal = link.url.startsWith('/')
+    let site: string | null = null
+    if (!internal) {
+      try {
+        site = new URL(link.url).hostname.replace(/^www\./, '')
+      } catch {
+        site = null
+      }
+    }
+    return { url: link.url, label: tr(link.label), site, to: internal ? localePath(link.url) : undefined }
+  }),
 )
 </script>
 
@@ -69,16 +87,32 @@ const files = computed(() =>
             <UiIcon name="download" size="1.1rem" />{{ file.label }}<small class="text-sm font-normal text-text-muted">{{ file.size }}</small>
           </a>
         </li>
+        <li v-for="page in pages" :key="page.url">
+          <NuxtLink v-if="page.to" :to="page.to" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+            <UiIcon name="external-link" size="1.1rem" />{{ page.label }}
+          </NuxtLink>
+          <a v-else :href="page.url" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+            <UiIcon name="external-link" size="1.1rem" />{{ page.label }}<small v-if="page.site" class="text-sm font-normal text-text-muted">{{ page.site }}</small>
+          </a>
+        </li>
       </ul>
     </div>
   </section>
 
-  <section v-else-if="files.length" aria-labelledby="journee-documents-titre">
+  <section v-else-if="files.length || pages.length" aria-labelledby="journee-documents-titre">
     <h2 id="journee-documents-titre" class="heading-condensed text-[clamp(1.9rem,3.6vw,2.5rem)] text-heading">{{ t('track.documents.title') }}</h2>
     <ul class="mt-3 flex flex-col">
       <li v-for="file in files" :key="file.id">
         <a :href="file.url" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
           <UiIcon name="document" size="1.1rem" />{{ file.label }}<small class="text-sm font-normal text-text-muted">{{ file.size }}</small>
+        </a>
+      </li>
+      <li v-for="page in pages" :key="page.url">
+        <NuxtLink v-if="page.to" :to="page.to" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+          <UiIcon name="external-link" size="1.1rem" />{{ page.label }}
+        </NuxtLink>
+        <a v-else :href="page.url" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2.5 font-semibold text-accent no-underline hover:underline">
+          <UiIcon name="external-link" size="1.1rem" />{{ page.label }}<small v-if="page.site" class="text-sm font-normal text-text-muted">{{ page.site }}</small>
         </a>
       </li>
     </ul>

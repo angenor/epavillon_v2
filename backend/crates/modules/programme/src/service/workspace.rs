@@ -575,7 +575,10 @@ fn actions_en_attente(
                 subject: titre.clone(),
                 count: 1,
                 due_at: None,
-                target: format!("/mon-organisation/dossiers/{}#couverture", suivi.proposal.id),
+                target: format!(
+                    "/mon-organisation/dossiers/{}#couverture",
+                    suivi.proposal.id
+                ),
             });
         }
     }

@@ -67,7 +67,7 @@ pub(crate) async fn lire(
 /// Enregistrer les réglages de la page et ses partenaires.
 #[utoipa::path(
     put,
-    description = "`TrackPagePayload` → `TrackPageSettings`. Écriture **totale** des colonnes de la page et **remplacement** de la liste des partenaires (l'ordre envoyé est l'ordre affiché ; une organisation citée deux fois garde sa première place ; `role_code` relève de la taxonomie `track_partner_role`, `partner` par défaut). Le lieu doit appartenir à l'édition du fil. Le lien de l'encart est une adresse absolue ou un chemin du site (`/…`), donné avec son libellé. Parties et moments ont leurs propres routes.",
+    description = "`TrackPagePayload` → `TrackPageSettings`. Écriture **totale** des colonnes de la page et **remplacement** de la liste des partenaires (l'ordre envoyé est l'ordre affiché ; une organisation citée deux fois garde sa première place ; `role_code` relève de la taxonomie `track_partner_role`, `partner` par défaut). Le lieu doit appartenir à l'édition du fil. Le lien de l'encart est une adresse absolue ou un chemin du site (`/…`), donné avec son libellé. Les liens de téléchargement (`links`, `TrackLinkPayload[]`) sont **remplacés** comme les partenaires : même forme d'adresse, libellé français exigé. Parties et moments ont leurs propres routes.",
     path = "/admin/tracks/{id}/page",
     tag = "Back-office — événements",
     operation_id = "admin_fil_page_enregistrer",

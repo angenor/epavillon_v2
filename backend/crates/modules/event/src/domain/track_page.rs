@@ -55,6 +55,17 @@ pub struct TrackPartner {
     pub sort_order: i16,
 }
 
+/// Un lien vers une page de téléchargement : `TrackLink`. Affiché après les
+/// PDF déposés.
+#[derive(Debug, Clone, Serialize)]
+pub struct TrackLink {
+    pub id: Uuid,
+    pub label: Value,
+    /// Adresse absolue, ou chemin du site.
+    pub url: String,
+    pub sort_order: i16,
+}
+
 /// Une activité rattachée au fil, telle que l'éditeur de la page la place :
 /// `TrackCompositionEntry`.
 #[derive(Debug, Clone, Serialize)]
@@ -95,6 +106,7 @@ pub struct TrackPageSettings {
     pub parts: Vec<TrackPart>,
     pub moments: Vec<TrackMoment>,
     pub partners: Vec<TrackPartner>,
+    pub links: Vec<TrackLink>,
     pub sessions: Vec<TrackCompositionEntry>,
 }
 
@@ -106,6 +118,13 @@ pub struct TrackPartnerPayload {
     /// Code de la taxonomie `track_partner_role` ; `partner` par défaut.
     #[serde(default = "role_par_defaut")]
     pub role_code: String,
+}
+
+/// Un lien envoyé par l'éditeur, élément de `TrackPagePayload.links`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct TrackLinkPayload {
+    pub label: Value,
+    pub url: String,
 }
 
 fn role_par_defaut() -> String {
@@ -139,6 +158,9 @@ pub struct TrackPagePayload {
     pub feature_link_url: Option<String>,
     #[serde(default)]
     pub partners: Vec<TrackPartnerPayload>,
+    /// Remplacés comme les partenaires : la liste envoyée, dans son ordre.
+    #[serde(default)]
+    pub links: Vec<TrackLinkPayload>,
 }
 
 /// Une partie : `TrackPartPayload`.

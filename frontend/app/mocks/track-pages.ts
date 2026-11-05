@@ -306,6 +306,7 @@ interface Source {
   partenaires: PublicTrackPartner[]
   feature: PublicTrackPage['feature']
   documents: PublicTrackPage['documents']
+  links: PublicTrackPage['links']
   parties: Array<{ cle: string; label: string | null; title: string | null; summary: string | null }>
   activites: Activite[]
   moments: Moment[]
@@ -373,6 +374,7 @@ const atelier: Source = {
       caption: fr('Résumé (PDF)'),
     },
   ],
+  links: [{ label: fr("Les publications de l'IFDD"), url: 'https://www.ifdd.francophonie.org/publications/' }],
   parties: [
     { cle: 'matin', label: 'Matin', title: null, summary: 'Où en sont les négociations, thème par thème' },
     { cle: 'apres-midi', label: 'Après-midi', title: null, summary: 'Le Guide des négociations et le Programme de la Francophonie' },
@@ -424,6 +426,7 @@ const finance: Source = {
       caption: fr('Programme de la journée (PDF)'),
     },
   ],
+  links: [],
   parties: [
     { cle: 'p1', label: null, title: "Opportunités de financement durable et synergies d'action en Francophonie", summary: "Opportunités de financement et synergies d'action" },
     { cle: 'p2', label: null, title: 'Initiatives pertinentes nationales, études de cas et témoignages', summary: 'Initiatives nationales, études de cas et témoignages' },
@@ -503,6 +506,7 @@ const jeunesse: Source = {
   ],
   feature: null,
   documents: [],
+  links: [],
   parties: [
     { cle: 'inspirer', label: "S'inspirer", title: null, summary: 'Ouverture et dix minutes qui inspirent' },
     { cle: 'creer', label: 'Créer et jouer', title: null, summary: 'Hackathon, Info ou Intox, ClimArtistes' },
@@ -643,6 +647,7 @@ const page = (s: Source): PublicTrackPage => {
     is_off_site: s.venue.kind !== 'pavilion',
     cover: s.cover,
     documents: s.documents,
+    links: s.links,
     feature: s.feature,
     target_audiences: s.publics.map(fr),
     support_note: s.support ? fr(s.support) : null,
@@ -693,6 +698,7 @@ export const trackPageSettings: Record<string, TrackPageSettings> = Object.fromE
             : [],
         ),
         partners: s.partenaires.map((x, i) => ({ ...x, sort_order: i + 1 })),
+        links: s.links.map((x, i) => ({ id: `${s.id}-lien-${i}`, label: x.label, url: x.url, sort_order: i })),
         sessions: s.activites.map((x, i) => {
           const session = ligne(x, piste(s))
           return {

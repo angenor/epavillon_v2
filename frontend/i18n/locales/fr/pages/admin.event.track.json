@@ -56,12 +56,20 @@
     "cover": "Photo du bandeau",
     "coverUse": "recadrée selon la largeur de l'écran",
     "documents": "Documents",
-    "documentsHint": "En PDF. Le libellé est celui du lien sur la page : « Programme (PDF) », « Résumé du Guide ».",
+    "documentsHint": "Un PDF déposé, ou un lien vers la page où le télécharger. Le libellé est celui du lien sur la page : « Programme (PDF) », « Résumé du Guide ».",
     "addDocument": "Ajouter un document",
     "caption": "Libellé du lien",
     "captionHint": "Sans libellé, la page affiche le nom du fichier.",
     "removeDocument": "Retirer {name}",
-    "untitled": "Document"
+    "untitled": "Document",
+    "addLink": "Ajouter un lien",
+    "linkUrl": "Adresse de la page",
+    "linkUrlHint": "Adresse complète (https://…) ou chemin du site (/programmations).",
+    "linkLabelHint": "Obligatoire pour un lien : une adresse nue ne dit pas où elle mène.",
+    "linkLabelMissing": "Un lien demande son libellé.",
+    "linkUrlMissing": "Un lien demande son adresse.",
+    "removeLink": "Retirer le lien {name}",
+    "newLink": "Nouveau lien"
   },
   "feature": {
     "kicker": "Surtitre",

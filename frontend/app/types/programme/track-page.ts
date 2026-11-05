@@ -87,6 +87,13 @@ export interface PublicTrackFeature {
   visual: AttachedImage | null
 }
 
+/** Une page où télécharger un document chez son éditeur (`event.programme_track_links`). */
+export interface PublicTrackLink {
+  label: I18nText
+  /** Adresse absolue, ou chemin du site. */
+  url: string
+}
+
 export interface PublicTrackPartner {
   organization_id: OrganizationId
   name: string
@@ -186,6 +193,8 @@ export interface PublicTrackPage {
   cover: AttachedImage | null
   /** Programme en PDF, Résumé du Guide ; libellé = `caption`. */
   documents: AttachedDocument[]
+  /** Pages de téléchargement, affichées après les documents. */
+  links: PublicTrackLink[]
   feature: PublicTrackFeature | null
   target_audiences: I18nText[]
   support_note: I18nText | null

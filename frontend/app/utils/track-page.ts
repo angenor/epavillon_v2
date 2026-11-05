@@ -24,6 +24,14 @@ export interface TrackDocumentDraft {
   caption: I18nText | null
 }
 
+/** Un lien vers une page de téléchargement ; `url` vide tant que la saisie n'est pas faite. */
+export interface TrackLinkDraft {
+  /** Clé de liste stable : un lien n'a pas d'identifiant avant l'enregistrement. */
+  key: string
+  label: I18nText | null
+  url: string
+}
+
 export interface TrackPageDraft {
   venue_id: VenueId | null
   tagline: I18nText | null
@@ -41,6 +49,7 @@ export interface TrackPageDraft {
   visual: AttachedImage | null
   visual_asset_id: AssetId | null
   documents: TrackDocumentDraft[]
+  links: TrackLinkDraft[]
 }
 
 const OWNER = { owner_schema: 'event', owner_table: 'programme_tracks' } as const
@@ -103,6 +112,9 @@ export function draftFromSettings(settings: TrackPageSettings, media: AttachedMe
       .filter((m) => m.role === 'document')
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((m) => ({ asset_id: m.asset_id, filename: filenameOf(m.url), url: m.url, caption: m.caption })),
+    links: [...settings.links]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((l) => ({ key: l.id, label: l.label, url: l.url })),
   }
 }
 
@@ -124,6 +136,10 @@ export function payloadFromDraft(draft: TrackPageDraft): TrackPagePayload {
     feature_link_label: filled(draft.feature_link_label),
     feature_link_url: url || null,
     partners: draft.partners.map((p) => ({ organization_id: p.organization_id, role_code: p.role_code })),
+    // Un lien laissé vide n'est pas envoyé ; un lien à moitié rempli l'est, pour que l'API dise ce qui manque.
+    links: draft.links
+      .filter((l) => l.url.trim() || filled(l.label))
+      .map((l) => ({ label: l.label ?? { fr: '' }, url: l.url.trim() })),
   }
 }
 

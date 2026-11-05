@@ -80,6 +80,7 @@ function settingsOf(trackId: TrackId, eventId: EventId): TrackPageSettings {
     parts: [],
     moments: [],
     partners: [],
+    links: [],
     sessions: [],
   }
   trackPageSettings[trackId] = blank
@@ -118,6 +119,12 @@ export function saveTrackPage(trackId: TrackId, eventId: EventId, payload: Track
   if (payload.target_audiences.some((a) => !a.fr?.trim())) {
     throw new Refus('Chaque public cible demande son libellé en français.')
   }
+  if (payload.links.some((l) => !l.label.fr?.trim())) {
+    throw new Refus('Chaque lien doit avoir son libellé en français : une adresse nue ne dit pas où elle mène.')
+  }
+  if (payload.links.some((l) => !/^(https?:\/\/|\/)\S*$/.test(l.url))) {
+    throw new Refus('Adresse du lien refusée : une adresse complète (https://…) ou un chemin du site (/…).')
+  }
   const roles = trackPartnerRoles()
   const seen = new Set<string>()
   const partners = payload.partners.flatMap((p, index) => {
@@ -145,6 +152,7 @@ export function saveTrackPage(trackId: TrackId, eventId: EventId, payload: Track
     feature_link_label: payload.feature_link_label,
     feature_link_url: payload.feature_link_url,
     partners,
+    links: payload.links.map((l, index) => ({ id: `${trackId}-lien-${index}`, label: l.label, url: l.url, sort_order: index })),
   })
   return copy(settings)
 }

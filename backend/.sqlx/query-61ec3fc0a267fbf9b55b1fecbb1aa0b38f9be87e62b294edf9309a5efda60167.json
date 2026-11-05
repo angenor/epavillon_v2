@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_track_links (track_id, label, url, sort_order)\n         SELECT $1, l.label::platform.i18n_text, a.url, a.rang - 1\n           FROM unnest($3::text[]) WITH ORDINALITY AS a(url, rang)\n           JOIN jsonb_array_elements($2::jsonb) WITH ORDINALITY AS l(label, rang)\n             ON l.rang = a.rang",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "61ec3fc0a267fbf9b55b1fecbb1aa0b38f9be87e62b294edf9309a5efda60167"
+}

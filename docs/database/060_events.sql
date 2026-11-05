@@ -611,6 +611,29 @@ CREATE TRIGGER tg_programme_track_partners_check_role
     BEFORE INSERT OR UPDATE OF role_term_id ON event.programme_track_partners
     FOR EACH ROW EXECUTE FUNCTION event.tg_check_track_partner_role();
 
+-- LIENS VERS UNE PAGE DE TÉLÉCHARGEMENT (05/11/2026). À côté des PDF déposés
+-- (media.attachments, rôle `document`), un fil mène vers la page où son
+-- éditeur publie un document, sans en héberger de copie : le Guide des
+-- négociations sur le site de l'OIF. Une table et non media.attachments : un
+-- lien n'est pas un fichier, il n'a ni poids ni type. Sur la page, les liens
+-- suivent les fichiers. Libellé obligatoire : une adresse nue ne dit pas où
+-- elle mène. Même forme d'adresse que feature_link_url.
+CREATE TABLE event.programme_track_links (
+    id         uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    track_id   uuid        NOT NULL REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
+    label      platform.i18n_text NOT NULL,
+    url        text        NOT NULL,
+    sort_order smallint    NOT NULL DEFAULT 0,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ck_programme_track_links_url
+        CHECK (url ~ '^(https?://|/)[^\s]*$' AND length(url) <= 2048)
+);
+
+CREATE INDEX ix_programme_track_links_track ON event.programme_track_links (track_id, sort_order);
+
+COMMENT ON TABLE event.programme_track_links IS
+    'Liens d''un fil vers la page où un document se télécharge chez son éditeur. Remplacés en bloc par l''éditeur de la page ; affichés après les PDF déposés.';
+
 -- Signal du programme public (temps réel, 31/10) : un fil publié, ou qui cesse
 -- de l'être, et sa page (parties, moments, partenaires) changent ce que
 -- montrent la programmation et la page du fil. `edition:<id>:public:schedule`,
@@ -671,6 +694,10 @@ CREATE TRIGGER tg_programme_track_moments_public_signal
 
 CREATE TRIGGER tg_programme_track_partners_public_signal
     AFTER INSERT OR UPDATE OR DELETE ON event.programme_track_partners
+    FOR EACH ROW EXECUTE FUNCTION event.tg_programme_track_page_signal();
+
+CREATE TRIGGER tg_programme_track_links_public_signal
+    AFTER INSERT OR UPDATE OR DELETE ON event.programme_track_links
     FOR EACH ROW EXECUTE FUNCTION event.tg_programme_track_page_signal();
 
 -- -----------------------------------------------------------------------------

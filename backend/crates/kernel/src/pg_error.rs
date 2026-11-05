@@ -234,6 +234,7 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         | ("23514", "ck_programme_tracks_feature_link_url") => {
             ApiError::new(ValidationFailed).field("feature_link_url")
         }
+        ("23514", "ck_programme_track_links_url") => ApiError::new(ValidationFailed).field("links"),
         ("23514", "ck_programme_tracks_feature_title") => {
             ApiError::new(ValidationFailed).field("feature_title")
         }

@@ -258,6 +258,8 @@ pub struct PublicTrackPage {
     pub cover: Option<Value>,
     /// `AttachedDocument[]` : programme en PDF, Guide des négociations.
     pub documents: Vec<Value>,
+    /// `PublicTrackLink[]` : pages de téléchargement, affichées après les documents.
+    pub links: Vec<Value>,
     pub feature: Option<PublicTrackFeature>,
     pub target_audiences: Vec<Value>,
     pub support_note: Option<Value>,

@@ -56,12 +56,20 @@
     "cover": "Header photo",
     "coverUse": "cropped to the screen width",
     "documents": "Documents",
-    "documentsHint": "As PDF. The label is the link text on the page: \"Programme (PDF)\", \"Guide summary\".",
+    "documentsHint": "An uploaded PDF, or a link to the page where it can be downloaded. The label is the link text on the page: \"Programme (PDF)\", \"Guide summary\".",
     "addDocument": "Add a document",
     "caption": "Link label",
     "captionHint": "Without a label, the page shows the file name.",
     "removeDocument": "Remove {name}",
-    "untitled": "Document"
+    "untitled": "Document",
+    "addLink": "Add a link",
+    "linkUrl": "Page address",
+    "linkUrlHint": "Full address (https://…) or site path (/programmations).",
+    "linkLabelHint": "Required for a link: a bare address does not say where it leads.",
+    "linkLabelMissing": "A link needs its label.",
+    "linkUrlMissing": "A link needs its address.",
+    "removeLink": "Remove the link {name}",
+    "newLink": "New link"
   },
   "feature": {
     "kicker": "Kicker",

@@ -288,6 +288,7 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
         is_off_site: fil.is_off_site,
         cover: fil.cover,
         documents: en_liste(fil.documents),
+        links: en_liste(fil.links),
         feature,
         target_audiences: en_liste(fil.target_audiences),
         support_note: fil.support_note,

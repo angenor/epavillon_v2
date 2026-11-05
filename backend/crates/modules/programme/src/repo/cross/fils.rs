@@ -50,6 +50,8 @@ pub struct FilPublie {
     pub cover: Option<Value>,
     pub feature_visual: Option<Value>,
     pub documents: Value,
+    /// `PublicTrackLink[]` : pages de téléchargement, après les documents.
+    pub links: Value,
 
     /// Le lieu résolu : celui du fil, à défaut le pavillon de l'édition.
     pub venue_id: Option<Uuid>,
@@ -113,6 +115,10 @@ pub async fn fil_publie<'e>(
                       AS "feature_visual: Value",
                   media.attached_documents('event', 'programme_tracks', f.id, 'document')
                       AS "documents!: Value",
+                  COALESCE((SELECT jsonb_agg(jsonb_build_object('label', l.label, 'url', l.url)
+                                             ORDER BY l.sort_order, l.created_at)
+                              FROM event.programme_track_links l
+                             WHERE l.track_id = f.id), '[]'::jsonb) AS "links!: Value",
                   v.id AS "venue_id?", v.name AS "venue_name?: Value", v.kind AS "venue_kind?",
                   v.address AS "venue_address?", v.map_url::text AS "venue_map_url?",
                   v.area AS "venue_area?: Value", v.access_note AS "venue_access_note?: Value",
