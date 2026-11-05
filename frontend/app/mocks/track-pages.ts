@@ -358,11 +358,9 @@ const atelier: Source = {
   feature: {
     kicker: fr("Présenté pendant l'atelier"),
     title: fr('Guide des négociations de la CdP31'),
-    body: fr(
-      "Le Guide et son Résumé sont présentés l'après-midi par Dr Issa Bado et M. Serges Djohy. Le Guide se lit aussi dans l'application Guide Négo, au fil des sessions.",
-    ),
-    link_label: fr('Ouvrir dans Guide Négo'),
-    link_url: '/guide-nego',
+    body: fr("Le Guide et son Résumé sont présentés l'après-midi par Dr Issa Bado et M. Serges Djohy."),
+    link_label: null,
+    link_url: null,
     visual: photo(10, 'Couverture du Guide des négociations de la CdP31'),
   },
   documents: [
