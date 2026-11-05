@@ -14,7 +14,7 @@ Chaque dossier contient :
 - `tournage/` : scripts Playwright. Ils se connectent avec le compte de démonstration (mot de passe lu dans `.env`), capturent chaque étape en 1440 × 810 à 2× et relèvent l'emplacement des boutons dans `reperes.json`.
 - `montage/construire.py` : engendre la composition HyperFrames (une sous-composition par scène, sous-titres, sons). Curseur, zooms et cadres se calculent depuis `reperes.json` ; les temps, depuis les pauses de la voix (`ffmpeg -af silencedetect=n=-38dB:d=0.22`).
 
-Les captures (14 Mo) et le MP4 ne sont pas versionnés : on les refait.
+La vidéo rendue se range dans le dossier de la vidéo (`01-image-de-couverture/tutoriel-image-de-couverture.mp4`), ignorée par Git (`docs/tutoriels/.gitignore`). Les captures (14 Mo) ne sont pas versionnées : on les refait.
 
 ## Tourner
 
