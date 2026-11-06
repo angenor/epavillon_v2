@@ -61,7 +61,8 @@ onBeforeUnmount(() => window.removeEventListener('resize', measure))
   inset-inline: 0;
   bottom: var(--target-min);
   height: 5.5em;
-  background: linear-gradient(to bottom, transparent, var(--color-surface));
+  /* Une carte posée sur la page redonne sa propre surface : `[--fold-fade:…]`. */
+  background: linear-gradient(to bottom, transparent, var(--fold-fade, var(--color-surface)));
   pointer-events: none;
 }
 </style>

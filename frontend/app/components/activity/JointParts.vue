@@ -108,7 +108,9 @@ const ruleStyle = { '--rule-solid': 'var(--color-day-solid)', '--rule-on': 'var(
           >
             {{ card.title }}
           </h3>
-          <UiRichContent class="text-[0.95rem] leading-[1.7]" :html="card.description" />
+          <ActivityFold v-if="card.description" class="[--fold-fade:var(--color-surface-raised)]">
+            <UiRichContent class="text-[0.95rem] leading-[1.7]" :html="card.description" />
+          </ActivityFold>
           <ActivityPeople :speakers="card.speakers" compact />
           <ul v-if="card.associates.length" class="grid gap-2 border-t border-border-subtle pt-3" :aria-label="t('activity.organizations.title')">
             <li v-for="associate in card.associates" :key="associate.id" class="flex min-w-0 items-center gap-2.5">
