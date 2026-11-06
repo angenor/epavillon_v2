@@ -358,27 +358,43 @@ async fn les_bornes_dintervenants_sappliquent_au_depot_et_pas_avant() {
 }
 
 #[tokio::test]
-async fn la_duree_hors_bornes_de_lappel_est_refusee_sur_son_champ() {
+async fn la_duree_tient_entre_dix_minutes_et_la_borne_haute_de_lappel() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
 
-    // La colonne accepte 15 à 600 ; l'appel, lui, borne à 45–150 par défaut.
-    // Ce sont des règles de CAMPAGNE, et ce sont elles qui refusent en premier.
-    let mut trop_court = complet(&terrain, "Trop court");
-    trop_court.duration_minutes = Some(20);
-
-    let refus = draft_write::enregistrer(
+    // L'appel borne à 45–150 par défaut ; la vérification accepte dès 10
+    // minutes (« COP Bike Ride », 06/11), la borne haute reste celle de l'appel.
+    let mut court = complet(&terrain, "Dix minutes");
+    court.duration_minutes = Some(10);
+    draft_write::enregistrer(
         &bac.state,
         &bac.ctx(),
         terrain.deposante,
-        commun::charge(&terrain, trop_court),
+        commun::charge(&terrain, court),
     )
     .await
-    .expect_err("vingt minutes est sous la borne de l'appel");
+    .expect("dix minutes est admis, même sous la borne basse de l'appel");
 
-    assert_eq!(refus.code, ErrorCode::ValidationFailed);
-    assert_eq!(refus.field.as_deref(), Some("duration_minutes"));
-    assert!(refus.message.contains("45"), "{}", refus.message);
+    for (titre, minutes) in [("Neuf minutes", 9), ("Trop long", 160)] {
+        let mut hors = complet(&terrain, titre);
+        hors.duration_minutes = Some(minutes);
+        let refus = draft_write::enregistrer(
+            &bac.state,
+            &bac.ctx(),
+            terrain.deposante,
+            commun::charge(&terrain, hors),
+        )
+        .await
+        .expect_err("hors de 10 à 150 minutes");
+
+        assert_eq!(refus.code, ErrorCode::ValidationFailed);
+        assert_eq!(refus.field.as_deref(), Some("duration_minutes"));
+        assert!(
+            refus.message.contains("entre 10 et 150"),
+            "{}",
+            refus.message
+        );
+    }
 }
 
 #[tokio::test]

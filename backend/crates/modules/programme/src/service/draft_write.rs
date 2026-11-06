@@ -583,19 +583,23 @@ fn format_admis(brouillon: &ProposalDraft, regles: &ReglesDeLAppel) -> Result<St
     }
 }
 
-/// La durée doit tenir dans les bornes **de l'appel**, plus serrées que celles
-/// de la colonne (15 à 600) : ce sont des règles de campagne, pas de données.
+/// Plancher de toute activité, quelle que soit la borne basse de l'appel : le
+/// 06/11, « COP Bike Ride » ne se corrigeait plus sous les 45 minutes de la
+/// CdP31. Le formulaire garde les bornes de l'appel, la vérification celle-ci.
+const DUREE_MINIMALE: i16 = 10;
+
+/// La durée tient entre `DUREE_MINIMALE` et la borne haute **de l'appel**.
 fn duree_admise(brouillon: &ProposalDraft, regles: &ReglesDeLAppel) -> Result<Option<i16>> {
     let Some(duree) = brouillon.duration_minutes else {
         return Ok(None);
     };
 
-    if duree < regles.min_duration_minutes || duree > regles.max_duration_minutes {
+    if duree < DUREE_MINIMALE || duree > regles.max_duration_minutes {
         return Err(ApiError::with_message(
             ErrorCode::ValidationFailed,
             format!(
                 "La durée doit être comprise entre {} et {} minutes.",
-                regles.min_duration_minutes, regles.max_duration_minutes
+                DUREE_MINIMALE, regles.max_duration_minutes
             ),
         )
         .field("duration_minutes"));

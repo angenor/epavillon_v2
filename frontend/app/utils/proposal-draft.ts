@@ -159,6 +159,9 @@ export function draftDocumentOf(entry: ProposalDocumentEntry, index: number): Dr
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
+/** Plancher de toute activité, même sous la borne basse de l'appel (miroir de l'API). */
+const MIN_DURATION_MINUTES = 10
+
 /**
  * Le TEXTE d'un fragment de texte riche, balisage retiré.
  *
@@ -465,10 +468,9 @@ function validateSchedule(
 ): DraftIssue[] {
   const issues: DraftIssue[] = []
 
-  // LES BORNES VIENNENT DE L'APPEL, pas d'une constante : `min_duration_minutes`
-  // et `max_duration_minutes` sont des colonnes depuis le 17/08. Le `CHECK` de
-  // `proposals.duration_minutes` (15 à 600) reste en base comme garde-fou de
-  // données ; ce n'est pas lui qui dit ce qu'un pavillon accepte.
+  // La borne haute vient de l'appel ; la basse est `MIN_DURATION_MINUTES`, comme
+  // côté API : le formulaire propose les durées de l'appel, la vérification
+  // accepte plus court (« COP Bike Ride », 06/11).
   if (draft.duration_minutes === null) {
     issues.push({
       step: 'schedule',
@@ -477,7 +479,7 @@ function validateSchedule(
       messageKey: 'proposal.form.step-schedule.errors.durationRequired',
     })
   } else if (
-    draft.duration_minutes < call.min_duration_minutes ||
+    draft.duration_minutes < MIN_DURATION_MINUTES ||
     draft.duration_minutes > call.max_duration_minutes
   ) {
     issues.push({
@@ -485,7 +487,7 @@ function validateSchedule(
       field: 'duration_minutes',
       severity: 'error',
       messageKey: 'proposal.form.step-schedule.errors.durationRange',
-      params: { min: call.min_duration_minutes, max: call.max_duration_minutes },
+      params: { min: MIN_DURATION_MINUTES, max: call.max_duration_minutes },
     })
   }
 

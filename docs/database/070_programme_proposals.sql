@@ -152,7 +152,7 @@ CREATE TABLE programme.proposals (
     -- Créneau souhaité par l'organisation. Le créneau retenu vit sur la session.
     preferred_start_at timestamptz,
     preferred_end_at   timestamptz,
-    duration_minutes   smallint   CHECK (duration_minutes IS NULL OR duration_minutes BETWEEN 15 AND 600),
+    duration_minutes   smallint   CHECK (duration_minutes IS NULL OR duration_minutes BETWEEN 10 AND 600),
     -- Nombre d'occurrences demandées : un cycle de webinaires en annonce
     -- plusieurs dès la soumission (cas PACO).
     requested_sessions smallint   NOT NULL DEFAULT 1 CHECK (requested_sessions BETWEEN 1 AND 50),

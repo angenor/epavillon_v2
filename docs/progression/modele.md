@@ -661,3 +661,7 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 - **`event.programme_track_links`** (`060_events.sql` § 4 ter, après les partenaires) : libellé `platform.i18n_text` obligatoire, adresse (`ck_programme_track_links_url`, même forme que `feature_link_url` : `https://…` ou chemin du site, 2048 au plus), rang. Un lien n'est pas un fichier : ni `media.attachments`, ni poids, ni type. Signal du programme public par `tg_programme_track_links_public_signal`, comme parties, moments et partenaires.
 
 **En production** : `ops/migrations/2026-11-05-liens-documents-fil.sql`, rejouable, additive, modèle seul, **à jouer avant de déployer l'API**. Jouée le 05/11 après sauvegarde (`epavillon-20261105-222036.sql.gz`), accord du commanditaire.
+
+## 2026-11-06 : durée d'un dossier dès 10 minutes
+
+`programme.proposals.duration_minutes` : garde-fou de 10 à 600 au lieu de 15 à 600 (`070`). « COP Bike Ride » ne se corrigeait plus au back-office sous les 45 minutes de l'appel de la CdP31. Les bornes de l'appel ne bougent pas (`ck_calls_duration_bounds` garde 15) : le formulaire propose toujours les durées de l'appel, l'API accepte dès 10 minutes (`DUREE_MINIMALE` de `service/draft_write.rs`, `MIN_DURATION_MINUTES` du site). Migration `ops/migrations/2026-11-06-duree-minimale-10-minutes.sql`, rejouable, à jouer avant l'API.
