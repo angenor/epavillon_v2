@@ -665,3 +665,7 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 ## 2026-11-06 : durée d'un dossier dès 10 minutes
 
 `programme.proposals.duration_minutes` : garde-fou de 10 à 600 au lieu de 15 à 600 (`070`). « COP Bike Ride » ne se corrigeait plus au back-office sous les 45 minutes de l'appel de la CdP31. Les bornes de l'appel ne bougent pas (`ck_calls_duration_bounds` garde 15) : le formulaire propose toujours les durées de l'appel, l'API accepte dès 10 minutes (`DUREE_MINIMALE` de `service/draft_write.rs`, `MIN_DURATION_MINUTES` du site). Migration `ops/migrations/2026-11-06-duree-minimale-10-minutes.sql`, rejouable, à jouer avant l'API.
+
+## 2026-11-07 : une journée en présentiel seulement
+
+`event.programme_tracks.is_streamed boolean NOT NULL DEFAULT true` (`060`). Faux : la page le dit, l'inscription à la journée se refuse, aucune réunion ne naît, celle qui existe est annulée (événement `event.track.streaming_disabled`, premier événement émis par un fil). Migration `ops/migrations/2026-11-07-atelier-en-presentiel.sql`, rejouable, à jouer avant l'API ; elle éteint l'atelier de la CdP31 et annule sa réunion.

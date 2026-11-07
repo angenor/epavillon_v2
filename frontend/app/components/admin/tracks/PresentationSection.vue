@@ -9,6 +9,7 @@ import type { TrackPageDraft } from '~/utils/track-page'
  * l'édition ; aucun choix veut dire « le pavillon » (`venue_id` nul), le cas
  * de toutes les journées spéciales. L'hôtel de l'atelier se déclare à
  * l'onglet « Lieux et salles », avec son adresse, son secteur et sa consigne.
+ * La diffusion en ligne s'y règle aussi : un lieu, ou un lieu et un direct.
  */
 
 const props = defineProps<{
@@ -93,6 +94,14 @@ const shown = computed<EditionVenue | null>(() =>
         </UiButton>
       </div>
     </div>
+
+    <UiSwitch
+      :model-value="props.modelValue.is_streamed"
+      :label="t('admin.event.track.place.streamed')"
+      :hint="t(props.modelValue.is_streamed ? 'admin.event.track.place.streamedHint' : 'admin.event.track.place.notStreamedHint')"
+      :disabled="props.disabled"
+      @update:model-value="(next: boolean) => set('is_streamed', next)"
+    />
 
     <AdminEventsI18nField
       :model-value="props.modelValue.tagline"

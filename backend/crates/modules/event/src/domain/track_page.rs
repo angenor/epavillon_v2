@@ -95,6 +95,8 @@ pub struct TrackPageSettings {
     pub event_id: Uuid,
     /// Nul : le pavillon de l'édition.
     pub venue_id: Option<Uuid>,
+    /// Faux : présentiel seulement, ni inscription ni direct (07/11).
+    pub is_streamed: bool,
     pub tagline: Option<Value>,
     pub target_audiences: Vec<Value>,
     pub support_note: Option<Value>,
@@ -127,6 +129,10 @@ pub struct TrackLinkPayload {
     pub url: String,
 }
 
+fn diffusee_par_defaut() -> bool {
+    true
+}
+
 fn role_par_defaut() -> String {
     "partner".to_owned()
 }
@@ -140,6 +146,9 @@ fn role_par_defaut() -> String {
 pub struct TrackPagePayload {
     #[serde(default)]
     pub venue_id: Option<Uuid>,
+    /// Absent : diffusée, comme avant le 07/11.
+    #[serde(default = "diffusee_par_defaut")]
+    pub is_streamed: bool,
     #[serde(default)]
     pub tagline: Option<Value>,
     #[serde(default)]

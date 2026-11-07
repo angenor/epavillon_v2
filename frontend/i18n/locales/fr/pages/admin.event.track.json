@@ -41,7 +41,10 @@
     "map": "Voir sur la carte",
     "noAddress": "Ni adresse ni lien de carte : la page n'affichera pas de plan d'accès.",
     "tagline": "Accroche",
-    "taglineHint": "Quelques mots posés sous le titre : « Hackathon, pitchs, jeu, scène »."
+    "taglineHint": "Quelques mots posés sous le titre : « Hackathon, pitchs, jeu, scène ».",
+    "streamed": "Diffusée en ligne",
+    "streamedHint": "Un seul direct de l'ouverture à la clôture, sur inscription.",
+    "notStreamedHint": "Présentiel seulement : la page le dit, l'inscription en ligne est fermée et la réunion Zoom de la journée est annulée. Les inscrits gardent leur inscription, pour qu'on puisse leur écrire."
   },
   "audiences": {
     "label": "Publics cibles",

@@ -34,6 +34,7 @@ export interface TrackLinkDraft {
 
 export interface TrackPageDraft {
   venue_id: VenueId | null
+  is_streamed: boolean
   tagline: I18nText | null
   /** Une ligne par public ; `fr` vide tant que la saisie n'est pas faite. */
   target_audiences: I18nText[]
@@ -87,6 +88,7 @@ export function draftFromSettings(settings: TrackPageSettings, media: AttachedMe
   const visual = asImage(media.find((m) => m.role === 'thumbnail'))
   return {
     venue_id: settings.venue_id,
+    is_streamed: settings.is_streamed,
     tagline: settings.tagline,
     target_audiences: settings.target_audiences.map((a) => ({ ...a })),
     support_note: settings.support_note,
@@ -127,6 +129,7 @@ export function payloadFromDraft(draft: TrackPageDraft): TrackPagePayload {
   const url = draft.feature_link_url.trim()
   return {
     venue_id: draft.venue_id,
+    is_streamed: draft.is_streamed,
     tagline: filled(draft.tagline),
     target_audiences: draft.target_audiences.filter((a) => a.fr.trim() || a.en?.trim()),
     support_note: filled(draft.support_note),

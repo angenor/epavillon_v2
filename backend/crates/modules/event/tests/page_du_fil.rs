@@ -45,6 +45,7 @@ async fn hotel(bac: &Bac, event_id: Uuid) -> Uuid {
 fn page_vide() -> TrackPagePayload {
     TrackPagePayload {
         venue_id: None,
+        is_streamed: true,
         tagline: None,
         target_audiences: Vec::new(),
         support_note: None,
@@ -361,4 +362,36 @@ async fn hors_perimetre_le_fil_est_refuse_comme_inexistant() {
     edition_dans_le_perimetre(bac.pool(), &globale, Cible::Fil(TrackId::from(enfants.fil)))
         .await
         .expect("l'administratrice de la plateforme y accède");
+}
+
+/// Le direct éteint (07/11) se relit, et s'annonce une seule fois au module du
+/// direct, qui annule la réunion de la journée.
+#[tokio::test]
+async fn eteindre_le_direct_se_relit_et_sannonce_une_fois() {
+    let bac = Bac::monter().await;
+    let editions = seed::editions(&bac).await;
+    let enfants = seed::enfants(&bac, editions.cop31).await;
+    let fil = TrackId::from(enfants.fil);
+
+    let lu = track_page::lire(bac.pool(), fil).await.expect("lecture");
+    assert!(lu.is_streamed, "diffusée par défaut");
+
+    let mut page = page_vide();
+    page.is_streamed = false;
+    for _ in 0..2 {
+        let ecrit = track_page::enregistrer(&bac.state, &bac.ctx(), fil, page.clone())
+            .await
+            .expect("écriture");
+        assert!(!ecrit.is_streamed);
+    }
+
+    let annonces: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM platform.outbox_events
+          WHERE aggregate_id = $1 AND event_type = 'event.track.streaming_disabled'",
+    )
+    .bind(enfants.fil)
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(annonces, 1, "seulement au passage de diffusée à présentiel");
 }

@@ -15,9 +15,10 @@
 //! personne.
 //!
 //! Ce qui n'émet **rien**, et c'est une soustraction délibérée : les journées du
-//! calendrier, les fils de programmation, les lieux, les salles, les canaux de
-//! diffusion et le comité de sélection. Aucun autre module n'a à y réagir, et
-//! émettre « pour plus tard » remplit la file de messages que personne ne lit.
+//! calendrier, les lieux, les salles, les canaux de diffusion et le comité de
+//! sélection. Aucun autre module n'a à y réagir, et émettre « pour plus tard »
+//! remplit la file de messages que personne ne lit. Un fil n'émet qu'une chose
+//! (07/11) : son direct éteint, que le module du direct doit annuler chez Zoom.
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -26,6 +27,7 @@ pub const AGGREGATE_SCHEMA: &str = "event";
 pub const AGGREGATE_EDITION: &str = "edition";
 pub const AGGREGATE_CALL: &str = "call";
 pub const AGGREGATE_PROGRAMME: &str = "programme";
+pub const AGGREGATE_TRACK: &str = "track";
 
 pub const EDITION_CREATED: &str = "event.edition.created";
 pub const EDITION_UPDATED: &str = "event.edition.updated";
@@ -33,6 +35,9 @@ pub const CALL_OPENED: &str = "event.call.opened";
 pub const CALL_CLOSED: &str = "event.call.closed";
 pub const CALL_DEADLINE_EXTENDED: &str = "event.call.deadline_extended";
 pub const PROGRAMME_PUBLISHED: &str = "event.programme.published";
+/// La journée ne se suit plus en ligne : sa réunion est annulée. Charge vide,
+/// l'agrégat est le fil.
+pub const TRACK_STREAMING_DISABLED: &str = "event.track.streaming_disabled";
 
 /// Personne ne la consomme aujourd'hui. Elle porte la trace de l'entité dont
 /// B4, B5 et B6 dépendent tous.

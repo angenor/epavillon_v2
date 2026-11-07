@@ -516,3 +516,40 @@ async fn placer_une_activite_dans_une_partie_de_son_fil_et_seulement_la() {
     .expect_err("séance non rattachée à ce fil");
     assert_eq!(refus.code, ErrorCode::NotFound);
 }
+
+/// Une journée en présentiel seulement (07/11) : la page le dit, l'inscription
+/// à la journée se refuse avec une phrase.
+#[tokio::test]
+async fn une_journee_en_presentiel_seulement_refuse_linscription() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let id = fil(&bac, terrain.edition, "atelier-preparatoire", true, None).await;
+
+    let page = track_page::page(bac.pool(), SLUG_COP31, "atelier-preparatoire")
+        .await
+        .expect("page");
+    assert!(page.track.is_streamed, "diffusée par défaut");
+
+    sqlx::query("UPDATE event.programme_tracks SET is_streamed = false WHERE id = $1")
+        .bind(id)
+        .execute(bac.pool())
+        .await
+        .unwrap();
+    let page = track_page::page(bac.pool(), SLUG_COP31, "atelier-preparatoire")
+        .await
+        .expect("page");
+    assert!(!page.track.is_streamed);
+
+    let charge = serde_json::from_value(serde_json::json!({ "track_id": id })).unwrap();
+    let refus = programme::service::track_registration::sinscrire(
+        &bac.state,
+        &bac.ctx(),
+        Some(terrain.deposante),
+        None,
+        charge,
+    )
+    .await
+    .expect_err("présentiel seulement");
+    assert_eq!(refus.code, ErrorCode::RegistrationNotAccepted);
+    assert!(refus.message.contains("présentiel"), "{}", refus.message);
+}

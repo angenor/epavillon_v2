@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT is_streamed FROM event.programme_tracks WHERE id = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "is_streamed",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "is_streamed"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5dbd7aff45b4cc458f6c16f55af9ee18d82ebc8956fd550b36db3de0ca0cc8ba"
+}

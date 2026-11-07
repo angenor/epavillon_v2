@@ -74,6 +74,10 @@
       "dayLive": "The day's live stream is open, from opening to closing.",
       "join": "Join the day's live stream",
       "guestLive": "Follow the live link you received by email."
+    },
+    "inPerson": {
+      "title": "In person only.",
+      "body": "This day is not streamed online."
     }
   },
   "overview": {

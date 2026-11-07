@@ -69,6 +69,7 @@ function settingsOf(trackId: TrackId, eventId: EventId): TrackPageSettings {
     track_id: trackId,
     event_id: eventId,
     venue_id: null,
+    is_streamed: true,
     tagline: null,
     target_audiences: [],
     support_note: null,
@@ -143,6 +144,7 @@ export function saveTrackPage(trackId: TrackId, eventId: EventId, payload: Track
   })
   Object.assign(settings, {
     venue_id: payload.venue_id,
+    is_streamed: payload.is_streamed,
     tagline: payload.tagline,
     target_audiences: payload.target_audiences,
     support_note: payload.support_note,

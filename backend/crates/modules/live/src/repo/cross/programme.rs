@@ -367,6 +367,8 @@ pub struct Journee {
     pub is_published: bool,
 }
 
+/// Une journée qui se suit en ligne : éteinte (`is_streamed`, 07/11), elle
+/// n'existe pas pour le direct, et aucune réunion ne naît.
 pub async fn journee(conn: &mut PgConnection, track_id: Uuid) -> Result<Option<Journee>> {
     let ligne = sqlx::query!(
         r#"WITH bornes AS (
@@ -389,7 +391,7 @@ pub async fn journee(conn: &mut PgConnection, track_id: Uuid) -> Result<Option<J
              FROM event.programme_tracks t
              JOIN event.events e ON e.id = t.event_id
              CROSS JOIN bornes b
-            WHERE t.id = $1 AND programme.is_day_track_kind(t.kind)"#,
+            WHERE t.id = $1 AND programme.is_day_track_kind(t.kind) AND t.is_streamed"#,
         track_id
     )
     .fetch_optional(conn)

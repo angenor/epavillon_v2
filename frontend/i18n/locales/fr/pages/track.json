@@ -74,6 +74,10 @@
       "dayLive": "Le direct de la journée est ouvert, de l'ouverture à la clôture.",
       "join": "Rejoindre le direct de la journée",
       "guestLive": "Suivez le lien du direct reçu par courriel."
+    },
+    "inPerson": {
+      "title": "Exclusivement en présentiel.",
+      "body": "Cette journée n'est pas diffusée en ligne."
     }
   },
   "overview": {

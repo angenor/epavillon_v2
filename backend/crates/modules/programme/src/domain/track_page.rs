@@ -242,6 +242,8 @@ pub struct PublicTrackHeader {
     pub color_hex: Option<String>,
     /// Pictogramme, code d'un dessin connu du site ; nul : aucun.
     pub icon_code: Option<String>,
+    /// Faux : présentiel seulement, ni inscription ni direct (07/11).
+    pub is_streamed: bool,
     /// `ScheduleThemeBadge[]`.
     pub themes: Value,
 }

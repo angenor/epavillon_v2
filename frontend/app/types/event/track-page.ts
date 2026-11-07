@@ -103,6 +103,8 @@ export interface TrackPageSettings {
   event_id: EventId
   /** Nul : le pavillon de l'édition. */
   venue_id: VenueId | null
+  /** Faux : présentiel seulement, ni inscription ni direct. */
+  is_streamed: boolean
   tagline: I18nText | null
   target_audiences: I18nText[]
   support_note: I18nText | null
@@ -131,6 +133,8 @@ export interface TrackPartnerPayload {
  */
 export interface TrackPagePayload {
   venue_id: VenueId | null
+  /** Faux : présentiel seulement, ni inscription ni direct. */
+  is_streamed: boolean
   tagline: I18nText | null
   target_audiences: I18nText[]
   support_note: I18nText | null

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.programme_tracks SET\n               venue_id           = $2,\n               tagline            = $3::jsonb,\n               target_audiences   = ARRAY(SELECT a::platform.i18n_text\n                                            FROM jsonb_array_elements($4::jsonb) AS a),\n               support_note       = $5::jsonb,\n               feature_kicker     = $6::jsonb,\n               feature_title      = $7::jsonb,\n               feature_body       = $8::jsonb,\n               feature_link_label = $9::jsonb,\n               feature_link_url   = $10,\n               is_streamed        = $11\n         WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "edd2ab7d580541348204f4b2c21d453507fd967ce74c1e08156d6d85fe4268f6"
+}

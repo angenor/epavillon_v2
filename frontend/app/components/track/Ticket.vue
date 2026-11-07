@@ -18,6 +18,8 @@ import type { TrackDayPhase } from '~/composables/useTrackDay'
  * l'ouverture à la clôture. Avant, « S'inscrire à la journée » ; inscrite, ce
  * qu'elle suit et « Modifier mes activités » ; le jour même, un seul
  * « Rejoindre le direct de la journée ». La fenêtre d'inscription est montée ici.
+ * Une journée en présentiel seulement (07/11) n'a ni l'un ni l'autre : le
+ * billet le dit à leur place.
  */
 
 interface Props {
@@ -47,13 +49,15 @@ const { mine, guestRegistered, registered, dialogOpen, highlight } = day
 const cancelling = ref(false)
 const cancelError = ref<string | null>(null)
 
+const streamed = computed(() => props.page.track.is_streamed)
+
 /** Le bloc d'inscription : s'inscrire, ou ce qu'on suit ; le jour même, le direct prend sa place. */
 const signup = computed<'register' | 'registered' | null>(() => {
-  if (props.phase === 'after') return null
+  if (props.phase === 'after' || !streamed.value) return null
   if (!registered.value) return 'register'
   return props.phase === 'before' ? 'registered' : null
 })
-const canJoin = computed(() => props.phase === 'during' && mine.value !== null && props.meetingJoinable)
+const canJoin = computed(() => streamed.value && props.phase === 'during' && mine.value !== null && props.meetingJoinable)
 const following = computed(() => {
   const value = mine.value
   if (!value || !hasActivityChoice(props.page)) return ''
@@ -139,7 +143,7 @@ const now = computed(() => {
         : t('track.ticket.until', { time: until })
       : organization,
     to: link(props.page.edition.slug, session),
-    note: session.is_streamed ? '' : t('track.ticket.notStreamed'),
+    note: streamed.value && !session.is_streamed ? t('track.ticket.notStreamed') : '',
   }
 })
 
@@ -239,8 +243,16 @@ const hasMore = computed(() => (props.page.is_off_site && venue.value) || props.
         </template>
       </div>
 
+      <p
+        v-if="!streamed && props.phase !== 'after'"
+        class="mt-4 flex gap-2.5 rounded-md border border-border-subtle bg-surface p-3.5 text-sm leading-relaxed"
+      >
+        <UiIcon name="map-pin" size="1.125rem" class="mt-0.5 shrink-0 text-text-muted" />
+        <span><b class="font-semibold text-text">{{ t('track.ticket.inPerson.title') }}</b> {{ t('track.ticket.inPerson.body') }}</span>
+      </p>
+
       <div
-        v-if="now || (props.phase === 'during' && registered)"
+        v-if="now || (props.phase === 'during' && registered && streamed)"
         class="mt-4 rounded-md border p-3"
         :class="now?.live ? 'border-live-border bg-live-surface' : now ? 'border-warning-border bg-warning-surface' : 'border-[color-mix(in_srgb,var(--color-day-solid)_35%,transparent)] bg-(--color-day-surface)'"
       >

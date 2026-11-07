@@ -36,6 +36,7 @@ pub async fn lire(pool: &PgPool, track: TrackId) -> Result<TrackPageSettings> {
         track_id: track.as_uuid(),
         event_id: colonnes.event_id,
         venue_id: colonnes.venue_id,
+        is_streamed: colonnes.is_streamed,
         tagline: colonnes.tagline,
         target_audiences,
         support_note: colonnes.support_note,
@@ -97,10 +98,23 @@ pub async fn enregistrer(
         ));
     }
 
-    match track_page::ecrire(&mut tx, track, &payload).await {
-        Ok(true) => {}
-        Ok(false) => return Err(ApiError::not_found()),
+    let diffusee_avant = match track_page::ecrire(&mut tx, track, &payload).await {
+        Ok(Some(avant)) => avant,
+        Ok(None) => return Err(ApiError::not_found()),
         Err(e) => return Err(pg_error::translate(&e)),
+    };
+    if diffusee_avant && !payload.is_streamed {
+        kernel::events::emit(
+            &mut tx,
+            kernel::events::DomainEvent {
+                aggregate_schema: contracts::event::AGGREGATE_SCHEMA,
+                aggregate_type: contracts::event::AGGREGATE_TRACK,
+                aggregate_id: track.as_uuid(),
+                event_type: contracts::event::TRACK_STREAMING_DISABLED,
+                payload: serde_json::json!({}),
+            },
+        )
+        .await?;
     }
     track_page::remplacer_partenaires(&mut tx, track, &payload.partners)
         .await

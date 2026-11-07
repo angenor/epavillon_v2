@@ -494,6 +494,19 @@ ALTER TABLE event.programme_tracks
 COMMENT ON COLUMN event.programme_tracks.icon_code IS
     'Pictogramme du fil, code d''un dessin connu du site (« coins », « sprout »). NULL : aucun. Forme seule contrainte : la liste vit dans le code du site.';
 
+-- DIRECT DE LA JOURNÉE (07/11). Une journée se suivait toujours en ligne : un
+-- seul direct, né avec la première inscription (075, 080). L'atelier de la
+-- CdP31 du 08/11 s'est tenu exclusivement en présentiel, décidé la veille.
+-- Éteint : la page le dit, l'inscription à la journée se refuse, aucune
+-- réunion ne naît, et celle qui existe est annulée chez Zoom par le module du
+-- direct (événement event.track.streaming_disabled). Les inscriptions déjà
+-- faites restent, pour qu'on puisse leur écrire.
+ALTER TABLE event.programme_tracks
+    ADD COLUMN is_streamed boolean NOT NULL DEFAULT true;
+
+COMMENT ON COLUMN event.programme_tracks.is_streamed IS
+    'La journée se suit en ligne (un direct, une inscription). Faux : présentiel seulement, ni inscription ni réunion.';
+
 -- Parties du déroulé. `label` est le nom court (« Matin », « S'inspirer ») ;
 -- nul, l'écran écrit « Partie N ». `title` est l'intitulé long, `summary` sa
 -- version d'une ligne pour le sommaire « La journée en trois temps ». Les trois

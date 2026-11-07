@@ -21,6 +21,7 @@ use crate::domain::track_page::{
 pub struct ColonnesDeLaPage {
     pub event_id: Uuid,
     pub venue_id: Option<Uuid>,
+    pub is_streamed: bool,
     pub tagline: Option<serde_json::Value>,
     /// Tableau JSON, un texte multilingue par public.
     pub target_audiences: serde_json::Value,
@@ -38,7 +39,7 @@ pub async fn colonnes<'e>(
 ) -> Result<Option<ColonnesDeLaPage>> {
     let ligne = sqlx::query_as!(
         ColonnesDeLaPage,
-        r#"SELECT event_id, venue_id,
+        r#"SELECT event_id, venue_id, is_streamed,
                   tagline AS "tagline: serde_json::Value",
                   to_jsonb(target_audiences) AS "target_audiences!: serde_json::Value",
                   support_note AS "support_note: serde_json::Value",
@@ -147,14 +148,24 @@ pub async fn remplacer_liens(
     Ok(())
 }
 
-/// Écrire les colonnes de la page : écriture **totale**.
+/// Écrire les colonnes de la page : écriture **totale**. Rend la diffusion
+/// d'avant l'écriture, nul si le fil n'existe pas.
 pub async fn ecrire(
     conn: &mut PgConnection,
     track: TrackId,
     p: &TrackPagePayload,
-) -> std::result::Result<bool, sqlx::Error> {
+) -> std::result::Result<Option<bool>, sqlx::Error> {
     let publics = serde_json::Value::Array(p.target_audiences.clone());
-    let touchees = sqlx::query!(
+    let avant = sqlx::query_scalar!(
+        "SELECT is_streamed FROM event.programme_tracks WHERE id = $1 FOR UPDATE",
+        track.as_uuid()
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+    if avant.is_none() {
+        return Ok(None);
+    }
+    sqlx::query!(
         r#"UPDATE event.programme_tracks SET
                venue_id           = $2,
                tagline            = $3::jsonb,
@@ -165,7 +176,8 @@ pub async fn ecrire(
                feature_title      = $7::jsonb,
                feature_body       = $8::jsonb,
                feature_link_label = $9::jsonb,
-               feature_link_url   = $10
+               feature_link_url   = $10,
+               is_streamed        = $11
          WHERE id = $1"#,
         track.as_uuid(),
         p.venue_id,
@@ -176,13 +188,13 @@ pub async fn ecrire(
         p.feature_title,
         p.feature_body,
         p.feature_link_label,
-        p.feature_link_url
+        p.feature_link_url,
+        p.is_streamed
     )
     .execute(&mut *conn)
-    .await?
-    .rows_affected();
+    .await?;
 
-    Ok(touchees == 1)
+    Ok(avant)
 }
 
 /// Les codes de rôle inconnus parmi ceux-là : un code absent de la taxonomie

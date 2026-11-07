@@ -481,6 +481,27 @@ pub async fn annuler_reunion(conn: &mut PgConnection, session_id: Uuid) -> Resul
     Ok(())
 }
 
+/// La journée ne se suit plus en ligne (07/11) : sa réunion est annulée, chez
+/// Zoom aussi, qui prévient lui-même ses inscrits.
+pub async fn annuler_reunion_journee(conn: &mut PgConnection, track_id: Uuid) -> Result<()> {
+    let annulee = sqlx::query!(
+        "UPDATE live.meetings
+            SET status = 'cancelled', sync_status = 'not_required'
+          WHERE track_id = $1 AND status NOT IN ('cancelled', 'failed')
+        RETURNING id, external_id",
+        track_id
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+    if let Some(m) = annulee.filter(|m| m.external_id.is_some()) {
+        let mut job = NewJob::new(CANCEL_MEETING, json!({ "meeting_id": m.id }))
+            .idempotent(format!("{}:annulation", m.id));
+        job.queue = FILE;
+        jobs::enqueue(conn, job).await?;
+    }
+    Ok(())
+}
+
 /// Séance déplacée : la réunion prend le nouvel horaire, qui part chez Zoom
 /// cinq minutes plus tard. Zoom compte cent modifications par jour et par hôte :
 /// une activité déplacée plusieurs fois de suite n'en coûte qu'une, l'heure

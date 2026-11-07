@@ -25,6 +25,8 @@ pub struct Journee {
     pub title: Value,
     /// Fin du déroulé, à défaut le dernier jour annoncé.
     pub ends_at: Option<OffsetDateTime>,
+    /// Faux : présentiel seulement, l'inscription se refuse (07/11).
+    pub is_streamed: bool,
 }
 
 pub async fn journee<'e>(executor: impl PgExecutor<'e>, track_id: Uuid) -> Result<Option<Journee>> {
@@ -44,7 +46,8 @@ pub async fn journee<'e>(executor: impl PgExecutor<'e>, track_id: Uuid) -> Resul
                           (SELECT max(COALESCE(m.ends_at, m.starts_at))
                              FROM event.programme_track_moments m WHERE m.track_id = t.id)),
                       ((COALESCE(t.ends_on, t.starts_on) + 1)::timestamp AT TIME ZONE e.timezone)
-                  ) AS ends_at
+                  ) AS ends_at,
+                  t.is_streamed
              FROM event.programme_tracks t
              JOIN event.events e ON e.id = t.event_id
             WHERE t.id = $1"#,

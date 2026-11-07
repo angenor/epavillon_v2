@@ -56,6 +56,8 @@ export interface PublicTrackHeader {
   color_hex: string | null
   /** Pictogramme, code d'un dessin de `utils/track-icons.ts` ; nul : aucun. */
   icon_code: string | null
+  /** Faux : présentiel seulement, ni inscription ni direct (07/11). */
+  is_streamed: boolean
   themes: ScheduleThemeBadge[]
 }
 

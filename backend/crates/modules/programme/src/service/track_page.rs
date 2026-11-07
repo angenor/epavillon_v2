@@ -282,6 +282,7 @@ pub async fn page(pool: &PgPool, event_slug: &str, track_slug: &str) -> Result<P
             ends_on: fil.ends_on,
             color_hex: fil.color_hex,
             icon_code: fil.icon_code,
+            is_streamed: fil.is_streamed,
             themes: fil.themes,
         },
         venue,

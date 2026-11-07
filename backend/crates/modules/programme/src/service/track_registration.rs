@@ -131,6 +131,12 @@ pub async fn sinscrire(
     payload: DayRegisterPayload,
 ) -> Result<DayRegistrationResult> {
     let journee = journee_ouverte(state, payload.track_id).await?;
+    if !journee.is_streamed {
+        return Err(ApiError::with_message(
+            ErrorCode::RegistrationNotAccepted,
+            "Cette journée se tient exclusivement en présentiel : elle ne se suit pas en ligne.",
+        ));
+    }
     if let Some(fin) = journee.ends_at {
         if OffsetDateTime::now_utc() > fin {
             return Ok(DayRegistrationResult::Closed { closed_at: fin });

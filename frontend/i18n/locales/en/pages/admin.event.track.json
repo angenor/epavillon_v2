@@ -41,7 +41,10 @@
     "map": "View on map",
     "noAddress": "No address and no map link: the page will show no access map.",
     "tagline": "Tagline",
-    "taglineHint": "A few words under the title: \"Hackathon, pitches, game, stage\"."
+    "taglineHint": "A few words under the title: \"Hackathon, pitches, game, stage\".",
+    "streamed": "Streamed online",
+    "streamedHint": "One live stream from opening to closing, on registration.",
+    "notStreamedHint": "In person only: the page says so, online registration is closed and the day's Zoom meeting is cancelled. Registrants keep their registration, so they can be written to."
   },
   "audiences": {
     "label": "Target audiences",

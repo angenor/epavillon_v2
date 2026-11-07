@@ -38,6 +38,7 @@ pub struct FilPublie {
     pub ends_on: Option<Date>,
     pub color_hex: Option<String>,
     pub icon_code: Option<String>,
+    pub is_streamed: bool,
     pub themes: Value,
     pub target_audiences: Value,
     pub support_note: Option<Value>,
@@ -101,6 +102,7 @@ pub async fn fil_publie<'e>(
                   f.kind::text AS "kind!", f.title AS "title!: Value",
                   f.subtitle AS "subtitle: Value", f.description AS "description: Value",
                   f.tagline AS "tagline: Value", f.starts_on, f.ends_on, f.color_hex, f.icon_code,
+                  f.is_streamed AS "is_streamed!",
                   reference.term_badges('event', 'programme_tracks', f.id, 'activity_theme')
                       AS "themes!: Value",
                   to_jsonb(f.target_audiences) AS "target_audiences!: Value",

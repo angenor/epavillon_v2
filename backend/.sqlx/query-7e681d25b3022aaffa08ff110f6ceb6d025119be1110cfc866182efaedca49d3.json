@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "WITH f AS (\n               SELECT t.*, e.slug::text AS e_slug, e.title AS e_title, e.acronym AS e_acronym,\n                      e.timezone::text AS e_timezone, e.starts_at AS e_starts_at,\n                      e.ends_at AS e_ends_at, e.city AS e_city, c.name AS e_country,\n                      COALESCE(t.venue_id, (\n                          SELECT v.id FROM event.venues v\n                           WHERE v.event_id = e.id AND v.kind = 'pavilion'\n                           ORDER BY v.created_at, v.id LIMIT 1)) AS lieu_id\n                 FROM event.programme_tracks t\n                 JOIN event.events e ON e.id = t.event_id\n                 LEFT JOIN reference.countries c ON c.id = e.country_id\n                WHERE e.slug = $1 AND t.slug = $2\n                  AND t.published_at IS NOT NULL\n                  AND e.status NOT IN ('draft', 'cancelled')\n           )\n           SELECT f.event_id AS \"event_id!\", f.e_slug AS \"event_slug!\",\n                  f.e_title AS \"event_title!: Value\", f.e_acronym AS event_acronym,\n                  f.e_timezone AS \"timezone!\", f.e_starts_at AS \"event_starts_at!\",\n                  f.e_ends_at AS \"event_ends_at!\", f.e_city AS city,\n                  f.e_country AS \"country_name: Value\",\n                  f.id AS \"id!\", f.slug::text AS \"slug!\", f.code AS \"code!\",\n                  f.kind::text AS \"kind!\", f.title AS \"title!: Value\",\n                  f.subtitle AS \"subtitle: Value\", f.description AS \"description: Value\",\n                  f.tagline AS \"tagline: Value\", f.starts_on, f.ends_on, f.color_hex, f.icon_code,\n                  reference.term_badges('event', 'programme_tracks', f.id, 'activity_theme')\n                      AS \"themes!: Value\",\n                  to_jsonb(f.target_audiences) AS \"target_audiences!: Value\",\n                  f.support_note AS \"support_note: Value\",\n                  f.feature_kicker AS \"feature_kicker: Value\",\n                  f.feature_title AS \"feature_title: Value\",\n                  f.feature_body AS \"feature_body: Value\",\n                  f.feature_link_label AS \"feature_link_label: Value\",\n                  f.feature_link_url,\n                  media.attached_image('event', 'programme_tracks', f.id, 'cover') AS \"cover: Value\",\n                  media.attached_image('event', 'programme_tracks', f.id, 'thumbnail')\n                      AS \"feature_visual: Value\",\n                  media.attached_documents('event', 'programme_tracks', f.id, 'document')\n                      AS \"documents!: Value\",\n                  COALESCE((SELECT jsonb_agg(jsonb_build_object('label', l.label, 'url', l.url)\n                                             ORDER BY l.sort_order, l.created_at)\n                              FROM event.programme_track_links l\n                             WHERE l.track_id = f.id), '[]'::jsonb) AS \"links!: Value\",\n                  v.id AS \"venue_id?\", v.name AS \"venue_name?: Value\", v.kind AS \"venue_kind?\",\n                  v.address AS \"venue_address?\", v.map_url::text AS \"venue_map_url?\",\n                  v.area AS \"venue_area?: Value\", v.access_note AS \"venue_access_note?: Value\",\n                  v.latitude::float8 AS \"venue_latitude?\", v.longitude::float8 AS \"venue_longitude?\",\n                  (f.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS \"is_off_site!\"\n             FROM f\n             LEFT JOIN event.venues v ON v.id = f.lieu_id",
+  "query": "WITH f AS (\n               SELECT t.*, e.slug::text AS e_slug, e.title AS e_title, e.acronym AS e_acronym,\n                      e.timezone::text AS e_timezone, e.starts_at AS e_starts_at,\n                      e.ends_at AS e_ends_at, e.city AS e_city, c.name AS e_country,\n                      COALESCE(t.venue_id, (\n                          SELECT v.id FROM event.venues v\n                           WHERE v.event_id = e.id AND v.kind = 'pavilion'\n                           ORDER BY v.created_at, v.id LIMIT 1)) AS lieu_id\n                 FROM event.programme_tracks t\n                 JOIN event.events e ON e.id = t.event_id\n                 LEFT JOIN reference.countries c ON c.id = e.country_id\n                WHERE e.slug = $1 AND t.slug = $2\n                  AND t.published_at IS NOT NULL\n                  AND e.status NOT IN ('draft', 'cancelled')\n           )\n           SELECT f.event_id AS \"event_id!\", f.e_slug AS \"event_slug!\",\n                  f.e_title AS \"event_title!: Value\", f.e_acronym AS event_acronym,\n                  f.e_timezone AS \"timezone!\", f.e_starts_at AS \"event_starts_at!\",\n                  f.e_ends_at AS \"event_ends_at!\", f.e_city AS city,\n                  f.e_country AS \"country_name: Value\",\n                  f.id AS \"id!\", f.slug::text AS \"slug!\", f.code AS \"code!\",\n                  f.kind::text AS \"kind!\", f.title AS \"title!: Value\",\n                  f.subtitle AS \"subtitle: Value\", f.description AS \"description: Value\",\n                  f.tagline AS \"tagline: Value\", f.starts_on, f.ends_on, f.color_hex, f.icon_code,\n                  f.is_streamed AS \"is_streamed!\",\n                  reference.term_badges('event', 'programme_tracks', f.id, 'activity_theme')\n                      AS \"themes!: Value\",\n                  to_jsonb(f.target_audiences) AS \"target_audiences!: Value\",\n                  f.support_note AS \"support_note: Value\",\n                  f.feature_kicker AS \"feature_kicker: Value\",\n                  f.feature_title AS \"feature_title: Value\",\n                  f.feature_body AS \"feature_body: Value\",\n                  f.feature_link_label AS \"feature_link_label: Value\",\n                  f.feature_link_url,\n                  media.attached_image('event', 'programme_tracks', f.id, 'cover') AS \"cover: Value\",\n                  media.attached_image('event', 'programme_tracks', f.id, 'thumbnail')\n                      AS \"feature_visual: Value\",\n                  media.attached_documents('event', 'programme_tracks', f.id, 'document')\n                      AS \"documents!: Value\",\n                  COALESCE((SELECT jsonb_agg(jsonb_build_object('label', l.label, 'url', l.url)\n                                             ORDER BY l.sort_order, l.created_at)\n                              FROM event.programme_track_links l\n                             WHERE l.track_id = f.id), '[]'::jsonb) AS \"links!: Value\",\n                  v.id AS \"venue_id?\", v.name AS \"venue_name?: Value\", v.kind AS \"venue_kind?\",\n                  v.address AS \"venue_address?\", v.map_url::text AS \"venue_map_url?\",\n                  v.area AS \"venue_area?: Value\", v.access_note AS \"venue_access_note?: Value\",\n                  v.latitude::float8 AS \"venue_latitude?\", v.longitude::float8 AS \"venue_longitude?\",\n                  (f.venue_id IS NOT NULL AND v.kind IS DISTINCT FROM 'pavilion') AS \"is_off_site!\"\n             FROM f\n             LEFT JOIN event.venues v ON v.id = f.lieu_id",
   "describe": {
     "columns": [
       {
@@ -216,18 +216,29 @@
       },
       {
         "ordinal": 21,
+        "name": "is_streamed!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "is_streamed"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
         "name": "themes!: Value",
         "type_info": "Jsonb",
         "origin": "Expression"
       },
       {
-        "ordinal": 22,
+        "ordinal": 23,
         "name": "target_audiences!: Value",
         "type_info": "Jsonb",
         "origin": "Expression"
       },
       {
-        "ordinal": 23,
+        "ordinal": 24,
         "name": "support_note: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -238,7 +249,7 @@
         }
       },
       {
-        "ordinal": 24,
+        "ordinal": 25,
         "name": "feature_kicker: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -249,7 +260,7 @@
         }
       },
       {
-        "ordinal": 25,
+        "ordinal": 26,
         "name": "feature_title: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -260,7 +271,7 @@
         }
       },
       {
-        "ordinal": 26,
+        "ordinal": 27,
         "name": "feature_body: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -271,7 +282,7 @@
         }
       },
       {
-        "ordinal": 27,
+        "ordinal": 28,
         "name": "feature_link_label: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -282,7 +293,7 @@
         }
       },
       {
-        "ordinal": 28,
+        "ordinal": 29,
         "name": "feature_link_url",
         "type_info": "Text",
         "origin": {
@@ -293,31 +304,31 @@
         }
       },
       {
-        "ordinal": 29,
+        "ordinal": 30,
         "name": "cover: Value",
         "type_info": "Jsonb",
         "origin": "Expression"
       },
       {
-        "ordinal": 30,
+        "ordinal": 31,
         "name": "feature_visual: Value",
         "type_info": "Jsonb",
         "origin": "Expression"
       },
       {
-        "ordinal": 31,
+        "ordinal": 32,
         "name": "documents!: Value",
         "type_info": "Jsonb",
         "origin": "Expression"
       },
       {
-        "ordinal": 32,
+        "ordinal": 33,
         "name": "links!: Value",
         "type_info": "Jsonb",
         "origin": "Expression"
       },
       {
-        "ordinal": 33,
+        "ordinal": 34,
         "name": "venue_id?",
         "type_info": "Uuid",
         "origin": {
@@ -328,7 +339,7 @@
         }
       },
       {
-        "ordinal": 34,
+        "ordinal": 35,
         "name": "venue_name?: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -339,7 +350,7 @@
         }
       },
       {
-        "ordinal": 35,
+        "ordinal": 36,
         "name": "venue_kind?",
         "type_info": "Text",
         "origin": {
@@ -350,7 +361,7 @@
         }
       },
       {
-        "ordinal": 36,
+        "ordinal": 37,
         "name": "venue_address?",
         "type_info": "Text",
         "origin": {
@@ -361,13 +372,13 @@
         }
       },
       {
-        "ordinal": 37,
+        "ordinal": 38,
         "name": "venue_map_url?",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 38,
+        "ordinal": 39,
         "name": "venue_area?: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -378,7 +389,7 @@
         }
       },
       {
-        "ordinal": 39,
+        "ordinal": 40,
         "name": "venue_access_note?: Value",
         "type_info": "Jsonb",
         "origin": {
@@ -389,19 +400,19 @@
         }
       },
       {
-        "ordinal": 40,
+        "ordinal": 41,
         "name": "venue_latitude?",
         "type_info": "Float8",
         "origin": "Expression"
       },
       {
-        "ordinal": 41,
+        "ordinal": 42,
         "name": "venue_longitude?",
         "type_info": "Float8",
         "origin": "Expression"
       },
       {
-        "ordinal": 42,
+        "ordinal": 43,
         "name": "is_off_site!",
         "type_info": "Bool",
         "origin": "Expression"
@@ -435,6 +446,7 @@
       true,
       true,
       true,
+      false,
       null,
       null,
       true,
@@ -459,5 +471,5 @@
       null
     ]
   },
-  "hash": "44962534158488bb411ce9487bea6ee21bc3581cdee8ea40b28e21909003e74f"
+  "hash": "7e681d25b3022aaffa08ff110f6ceb6d025119be1110cfc866182efaedca49d3"
 }
