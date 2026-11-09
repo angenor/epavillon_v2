@@ -68,7 +68,9 @@ pub async fn recopier_les_intervenants(
 /// personne (D16) : reconnu, il garde sa ligne et sa présence notée ; retiré du
 /// dossier, il quitte la séance ; nouveau, il y entre. Une séance annulée garde
 /// ce qu'elle avait. Une séance commune suit chacun de ses dossiers, ligne par
-/// ligne rangée sous lui.
+/// ligne rangée sous lui. Un intervenant posé pendant l'événement (régie, lien
+/// d'inscription, 08/11) n'est pas du dossier : la resynchronisation ne le
+/// retire pas.
 pub async fn resynchroniser_les_intervenants(
     conn: &mut PgConnection,
     proposal_id: Uuid,
@@ -78,6 +80,7 @@ pub async fn resynchroniser_les_intervenants(
           USING programme.sessions s
           WHERE d.session_id = s.id AND (s.proposal_id = $1 OR d.proposal_id = $1)
             AND s.status <> 'cancelled'
+            AND d.source = 'dossier'
             AND NOT EXISTS (
                 SELECT 1 FROM programme.proposal_speakers p
                  WHERE p.proposal_id = $1 AND p.role = d.role
@@ -240,7 +243,7 @@ pub async fn intervenants_publics_de<'e>(
                                     media.attached_image('identity', 'people', p.id, 'avatar'))) AS "ligne!"
              FROM programme.session_speakers s
              LEFT JOIN identity.people p ON p.id = s.person_id
-            WHERE s.session_id = ANY($1)
+            WHERE s.session_id = ANY($1) AND s.is_listed
             ORDER BY s.session_id, s.sort_order, s.created_at"#,
         seances
     )

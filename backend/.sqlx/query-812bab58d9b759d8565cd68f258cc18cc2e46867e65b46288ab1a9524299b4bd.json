@@ -1,0 +1,140 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.event_id, s.title AS \"title!: Value\", e.title AS \"event_title!: Value\",\n                  s.starts_at, s.ends_at, s.timezone::text AS \"timezone!\", e.city,\n                  s.status::text AS \"status!\", (s.published_at IS NOT NULL) AS \"is_published!\",\n                  (s.is_streamed AND COALESCE((SELECT t.is_streamed FROM event.programme_tracks t\n                                                WHERE t.id = programme.day_track_of(s.id)), true))\n                      AS \"is_streamed!\",\n                  s.speaker_link_token AS token\n             FROM programme.sessions s\n             JOIN event.events e ON e.id = s.event_id\n            WHERE s.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "event_title!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "is_published!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "is_streamed!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "token",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "speaker_link_token"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      true,
+      null,
+      null,
+      null,
+      false
+    ]
+  },
+  "hash": "812bab58d9b759d8565cd68f258cc18cc2e46867e65b46288ab1a9524299b4bd"
+}

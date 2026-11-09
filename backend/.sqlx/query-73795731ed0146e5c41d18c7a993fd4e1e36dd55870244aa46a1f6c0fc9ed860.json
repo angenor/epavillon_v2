@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.session_speakers\n                SET is_listed = is_listed OR $2,\n                    job_title_snapshot = CASE WHEN source = 'dossier' THEN job_title_snapshot ELSE $3 END,\n                    organization_snapshot = CASE WHEN source = 'dossier' THEN organization_snapshot ELSE $4 END,\n                    bio = CASE WHEN source = 'dossier' OR $5::text IS NULL THEN bio\n                               ELSE jsonb_build_object('fr', $5::text) END,\n                    country_id = COALESCE((SELECT c.id FROM reference.countries c WHERE c.iso2 = $6), country_id)\n              WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Text",
+        "Text",
+        "Text",
+        "Bpchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "73795731ed0146e5c41d18c7a993fd4e1e36dd55870244aa46a1f6c0fc9ed860"
+}

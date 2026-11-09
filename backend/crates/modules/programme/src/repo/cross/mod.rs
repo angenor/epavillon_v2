@@ -966,3 +966,7 @@ pub mod regie;
 // sujets avec le nom de leurs auteurs. Lectures seules, lecture n° 22.
 // -----------------------------------------------------------------------------
 pub mod assistance;
+
+// Les intervenants en ligne (08/11) : lien d'inscription, liens Zoom demandés,
+// porteur. Lectures seules, lecture n° 23.
+pub mod intervenants;

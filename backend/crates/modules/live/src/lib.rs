@@ -68,6 +68,7 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::admin::configurer(cfg);
     routes::meeting::chemins_admin(cfg);
     routes::meeting::chemins_de_journee(cfg);
+    routes::intervenants::configurer(cfg);
 }
 
 /// La lecture publique, sous `/events/{event_id}/incidents`.
@@ -99,7 +100,7 @@ pub fn zoom_webhook_configure(config: &Config) -> bool {
         .is_some_and(|z| z.webhook_secret_token.is_some())
 }
 
-/// Les sept travaux de la file « live », aucun sans Zoom : les travaux
+/// Les neuf travaux de la file « live », aucun sans Zoom : les travaux
 /// déposés attendent alors en file, sans échouer, qu'il soit configuré. Plus
 /// celui de la fenêtre des messages d'incident, toujours servi, dans sa file.
 pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
@@ -126,6 +127,8 @@ pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
             db.clone(),
         )),
         Arc::new(jobs::filet::RequeueParticipants::new(db.clone())),
+        Arc::new(jobs::intervenants::SpeakerPlacesJob::new(db.clone())),
+        Arc::new(jobs::intervenants::SpeakerLinksSweep::new(db.clone())),
         Arc::new(jobs::annonce::AnnounceMeetingStart::new(db.clone())),
         Arc::new(jobs::webhook::ProcessWebhook::new(db)),
     ]);

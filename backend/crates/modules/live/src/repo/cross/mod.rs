@@ -15,5 +15,6 @@
 
 pub mod event;
 pub mod identity;
+pub mod intervenants;
 pub mod org;
 pub mod programme;

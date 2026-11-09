@@ -1800,7 +1800,11 @@ INSERT INTO platform.settings (key, value, description) VALUES
     -- 02/11/2026 : la boîte d'expédition ne se lit pas encore ; l'équipe garde
     -- trace de ce qui part en copie visible (une réponse à tous lui revient).
     ('engagement.mail.automatic_cc', '[]',
-     'Adresses en copie visible de chaque courriel automatique, sauf ceux qui portent un lien personnel ou d''inscription (création de compte, mot de passe, invitation, confirmations d''inscription) ; un rappel n''est copié qu''une fois par activité et par délai. Lu par GardedMailer.')
+     'Adresses en copie visible de chaque courriel automatique, sauf ceux qui portent un lien personnel ou d''inscription (création de compte, mot de passe, invitation, confirmations d''inscription) ; un rappel n''est copié qu''une fois par activité et par délai. Lu par GardedMailer.'),
+    -- 08/11/2026, intervenants en ligne (075 § 2 bis) : le commanditaire veut
+    -- chaque lien Zoom d'intervenant et chaque lien d'inscription en copie.
+    ('engagement.speaker_links.cc', '["angenor99@gmail.com", "issa.bado@francophonie.org"]',
+     'Adresses en copie de chaque courriel d''intervenant en ligne : lien Zoom personnel, lien d''inscription envoyé au porteur.')
 ON CONFLICT (key) DO NOTHING;
 
 INSERT INTO identity.permissions (code, label, module_code) VALUES

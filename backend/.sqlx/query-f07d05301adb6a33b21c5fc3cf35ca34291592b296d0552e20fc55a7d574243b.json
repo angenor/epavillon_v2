@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE((SELECT value = 'true'::jsonb FROM platform.settings\n                             WHERE key = 'live.speaker_links.auto'), false) AS \"oui!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "oui!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f07d05301adb6a33b21c5fc3cf35ca34291592b296d0552e20fc55a7d574243b"
+}

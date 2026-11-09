@@ -145,6 +145,12 @@ pub fn track_registration_routes(cfg: &mut ServiceConfig) {
     routes::track_registrations::configurer(cfg);
 }
 
+/// `/speaker-links` : le lien d'inscription des intervenants en ligne (08/11),
+/// chemins plats ; le module Live y dépose `/speaker-links/zoom`.
+pub fn speaker_link_routes(cfg: &mut ServiceConfig) {
+    routes::online_speakers::publics(cfg);
+}
+
 pub fn public_schedule_routes(cfg: &mut ServiceConfig) {
     routes::public_schedule::configurer(cfg);
 }
@@ -172,6 +178,10 @@ pub fn comment_routes(cfg: &mut ServiceConfig) {
         web::scope("/proposal-comments").configure(routes::workspace::sous_proposal_comments),
     )
     .service(web::scope("/admin/proposals").configure(routes::admin_ops::configurer))
-    .service(web::scope("/admin/regie").configure(routes::regie::configurer))
+    .service(
+        web::scope("/admin/regie")
+            .configure(routes::regie::configurer)
+            .configure(routes::online_speakers::regie),
+    )
     .service(web::scope("/assistance").configure(routes::assistance::configurer));
 }

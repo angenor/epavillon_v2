@@ -42,6 +42,8 @@ pub struct ApiErrorBody {
         crate::routes::meeting::lien_animateur,
         crate::routes::meeting::publique_journee,
         crate::routes::meeting::acces_journee,
+        crate::routes::intervenants::lien_par_le_jeton,
+        crate::routes::intervenants::lien_pour_la_regie,
         crate::routes::webhook::recevoir,
     ),
     components(schemas(ApiErrorBody)),

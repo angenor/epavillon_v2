@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id AS speaker_id, p.id AS person_id, p.primary_email::text AS \"email!\",\n                  p.first_name, p.last_name, p.display_name AS \"display_name!\"\n             FROM programme.session_speakers d\n             JOIN identity.people p ON p.id = d.person_id AND p.status <> 'anonymized'\n            WHERE d.session_id = $1 AND ($2::uuid[] IS NULL OR d.id = ANY($2))\n            ORDER BY d.sort_order, d.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "speaker_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "last_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "last_name"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "ce1f9fbf4419d3ec6164219f2760c38cb39dcffb652736b19f485c27931724ad"
+}

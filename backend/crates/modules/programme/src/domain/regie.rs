@@ -113,6 +113,8 @@ pub struct RegieSession {
     pub cancellation: Option<RegieCancellation>,
     /// Le dernier geste de la séance encore défaisable, pour « Défaire ».
     pub last_action_id: Option<Uuid>,
+    /// Intervenants en ligne (08/11).
+    pub speakers: crate::domain::online_speakers::RegieSpeakerSummary,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]

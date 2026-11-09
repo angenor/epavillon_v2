@@ -8,6 +8,7 @@ pub mod assistance;
 pub mod cover_design;
 pub mod day_plan;
 pub mod detail;
+pub mod online_speakers;
 pub mod openapi;
 pub mod people;
 pub mod planner;

@@ -18,6 +18,7 @@ pub mod day_plan;
 pub mod documents;
 pub mod forms;
 pub mod joint;
+pub mod online_speakers;
 pub mod organizations;
 pub mod people;
 pub mod planner;

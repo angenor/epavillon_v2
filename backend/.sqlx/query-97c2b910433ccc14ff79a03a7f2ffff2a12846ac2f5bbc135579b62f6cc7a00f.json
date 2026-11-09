@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM programme.session_speakers\n                           WHERE id = $1 AND session_id = $2) AS \"oui!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "oui!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "97c2b910433ccc14ff79a03a7f2ffff2a12846ac2f5bbc135579b62f6cc7a00f"
+}

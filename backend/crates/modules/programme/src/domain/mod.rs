@@ -20,6 +20,7 @@ pub mod eligibility;
 pub mod facets;
 pub mod ids;
 pub mod limits;
+pub mod online_speakers;
 pub mod ownership;
 pub mod permissions;
 pub mod regie;

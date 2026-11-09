@@ -51,3 +51,32 @@ pub struct DayRegistrationEmail {
     #[serde(default)]
     pub resent: bool,
 }
+
+/// Le lien Zoom personnel d'un intervenant en ligne (08/11). Mis en file par le
+/// module Live dès que la place existe chez Zoom, sous la clé
+/// `<place>:<instant de la demande>`.
+pub const SEND_SPEAKER_ZOOM_LINK: &str = "engagement.send_speaker_zoom_link";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpeakerZoomLinkEmail {
+    /// Nul seulement pour un aperçu.
+    pub participant_id: Option<uuid::Uuid>,
+    pub session_id: uuid::Uuid,
+    /// Aperçu pour validation : à cette seule adresse, sans copie, avec un lien
+    /// et un nom d'exemple. Posé à la main, jamais par le code.
+    #[serde(default)]
+    pub preview_to: Option<String>,
+}
+
+/// Le lien d'inscription des intervenants en ligne, au porteur de l'activité
+/// (08/11). Mis en file par la régie (module Programmation) ou par le balayage
+/// de l'avant-veille.
+pub const SEND_SPEAKER_SIGNUP_LINK: &str = "engagement.send_speaker_signup_link";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpeakerSignupLinkEmail {
+    pub session_id: uuid::Uuid,
+    /// Aperçu pour validation : à cette seule adresse, sans copie.
+    #[serde(default)]
+    pub preview_to: Option<String>,
+}

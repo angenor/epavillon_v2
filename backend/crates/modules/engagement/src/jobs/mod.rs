@@ -23,6 +23,7 @@
 
 pub mod annulation;
 pub mod inscription;
+pub mod intervenants;
 pub mod journees;
 pub mod notification_email;
 pub mod partitions;

@@ -1,0 +1,49 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n                          SET external_registrant_id = $2,\n                              personal_join_url = $3::text::platform.url,\n                              sync_status = 'synced', synced_at = now(),\n                              last_error = NULL, next_retry_at = NULL\n                        WHERE id = $1\n                    RETURNING cancelled_at IS NOT NULL AS \"annule!\",\n                              link_requested_at, speaker_session_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "annule!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "link_requested_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "link_requested_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "speaker_session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "speaker_session_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "9c0d9c86125a15e319f9f00c43a187db2ed182810fe5843f91f878b2223877b6"
+}

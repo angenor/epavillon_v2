@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, cancelled_at IS NOT NULL AS \"cancelled!\", link_requested_at,\n                  CASE WHEN sync_status = 'synced' THEN personal_join_url::text END AS personal_join_url\n             FROM live.meeting_participants\n            WHERE meeting_id = $1 AND email = $2::text::platform.email",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "cancelled!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "link_requested_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "link_requested_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "personal_join_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "79cfe3e1f9c2d805c1a45760c82451cbbcae6240558496721189f20e75608620"
+}

@@ -7,6 +7,7 @@ pub mod cancel_meeting;
 pub mod cancel_participant;
 pub mod fenetre;
 pub mod filet;
+pub mod intervenants;
 pub mod sync_meeting;
 pub mod sync_participant;
 pub mod webhook;

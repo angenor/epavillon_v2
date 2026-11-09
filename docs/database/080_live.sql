@@ -525,6 +525,31 @@ CREATE UNIQUE INDEX ux_meeting_participants_registrant
     ON live.meeting_participants (meeting_id, external_registrant_id)
     WHERE external_registrant_id IS NOT NULL;
 
+-- Intervenants en ligne (08/11/2026, 075 § 2 bis) : la place d'un intervenant
+-- est une ligne `panelist` sans inscription, reconnue par son adresse (un
+-- intervenant déjà inscrit comme public garde sa ligne, son lien est le même).
+-- `link_requested_at` dit qu'un courriel portant le lien Zoom lui est dû :
+-- le travail de synchronisation le pose dès que le lien existe, sous la clé
+-- `<place>:<instant de la demande>`, qui empêche tout double envoi.
+-- `speaker_session_id` nomme l'activité où il intervient : la réunion d'une
+-- journée en diffuse plusieurs, et le courriel dit laquelle.
+ALTER TABLE live.meeting_participants
+    ADD COLUMN link_requested_at timestamptz,
+    ADD COLUMN speaker_session_id uuid CONSTRAINT xmod_fk_meeting_participants_speaker_session
+        REFERENCES programme.sessions(id) ON DELETE SET NULL;
+
+COMMENT ON COLUMN live.meeting_participants.link_requested_at IS
+    'Dernière demande d''envoi du lien Zoom personnel à un intervenant (veille de l''activité, inscription, renvoi par la régie). Nulle : aucun courriel de lien dû.';
+COMMENT ON COLUMN live.meeting_participants.speaker_session_id IS
+    'Activité où la personne intervient, celle que nomme le courriel de son lien Zoom.';
+
+-- Les envois d'office (porteur à J-2, intervenants à J-1) attendent la
+-- validation des courriels : éteints tant que le commanditaire n'a pas dit oui.
+INSERT INTO platform.settings (key, value, description) VALUES
+    ('live.speaker_links.auto', 'false',
+     'Envoie d''office le lien d''inscription des intervenants au porteur 2 jours avant chaque activité diffusée, et son lien Zoom à chaque intervenant la veille. Les gestes de la régie partent dans tous les cas.')
+ON CONFLICT (key) DO NOTHING;
+
 -- File de rattrapage : le back-office « inscriptions à resynchroniser » lit cet
 -- index, jamais un balayage complet de la table.
 CREATE INDEX ix_meeting_participants_to_sync

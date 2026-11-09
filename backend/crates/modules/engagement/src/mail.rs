@@ -60,7 +60,7 @@ use uuid::Uuid;
 /// confirmation d'inscription. Les envois du back-office ont leurs propres copies.
 /// L'avis d'annulation par une organisation est écrit À l'équipe : la copier
 /// lui ferait recevoir deux fois le même message.
-const SANS_COPIE: [&str; 9] = [
+const SANS_COPIE: [&str; 11] = [
     "identity.send_verification_email",
     "identity.send_existing_account_notice",
     "identity.send_password_reset_email",
@@ -70,6 +70,9 @@ const SANS_COPIE: [&str; 9] = [
     "engagement.send_mailing",
     "engagement.send_mailing_test",
     contracts::programme::OWNER_CANCELLATION_TASK,
+    // Les intervenants en ligne (08/11) portent leur propre copie.
+    contracts::engagement::SEND_SPEAKER_ZOOM_LINK,
+    contracts::engagement::SEND_SPEAKER_SIGNUP_LINK,
 ];
 
 /// L'expéditeur enveloppé.

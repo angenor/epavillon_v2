@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ARRAY(SELECT jsonb_array_elements_text(value)) AS adresses\n             FROM platform.settings\n            WHERE key = 'engagement.speaker_links.cc' AND jsonb_typeof(value) = 'array'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "adresses",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "bf17ef582510624eeeed7672f74c373fe5f32a07556a31fa81456eba03246143"
+}

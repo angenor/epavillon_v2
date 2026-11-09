@@ -11,6 +11,7 @@ use time::{Date, Duration, OffsetDateTime};
 use uuid::Uuid;
 
 use crate::domain::ids::EventId;
+use crate::domain::online_speakers::RegieSpeakerSummary;
 use crate::domain::regie::{
     JournalKind, NoticeState, PresenceState, RegieActionKind, RegieCancellation, RegieDocument,
     RegieJournalEntry, RegieLiveElsewhere, RegieMeeting, RegieNoticeStatus, RegieOrganization,
@@ -152,6 +153,25 @@ pub async fn ecran(
         });
     }
 
+    let mut intervenants: HashMap<Uuid, RegieSpeakerSummary> =
+        crate::repo::cross::intervenants::resumes(&mut *tx, &ids)
+            .await?
+            .into_iter()
+            .map(|r| {
+                (
+                    r.session_id,
+                    RegieSpeakerSummary {
+                        online: r.online,
+                        reachable: r.reachable,
+                        to_list: r.to_list,
+                        links_sent_at: r.links_sent_at,
+                        owner_link_sent_at: r.owner_link_sent_at,
+                        has_owner: r.has_owner,
+                    },
+                )
+            })
+            .collect();
+
     let gestes = lecture::gestes_du_jour(&mut *tx, event_id, jour).await?;
     let annulations: Vec<Uuid> = gestes
         .iter()
@@ -215,6 +235,7 @@ pub async fn ecran(
                     present_count: l.meeting_present,
                 }),
                 documents: pieces.remove(&l.id).unwrap_or_default(),
+                speakers: intervenants.remove(&l.id).unwrap_or_default(),
                 live_started_at: l.live_started_at,
                 live_ended_at: l.live_ended_at,
                 resumable_until: reprise,

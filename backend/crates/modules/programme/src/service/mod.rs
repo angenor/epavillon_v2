@@ -15,6 +15,7 @@ pub mod draft_read;
 pub mod draft_write;
 pub mod joint;
 pub mod list;
+pub mod online_speakers;
 pub mod perimeter;
 pub mod planner;
 pub mod public_schedule;

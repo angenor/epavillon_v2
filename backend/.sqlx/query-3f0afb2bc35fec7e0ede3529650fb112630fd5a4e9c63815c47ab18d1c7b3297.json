@@ -1,0 +1,68 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT mp.email::text AS \"email!\", p.civility,\n                  COALESCE(p.last_name, mp.display_name) AS \"last_name!\",\n                  COALESCE(p.preferred_locale::text, 'fr') AS \"locale!\",\n                  mp.person_id, mp.personal_join_url::text AS \"join_url!\"\n             FROM live.meeting_participants mp\n             LEFT JOIN identity.people p ON p.id = mp.person_id\n            WHERE mp.id = $1 AND mp.cancelled_at IS NULL\n              AND mp.sync_status = 'synced' AND mp.personal_join_url IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "civility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "civility"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "last_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "locale!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "join_url!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      null,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "3f0afb2bc35fec7e0ede3529650fb112630fd5a4e9c63815c47ab18d1c7b3297"
+}

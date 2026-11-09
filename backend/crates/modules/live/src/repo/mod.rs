@@ -3,6 +3,7 @@
 pub mod active;
 pub mod cross;
 pub mod incidents;
+pub mod intervenants;
 pub mod kinds;
 pub mod meetings;
 pub mod poste;

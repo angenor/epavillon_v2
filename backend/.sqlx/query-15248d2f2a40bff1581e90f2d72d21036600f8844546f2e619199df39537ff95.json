@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n              SET link_requested_at = clock_timestamp(), speaker_session_id = $2\n            WHERE id = $1\n        RETURNING link_requested_at AS \"demande!\", sync_status = 'synced' AS \"pret!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "demande!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "link_requested_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "pret!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      null
+    ]
+  },
+  "hash": "15248d2f2a40bff1581e90f2d72d21036600f8844546f2e619199df39537ff95"
+}

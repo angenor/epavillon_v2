@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_speakers\n             (session_id, person_id, role, job_title_snapshot, organization_snapshot, bio,\n              sort_order, source, is_listed, country_id)\n         VALUES ($1, $2, 'speaker', $3, $4,\n                 CASE WHEN $5::text IS NULL THEN NULL ELSE jsonb_build_object('fr', $5::text) END,\n                 (SELECT COALESCE(max(sort_order), 0) + 1 FROM programme.session_speakers WHERE session_id = $1),\n                 $6, $7, (SELECT c.id FROM reference.countries c WHERE c.iso2 = $8))\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        "Bpchar"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "93d89ee663e09e222669917362f006c0f3e5160ec193bc671637fa957f6f44d6"
+}

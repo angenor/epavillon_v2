@@ -1,0 +1,109 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id,\n                  COALESCE(p.display_name, btrim(d.first_name || ' ' || d.last_name)) AS \"display_name!\",\n                  d.job_title_snapshot AS job_title, d.organization_snapshot AS organization,\n                  p.primary_email::text AS \"email?\", d.source, d.is_listed, d.created_at,\n                  (SELECT max(mp.link_requested_at)\n                     FROM live.meeting_participants mp\n                     JOIN live.meetings m ON m.id = mp.meeting_id\n                    WHERE (m.session_id = d.session_id OR m.track_id = programme.day_track_of(d.session_id))\n                      AND m.status NOT IN ('cancelled', 'failed')\n                      AND mp.email = p.primary_email) AS \"link_sent_at?\"\n             FROM programme.session_speakers d\n             LEFT JOIN identity.people p ON p.id = d.person_id AND p.status <> 'anonymized'\n            WHERE d.session_id = $1\n            ORDER BY d.sort_order, d.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "job_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "job_title_snapshot"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "organization",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "organization_snapshot"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "email?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "source",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "source"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_listed",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "is_listed"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.session_speakers",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "link_sent_at?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      true,
+      null,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "e061d12e0f4c40b54c0f2689ae42ef8c17e2e76b1bc34416f8bf541e5da382e9"
+}

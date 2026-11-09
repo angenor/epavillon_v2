@@ -229,7 +229,11 @@ fn acces_depuis(
 }
 
 /// Périmètre de l'édition de la séance, puis permission sur cette édition.
-async fn autoriser(state: &LiveState, perimetre: &Perimeter, session_id: Uuid) -> Result<()> {
+pub(crate) async fn autoriser(
+    state: &LiveState,
+    perimetre: &Perimeter,
+    session_id: Uuid,
+) -> Result<()> {
     let mut conn = state.pool().acquire().await?;
     let seance = programme::seance(&mut conn, session_id)
         .await?

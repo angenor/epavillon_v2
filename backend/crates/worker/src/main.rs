@@ -237,6 +237,17 @@ async fn armer_les_recurrents(db: &Db, config: &Config) {
         {
             armees.push("relance des inscrits Zoom");
         }
+        // Les envois d'office aux intervenants en ligne (08/11), réglage
+        // `live.speaker_links.auto` lu à chaque passage.
+        if config.zoom.is_some()
+            && live::jobs::intervenants::planifier(
+                &mut tx,
+                live::jobs::intervenants::prochaine_occurrence(maintenant),
+            )
+            .await?
+        {
+            armees.push("liens des intervenants en ligne");
+        }
         // Une chaîne par import allumé : la lecture de la source officielle
         // d'une édition, toutes les `interval_seconds`.
         if negotiation::jobs::import::armer(&mut tx, maintenant).await? > 0 {

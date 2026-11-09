@@ -1,4 +1,5 @@
 pub mod admin;
+pub mod intervenants;
 pub mod meeting;
 pub mod openapi;
 pub mod public;

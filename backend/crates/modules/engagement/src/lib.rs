@@ -99,6 +99,17 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             mailer.clone(),
         )),
         Arc::new(jobs::regie_notice::RegieNotice::new(db.clone())),
+        // Intervenants en ligne (08/11) : lien Zoom et lien d'inscription.
+        Arc::new(jobs::intervenants::SendSpeakerZoomLink::new(
+            db.clone(),
+            config,
+            mailer.clone(),
+        )),
+        Arc::new(jobs::intervenants::SendSpeakerSignupLink::new(
+            db.clone(),
+            config,
+            mailer.clone(),
+        )),
         // Inscription à une activité seule (02/11) : sa confirmation.
         Arc::new(jobs::inscription::SendRegistration::new(
             db.clone(),

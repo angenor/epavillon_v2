@@ -7,6 +7,7 @@
 
 pub mod cross;
 pub mod delivery;
+pub mod intervenants;
 pub mod journees;
 pub mod mail_templates;
 pub mod mail_texts;

@@ -417,6 +417,47 @@ CREATE INDEX ix_session_speakers_session ON programme.session_speakers (session_
 CREATE INDEX ix_session_speakers_person  ON programme.session_speakers (person_id);
 
 -- -----------------------------------------------------------------------------
+-- 2 bis. Intervenants en ligne (08/11/2026)
+--
+-- Demande du commanditaire pendant la CdP31 : l'intervenant qui parle à
+-- distance reçoit son lien Zoom personnel, qui ouvre l'application, quand le
+-- public suit dans la page (SDK). Certains ne se décident que le jour même :
+-- chaque activité a donc un lien d'inscription d'intervenant, envoyé au porteur
+-- qui le transmet. L'inscrit par ce lien devient intervenant de l'activité, mais
+-- n'apparaît sur sa page qu'après un clic de la régie ou de l'organisation (un
+-- lien transféré trop loin ne met pas un inconnu à l'affiche).
+--
+-- Le jeton est gardé EN CLAIR, à la différence du lien de gestion d'une
+-- inscription (`manage_token_hash`) : il se renvoie au porteur à l'identique,
+-- puisqu'il l'a peut-être déjà transmis, et ne donne que ce qu'une inscription
+-- publique donne déjà, une place dans la réunion. Il cesse de servir à la fin
+-- de l'activité (vérifié par le service).
+-- -----------------------------------------------------------------------------
+ALTER TABLE programme.sessions
+    ADD COLUMN speaker_link_token text NOT NULL DEFAULT encode(gen_random_bytes(24), 'hex');
+CREATE UNIQUE INDEX ux_sessions_speaker_link_token ON programme.sessions (speaker_link_token);
+
+COMMENT ON COLUMN programme.sessions.speaker_link_token IS
+    'Jeton du lien d''inscription des intervenants en ligne (/intervenant?jeton=). En clair : il se renvoie à l''identique au porteur. Sans effet après la fin de l''activité.';
+
+-- Origine de la ligne : `dossier` est tenue sur le dossier (resynchronisée,
+-- retirée avec lui) ; `regie` et `lien` sont posées pendant l'événement et
+-- échappent à la resynchronisation, sans quoi la prochaine correction du
+-- dossier les effacerait.
+ALTER TABLE programme.session_speakers
+    ADD COLUMN source text NOT NULL DEFAULT 'dossier'
+        CONSTRAINT ck_session_speakers_source CHECK (source IN ('dossier', 'regie', 'lien')),
+    ADD COLUMN is_listed boolean NOT NULL DEFAULT true,
+    ADD COLUMN country_id uuid REFERENCES reference.countries(id) ON DELETE SET NULL;
+
+COMMENT ON COLUMN programme.session_speakers.source IS
+    'dossier : recopié du dossier et tenu sur lui ; regie : inscrit par l''équipe pendant l''événement ; lien : inscrit par le lien d''intervenant de l''activité.';
+COMMENT ON COLUMN programme.session_speakers.is_listed IS
+    'Figure sur la page publique de l''activité. Faux pour un inscrit par le lien, jusqu''au clic « Afficher sur la page ».';
+COMMENT ON COLUMN programme.session_speakers.country_id IS
+    'Pays déclaré à l''inscription d''un intervenant en ligne.';
+
+-- -----------------------------------------------------------------------------
 -- 2 ter. Co-organisation de la session
 --
 -- Reprise depuis la proposition à la programmation, puis modifiable : la liste

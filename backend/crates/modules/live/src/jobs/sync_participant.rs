@@ -16,6 +16,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use super::delai_avant;
+use crate::repo::intervenants;
 use crate::repo::meetings::{self, CANCEL_PARTICIPANT, FILE, SYNC_PARTICIPANT};
 use crate::zoom::Zoom;
 
@@ -80,22 +81,29 @@ impl JobHandler for SyncParticipant {
             Ok(inscrit) => {
                 // Les identifiants s'écrivent même si l'inscription a été
                 // annulée pendant l'appel : c'est ce qui permet d'annuler chez Zoom.
-                let annule = sqlx::query_scalar!(
+                let ligne = sqlx::query!(
                     r#"UPDATE live.meeting_participants
                           SET external_registrant_id = $2,
                               personal_join_url = $3::text::platform.url,
                               sync_status = 'synced', synced_at = now(),
                               last_error = NULL, next_retry_at = NULL
                         WHERE id = $1
-                    RETURNING cancelled_at IS NOT NULL AS "annule!""#,
+                    RETURNING cancelled_at IS NOT NULL AS "annule!",
+                              link_requested_at, speaker_session_id"#,
                     participant_id,
                     inscrit.registrant_id,
                     inscrit.join_url
                 )
                 .fetch_one(&mut *tx)
                 .await?;
-                if annule {
+                if ligne.annule {
                     meetings::mettre_en_file(&mut tx, CANCEL_PARTICIPANT, participant_id, None)
+                        .await?;
+                } else if let (Some(demande), Some(seance)) =
+                    (ligne.link_requested_at, ligne.speaker_session_id)
+                {
+                    // Intervenant en ligne : le lien existe, son courriel part.
+                    intervenants::poser_le_courriel(&mut tx, participant_id, seance, demande)
                         .await?;
                 }
                 tx.commit().await
