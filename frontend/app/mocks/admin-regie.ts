@@ -14,8 +14,10 @@ import type {
   RegieReason,
   RegieScreen,
   RegieSession,
+  RegieSpeakerSummary,
   RegieUndoPayload,
 } from '~/types/admin-regie'
+import type { OnlineSpeakerCreated, OnlineSpeakerInput, RegieSpeaker, RegieSpeakers, SpeakerLinksSent } from '~/types/programme/online-speaker'
 import type { IsoDate, Uuid } from '~/types/shared'
 import { ApiRequestError } from '~/utils/api-error'
 import { dayKeyInZone } from '~/utils/datetime'
@@ -153,6 +155,7 @@ function sessionsOf(eventId: Uuid): RegieSession[] {
             }
           : null,
       last_action_id: null,
+      speakers: speakerSummary(seedSpeakers(session.id, index, anchor)),
     }
   })
   days.set(eventId, built)
@@ -250,7 +253,7 @@ export function regieScreen(eventId: Uuid, day: IsoDate | null): RegieScreen | n
     today,
     now: iso(nowMs),
     live_elsewhere: null,
-    sessions: sessions.map((session) => ({ ...session })),
+    sessions: sessions.map((session) => ({ ...session, speakers: speakerSummary(speakersOf(session.session_id)) })),
     journal: shown === today ? journalOf(eventId) : [],
     reasons: REASONS,
   }
@@ -336,4 +339,113 @@ export function regieUndo(actionId: Uuid, _payload: RegieUndoPayload): RegieGest
 
 export function meetingHostLink(_sessionId: Uuid): MeetingHostLink {
   return { url: 'https://zoom.us/s/0000000000' }
+}
+
+// ---------------------------------------------------------------------------
+// Intervenants en ligne : trois inscrits dont un par le lien, aucun, sans porteur
+// ---------------------------------------------------------------------------
+
+const speakerLists = new Map<Uuid, RegieSpeakers>()
+
+function seedSpeakers(sessionId: Uuid, index: number, anchor: number): RegieSpeakers {
+  const known = speakerLists.get(sessionId)
+  if (known) return known
+  const sentAt = iso(anchor - 22 * 60 * MINUTE)
+  const speaker = (n: number, fields: Omit<RegieSpeaker, 'speaker_id'>): RegieSpeaker => ({
+    speaker_id: `01a05500-0000-7000-8000-${String(index * 10 + n).padStart(12, '0')}`,
+    ...fields,
+  })
+  const speakers: RegieSpeaker[] =
+    index === 2
+      ? [
+          speaker(1, { display_name: 'Mme Aminata Diallo', job_title: 'Directrice', organization: 'Exemple de ministère', email: 'aminata.diallo@exemple.org', source: 'dossier', is_listed: true, created_at: iso(anchor - 30 * 24 * 60 * MINUTE), link_sent_at: sentAt }),
+          speaker(2, { display_name: 'M. Jean-Pierre Mbala', job_title: 'Conseiller', organization: "Exemple d'agence", email: 'jp.mbala@exemple.org', source: 'regie', is_listed: true, created_at: iso(anchor - 2 * 24 * 60 * MINUTE), link_sent_at: sentAt }),
+          speaker(3, { display_name: 'Dr Koffi Mensah', job_title: 'Chercheur', organization: "Exemple d'université", email: 'k.mensah@exemple.org', source: 'lien', is_listed: false, created_at: iso(anchor - 3 * 60 * MINUTE), link_sent_at: iso(anchor - 3 * 60 * MINUTE) }),
+          speaker(4, { display_name: 'M. Paul Kasongo', job_title: 'Expert', organization: null, email: null, source: 'dossier', is_listed: true, created_at: iso(anchor - 30 * 24 * 60 * MINUTE), link_sent_at: null }),
+        ]
+      : []
+  const list: RegieSpeakers = {
+    session_id: sessionId,
+    speakers,
+    signup_url: `https://epavillon.exemple.org/intervenant?jeton=exemple-${index}`,
+    owner_emails: index === 1 ? [] : ['porteur@exemple.org'],
+    owner_link_sent_at: index === 4 ? iso(anchor - 46 * 60 * MINUTE) : null,
+  }
+  speakerLists.set(sessionId, list)
+  return list
+}
+
+/** Le rendu serveur a lu l'écran dans son propre exemplaire des mocks : le navigateur reconstruit la journée. */
+function speakersOf(sessionId: Uuid): RegieSpeakers {
+  const eventId = allSessions.find((session) => session.id === sessionId)?.event_id
+  if (!speakerLists.has(sessionId) && eventId) sessionsOf(eventId)
+  const known = speakerLists.get(sessionId)
+  if (known) return known
+  findSession(sessionId)
+  return seedSpeakers(sessionId, -1, Date.now())
+}
+
+function speakerSummary(list: RegieSpeakers): RegieSpeakerSummary {
+  const sent = list.speakers.map((entry) => entry.link_sent_at).filter((at): at is string => at !== null).sort()
+  return {
+    online: sent.length,
+    reachable: list.speakers.filter((entry) => entry.email !== null).length,
+    to_list: list.speakers.filter((entry) => entry.source === 'lien' && !entry.is_listed).length,
+    links_sent_at: sent.at(-1) ?? null,
+    owner_link_sent_at: list.owner_link_sent_at,
+    has_owner: list.owner_emails.length > 0,
+  }
+}
+
+const copy = (list: RegieSpeakers): RegieSpeakers => ({ ...list, speakers: list.speakers.map((entry) => ({ ...entry })) })
+
+export function regieSpeakers(sessionId: Uuid): RegieSpeakers {
+  return copy(speakersOf(sessionId))
+}
+
+export function regieAddSpeaker(sessionId: Uuid, input: OnlineSpeakerInput): OnlineSpeakerCreated {
+  const list = speakersOf(sessionId)
+  if (list.speakers.some((entry) => entry.email?.toLowerCase() === input.email.toLowerCase())) {
+    throw new ApiRequestError({ code: 'CONFLICT', message: 'Cette adresse est déjà inscrite comme intervenant de cette activité.', field: 'email' }, 409)
+  }
+  const civility = input.civility ? { mme: 'Mme', m: 'M.', dr: 'Dr', pr: 'Pr', other: '' }[input.civility] : ''
+  const now = iso(Date.now())
+  const speaker: RegieSpeaker = {
+    speaker_id: nextId(),
+    display_name: [civility, input.first_name, input.last_name].filter(Boolean).join(' '),
+    job_title: input.job_title,
+    organization: input.organization,
+    email: input.email,
+    source: 'regie',
+    is_listed: true,
+    created_at: now,
+    link_sent_at: now,
+  }
+  list.speakers.push(speaker)
+  return { speaker_id: speaker.speaker_id }
+}
+
+export function regieListSpeaker(sessionId: Uuid, speakerId: Uuid): RegieSpeakers {
+  const list = speakersOf(sessionId)
+  const speaker = list.speakers.find((entry) => entry.speaker_id === speakerId)
+  if (!speaker) throw new ApiRequestError({ code: 'NOT_FOUND', message: "Cet intervenant n'existe pas." }, 404)
+  speaker.is_listed = true
+  return copy(list)
+}
+
+export function regieResendZoomLinks(sessionId: Uuid): SpeakerLinksSent {
+  const list = speakersOf(sessionId)
+  const now = iso(Date.now())
+  const reachable = list.speakers.filter((entry) => entry.email !== null)
+  reachable.forEach((entry) => (entry.link_sent_at = now))
+  return { recipients: reachable.length }
+}
+
+export function regieSendOwnerLink(sessionId: Uuid): SpeakerLinksSent {
+  const list = speakersOf(sessionId)
+  if (!list.owner_emails.length) {
+    throw new ApiRequestError({ code: 'CONFLICT', message: "Cette activité n'a pas de porteur à qui envoyer le lien." }, 409)
+  }
+  list.owner_link_sent_at = iso(Date.now())
+  return { recipients: list.owner_emails.length }
 }

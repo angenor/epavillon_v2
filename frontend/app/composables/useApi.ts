@@ -96,6 +96,7 @@ import { createAdminPresenceApi, createPresenceApi } from './api/presence'
 import { createProgrammeChangesApi } from './api/programme-changes'
 import { createAssistanceApi } from './api/assistance'
 import { createTrackRegistrationsApi } from './api/track-registrations'
+import { createSpeakerLinksApi } from './api/speaker-links'
 import type { ApiHeaders } from './api/proposal-review'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
@@ -328,6 +329,8 @@ export function useApi() {
     negotiationReports: createNegotiationReportsApi({ call, send }),
     negotiationMeetings: createNegotiationMeetingsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     trackRegistrations: createTrackRegistrationsApi(deps),
+    /** Le lien d'inscription des intervenants en ligne, sans compte. */
+    speakerLinks: createSpeakerLinksApi(deps),
     pavillon: createPavillonApi({ callOrNull, send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     notifications: createNotificationsApi({ call, send }),
     /** Pouls et flux, pour `useRealtime()` seulement : aucune page ne les appelle. */

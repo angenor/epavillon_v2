@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RegieLiveElsewhere, RegieSession } from '~/types/admin-regie'
+import type { RegieLiveElsewhere, RegieSession, RegieSpeakersGesture } from '~/types/admin-regie'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 
 interface Props {
@@ -26,6 +26,7 @@ const emit = defineEmits<{
   'create-meeting': [session: RegieSession]
   restore: [session: RegieSession]
   resume: [session: RegieSession]
+  speakers: [session: RegieSession, gesture: RegieSpeakersGesture]
 }>()
 
 const { t } = useI18n()
@@ -74,6 +75,7 @@ const count = computed(() => {
         @create-meeting="emit('create-meeting', session)"
         @restore="emit('restore', session)"
         @resume="emit('resume', session)"
+        @speakers="emit('speakers', session, $event)"
       />
     </ol>
   </section>

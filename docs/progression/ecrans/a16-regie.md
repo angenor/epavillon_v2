@@ -33,6 +33,10 @@
 2. **Lien d'animateur en grand.** Encart du direct dans `NowPanel` : « Ouvrir Zoom (animateur) » en grand (nouvel onglet ouvert au clic, avant l'appel, contre les bloqueurs) ; « Création de la réunion Zoom en cours » avec témoin tant qu'elle n'est pas prête ; en échec, « Relancer la création » (`live.meeting.manage`). Démarrer une activité dont la réunion est déjà prête ouvre Zoom du même clic. L'écran relit au signal du poste et, faute de lui (sujet réservé à `live.meeting.manage`), toutes les 5 s tant que le lien manque ; un message annonce son arrivée.
 3. **Direct terminé** : `REGISTRATION_SESSION_ENDED` (409) refuse l'inscription à une séance `completed`, ou passée hors direct (un direct qui déborde reste ouvert). Garder une activité terminée d'une journée ne crée plus d'inscription (`track_registrations::garder`) ; déjà gardée, elle le reste.
 
+## Intervenants en ligne (08/11)
+
+Rangée « Intervenants en ligne » sous chaque activité diffusée (`SpeakersRow`), trois fenêtres portées par `SpeakersGestures` : inscrire un intervenant (`SpeakersDialog` : déjà inscrits, « Afficher sur la page » pour ceux venus du lien, formulaire `speaker/OnlineSpeakerFields`, puis le lien Zoom à copier), renvoyer les liens Zoom (`ResendLinksDialog`), envoyer le lien d'inscription au porteur (`OwnerLinkDialog`, désactivé sans porteur). La carte se relit à la fermeture. Dates d'envoi en « le 12 novembre à 11:30 », au fuseau de l'édition annoncé dans l'en-tête du jour. Le lien Zoom à l'écran se redemande toutes les 3 s pendant 60 s (`utils/speaker-links.ts`, 409 tant que Zoom n'a pas répondu) ; passé ce délai, il part par courriel. Détail : [journal du 08/11](../journal/2026-11-08.md).
+
 ## Reste
 
 - Le direct en cours au moment de la mise en ligne n'aura pas de réunion d'office (son événement est passé) : « Créer la réunion Zoom » dans l'encart du direct.

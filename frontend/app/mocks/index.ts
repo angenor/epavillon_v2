@@ -483,11 +483,18 @@ export {
   meetingHostLink,
   regieCancel,
   regieConfirmPresence,
+  regieAddSpeaker,
   regieEndLive,
+  regieListSpeaker,
+  regieResendZoomLinks,
   regieScreen,
+  regieSendOwnerLink,
+  regieSpeakers,
   regieStartLive,
   regieUndo,
 } from './admin-regie'
+
+export { speakerLinkInvite, speakerLinkRegister, speakerLinkZoom, speakerZoomAccess } from './speaker-links'
 
 export {
   journalChangePage,

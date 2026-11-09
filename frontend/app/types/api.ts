@@ -2966,6 +2966,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/regie/sessions/{sessionId}/speakers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `RegieSpeakers` : les intervenants d'une activité, leur adresse, leur origine (`dossier`, `regie`, `lien`), leur affichage sur la page et l'envoi de leur lien Zoom ; le lien d'inscription et les adresses du porteur. */
+        get: operations["regie_intervenants"];
+        put?: never;
+        /** @description `OnlineSpeakerInput` → `OnlineSpeakerCreated`. La régie inscrit un intervenant en ligne : affiché d'office sur la page, son lien Zoom part aussitôt ; `GET /admin/sessions/{sessionId}/speakers/{speakerId}/zoom` le rend à l'écran. */
+        post: operations["regie_inscrire_un_intervenant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/sessions/{sessionId}/speakers/owner-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `SpeakerLinksSent` : envoie au porteur (déposant et personne à contacter de chaque dossier) le lien d'inscription des intervenants en ligne, copie aux adresses du réglage `engagement.speaker_links.cc`. */
+        post: operations["regie_envoyer_le_lien_au_porteur"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/sessions/{sessionId}/speakers/zoom-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `SpeakerLinksSent` : renvoie à chaque intervenant qui a une adresse son lien Zoom personnel (place créée chez Zoom s'il le faut), copie aux adresses du réglage `engagement.speaker_links.cc`. */
+        post: operations["regie_renvoyer_les_liens_zoom"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/regie/sessions/{sessionId}/speakers/{speakerId}/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `RegieSpeakers` : « Afficher sur la page » pour un intervenant inscrit par le lien. */
+        post: operations["regie_afficher_un_intervenant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/reminder-rules": {
         parameters: {
             query?: never;
@@ -3234,6 +3303,27 @@ export interface paths {
          *     Exige `live.meeting.manage` sur l'édition. **404** sans réunion. `LIVE_ZOOM_UNAVAILABLE` (503) si Zoom n'est pas configuré.
          */
         post: operations["admin_seance_reunion_envoyer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/sessions/{session_id}/speakers/{speaker_id}/zoom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `SpeakerZoomAccess` : le lien Zoom personnel d'un intervenant de la séance, pour la régie qui vient de l'inscrire. Exige `live.meeting.manage`. Réponse `Cache-Control: private, no-store`.
+         *
+         *     Refus : `LIVE_MEETING_NOT_READY` (409 : réessayer), `LIVE_ZOOM_UNAVAILABLE` (503).
+         */
+        get: operations["regie_lien_zoom_intervenant"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7467,6 +7557,61 @@ export interface paths {
         get: operations["seance_flux_en_cours"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/speaker-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `SpeakerLinkInvite` : l'activité du lien d'inscription des intervenants en ligne (en-tête `X-Speaker-Link`). **404** pour un jeton inconnu, une activité finie, annulée ou non diffusée. Réponse `Cache-Control: private, no-store`. */
+        get: operations["lien_intervenant_invitation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/speaker-links/speakers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `OnlineSpeakerInput` → `OnlineSpeakerCreated`. Inscription d'un intervenant en ligne par le lien de l'activité (en-tête `X-Speaker-Link`) : il devient intervenant, **masqué** sur la page jusqu'à la validation de la régie, et son lien Zoom personnel part par courriel dès que sa place existe chez Zoom ; `POST /speaker-links/zoom` le rend à l'écran. Une adresse déjà intervenante de l'activité reprend sa ligne. `consent` obligatoire. */
+        post: operations["lien_intervenant_inscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/speaker-links/zoom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `SpeakerZoomAccess` : le lien Zoom personnel d'un intervenant qui vient de s'inscrire par le lien de l'activité (en-tête `X-Speaker-Link`, corps `{ speaker_id }`). Il ouvre l'application Zoom. Réponse `Cache-Control: private, no-store`.
+         *
+         *     Refus : `LIVE_MEETING_NOT_READY` (409, place pas encore enregistrée chez Zoom : réessayer), `LIVE_ZOOM_UNAVAILABLE` (503), 404 pour un lien plus valable ou un intervenant d'une autre activité.
+         */
+        post: operations["lien_intervenant_zoom"];
         delete?: never;
         options?: never;
         head?: never;
@@ -17483,6 +17628,244 @@ export interface operations {
             };
         };
     };
+    regie_intervenants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RegieSpeakers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_inscrire_un_intervenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description OnlineSpeakerCreated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Champ manquant ou invalide, activité annulée ou non diffusée */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_envoyer_le_lien_au_porteur: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SpeakerLinksSent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucun porteur, activité annulée ou non diffusée */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_renvoyer_les_liens_zoom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SpeakerLinksSent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inexistante ou hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucun intervenant joignable, activité annulée ou non diffusée */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_afficher_un_intervenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                sessionId: string;
+                /** @description Intervenant de la séance */
+                speakerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RegieSpeakers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission de planifier absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance ou intervenant inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     engagement_regles_de_rappel: {
         parameters: {
             query: {
@@ -18358,6 +18741,67 @@ export interface operations {
                 };
             };
             /** @description LIVE_ZOOM_UNAVAILABLE */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    regie_lien_zoom_intervenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance */
+                session_id: string;
+                /** @description Intervenant de la séance */
+                speaker_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SpeakerZoomAccess */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Permission absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance ou intervenant inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Place pas encore enregistrée chez Zoom */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Zoom non configuré */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -28600,6 +29044,164 @@ export interface operations {
             };
             /** @description Séance inconnue **ou non publiée** — indiscernables */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    lien_intervenant_invitation: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Jeton du lien d'inscription */
+                "X-Speaker-Link": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SpeakerLinkInvite */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucun jeton */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Lien inconnu ou plus valable */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    lien_intervenant_inscription: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Jeton du lien d'inscription */
+                "X-Speaker-Link": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description OnlineSpeakerCreated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucun jeton */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Lien inconnu ou plus valable */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Champ manquant ou invalide, accord absent */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    lien_intervenant_zoom: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Jeton du lien d'inscription */
+                "X-Speaker-Link": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description SpeakerZoomAccess */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucun jeton */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Lien ou intervenant inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Place pas encore enregistrée chez Zoom */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Zoom non configuré */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

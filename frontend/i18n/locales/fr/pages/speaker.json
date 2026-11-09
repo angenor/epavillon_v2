@@ -1,0 +1,26 @@
+{
+  "title": "Intervenir en ligne : {title}",
+  "titleBare": "Intervenir en ligne",
+  "when": "{day}, de {start} à {end}, {zone}",
+  "loading": "Chargement de l'activité",
+  "invalid": {
+    "title": "Ce lien n'est plus valable",
+    "description": "Il cesse de fonctionner à la fin de l'activité. Demandez-en un nouveau à l'organisation."
+  },
+  "error": "L'activité n'a pas pu être chargée.",
+  "intro": "Vous intervenez en ligne dans cette activité ? Inscrivez-vous : vous recevez aussitôt votre lien Zoom personnel. Si vous êtes sur place, vous n'avez rien à faire.",
+  "consent": "J'accepte que mon nom et ma fonction figurent sur la page de l'activité.",
+  "consentRequired": "Cochez cette case pour recevoir votre lien.",
+  "submit": "Recevoir mon lien Zoom",
+  "waiting": "Préparation de votre lien Zoom…",
+  "done": {
+    "title": "Votre lien Zoom est prêt",
+    "lead": "Il ouvre l'application Zoom directement, à votre nom. Nous vous l'avons aussi envoyé à {email}.",
+    "laterTitle": "Vous êtes inscrit(e)",
+    "later": "Votre lien Zoom vous est envoyé à {email} dès qu'il est prêt.",
+    "open": "Ouvrir Zoom",
+    "copy": "Copier le lien",
+    "copied": "Lien copié",
+    "connect": "Connectez-vous quelques minutes avant {time}, {zone}. L'équipe technique vous donnera la parole."
+  }
+}

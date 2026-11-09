@@ -10,6 +10,7 @@ import type {
   RegieUndoPayload,
 } from '~/types/admin-regie'
 import type { AdministeredEvents } from '~/types/identity'
+import type { OnlineSpeakerCreated, OnlineSpeakerInput, RegieSpeakers, SpeakerLinksSent } from '~/types/programme/online-speaker'
 import type { EventId, IsoDate, SessionId, Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -41,5 +42,23 @@ export function createAdminRegieApi({ call, send, assertEventInScope }: RegieApi
     /** Défait une ligne du journal ; 409 `REGIE_RESUME_EXPIRED` pour un direct terminé depuis plus de 15 min. */
     undo: (actionId: Uuid, payload: RegieUndoPayload): Promise<RegieGesture> =>
       send(`/admin/regie/actions/${actionId}/undo`, payload, (m) => m.regieUndo(actionId, payload)),
+
+    /** Les intervenants en ligne d'une activité diffusée, le lien d'inscription et les adresses du porteur. */
+    speakers: (sessionId: SessionId): Promise<RegieSpeakers> =>
+      call(`/admin/regie/sessions/${sessionId}/speakers`, (m) => m.regieSpeakers(sessionId)),
+
+    /** Affiché d'office sur la page ; son lien Zoom part aussitôt. */
+    addSpeaker: (sessionId: SessionId, input: OnlineSpeakerInput): Promise<OnlineSpeakerCreated> =>
+      send(`/admin/regie/sessions/${sessionId}/speakers`, input, (m) => m.regieAddSpeaker(sessionId, input)),
+
+    /** Un inscrit par le lien attend ce geste pour figurer sur la page de l'activité. */
+    listSpeaker: (sessionId: SessionId, speakerId: Uuid): Promise<RegieSpeakers> =>
+      send(`/admin/regie/sessions/${sessionId}/speakers/${speakerId}/list`, {}, (m) => m.regieListSpeaker(sessionId, speakerId)),
+
+    resendZoomLinks: (sessionId: SessionId): Promise<SpeakerLinksSent> =>
+      send(`/admin/regie/sessions/${sessionId}/speakers/zoom-links`, {}, (m) => m.regieResendZoomLinks(sessionId)),
+
+    sendOwnerLink: (sessionId: SessionId): Promise<SpeakerLinksSent> =>
+      send(`/admin/regie/sessions/${sessionId}/speakers/owner-link`, {}, (m) => m.regieSendOwnerLink(sessionId)),
   }
 }

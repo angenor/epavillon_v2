@@ -1,0 +1,69 @@
+{
+  "row": {
+    "label": "Online speakers",
+    "online": "No online speakers | Online speakers: {count} | Online speakers: {count}",
+    "noneTail": " yet.",
+    "toList": ", including {count} signed up through the link, to approve. | , including {count} signed up through the link, to approve. | , including {count} signed up through the link, to approve.",
+    "end": ".",
+    "linksSent": "Zoom links sent on {date} at {time}.",
+    "ownerSent": "Sign-up link sent to the organiser on {date} at {time}.",
+    "register": "Register a speaker",
+    "resend": "Resend Zoom links",
+    "resendNone": "No speaker has an email address.",
+    "owner": "Send the sign-up link to the organiser",
+    "ownerNone": "This activity has no organiser to send the link to."
+  },
+  "cc": "Copied to {first} and {second}.",
+  "ccEach": "Each one copied to {first} and {second}.",
+  "register": {
+    "title": "Register a speaker",
+    "description": "{title}, {when}",
+    "listed": "Already registered online",
+    "loading": "Loading speakers",
+    "loadError": "The speaker list could not be loaded.",
+    "empty": "No online speakers yet.",
+    "copySignup": "Copy the sign-up link",
+    "copiedSignup": "Sign-up link copied",
+    "sentOn": "link sent on {date} at {time}",
+    "signedUpOn": "signed up through the link on {date} at {time}",
+    "notSent": "link not sent yet",
+    "noEmail": "no email address",
+    "onPage": "On the page",
+    "showOnPage": "Show on the page",
+    "newSpeaker": "New speaker",
+    "note": "Their Zoom link is sent straight away.",
+    "close": "Close",
+    "submit": "Register and send the Zoom link",
+    "waiting": "Preparing their Zoom link…",
+    "done": {
+      "title": "{name} is registered",
+      "sentTo": "Their personal Zoom link is on its way to {email}.",
+      "later": "Their Zoom link will be emailed to them as soon as it is ready.",
+      "link": "Zoom link, which you can also pass on by message",
+      "copy": "Copy the link",
+      "copied": "Link copied",
+      "another": "Register another speaker",
+      "finish": "Done"
+    },
+    "when": "{day}, from {start} to {end}, {zone}"
+  },
+  "resend": {
+    "title": "Resend the Zoom links?",
+    "description": "Each speaker receives their own link again.",
+    "noEmail": "no email address: nothing can be sent to them",
+    "noEmailTag": "No address",
+    "mails": "No emails. | {count} email. | {count} emails.",
+    "cancel": "Cancel",
+    "confirm": "Resend to {count} speaker | Resend to {count} speaker | Resend to {count} speakers",
+    "done": "No Zoom links resent. | Zoom link resent to {count} speaker. | Zoom links resent to {count} speakers."
+  },
+  "owner": {
+    "title": "Send the sign-up link to the organiser?",
+    "description": "The organiser receives the link to pass on to their online speakers. Those attending in person need do nothing.",
+    "recipients": "Recipients",
+    "cancel": "Cancel",
+    "confirm": "Send the link",
+    "done": "No sign-up link sent. | Sign-up link sent to {count} address. | Sign-up link sent to {count} addresses."
+  },
+  "errorTitle": "Sending failed"
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Speaking online: {title}",
+  "titleBare": "Speaking online",
+  "when": "{day}, from {start} to {end}, {zone}",
+  "loading": "Loading the activity",
+  "invalid": {
+    "title": "This link is no longer valid",
+    "description": "It stops working once the activity is over. Ask the organisers for a new one."
+  },
+  "error": "The activity could not be loaded.",
+  "intro": "Speaking online in this activity? Sign up and you will receive your personal Zoom link straight away. If you are attending in person, there is nothing to do.",
+  "consent": "I agree that my name and position may appear on the activity page.",
+  "consentRequired": "Tick this box to receive your link.",
+  "submit": "Get my Zoom link",
+  "waiting": "Preparing your Zoom link…",
+  "done": {
+    "title": "Your Zoom link is ready",
+    "lead": "It opens the Zoom app directly, under your name. We have also sent it to {email}.",
+    "laterTitle": "You are signed up",
+    "later": "Your Zoom link will be sent to {email} as soon as it is ready.",
+    "open": "Open Zoom",
+    "copy": "Copy the link",
+    "copied": "Link copied",
+    "connect": "Please join a few minutes before {time}, {zone}. The technical team will give you the floor."
+  }
+}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { IncidentListScreen, IncidentPayload, ManagedIncident } from '~/types/admin-incidents'
-import type { RegieGesture, RegieJournalEntry, RegieScreen, RegieSession } from '~/types/admin-regie'
+import type { RegieGesture, RegieJournalEntry, RegieScreen, RegieSession, RegieSpeakersTarget } from '~/types/admin-regie'
 import type { EffectivePermission } from '~/types/identity'
 import type { IsoDate, Uuid } from '~/types/shared'
 import type { ComposerCommand, JournalUndoMode, RegieCancelChoice, RegieRestoreChoice } from '~/utils/regie'
@@ -412,6 +412,10 @@ async function submitRestore(choice: RegieRestoreChoice): Promise<void> {
   await reload()
 }
 
+// --- Intervenants en ligne ---------------------------------------------------
+
+const speakersTarget = ref<RegieSpeakersTarget | null>(null)
+
 // --- Journal -----------------------------------------------------------------
 
 async function actOnJournal(entry: RegieJournalEntry, mode: JournalUndoMode): Promise<void> {
@@ -563,6 +567,7 @@ async function publishIncident(payload: IncidentPayload): Promise<void> {
             @create-meeting="createMeeting"
             @restore="openRestore($event, $event.cancellation?.action_id ?? null)"
             @resume="resumeLive"
+            @speakers="(session, gesture) => (speakersTarget = { session, gesture })"
           />
           <UiEmptyState
             v-else
@@ -640,6 +645,13 @@ async function publishIncident(payload: IncidentPayload): Promise<void> {
         :submitting="busy === 'restore'"
         :error="dialogError"
         @submit="submitRestore"
+      />
+      <AdminRegieSpeakersGestures
+        v-model:target="speakersTarget"
+        :timezone="timezone"
+        :zone-label="zoneLabel"
+        :can-manage-meeting="canManageMeeting"
+        @changed="reload"
       />
       <AdminRegieUndoBar
         v-if="undoOffer"

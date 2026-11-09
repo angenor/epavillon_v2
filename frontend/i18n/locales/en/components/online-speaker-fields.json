@@ -1,0 +1,11 @@
+{
+  "civility": "Title",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "jobTitle": "Position",
+  "organization": "Organisation",
+  "email": "Email address",
+  "country": "Country",
+  "bio": "Short biography",
+  "bioHint": "Shown on the activity page."
+}

@@ -106,6 +106,27 @@ export interface RegieSession {
   resumable_until: IsoDateTime | null
   cancellation: RegieCancellation | null
   last_action_id: Uuid | null
+  speakers: RegieSpeakerSummary
+}
+
+/** Les trois gestes de la rangée « Intervenants en ligne ». */
+export type RegieSpeakersGesture = 'register' | 'resend' | 'owner'
+
+export interface RegieSpeakersTarget {
+  session: RegieSession
+  gesture: RegieSpeakersGesture
+}
+
+export interface RegieSpeakerSummary {
+  /** Intervenants dont le lien Zoom a été envoyé. */
+  online: number
+  /** Intervenants qui ont une adresse. */
+  reachable: number
+  /** Inscrits par le lien, pas encore affichés sur la page. */
+  to_list: number
+  links_sent_at: IsoDateTime | null
+  owner_link_sent_at: IsoDateTime | null
+  has_owner: boolean
 }
 
 export interface RegieJournalEntry {

@@ -7,6 +7,7 @@ import type {
   RegistrationJoinResult,
 } from '~/types/live'
 import type { MeetingHostLink } from '~/types/admin-regie'
+import type { SpeakerZoomAccess } from '~/types/programme/online-speaker'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 import { manageHeaders } from './track-registrations'
@@ -56,6 +57,13 @@ export function createMeetingsApi({ call, callOrNull, send }: Pick<ApiTransport,
     /** Lien d'animateur, à ouvrir aussitôt : jamais gardé dans un état ni affiché. */
     hostLink: (sessionId: Uuid): Promise<MeetingHostLink> =>
       call(`/admin/sessions/${sessionId}/meeting/host`, (m) => m.meetingHostLink(sessionId)),
+
+    /**
+     * Le lien Zoom personnel d'un intervenant, avec `live.meeting.manage`. Refus :
+     * 409 `LIVE_MEETING_NOT_READY` (réessayer), 503 `LIVE_ZOOM_UNAVAILABLE`.
+     */
+    speakerZoom: (sessionId: Uuid, speakerId: Uuid): Promise<SpeakerZoomAccess> =>
+      call(`/admin/sessions/${sessionId}/speakers/${speakerId}/zoom`, (m) => m.speakerZoomAccess(speakerId)),
 
     /** Lève l'attente d'un déplacement (ou d'un quota) : la synchronisation part tout de suite. Inscrits non touchés. */
     push: (sessionId: Uuid): Promise<AdminSessionMeeting> =>

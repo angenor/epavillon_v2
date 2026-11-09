@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RegieSession } from '~/types/admin-regie'
+import type { RegieSession, RegieSpeakersGesture } from '~/types/admin-regie'
 import type { TimeZoneName } from '~/types/shared'
 import type { MenuItem } from '~/types/ui'
 import type { RegieDisplayState, StartLiveBlock } from '~/utils/regie'
@@ -27,6 +27,7 @@ const emit = defineEmits<{
   'create-meeting': []
   restore: []
   resume: []
+  speakers: [gesture: RegieSpeakersGesture]
 }>()
 
 const { t } = useI18n()
@@ -77,6 +78,10 @@ const cancellationText = computed(() => {
   } else parts.push(t('admin.regie.notice.none'))
   return parts.filter(Boolean).join(' ')
 })
+
+const showSpeakers = computed(
+  () => props.canSchedule && props.session.is_streamed && (isOpen.value || props.state === 'live'),
+)
 
 const canResume = computed(
   () =>
@@ -190,6 +195,14 @@ const blockText = computed(() =>
     <p v-if="props.isNext && blockText && props.canSchedule && isOpen" class="col-span-full text-xs text-text-secondary md:col-start-2">
       {{ blockText }}
     </p>
+    <AdminRegieSpeakersRow
+      v-if="showSpeakers"
+      :summary="props.session.speakers"
+      :timezone="props.timezone"
+      @register="emit('speakers', 'register')"
+      @resend="emit('speakers', 'resend')"
+      @owner="emit('speakers', 'owner')"
+    />
   </li>
 </template>
 

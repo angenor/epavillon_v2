@@ -1,0 +1,69 @@
+{
+  "row": {
+    "label": "Intervenants en ligne",
+    "online": "Aucun intervenant en ligne | Intervenants en ligne : {count} | Intervenants en ligne : {count}",
+    "noneTail": " pour l'instant.",
+    "toList": ", dont {count} inscrit par le lien, à valider. | , dont {count} inscrit par le lien, à valider. | , dont {count} inscrits par le lien, à valider.",
+    "end": ".",
+    "linksSent": "Liens Zoom envoyés le {date} à {time}.",
+    "ownerSent": "Lien d'inscription envoyé au porteur le {date} à {time}.",
+    "register": "Inscrire un intervenant",
+    "resend": "Renvoyer les liens Zoom",
+    "resendNone": "Aucun intervenant n'a d'adresse courriel.",
+    "owner": "Envoyer le lien d'inscription au porteur",
+    "ownerNone": "Cette activité n'a pas de porteur à qui envoyer le lien."
+  },
+  "cc": "Copie à {first} et {second}.",
+  "ccEach": "Copie de chacun à {first} et {second}.",
+  "register": {
+    "title": "Inscrire un intervenant",
+    "description": "{title}, {when}",
+    "listed": "Déjà inscrits en ligne",
+    "loading": "Chargement des intervenants",
+    "loadError": "La liste des intervenants n'a pas pu être chargée.",
+    "empty": "Aucun intervenant en ligne pour l'instant.",
+    "copySignup": "Copier le lien d'inscription",
+    "copiedSignup": "Lien d'inscription copié",
+    "sentOn": "lien envoyé le {date} à {time}",
+    "signedUpOn": "inscrit par le lien le {date} à {time}",
+    "notSent": "lien pas encore envoyé",
+    "noEmail": "sans adresse courriel",
+    "onPage": "Sur la page",
+    "showOnPage": "Afficher sur la page",
+    "newSpeaker": "Nouvel intervenant",
+    "note": "Son lien Zoom part tout de suite.",
+    "close": "Fermer",
+    "submit": "Inscrire et envoyer le lien Zoom",
+    "waiting": "Préparation de son lien Zoom…",
+    "done": {
+      "title": "{name} est inscrit(e)",
+      "sentTo": "Son lien Zoom personnel part à {email}.",
+      "later": "Son lien Zoom lui est envoyé par courriel dès qu'il est prêt.",
+      "link": "Lien Zoom, à transmettre aussi par message si besoin",
+      "copy": "Copier le lien",
+      "copied": "Lien copié",
+      "another": "Inscrire un autre intervenant",
+      "finish": "Terminé"
+    },
+    "when": "{day}, de {start} à {end}, {zone}"
+  },
+  "resend": {
+    "title": "Renvoyer les liens Zoom ?",
+    "description": "Chaque intervenant reçoit à nouveau son propre lien.",
+    "noEmail": "sans adresse courriel : rien ne peut lui être envoyé",
+    "noEmailTag": "Sans adresse",
+    "mails": "Aucun courriel. | {count} courriel. | {count} courriels.",
+    "cancel": "Annuler",
+    "confirm": "Renvoyer à {count} intervenant | Renvoyer à {count} intervenant | Renvoyer à {count} intervenants",
+    "done": "Aucun lien Zoom renvoyé. | Lien Zoom renvoyé à {count} intervenant. | Liens Zoom renvoyés à {count} intervenants."
+  },
+  "owner": {
+    "title": "Envoyer le lien d'inscription au porteur ?",
+    "description": "Le porteur reçoit le lien à transmettre à ses intervenants en ligne. Ceux qui sont sur place n'ont rien à faire.",
+    "recipients": "Destinataires",
+    "cancel": "Annuler",
+    "confirm": "Envoyer le lien",
+    "done": "Aucun lien d'inscription envoyé. | Lien d'inscription envoyé à {count} adresse. | Lien d'inscription envoyé à {count} adresses."
+  },
+  "errorTitle": "L'envoi n'a pas abouti"
+}

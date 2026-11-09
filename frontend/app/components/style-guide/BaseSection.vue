@@ -133,6 +133,7 @@ const visibleFilters = computed(() => filters.value.filter((filter) => !removed.
             <UiButton variant="secondary" pressed icon="filter">
               {{ t('style-guide.base.buttons.pressed') }}
             </UiButton>
+            <UiCopyButton text="https://epavillon.exemple.org/intervenant?jeton=exemple" :label="t('style-guide.base.buttons.copy')" />
           </div>
           <div class="mt-3 max-w-sm">
             <UiButton block icon="upload">{{ t('style-guide.base.buttons.block') }}</UiButton>

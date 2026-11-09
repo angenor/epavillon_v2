@@ -669,3 +669,11 @@ Arbitrages du commanditaire sur l'inscription à une journée.
 ## 2026-11-07 : une journée en présentiel seulement
 
 `event.programme_tracks.is_streamed boolean NOT NULL DEFAULT true` (`060`). Faux : la page le dit, l'inscription à la journée se refuse, aucune réunion ne naît, celle qui existe est annulée (événement `event.track.streaming_disabled`, premier événement émis par un fil). Migration `ops/migrations/2026-11-07-atelier-en-presentiel.sql`, rejouable, à jouer avant l'API ; elle éteint l'atelier de la CdP31 et annule sa réunion.
+
+## 2026-11-08 : intervenants en ligne
+
+Demande du commanditaire pendant la CdP31 : l'intervenant qui parle à distance reçoit son lien Zoom personnel (qui ouvre l'application), le public reste sur le SDK du site ; un lien d'inscription par activité pour ceux qui se décident le jour même.
+- `075` § 2 bis : `programme.sessions.speaker_link_token` (en clair, renvoyé à l'identique au porteur ; sans effet après la fin de l'activité) ; `programme.session_speakers.source` (`dossier`, `regie`, `lien`), `is_listed` (masqué sur la page pour un inscrit par le lien, jusqu'à la régie), `country_id`. La resynchronisation sur le dossier ne touche que `source = 'dossier'`.
+- `080` : `live.meeting_participants.link_requested_at` et `speaker_session_id` (place `panelist` sans inscription, reconnue par l'adresse) ; réglage `live.speaker_links.auto` (envois d'office à J-2 et J-1), **faux** jusqu'à la validation des courriels.
+- `110` : réglage `engagement.speaker_links.cc` (Angenor, Issa), copie de chaque courriel d'intervenant.
+Migration `ops/migrations/2026-11-08-intervenants-en-ligne.sql`, rejouable, à jouer avant l'API ; éprouvée deux fois sur une base construite avec le schéma précédent.
