@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.registrations SET manage_token_hash = $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "74f4d0d1e80b57a498c6c5d2a18c6b8d3559d7dbfe1eaf5322a52034c86007e9"
+}

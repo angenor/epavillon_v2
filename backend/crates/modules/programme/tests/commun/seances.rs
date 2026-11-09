@@ -797,7 +797,9 @@ pub fn identifiant_de(issue: &IssueDInscription) -> Uuid {
     let ligne = match issue {
         IssueDInscription::Registered { registration }
         | IssueDInscription::Waitlisted { registration, .. }
-        | IssueDInscription::AlreadyRegistered { registration } => registration,
+        | IssueDInscription::AlreadyRegistered {
+            registration: Some(registration),
+        } => registration,
         autre => panic!("aucune inscription dans cette issue : {autre:?}"),
     };
 

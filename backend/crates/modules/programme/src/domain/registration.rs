@@ -32,9 +32,10 @@ pub enum IssueDInscription {
         position: i32,
     },
     /// Une inscription vivante existe déjà : la ligne est **relue et rendue**,
-    /// et non refusée (`ux_registrations_person_session`).
+    /// et non refusée (`ux_registrations_person_session`). Sans compte, rien
+    /// n'est rendu : une adresse tapée ne prouve pas qu'on en est le titulaire.
     AlreadyRegistered {
-        registration: serde_json::Value,
+        registration: Option<serde_json::Value>,
     },
     /// Jauge atteinte **sans liste d'attente**. Le nombre de places est relu sur
     /// la séance.

@@ -200,6 +200,7 @@ async fn une_seconde_inscription_rend_lexistante_et_la_reinscription_passe() {
         .unwrap();
     match issue {
         IssueDInscription::AlreadyRegistered { registration } => {
+            let registration = registration.expect("connectée, la ligne est rendue");
             assert_eq!(
                 registration.get("id").and_then(|v| v.as_str()),
                 Some(premiere.to_string().as_str())
@@ -293,6 +294,70 @@ async fn les_quatre_fenetres_rendent_quatre_motifs_distincts() {
 }
 
 /// **L'inscription sans compte** : la personne est créée sans compte, retrouvée
+/// par son adresse à la seconde inscription, et refusée quand le formulaire ne
+/// l'admet pas.
+#[tokio::test]
+async fn sans_compte_le_lien_part_par_courriel_et_rien_ne_revient_a_qui_tape_ladresse() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    seances::grille(&bac, terrain.edition).await;
+    let seance = seance_ouverte(&bac, &terrain, "lien", None, false).await;
+    let charge = || registration::SessionRegisterPayload {
+        guest: Some(registration::Invite {
+            email: "lien@example.org".to_owned(),
+            first_name: "Awa".to_owned(),
+            last_name: "Sow".to_owned(),
+            civility: None,
+        }),
+        ..seances::reponses_valides()
+    };
+
+    let IssueDInscription::Registered { registration } =
+        seances::sinscrire(&bac, seance, None, charge()).await.unwrap()
+    else {
+        panic!("attendait une inscription");
+    };
+    assert!(
+        registration.get("manage_token_hash").is_none(),
+        "l'empreinte ne sort jamais"
+    );
+    let id = seances::identifiant_de(&IssueDInscription::Registered { registration });
+    let empreinte = || async {
+        sqlx::query_scalar!(
+            "SELECT manage_token_hash FROM programme.registrations WHERE id = $1",
+            id
+        )
+        .fetch_one(bac.pool())
+        .await
+        .unwrap()
+        .expect("sans compte, l'empreinte est posée")
+    };
+    let premiere = empreinte().await;
+    assert_eq!(premiere.len(), 32);
+
+    let issue = seances::sinscrire(&bac, seance, None, charge()).await.unwrap();
+    assert!(
+        matches!(issue, IssueDInscription::AlreadyRegistered { registration: None }),
+        "une adresse tapée ne donne accès à rien : {issue:?}"
+    );
+    assert_ne!(empreinte().await, premiere, "le renvoi remplace le lien");
+
+    let envois = sqlx::query_scalar!(
+        r#"SELECT (payload ->> 'resent')::boolean AS "renvoi!"
+             FROM platform.jobs
+            WHERE task = 'engagement.send_registration'
+              AND payload ->> 'registration_id' = $1
+              AND payload ->> 'token' IS NOT NULL
+            ORDER BY created_at"#,
+        id.to_string()
+    )
+    .fetch_all(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(envois, vec![false, true]);
+}
+
+/// Sans compte : la personne est créée, sans compte et sans rôle, puis retrouvée
 /// par son adresse à la seconde inscription, et refusée quand le formulaire ne
 /// l'admet pas.
 #[tokio::test]

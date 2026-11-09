@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH annulee AS (\n               UPDATE programme.registrations\n                  SET status = 'cancelled',\n                      waitlist_position = NULL,\n                      cancelled_at = now(),\n                      cancelled_reason = $2\n                WHERE id = $1 AND status <> 'cancelled'\n               RETURNING *\n           )\n           SELECT to_jsonb(annulee) - 'manage_token_hash' AS \"ligne!\",\n                  (SELECT r.status::text FROM programme.registrations r WHERE r.id = $1)\n                      AS \"precedent!\"\n             FROM annulee",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "precedent!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "9cc291484d7fee901c30adade5ae7888b66554ffb69839d41ab118da65f79d51"
+}

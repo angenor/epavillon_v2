@@ -26,6 +26,7 @@
 
 use kernel::context::RequestContext;
 use kernel::error::{ApiError, ErrorCode, Result};
+use kernel::jobs::{self, NewJob};
 use kernel::pg_error;
 use serde::Deserialize;
 use sqlx::postgres::PgConnection;
@@ -39,6 +40,7 @@ use crate::domain::registration::{
 };
 use crate::domain::{answers, sessions as formes};
 use crate::repo::{consents, forms, people, registrations, track_registrations};
+use crate::service::track_registration::jeton_neuf;
 use crate::state::ProgrammeState;
 
 /// Ce qu'une tentative d'inscription porte — `SessionRegisterPayload`.
@@ -166,8 +168,13 @@ pub async fn sinscrire(
     if let Some(existante) =
         registrations::inscription_vivante(&mut tx, session_id, personne).await?
     {
+        if lecteur.is_none() {
+            donner_le_lien(&mut tx, identifiant_de(&existante)?, true).await?;
+            tx.commit().await?;
+            return Ok(IssueDInscription::AlreadyRegistered { registration: None });
+        }
         return Ok(IssueDInscription::AlreadyRegistered {
-            registration: existante,
+            registration: Some(existante),
         });
     }
 
@@ -183,7 +190,12 @@ pub async fn sinscrire(
     .await;
 
     let issue = match inscription {
-        Ok(ligne) => issue_de(ligne),
+        Ok(ligne) => {
+            if lecteur.is_none() {
+                donner_le_lien(&mut tx, identifiant_de(&ligne)?, false).await?;
+            }
+            issue_de(ligne)
+        }
         Err(erreur) => {
             let issue = traduire_linscription(&erreur, &seance)?;
             tx.rollback().await?;
@@ -193,6 +205,38 @@ pub async fn sinscrire(
 
     tx.commit().await?;
     Ok(issue)
+}
+
+/// Sans compte, la salle ne reconnaît personne : le courriel porte un lien
+/// personnel. Mis en file ici et non par l'outbox, qui ne doit jamais voir le
+/// jeton en clair.
+async fn donner_le_lien(conn: &mut PgConnection, registration_id: Uuid, renvoi: bool) -> Result<()> {
+    let (jeton, empreinte) = jeton_neuf();
+    registrations::poser_empreinte(&mut *conn, registration_id, &empreinte).await?;
+    let charge = contracts::engagement::RegistrationEmail {
+        registration_id,
+        token: Some(jeton),
+        resent: renvoi,
+    };
+    let mut job = NewJob::new(
+        contracts::engagement::SEND_REGISTRATION,
+        serde_json::to_value(&charge).map_err(ApiError::internal)?,
+    )
+    .idempotent(format!(
+        "{registration_id}:{}",
+        OffsetDateTime::now_utc().unix_timestamp_nanos()
+    ));
+    job.queue = contracts::engagement::EMAIL_QUEUE;
+    jobs::enqueue(conn, job).await?;
+    Ok(())
+}
+
+fn identifiant_de(ligne: &serde_json::Value) -> Result<Uuid> {
+    ligne
+        .get("id")
+        .and_then(serde_json::Value::as_str)
+        .and_then(|s| Uuid::parse_str(s).ok())
+        .ok_or_else(|| ApiError::internal("inscription sans identifiant"))
 }
 
 /// La fenêtre, telle que le domaine la décide, sur des valeurs **relues sous

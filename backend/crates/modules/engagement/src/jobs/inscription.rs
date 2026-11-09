@@ -4,9 +4,13 @@
 //! direct, la salle du site (SDK), jamais le lien Zoom. Mis en file par le
 //! consommateur des avis à la création de l'inscription ; une activité gardée
 //! d'une inscription à la journée n'a pas la sienne, celle de la journée suffit.
+//!
+//! Sans compte, la salle ne reconnaît personne : le module Programmation met en
+//! file une confirmation qui porte le jeton en clair, vers la page qui entre
+//! directement dans Zoom. Celle du consommateur s'efface alors devant elle.
 
 use async_trait::async_trait;
-use contracts::engagement::EMAIL_QUEUE;
+use contracts::engagement::{RegistrationEmail, EMAIL_QUEUE, SEND_REGISTRATION};
 use kernel::config::Config;
 use kernel::db::Db;
 use kernel::error::{ApiError, Result};
@@ -15,7 +19,6 @@ use kernel::jobs::{self, ClaimedJob, JobHandler, NewJob};
 use kernel::mail::{Extras, Mailer, OutgoingMail};
 use sqlx::postgres::PgConnection;
 use std::sync::Arc;
-use uuid::Uuid;
 
 use crate::domain::courriel_direct::{self, CourrielDirect};
 use crate::domain::gabarits::{images_integrees, Visuels};
@@ -23,7 +26,6 @@ use crate::jobs::send_mailing::apparence;
 use crate::repo::delivery;
 use crate::repo::journees::{self, ActivitePourCourriel};
 
-pub const SEND_REGISTRATION: &str = "engagement.send_registration";
 const TYPE_CONFIRMATION: &str = "programme.registration.confirmed";
 /// La liste d'attente a sa place chez Zoom : le jour même, les premiers arrivés entrent.
 const ETATS: [&str; 2] = ["registered", "waitlisted"];
@@ -53,12 +55,24 @@ pub async fn poser(conn: &mut PgConnection, event: &OutboxEvent) -> Result<()> {
 
 /// Le lien du bouton : la salle de l'activité, qui entre sans second clic, ou
 /// la page de sa journée, qui porte le direct.
-fn lien(app: &str, a: &ActivitePourCourriel) -> String {
+fn lien(app: &str, a: &ActivitePourCourriel, jeton: Option<&str>) -> String {
     let base = app.trim_end_matches('/');
     let anglais = a.locale.starts_with("en");
     match (&a.track_slug, anglais) {
         (Some(t), false) => format!("{base}/programmations/{}/journees/{t}", a.event_slug),
         (Some(t), true) => format!("{base}/en/programmes/{}/days/{t}", a.event_slug),
+        (None, false) if jeton.is_some() => format!(
+            "{base}/programmations/{}/{}/direct?jeton={}",
+            a.event_slug,
+            a.session_slug,
+            jeton.unwrap_or_default()
+        ),
+        (None, true) if jeton.is_some() => format!(
+            "{base}/en/programmes/{}/{}/live?jeton={}",
+            a.event_slug,
+            a.session_slug,
+            jeton.unwrap_or_default()
+        ),
         (None, false) => format!(
             "{base}/programmations/{}/{}/salle?entrer=1",
             a.event_slug, a.session_slug
@@ -72,6 +86,8 @@ fn lien(app: &str, a: &ActivitePourCourriel) -> String {
 
 pub fn confirmation(
     a: &ActivitePourCourriel,
+    jeton: Option<&str>,
+    renvoi: bool,
     app: &str,
     message_id: &str,
     visuels: Option<&Visuels>,
@@ -87,7 +103,12 @@ pub fn confirmation(
     if anglais {
         avant.push(format!("Hello {},", a.first_name));
         avant.push(format!(
-            "Your registration is confirmed. \"{}\" starts on {quand}.",
+            "{} \"{}\" starts on {quand}.",
+            if renvoi {
+                "Here is your link again."
+            } else {
+                "Your registration is confirmed."
+            },
             a.titre
         ));
         if attente {
@@ -99,7 +120,12 @@ pub fn confirmation(
     } else {
         avant.push(format!("Bonjour {},", a.first_name));
         avant.push(format!(
-            "Votre inscription est confirmée. « {} » commence le {quand}.",
+            "{} « {} » commence le {quand}.",
+            if renvoi {
+                "Voici de nouveau votre lien."
+            } else {
+                "Votre inscription est confirmée."
+            },
             a.titre
         ));
         if attente {
@@ -112,14 +138,24 @@ pub fn confirmation(
     }
     let c = CourrielDirect {
         anglais,
-        sujet: if anglais {
-            format!("Registration confirmed: {}", a.titre)
-        } else {
-            format!("Inscription confirmée : {}", a.titre)
+        sujet: match (anglais, renvoi) {
+            (true, true) => format!("Your link for {}", a.titre),
+            (true, false) => format!("Registration confirmed: {}", a.titre),
+            (false, true) => format!("Votre lien pour {}", a.titre),
+            (false, false) => format!("Inscription confirmée : {}", a.titre),
         },
         avant,
-        lien: lien(app, a),
-        apres: vec![],
+        lien: lien(app, a, jeton),
+        apres: jeton
+            .map(|_| {
+                if anglais {
+                    "This link is personal: please do not forward it.".to_owned()
+                } else {
+                    "Ce lien est personnel : merci de ne pas le transférer.".to_owned()
+                }
+            })
+            .into_iter()
+            .collect(),
     };
     courriel_direct::composer(&c, visuels, &a.email, &a.locale, message_id)
 }
@@ -150,18 +186,21 @@ impl JobHandler for SendRegistration {
         EMAIL_QUEUE
     }
 
+    fn carries_secret(&self) -> bool {
+        true
+    }
+
     async fn run(&self, job: &ClaimedJob) -> Result<()> {
-        let id = job
-            .payload
-            .get("registration_id")
-            .and_then(serde_json::Value::as_str)
-            .and_then(|s| Uuid::parse_str(s).ok())
-            .ok_or_else(|| ApiError::internal("charge sans registration_id"))?;
+        let c: RegistrationEmail = serde_json::from_value(job.payload.clone())
+            .map_err(|_| ApiError::internal("charge sans registration_id"))?;
         let pool = self.db.pool();
-        let Some(a) = journees::activite_pour_courriel(pool, id).await? else {
+        let Some(a) = journees::activite_pour_courriel(pool, c.registration_id).await? else {
             return Ok(());
         };
         if a.track_registration_id.is_some() || !ETATS.contains(&a.status.as_str()) {
+            return Ok(());
+        }
+        if a.lien_personnel && c.token.is_none() {
             return Ok(());
         }
         if !delivery::canal_autorise(pool, a.person_id, TYPE_CONFIRMATION, "email").await? {
@@ -177,6 +216,8 @@ impl JobHandler for SendRegistration {
         .await?;
         let mail = confirmation(
             &a,
+            c.token.as_deref(),
+            c.resent,
             &self.app_public_url,
             &job.id.to_string(),
             habit.visuels.as_ref(),
@@ -197,6 +238,7 @@ impl JobHandler for SendRegistration {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use uuid::Uuid;
 
     fn activite(locale: &str, journee: Option<&str>) -> ActivitePourCourriel {
         ActivitePourCourriel {
@@ -213,17 +255,18 @@ mod tests {
             debut_local: Some("13/11/2026 à 08h00".to_owned()),
             track_registration_id: None,
             track_slug: journee.map(str::to_owned),
+            lien_personnel: false,
         }
     }
 
     #[test]
     fn le_bouton_mene_a_la_salle_de_l_activite() {
-        let m = confirmation(&activite("fr", None), "https://site.org/", "j", None);
+        let m = confirmation(&activite("fr", None), None, false, "https://site.org/", "j", None);
         assert!(m
             .text
             .contains("https://site.org/programmations/cdp31/finance-climat/salle?entrer=1"));
         assert!(m.text.contains("(Europe/Istanbul)"));
-        let m = confirmation(&activite("en", None), "https://site.org", "j", None);
+        let m = confirmation(&activite("en", None), None, false, "https://site.org", "j", None);
         assert!(m
             .text
             .contains("https://site.org/en/programmes/cdp31/finance-climat/room?entrer=1"));
@@ -233,6 +276,8 @@ mod tests {
     fn une_activite_de_journee_mene_a_la_journee() {
         let m = confirmation(
             &activite("fr", Some("jeunesse")),
+            None,
+            false,
             "https://site.org",
             "j",
             None,
@@ -240,5 +285,19 @@ mod tests {
         assert!(m
             .text
             .contains("https://site.org/programmations/cdp31/journees/jeunesse\n"));
+    }
+
+    #[test]
+    fn sans_compte_le_bouton_porte_le_jeton() {
+        let m = confirmation(&activite("fr", None), Some("abc"), false, "https://site.org", "j", None);
+        assert!(m
+            .text
+            .contains("https://site.org/programmations/cdp31/finance-climat/direct?jeton=abc"));
+        assert!(m.text.contains("personnel"));
+        let m = confirmation(&activite("en", None), Some("abc"), true, "https://site.org", "j", None);
+        assert!(m
+            .text
+            .contains("https://site.org/en/programmes/cdp31/finance-climat/live?jeton=abc"));
+        assert!(m.subject.starts_with("Your link"));
     }
 }

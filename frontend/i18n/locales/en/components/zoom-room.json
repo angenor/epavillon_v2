@@ -4,7 +4,7 @@
   "login": {
     "message": "Sign in to enter the meeting.",
     "action": "Sign in",
-    "registerMessage": "The meeting is reserved for registered participants. Register, or sign in if you already are."
+    "registerMessage": "This meeting is for registered people. Register, or sign in. Registered without an account? Enter your address again and your personal link will be emailed to you."
   },
   "register": {
     "message": "The meeting is reserved for registered participants.",

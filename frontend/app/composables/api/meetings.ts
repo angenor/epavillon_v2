@@ -23,8 +23,8 @@ export function createMeetingsApi({ call, callOrNull, send }: Pick<ApiTransport,
      * 401, 403 `LIVE_MEETING_REGISTRATION_REQUIRED`, 409 `LIVE_MEETING_NOT_OPEN` ou
      * `LIVE_MEETING_NOT_READY`, 503 `LIVE_ZOOM_UNAVAILABLE`.
      */
-    access: (sessionId: Uuid): Promise<MeetingAccess> =>
-      call(`/sessions/${sessionId}/meeting/access`, (m) => m.meetingAccess(sessionId)),
+    access: (sessionId: Uuid, token: string | null = null): Promise<MeetingAccess> =>
+      call(`/sessions/${sessionId}/meeting/access`, (m) => m.meetingAccess(sessionId), undefined, manageHeaders(token)),
 
     /** Public. La réunion unique d'une journée spéciale ou de l'atelier ; nulle : pas de réunion. */
     forTrack: (trackId: Uuid): Promise<PublicSessionMeeting | null> =>

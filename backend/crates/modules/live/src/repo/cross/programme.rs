@@ -471,6 +471,25 @@ pub async fn inscription_journee_de(
     Ok(id)
 }
 
+/// L'inscription du porteur du lien reçu par courriel, pour cette activité ;
+/// mêmes états que [`inscription_active_de`].
+pub async fn inscription_active_par_empreinte(
+    conn: &mut PgConnection,
+    session_id: Uuid,
+    empreinte: &[u8],
+) -> Result<Option<Uuid>> {
+    let id = sqlx::query_scalar!(
+        "SELECT id FROM programme.registrations
+          WHERE session_id = $1 AND manage_token_hash = $2
+            AND status IN ('registered', 'waitlisted', 'attended')",
+        session_id,
+        empreinte
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(id)
+}
+
 /// L'inscription active du porteur du lien de gestion, pour cette journée.
 pub async fn inscription_journee_par_empreinte(
     conn: &mut PgConnection,

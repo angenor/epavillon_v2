@@ -677,3 +677,9 @@ Demande du commanditaire pendant la CdP31 : l'intervenant qui parle à distance 
 - `080` : `live.meeting_participants.link_requested_at` et `speaker_session_id` (place `panelist` sans inscription, reconnue par l'adresse) ; réglage `live.speaker_links.auto` (envois d'office à J-2 et J-1), **faux** jusqu'à la validation des courriels.
 - `110` : réglage `engagement.speaker_links.cc` (Angenor, Issa), copie de chaque courriel d'intervenant.
 Migration `ops/migrations/2026-11-08-intervenants-en-ligne.sql`, rejouable, à jouer avant l'API ; éprouvée deux fois sur une base construite avec le schéma précédent.
+
+## 09/11 : lien d'entrée d'une inscription sans compte
+
+- `075` : `programme.registrations.manage_token_hash` (empreinte SHA-256, contrainte `ck_registrations_token`, index unique `ux_registrations_manage_token`), comme `track_registrations`. Jamais rendue par l'API.
+
+Migration `ops/migrations/2026-11-09-entree-sans-compte-activite.sql`, rejouable, à jouer avant l'API.

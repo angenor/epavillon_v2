@@ -93,7 +93,7 @@ pub async fn inscription_vivante(
     person_id: Uuid,
 ) -> Result<Option<serde_json::Value>> {
     let ligne = sqlx::query_scalar!(
-        r#"SELECT to_jsonb(r) AS "ligne!"
+        r#"SELECT to_jsonb(r) - 'manage_token_hash' AS "ligne!"
              FROM programme.registrations r
             WHERE r.session_id = $1 AND r.person_id = $2 AND r.status <> 'cancelled'"#,
         session_id.as_uuid(),
@@ -123,7 +123,7 @@ pub async fn inscrire(
                VALUES ($1, $2, $3, $4, $5)
                RETURNING *
            )
-           SELECT to_jsonb(nouvelle) AS "ligne!" FROM nouvelle"#,
+           SELECT to_jsonb(nouvelle) - 'manage_token_hash' AS "ligne!" FROM nouvelle"#,
         session_id.as_uuid(),
         person_id,
         organization_id,
@@ -153,7 +153,7 @@ pub async fn annuler(
                 WHERE id = $1 AND status <> 'cancelled'
                RETURNING *
            )
-           SELECT to_jsonb(annulee) AS "ligne!",
+           SELECT to_jsonb(annulee) - 'manage_token_hash' AS "ligne!",
                   (SELECT r.status::text FROM programme.registrations r WHERE r.id = $1)
                       AS "precedent!"
              FROM annulee"#,
@@ -242,7 +242,7 @@ pub async fn liste_nominative<'e>(
 ) -> Result<Vec<serde_json::Value>> {
     let lignes = sqlx::query_scalar!(
         r#"SELECT jsonb_build_object(
-                     'registration', to_jsonb(r),
+                     'registration', to_jsonb(r) - 'manage_token_hash',
                      'person', jsonb_build_object(
                          'id', p.id,
                          'display_name', p.display_name,
@@ -265,13 +265,29 @@ pub async fn liste_nominative<'e>(
     Ok(lignes)
 }
 
+/// Le lien d'entrée d'une inscription sans compte : un nouvel envoi remplace l'ancien.
+pub async fn poser_empreinte(
+    conn: &mut PgConnection,
+    registration_id: Uuid,
+    empreinte: &[u8],
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE programme.registrations SET manage_token_hash = $2 WHERE id = $1",
+        registration_id,
+        empreinte
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
 /// « Mes inscriptions » — **annulations comprises**, comme le contrat le dit.
 pub async fn mes_inscriptions<'e>(
     executor: impl PgExecutor<'e>,
     person_id: Uuid,
 ) -> Result<Vec<serde_json::Value>> {
     let lignes = sqlx::query_scalar!(
-        r#"SELECT to_jsonb(r) AS "ligne!"
+        r#"SELECT to_jsonb(r) - 'manage_token_hash' AS "ligne!"
              FROM programme.registrations r
             WHERE r.person_id = $1
             ORDER BY r.created_at DESC"#,

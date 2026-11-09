@@ -4,7 +4,7 @@
   "login": {
     "message": "Connectez-vous pour entrer dans la réunion.",
     "action": "Se connecter",
-    "registerMessage": "La réunion est réservée aux personnes inscrites. Inscrivez-vous, ou connectez-vous si vous l'êtes déjà."
+    "registerMessage": "La réunion est réservée aux personnes inscrites. Inscrivez-vous, ou connectez-vous. Inscrit·e sans compte ? Reprenez votre adresse : votre lien personnel repart par courriel."
   },
   "register": {
     "message": "La réunion est réservée aux personnes inscrites.",

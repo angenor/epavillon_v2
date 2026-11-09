@@ -18,11 +18,11 @@
   },
   "unregistered": "Registration cancelled",
   "register": "Register again",
-  "dayCancelled": {
+  "cancelled": {
     "title": "The live stream is cancelled",
     "description": "This day's live stream will not take place. The day's page explains what changes."
   },
-  "toDay": "See the day",
+  "back": "See the day",
   "error": "The live stream could not open.",
   "retry": "Try again",
   "manage": "Manage my registration"

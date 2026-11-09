@@ -125,7 +125,8 @@
       "meetingStarts": "The meeting starts on {date} at {time}. If it has not started yet, you will wait in the Zoom waiting room.",
       "meetingAfter": "The scheduled time has passed, but the meeting may run over: join to see whether it is still going on.",
       "freeMeeting": "Free entry, no registration.",
-      "liveRegister": "The live stream has started: register, and the Zoom room opens right after."
+      "liveRegister": "The live stream has started: register, and the Zoom room opens right after.",
+      "guest": "Your personal entry link is in the confirmation email. Remember to check your spam folder."
     },
     "languages": "Languages",
     "calendar": "Calendar",
@@ -156,7 +157,8 @@
       "edit": "Change my activities",
       "join": "Join the day's live stream",
       "endedNote": "This activity is over. The day \"{day}\" goes on: register from its page."
-    }
+    },
+    "resendLink": "Send me my link again"
   },
   "gallery": {
     "title": "Gallery",

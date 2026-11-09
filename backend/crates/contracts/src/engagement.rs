@@ -38,6 +38,22 @@ pub struct EmailSuppressed {
 /// l'inscription ; servi par le module Engagement, qui le déclare secret.
 pub const SEND_DAY_REGISTRATION: &str = "engagement.send_day_registration";
 
+/// La confirmation d'une inscription à une activité seule. Mise en file par le
+/// consommateur des avis, sans jeton ; sans compte, par le module Programmation
+/// dans la transaction de l'inscription, jeton en clair, comme pour une journée.
+pub const SEND_REGISTRATION: &str = "engagement.send_registration";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RegistrationEmail {
+    pub registration_id: uuid::Uuid,
+    /// Jeton en clair du lien d'entrée, sans compte seulement.
+    #[serde(default)]
+    pub token: Option<String>,
+    /// Vrai : l'inscription existait déjà, on renvoie le lien.
+    #[serde(default)]
+    pub resent: bool,
+}
+
 /// La file des courriels, celle que le module Engagement écoute.
 pub const EMAIL_QUEUE: &str = "email";
 

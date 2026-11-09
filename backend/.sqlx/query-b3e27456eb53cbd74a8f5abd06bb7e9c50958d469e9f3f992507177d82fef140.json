@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT r.status::text AS \"status!\", r.person_id, p.first_name,\n                  p.primary_email::text AS \"email!\", r.locale, s.event_id,\n                  platform.t(s.title, r.locale) AS \"titre!\",\n                  e.slug::text AS \"event_slug!\", s.slug::text AS \"session_slug!\",\n                  s.timezone::text AS \"timezone!\",\n                  to_char(s.starts_at AT TIME ZONE s.timezone,\n                          CASE WHEN r.locale LIKE 'en%' THEN 'YYYY-MM-DD \"at\" HH24:MI'\n                               ELSE 'DD/MM/YYYY \"à\" HH24\"h\"MI' END) AS debut_local,\n                  r.track_registration_id,\n                  (SELECT t.slug::text FROM event.programme_tracks t\n                    WHERE t.id = programme.day_track_of(s.id)) AS track_slug\n             FROM programme.registrations r\n             JOIN identity.people p ON p.id = r.person_id\n             JOIN programme.sessions s ON s.id = r.session_id\n             JOIN event.events e ON e.id = s.event_id\n            WHERE r.id = $1",
+  "query": "SELECT r.status::text AS \"status!\", r.person_id, p.first_name,\n                  p.primary_email::text AS \"email!\", r.locale, s.event_id,\n                  platform.t(s.title, r.locale) AS \"titre!\",\n                  e.slug::text AS \"event_slug!\", s.slug::text AS \"session_slug!\",\n                  s.timezone::text AS \"timezone!\",\n                  to_char(s.starts_at AT TIME ZONE s.timezone,\n                          CASE WHEN r.locale LIKE 'en%' THEN 'YYYY-MM-DD \"at\" HH24:MI'\n                               ELSE 'DD/MM/YYYY \"à\" HH24\"h\"MI' END) AS debut_local,\n                  r.track_registration_id,\n                  r.manage_token_hash IS NOT NULL AS \"lien_personnel!\",\n                  (SELECT t.slug::text FROM event.programme_tracks t\n                    WHERE t.id = programme.day_track_of(s.id)) AS track_slug\n             FROM programme.registrations r\n             JOIN identity.people p ON p.id = r.person_id\n             JOIN programme.sessions s ON s.id = r.session_id\n             JOIN event.events e ON e.id = s.event_id\n            WHERE r.id = $1",
   "describe": {
     "columns": [
       {
@@ -102,6 +102,12 @@
       },
       {
         "ordinal": 12,
+        "name": "lien_personnel!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
         "name": "track_slug",
         "type_info": "Text",
         "origin": "Expression"
@@ -125,8 +131,9 @@
       null,
       null,
       true,
+      null,
       null
     ]
   },
-  "hash": "cb1eab95055619861d6d381cd7573e4d2276a49356ec114c29ef9d8da7f4c4a1"
+  "hash": "b3e27456eb53cbd74a8f5abd06bb7e9c50958d469e9f3f992507177d82fef140"
 }

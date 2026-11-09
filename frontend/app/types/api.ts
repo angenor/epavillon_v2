@@ -7527,7 +7527,7 @@ export interface paths {
         /**
          * @description `MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.
          *
-         *     Réservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. Réponse `Cache-Control: no-store`.
+         *     Réservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. **Inscription sans compte** : le porteur du lien reçu par courriel présente son jeton (en-tête `X-Manage-Token`), qui prime sur la session ; un jeton inconnu ou remplacé rend 403. Réponse `Cache-Control: no-store`.
          *
          *     **Aucune fenêtre horaire** : on entre à toute heure tant que la réunion existe chez Zoom, même terminée (l'animateur peut la relancer), jusqu'à l'annulation de la séance (`LIVE_MEETING_CANCELLED`, 409).
          *
@@ -28956,7 +28956,10 @@ export interface operations {
     seance_reunion_acces: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Jeton du lien reçu par courriel, inscription sans compte */
+                "X-Manage-Token"?: string | null;
+            };
             path: {
                 /** @description Séance publiée */
                 session_id: string;
@@ -28974,7 +28977,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Aucune session */
+            /** @description Ni session ni jeton */
             401: {
                 headers: {
                     [name: string]: unknown;

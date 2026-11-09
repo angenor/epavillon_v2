@@ -1,0 +1,28 @@
+{
+  "title": "Live: {title}",
+  "kicker": "Activity live stream",
+  "when": "{day}, {start} to {end}, {zone}",
+  "checking": "Preparing your access to the live stream",
+  "waiting": {
+    "title": "The live stream is not ready yet",
+    "description": "Your personal link is being prepared. Keep this page open: it takes you to the live stream as soon as it is ready.",
+    "retry": "Trying again now | Trying again in {seconds} second | Trying again in {seconds} seconds",
+    "now": "Try again now"
+  },
+  "redirecting": "Opening Zoom",
+  "open": "Open the live stream in Zoom",
+  "noLink": "The personal live link is not available. Try again in a moment.",
+  "invalid": {
+    "title": "This link is no longer valid",
+    "description": "It may have been replaced by a more recent email: open the latest one. Otherwise, enter your address again on the activity page and a new link will be sent to you."
+  },
+  "unregistered": "Registration cancelled",
+  "register": "Register again",
+  "cancelled": {
+    "title": "The live stream is cancelled",
+    "description": "This activity will not be streamed. Its page explains what changes."
+  },
+  "back": "View the activity",
+  "error": "The live stream could not open.",
+  "retry": "Try again"
+}

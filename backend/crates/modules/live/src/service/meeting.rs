@@ -117,6 +117,40 @@ pub async fn acces(
     acces_depuis(zoom, place, maintenant)
 }
 
+/// L'entrée d'une personne inscrite sans compte, par le lien de son courriel.
+/// Une activité de journée ne passe pas par ici : son lien est celui de la
+/// journée. La première entrée est notée, faute de session pour le faire ensuite.
+pub async fn acces_par_jeton(
+    state: &LiveState,
+    ctx: &RequestContext,
+    session_id: Uuid,
+    jeton: &str,
+    maintenant: OffsetDateTime,
+) -> Result<MeetingAccess> {
+    let zoom = state.zoom()?;
+    let mut tx = state.db().write(ctx).await?;
+    let seance = programme::seance(&mut tx, session_id)
+        .await?
+        .filter(|s| s.is_published)
+        .ok_or_else(ApiError::not_found)?;
+    if matches!(seance.status.as_str(), "cancelled" | "postponed") {
+        return Err(ApiError::new(ErrorCode::LiveMeetingCancelled));
+    }
+    let inscription = programme::inscription_active_par_empreinte(
+        &mut tx,
+        session_id,
+        &kernel::crypto::token_hash(jeton),
+    )
+    .await?
+    .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingRegistrationRequired))?;
+    let place = meetings::place(&mut tx, inscription).await?;
+    if place.is_some() {
+        programme::noter_la_presence(&mut tx, inscription).await?;
+    }
+    tx.commit().await?;
+    acces_depuis(zoom, place, maintenant)
+}
+
 /// Qui entre dans la réunion d'une journée : la personne connectée, ou le
 /// porteur du lien reçu par courriel (inscription sans compte).
 pub enum Porteur {

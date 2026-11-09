@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT manage_token_hash FROM programme.registrations WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "manage_token_hash",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "programme.registrations",
+            "name": "manage_token_hash"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "b664ab4f485a1b000d83e546b1cf437e93b4842b8beff051c5596cb1e25a0d9f"
+}

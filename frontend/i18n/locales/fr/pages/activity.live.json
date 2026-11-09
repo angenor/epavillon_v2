@@ -1,0 +1,28 @@
+{
+  "title": "Direct : {title}",
+  "kicker": "Direct de l'activité",
+  "when": "{day}, {start} à {end}, {zone}",
+  "checking": "Préparation de votre accès au direct",
+  "waiting": {
+    "title": "Le direct n'est pas encore prêt",
+    "description": "Votre lien personnel est en cours de préparation. Gardez cette page ouverte : elle vous emmène au direct dès qu'il est prêt.",
+    "retry": "Nouvel essai maintenant | Nouvel essai dans {seconds} seconde | Nouvel essai dans {seconds} secondes",
+    "now": "Réessayer maintenant"
+  },
+  "redirecting": "Ouverture de Zoom",
+  "open": "Ouvrir le direct dans Zoom",
+  "noLink": "Le lien personnel du direct n'est pas disponible. Réessayez dans un instant.",
+  "invalid": {
+    "title": "Ce lien n'est plus valable",
+    "description": "Il a pu être remplacé par un courriel plus récent : ouvrez le dernier reçu. Sinon, reprenez votre adresse sur la page de l'activité : un nouveau lien vous sera envoyé."
+  },
+  "unregistered": "Inscription annulée",
+  "register": "S'inscrire de nouveau",
+  "cancelled": {
+    "title": "Le direct est annulé",
+    "description": "Cette activité n'aura pas lieu en direct. Sa page dit ce qui change."
+  },
+  "back": "Voir l'activité",
+  "error": "Le direct n'a pas pu s'ouvrir.",
+  "retry": "Réessayer"
+}

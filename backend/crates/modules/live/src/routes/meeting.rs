@@ -3,8 +3,8 @@
 
 use actix_web::http::header::{CacheControl, CacheDirective};
 use actix_web::{web, HttpRequest, HttpResponse};
-use kernel::auth::{Actor, Perimeter};
-use kernel::error::Result;
+use kernel::auth::Perimeter;
+use kernel::error::{ApiError, Result};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -72,35 +72,38 @@ pub(crate) async fn publique(
 
 #[utoipa::path(
     get,
-    description = "`MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.\n\nRéservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. Réponse `Cache-Control: no-store`.\n\n**Aucune fenêtre horaire** : on entre à toute heure tant que la réunion existe chez Zoom, même terminée (l'animateur peut la relancer), jusqu'à l'annulation de la séance (`LIVE_MEETING_CANCELLED`, 409).\n\nRefus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, jamais en entrée libre),  `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).",
+    description = "`MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.\n\nRéservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. **Inscription sans compte** : le porteur du lien reçu par courriel présente son jeton (en-tête `X-Manage-Token`), qui prime sur la session ; un jeton inconnu ou remplacé rend 403. Réponse `Cache-Control: no-store`.\n\n**Aucune fenêtre horaire** : on entre à toute heure tant que la réunion existe chez Zoom, même terminée (l'animateur peut la relancer), jusqu'à l'annulation de la séance (`LIVE_MEETING_CANCELLED`, 409).\n\nRefus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, jamais en entrée libre),  `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).",
     path = "/sessions/{session_id}/meeting/access",
     tag = "Direct",
     operation_id = "seance_reunion_acces",
-    params(("session_id" = Uuid, Path, description = "Séance publiée")),
+    params(
+        ("session_id" = Uuid, Path, description = "Séance publiée"),
+        ("X-Manage-Token" = Option<String>, Header, description = "Jeton du lien reçu par courriel, inscription sans compte"),
+    ),
     responses(
         (status = 200, description = "MeetingAccess", body = Object),
-        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 401, description = "Ni session ni jeton", body = crate::routes::openapi::ApiErrorBody),
         (status = 403, description = "LIVE_MEETING_REGISTRATION_REQUIRED", body = crate::routes::openapi::ApiErrorBody),
         (status = 404, description = "Séance inconnue ou non publiée", body = crate::routes::openapi::ApiErrorBody),
         (status = 409, description = "LIVE_MEETING_CANCELLED ou LIVE_MEETING_NOT_READY", body = crate::routes::openapi::ApiErrorBody),
         (status = 503, description = "LIVE_ZOOM_UNAVAILABLE", body = crate::routes::openapi::ApiErrorBody),
-    ),
-    security(("session" = []))
+    )
 )]
 pub(crate) async fn acces(
     state: web::Data<LiveState>,
     requete: HttpRequest,
-    acteur: Actor,
     chemin: web::Path<Uuid>,
 ) -> Result<HttpResponse> {
-    let acces = meeting::acces(
-        &state,
-        &crate::routes::contexte_de(&requete, acteur.0),
-        acteur.0,
-        chemin.into_inner(),
-        OffsetDateTime::now_utc(),
-    )
-    .await?;
+    let session_id = chemin.into_inner();
+    let maintenant = OffsetDateTime::now_utc();
+    let acces = if let Some(jeton) = jeton_du_lien(&requete) {
+        let ctx = contexte_anonyme(&requete);
+        meeting::acces_par_jeton(&state, &ctx, session_id, &jeton, maintenant).await?
+    } else {
+        let personne = personne_connectee(&requete).ok_or_else(ApiError::unauthenticated)?;
+        let ctx = crate::routes::contexte_de(&requete, personne);
+        meeting::acces(&state, &ctx, personne, session_id, maintenant).await?
+    };
     Ok(HttpResponse::Ok()
         .insert_header(CacheControl(vec![CacheDirective::NoStore]))
         .json(acces))
@@ -272,31 +275,14 @@ pub(crate) async fn acces_journee(
     requete: HttpRequest,
     chemin: web::Path<Uuid>,
 ) -> Result<HttpResponse> {
-    use actix_web::HttpMessage;
-    let personne = requete
-        .extensions()
-        .get::<kernel::context::RequestContext>()
-        .and_then(|c| c.actor_id);
-    let (porteur, ctx) = match personne {
+    let (porteur, ctx) = match personne_connectee(&requete) {
         Some(p) => (
             meeting::Porteur::Personne(p),
             crate::routes::contexte_de(&requete, p),
         ),
         None => {
-            let jeton = requete
-                .headers()
-                .get("x-manage-token")
-                .and_then(|v| v.to_str().ok())
-                .map(str::trim)
-                .filter(|j| !j.is_empty() && j.len() <= 128)
-                .ok_or_else(kernel::error::ApiError::unauthenticated)?;
-            (
-                meeting::Porteur::Jeton(jeton.to_owned()),
-                kernel::context::RequestContext::new(
-                    kernel::context::RequestContext::generated_request_id(),
-                    crate::routes::locale_de(&requete),
-                ),
-            )
+            let jeton = jeton_du_lien(&requete).ok_or_else(ApiError::unauthenticated)?;
+            (meeting::Porteur::Jeton(jeton), contexte_anonyme(&requete))
         }
     };
     let acces = meeting::acces_journee(
@@ -310,4 +296,29 @@ pub(crate) async fn acces_journee(
     Ok(HttpResponse::Ok()
         .insert_header(CacheControl(vec![CacheDirective::NoStore]))
         .json(acces))
+}
+
+fn personne_connectee(requete: &HttpRequest) -> Option<Uuid> {
+    use actix_web::HttpMessage;
+    requete
+        .extensions()
+        .get::<kernel::context::RequestContext>()
+        .and_then(|c| c.actor_id)
+}
+
+fn jeton_du_lien(requete: &HttpRequest) -> Option<String> {
+    requete
+        .headers()
+        .get("x-manage-token")
+        .and_then(|v| v.to_str().ok())
+        .map(str::trim)
+        .filter(|j| !j.is_empty() && j.len() <= 128)
+        .map(str::to_owned)
+}
+
+fn contexte_anonyme(requete: &HttpRequest) -> kernel::context::RequestContext {
+    kernel::context::RequestContext::new(
+        kernel::context::RequestContext::generated_request_id(),
+        crate::routes::locale_de(requete),
+    )
 }

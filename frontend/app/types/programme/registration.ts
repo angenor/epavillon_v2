@@ -176,8 +176,8 @@ export interface RegistrationGuest {
 export type RegistrationResult =
   | { status: 'registered'; registration: Registration }
   | { status: 'waitlisted'; registration: Registration; position: number }
-  /** Une inscription vivante existait déjà : elle est relue et rendue, pas refusée. */
-  | { status: 'already_registered'; registration: Registration }
+  /** Une inscription vivante existait déjà : relue et rendue, pas refusée. Nulle sans compte : le lien repart par courriel. */
+  | { status: 'already_registered'; registration: Registration | null }
   /** Jauge atteinte SANS liste d'attente. */
   | { status: 'full'; capacity: number }
   | { status: 'closed'; closed_at: IsoDateTime }

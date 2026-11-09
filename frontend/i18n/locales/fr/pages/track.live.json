@@ -18,11 +18,11 @@
   },
   "unregistered": "Inscription annulée",
   "register": "S'inscrire de nouveau",
-  "dayCancelled": {
+  "cancelled": {
     "title": "Le direct est annulé",
     "description": "Le direct de cette journée n'aura pas lieu. La page de la journée dit ce qui change."
   },
-  "toDay": "Voir la journée",
+  "back": "Voir la journée",
   "error": "Le direct n'a pas pu s'ouvrir.",
   "retry": "Réessayer",
   "manage": "Gérer mon inscription"

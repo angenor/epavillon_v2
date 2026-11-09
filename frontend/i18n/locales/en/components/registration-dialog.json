@@ -41,7 +41,8 @@
     "already": {
       "title": "You are already registered",
       "registered": "Your seat for “{title}” was already booked. Nothing has changed.",
-      "waitlisted": "You are already on the waiting list, at number {position}. Nothing has changed."
+      "waitlisted": "You are already on the waiting list, at number {position}. Nothing has changed.",
+      "guest": "Your registration was already recorded. We are sending your personal link to join the live stream to {email} again; the previous one no longer works."
     },
     "full": {
       "title": "This activity is full",
@@ -54,7 +55,8 @@
     "notOpen": {
       "title": "Registration is not open yet",
       "message": "It opens on {date}. Please come back then."
-    }
+    },
+    "guestLink": "Your personal link to join the live stream is on its way to {email}."
   },
   "day": {
     "kicker": "Register for the day",

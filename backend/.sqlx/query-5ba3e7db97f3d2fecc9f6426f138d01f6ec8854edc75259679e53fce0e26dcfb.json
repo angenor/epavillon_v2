@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT to_jsonb(r) AS \"ligne!\"\n             FROM programme.registrations r\n            WHERE r.person_id = $1\n            ORDER BY r.created_at DESC",
+  "query": "SELECT to_jsonb(r) - 'manage_token_hash' AS \"ligne!\"\n             FROM programme.registrations r\n            WHERE r.session_id = $1 AND r.person_id = $2 AND r.status <> 'cancelled'",
   "describe": {
     "columns": [
       {
@@ -12,6 +12,7 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -19,5 +20,5 @@
       null
     ]
   },
-  "hash": "228524795052852ac10f0a52a4075a325b8c4fe2f09448a0d2d60796b6091b70"
+  "hash": "5ba3e7db97f3d2fecc9f6426f138d01f6ec8854edc75259679e53fce0e26dcfb"
 }

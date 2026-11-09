@@ -41,7 +41,8 @@
     "already": {
       "title": "Vous êtes déjà inscrit·e",
       "registered": "Votre place pour « {title} » était déjà réservée. Rien n'a changé.",
-      "waitlisted": "Vous êtes déjà sur la liste d'attente, en position {position}. Rien n'a changé."
+      "waitlisted": "Vous êtes déjà sur la liste d'attente, en position {position}. Rien n'a changé.",
+      "guest": "Votre inscription était déjà enregistrée. Nous renvoyons à {email} votre lien personnel pour entrer dans le direct ; le précédent ne vaut plus."
     },
     "full": {
       "title": "Cette activité est complète",
@@ -54,7 +55,8 @@
     "notOpen": {
       "title": "Les inscriptions ne sont pas encore ouvertes",
       "message": "Elles ouvriront le {date}. Revenez à ce moment-là."
-    }
+    },
+    "guestLink": "Votre lien personnel pour entrer dans le direct arrive à {email}."
   },
   "day": {
     "kicker": "S'inscrire à la journée",

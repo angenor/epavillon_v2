@@ -903,20 +903,31 @@ CREATE TABLE programme.registrations (
     -- Provenance technique de l'inscription, utile au diagnostic.
     source          text        NOT NULL DEFAULT 'web'
                                 CHECK (source IN ('web', 'import', 'admin', 'api', 'partner')),
+    -- Empreinte SHA-256 du jeton du lien d'entrée (32 octets), posée pour une
+    -- inscription sans compte. Le jeton en clair n'est jamais stocké.
+    manage_token_hash bytea,
     cancelled_at    timestamptz,
     cancelled_reason text,
     created_at      timestamptz NOT NULL DEFAULT now(),
     updated_at      timestamptz NOT NULL DEFAULT now(),
 
     CONSTRAINT ck_registrations_waitlist
-        CHECK ((status = 'waitlisted') = (waitlist_position IS NOT NULL))
+        CHECK ((status = 'waitlisted') = (waitlist_position IS NOT NULL)),
+    CONSTRAINT ck_registrations_token
+        CHECK (manage_token_hash IS NULL OR octet_length(manage_token_hash) = 32)
 );
+
+COMMENT ON COLUMN programme.registrations.manage_token_hash IS
+    'Empreinte SHA-256 du jeton du lien d''entrée dans le direct d''une inscription sans compte (09/11). Le jeton en clair ne vit que dans le courriel ; un nouvel envoi remplace l''empreinte, et l''ancien lien cesse de valoir. Jamais rendue par l''API.';
 
 -- Une personne ne s'inscrit qu'une fois par session ; une annulation libère la place.
 CREATE UNIQUE INDEX ux_registrations_person_session
     ON programme.registrations (session_id, person_id)
     WHERE status <> 'cancelled';
 
+CREATE UNIQUE INDEX ux_registrations_manage_token
+    ON programme.registrations (manage_token_hash)
+    WHERE manage_token_hash IS NOT NULL;
 CREATE INDEX ix_registrations_session   ON programme.registrations (session_id, status);
 CREATE INDEX ix_registrations_person    ON programme.registrations (person_id, created_at DESC);
 CREATE INDEX ix_registrations_answers   ON programme.registrations USING gin (answers jsonb_path_ops);

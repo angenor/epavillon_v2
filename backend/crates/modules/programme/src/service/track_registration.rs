@@ -45,7 +45,7 @@ pub enum Demandeur {
 const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 /// Un jeton neuf et son empreinte (SHA-256, 32 octets).
-fn jeton_neuf() -> (String, [u8; 32]) {
+pub(crate) fn jeton_neuf() -> (String, [u8; 32]) {
     let jeton = kernel::crypto::random_string(ALPHABET, 43);
     let empreinte = kernel::crypto::token_hash(&jeton);
     (jeton, empreinte)

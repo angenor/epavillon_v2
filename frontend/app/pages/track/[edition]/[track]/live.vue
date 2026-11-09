@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { MeetingAccess } from '~/types/live'
-
 /**
  * LE LIEN DU DIRECT D'UNE JOURNÉE, POUR QUI S'EST INSCRIT SANS COMPTE : celui
  * du courriel. La page demande l'accès avec le jeton et renvoie aussitôt au
@@ -36,85 +34,16 @@ const manageTo = computed(() =>
   localePath({
     name: 'track-edition-track-my-registration',
     params: { edition: editionSlug.value, track: trackSlug.value },
-    query: { jeton: token.value ?? undefined },
+    query: { jeton: typeof route.query.jeton === 'string' ? route.query.jeton : undefined },
   }),
 )
 
-type State = 'checking' | 'waiting' | 'redirecting' | 'invalid' | 'unregistered' | 'dayCancelled' | 'error'
-const state = ref<State>('checking')
-const message = ref<string | null>(null)
-const token = ref<string | null>(null)
-const joinUrl = ref<string | null>(null)
-const retryIn = ref(0)
-
-const RETRY_S = 20
-let ticker: ReturnType<typeof setInterval> | undefined
-
-function wait(): void {
-  state.value = 'waiting'
-  retryIn.value = RETRY_S
-  clearInterval(ticker)
-  ticker = setInterval(() => {
-    retryIn.value -= 1
-    if (retryIn.value <= 0) void attempt()
-  }, 1000)
+const trackId = computed(() => page.value?.track.id ?? null)
+const requestAccess = (token: string) => api.meetings.trackAccess(trackId.value ?? '', token)
+async function isCancelled(): Promise<boolean> {
+  if (!trackId.value) return false
+  return (await api.meetings.forTrack(trackId.value).catch(() => null))?.status === 'cancelled'
 }
-
-function go(access: MeetingAccess): void {
-  if (!access.join_url) {
-    message.value = k('noLink')
-    state.value = 'error'
-    return
-  }
-  joinUrl.value = access.join_url
-  state.value = 'redirecting'
-  window.location.replace(access.join_url)
-}
-
-async function attempt(): Promise<void> {
-  clearInterval(ticker)
-  const trackId = page.value?.track.id
-  if (!token.value || !trackId) {
-    state.value = 'invalid'
-    return
-  }
-  state.value = 'checking'
-  message.value = null
-  try {
-    go(await api.meetings.trackAccess(trackId, token.value))
-  } catch (error) {
-    if (error instanceof ApiRequestError) {
-      if (error.code === 'LIVE_MEETING_NOT_READY') return wait()
-      if (error.status === 404 || error.status === 401) {
-        state.value = 'invalid'
-        return
-      }
-      if (error.code === 'LIVE_MEETING_REGISTRATION_REQUIRED') {
-        message.value = error.message
-        state.value = 'unregistered'
-        return
-      }
-    }
-    // La réunion de la journée annulée : on le dit plutôt que l'erreur brute.
-    const meeting = await api.meetings.forTrack(trackId).catch(() => null)
-    if (meeting?.status === 'cancelled') {
-      state.value = 'dayCancelled'
-      return
-    }
-    message.value = apiErrorMessage(error, t)
-    state.value = 'error'
-  }
-}
-
-onMounted(() => {
-  const value = route.query.jeton
-  token.value = typeof value === 'string' && value.trim() ? value.trim() : null
-  if (page.value) void attempt()
-})
-watch(page, (value, previous) => {
-  if (value && !previous && import.meta.client) void attempt()
-})
-onBeforeUnmount(() => clearInterval(ticker))
 
 const when = computed(() => {
   const current = page.value
@@ -161,55 +90,11 @@ useHead(() => ({
           <p v-if="when" class="mt-1.5 text-sm first-letter:uppercase">{{ when }}</p>
         </header>
 
-        <div class="flex flex-col items-start gap-3 p-5 sm:p-6" aria-live="polite">
-          <ClientOnly>
-            <p v-if="state === 'checking'" class="flex items-center gap-2 text-sm" role="status">
-              <UiSpinner size="1rem" />{{ k('checking') }}
-            </p>
-
-            <template v-else-if="state === 'waiting'">
-              <p class="font-condensed text-[1.25rem] font-bold tracking-[0.03em] text-warning uppercase">{{ k('waiting.title') }}</p>
-              <p class="text-sm leading-relaxed">{{ k('waiting.description') }}</p>
-              <p class="text-sm text-text-muted tabular-nums" role="status">{{ t('track.live.waiting.retry', { seconds: retryIn }, retryIn) }}</p>
-              <UiButton variant="secondary" icon="refresh" @click="attempt">{{ k('waiting.now') }}</UiButton>
-            </template>
-
-            <template v-else-if="state === 'redirecting'">
-              <p class="flex items-center gap-2 text-sm" role="status"><UiSpinner size="1rem" />{{ k('redirecting') }}</p>
-              <UiButton v-if="joinUrl" variant="live" icon="video" :href="joinUrl">{{ k('open') }}</UiButton>
-            </template>
-
-            <template v-else-if="state === 'invalid'">
-              <p class="font-condensed text-[1.25rem] font-bold tracking-[0.03em] text-text-secondary uppercase">{{ k('invalid.title') }}</p>
-              <p class="text-sm leading-relaxed">{{ k('invalid.description') }}</p>
-              <UiButton variant="secondary" :to="dayTo">{{ k('toDay') }}</UiButton>
-            </template>
-
-            <template v-else-if="state === 'unregistered'">
-              <p class="font-condensed text-[1.25rem] font-bold tracking-[0.03em] text-text-secondary uppercase">{{ k('unregistered') }}</p>
-              <p class="text-sm leading-relaxed">{{ message }}</p>
-              <UiButton variant="signup" :to="dayTo">{{ k('register') }}</UiButton>
-            </template>
-
-            <template v-else-if="state === 'dayCancelled'">
-              <p class="font-condensed text-[1.25rem] font-bold tracking-[0.03em] text-danger uppercase">{{ k('dayCancelled.title') }}</p>
-              <p class="text-sm leading-relaxed">{{ k('dayCancelled.description') }}</p>
-              <UiButton variant="secondary" :to="dayTo">{{ k('toDay') }}</UiButton>
-            </template>
-
-            <template v-else>
-              <UiAlert intent="danger" :message="message ?? k('error')" />
-              <div class="flex flex-wrap gap-x-5 gap-y-2">
-                <UiButton icon="refresh" @click="attempt">{{ k('retry') }}</UiButton>
-                <UiButton variant="link" :to="manageTo">{{ k('manage') }}</UiButton>
-              </div>
-            </template>
-
-            <template #fallback>
-              <p class="flex items-center gap-2 text-sm"><UiSpinner size="1rem" />{{ k('checking') }}</p>
-            </template>
-          </ClientOnly>
-        </div>
+        <EventLiveLinkEntry messages="track.live" :ready="trackId !== null" :request-access="requestAccess" :is-cancelled="isCancelled" :back-to="dayTo">
+          <template #error-actions>
+            <UiButton variant="link" :to="manageTo">{{ k('manage') }}</UiButton>
+          </template>
+        </EventLiveLinkEntry>
       </article>
     </div>
   </div>

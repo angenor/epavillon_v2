@@ -248,3 +248,42 @@ async fn la_liste_dattente_entre_aussi() {
         .unwrap();
     assert_eq!(acces.user_email, "jean.kabore@exemple.org");
 }
+
+#[tokio::test]
+async fn sans_compte_le_lien_du_courriel_ouvre_la_salle() {
+    let bac = Bac::monter().await;
+    let d = decor(&bac).await;
+    publier(&bac, d.session_id).await;
+    let (debut, _) = horaires(&bac, d.session_id).await;
+
+    let awa = personne(&bac, "awa.diallo@exemple.org", "Awa", "Diallo").await;
+    let r = inscrire(&bac, d.session_id, awa).await;
+    consommer(&bac, r).await;
+    sqlx::query!(
+        "UPDATE programme.registrations SET manage_token_hash = $2 WHERE id = $1",
+        r,
+        &kernel::crypto::token_hash("le-bon-jeton")[..]
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    let etat = etat_avec_zoom(&bac);
+    let code = etat.zoom().unwrap().coffre.chiffrer("x").unwrap();
+    simuler_zoom(&bac, d.session_id, code).await;
+
+    let erreur = meeting::acces_par_jeton(&etat, &bac.ctx(awa), d.session_id, "un-autre", debut)
+        .await
+        .unwrap_err();
+    assert_eq!(erreur.code, ErrorCode::LiveMeetingRegistrationRequired);
+
+    let acces = meeting::acces_par_jeton(&etat, &bac.ctx(awa), d.session_id, "le-bon-jeton", debut)
+        .await
+        .unwrap();
+    assert_eq!(acces.user_email, "awa.diallo@exemple.org");
+
+    let entree = sqlx::query_scalar!("SELECT joined_at FROM programme.registrations WHERE id = $1", r)
+        .fetch_one(bac.pool())
+        .await
+        .unwrap();
+    assert!(entree.is_some(), "la première entrée est notée");
+}

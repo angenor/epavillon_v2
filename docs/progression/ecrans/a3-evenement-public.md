@@ -259,3 +259,7 @@ Retours après l'essai en production.
 ## 03/11 : journées en un bloc dans `/programmations`
 
 Maquette `docs/maquettes/journees-en-bloc/`. Une journée spéciale et l'atelier préparatoire tiennent chacun en un bloc à leur couleur (`EventProgrammeTrackBlock`), au calendrier comme en liste, à la place de leurs activités ; tout le bloc mène à la page du fil. Page d'une journée : un moment peut regrouper des activités (heure, logo, organisation, sans lien) ; bouton « Voir toute la programmation » sous les autres temps forts. Écarts à la maquette : pas de ligne de sujet sous chaque organisation (choix du commanditaire) ; l'atelier, sans couleur en base, prend le bleu nuit ; l'heure d'un moment regroupant garde la taille des autres moments. Détail : [journal](../journal/2026-11-03.md).
+
+## 09/11 : entrer sans compte dans le direct d'une activité
+
+Le billet et la salle ne reconnaissent pas une personne sans compte. Le courriel porte désormais un lien personnel vers `/programmations/[édition]/[activité]/direct`, qui renvoie au lien Zoom. Le billet retient l'inscription dans le navigateur : « Inscription confirmée », rappel du courriel, « Recevoir de nouveau mon lien ». Voir [journal](../journal/2026-11-09.md).

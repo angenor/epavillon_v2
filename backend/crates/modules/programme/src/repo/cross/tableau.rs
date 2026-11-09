@@ -31,7 +31,7 @@ pub async fn personnes_a_joindre<'e>(
     ids: &[Uuid],
 ) -> Result<Vec<PersonneAJoindre>> {
     let lignes = sqlx::query!(
-        r#"SELECT p.id, p.display_name AS "display_name!", p.job_title,
+        r#"SELECT p.id AS "id!", p.display_name AS "display_name!", p.job_title,
                   p.primary_email::text AS "email!", o.legal_name AS "organization_name?",
                   media.attached_image('identity', 'people', p.id, 'avatar') AS photo
              FROM identity.people p

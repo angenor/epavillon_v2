@@ -141,6 +141,8 @@ pub struct ActivitePourCourriel {
     pub track_registration_id: Option<Uuid>,
     /// La journée dont l'activité fait partie : son direct est celui de la journée.
     pub track_slug: Option<String>,
+    /// Sans compte : la confirmation qui compte est celle qui porte le jeton.
+    pub lien_personnel: bool,
 }
 
 pub async fn activite_pour_courriel(
@@ -157,6 +159,7 @@ pub async fn activite_pour_courriel(
                           CASE WHEN r.locale LIKE 'en%' THEN 'YYYY-MM-DD "at" HH24:MI'
                                ELSE 'DD/MM/YYYY "à" HH24"h"MI' END) AS debut_local,
                   r.track_registration_id,
+                  r.manage_token_hash IS NOT NULL AS "lien_personnel!",
                   (SELECT t.slug::text FROM event.programme_tracks t
                     WHERE t.id = programme.day_track_of(s.id)) AS track_slug
              FROM programme.registrations r
@@ -183,5 +186,6 @@ pub async fn activite_pour_courriel(
         debut_local: l.debut_local,
         track_registration_id: l.track_registration_id,
         track_slug: l.track_slug,
+        lien_personnel: l.lien_personnel,
     }))
 }

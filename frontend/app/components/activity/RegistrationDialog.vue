@@ -52,7 +52,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { sessionId: '', sessionTitle: '', timezone: undefined, timezoneLabel: undefined, day: null })
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  done: [result: RegistrationResult]
+  done: [result: RegistrationResult, asGuest: boolean]
   'day-registered': [result: DayRegistrationResult, asGuest: boolean]
   'day-updated': [registration: DayRegistration]
 }>()
@@ -336,7 +336,7 @@ async function submit(): Promise<void> {
     })
     result.value = outcome
     phase.value = 'result'
-    emit('done', outcome)
+    emit('done', outcome, isGuest.value)
   } catch (error) {
     showSubmitError(error)
   } finally {
@@ -425,16 +425,19 @@ const outcome = computed<Outcome | null>(() => {
   const r = result.value
   if (!r) return null
   const title = props.sessionTitle
+  const email = guest.email.trim()
+  const withLink = (message: string) => (isGuest.value ? `${message} ${k('outcome.guestLink', { email })}` : message)
   switch (r.status) {
     case 'registered':
-      return { intent: 'success', title: k('outcome.registered.title'), message: k('outcome.registered.message', { title }) }
+      return { intent: 'success', title: k('outcome.registered.title'), message: withLink(k('outcome.registered.message', { title })) }
     case 'waitlisted':
       return {
         intent: 'warning',
         title: k('outcome.waitlisted.title'),
-        message: k('outcome.waitlisted.message', { position: r.position }),
+        message: withLink(k('outcome.waitlisted.message', { position: r.position })),
       }
     case 'already_registered':
+      if (!r.registration) return { intent: 'info', title: k('outcome.already.title'), message: k('outcome.already.guest', { email }) }
       return r.registration.status === 'waitlisted'
         ? {
             intent: 'warning',

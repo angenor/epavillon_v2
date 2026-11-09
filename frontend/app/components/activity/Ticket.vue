@@ -47,7 +47,7 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { dateTime, dayLong, time, timeWithZone, zoneOffsetShort, zoneLabel } = useDateTime()
 const { duration } = useProgrammeSession()
-const { mine, refresh, cancel } = useSessionRegistration(computed(() => (props.day ? '' : props.session.id)))
+const { mine, refresh, cancel, guestRegistered, rememberGuest } = useSessionRegistration(computed(() => (props.day ? '' : props.session.id)))
 const dayRegistration = useDayRegistration(() => props.day?.page.track.id ?? null)
 const { mine: dayMine, dialogOpen: dayDialogOpen, highlight: dayHighlight } = dayRegistration
 const isRegistered = computed(() => (props.day ? dayRegistration.registered.value : mine.value !== null))
@@ -74,7 +74,7 @@ const closesAt = computed(() => props.session.registration_closes_at ?? null)
 const notOpenYet = computed(() => !props.day && props.now !== null && opensAt.value !== null && Date.parse(opensAt.value) > props.now)
 const closed = computed(() => !props.day && props.now !== null && closesAt.value !== null && Date.parse(closesAt.value) <= props.now)
 
-type Action = 'registered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'closed' | 'free' | 'watch' | 'join' | 'replay' | 'none'
+type Action = 'registered' | 'guestRegistered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'closed' | 'free' | 'watch' | 'join' | 'replay' | 'none'
 
 /** Un direct terminé ne prend plus personne : ni inscription, ni agenda (02/11). */
 const ended = computed(() => props.state === 'past')
@@ -88,6 +88,8 @@ const canRegister = computed(() => registrationRequired.value && !isRegistered.v
 
 const action = computed<Action>(() => {
   const state = props.state
+  // Sans compte, le bouton d'entrée est dans le courriel : la page ne peut pas ouvrir la salle.
+  if (!props.day && guestRegistered.value && state !== 'past' && state !== 'cancelled') return 'guestRegistered'
   if (props.zoomOpen) {
     if (!registrationRequired.value || isRegistered.value) return 'join'
     if (canRegister.value) return registerOrWait()
@@ -112,6 +114,8 @@ const note = computed(() => {
     case 'registered':
       if (props.day) return dayNote.value
       return mine.value?.status === 'waitlisted' ? t('activity.ticket.note.waitlisted') : t('activity.ticket.note.registered')
+    case 'guestRegistered':
+      return t('activity.ticket.note.guest')
     case 'join':
       return props.day ? joinLead.value : [joinLead.value, meetingWhen.value].filter(Boolean).join(' ')
     case 'free':
@@ -214,7 +218,7 @@ const zone = computed(() =>
   }),
 )
 const streamedHere = computed(() => props.session.is_streamed && props.state !== 'past' && props.state !== 'cancelled')
-const hasAction = computed(() => callToAction.value !== null || action.value === 'registered' || note.value !== '')
+const hasAction = computed(() => callToAction.value !== null || action.value === 'registered' || action.value === 'guestRegistered' || note.value !== '')
 
 const place = computed(() =>
   [props.session.room_name ? tr(props.session.room_name) : '', props.edition.city, tr(props.edition.country_name)]
@@ -222,7 +226,8 @@ const place = computed(() =>
     .join(' · '),
 )
 
-async function onDone(_result: RegistrationResult): Promise<void> {
+async function onDone(result: RegistrationResult, asGuest: boolean): Promise<void> {
+  if (asGuest && (result.status === 'registered' || result.status === 'waitlisted' || result.status === 'already_registered')) rememberGuest()
   await refresh()
 }
 
@@ -341,13 +346,16 @@ function downloadCalendar(): void {
           </UiButton>
           <p v-if="note" class="text-[0.8125rem] leading-relaxed text-text-muted">{{ note }}</p>
         </template>
-        <div v-else-if="action === 'registered'" class="flex flex-col items-start gap-2 rounded-md border border-success-border bg-success-surface p-3">
+        <div v-else-if="action === 'registered' || action === 'guestRegistered'" class="flex flex-col items-start gap-2 rounded-md border border-success-border bg-success-surface p-3">
           <span class="inline-flex items-center gap-1.5 rounded-full bg-success-solid px-2.5 py-1 text-xs font-bold tracking-[0.05em] text-success-contrast uppercase">
             <UiIcon name="check" size="0.875rem" :stroke-width="2.5" />
             {{ t(props.day ? 'activity.ticket.day.registered' : mine?.status === 'waitlisted' ? 'activity.ticket.onWaitlist' : 'activity.ticket.registered') }}
           </span>
           <p v-if="note" class="text-sm leading-relaxed text-text">{{ note }}</p>
-          <UiButton v-if="props.day && dayMine && hasActivityChoice(props.day.page)" variant="link" @click="dayRegistration.openDialog(props.session.id)">
+          <UiButton v-if="action === 'guestRegistered'" variant="link" @click="openRegistration">
+            {{ t('activity.ticket.resendLink') }}
+          </UiButton>
+          <UiButton v-else-if="props.day && dayMine && hasActivityChoice(props.day.page)" variant="link" @click="dayRegistration.openDialog(props.session.id)">
             {{ t('activity.ticket.day.edit') }}
           </UiButton>
           <UiButton v-else-if="!props.day" variant="link" :loading="cancelling" @click="onCancel">
