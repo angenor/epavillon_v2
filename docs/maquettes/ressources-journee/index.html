@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ressources d'une journée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../direction-condensee/style.css">
+<link rel="stylesheet" href="ressources.css">
+<style>
+  /* Demande du 10/11 : liens de l'appel à manifestation d'intérêt (page, dossier PDF,
+     vidéo YouTube) sur la journée finance durable ; lien de l'article sur le
+     hackathon, journée jeunesse. */
+  body { background: var(--page); }
+  .intro, .scene { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+  .intro { padding-top: 40px; }
+  .intro h1 { margin: 0 0 10px; font-size: 2.2rem; }
+  .intro p, .scene > header p, .scene li { max-width: 80ch; margin: 0 0 8px; line-height: 1.55; color: var(--color-text-secondary); }
+  .intro .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .scene { margin-top: 56px; }
+  .scene > header h2 { margin: 0 0 6px; font-size: 1.7rem; }
+  .scene > header ul { margin: 6px 0 0; padding-left: 20px; }
+  .views { display: grid; grid-template-columns: minmax(0, 1fr) 375px; gap: 32px; margin-top: 18px; align-items: start; }
+  @media (max-width: 1100px) { .views { grid-template-columns: minmax(0, 1fr); } }
+  .label { margin: 0 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+  .phone { width: 375px; max-width: 100%; height: 720px; border: 1px solid var(--color-border-strong); border-radius: 24px; overflow: hidden; background: var(--page); }
+  .phone iframe { width: 100%; height: 100%; border: 0; }
+
+  /* Le temps fort, tel que la page de la journée le dessine (TrackHighlight). */
+  .highlight { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; align-items: center; padding: 28px; border-radius: var(--radius-lg); background: var(--day-solid); color: var(--day-on); }
+  .highlight .label-hl { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .highlight h3 { margin-top: 8px; font-size: 1.9rem; font-weight: 600; text-transform: none; color: inherit; line-height: 1.08; }
+  .highlight .when { margin-top: 12px; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; }
+  .highlight .by { margin: 4px 0 0; font-size: 0.95rem; }
+  .highlight .btn { margin-top: 16px; background: var(--ifdd-bleu-900); color: #fff; }
+  .highlight img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius); }
+  @media (max-width: 760px) { .highlight { grid-template-columns: minmax(0, 1fr); padding: 22px; } .highlight h3 { font-size: 1.6rem; } }
+
+  /* Saisie au back-office : la liste « Liens » existante, une colonne de plus. */
+  .bo { max-width: 920px; padding: 20px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius); background: var(--card); }
+  .bo h3 { margin: 0 0 4px; font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--color-heading); }
+  .bo > p { margin: 0 0 14px; font-size: 0.88rem; color: var(--color-text-muted); }
+  .bo-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) 190px 44px; gap: 10px; align-items: end; padding: 12px 0; border-top: 1px solid var(--color-border-subtle); }
+  .bo-row label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary); }
+  .bo-row .field { margin-top: 4px; min-height: 44px; padding: 10px 12px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); font-size: 0.88rem; white-space: nowrap; text-overflow: ellipsis; color: var(--color-text); }
+  .bo-row .field.empty { color: var(--color-text-subtle); }
+  .bo-row .new { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .bo-row .del { display: grid; place-items: center; height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-text-muted); }
+  .bo-hint { margin: 2px 0 0; font-size: 0.76rem; color: var(--color-text-muted); }
+  @media (max-width: 760px) { .bo-row { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Ressources d'une journée</h1>
+  <p>Aujourd'hui, les liens d'une journée s'affichent tout en bas de la page, en simple texte, après les PDF. Proposition : un seul bloc « Ressources de la journée », placé juste sous la présentation de la journée. Pages web, PDF et vidéos y sont réunis, chacun avec son genre, son site et son geste (ouvrir, télécharger, regarder). Le genre se reconnaît à l'adresse : rien de plus à saisir.</p>
+  <p>Deux ajouts au back-office : une date « Afficher à partir du » pour un lien qui n'est pas encore public (la page de l'appel paraît le 12 ou le 13), et un lien facultatif sur un temps fort (le hackathon de la journée jeunesse).</p>
+  <div class="links">
+    <a class="btn btn-primary" href="finance.html#ressources">Voir la page de la journée finance</a>
+    <a class="btn btn-outline" href="finance.html?avant=1#ressources">La même avant le 12 novembre</a>
+  </div>
+</div>
+
+<section class="scene">
+  <header>
+    <h2>1. Journée finance durable</h2>
+    <ul>
+      <li><b>Page web</b> : s'ouvre dans un nouvel onglet, sur le site de l'IFDD.</li>
+      <li><b>PDF</b> : le dossier de présentation se télécharge ; les PDF déposés sur la plateforme (programme de la journée) rejoignent le même bloc, avec leur poids.</li>
+      <li><b>Vidéo YouTube</b> : sa vignette, un bouton de lecture ; elle se regarde sur place, dans une fenêtre, avec « Ouvrir sur YouTube » à côté. Cliquez dessus dans la page de la journée.</li>
+      <li><b>Avant sa date</b>, le lien de l'appel n'apparaît pas du tout : personne ne tombe sur une page encore masquée. Il apparaît seul à l'heure dite, sans republier la page.</li>
+    </ul>
+  </header>
+  <div class="views">
+    <div>
+      <p class="label">Grand écran : le bloc dans la page</p>
+      <div class="day-finance">
+        <section class="resources" aria-label="Ressources de la journée">
+          <header><h3>Ressources de la journée</h3><span>4 ressources</span></header>
+          <ul class="res-list">
+            <li><a class="res" href="#"><span class="res-mark"><svg class="icon"><use href="#i-map"/></svg></span><span><span class="res-kind">Page web <small>· ifdd.francophonie.org</small></span><span class="res-title">Lancement officiel de l'appel à manifestation d'intérêt des États membres de l'OIF pour l'accompagnement à l'accès à la finance durable</span></span><span class="res-go">Ouvrir <svg class="icon"><use href="#i-arrow"/></svg></span></a></li>
+            <li><a class="res" href="#"><span class="res-mark"><svg class="icon"><use href="#i-file"/></svg></span><span><span class="res-kind">PDF <small>· ifdd.francophonie.org</small></span><span class="res-title">Dossier de présentation de l'appel à manifestation d'intérêt</span></span><span class="res-go">Télécharger <svg class="icon"><use href="#i-arrow"/></svg></span></a></li>
+            <li><a class="res" href="finance.html#ressources"><span class="res-mark video"><img src="https://img.youtube.com/vi/4vkLwfSDAM8/mqdefault.jpg" alt=""><span class="res-play"></span></span><span><span class="res-kind">Vidéo <small>· YouTube</small></span><span class="res-title">Présentation de la Plateforme francophone de la finance durable</span></span><span class="res-go">Regarder <svg class="icon"><use href="#i-play"/></svg></span></a></li>
+            <li><a class="res" href="#"><span class="res-mark"><svg class="icon"><use href="#i-file"/></svg></span><span><span class="res-kind">PDF <small>· 620 ko</small></span><span class="res-title">Programme de la journée</span></span><span class="res-go">Télécharger <svg class="icon"><use href="#i-arrow"/></svg></span></a></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+    <div>
+      <p class="label">Téléphone, 375 px</p>
+      <div class="phone"><iframe src="finance.html#ressources" title="Journée finance sur téléphone"></iframe></div>
+    </div>
+  </div>
+</section>
+
+<section class="scene">
+  <header>
+    <h2>2. Journée jeunesse : le lien du hackathon</h2>
+    <p>Le hackathon est un temps fort, pas une activité : il n'a pas de fiche. Le bandeau du temps fort reçoit un bouton vers l'article de francophonie.org. Le même lien peut aussi figurer dans les ressources de la journée jeunesse, si vous le voulez à deux endroits.</p>
+  </header>
+  <div class="day-jeunesse" style="max-width:860px;margin-top:18px">
+    <div class="highlight">
+      <div>
+        <span class="label-hl"><svg class="icon"><use href="#i-star"/></svg>Temps fort</span>
+        <h3>Hackathon</h3>
+        <div class="when">10:20 à 11:20</div>
+        <p class="by">Avec la Fondation Green OpenLab</p>
+        <a class="btn" href="https://www.francophonie.org/face-au-changement-climatique-la-francophonie-mobilise-une-ia-localisee-et-souveraine-8764" target="_blank" rel="noopener">Lire l'article sur francophonie.org <svg class="icon"><use href="#i-arrow"/></svg></a>
+      </div>
+      <img src="../../../frontend/public/mocks/covers/jeunesse-francophone.jpg" alt="">
+    </div>
+  </div>
+</section>
+
+<section class="scene" style="margin-bottom:72px">
+  <header>
+    <h2>3. Au back-office</h2>
+    <p>L'éditeur de la page d'une journée garde sa liste « Liens » ; elle gagne une date facultative. Le temps fort gagne un lien facultatif (libellé et adresse), comme l'encart mis en avant.</p>
+  </header>
+  <div class="bo" style="margin-top:18px">
+    <h3>Liens</h3>
+    <p>Pages, PDF et vidéos hébergés ailleurs. Le genre se reconnaît à l'adresse.</p>
+    <div class="bo-row">
+      <div><label>Libellé</label><div class="field">Lancement officiel de l'appel à manifestation d'intérêt…</div></div>
+      <div><label>Adresse</label><div class="field">https://www.ifdd.francophonie.org/appel-a-manifestation…</div></div>
+      <div><label>Afficher à partir du</label><div class="field new">12/11/2026 09:00</div><p class="bo-hint">Heure d'Antalya. Vide : tout de suite.</p></div>
+      <span class="del" aria-label="Retirer">×</span>
+    </div>
+    <div class="bo-row">
+      <div><label>Libellé</label><div class="field">Dossier de présentation de l'appel à manifestation d'intérêt</div></div>
+      <div><label>Adresse</label><div class="field">https://www.ifdd.francophonie.org/wp-content/uploads/…pdf</div></div>
+      <div><label>Afficher à partir du</label><div class="field empty">Tout de suite</div></div>
+      <span class="del" aria-label="Retirer">×</span>
+    </div>
+    <div class="bo-row">
+      <div><label>Libellé</label><div class="field">Présentation de la Plateforme francophone de la finance durable</div></div>
+      <div><label>Adresse</label><div class="field">https://www.youtube.com/watch?v=4vkLwfSDAM8</div></div>
+      <div><label>Afficher à partir du</label><div class="field empty">Tout de suite</div></div>
+      <span class="del" aria-label="Retirer">×</span>
+    </div>
+  </div>
+</section>
+
+<script src="../direction-condensee/icones.js"></script>
+</body>
+</html>
