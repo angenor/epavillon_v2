@@ -313,7 +313,9 @@ async fn sans_compte_le_lien_part_par_courriel_et_rien_ne_revient_a_qui_tape_lad
     };
 
     let IssueDInscription::Registered { registration } =
-        seances::sinscrire(&bac, seance, None, charge()).await.unwrap()
+        seances::sinscrire(&bac, seance, None, charge())
+            .await
+            .unwrap()
     else {
         panic!("attendait une inscription");
     };
@@ -335,9 +337,14 @@ async fn sans_compte_le_lien_part_par_courriel_et_rien_ne_revient_a_qui_tape_lad
     let premiere = empreinte().await;
     assert_eq!(premiere.len(), 32);
 
-    let issue = seances::sinscrire(&bac, seance, None, charge()).await.unwrap();
+    let issue = seances::sinscrire(&bac, seance, None, charge())
+        .await
+        .unwrap();
     assert!(
-        matches!(issue, IssueDInscription::AlreadyRegistered { registration: None }),
+        matches!(
+            issue,
+            IssueDInscription::AlreadyRegistered { registration: None }
+        ),
         "une adresse tapée ne donne accès à rien : {issue:?}"
     );
     assert_ne!(empreinte().await, premiere, "le renvoi remplace le lien");

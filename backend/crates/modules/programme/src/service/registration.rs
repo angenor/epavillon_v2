@@ -210,7 +210,11 @@ pub async fn sinscrire(
 /// Sans compte, la salle ne reconnaît personne : le courriel porte un lien
 /// personnel. Mis en file ici et non par l'outbox, qui ne doit jamais voir le
 /// jeton en clair.
-async fn donner_le_lien(conn: &mut PgConnection, registration_id: Uuid, renvoi: bool) -> Result<()> {
+async fn donner_le_lien(
+    conn: &mut PgConnection,
+    registration_id: Uuid,
+    renvoi: bool,
+) -> Result<()> {
     let (jeton, empreinte) = jeton_neuf();
     registrations::poser_empreinte(&mut *conn, registration_id, &empreinte).await?;
     let charge = contracts::engagement::RegistrationEmail {

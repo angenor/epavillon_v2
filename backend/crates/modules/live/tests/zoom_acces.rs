@@ -281,9 +281,12 @@ async fn sans_compte_le_lien_du_courriel_ouvre_la_salle() {
         .unwrap();
     assert_eq!(acces.user_email, "awa.diallo@exemple.org");
 
-    let entree = sqlx::query_scalar!("SELECT joined_at FROM programme.registrations WHERE id = $1", r)
-        .fetch_one(bac.pool())
-        .await
-        .unwrap();
+    let entree = sqlx::query_scalar!(
+        "SELECT joined_at FROM programme.registrations WHERE id = $1",
+        r
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
     assert!(entree.is_some(), "la première entrée est notée");
 }

@@ -261,12 +261,26 @@ mod tests {
 
     #[test]
     fn le_bouton_mene_a_la_salle_de_l_activite() {
-        let m = confirmation(&activite("fr", None), None, false, "https://site.org/", "j", None);
+        let m = confirmation(
+            &activite("fr", None),
+            None,
+            false,
+            "https://site.org/",
+            "j",
+            None,
+        );
         assert!(m
             .text
             .contains("https://site.org/programmations/cdp31/finance-climat/salle?entrer=1"));
         assert!(m.text.contains("(Europe/Istanbul)"));
-        let m = confirmation(&activite("en", None), None, false, "https://site.org", "j", None);
+        let m = confirmation(
+            &activite("en", None),
+            None,
+            false,
+            "https://site.org",
+            "j",
+            None,
+        );
         assert!(m
             .text
             .contains("https://site.org/en/programmes/cdp31/finance-climat/room?entrer=1"));
@@ -289,12 +303,26 @@ mod tests {
 
     #[test]
     fn sans_compte_le_bouton_porte_le_jeton() {
-        let m = confirmation(&activite("fr", None), Some("abc"), false, "https://site.org", "j", None);
+        let m = confirmation(
+            &activite("fr", None),
+            Some("abc"),
+            false,
+            "https://site.org",
+            "j",
+            None,
+        );
         assert!(m
             .text
             .contains("https://site.org/programmations/cdp31/finance-climat/direct?jeton=abc"));
         assert!(m.text.contains("personnel"));
-        let m = confirmation(&activite("en", None), Some("abc"), true, "https://site.org", "j", None);
+        let m = confirmation(
+            &activite("en", None),
+            Some("abc"),
+            true,
+            "https://site.org",
+            "j",
+            None,
+        );
         assert!(m
             .text
             .contains("https://site.org/en/programmes/cdp31/finance-climat/live?jeton=abc"));
