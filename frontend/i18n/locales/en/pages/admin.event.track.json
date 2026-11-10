@@ -72,7 +72,9 @@
     "linkLabelMissing": "A link needs its label.",
     "linkUrlMissing": "A link needs its address.",
     "removeLink": "Remove the link {name}",
-    "newLink": "New link"
+    "newLink": "New link",
+    "visibleFrom": "Show from",
+    "visibleFromHint": "Optional: before this date, the link does not appear on the public page. Empty: right away."
   },
   "feature": {
     "kicker": "Kicker",
@@ -160,6 +162,12 @@
     "removeTitle": "Remove this moment from the agenda?",
     "removeAction": "Remove moment",
     "highlight": "Highlight of the day",
-    "highlightHint": "Featured at the top of the day page, like a highlighted activity."
+    "highlightHint": "Featured at the top of the day page, like a highlighted activity.",
+    "linkUrl": "Highlight link",
+    "linkUrlHint": "Optional: the article or page that tells more. Full address (https://…) or site path (/…).",
+    "linkLabel": "Button label",
+    "linkLabelHint": "“Read the article on francophonie.org”",
+    "linkUrlMissing": "Give the link address, or clear its label.",
+    "linkLabelMissing": "Give the button label: a bare address does not say where it leads."
   }
 }

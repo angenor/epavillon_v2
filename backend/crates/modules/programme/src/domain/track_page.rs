@@ -129,6 +129,9 @@ pub struct PublicTrackMoment {
     pub description: Option<Value>,
     /// Temps fort du fil (le hackathon de la journée jeunesse).
     pub is_highlight: bool,
+    /// Lien du temps fort (10/11) : l'article du hackathon. Ensemble ou nuls.
+    pub link_label: Option<Value>,
+    pub link_url: Option<String>,
     /// Les activités publiées qu'il regroupe (03/11), par heure : « Les 10
     /// minutes qui inspirent ». Vide pour un accueil ou un déjeuner.
     pub activities: Vec<PublicTrackMomentActivity>,

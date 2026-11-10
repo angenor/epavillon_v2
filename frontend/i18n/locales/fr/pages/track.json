@@ -134,5 +134,16 @@
   },
   "hero": {
     "live": "En direct"
+  },
+  "resources": {
+    "title": "Ressources",
+    "page": "Page web",
+    "video": "Vidéo",
+    "open": "Ouvrir la page",
+    "download": "Télécharger",
+    "watch": "Regarder",
+    "watchNamed": "Regarder la vidéo : {title}",
+    "openOnYoutube": "Ouvrir sur YouTube",
+    "thisSite": "ePavillon"
   }
 }

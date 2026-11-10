@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AttachableRoleRule, AttachedImage, UploadedAsset } from '~/types/media'
-import type { I18nText } from '~/types/shared'
+import type { I18nText, TimeZoneName } from '~/types/shared'
 import type { TrackDocumentDraft, TrackLinkDraft, TrackPageDraft } from '~/utils/track-page'
 
 /**
@@ -17,6 +17,9 @@ const props = defineProps<{
   modelValue: TrackPageDraft
   rules: AttachableRoleRule[]
   trackId: string
+  /** Fuseau de l'édition : la date d'affichage d'un lien s'y saisit. */
+  timezone: TimeZoneName
+  zoneLabel: string
   disabled?: boolean
 }>()
 const emit = defineEmits<{ 'update:modelValue': [value: TrackPageDraft] }>()
@@ -55,10 +58,16 @@ function patchLink(index: number, patch: Partial<TrackLinkDraft>): void {
   setLinks(props.modelValue.links.map((link, i) => (i === index ? { ...link, ...patch } : link)))
 }
 
+/** La date d'affichage, en heure de l'édition dans le champ, en instant dans le brouillon. */
+const visibleFrom = (link: TrackLinkDraft) => (link.visible_from ? wallClockInZone(link.visible_from, props.timezone).replace(' ', 'T') : '')
+function setVisibleFrom(index: number, value: string): void {
+  patchLink(index, { visible_from: value ? instantFromWallClock(value, props.timezone) : null })
+}
+
 let created = 0
 async function addLink(): Promise<void> {
   const key = `nouveau-${++created}`
-  setLinks([...props.modelValue.links, { key, label: null, url: '' }])
+  setLinks([...props.modelValue.links, { key, label: null, url: '', visible_from: null }])
   await nextTick()
   document.getElementById(`lien-${key}`)?.focus()
 }
@@ -196,6 +205,16 @@ const labelError = (link: TrackLinkDraft) =>
             :maxlength="80"
             :disabled="props.disabled"
             @update:model-value="(next: I18nText | null) => patchLink(index, { label: next })"
+          />
+          <UiDatePicker
+            class="mt-3"
+            :model-value="visibleFrom(link)"
+            with-time
+            :label="t('admin.event.track.media.visibleFrom')"
+            :hint="t('admin.event.track.media.visibleFromHint')"
+            :timezone-label="props.zoneLabel"
+            :disabled="props.disabled"
+            @update:model-value="(next: string) => setVisibleFrom(index, next)"
           />
         </li>
       </ol>

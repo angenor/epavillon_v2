@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_track_links (track_id, label, url, sort_order, visible_from)\n         SELECT $1, l.label::platform.i18n_text, a.url, a.rang - 1, d.visible_from\n           FROM unnest($3::text[]) WITH ORDINALITY AS a(url, rang)\n           JOIN jsonb_array_elements($2::jsonb) WITH ORDINALITY AS l(label, rang)\n             ON l.rang = a.rang\n           JOIN unnest($4::timestamptz[]) WITH ORDINALITY AS d(visible_from, rang)\n             ON d.rang = a.rang",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "TextArray",
+        "TimestamptzArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "39bdbb34df5e64710b90950d81c58040a6df0d4fde73fc07f9a0846936c9f71d"
+}

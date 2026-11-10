@@ -38,6 +38,9 @@ pub struct TrackMoment {
     pub label: Value,
     pub description: Option<Value>,
     pub is_highlight: bool,
+    /// Lien du temps fort (10/11) : libellé et adresse vont ensemble.
+    pub link_label: Option<Value>,
+    pub link_url: Option<String>,
 }
 
 /// Un partenaire du fil : `TrackPartner`. Nom, sigle et logo résolus : l'écran
@@ -64,6 +67,9 @@ pub struct TrackLink {
     /// Adresse absolue, ou chemin du site.
     pub url: String,
     pub sort_order: i16,
+    /// Public à partir de cet instant ; nul : tout de suite (10/11).
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub visible_from: Option<OffsetDateTime>,
 }
 
 /// Une activité rattachée au fil, telle que l'éditeur de la page la place :
@@ -127,6 +133,9 @@ pub struct TrackPartnerPayload {
 pub struct TrackLinkPayload {
     pub label: Value,
     pub url: String,
+    /// Absent ou nul : public tout de suite.
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    pub visible_from: Option<OffsetDateTime>,
 }
 
 fn diffusee_par_defaut() -> bool {
@@ -200,4 +209,9 @@ pub struct TrackMomentPayload {
     /// Temps fort du fil. Absent : faux.
     #[serde(default)]
     pub is_highlight: bool,
+    /// Lien du temps fort : libellé et adresse ensemble, ou ni l'un ni l'autre.
+    #[serde(default)]
+    pub link_label: Option<Value>,
+    #[serde(default)]
+    pub link_url: Option<String>,
 }

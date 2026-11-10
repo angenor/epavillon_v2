@@ -553,7 +553,16 @@ CREATE TABLE event.programme_track_moments (
     -- n'est pas une activité. Même rôle que programme.session_tracks.is_highlight.
     -- Clôt la table : arrivée par ALTER sur une base en service.
     is_highlight boolean    NOT NULL DEFAULT false,
+    -- Lien d'un moment (10/11/2026) : le bandeau du temps fort mène à l'article
+    -- du hackathon sur francophonie.org, faute de fiche d'activité. Libellé et
+    -- adresse vont ensemble, même forme d'adresse que feature_link_url.
+    -- Arrivées par ALTER, après is_highlight.
+    link_label  platform.i18n_text,
+    link_url    text,
     CONSTRAINT ck_programme_track_moments_period CHECK (ends_at IS NULL OR ends_at > starts_at),
+    CONSTRAINT ck_programme_track_moments_link CHECK ((link_url IS NULL) = (link_label IS NULL)),
+    CONSTRAINT ck_programme_track_moments_link_url
+        CHECK (link_url IS NULL OR (link_url ~ '^(https?://|/)[^\s]*$' AND length(link_url) <= 2048)),
     -- Retirer une partie remet ses moments hors partie, sans toucher au fil :
     -- SET NULL sur la seule colonne de la partie (PostgreSQL 15 et plus).
     CONSTRAINT fk_programme_track_moments_part FOREIGN KEY (part_id, track_id)
@@ -631,6 +640,12 @@ CREATE TRIGGER tg_programme_track_partners_check_role
 -- lien n'est pas un fichier, il n'a ni poids ni type. Sur la page, les liens
 -- suivent les fichiers. Libellé obligatoire : une adresse nue ne dit pas où
 -- elle mène. Même forme d'adresse que feature_link_url.
+--
+-- RESSOURCES DE LA JOURNÉE (10/11/2026) : la page publique les montre selon
+-- leur genre (page, PDF, vidéo), lu dans l'adresse et non saisi. Un lien peut
+-- attendre sa date (`visible_from`) : la page de l'appel à manifestation
+-- d'intérêt de l'IFDD existe, masquée, et ne paraît que le 12 ou le 13. Avant,
+-- l'API publique ne le rend pas ; le back-office le voit toujours.
 CREATE TABLE event.programme_track_links (
     id         uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     track_id   uuid        NOT NULL REFERENCES event.programme_tracks(id) ON DELETE CASCADE,
@@ -638,6 +653,8 @@ CREATE TABLE event.programme_track_links (
     url        text        NOT NULL,
     sort_order smallint    NOT NULL DEFAULT 0,
     created_at timestamptz NOT NULL DEFAULT now(),
+    -- NULL : public tout de suite. Arrivée par ALTER, en dernier.
+    visible_from timestamptz,
     CONSTRAINT ck_programme_track_links_url
         CHECK (url ~ '^(https?://|/)[^\s]*$' AND length(url) <= 2048)
 );
@@ -645,7 +662,7 @@ CREATE TABLE event.programme_track_links (
 CREATE INDEX ix_programme_track_links_track ON event.programme_track_links (track_id, sort_order);
 
 COMMENT ON TABLE event.programme_track_links IS
-    'Liens d''un fil vers la page où un document se télécharge chez son éditeur. Remplacés en bloc par l''éditeur de la page ; affichés après les PDF déposés.';
+    'Liens d''un fil vers une ressource hébergée ailleurs (page, PDF, vidéo). Remplacés en bloc par l''éditeur de la page ; publics à partir de visible_from.';
 
 -- Signal du programme public (temps réel, 31/10) : un fil publié, ou qui cesse
 -- de l'être, et sa page (parties, moments, partenaires) changent ce que

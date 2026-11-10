@@ -53,6 +53,9 @@ export interface TrackMoment {
   label: I18nText
   description: I18nText | null
   is_highlight: boolean
+  /** Lien du temps fort (10/11) : libellé et adresse ensemble, ou nuls. */
+  link_label: I18nText | null
+  link_url: string | null
 }
 
 /** Table `event.programme_track_partners`, résolue. */
@@ -74,11 +77,14 @@ export interface TrackLink {
   /** Adresse absolue, ou chemin du site. */
   url: string
   sort_order: number
+  /** Public à partir de cet instant ; nul : tout de suite (10/11). */
+  visible_from: IsoDateTime | null
 }
 
 export interface TrackLinkPayload {
   label: I18nText
   url: string
+  visible_from: IsoDateTime | null
 }
 
 /** Une activité rattachée au fil (`programme.session_tracks`), publiée ou non. */
@@ -163,4 +169,6 @@ export interface TrackMomentPayload {
   label: I18nText
   description: I18nText | null
   is_highlight: boolean
+  link_label: I18nText | null
+  link_url: string | null
 }

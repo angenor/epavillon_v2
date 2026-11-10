@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, part_id, starts_at, ends_at, label AS \"label!: Value\",\n                  description AS \"description: Value\", is_highlight\n             FROM event.programme_track_moments\n            WHERE track_id = $1\n            ORDER BY starts_at, created_at",
+  "query": "SELECT id, part_id, starts_at, ends_at, label AS \"label!: Value\",\n                  description AS \"description: Value\", is_highlight,\n                  link_label AS \"link_label: Value\", link_url\n             FROM event.programme_track_moments\n            WHERE track_id = $1\n            ORDER BY starts_at, created_at",
   "describe": {
     "columns": [
       {
@@ -79,6 +79,28 @@
             "name": "is_highlight"
           }
         }
+      },
+      {
+        "ordinal": 7,
+        "name": "link_label: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "link_label"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "link_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "link_url"
+          }
+        }
       }
     ],
     "parameters": {
@@ -93,8 +115,10 @@
       true,
       false,
       true,
-      false
+      false,
+      true,
+      true
     ]
   },
-  "hash": "5ada0194f294348ea7882c2738e10e280c7c70f9da70c0538a571e03fd45d74f"
+  "hash": "17d703ba8585dd41bc35e12e320c012217e8d363db5a94364feef5c31d94b389"
 }

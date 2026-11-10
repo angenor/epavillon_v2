@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.programme_track_moments SET\n               part_id = $3, starts_at = $4, ends_at = $5,\n               label = $6::jsonb, description = $7::jsonb, is_highlight = $8,\n               link_label = $9::jsonb, link_url = $10\n         WHERE id = $2 AND track_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz",
+        "Jsonb",
+        "Jsonb",
+        "Bool",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "df53d9e81beb995479a5a0b5d8115bfd12eff2fcb26cc1c89c0bd7126f6c0b86"
+}

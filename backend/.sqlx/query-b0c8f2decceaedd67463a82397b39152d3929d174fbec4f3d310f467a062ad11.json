@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, track_id, part_id, starts_at, ends_at,\n                  label AS \"label!: serde_json::Value\",\n                  description AS \"description: serde_json::Value\", is_highlight\n             FROM event.programme_track_moments\n            WHERE track_id = $1\n            ORDER BY starts_at, created_at",
+  "query": "SELECT id, track_id, part_id, starts_at, ends_at,\n                  label AS \"label!: serde_json::Value\",\n                  description AS \"description: serde_json::Value\", is_highlight,\n                  link_label AS \"link_label: serde_json::Value\", link_url\n             FROM event.programme_track_moments\n            WHERE track_id = $1\n            ORDER BY starts_at, created_at",
   "describe": {
     "columns": [
       {
@@ -90,6 +90,28 @@
             "name": "is_highlight"
           }
         }
+      },
+      {
+        "ordinal": 8,
+        "name": "link_label: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "link_label"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "link_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.programme_track_moments",
+            "name": "link_url"
+          }
+        }
       }
     ],
     "parameters": {
@@ -105,8 +127,10 @@
       true,
       false,
       true,
-      false
+      false,
+      true,
+      true
     ]
   },
-  "hash": "78e9e8a31489c7485c45c9efdc8e170b47df4c87786d8099a06ad446ad432ee3"
+  "hash": "b0c8f2decceaedd67463a82397b39152d3929d174fbec4f3d310f467a062ad11"
 }

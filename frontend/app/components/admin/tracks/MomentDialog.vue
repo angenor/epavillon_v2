@@ -32,6 +32,8 @@ const label = ref<I18nText | null>(null)
 const description = ref<I18nText | null>(null)
 const partId = ref('')
 const highlight = ref(false)
+const linkLabel = ref<I18nText | null>(null)
+const linkUrl = ref('')
 const tried = ref(false)
 
 const wallClock = (value: string | null): string => (value ? wallClockInZone(value, props.timezone).replace(' ', 'T') : '')
@@ -46,6 +48,8 @@ watch(
     description.value = moment?.description ?? null
     partId.value = moment?.part_id ?? ''
     highlight.value = moment?.is_highlight ?? false
+    linkLabel.value = moment?.link_label ?? null
+    linkUrl.value = moment?.link_url ?? ''
     tried.value = false
   },
   { immediate: true },
@@ -72,9 +76,22 @@ const endError = computed(() =>
     : undefined,
 )
 
+/** Le lien du temps fort : une adresse du site (`/…`) ou absolue, donnée avec son libellé. */
+const linkUrlError = computed(() => {
+  const url = linkUrl.value.trim()
+  if (!url) return linkLabel.value?.fr.trim() ? t('admin.event.track.moments.linkUrlMissing') : undefined
+  return /^(https?:\/\/|\/)\S*$/.test(url) ? undefined : t('admin.event.track.feature.urlInvalid')
+})
+const linkLabelError = computed(() =>
+  linkUrl.value.trim() && !linkLabel.value?.fr.trim() ? t('admin.event.track.moments.linkLabelMissing') : undefined,
+)
+
 function submit(): void {
   tried.value = true
-  if (!startsAt.value || !label.value || endError.value) return
+  const linkInvalid = highlight.value && Boolean(linkUrlError.value || linkLabelError.value)
+  if (!startsAt.value || !label.value || endError.value || linkInvalid) return
+  // Le lien est celui du temps fort : décocher le temps fort le retire.
+  const url = highlight.value ? linkUrl.value.trim() : ''
   emit('save', {
     part_id: partId.value || null,
     starts_at: startsAt.value,
@@ -82,6 +99,8 @@ function submit(): void {
     label: label.value,
     description: description.value,
     is_highlight: highlight.value,
+    link_label: url ? linkLabel.value : null,
+    link_url: url || null,
   })
 }
 </script>
@@ -149,6 +168,25 @@ function submit(): void {
         :label="t('admin.event.track.moments.highlight')"
         :hint="t('admin.event.track.moments.highlightHint')"
       />
+
+      <!-- Un temps fort n'a pas de fiche : son bandeau peut mener ailleurs (l'article du hackathon). -->
+      <template v-if="highlight">
+        <UiInput
+          v-model="linkUrl"
+          type="url"
+          :label="t('admin.event.track.moments.linkUrl')"
+          :hint="t('admin.event.track.moments.linkUrlHint')"
+          :error="tried ? linkUrlError : undefined"
+          :maxlength="2048"
+        />
+        <AdminEventsI18nField
+          v-model="linkLabel"
+          :label="t('admin.event.track.moments.linkLabel')"
+          :hint="t('admin.event.track.moments.linkLabelHint')"
+          :error="tried ? linkLabelError : undefined"
+          :maxlength="60"
+        />
+      </template>
     </form>
 
     <template #footer>

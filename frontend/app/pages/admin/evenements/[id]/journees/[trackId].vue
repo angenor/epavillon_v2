@@ -479,6 +479,8 @@ const defaultDay = computed(() => track.value?.starts_on ?? detail.value?.period
               v-model="draft"
               :rules="mediaRules"
               :track-id="trackId"
+              :timezone="timezone"
+              :zone-label="zoneLabel"
               :disabled="!canManage || saving"
             />
             <AdminTracksFeatureSection

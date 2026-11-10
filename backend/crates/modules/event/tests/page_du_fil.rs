@@ -63,6 +63,7 @@ fn lien(libelle: &str, adresse: &str) -> TrackLinkPayload {
     TrackLinkPayload {
         label: json!({ "fr": libelle }),
         url: adresse.to_owned(),
+        visible_from: None,
     }
 }
 
@@ -83,6 +84,8 @@ fn moment(part_id: Option<Uuid>, heure: &str, libelle: &str) -> TrackMomentPaylo
         label: json!({ "fr": libelle }),
         description: None,
         is_highlight: false,
+        link_label: None,
+        link_url: None,
     }
 }
 
@@ -394,4 +397,68 @@ async fn eteindre_le_direct_se_relit_et_sannonce_une_fois() {
     .await
     .unwrap();
     assert_eq!(annonces, 1, "seulement au passage de diffusée à présentiel");
+}
+
+#[tokio::test]
+async fn un_lien_date_se_relit_et_un_moment_garde_son_lien_ou_le_refuse_sans_libelle() {
+    let bac = Bac::monter().await;
+    let editions = seed::editions(&bac).await;
+    let enfants = seed::enfants(&bac, editions.cop31).await;
+    let fil = TrackId::from(enfants.fil);
+    let mut page = page_vide();
+    page.links = vec![
+        TrackLinkPayload {
+            visible_from: Some(commun::instant("2026-11-12T06:00:00Z")),
+            ..lien(
+                "Appel à manifestation d'intérêt",
+                "https://www.ifdd.francophonie.org/appel",
+            )
+        },
+        lien("Vidéo", "https://www.youtube.com/watch?v=4vkLwfSDAM8"),
+    ];
+    let lue = track_page::enregistrer(&bac.state, &bac.ctx(), fil, page)
+        .await
+        .unwrap();
+    assert_eq!(lue.links.len(), 2);
+    assert_eq!(
+        lue.links[0].visible_from,
+        Some(commun::instant("2026-11-12T06:00:00Z"))
+    );
+    assert_eq!(lue.links[1].visible_from, None);
+
+    let mut hackathon = moment(None, "2027-11-08T17:20:00Z", "Hackathon");
+    hackathon.link_url = Some("  https://www.francophonie.org/hackathon  ".to_owned());
+    hackathon.link_label = Some(json!({ "fr": "Lire l'article" }));
+    let lue = track_page::creer_moment(&bac.state, &bac.ctx(), fil, hackathon)
+        .await
+        .unwrap();
+    let cree = lue
+        .moments
+        .iter()
+        .find(|m| m.label["fr"] == "Hackathon")
+        .unwrap();
+    assert_eq!(
+        cree.link_url.as_deref(),
+        Some("https://www.francophonie.org/hackathon")
+    );
+
+    let mut sans_libelle = moment(None, "2027-11-08T18:00:00Z", "Pause");
+    sans_libelle.link_url = Some("https://www.francophonie.org/".to_owned());
+    let refus = track_page::creer_moment(&bac.state, &bac.ctx(), fil, sans_libelle)
+        .await
+        .unwrap_err();
+    assert_eq!(refus.field.as_deref(), Some("link_label"));
+
+    let mut adresse_vide = moment(None, "2027-11-08T19:00:00Z", "Déjeuner");
+    adresse_vide.link_url = Some("   ".to_owned());
+    adresse_vide.link_label = Some(json!({ "fr": "Rien" }));
+    let lue = track_page::creer_moment(&bac.state, &bac.ctx(), fil, adresse_vide)
+        .await
+        .unwrap();
+    let dejeuner = lue
+        .moments
+        .iter()
+        .find(|m| m.label["fr"] == "Déjeuner")
+        .unwrap();
+    assert!(dejeuner.link_url.is_none() && dejeuner.link_label.is_none());
 }

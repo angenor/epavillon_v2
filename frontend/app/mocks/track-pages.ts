@@ -426,7 +426,11 @@ const finance: Source = {
       caption: fr('Programme de la journée (PDF)'),
     },
   ],
-  links: [],
+  links: [
+    { label: fr("Lancement officiel de l'appel à manifestation d'intérêt des États membres de l'OIF pour l'accompagnement à l'accès à la finance durable"), url: 'https://www.ifdd.francophonie.org/appel-a-manifestation-dinteret-acces-a-la-finance-durable' },
+    { label: fr("Dossier de présentation de l'appel à manifestation d'intérêt"), url: 'https://www.ifdd.francophonie.org/wp-content/uploads/2026/11/1.-DOSSIER-DE-PRESENTATION_Appel-a-manifestation-dinteret-ETAT-MEMBRE-2026.pdf' },
+    { label: fr('Présentation de la Plateforme francophone de la finance durable'), url: 'https://www.youtube.com/watch?v=4vkLwfSDAM8' },
+  ],
   parties: [
     { cle: 'p1', label: null, title: "Opportunités de financement durable et synergies d'action en Francophonie", summary: "Opportunités de financement et synergies d'action" },
     { cle: 'p2', label: null, title: 'Initiatives pertinentes nationales, études de cas et témoignages', summary: 'Initiatives nationales, études de cas et témoignages' },
@@ -552,6 +556,8 @@ const deroule = (s: Source): PublicTrackEntry[] => {
         label: fr(m.libelle),
         description: m.points ? fr(m.points.join('\n')) : null,
         is_highlight: false,
+        link_label: null,
+        link_url: null,
         activities: s.activites
           .filter((x) => x.regroupe === m.n)
           .map((x) => ({
@@ -696,11 +702,11 @@ export const trackPageSettings: Record<string, TrackPageSettings> = Object.fromE
         })),
         moments: p.agenda.flatMap((e) =>
           e.kind === 'moment'
-            ? [{ id: e.moment.id, track_id: s.id, part_id: e.part_id, starts_at: e.starts_at, ends_at: e.ends_at, label: e.moment.label, description: e.moment.description, is_highlight: e.moment.is_highlight }]
+            ? [{ id: e.moment.id, track_id: s.id, part_id: e.part_id, starts_at: e.starts_at, ends_at: e.ends_at, label: e.moment.label, description: e.moment.description, is_highlight: e.moment.is_highlight, link_label: e.moment.link_label, link_url: e.moment.link_url }]
             : [],
         ),
         partners: s.partenaires.map((x, i) => ({ ...x, sort_order: i + 1 })),
-        links: s.links.map((x, i) => ({ id: `${s.id}-lien-${i}`, label: x.label, url: x.url, sort_order: i })),
+        links: s.links.map((x, i) => ({ id: `${s.id}-lien-${i}`, label: x.label, url: x.url, sort_order: i, visible_from: null })),
         sessions: s.activites.map((x, i) => {
           const session = ligne(x, piste(s))
           return {

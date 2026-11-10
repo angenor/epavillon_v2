@@ -683,3 +683,7 @@ Migration `ops/migrations/2026-11-08-intervenants-en-ligne.sql`, rejouable, à j
 - `075` : `programme.registrations.manage_token_hash` (empreinte SHA-256, contrainte `ck_registrations_token`, index unique `ux_registrations_manage_token`), comme `track_registrations`. Jamais rendue par l'API.
 
 Migration `ops/migrations/2026-11-09-entree-sans-compte-activite.sql`, rejouable, à jouer avant l'API.
+
+## 10/11/2026 : ressources d'une journée
+
+`event.programme_track_links.visible_from` (public à partir de cette date) ; `event.programme_track_moments.link_label`, `link_url`, contraintes `ck_programme_track_moments_link` et `_link_url`. Migration `ops/migrations/2026-11-10-ressources-journee.sql`.

@@ -181,9 +181,9 @@ pub async fn creer_moment(
     state: &EventState,
     ctx: &RequestContext,
     track: TrackId,
-    payload: TrackMomentPayload,
+    mut payload: TrackMomentPayload,
 ) -> Result<TrackPageSettings> {
-    exiger_un_libelle(&payload)?;
+    exiger_un_libelle(&mut payload)?;
     let mut tx = state.db().write(ctx).await?;
     track_page::creer_moment(&mut tx, track, &payload)
         .await
@@ -198,9 +198,9 @@ pub async fn modifier_moment(
     ctx: &RequestContext,
     track: TrackId,
     moment: Uuid,
-    payload: TrackMomentPayload,
+    mut payload: TrackMomentPayload,
 ) -> Result<TrackPageSettings> {
-    exiger_un_libelle(&payload)?;
+    exiger_un_libelle(&mut payload)?;
     let mut tx = state.db().write(ctx).await?;
     let trouve = track_page::modifier_moment(&mut tx, track, moment, &payload)
         .await
@@ -233,13 +233,28 @@ fn a_son_francais(texte: &serde_json::Value) -> bool {
         .is_some_and(|fr| !fr.trim().is_empty())
 }
 
-fn exiger_un_libelle(payload: &TrackMomentPayload) -> Result<()> {
-    if a_son_francais(&payload.label) {
-        Ok(())
-    } else {
-        Err(ApiError::validation(
+/// Le libellé du moment, et celui de son lien s'il en a un : une adresse
+/// vide retire le lien, une adresse sans libellé est refusée en le nommant.
+fn exiger_un_libelle(payload: &mut TrackMomentPayload) -> Result<()> {
+    if !a_son_francais(&payload.label) {
+        return Err(ApiError::validation(
             "Le libellé du moment est obligatoire en français.",
             "label",
-        ))
+        ));
     }
+    payload.link_url = payload
+        .link_url
+        .as_deref()
+        .map(str::trim)
+        .filter(|url| !url.is_empty())
+        .map(str::to_owned);
+    if payload.link_url.is_none() {
+        payload.link_label = None;
+    } else if !payload.link_label.as_ref().is_some_and(a_son_francais) {
+        return Err(ApiError::validation(
+            "Le lien du moment doit avoir son libellé en français : une adresse nue ne dit pas où elle mène.",
+            "link_label",
+        ));
+    }
+    Ok(())
 }

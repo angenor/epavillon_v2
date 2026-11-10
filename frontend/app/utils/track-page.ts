@@ -1,6 +1,6 @@
 import type { TrackPageSettings, TrackPagePayload } from '~/types/event/track-page'
 import type { AttachedImage, AttachedMedia, AttachmentAssignment } from '~/types/media'
-import type { AssetId, I18nText, OrganizationId, Url, VenueId } from '~/types/shared'
+import type { AssetId, I18nText, IsoDateTime, OrganizationId, Url, VenueId } from '~/types/shared'
 
 /**
  * Le brouillon de la page d'un fil au back-office : les champs de
@@ -30,6 +30,8 @@ export interface TrackLinkDraft {
   key: string
   label: I18nText | null
   url: string
+  /** Instant d'affichage public ; nul : tout de suite. */
+  visible_from: IsoDateTime | null
 }
 
 export interface TrackPageDraft {
@@ -116,7 +118,7 @@ export function draftFromSettings(settings: TrackPageSettings, media: AttachedMe
       .map((m) => ({ asset_id: m.asset_id, filename: filenameOf(m.url), url: m.url, caption: m.caption })),
     links: [...settings.links]
       .sort((a, b) => a.sort_order - b.sort_order)
-      .map((l) => ({ key: l.id, label: l.label, url: l.url })),
+      .map((l) => ({ key: l.id, label: l.label, url: l.url, visible_from: l.visible_from })),
   }
 }
 
@@ -142,7 +144,7 @@ export function payloadFromDraft(draft: TrackPageDraft): TrackPagePayload {
     // Un lien laissé vide n'est pas envoyé ; un lien à moitié rempli l'est, pour que l'API dise ce qui manque.
     links: draft.links
       .filter((l) => l.url.trim() || filled(l.label))
-      .map((l) => ({ label: l.label ?? { fr: '' }, url: l.url.trim() })),
+      .map((l) => ({ label: l.label ?? { fr: '' }, url: l.url.trim(), visible_from: l.visible_from })),
   }
 }
 

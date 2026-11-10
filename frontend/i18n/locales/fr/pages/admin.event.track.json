@@ -72,7 +72,9 @@
     "linkLabelMissing": "Un lien demande son libellé.",
     "linkUrlMissing": "Un lien demande son adresse.",
     "removeLink": "Retirer le lien {name}",
-    "newLink": "Nouveau lien"
+    "newLink": "Nouveau lien",
+    "visibleFrom": "Afficher à partir du",
+    "visibleFromHint": "Facultatif : avant cette date, le lien n'apparaît pas sur la page publique. Vide : tout de suite."
   },
   "feature": {
     "kicker": "Surtitre",
@@ -160,6 +162,12 @@
     "removeTitle": "Retirer ce moment du déroulé ?",
     "removeAction": "Retirer le moment",
     "highlight": "Temps fort de la journée",
-    "highlightHint": "Mis en avant en haut de la page de la journée, comme une activité temps fort."
+    "highlightHint": "Mis en avant en haut de la page de la journée, comme une activité temps fort.",
+    "linkUrl": "Lien du temps fort",
+    "linkUrlHint": "Facultatif : l'article ou la page qui en dit plus. Adresse complète (https://…) ou chemin du site (/…).",
+    "linkLabel": "Libellé du bouton",
+    "linkLabelHint": "« Lire l'article sur francophonie.org »",
+    "linkUrlMissing": "Donnez l'adresse du lien, ou videz son libellé.",
+    "linkLabelMissing": "Donnez le libellé du bouton : une adresse nue ne dit pas où elle mène."
   }
 }

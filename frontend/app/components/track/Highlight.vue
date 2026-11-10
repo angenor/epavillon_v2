@@ -44,6 +44,15 @@ const by = computed(() => {
 })
 const note = computed(() => (props.moment?.moment.description ? tr(props.moment.moment.description) : ''))
 const cover = computed(() => session.value?.cover ?? null)
+
+/** Le lien d'un moment (10/11) : l'article du hackathon, faute de fiche. Un chemin du site reste dans l'onglet. */
+const localePath = useLocalePath()
+const momentLink = computed<{ label: string; to?: string; href?: string } | null>(() => {
+  const moment = props.moment?.moment
+  if (session.value || !moment?.link_url || !moment.link_label) return null
+  const label = tr(moment.link_label)
+  return moment.link_url.startsWith('/') ? { label, to: localePath(moment.link_url) } : { label, href: moment.link_url }
+})
 </script>
 
 <template>
@@ -65,6 +74,16 @@ const cover = computed(() => session.value?.cover ?? null)
       <p v-else-if="note" class="mt-1 max-w-(--measure) text-[0.95rem]">{{ note }}</p>
       <UiButton v-if="session" class="mt-4" variant="institutional" icon-trailing="arrow-right" :to="link(props.editionSlug, session)">
         {{ t('track.highlight.open') }}
+      </UiButton>
+      <UiButton
+        v-else-if="momentLink"
+        class="mt-4"
+        variant="institutional"
+        :icon-trailing="momentLink.to ? 'arrow-right' : 'external-link'"
+        :to="momentLink.to"
+        :href="momentLink.href"
+      >
+        {{ momentLink.label }}
       </UiButton>
     </div>
     <UiImage v-if="cover" :image="cover" ratio="4 / 3" rounded="var(--radius-md)" sizes="240px" />

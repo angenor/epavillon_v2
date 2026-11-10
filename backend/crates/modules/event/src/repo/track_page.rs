@@ -87,7 +87,8 @@ pub async fn moments<'e>(
         TrackMoment,
         r#"SELECT id, track_id, part_id, starts_at, ends_at,
                   label AS "label!: serde_json::Value",
-                  description AS "description: serde_json::Value", is_highlight
+                  description AS "description: serde_json::Value", is_highlight,
+                  link_label AS "link_label: serde_json::Value", link_url
              FROM event.programme_track_moments
             WHERE track_id = $1
             ORDER BY starts_at, created_at"#,
@@ -103,7 +104,7 @@ pub async fn moments<'e>(
 pub async fn liens<'e>(executor: impl PgExecutor<'e>, track: TrackId) -> Result<Vec<TrackLink>> {
     let lignes = sqlx::query_as!(
         TrackLink,
-        r#"SELECT id, label AS "label!: serde_json::Value", url, sort_order
+        r#"SELECT id, label AS "label!: serde_json::Value", url, sort_order, visible_from
              FROM event.programme_track_links
             WHERE track_id = $1
             ORDER BY sort_order, created_at"#,
@@ -124,6 +125,7 @@ pub async fn remplacer_liens(
 ) -> std::result::Result<(), sqlx::Error> {
     let libelles = serde_json::Value::Array(liens.iter().map(|l| l.label.clone()).collect());
     let adresses: Vec<String> = liens.iter().map(|l| l.url.clone()).collect();
+    let dates: Vec<Option<time::OffsetDateTime>> = liens.iter().map(|l| l.visible_from).collect();
 
     sqlx::query!(
         "DELETE FROM event.programme_track_links WHERE track_id = $1",
@@ -133,14 +135,17 @@ pub async fn remplacer_liens(
     .await?;
 
     sqlx::query!(
-        "INSERT INTO event.programme_track_links (track_id, label, url, sort_order)
-         SELECT $1, l.label::platform.i18n_text, a.url, a.rang - 1
+        "INSERT INTO event.programme_track_links (track_id, label, url, sort_order, visible_from)
+         SELECT $1, l.label::platform.i18n_text, a.url, a.rang - 1, d.visible_from
            FROM unnest($3::text[]) WITH ORDINALITY AS a(url, rang)
            JOIN jsonb_array_elements($2::jsonb) WITH ORDINALITY AS l(label, rang)
-             ON l.rang = a.rang",
+             ON l.rang = a.rang
+           JOIN unnest($4::timestamptz[]) WITH ORDINALITY AS d(visible_from, rang)
+             ON d.rang = a.rang",
         track.as_uuid(),
         libelles,
-        &adresses
+        &adresses,
+        &dates as &[Option<time::OffsetDateTime>]
     )
     .execute(&mut *conn)
     .await?;
@@ -317,8 +322,9 @@ pub async fn creer_moment(
 ) -> std::result::Result<Uuid, sqlx::Error> {
     sqlx::query_scalar!(
         r#"INSERT INTO event.programme_track_moments
-               (track_id, part_id, starts_at, ends_at, label, description, is_highlight)
-           VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7)
+               (track_id, part_id, starts_at, ends_at, label, description, is_highlight,
+                link_label, link_url)
+           VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8::jsonb, $9)
         RETURNING id"#,
         track.as_uuid(),
         p.part_id,
@@ -326,7 +332,9 @@ pub async fn creer_moment(
         p.ends_at,
         p.label,
         p.description,
-        p.is_highlight
+        p.is_highlight,
+        p.link_label,
+        p.link_url
     )
     .fetch_one(&mut *conn)
     .await
@@ -342,7 +350,8 @@ pub async fn modifier_moment(
     let touchees = sqlx::query!(
         r#"UPDATE event.programme_track_moments SET
                part_id = $3, starts_at = $4, ends_at = $5,
-               label = $6::jsonb, description = $7::jsonb, is_highlight = $8
+               label = $6::jsonb, description = $7::jsonb, is_highlight = $8,
+               link_label = $9::jsonb, link_url = $10
          WHERE id = $2 AND track_id = $1"#,
         track.as_uuid(),
         moment,
@@ -351,7 +360,9 @@ pub async fn modifier_moment(
         p.ends_at,
         p.label,
         p.description,
-        p.is_highlight
+        p.is_highlight,
+        p.link_label,
+        p.link_url
     )
     .execute(&mut *conn)
     .await?

@@ -267,3 +267,7 @@ Le billet et la salle ne reconnaissent pas une personne sans compte. Le courriel
 ## 10/11 : bandeau « En direct » sur toutes les pages publiques
 
 Maquette `docs/maquettes/direct-en-cours/`. `EventLiveNowBanner` sous la barre, `EventLiveNowPill` dans la barre une fois refermé, état `useLiveNow()` lu sur `GET /schedule`. Ni heure (« en cours depuis… »), ni couverture sur téléphone ; logo de l'organisation. Absent de la page du direct et de sa journée. Voir [journal](../journal/2026-11-10.md).
+
+## 10/11 : ressources d'une journée, intervenants en rangée
+
+Maquette `docs/maquettes/ressources-journee/` (direction « dossier »). `TrackResources` réunit documents et liens sous la présentation ; un lien daté n'arrive qu'à sa date ; un temps fort-moment porte un bouton. Intervenants d'une activité : une rangée qui défile, cartons de hauteur fixe. Voir [journal](../journal/2026-11-10.md).

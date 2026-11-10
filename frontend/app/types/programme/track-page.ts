@@ -146,6 +146,9 @@ export interface PublicTrackMoment {
   description: I18nText | null
   /** Temps fort du fil (02/11) : le hackathon de la journée jeunesse n'est pas une activité. */
   is_highlight: boolean
+  /** Lien du temps fort (10/11) : l'article du hackathon. Ensemble ou nuls. */
+  link_label: I18nText | null
+  link_url: string | null
   /**
    * Activités publiées qu'il regroupe (03/11), par heure : « Les 10 minutes qui
    * inspirent ». Elles ne sont pas des lignes du déroulé ; vide pour un accueil.

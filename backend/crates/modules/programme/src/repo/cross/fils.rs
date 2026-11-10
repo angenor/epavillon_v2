@@ -120,7 +120,9 @@ pub async fn fil_publie<'e>(
                   COALESCE((SELECT jsonb_agg(jsonb_build_object('label', l.label, 'url', l.url)
                                              ORDER BY l.sort_order, l.created_at)
                               FROM event.programme_track_links l
-                             WHERE l.track_id = f.id), '[]'::jsonb) AS "links!: Value",
+                             WHERE l.track_id = f.id
+                               AND (l.visible_from IS NULL OR l.visible_from <= now())),
+                           '[]'::jsonb) AS "links!: Value",
                   v.id AS "venue_id?", v.name AS "venue_name?: Value", v.kind AS "venue_kind?",
                   v.address AS "venue_address?", v.map_url::text AS "venue_map_url?",
                   v.area AS "venue_area?: Value", v.access_note AS "venue_access_note?: Value",
@@ -173,6 +175,8 @@ pub struct MomentDuFil {
     pub label: Value,
     pub description: Option<Value>,
     pub is_highlight: bool,
+    pub link_label: Option<Value>,
+    pub link_url: Option<String>,
 }
 
 pub async fn moments_du_fil<'e>(
@@ -182,7 +186,8 @@ pub async fn moments_du_fil<'e>(
     let lignes = sqlx::query_as!(
         MomentDuFil,
         r#"SELECT id, part_id, starts_at, ends_at, label AS "label!: Value",
-                  description AS "description: Value", is_highlight
+                  description AS "description: Value", is_highlight,
+                  link_label AS "link_label: Value", link_url
              FROM event.programme_track_moments
             WHERE track_id = $1
             ORDER BY starts_at, created_at"#,
