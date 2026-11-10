@@ -56,7 +56,7 @@
 
 <div class="intro">
   <h1>Ressources d'une journée</h1>
-  <p>Aujourd'hui, les liens d'une journée s'affichent tout en bas de la page, en simple texte, après les PDF. Proposition : un seul bloc « Ressources de la journée », placé juste sous la présentation de la journée. Pages web, PDF et vidéos y sont réunis, chacun avec son genre, son site et son geste (ouvrir, télécharger, regarder). Le genre se reconnaît à l'adresse : rien de plus à saisir.</p>
+  <p>Seconde proposition, sans filet de couleur ni liste. Les ressources d'une journée forment un dossier, juste sous la présentation de la journée : chacune a la forme de ce qu'elle est. La vidéo tient la grande place, sa vignette en plein cadre et son titre dessus ; la page web est une petite fenêtre de navigateur avec son adresse ; un PDF est une feuille au coin plié. Le genre se reconnaît à l'adresse : rien de plus à saisir.</p>
   <p>Deux ajouts au back-office : une date « Afficher à partir du » pour un lien qui n'est pas encore public (la page de l'appel paraît le 12 ou le 13), et un lien facultatif sur un temps fort (le hackathon de la journée jeunesse).</p>
   <div class="links">
     <a class="btn btn-primary" href="finance.html#ressources">Voir la page de la journée finance</a>
@@ -70,23 +70,43 @@
     <ul>
       <li><b>Page web</b> : s'ouvre dans un nouvel onglet, sur le site de l'IFDD.</li>
       <li><b>PDF</b> : le dossier de présentation se télécharge ; les PDF déposés sur la plateforme (programme de la journée) rejoignent le même bloc, avec leur poids.</li>
-      <li><b>Vidéo YouTube</b> : sa vignette, un bouton de lecture ; elle se regarde sur place, dans une fenêtre, avec « Ouvrir sur YouTube » à côté. Cliquez dessus dans la page de la journée.</li>
+      <li><b>Vidéo YouTube</b> : la grande vignette, le bouton de lecture ; elle se regarde sur place, dans une fenêtre, avec « Ouvrir sur YouTube » à côté. Cliquez dessus dans la page de la journée.</li>
+      <li><b>Sans vidéo</b>, les fenêtres et les feuilles se rangent côte à côte, sur toute la largeur.</li>
       <li><b>Avant sa date</b>, le lien de l'appel n'apparaît pas du tout : personne ne tombe sur une page encore masquée. Il apparaît seul à l'heure dite, sans republier la page.</li>
     </ul>
   </header>
   <div class="views">
     <div>
-      <p class="label">Grand écran : le bloc dans la page</p>
+      <p class="label">Grand écran</p>
       <div class="day-finance">
-        <section class="resources" aria-label="Ressources de la journée">
-          <header><h3>Ressources de la journée</h3><span>4 ressources</span></header>
-          <ul class="res-list">
-            <li><a class="res" href="#"><span class="res-mark"><svg class="icon"><use href="#i-map"/></svg></span><span><span class="res-kind">Page web <small>· ifdd.francophonie.org</small></span><span class="res-title">Lancement officiel de l'appel à manifestation d'intérêt des États membres de l'OIF pour l'accompagnement à l'accès à la finance durable</span></span><span class="res-go">Ouvrir <svg class="icon"><use href="#i-arrow"/></svg></span></a></li>
-            <li><a class="res" href="#"><span class="res-mark"><svg class="icon"><use href="#i-file"/></svg></span><span><span class="res-kind">PDF <small>· ifdd.francophonie.org</small></span><span class="res-title">Dossier de présentation de l'appel à manifestation d'intérêt</span></span><span class="res-go">Télécharger <svg class="icon"><use href="#i-arrow"/></svg></span></a></li>
-            <li><a class="res" href="finance.html#ressources"><span class="res-mark video"><img src="https://img.youtube.com/vi/4vkLwfSDAM8/mqdefault.jpg" alt=""><span class="res-play"></span></span><span><span class="res-kind">Vidéo <small>· YouTube</small></span><span class="res-title">Présentation de la Plateforme francophone de la finance durable</span></span><span class="res-go">Regarder <svg class="icon"><use href="#i-play"/></svg></span></a></li>
-            <li><a class="res" href="#"><span class="res-mark"><svg class="icon"><use href="#i-file"/></svg></span><span><span class="res-kind">PDF <small>· 620 ko</small></span><span class="res-title">Programme de la journée</span></span><span class="res-go">Télécharger <svg class="icon"><use href="#i-arrow"/></svg></span></a></li>
-          </ul>
-        </section>
+        <section class="kit" aria-labelledby="ressources-apercu">
+        <header class="kit-head"><h3 id="ressources-apercu">Ressources</h3><p>L'appel à manifestation d'intérêt et la plateforme, à lire et à regarder</p></header>
+        <div class="kit-grid">
+          <a class="kit-card kit-video" href="finance.html#ressources" data-video="4vkLwfSDAM8" data-title="Présentation de la Plateforme francophone de la finance durable">
+            <img src="https://img.youtube.com/vi/4vkLwfSDAM8/hqdefault.jpg" alt="">
+            <span class="play" aria-hidden="true"></span>
+            <span class="cap"><small>Vidéo · YouTube</small><b>Présentation de la Plateforme francophone de la finance durable</b></span>
+          </a>
+          <a class="kit-card kit-page" data-from="2026-11-12" href="https://www.ifdd.francophonie.org/appel-a-manifestation-dinteret-acces-a-la-finance-durable" target="_blank" rel="noopener">
+            <span class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"><b>ifdd.francophonie.org</b>/appel-a-manifestation-dinteret…</span></span>
+            <span class="kit-body"><span class="kit-kind">Page web</span>
+              <span class="kit-title">Lancement officiel de l'appel à manifestation d'intérêt des États membres de l'OIF pour l'accompagnement à l'accès à la finance durable</span>
+              <span class="kit-go">Ouvrir la page <svg class="icon"><use href="#i-arrow"/></svg></span></span>
+          </a>
+          <a class="kit-card kit-doc" href="https://www.ifdd.francophonie.org/wp-content/uploads/2026/11/1.-DOSSIER-DE-PRESENTATION_Appel-a-manifestation-dinteret-ETAT-MEMBRE-2026.pdf" target="_blank" rel="noopener">
+            <span class="sheet" aria-hidden="true"><b>PDF</b></span>
+            <span class="kit-body"><span class="kit-title">Dossier de présentation de l'appel à manifestation d'intérêt</span>
+              <span class="kit-meta">ifdd.francophonie.org</span>
+              <span class="kit-go">Télécharger <svg class="icon"><use href="#i-arrow"/></svg></span></span>
+          </a>
+          <a class="kit-card kit-doc" href="#">
+            <span class="sheet" aria-hidden="true"><b>PDF</b></span>
+            <span class="kit-body"><span class="kit-title">Programme de la journée</span>
+              <span class="kit-meta">620 ko</span>
+              <span class="kit-go">Télécharger <svg class="icon"><use href="#i-arrow"/></svg></span></span>
+          </a>
+        </div>
+      </section>
       </div>
     </div>
     <div>
