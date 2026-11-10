@@ -63,27 +63,41 @@
   @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
 
   /* ── Le bandeau ───────────────────────────────────────────────
-     Fond de carte, filet rouge du direct à gauche : rouge réservé à « en
-     direct », sans aplat rouge, qui dirait un incident grave. */
+     La couverture de l'activité (à défaut celle de l'édition), sous un voile
+     léger et un bouton de lecture rouge : on voit tout de suite que ça tourne.
+     Pas d'heure : « en cours depuis 12 min » ne se lit pas comme une annonce. */
   .live-banner { margin-top: 4px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface-raised); box-shadow: var(--shadow-md); }
-  .live-banner .in { display: flex; align-items: center; gap: 18px; max-width: 1280px; margin: 0 auto; padding: 12px 20px 12px 0; border-left: 5px solid var(--color-live); }
-  .live-tag { display: inline-flex; align-items: center; gap: 8px; flex: none; padding-left: 16px; font: 700 1rem/1 var(--font-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-live); }
+  .live-banner .in { position: relative; display: flex; align-items: center; gap: 16px; max-width: 1280px; margin: 0 auto; padding: 10px 16px 10px 12px; }
+  .live-thumb { position: relative; display: block; flex: none; width: 128px; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 6px; background: var(--color-surface-inverse); cursor: pointer; }
+  .live-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .live-thumb::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--color-scrim) 38%, transparent); }
+  .play { position: absolute; z-index: 1; top: 50%; left: 50%; display: grid; place-items: center; width: 36px; height: 36px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--ifdd-rouge-600, #d42c2d); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ifdd-blanc) 85%, transparent); }
+  .play::before { content: ""; margin-left: 3px; border-style: solid; border-width: 7px 0 7px 11px; border-color: transparent transparent transparent var(--ifdd-blanc); }
+  .live-thumb:hover .play { transform: translate(-50%, -50%) scale(1.08); }
   .live-what { min-width: 0; flex: 1; }
+  .live-tag { display: flex; align-items: center; gap: 8px; margin: 0 0 3px; font: 700 0.95rem/1 var(--font-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-live); }
+  .live-tag .since { font-weight: 600; letter-spacing: 0.04em; color: var(--color-text-secondary); }
   .live-what b { display: block; overflow: hidden; font: 600 1.28rem/1.15 var(--font-heading); color: var(--color-heading); text-overflow: ellipsis; white-space: nowrap; }
-  .live-what small { display: block; margin-top: 2px; font-size: 0.82rem; color: var(--color-text-secondary); }
-  .live-what small strong { font-weight: 700; color: var(--color-text); }
+  .live-what small { display: block; margin-top: 2px; font-size: 0.82rem; font-weight: 700; color: var(--color-text-secondary); }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: var(--target); padding: 0 18px; border: 0; border-radius: var(--radius); background: var(--color-accent-solid); font: 600 0.92rem var(--font-body); color: var(--color-accent-contrast); cursor: pointer; }
   .btn:hover { background: var(--color-accent-solid-hover); }
   .close { display: grid; place-items: center; flex: none; width: var(--target); height: var(--target); border: 0; border-radius: var(--radius); background: none; color: var(--color-text-muted); cursor: pointer; }
   .close:hover { background: var(--color-surface-hover); color: var(--color-text); }
   .close svg { width: 18px; height: 18px; }
 
-  .phone .live-banner .in { flex-wrap: wrap; gap: 8px 12px; padding: 12px 6px 14px 0; }
-  .phone .live-tag { padding-left: 12px; font-size: 0.95rem; }
-  .phone .live-what { order: 3; flex-basis: 100%; padding-left: 12px; }
-  .phone .live-what b { font-size: 1.15rem; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-  .phone .live-banner .btn { order: 4; flex: 1; margin: 4px 8px 0 12px; }
-  .phone .close { order: 2; margin-left: auto; }
+  .phone .live-banner .in { flex-wrap: wrap; gap: 10px 12px; padding: 12px 12px 14px; }
+  .org-short, .phone .org-long { display: none; }
+  .phone .org-short { display: inline; }
+  .phone .live-banner .in { align-items: flex-start; }
+  .phone .live-thumb { width: 104px; margin-top: 2px; }
+  .phone .play { width: 30px; height: 30px; }
+  .phone .play::before { border-width: 6px 0 6px 9px; margin-left: 2px; }
+  .phone .live-what { padding-right: 34px; }
+  .phone .live-tag { flex-wrap: wrap; gap: 2px 8px; font-size: 0.9rem; }
+  .phone .live-tag .since { flex-basis: 100%; padding-left: 17px; }
+  .phone .live-what b { font-size: 1.08rem; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .phone .live-banner .btn { flex: 1 1 100%; }
+  .phone .close { position: absolute; top: 4px; right: 2px; }
 
   @media (prefers-reduced-motion: no-preference) {
     .live-banner.arrive { animation: arrive 420ms cubic-bezier(.2,.8,.3,1); }
@@ -119,7 +133,7 @@
 <section class="scene">
   <header>
     <h2>1. Le bandeau</h2>
-    <p>Le rouge du direct, un trait et une pastille, pas un aplat : un aplat rouge annonce un incident grave. Le bouton mène à la salle du direct.</p>
+    <p>À gauche, la couverture de l'activité (à défaut, la photo de l'édition) sous un voile léger, avec un bouton de lecture rouge. Pas d'heure : « En direct, en cours depuis 12 min » ne peut pas se lire comme l'annonce d'un direct à venir. La photo et le bouton mènent tous deux à la salle.</p>
   </header>
   <div class="views">
     <div>
@@ -161,6 +175,7 @@
   <header>
     <h2>Les règles</h2>
     <ul>
+      <li><b>Durée écoulée</b> : « vient de commencer » la première minute, puis « en cours depuis 12 min », « depuis 1 h 05 ». Elle se met à jour toute seule.</li>
       <li><b>Arrivée</b> : le bandeau descend doucement sous la barre, sans son ni fenêtre qui bloque la page. Avec « moins d'animations », il apparaît sans bouger.</li>
       <li><b>Direct suivant</b> : le bandeau passe au nouveau titre, même s'il avait été refermé pour le précédent. Refermer ne vaut que pour un direct.</li>
       <li><b>Sur la page même du direct</b>, ni bandeau ni pastille : on y est déjà.</li>
@@ -182,10 +197,11 @@
   </div>
   <div class="live-banner" role="status" hidden>
     <div class="in">
-      <span class="live-tag"><span class="dot"></span>En direct</span>
+      <a class="live-thumb" aria-hidden="true" tabindex="-1"><img data-cover alt=""><span class="play"></span></a>
       <div class="live-what">
+        <p class="live-tag"><span class="dot"></span>En direct <span class="since" data-since></span></p>
         <b data-title></b>
-        <small><strong data-org></strong> · <span data-when></span></small>
+        <small><span class="org-long" data-org></span><span class="org-short" data-sigle></span></small>
       </div>
       <button type="button" class="btn">Rejoindre le direct</button>
       <button type="button" class="close" aria-label="Masquer ce bandeau"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
@@ -201,8 +217,8 @@
 
 <script>
   const DIRECTS = [
-    { titre: "Lutte contre la désinformation climatique en Francophonie", org: "IFDD", quand: "16:30 à 19:00, heure d'Antalya" },
-    { titre: "Accélérer l'action climatique par le capital humain : le rôle du secteur privé", org: "GA", quand: "15:30 à 16:30, heure d'Antalya" },
+    { titre: "Lutte contre la désinformation climatique en Francophonie", org: "Institut de la Francophonie pour le développement durable (IFDD)", sigle: "IFDD", depuis: "en cours depuis 12 min", couverture: "../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" },
+    { titre: "Accélérer l'action climatique par le capital humain : le rôle du secteur privé", org: "GA", sigle: "GA", depuis: "vient de commencer", couverture: "../../../frontend/public/mocks/covers/finance-climatique.jpg" },
   ];
   let courant = 0, referme = false, enCours = true;
 
@@ -216,7 +232,9 @@
       const bandeau = e.querySelector('.live-banner');
       e.querySelector('[data-title]').textContent = d.titre;
       e.querySelector('[data-org]').textContent = d.org;
-      e.querySelector('[data-when]').textContent = d.quand;
+      e.querySelector('[data-sigle]').textContent = d.sigle;
+      e.querySelector('[data-since]').textContent = d.depuis;
+      e.querySelector('[data-cover]').src = d.couverture;
       const montrer = enCours && !(fige || referme);
       bandeau.hidden = !montrer;
       bandeau.classList.toggle('arrive', Boolean(montrer && arrivee));
