@@ -117,6 +117,12 @@ export function createHomeApi({ call }: Pick<ApiTransport, 'call'>) {
         generated_at: new Date().toISOString(),
       }
     },
+
+    /**
+     * Les séances en cours et à venir de toutes les éditions : ce que relit le
+     * bandeau « En direct » de toutes les pages, sans la vitrine ni les éditions.
+     */
+    current: () => call<PublicScheduleRow[]>('/schedule', (m) => m.upcomingSessions()),
   }
 }
 

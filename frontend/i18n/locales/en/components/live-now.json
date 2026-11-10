@@ -1,0 +1,10 @@
+{
+  "label": "Live now",
+  "tag": "Live",
+  "justStarted": "just started",
+  "since": "started {minutes} min ago",
+  "sinceHours": "started {hours} h {minutes} ago",
+  "sinceHoursExact": "started {hours} h ago",
+  "join": "Join the live stream",
+  "dismiss": "Hide this banner"
+}

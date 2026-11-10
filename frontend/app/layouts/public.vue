@@ -156,6 +156,9 @@ const isMobileNavOpen = ref(false)
 watch(() => route.fullPath, () => (isMobileNavOpen.value = false))
 
 const currentYear = new Date().getFullYear()
+
+useLiveNowWatcher()
+const { pillShown: livePill } = useLiveNow()
 </script>
 
 <template>
@@ -223,7 +226,8 @@ const currentYear = new Date().getFullYear()
             width="132"
             height="36"
           >
-          <span class="flex flex-col leading-none text-text-on-inverse lg:max-xl:sr-only">
+          <!-- Sur téléphone, la pastille du direct prend la place du nom écrit. -->
+          <span class="flex flex-col leading-none text-text-on-inverse lg:max-xl:sr-only" :class="{ 'max-sm:sr-only': livePill }">
             <span class="font-display text-xl leading-none tracking-tight">
               <span class="font-light">{{ siteName.slice(0, 1) }}</span><span class="font-bold">{{ siteName.slice(1) }}</span>
             </span>
@@ -238,6 +242,7 @@ const currentYear = new Date().getFullYear()
       </template>
 
       <template #actions>
+        <EventLiveNowPill />
         <UiUserMenu
           v-if="auth.isAuthenticated && auth.person"
           :name="auth.person.display_name"
@@ -300,6 +305,8 @@ const currentYear = new Date().getFullYear()
         />
       </template>
     </UiNavBar>
+
+    <EventLiveNowBanner />
 
     <main
       id="contenu-principal"

@@ -1,0 +1,10 @@
+{
+  "label": "Direct en cours",
+  "tag": "En direct",
+  "justStarted": "vient de commencer",
+  "since": "en cours depuis {minutes} min",
+  "sinceHours": "en cours depuis {hours} h {minutes}",
+  "sinceHoursExact": "en cours depuis {hours} h",
+  "join": "Rejoindre le direct",
+  "dismiss": "Masquer ce bandeau"
+}

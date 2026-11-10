@@ -263,3 +263,7 @@ Maquette `docs/maquettes/journees-en-bloc/`. Une journée spéciale et l'atelier
 ## 09/11 : entrer sans compte dans le direct d'une activité
 
 Le billet et la salle ne reconnaissent pas une personne sans compte. Le courriel porte désormais un lien personnel vers `/programmations/[édition]/[activité]/direct`, qui renvoie au lien Zoom. Le billet retient l'inscription dans le navigateur : « Inscription confirmée », rappel du courriel, « Recevoir de nouveau mon lien ». Voir [journal](../journal/2026-11-09.md).
+
+## 10/11 : bandeau « En direct » sur toutes les pages publiques
+
+Maquette `docs/maquettes/direct-en-cours/`. `EventLiveNowBanner` sous la barre, `EventLiveNowPill` dans la barre une fois refermé, état `useLiveNow()` lu sur `GET /schedule`. Ni heure (« en cours depuis… »), ni couverture sur téléphone ; logo de l'organisation. Absent de la page du direct et de sa journée. Voir [journal](../journal/2026-11-10.md).
