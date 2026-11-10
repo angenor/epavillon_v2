@@ -45,6 +45,64 @@ const isOpen = computed({
     if (!value) opened.value = null
   },
 })
+
+/**
+ * UNE SEULE RANGÉE (10/11) : un panel nombreux passait sur trois ou quatre
+ * rangées. Quand elle déborde, elle défile seule d'un siège toutes les
+ * 3,5 s, revient au début en fin de rangée, et s'arrête tant qu'on la survole,
+ * la parcourt au clavier, la touche (8 s) ou lit une fiche. Rien ne bouge avec
+ * « moins d'animations » : les flèches restent.
+ */
+const AUTOPLAY_MS = 3500
+const TOUCH_PAUSE_MS = 8000
+const track = ref<HTMLElement | null>(null)
+const overflowing = ref(false)
+const hovered = ref(false)
+const focused = ref(false)
+let pausedUntil = 0
+let reducedMotion = false
+let timer: ReturnType<typeof setInterval> | undefined
+let observer: ResizeObserver | undefined
+
+function measure(): void {
+  const el = track.value
+  overflowing.value = !!el && el.scrollWidth > el.clientWidth + 2
+}
+
+function step(direction: 1 | -1): void {
+  const el = track.value
+  if (!el) return
+  const behavior: ScrollBehavior = reducedMotion ? 'auto' : 'smooth'
+  const seat = el.querySelector('li')?.getBoundingClientRect().width ?? 176
+  if (direction === 1 && el.scrollLeft + el.clientWidth >= el.scrollWidth - 4) el.scrollTo({ left: 0, behavior })
+  else if (direction === -1 && el.scrollLeft <= 4) el.scrollTo({ left: el.scrollWidth, behavior })
+  else el.scrollBy({ left: direction * seat, behavior })
+}
+
+function pauseAfterTouch(): void {
+  pausedUntil = Date.now() + TOUCH_PAUSE_MS
+}
+
+function move(direction: 1 | -1): void {
+  pauseAfterTouch()
+  step(direction)
+}
+
+onMounted(() => {
+  reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  observer = new ResizeObserver(measure)
+  if (track.value) observer.observe(track.value)
+  measure()
+  if (reducedMotion) return
+  timer = setInterval(() => {
+    const idle = !hovered.value && !focused.value && !isOpen.value && Date.now() > pausedUntil
+    if (overflowing.value && idle && document.visibilityState === 'visible') step(1)
+  }, AUTOPLAY_MS)
+})
+onBeforeUnmount(() => {
+  clearInterval(timer)
+  observer?.disconnect()
+})
 </script>
 
 <template>
@@ -74,11 +132,26 @@ const isOpen = computed({
   </ul>
 
   <section v-else-if="!props.compact && speakers.length" aria-labelledby="intervenants-titre">
-    <h2 id="intervenants-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
-      {{ t('activity.people.speakers') }}
-    </h2>
-    <ul class="mt-5 grid grid-cols-2 gap-y-7.5 sm:grid-cols-[repeat(auto-fill,minmax(10rem,1fr))]">
-      <li v-for="speaker in speakers" :key="speaker.id" class="flex min-w-0">
+    <div class="flex items-end justify-between gap-4">
+      <h2 id="intervenants-titre" class="heading-condensed text-[clamp(1.8rem,3.4vw,2.3rem)] text-heading">
+        {{ t('activity.people.speakers') }}
+      </h2>
+      <div v-if="overflowing" class="flex shrink-0 gap-2">
+        <UiButton variant="secondary" icon="arrow-left" icon-only :label="t('activity.people.previous')" @click="move(-1)" />
+        <UiButton variant="secondary" icon="arrow-right" icon-only :label="t('activity.people.next')" @click="move(1)" />
+      </div>
+    </div>
+    <ul
+      ref="track"
+      class="people-track mt-5 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain pb-2"
+      @mouseenter="hovered = true"
+      @mouseleave="hovered = false"
+      @focusin="focused = true"
+      @focusout="focused = false"
+      @pointerdown="pauseAfterTouch()"
+      @wheel.passive="pauseAfterTouch()"
+    >
+      <li v-for="speaker in speakers" :key="speaker.id" class="flex w-40 shrink-0 snap-start sm:w-44">
         <button
           type="button"
           class="seat flex flex-1 cursor-pointer flex-col items-center justify-end pb-3.5"
@@ -101,8 +174,9 @@ const isOpen = computed({
           >
             {{ speaker.initials }}
           </span>
-          <span class="tent flex min-h-26 w-[calc(100%-1.125rem)] flex-col items-center px-3 pt-4 pb-3 text-center">
-            <span class="tent-name font-condensed text-[1.12rem] leading-none font-bold text-heading uppercase sm:text-[1.32rem]">{{ speaker.name }}</span>
+          <!-- Hauteur fixe : un nom ou une organisation à rallonge ne grandit plus son carton ; le texte entier est dans la fiche. -->
+          <span class="tent flex h-32 w-[calc(100%-1.125rem)] flex-col items-center overflow-hidden px-3 pt-4 pb-3 text-center">
+            <span class="tent-name line-clamp-2 font-condensed text-[1.12rem] leading-[1.05] font-bold text-heading uppercase sm:text-[1.32rem]">{{ speaker.name }}</span>
             <span v-if="speaker.organization" class="tent-org mt-1.5 line-clamp-2 text-[0.78rem] leading-snug font-semibold text-text-secondary">{{ speaker.organization }}</span>
             <span class="tent-role mt-auto pt-1.5 text-[0.7rem] font-bold tracking-[0.06em] text-(--color-day) uppercase">{{ speaker.role }}</span>
           </span>
@@ -150,6 +224,9 @@ const isOpen = computed({
 </template>
 
 <style scoped>
+.people-track {
+  scrollbar-width: thin;
+}
 /* Le plateau de la table, continu d'un siège à l'autre : les sièges d'un rang s'y alignent, quelle que soit la hauteur du carton. */
 .seat {
   position: relative;

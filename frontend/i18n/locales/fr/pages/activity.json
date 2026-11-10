@@ -3,7 +3,10 @@
   "back": "Retour au programme",
   "trail": "Programmations / {edition} / {day}",
   "loading": "Chargement de l'activité",
-  "fold": { "more": "Lire la suite", "less": "Réduire" },
+  "fold": {
+    "more": "Lire la suite",
+    "less": "Réduire"
+  },
   "aboutObjectives": "Objectifs",
   "aboutPresentation": "Présentation",
   "about": "À propos",
@@ -65,7 +68,9 @@
       "keynote": "Discours principal",
       "facilitator": "Animation",
       "interpreter": "Interprétation"
-    }
+    },
+    "previous": "Intervenants précédents",
+    "next": "Intervenants suivants"
   },
   "organizations": {
     "title": "Organisations",

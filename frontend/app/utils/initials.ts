@@ -10,7 +10,12 @@
  * ne doit pas être coupée en deux unités de code.
  */
 export function initialsOf(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean)
+  // Un mot sans lettre ni chiffre (« (BERD) » une fois nettoyé, « - ») ne donne pas d'initiale : « R( » sinon.
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.replace(/^[^\p{L}\p{N}]+/u, ''))
+    .filter(Boolean)
   const letters = [words[0], words.length > 1 ? words[words.length - 1] : undefined]
     .filter((word): word is string => Boolean(word))
     .map((word) => Array.from(word)[0] ?? '')
