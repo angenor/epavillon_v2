@@ -78,7 +78,11 @@
   .live-tag { display: flex; align-items: center; gap: 8px; margin: 0 0 3px; font: 700 0.95rem/1 var(--font-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-live); }
   .live-tag .since { font-weight: 600; letter-spacing: 0.04em; color: var(--color-text-secondary); }
   .live-what b { display: block; overflow: hidden; font: 600 1.28rem/1.15 var(--font-heading); color: var(--color-heading); text-overflow: ellipsis; white-space: nowrap; }
-  .live-what small { display: block; margin-top: 2px; font-size: 0.82rem; font-weight: 700; color: var(--color-text-secondary); }
+  .live-what small { display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 0.82rem; font-weight: 700; color: var(--color-text-secondary); }
+  /* Le logo de l'organisation, tuile blanche dans les deux thèmes (OrganizationLogoMark, taille sm) ;
+     sans logo, son sigle. */
+  .logo-mark { display: inline-flex; flex: none; align-items: center; justify-content: center; height: 32px; min-width: 32px; max-width: 76px; padding: 0 5px; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: 6px; background: var(--color-surface-inverse-selected); font: 700 0.62rem/1 var(--font-heading); letter-spacing: 0.02em; color: var(--color-text-on-inverse-selected); }
+  .logo-mark img { display: block; width: auto; height: 24px; max-width: 66px; object-fit: contain; }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: var(--target); padding: 0 18px; border: 0; border-radius: var(--radius); background: var(--color-accent-solid); font: 600 0.92rem var(--font-body); color: var(--color-accent-contrast); cursor: pointer; }
   .btn:hover { background: var(--color-accent-solid-hover); }
   .close { display: grid; place-items: center; flex: none; width: var(--target); height: var(--target); border: 0; border-radius: var(--radius); background: none; color: var(--color-text-muted); cursor: pointer; }
@@ -89,12 +93,9 @@
   .org-short, .phone .org-long { display: none; }
   .phone .org-short { display: inline; }
   .phone .live-banner .in { align-items: flex-start; }
-  .phone .live-thumb { width: 104px; margin-top: 2px; }
-  .phone .play { width: 30px; height: 30px; }
-  .phone .play::before { border-width: 6px 0 6px 9px; margin-left: 2px; }
+  .phone .live-thumb { display: none; }
   .phone .live-what { padding-right: 34px; }
   .phone .live-tag { flex-wrap: wrap; gap: 2px 8px; font-size: 0.9rem; }
-  .phone .live-tag .since { flex-basis: 100%; padding-left: 17px; }
   .phone .live-what b { font-size: 1.08rem; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
   .phone .live-banner .btn { flex: 1 1 100%; }
   .phone .close { position: absolute; top: 4px; right: 2px; }
@@ -133,7 +134,7 @@
 <section class="scene">
   <header>
     <h2>1. Le bandeau</h2>
-    <p>À gauche, la couverture de l'activité (à défaut, la photo de l'édition) sous un voile léger, avec un bouton de lecture rouge. Pas d'heure : « En direct, en cours depuis 12 min » ne peut pas se lire comme l'annonce d'un direct à venir. La photo et le bouton mènent tous deux à la salle.</p>
+    <p>À gauche, la couverture de l'activité (à défaut, la photo de l'édition) sous un voile léger, avec un bouton de lecture rouge. Pas d'heure : « En direct, en cours depuis 12 min » ne peut pas se lire comme l'annonce d'un direct à venir. La photo et le bouton mènent tous deux à la salle. Devant le nom de l'organisation, son logo ; sans logo, son sigle. Sur téléphone, pas de photo : la place manque.</p>
   </header>
   <div class="views">
     <div>
@@ -201,7 +202,7 @@
       <div class="live-what">
         <p class="live-tag"><span class="dot"></span>En direct <span class="since" data-since></span></p>
         <b data-title></b>
-        <small><span class="org-long" data-org></span><span class="org-short" data-sigle></span></small>
+        <small><span class="logo-mark" data-logo></span><span class="org-long" data-org></span><span class="org-short" data-sigle></span></small>
       </div>
       <button type="button" class="btn">Rejoindre le direct</button>
       <button type="button" class="close" aria-label="Masquer ce bandeau"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
@@ -217,8 +218,8 @@
 
 <script>
   const DIRECTS = [
-    { titre: "Lutte contre la désinformation climatique en Francophonie", org: "Institut de la Francophonie pour le développement durable (IFDD)", sigle: "IFDD", depuis: "en cours depuis 12 min", couverture: "../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" },
-    { titre: "Accélérer l'action climatique par le capital humain : le rôle du secteur privé", org: "GA", sigle: "GA", depuis: "vient de commencer", couverture: "../../../frontend/public/mocks/covers/finance-climatique.jpg" },
+    { titre: "Lutte contre la désinformation climatique en Francophonie", org: "Institut de la Francophonie pour le développement durable (IFDD)", sigle: "IFDD", logo: "logo-ifdd.svg", depuis: "en cours depuis 12 min", couverture: "../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" },
+    { titre: "Accélérer l'action climatique par le capital humain : le rôle du secteur privé", org: "GA", sigle: "GA", logo: null, depuis: "vient de commencer", couverture: "../../../frontend/public/mocks/covers/finance-climatique.jpg" },
   ];
   let courant = 0, referme = false, enCours = true;
 
@@ -233,6 +234,9 @@
       e.querySelector('[data-title]').textContent = d.titre;
       e.querySelector('[data-org]').textContent = d.org;
       e.querySelector('[data-sigle]').textContent = d.sigle;
+      const marque = e.querySelector('[data-logo]');
+      marque.replaceChildren();
+      if (d.logo) { const i = document.createElement('img'); i.src = d.logo; i.alt = ''; marque.append(i); } else marque.textContent = d.sigle;
       e.querySelector('[data-since]').textContent = d.depuis;
       e.querySelector('[data-cover]').src = d.couverture;
       const montrer = enCours && !(fige || referme);
