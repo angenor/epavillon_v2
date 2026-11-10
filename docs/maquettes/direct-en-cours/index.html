@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direct en cours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<style>
+  /* Signaler un direct qui commence sur toutes les pages du site public (10/11).
+     Un bandeau sous la barre, refermable ; une fois refermé, une pastille
+     « En direct » reste dans la barre tant que le direct dure. */
+  :root {
+    --font-heading: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --radius: 8px;
+    --target: var(--target-min);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--color-surface); color: var(--color-text); font: 400 1rem/1.5 var(--font-body); }
+
+  .intro, .scene { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+  .intro { padding-top: 40px; }
+  .intro h1 { margin: 0 0 8px; font: 700 2.2rem/1 var(--font-heading); text-transform: uppercase; color: var(--color-heading); }
+  .intro p, .scene > header p, .scene > header li { max-width: 78ch; margin: 0 0 6px; line-height: 1.55; color: var(--color-text-secondary); }
+  .scene { margin-top: 52px; }
+  .scene > header h2 { margin: 0; font: 700 1.6rem/1.1 var(--font-heading); text-transform: uppercase; color: var(--color-heading); }
+  .scene > header ul { margin: 6px 0 0; padding-left: 20px; }
+  .views { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; margin-top: 18px; }
+  .label { margin: 0 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+  .screen { overflow: hidden; border: 1px solid var(--color-border-strong); border-radius: 10px; background: var(--color-surface); }
+  .screen.phone { width: 375px; max-width: 100%; border-radius: 26px; }
+
+  /* ── Haut de page du site, tel qu'il est ─────────────────────── */
+  .topbar { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 20px; border-bottom: 1px solid var(--color-border-on-inverse); background: var(--color-surface-inverse); font-size: 0.75rem; color: var(--color-text-on-inverse-muted); }
+  .topbar span:last-child { margin-left: auto; }
+  .topbar .short, .phone .topbar .long { display: none; }
+  .phone .topbar .short { display: inline; }
+  .nav { position: relative; display: flex; align-items: center; gap: 16px; height: 68px; padding: 0 20px; background: var(--color-surface-inverse); color: var(--color-text-on-inverse); }
+  .nav::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 4px; background: linear-gradient(90deg, var(--color-stripe-1) 0 20%, var(--color-stripe-2) 20% 40%, var(--color-stripe-3) 40% 60%, var(--color-stripe-4) 60% 80%, var(--color-stripe-5) 80%); }
+  .nav img { flex: none; height: 36px; width: auto; }
+  .nav .links { flex: none; }
+  .nav .links { display: flex; gap: 4px; margin: 0 auto; padding: 4px; border-radius: 999px; background: var(--color-surface-inverse-raised); }
+  .nav .links span { padding: 7px 14px; border-radius: 999px; font-size: 0.88rem; font-weight: 500; color: var(--color-text-on-inverse-muted); }
+  .nav .links span.on { background: var(--color-surface-inverse-selected); color: var(--color-text-on-inverse-selected); }
+  .nav .login { flex: none; white-space: nowrap; padding: 9px 16px; border: 1px solid var(--color-border-on-inverse); border-radius: var(--radius); font-size: 0.88rem; font-weight: 600; }
+  .phone .nav { height: 60px; padding: 0 14px; gap: 10px; }
+  .phone .nav .links, .phone .nav .login { display: none; }
+  .phone .nav .burger { margin-left: auto; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius); }
+  .burger::before { content: ""; width: 20px; height: 14px; border-block: 2px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 2px no-repeat; }
+  .nav .burger { display: none; }
+
+  /* La pastille de la barre : un direct dure, le bandeau a été refermé ou a défilé. */
+  .nav-live { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 10px; border: 1px solid color-mix(in srgb, var(--ifdd-rouge-300) 70%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--ifdd-rouge-600) 22%, transparent); font: 700 0.92rem/1 var(--font-heading); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-on-inverse); cursor: pointer; white-space: nowrap; }
+  .phone .nav-live { margin-left: auto; }
+  .phone .nav-live + .burger { margin-left: 0; }
+
+  .dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--color-live); animation: pulse 2s ease-in-out infinite; }
+  .nav-live .dot { background: var(--ifdd-rouge-400, #f0595a); }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.82); } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+
+  /* ── Le bandeau ───────────────────────────────────────────────
+     Fond de carte, filet rouge du direct à gauche : rouge réservé à « en
+     direct », sans aplat rouge, qui dirait un incident grave. */
+  .live-banner { margin-top: 4px; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface-raised); box-shadow: var(--shadow-md); }
+  .live-banner .in { display: flex; align-items: center; gap: 18px; max-width: 1280px; margin: 0 auto; padding: 12px 20px 12px 0; border-left: 5px solid var(--color-live); }
+  .live-tag { display: inline-flex; align-items: center; gap: 8px; flex: none; padding-left: 16px; font: 700 1rem/1 var(--font-heading); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-live); }
+  .live-what { min-width: 0; flex: 1; }
+  .live-what b { display: block; overflow: hidden; font: 600 1.28rem/1.15 var(--font-heading); color: var(--color-heading); text-overflow: ellipsis; white-space: nowrap; }
+  .live-what small { display: block; margin-top: 2px; font-size: 0.82rem; color: var(--color-text-secondary); }
+  .live-what small strong { font-weight: 700; color: var(--color-text); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: var(--target); padding: 0 18px; border: 0; border-radius: var(--radius); background: var(--color-accent-solid); font: 600 0.92rem var(--font-body); color: var(--color-accent-contrast); cursor: pointer; }
+  .btn:hover { background: var(--color-accent-solid-hover); }
+  .close { display: grid; place-items: center; flex: none; width: var(--target); height: var(--target); border: 0; border-radius: var(--radius); background: none; color: var(--color-text-muted); cursor: pointer; }
+  .close:hover { background: var(--color-surface-hover); color: var(--color-text); }
+  .close svg { width: 18px; height: 18px; }
+
+  .phone .live-banner .in { flex-wrap: wrap; gap: 8px 12px; padding: 12px 6px 14px 0; }
+  .phone .live-tag { padding-left: 12px; font-size: 0.95rem; }
+  .phone .live-what { order: 3; flex-basis: 100%; padding-left: 12px; }
+  .phone .live-what b { font-size: 1.15rem; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .phone .live-banner .btn { order: 4; flex: 1; margin: 4px 8px 0 12px; }
+  .phone .close { order: 2; margin-left: auto; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .live-banner.arrive { animation: arrive 420ms cubic-bezier(.2,.8,.3,1); }
+    @keyframes arrive { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+  }
+
+  /* ── Contenu de la page en dessous (une fiche d'organisation, au hasard) ── */
+  .page { padding: 26px 24px 34px; }
+  .phone .page { padding: 20px 16px 28px; }
+  .crumb { margin: 0 0 10px; font-size: 0.8rem; color: var(--color-text-muted); }
+  .page h3 { margin: 0 0 10px; font: 700 2rem/1 var(--font-heading); text-transform: uppercase; color: var(--color-heading); }
+  .line { height: 11px; margin: 9px 0; border-radius: 4px; background: var(--color-surface-sunken); }
+  .line.w8 { width: 82%; } .line.w6 { width: 61%; } .line.w9 { width: 92%; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+  .phone .cards { grid-template-columns: 1fr; }
+  .cards div { height: 96px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius); background: var(--color-surface-raised); }
+
+  .sim { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .sim button { min-height: var(--target); padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: var(--radius); background: var(--color-surface-raised); font: 600 0.88rem var(--font-body); color: var(--color-text); cursor: pointer; }
+  .sim button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .rules { margin: 56px auto 64px; }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Un direct commence</h1>
+  <p>Quand un direct commence, toute personne sur le site le voit, où qu'elle soit : fiche d'une organisation, page d'une autre activité, programme, connexion. Il n'y a jamais qu'un direct à la fois, donc jamais deux bandeaux.</p>
+  <p>Le bandeau se pose sous la barre et reste tant que le direct dure. La croix le referme ; la barre garde alors une pastille rouge « En direct » qui y mène. À la fin du direct, bandeau et pastille disparaissent seuls.</p>
+</div>
+
+<!-- 1 ──────────────────────────────────────────────────────────── -->
+<section class="scene">
+  <header>
+    <h2>1. Le bandeau</h2>
+    <p>Le rouge du direct, un trait et une pastille, pas un aplat : un aplat rouge annonce un incident grave. Le bouton mène à la salle du direct.</p>
+  </header>
+  <div class="views">
+    <div>
+      <p class="label">Grand écran</p>
+      <div class="screen" data-screen="large"></div>
+    </div>
+    <div>
+      <p class="label">Téléphone, 375 px</p>
+      <div class="screen phone" data-screen="phone"></div>
+    </div>
+  </div>
+  <div class="sim">
+    <button type="button" data-act="start">Simuler le début du direct</button>
+    <button type="button" data-act="next">Le direct suivant commence</button>
+    <button type="button" data-act="close">Refermer le bandeau</button>
+    <button type="button" data-act="end">Le direct se termine</button>
+  </div>
+</section>
+
+<!-- 2 ──────────────────────────────────────────────────────────── -->
+<section class="scene">
+  <header>
+    <h2>2. Bandeau refermé</h2>
+    <p>La pastille « En direct » reste dans la barre, qui est toujours visible en haut de l'écran, même quand on fait défiler la page. Un clic sur la pastille mène au direct.</p>
+  </header>
+  <div class="views">
+    <div>
+      <p class="label">Grand écran</p>
+      <div class="screen" data-screen="large" data-closed></div>
+    </div>
+    <div>
+      <p class="label">Téléphone, 375 px</p>
+      <div class="screen phone" data-screen="phone" data-closed></div>
+    </div>
+  </div>
+</section>
+
+<section class="scene rules">
+  <header>
+    <h2>Les règles</h2>
+    <ul>
+      <li><b>Arrivée</b> : le bandeau descend doucement sous la barre, sans son ni fenêtre qui bloque la page. Avec « moins d'animations », il apparaît sans bouger.</li>
+      <li><b>Direct suivant</b> : le bandeau passe au nouveau titre, même s'il avait été refermé pour le précédent. Refermer ne vaut que pour un direct.</li>
+      <li><b>Sur la page même du direct</b>, ni bandeau ni pastille : on y est déjà.</li>
+      <li><b>Partout ailleurs sur le site public</b> : accueil, programme, fiches, connexion, espace organisation. Pas dans le back-office, qui a sa régie, ni dans Guide Négo.</li>
+      <li><b>Le bouton</b> mène à la salle : inscrit, on entre ; pas inscrit, la page propose l'inscription, comme aujourd'hui.</li>
+      <li><b>Activité d'une journée spéciale</b> : le bouton mène au direct de la journée.</li>
+    </ul>
+  </header>
+</section>
+
+<template id="tpl-screen">
+  <div class="topbar"><span class="long">Institut de la Francophonie pour le développement durable · OIF</span><span class="short">IFDD · OIF</span><span>FR · EN</span></div>
+  <div class="nav">
+    <img src="../../../frontend/public/logos/svg/oif-nom-ifdd-epavillon-inverse.svg" alt="ePavillon">
+    <div class="links"><span>Programmations</span><span class="on">Communauté</span><span>Négociations</span></div>
+    <button type="button" class="nav-live" hidden><span class="dot"></span>En direct</button>
+    <span class="login">Se connecter</span>
+    <span class="burger" aria-hidden="true"></span>
+  </div>
+  <div class="live-banner" role="status" hidden>
+    <div class="in">
+      <span class="live-tag"><span class="dot"></span>En direct</span>
+      <div class="live-what">
+        <b data-title></b>
+        <small><strong data-org></strong> · <span data-when></span></small>
+      </div>
+      <button type="button" class="btn">Rejoindre le direct</button>
+      <button type="button" class="close" aria-label="Masquer ce bandeau"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+    </div>
+  </div>
+  <div class="page">
+    <p class="crumb">Communauté › Organisations</p>
+    <h3>Ministère de l'Environnement</h3>
+    <div class="line w9"></div><div class="line w8"></div><div class="line w6"></div>
+    <div class="cards"><div></div><div></div><div></div></div>
+  </div>
+</template>
+
+<script>
+  const DIRECTS = [
+    { titre: "Lutte contre la désinformation climatique en Francophonie", org: "IFDD", quand: "16:30 à 19:00, heure d'Antalya" },
+    { titre: "Accélérer l'action climatique par le capital humain : le rôle du secteur privé", org: "GA", quand: "15:30 à 16:30, heure d'Antalya" },
+  ];
+  let courant = 0, referme = false, enCours = true;
+
+  const ecrans = [...document.querySelectorAll('[data-screen]')];
+  for (const e of ecrans) e.append(document.getElementById('tpl-screen').content.cloneNode(true));
+
+  function rendre(arrivee) {
+    const d = DIRECTS[courant];
+    for (const e of ecrans) {
+      const fige = e.hasAttribute('data-closed');
+      const bandeau = e.querySelector('.live-banner');
+      e.querySelector('[data-title]').textContent = d.titre;
+      e.querySelector('[data-org]').textContent = d.org;
+      e.querySelector('[data-when]').textContent = d.quand;
+      const montrer = enCours && !(fige || referme);
+      bandeau.hidden = !montrer;
+      bandeau.classList.toggle('arrive', Boolean(montrer && arrivee));
+      e.querySelector('.nav-live').hidden = !(enCours && (fige || referme));
+    }
+  }
+
+  document.addEventListener('click', (ev) => {
+    const act = ev.target.closest('[data-act]')?.dataset.act;
+    if (ev.target.closest('.close')) { referme = true; rendre(false); return; }
+    if (!act) return;
+    if (act === 'start') { enCours = true; referme = false; rendre(false); requestAnimationFrame(() => rendre(true)); }
+    if (act === 'next') { courant = (courant + 1) % DIRECTS.length; enCours = true; referme = false; rendre(true); }
+    if (act === 'close') { referme = true; rendre(false); }
+    if (act === 'end') { enCours = false; rendre(false); }
+  });
+  rendre(false);
+</script>
+</body>
+</html>
