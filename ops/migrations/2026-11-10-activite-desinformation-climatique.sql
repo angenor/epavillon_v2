@@ -30,9 +30,7 @@ BEGIN
     SELECT id INTO v_id FROM programme.sessions WHERE event_id = v_ref.event_id AND slug = v_slug;
     IF FOUND THEN
         RAISE NOTICE 'Déjà créée : %', v_id;
-        RETURN;
-    END IF;
-
+    ELSE
     INSERT INTO programme.sessions (
         event_id, organization_id, title, slug, summary, status, format,
         starts_at, ends_at, timezone, room_id, location_note,
@@ -49,9 +47,32 @@ BEGIN
         v_ref.registration_required, v_ref.capacity, v_ref.waitlist_enabled, v_ref.registration_form_id,
         v_ref.is_streamed, v_ref.is_recorded, v_ref.allows_questions, now())
     RETURNING id INTO v_id;
-
     RAISE NOTICE 'Créée : %', v_id;
+    END IF;
+
+    -- Intervenant : Issa Bado, recopié de sa fiche dans l'atelier IFDD du 09/11
+    -- (même personne, fonction et photo que les autres activités de l'IFDD).
+    INSERT INTO programme.session_speakers (
+        session_id, person_id, role, job_title_snapshot, organization_snapshot,
+        bio, confirmed_at, sort_order, civility, first_name, last_name)
+    SELECT v_id, sp.person_id, sp.role, sp.job_title_snapshot, sp.organization_snapshot,
+           sp.bio, sp.confirmed_at, 0, sp.civility, sp.first_name, sp.last_name
+    FROM programme.session_speakers sp
+    WHERE sp.id = '01a198d3-12ce-753c-8c4c-0080ee702517'
+      AND NOT EXISTS (
+          SELECT 1 FROM programme.session_speakers x
+          WHERE x.session_id = v_id
+            AND x.person_id IS NOT DISTINCT FROM sp.person_id
+            AND x.role = sp.role);
+    IF NOT EXISTS (SELECT 1 FROM programme.session_speakers WHERE session_id = v_id) THEN
+        RAISE EXCEPTION 'Fiche d''intervenant d''Issa Bado introuvable : rien n''est créé.';
+    END IF;
 END $$;
+
+SELECT sp.role, sp.job_title_snapshot, sp.organization_snapshot, sp.person_id IS NOT NULL AS compte
+FROM programme.session_speakers sp
+JOIN programme.sessions s ON s.id = sp.session_id
+WHERE s.slug = 'lutte-contre-la-desinformation-climatique-en-francophonie';
 
 SELECT s.id, s.slug, s.status, s.published_at IS NOT NULL AS publiee,
        to_char(s.starts_at AT TIME ZONE s.timezone, 'DD/MM HH24:MI') AS debut,
