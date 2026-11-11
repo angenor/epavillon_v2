@@ -1803,7 +1803,8 @@ INSERT INTO platform.settings (key, value, description) VALUES
      'Adresses en copie visible de chaque courriel automatique, sauf ceux qui portent un lien personnel ou d''inscription (création de compte, mot de passe, invitation, confirmations d''inscription) ; un rappel n''est copié qu''une fois par activité et par délai. Lu par GardedMailer.'),
     -- 08/11/2026, intervenants en ligne (075 § 2 bis) : le commanditaire veut
     -- chaque lien Zoom d'intervenant et chaque lien d'inscription en copie.
-    ('engagement.speaker_links.cc', '["angenor99@gmail.com", "issa.bado@francophonie.org"]',
+    -- 11/11 : Issa retiré de toutes les copies, à la demande du commanditaire.
+    ('engagement.speaker_links.cc', '["angenor99@gmail.com"]',
      'Adresses en copie de chaque courriel d''intervenant en ligne : lien Zoom personnel, lien d''inscription envoyé au porteur.')
 ON CONFLICT (key) DO NOTHING;
 

@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour : 10 novembre 2026
+## Dernière mise à jour : 11 novembre 2026
+- 11/11 : **courriel de mobilisation** envoyé aux déposants des 57 activités à venir (58 envois, lien de l'activité en clair) ; **Issa retiré des copies** automatiques (migration `2026-11-11-copies-sans-issa` jouée). Voir [journal](progression/journal/2026-11-11.md).
 - 10/11 : **ressources d'une journée** (pages, PDF, vidéos sous la présentation, lien daté) et **lien d'un temps fort** ; intervenants d'une activité sur une rangée qui défile. Migration `2026-11-10-ressources-journee` jouée ; mis en ligne avec les seuls tests des pages de journée (Docker en panne, base jetable Postgres.app). Voir [journal](progression/journal/2026-11-10.md).
 - 10/11 : **bandeau « En direct » sur tout le site public** : sous la barre dès qu'un direct commence (« en cours depuis 12 min », couverture et logo), refermable, pastille « En direct » dans la barre ensuite ; maquette `docs/maquettes/direct-en-cours/`. Pas encore en ligne. Activité IFDD du jour sur la désinformation climatique ajoutée par script, en ligne. Voir [journal](progression/journal/2026-11-10.md).
 - 09/11 : **inscrit sans compte à une activité seule** : il ne pouvait pas entrer (la salle exige une connexion) et la page reproposait « S'inscrire ». Lien personnel dans le courriel (`/programmations/…/direct?jeton=`), renvoi s'il se réinscrit, billet « Inscription confirmée » ; une adresse tapée ne rend plus les données d'une inscription. Renvoi aux inscrits existants prêt, à jouer sur accord. Voir [journal](progression/journal/2026-11-09.md).
 - 08/11 : **intervenants en ligne** : lien d'inscription d'intervenant par activité (page `/intervenant`, sans compte), lien Zoom personnel qui ouvre l'application, rangée « Intervenants en ligne » sur la carte de la régie (inscrire, renvoyer les liens, envoyer le lien au porteur), copie Angenor et Issa ; envois d'office (porteur à J-2, intervenants à J-1) éteints jusqu'à validation. En ligne le 09/11 (migration jouée, 139 activités pourvues d'un lien), aperçus des deux courriels envoyés ; envois d'office à allumer après validation. Voir [journal](progression/journal/2026-11-08.md).
-- 07/11 : **journée en présentiel seulement** : interrupteur « Diffusée en ligne » de la page d'un fil (ni inscription, ni direct, réunion Zoom annulée) ; l'atelier de la CdP31 du 08/11 l'éteint ; courriel aux inscrits prêt (aperçu, puis envoi)
 
 ## État général
 | Domaine | État |
