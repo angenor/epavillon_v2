@@ -165,6 +165,7 @@ const isEmpty = computed(() => shown.value.length === 0 && upcomingEditions.valu
       :editions="props.editions"
       :single-edition="singleEdition"
       :fastening="fastening"
+      :now="props.now"
     />
 
     <section

@@ -326,6 +326,18 @@
   animation: attention-blink 1.2s ease-in-out 4;
 }
 
+/* Le point d'un direct : pulsation lente, pas un clignotement (WCAG 2.3.1). */
+@keyframes live-pulse {
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+
+.live-pulse {
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

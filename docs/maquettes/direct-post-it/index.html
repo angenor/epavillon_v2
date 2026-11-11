@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marque-page du direct</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../journees-speciales/commun/jetons.css">
+<link rel="stylesheet" href="../direction-condensee/style.css">
+<style>
+  /* Le marque-page d'une activité EN DIRECT dans « À venir au pavillon » (11/11).
+     En production, le papier restait blanc (la couleur de journée, posée en style
+     sur l'élément, écrasait le rouge) et l'heure, écrite en blanc, disparaissait. */
+  body { background: var(--color-surface); }
+  .intro { max-width: 1240px; margin: 0 auto; padding: 40px 24px 8px; }
+  .intro h1 { margin: 0 0 8px; font-family: var(--font-heading); font-size: 2.2rem; text-transform: uppercase; color: var(--color-heading); }
+  .intro p { margin: 0 0 6px; max-width: 76ch; line-height: 1.55; color: var(--color-text-secondary); }
+
+  .direction { max-width: 1240px; margin: 44px auto 0; padding: 0 24px; }
+  .direction > header h2 { margin: 0; font-family: var(--font-heading); font-size: 1.7rem; text-transform: uppercase; color: var(--color-heading); }
+  .direction > header h2 em { font-style: normal; color: var(--ifdd-vert-700); font-size: 1.1rem; margin-left: 8px; }
+  .direction > header p { margin: 4px 0 0; max-width: 80ch; line-height: 1.5; color: var(--color-text-secondary); }
+  .direction > header ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.5; color: var(--color-text-secondary); }
+  .views { display: grid; grid-template-columns: minmax(0, 1fr) 375px; gap: 24px; margin-top: 18px; align-items: start; }
+  @media (max-width: 1000px) { .views { grid-template-columns: minmax(0, 1fr); } }
+
+  /* La vitrine, réduite à sa moitié droite : photo voilée, panneau de verre. */
+  .showcase { position: relative; isolation: isolate; display: flex; justify-content: flex-end; padding: 40px 36px; border-radius: var(--radius-lg); background: var(--ifdd-bleu-900); overflow: hidden; }
+  .showcase > img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+  .showcase::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(29 26 91 / 0.8), rgb(29 26 91 / 0.35)); }
+  .showcase .panel { width: 400px; }
+  .phone-label { margin: 0 0 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); }
+  .phone { width: 375px; border-radius: 24px; border: 1px solid var(--color-border-strong); background: var(--ifdd-bleu-900); padding: 28px 16px 24px; }
+
+  .panel { padding: 22px; border-radius: var(--radius-lg); color: #fff; background: var(--color-glass); border: 1px solid var(--color-glass-border); backdrop-filter: blur(var(--blur-glass-strong)); -webkit-backdrop-filter: blur(var(--blur-glass-strong)); box-shadow: var(--shadow-glass); }
+  .phone .panel { background: var(--ifdd-bleu-800); border-color: rgb(255 255 255 / 0.14); backdrop-filter: none; box-shadow: none; }
+  .panel-head { display: flex; gap: 12px; align-items: center; }
+  .panel-head > div { flex: 1; min-width: 0; }
+  .upcoming-title { margin: 0; font-family: var(--font-heading); font-size: 1.6rem; text-transform: uppercase; color: #fff; }
+  .upcoming-sub { margin: 2px 0 0; font-size: 0.85rem; color: rgb(255 255 255 / 0.75); }
+  .logo { display: grid; place-items: center; height: 64px; padding: 6px 10px; border-radius: var(--radius-lg); background: #fff; color: var(--ifdd-bleu-800); font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; line-height: 1; text-align: center; }
+  .logo small { display: block; font-size: 0.6rem; letter-spacing: 0.12em; color: var(--ifdd-rouge-600); }
+
+  .rows { list-style: none; margin: 12px 0 0; padding: 0; }
+  .rows li { position: relative; display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-top: 1px solid var(--color-glass-border); }
+  .phone .rows li { border-color: rgb(255 255 255 / 0.14); }
+  .n-title { display: block; font-family: var(--font-heading); font-weight: 600; font-size: 1.12rem; line-height: 1.15; color: #fff; text-decoration: none; }
+  .n-title::after { content: ""; position: absolute; inset: 0; }
+  .n-title:hover { text-decoration: underline; }
+  .n-org { margin: 4px 0 0; font-size: 0.8rem; color: rgb(255 255 255 / 0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-badge { margin: 6px 0 0; }
+  .tag-live { font-size: 0.72rem; }
+
+  /* Le marque-page, tenu par un ruban, un peu de travers (production). */
+  .flag { position: relative; align-self: start; margin: 0 0 0 -34px; padding: 8px 8px 7px 12px; border-radius: 0 3px 3px 0; background: var(--paper, #fff); color: var(--ifdd-bleu-900); font-family: var(--font-heading); text-transform: uppercase; line-height: 1; box-shadow: 0 1px 1px rgb(0 0 0 / 0.15), 0 6px 10px -6px rgb(0 0 0 / 0.5); transform: rotate(var(--tilt, 0deg)); transform-origin: 50% 0; }
+  .phone .flag { margin-left: -24px; }
+  .rows li:nth-child(1) .flag { --tilt: -2.5deg; }
+  .rows li:nth-child(2) .flag { --tilt: 1.8deg; }
+  .rows li:nth-child(3) .flag { --tilt: -1.2deg; }
+  .flag::before { content: ""; position: absolute; z-index: 1; top: -8px; left: 50%; width: 46px; height: 16px; transform: translateX(-50%) rotate(-4deg); background: rgb(255 255 255 / 0.5); border: 1px solid rgb(255 255 255 / 0.45); }
+  .flag b { display: block; font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .flag small { display: block; margin-top: 2px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; color: var(--ifdd-bleu-700); }
+  .flag.j-finance { --paper: var(--ifdd-cyan-100); }
+  .flag.j-finance small { color: var(--ifdd-cyan-800); }
+  .flag.live { --paper: var(--color-live); color: #fff; }
+  .flag.live small { color: #fff; }
+
+  /* A : « DIRECT » au lieu de l'heure, la durée écoulée, la jauge jusqu'à la fin prévue. */
+  .flag.a b { display: flex; align-items: center; gap: 6px; font-size: 1.35rem; letter-spacing: 0.02em; }
+  .flag.a b::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: pulse 1.6s ease-in-out infinite; }
+  .flag.a small { text-transform: none; letter-spacing: 0.02em; font-size: 0.85rem; white-space: nowrap; }
+  .gauge { display: block; height: 4px; margin-top: 7px; border-radius: 2px; background: rgb(255 255 255 / 0.35); overflow: hidden; }
+  .gauge i { display: block; height: 100%; width: var(--done); background: #fff; }
+  .join { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85rem; font-weight: 600; color: #fff; }
+  .join svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .join-end { display: block; margin-top: 1px; font-size: 0.75rem; color: rgb(255 255 255 / 0.72); }
+
+  /* B : l'heure, rendue lisible, et la fin. */
+  .flag.b small.end { text-transform: none; letter-spacing: 0; }
+
+  /* C : un polaroïd, couverture voilée et bouton de lecture rouge. */
+  .rows.c li { grid-template-columns: 96px minmax(0, 1fr); }
+  .polaroid { position: relative; align-self: start; margin-left: -34px; padding: 5px 5px 0; background: #fff; border-radius: 2px; box-shadow: 0 1px 1px rgb(0 0 0 / 0.15), 0 8px 12px -6px rgb(0 0 0 / 0.55); transform: rotate(-2.5deg); transform-origin: 50% 0; }
+  .phone .polaroid { margin-left: -24px; }
+  .polaroid::before { content: ""; position: absolute; z-index: 1; top: -8px; left: 50%; width: 46px; height: 16px; transform: translateX(-50%) rotate(-4deg); background: rgb(255 255 255 / 0.5); border: 1px solid rgb(255 255 255 / 0.45); }
+  .polaroid .shot { position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; background: var(--ifdd-bleu-900); }
+  .polaroid img { width: 100%; height: 100%; object-fit: cover; }
+  .polaroid .shot::after { content: ""; position: absolute; inset: 0; background: rgb(29 26 91 / 0.4); }
+  .polaroid .play { position: absolute; z-index: 1; top: 50%; left: 50%; display: grid; place-items: center; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: var(--color-live); box-shadow: 0 0 0 3px rgb(255 255 255 / 0.8); }
+  .polaroid .play svg { width: 10px; height: 12px; margin-left: 2px; fill: #fff; }
+  .polaroid figcaption { padding: 5px 2px 6px; font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-live); text-align: center; }
+
+  @keyframes pulse { 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .flag.a b::before { animation: none; } }
+
+  .stats { display: flex; gap: 22px; margin: 4px 0 14px; padding-top: 14px; border-top: 1px solid var(--color-glass-border); }
+  .phone .stats { border-color: rgb(255 255 255 / 0.14); }
+  .stats div { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgb(255 255 255 / 0.75); }
+  .stats b { display: block; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; line-height: 1; color: #fff; }
+  .panel .btn { width: 100%; }
+
+  .question { max-width: 1240px; margin: 48px auto 64px; padding: 0 24px; }
+  .question div { padding: 18px 20px; border-radius: var(--radius); border: 1px solid var(--color-border); background: var(--color-surface-raised); }
+  .question h2 { margin: 0 0 6px; font-family: var(--font-heading); font-size: 1.4rem; text-transform: uppercase; color: var(--color-heading); }
+  .question p { margin: 0 0 6px; max-width: 80ch; line-height: 1.5; color: var(--color-text-secondary); }
+</style>
+</head>
+<body>
+
+<section class="intro">
+  <h1>Le marque-page du direct</h1>
+  <p>Panneau « À venir au pavillon » de l'accueil, pendant un direct. Aujourd'hui, le marque-page de l'activité en cours reste blanc et ne montre que « MARDI 10 » : l'heure y est écrite en blanc sur blanc. Trois façons de le remplir, sur la photo (grand écran) et sur téléphone.</p>
+</section>
+
+<section class="direction" data-variant="a">
+  <header>
+    <h2>A. Le direct, depuis quand, jusqu'où <em>recommandé</em></h2>
+    <p>Le marque-page passe au rouge et dit « DIRECT » à la place de l'heure prévue, comme le bandeau d'en haut (« en cours depuis »). Une jauge se remplit jusqu'à la fin prévue.</p>
+    <ul>
+      <li>Aucune heure à lire comme une annonce ; la jauge dit d'un coup d'œil s'il reste deux heures ou dix minutes.</li>
+      <li>L'étiquette « En direct » sous le titre ferait doublon : elle laisse la place à « Rejoindre le direct », et la fin prévue en clair.</li>
+    </ul>
+  </header>
+  <div class="views"><div class="showcase"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""><div class="host"></div></div><div><p class="phone-label">Téléphone, 375 px</p><div class="phone host"></div></div></div>
+</section>
+
+<section class="direction" data-variant="b">
+  <header>
+    <h2>B. Le défaut corrigé, sans plus</h2>
+    <p>Le marque-page devient rouge comme prévu par la maquette du 02/11 : l'heure de début en blanc, et « jusqu'à 19:00 » à la place du jour. L'étiquette « En direct » reste sous le titre.</p>
+    <ul>
+      <li>Le moins de travail.</li>
+      <li>« 16:30 » en gros peut se lire comme une annonce : le piège relevé pour le bandeau.</li>
+    </ul>
+  </header>
+  <div class="views"><div class="showcase"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""><div class="host"></div></div><div><p class="phone-label">Téléphone, 375 px</p><div class="phone host"></div></div></div>
+</section>
+
+<section class="direction" data-variant="c">
+  <header>
+    <h2>C. Le polaroïd</h2>
+    <p>À la place du marque-page, une photo tenue par le même ruban : l'image de l'activité voilée, le bouton de lecture rouge, « Direct » écrit dessous.</p>
+    <ul>
+      <li>Le plus parlant : on voit que ça se regarde.</li>
+      <li>Plus large et plus haut : la ligne prend de la place dans un panneau limité à trois lignes. Sans image d'activité, il faut se rabattre sur celle de l'édition.</li>
+    </ul>
+  </header>
+  <div class="views"><div class="showcase"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-16-9.jpg" alt=""><div class="host"></div></div><div><p class="phone-label">Téléphone, 375 px</p><div class="phone host"></div></div></div>
+</section>
+
+<section class="question">
+  <div>
+    <h2>À trancher</h2>
+    <p>A, B ou C. La correction du défaut (papier rouge) vient avec chacune.</p>
+  </div>
+</section>
+
+<script>
+  const LIVE = { title: 'Lutte contre la désinformation climatique en Francophonie', org: 'Institut de la Francophonie pour le développement durable' }
+  const NEXT = [
+    { time: '09:30', day: 'mercredi 11', title: 'Mobiliser la finance durable pour les territoires francophones', org: 'AIRF', cls: 'j-finance' },
+    { time: '11:00', day: 'mercredi 11', title: "Adaptation côtière : retours d'expérience au Sahel et dans l'océan Indien", org: 'Commission de l\'océan Indien', cls: '' },
+  ]
+  const arrow = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+
+  const LIVE_ROW = {
+    a: `<p class="flag live a"><b>Direct</b><small>depuis 45 min</small><span class="gauge" role="img" aria-label="Écoulé : 45 min sur 2 h 30"><i style="--done:30%"></i></span></p>
+        <div><a class="n-title" href="#">${LIVE.title}</a><p class="n-org">${LIVE.org}</p>
+        <span class="join">Rejoindre le direct ${arrow}</span><span class="join-end">fin prévue à 19:00</span></div>`,
+    b: `<p class="flag live b"><b>16:30</b><small class="end">jusqu'à 19:00</small></p>
+        <div><a class="n-title" href="#">${LIVE.title}</a><p class="n-org">${LIVE.org}</p><p class="row-badge"><span class="tag tag-live">En direct</span></p></div>`,
+    c: `<figure class="polaroid" style="margin-top:0;margin-bottom:0"><span class="shot"><img src="../../../frontend/public/mocks/covers/pavillon-cop31-1-1.jpg" alt=""><span class="play"><svg viewBox="0 0 12 14"><path d="M0 0l12 7-12 7z"/></svg></span></span><figcaption>Direct</figcaption></figure>
+        <div><a class="n-title" href="#">${LIVE.title}</a><p class="n-org">${LIVE.org}</p><span class="join">Rejoindre le direct ${arrow}</span></div>`,
+  }
+
+  const panel = (v) => `<div class="panel">
+    <div class="panel-head"><div><h2 class="upcoming-title">À venir au pavillon</h2><p class="upcoming-sub">CdP31, Antalya, heure d'Antalya</p></div><span class="logo">COP31<small>Antalya</small></span></div>
+    <ol class="rows ${v}">
+      <li>${LIVE_ROW[v]}</li>
+      ${NEXT.map((s) => `<li><p class="flag ${s.cls}"><b>${s.time}</b><small>${s.day}</small></p><div><a class="n-title" href="#">${s.title}</a><p class="n-org">${s.org}</p></div></li>`).join('')}
+    </ol>
+    <div class="stats"><div><b>64</b>activités</div><div><b>81</b>organisations</div><div><b>34</b>pays</div></div>
+    <a class="btn btn-white" href="#">Voir toute la programmation</a>
+  </div>`
+
+  document.querySelectorAll('.direction').forEach((section) => {
+    section.querySelectorAll('.host').forEach((host) => { host.innerHTML = panel(section.dataset.variant) })
+  })
+</script>
+</body>
+</html>

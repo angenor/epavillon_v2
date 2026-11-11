@@ -15,10 +15,7 @@ const { tr } = useI18nText()
 const { live, to, bannerShown, dismiss } = useLiveNow()
 const k = (key: string, params: Record<string, unknown> = {}) => t(`live-now.${key}`, params)
 
-const now = ref(Date.now())
-let ticker: ReturnType<typeof setInterval> | undefined
-onMounted(() => (ticker = setInterval(() => (now.value = Date.now()), 30_000)))
-onBeforeUnmount(() => clearInterval(ticker))
+const now = useLiveClock()
 
 const session = computed(() => live.value?.session ?? null)
 const image = computed(() => session.value?.cover ?? editionPhoto(live.value?.edition))
@@ -58,7 +55,7 @@ const since = computed(() => {
 
         <div class="min-w-0 flex-1 pe-10 sm:pe-0">
           <p class="flex flex-wrap items-center gap-x-2 font-condensed text-[0.95rem] leading-none font-bold tracking-[0.08em] text-live uppercase">
-            <span class="live-now-dot size-2 shrink-0 rounded-full bg-live" aria-hidden="true" />
+            <span class="live-pulse size-2 shrink-0 rounded-full bg-live" aria-hidden="true" />
             {{ k('tag') }}
             <span class="font-semibold tracking-[0.04em] text-text-secondary">{{ since }}</span>
           </p>
@@ -88,23 +85,6 @@ const since = computed(() => {
 </template>
 
 <style scoped>
-/* Même pulsation lente que `UiLiveBadge` (WCAG 2.3.1), figée avec « moins d'animations ». */
-.live-now-dot {
-  animation: live-now-pulse 2s ease-in-out infinite;
-}
-
-@keyframes live-now-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.45;
-    transform: scale(0.82);
-  }
-}
-
 .live-now-enter-active {
   transition:
     opacity 420ms cubic-bezier(0.2, 0.8, 0.3, 1),
@@ -117,10 +97,6 @@ const since = computed(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .live-now-dot {
-    animation: none;
-  }
-
   .live-now-enter-active {
     transition: none;
   }

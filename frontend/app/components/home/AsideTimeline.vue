@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
+import type { IsoDateTime } from '~/types/shared'
 import type { AsideFastening } from './AsideSession.vue'
 
 /**
@@ -18,6 +19,7 @@ interface Props {
   /** L'édition commune à toutes les séances, déjà nommée par le panneau. */
   singleEdition: PublicEditionRow | null
   fastening: AsideFastening
+  now: IsoDateTime
 }
 
 const props = defineProps<Props>()
@@ -63,6 +65,7 @@ function sessionEdition(session: PublicScheduleRow): PublicEditionRow | null {
         :show-zone="!props.singleEdition"
         :fastening="props.fastening"
         :index="index"
+        :now="props.now"
       />
     </li>
   </ol>

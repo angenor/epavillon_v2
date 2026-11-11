@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
+import type { IsoDateTime } from '~/types/shared'
 
 /**
  * UNE ACTIVITÉ DU PANNEAU « À VENIR » : l'heure en grand, le jour abrégé, le
@@ -15,6 +16,11 @@ import type { PublicScheduleRow } from '~/types/views'
  * L'HEURE SUR UN MARQUE-PAGE (maquette `docs/maquettes/a-venir-post-it/`, 02/11)
  * qui dépasse du bord gauche du panneau : papier à la couleur de la journée
  * spéciale, rouge pour le direct, tenu par un ruban ou une épingle selon le jour.
+ *
+ * EN DIRECT (maquette `docs/maquettes/direct-post-it/`, 11/11) : « Direct » au
+ * lieu de l'heure prévue, qui se lirait comme une annonce, la durée écoulée et
+ * une jauge jusqu'à la fin prévue ; dessous, « Rejoindre le direct » et la fin
+ * en clair. Comme le bandeau, la durée part de l'heure prévue.
  */
 
 export type AsideFastening = 'tape' | 'pin'
@@ -35,6 +41,8 @@ interface Props {
   fastening?: AsideFastening
   /** Rang dans le panneau : donne l'inclinaison du marque-page. */
   index?: number
+  /** Heure de composition de l'API : la durée du direct se rend pareil au serveur et au navigateur. */
+  now?: IsoDateTime
 }
 
 const props = withDefaults(defineProps<Props>(), { showZone: false, fastening: 'tape', index: 0 })
@@ -64,8 +72,33 @@ const day = computed(() =>
   }).format(new Date(props.session.starts_at)),
 )
 
+const live = computed(() => isLive(props.session.id))
+const now = useLiveClock(props.now)
+
+/** « depuis 45 min », « depuis 1 h 05 » : le marque-page n'a pas la place d'« en cours ». */
+const since = computed(() => {
+  const minutes = Math.floor((now.value - Date.parse(props.session.starts_at)) / 60_000)
+  if (minutes < 1) return t('home.aside.live.justStarted')
+  if (minutes < 60) return t('home.aside.live.since', { minutes })
+  const rest = minutes % 60
+  return rest
+    ? t('home.aside.live.sinceHours', { hours: Math.floor(minutes / 60), minutes: String(rest).padStart(2, '0') })
+    : t('home.aside.live.sinceHoursExact', { hours: minutes / 60 })
+})
+
+/** Part écoulée du créneau prévu ; un direct qui déborde reste plein. */
+const elapsed = computed(() => {
+  const start = Date.parse(props.session.starts_at)
+  const span = Date.parse(props.session.ends_at) - start
+  if (span <= 0) return 1
+  return Math.min(1, Math.max(0, (now.value - start) / span))
+})
+
+/** En direct, le rouge passe par le style comme la couleur de journée : une classe ne l'emporterait pas sur lui. */
 const flagStyle = computed(() => ({
-  ...trackPaperStyle(props.session.tracks.find((badge) => badge.kind === 'special_day')?.color ?? null),
+  ...(live.value
+    ? { '--paper': 'var(--color-live)', '--paper-ink': 'var(--color-live-contrast)' }
+    : trackPaperStyle(props.session.tracks.find((badge) => badge.kind === 'special_day')?.color ?? null)),
   '--tilt': TILTS[props.index % TILTS.length],
 }))
 
@@ -77,11 +110,22 @@ const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, 
     <!-- La marge négative vaut le retrait du panneau moins 12 px : le marque-page dépasse du bord. -->
     <p
       class="aside-flag -ml-8 self-start py-2 pr-2 pl-3 font-condensed leading-none uppercase sm:-ml-9"
-      :class="[`aside-flag-${props.fastening}`, { 'aside-flag-live': isLive(props.session.id) }]"
+      :class="[`aside-flag-${props.fastening}`, { 'aside-flag-live': live }]"
       :style="flagStyle"
     >
-      <b class="block text-[1.5rem] font-bold tabular-nums">{{ time(props.session.starts_at, props.session.timezone) }}</b>
-      <small class="text-[0.72rem] font-semibold tracking-[0.05em]">{{ day }}</small>
+      <template v-if="live">
+        <b class="flex items-center gap-1.5 text-[1.35rem] font-bold tracking-[0.02em]">
+          <span class="live-pulse size-2.25 shrink-0 rounded-full bg-live-contrast" aria-hidden="true" />{{ t('home.aside.live.tag') }}
+        </b>
+        <small class="mt-0.5 block text-[0.85rem] font-semibold tracking-[0.02em] whitespace-nowrap normal-case">{{ since }}</small>
+        <span class="mt-1.75 block h-1 overflow-hidden rounded-full bg-live-contrast/35" aria-hidden="true">
+          <span class="block h-full bg-live-contrast" :style="{ width: `${elapsed * 100}%` }" />
+        </span>
+      </template>
+      <template v-else>
+        <b class="block text-[1.5rem] font-bold tabular-nums">{{ time(props.session.starts_at, props.session.timezone) }}</b>
+        <small class="text-[0.72rem] font-semibold tracking-[0.05em]">{{ day }}</small>
+      </template>
     </p>
 
     <div class="min-w-0">
@@ -99,14 +143,15 @@ const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, 
         </span>
         <span v-if="zone" class="block">{{ zone }}</span>
       </p>
-      <div v-if="isLive(props.session.id) || (props.session.temporal_state === 'ongoing' && props.session.status !== 'completed')" class="mt-1.5">
-        <UiLiveBadge :session-id="props.session.id" size="sm" />
-        <UiStatusBadge
-          v-if="!isLive(props.session.id)"
-          state="ongoing"
-          size="sm"
-          :label="t('home.aside.sessions.ongoing')"
-        />
+      <!-- Le marque-page dit déjà « Direct » : une étiquette de plus ferait doublon. Toute la ligne est le lien. -->
+      <p v-if="live" class="mt-1.5 text-[0.85rem] font-semibold text-text-on-inverse">
+        <span class="flex items-center gap-1.5">{{ t('home.aside.live.join') }}<UiIcon name="arrow-right" size="0.95rem" /></span>
+        <span class="block text-[0.75rem] font-normal text-text-on-inverse-muted">
+          {{ t('home.aside.live.ends', { time: time(props.session.ends_at, props.session.timezone) }) }}
+        </span>
+      </p>
+      <div v-else-if="props.session.temporal_state === 'ongoing' && props.session.status !== 'completed'" class="mt-1.5">
+        <UiStatusBadge state="ongoing" size="sm" :label="t('home.aside.sessions.ongoing')" />
       </div>
     </div>
   </article>
@@ -128,8 +173,6 @@ const zone = computed(() => (props.showZone ? zoneLabel(props.session.timezone, 
   color: var(--paper-ink);
 }
 .aside-flag-live {
-  --paper: var(--color-live);
-  --paper-ink: var(--color-live-contrast);
   color: var(--color-live-contrast);
 }
 

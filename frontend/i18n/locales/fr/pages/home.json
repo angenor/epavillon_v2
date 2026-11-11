@@ -52,6 +52,15 @@
     "sessions": {
       "ongoing": "En cours"
     },
+    "live": {
+      "tag": "Direct",
+      "justStarted": "à l'instant",
+      "since": "depuis {minutes} min",
+      "sinceHours": "depuis {hours} h {minutes}",
+      "sinceHoursExact": "depuis {hours} h",
+      "join": "Rejoindre le direct",
+      "ends": "fin prévue à {time}"
+    },
     "editions": {
       "title": "Prochains événements",
       "startsToday": "Commence aujourd'hui",

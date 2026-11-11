@@ -52,6 +52,15 @@
     "sessions": {
       "ongoing": "Ongoing"
     },
+    "live": {
+      "tag": "Live",
+      "justStarted": "just now",
+      "since": "for {minutes} min",
+      "sinceHours": "for {hours} h {minutes}",
+      "sinceHoursExact": "for {hours} h",
+      "join": "Join the live stream",
+      "ends": "scheduled to end at {time}"
+    },
     "editions": {
       "title": "Upcoming events",
       "startsToday": "Starts today",
