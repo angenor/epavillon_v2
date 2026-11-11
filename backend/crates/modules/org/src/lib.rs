@@ -82,10 +82,6 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             mailer.clone(),
             url.clone(),
         )),
-        Arc::new(jobs::emails::SendRequestEmail::new(
-            mailer.clone(),
-            url.clone(),
-        )),
         Arc::new(jobs::emails::SendApprovedEmail::new(mailer, url)),
     ]
 }

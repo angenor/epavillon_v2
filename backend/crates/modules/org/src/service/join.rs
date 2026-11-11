@@ -87,14 +87,14 @@ pub async fn join(
     )
     .await?;
 
+    // Une adhésion active de plus change le score de confiance et la fiche de
+    // performance. Les deux travaux naissent **dans la transaction** : si elle
+    // est annulée, ils ne naissent pas.
+    // Une demande en attente ne part plus par courriel (11/11, crainte d'être
+    // classé indésirable) : les référents la voient dans la pastille « à voir »
+    // de « Mon espace » et à faire sur leur espace organisation.
     if auto {
-        // Une adhésion active de plus change le score de confiance et la fiche
-        // de performance. Les deux travaux naissent **dans la transaction** : si
-        // elle est annulée, ils ne naissent pas.
         jobs::planifier_apres_ecriture(&mut tx, state.config(), cible).await?;
-    } else {
-        // Les référents doivent savoir qu'une demande les attend.
-        jobs::emails::mettre_en_file_demande(&mut tx, adhesion.id, cible).await?;
     }
 
     let membership_id = adhesion.id;

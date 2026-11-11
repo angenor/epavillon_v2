@@ -3,6 +3,7 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour : 11 novembre 2026
+- 11/11 : **demande d'adhésion sans courriel** : les référents la voient dans la pastille « à voir » de « Mon espace ». Voir [journal](progression/journal/2026-11-11.md).
 - 11/11 : **marque-page du direct** dans « À venir au pavillon » : rouge, « Direct », durée écoulée et jauge du créneau (il restait blanc, heure invisible) ; maquette `docs/maquettes/direct-post-it/`. Voir [journal](progression/journal/2026-11-11.md).
 - 11/11 : **courriel de mobilisation** envoyé aux déposants des 57 activités à venir (58 envois, lien de l'activité en clair) ; **Issa retiré des copies** automatiques (migration `2026-11-11-copies-sans-issa` jouée). Voir [journal](progression/journal/2026-11-11.md).
 - 10/11 : **ressources d'une journée** (pages, PDF, vidéos sous la présentation, lien daté) et **lien d'un temps fort** ; intervenants d'une activité sur une rangée qui défile. Migration `2026-11-10-ressources-journee` jouée ; mis en ligne avec les seuls tests des pages de journée (Docker en panne, base jetable Postgres.app). Voir [journal](progression/journal/2026-11-10.md).

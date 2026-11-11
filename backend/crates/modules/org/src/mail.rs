@@ -103,43 +103,6 @@ pub fn invitation(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail {
     compose(ctx, &subject, text)
 }
 
-/// Le message qui prévient les référents qu'une demande les attend. **Aucun
-/// lien de décision** : il mène à l'espace de l'organisation, où la personne
-/// s'authentifie.
-pub fn demande_recue(ctx: &MailContext<'_>, demandeur: &str) -> OutgoingMail {
-    let espace = url(ctx, Ecran::EspaceOrganisation);
-
-    let (subject, text) = if en_anglais(ctx.locale) {
-        (
-            format!("A membership request for {}", ctx.organization_name),
-            format!(
-                "Hello {prenom},\n\n\
-                 {demandeur} has asked to join {organisation} on ePavillon. \
-                 Accept or decline from your organization space:\n\n\
-                 {espace}\n\n\
-                 The ePavillon team, IFDD",
-                prenom = ctx.first_name,
-                organisation = ctx.organization_name,
-            ),
-        )
-    } else {
-        (
-            format!("Une demande d'adhésion pour {}", ctx.organization_name),
-            format!(
-                "Bonjour {prenom},\n\n\
-                 {demandeur} demande à rejoindre {organisation} sur ePavillon. \
-                 Acceptez ou refusez depuis votre espace organisation :\n\n\
-                 {espace}\n\n\
-                 L'équipe ePavillon, IFDD",
-                prenom = ctx.first_name,
-                organisation = ctx.organization_name,
-            ),
-        )
-    };
-
-    compose(ctx, &subject, text)
-}
-
 /// Le message qui annonce qu'une adhésion est active.
 pub fn adhesion_approuvee(ctx: &MailContext<'_>) -> OutgoingMail {
     let espace = url(ctx, Ecran::EspaceOrganisation);
@@ -229,12 +192,11 @@ mod tests {
         assert!(invitation(&ctx, "x").text.contains("/invitation?token=x"));
     }
 
-    /// Les deux messages sans jeton ne doivent en porter aucun : un lien de
-    /// décision reçu par courriel ferait entrer qui tient le message.
+    /// Le message sans jeton ne doit en porter aucun : un lien de décision reçu
+    /// par courriel ferait entrer qui tient le message.
     #[test]
     fn seuls_les_liens_dinvitation_portent_un_jeton() {
         let ctx = contexte();
-        assert!(!demande_recue(&ctx, "Awa Sow Fall").text.contains("token="));
         assert!(!adhesion_approuvee(&ctx).text.contains("token="));
     }
 }
